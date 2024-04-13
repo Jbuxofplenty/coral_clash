@@ -1,7 +1,7 @@
 import { View } from 'dripsy';
 import { useState } from 'react';
 import { useWindowDimensions } from 'react-native';
-import useChess from '../hooks/useChess';
+import useCoralClash from '../hooks/useCoralClash';
 import EmptyBoard from './EmptyBoard';
 import Moves from './Moves';
 import Pieces from './Pieces';
@@ -16,7 +16,7 @@ const useRandomMove = (chess) => {
 
 const Chess = () => {
     const { width } = useWindowDimensions();
-    const chess = useChess();
+    const chess = useCoralClash();
     const [visibleMoves, setVisibleMoves] = useState([]);
     const boardSize = Math.min(width, 400);
 

@@ -7,6 +7,11 @@ module.exports = async function (env, argv) {
             babel: {
                 dangerouslyAddModulePathsToTranspile: ['dripsy', '@dripsy'],
             },
+            resolve: {
+                fallback: {
+                    crypto: require.resolve('expo-crypto'),
+                }
+            }
         },
         argv
     );
