@@ -112,9 +112,7 @@ material-kit-react-native/
 ├── package-lock.json
 ├── package.json
 ├── screens
-│   ├── Components.js
 │   ├── Home.js
-│   ├── Onboarding.js
 │   ├── Pro.js
 │   ├── Profile.js
 │   └── Settings.js

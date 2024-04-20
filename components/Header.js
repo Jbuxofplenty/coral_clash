@@ -1,10 +1,10 @@
-import React from 'react';
 import { withNavigation } from '@react-navigation/compat';
-import { TouchableOpacity, StyleSheet, Platform, Dimensions } from 'react-native';
-import { Button, Block, NavBar, Input, Text, theme } from 'galio-framework';
+import { Block, Button, Input, NavBar, Text, theme } from 'galio-framework';
+import React from 'react';
+import { Dimensions, Platform, StyleSheet, TouchableOpacity } from 'react-native';
 
-import Icon from './Icon';
 import materialTheme from '../constants/Theme';
+import Icon from './Icon';
 
 const { height, width } = Dimensions.get('window');
 const iPhoneX = () => Platform.OS === 'ios' && (height === 812 || width === 812 || height === 896 || width === 896);
@@ -181,7 +181,6 @@ class Header extends React.Component {
           ]}
           onLeftPress={this.handleLeftPress}
         />
-        {this.renderHeader()}
       </Block>
     );
   }

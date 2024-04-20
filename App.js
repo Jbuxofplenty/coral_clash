@@ -10,13 +10,13 @@
  * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 */
-import React, { useState, useEffect, useCallback } from "react";
-import { Platform, StatusBar, Image } from "react-native";
-import { Asset } from "expo-asset";
-import { Block, GalioProvider } from "galio-framework";
 import { NavigationContainer } from "@react-navigation/native";
+import { Asset } from "expo-asset";
 import * as SplashScreen from "expo-splash-screen";
-import { Images, products, materialTheme } from "./constants/";
+import { Block, GalioProvider } from "galio-framework";
+import React, { useCallback, useEffect, useState } from "react";
+import { Image, Platform, StatusBar } from "react-native";
+import { Images, materialTheme, products } from "./constants/";
 import Screens from "./navigation/Screens";
 
 // Before rendering any navigation stack
@@ -28,7 +28,6 @@ const assetImages = [
   Images.Pro,
   Images.Profile,
   Images.Avatar,
-  Images.Onboarding,
 ];
 
 // cache product images

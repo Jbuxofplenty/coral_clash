@@ -1,10 +1,10 @@
-import React from "react";
-import { TouchableWithoutFeedback, ScrollView, StyleSheet, Image } from "react-native";
 import { Block, Text, theme } from "galio-framework";
+import React from "react";
+import { Image, ScrollView, StyleSheet, TouchableWithoutFeedback } from "react-native";
 import { useSafeArea } from "react-native-safe-area-context";
 
-import { Icon, Drawer as DrawerCustomItem } from '../components/';
-import { Images, materialTheme } from "../constants/";
+import { Drawer as DrawerCustomItem, Icon } from '../components/';
+import { materialTheme } from "../constants/";
 
 
 function CustomDrawerContent({
@@ -18,13 +18,8 @@ function CustomDrawerContent({
   const insets = useSafeArea();
   const screens = [
     "Home",
-    "Woman",
-    "Man",
-    "Kids",
-    "New Collection",
     "Profile",
-    "Settings",
-    "Components"
+    "Settings"
   ];
   return (
     <Block
@@ -82,14 +77,9 @@ function CustomDrawerContent({
       </Block>
       <Block flex={0.3} style={{ paddingLeft: 7, paddingRight: 14 }}>
         <DrawerCustomItem
-          title="Sign In"
+          title="Log In"
           navigation={navigation}
           focused={state.index === 8 ? true : false}
-        />
-        <DrawerCustomItem
-          title="Sign Up"
-          navigation={navigation}
-          focused={state.index === 9 ? true : false}
         />
       </Block>
     </Block>

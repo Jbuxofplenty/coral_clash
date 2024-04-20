@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "rn-material-kit-free",
-    "description": "React Native - Material Kit Free",
-    "slug": "rn-material-kit-free",
+    "name": "coral-clash",
+    "description": "Coral Clash Board Game",
+    "slug": "coral-clash",
     "privacy": "unlisted",
     "platforms": [
       "ios",
@@ -24,6 +24,9 @@
     ],
     "ios": {
       "supportsTablet": true
-    }
+    },
+    "plugins": [
+      "expo-font"
+    ]
   }
 }

@@ -1,11 +1,11 @@
+import { Block, Input, theme } from 'galio-framework';
 import React from 'react';
-import { StyleSheet, Dimensions, ScrollView } from 'react-native';
-import { Button, Block, Text, Input, theme } from 'galio-framework';
+import { Dimensions, ScrollView, StyleSheet } from 'react-native';
 
 import { Icon, Product } from '../components/';
+import products from '../constants/products';
 
 const { width } = Dimensions.get('screen');
-import products from '../constants/products';
 
 export default class Home extends React.Component {
   renderSearch = () => {
@@ -24,26 +24,6 @@ export default class Home extends React.Component {
     )
   }
   
-  renderTabs = () => {
-    const { navigation } = this.props;
-
-    return (
-      <Block row style={styles.tabs}>
-        <Button shadowless style={[styles.tab, styles.divider]} onPress={() => navigation.navigate('Pro')}>
-          <Block row middle>
-            <Icon name="grid" family="feather" style={{ paddingRight: 8 }} />
-            <Text size={16} style={styles.tabTitle}>Categories</Text>
-          </Block>
-        </Button>
-        <Button shadowless style={styles.tab} onPress={() => navigation.navigate('Pro')}>
-          <Block row middle>
-            <Icon size={16} name="camera-18" family="GalioExtra" style={{ paddingRight: 8 }} />
-            <Text size={16} style={styles.tabTitle}>Best Deals</Text>
-          </Block>
-        </Button>
-      </Block>
-    )
-  }
 
   renderProducts = () => {
     return (
@@ -52,12 +32,6 @@ export default class Home extends React.Component {
         contentContainerStyle={styles.products}>
         <Block flex>
           <Product product={products[0]} horizontal />
-          <Block flex row>
-            <Product product={products[1]} style={{ marginRight: theme.SIZES.BASE }} />
-            <Product product={products[2]} />
-          </Block>
-          <Product product={products[3]} horizontal />
-          <Product product={products[4]} full />
         </Block>
       </ScrollView>
     )

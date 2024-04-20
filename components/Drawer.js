@@ -1,18 +1,9 @@
-import React from "react";
-import { TouchableOpacity, StyleSheet } from "react-native";
 import { Block, Text, theme } from "galio-framework";
+import React from "react";
+import { StyleSheet, TouchableOpacity } from "react-native";
 
-import Icon from "./Icon";
 import materialTheme from "../constants/Theme";
-
-const proScreens = [
-  "Woman",
-  "Man",
-  "Kids",
-  "New Collection",
-  "Sign In",
-  "Sign Up"
-];
+import Icon from "./Icon";
 
 class DrawerItem extends React.Component {
   renderIcon = () => {
@@ -25,42 +16,6 @@ class DrawerItem extends React.Component {
             size={16}
             name="shop"
             family="GalioExtra"
-            color={focused ? "white" : materialTheme.COLORS.MUTED}
-          />
-        );
-      case "Woman":
-        return (
-          <Icon
-            size={16}
-            name="md-woman"
-            family="ionicon"
-            color={focused ? "white" : materialTheme.COLORS.MUTED}
-          />
-        );
-      case "Man":
-        return (
-          <Icon
-            size={16}
-            name="man"
-            family="entypo"
-            color={focused ? "white" : materialTheme.COLORS.MUTED}
-          />
-        );
-      case "Kids":
-        return (
-          <Icon
-            size={16}
-            name="baby"
-            family="GalioExtra"
-            color={focused ? "white" : materialTheme.COLORS.MUTED}
-          />
-        );
-      case "New Collection":
-        return (
-          <Icon
-            size={16}
-            name="grid-on"
-            family="material"
             color={focused ? "white" : materialTheme.COLORS.MUTED}
           />
         );
@@ -82,30 +37,12 @@ class DrawerItem extends React.Component {
             color={focused ? "white" : materialTheme.COLORS.MUTED}
           />
         );
-      case "Components":
+      case "Log In":
         return (
           <Icon
             size={16}
-            name="md-switch"
-            family="ionicon"
-            color={focused ? "white" : materialTheme.COLORS.MUTED}
-          />
-        );
-      case "Sign In":
-        return (
-          <Icon
-            size={16}
-            name="ios-log-in"
-            family="ionicon"
-            color={focused ? "white" : materialTheme.COLORS.MUTED}
-          />
-        );
-      case "Sign Up":
-        return (
-          <Icon
-            size={16}
-            name="md-person-add"
-            family="ionicon"
+            name="sign-in"
+            family="font-awesome"
             color={focused ? "white" : materialTheme.COLORS.MUTED}
           />
         );
@@ -114,25 +51,8 @@ class DrawerItem extends React.Component {
     }
   };
 
-  renderLabel = () => {
-    const { title } = this.props;
-
-    if (proScreens.includes(title)) {
-      return (
-        <Block middle style={styles.pro}>
-          <Text size={12} color="white">
-            PRO
-          </Text>
-        </Block>
-      );
-    }
-
-    return null;
-  };
-
   render() {
     const { focused, title, navigation } = this.props;
-    const proScreen = proScreens.includes(title);
     return (
       <TouchableOpacity style={{ height: 55 }} onPress={() => {navigation.navigate(title)}}>
         <Block
@@ -152,14 +72,11 @@ class DrawerItem extends React.Component {
               color={
                 focused
                   ? "white"
-                  : proScreen
-                  ? materialTheme.COLORS.MUTED
                   : "black"
               }
             >
               {title}
             </Text>
-            {this.renderLabel()}
           </Block>
         </Block>
       </TouchableOpacity>

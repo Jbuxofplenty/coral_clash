@@ -1,6 +1,6 @@
+import { Block, Icon, Text, theme } from "galio-framework";
 import React from 'react';
-import { StyleSheet, Switch, FlatList, Platform, TouchableOpacity, View } from "react-native";
-import { Block, Text, theme, Icon } from "galio-framework";
+import { FlatList, Platform, StyleSheet, Switch, TouchableOpacity, View } from "react-native";
 
 import materialTheme from '../constants/Theme';
 
