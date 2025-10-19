@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { Chess, ChessInstance } from './coralClash';
+import { CoralClash, CoralClashInstance } from './coralClash';
 
 const useCoralClash = () => {
-    const [coralClashInstance] = useState<ChessInstance | undefined>(new Chess());
+    const [coralClashInstance] = useState<CoralClashInstance | undefined>(new CoralClash());
 
     return coralClashInstance;
 };

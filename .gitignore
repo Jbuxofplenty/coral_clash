@@ -7,3 +7,11 @@ yarn.lock
 *.p12
 *.key
 *.mobileprovision
+
+# macOS
+.DS_Store
+
+# Python
+.venv/
+__pycache__/
+*.pyc

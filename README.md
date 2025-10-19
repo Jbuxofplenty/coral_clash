@@ -69,11 +69,11 @@ npm run android
 ```
 coral_clash/
 ├── src/                    # Main source code
-│   ├── components/        # TypeScript components
-│   │   ├── ChessBoard.tsx
-│   │   ├── EmptyBoard.tsx
-│   │   ├── Moves.tsx
-│   │   └── Pieces.tsx
+│   ├── components/        # React components
+│   │   ├── CoralClashBoard.js
+│   │   ├── EmptyBoard.js
+│   │   ├── Moves.js
+│   │   └── Pieces.js
 │   ├── hooks/            # Custom React hooks
 │   ├── screens/          # Screen components
 │   └── images/           # Image assets

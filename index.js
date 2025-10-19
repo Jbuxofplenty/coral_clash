@@ -2,7 +2,7 @@ import { registerRootComponent } from 'expo';
 import Constants from 'expo-constants';
 import * as Sentry from 'sentry-expo';
 
-import App from './src/index';
+import App from './App';
 
 Sentry.init({
     dsn: Constants.manifest.extra.SENTRY_DSN,
