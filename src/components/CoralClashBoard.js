@@ -255,7 +255,12 @@ const CoralClash = ({ fixture }) => {
         }
 
         // Execute the move (non-whale pieces only)
-        coralClash.move(move.promotion ? { ...move, promotion: 'q' } : move);
+        // Only pass the fields that move() expects: from, to, promotion
+        coralClash.move({
+            from: move.from,
+            to: move.to,
+            ...(move.promotion && { promotion: 'q' }),
+        });
         setVisibleMoves([]);
         setSelectedSquare(null);
         setWhaleDestination(null);
