@@ -907,5 +907,132 @@ describe('CoralClash Whale Mechanics', () => {
             expect(game.isAttacked('c3', 'w')).toBe(false);
             expect(game.isAttacked('e3', 'w')).toBe(false);
         });
+
+        it('should trigger coral scoring when white crab reaches rank 8', () => {
+            // Game ends when a crab or octopus reaches the opponent's back row
+            const game = new CoralClash();
+            // Use FEN: white crab at d7, whales + other pieces in safe positions
+            game.load('h1t2t2/3C4/8/8/8/8/8/H1T2T2 w - - 0 1');
+
+            console.log('\n=== Before crab reaches rank 8 ===');
+            console.log('FEN:', game.fen());
+            console.log('d7 piece:', game.get('d7'));
+            console.log('d8 piece:', game.get('d8'));
+            console.log('Legal moves:', game.moves().length);
+
+            // Move crab from d7 to d8 (reaches black's back row)
+            const result = game.move({ from: 'd7', to: 'd8' });
+            console.log('\n=== After crab move ===');
+            console.log('Move result:', result);
+            console.log('FEN:', game.fen());
+            console.log('d7 piece:', game.get('d7'));
+            console.log('d8 piece:', game.get('d8'));
+            console.log(
+                'Should trigger coral scoring?',
+                (game as any)._shouldTriggerCoralScoring(),
+            );
+            console.log('Game over?', game.isGameOver());
+
+            // Game should trigger coral scoring
+            expect((game as any)._shouldTriggerCoralScoring()).toBe(true);
+            expect(game.isGameOver()).toBe(true);
+        });
+
+        it('should trigger coral scoring when black crab reaches rank 1', () => {
+            const game = new CoralClash();
+            // Use FEN: black crab at d2, whales + other pieces at safe positions
+            game.load('h1t2t2/8/8/8/8/8/3c4/H1T2T2 w - - 0 1');
+
+            console.log('\n=== Before black crab reaches rank 1 ===');
+
+            // White passes
+            game.move({ from: 'b1', to: 'b2' });
+
+            // Black crab moves from d2 to d1 (reaches white's back row)
+            game.move({ from: 'd2', to: 'd1' });
+
+            console.log('\n=== After black crab reaches rank 1 ===');
+            console.log('Black crab at d1');
+            console.log(
+                'Should trigger coral scoring?',
+                (game as any)._shouldTriggerCoralScoring(),
+            );
+
+            expect((game as any)._shouldTriggerCoralScoring()).toBe(true);
+            expect(game.isGameOver()).toBe(true);
+        });
+
+        it('should trigger coral scoring when white octopus reaches rank 8', () => {
+            const game = new CoralClash();
+            // Use FEN: white octopus at f7, whales at a1/a8, black turtle at c8, black to move
+            game.load('h1t5/5O2/8/8/8/8/8/H1T5 b - - 0 1');
+
+            console.log('\n=== Before octopus reaches rank 8 ===');
+
+            // Black turtle passes
+            game.move({ from: 'c8', to: 'c7' });
+
+            // White octopus moves from f7 to g8 (diagonal, reaching rank 8)
+            game.move({ from: 'f7', to: 'g8' });
+
+            console.log('\n=== After octopus reaches rank 8 ===');
+            console.log('Octopus at g8');
+            console.log(
+                'Should trigger coral scoring?',
+                (game as any)._shouldTriggerCoralScoring(),
+            );
+
+            expect((game as any)._shouldTriggerCoralScoring()).toBe(true);
+            expect(game.isGameOver()).toBe(true);
+        });
+
+        it('should trigger coral scoring when black octopus reaches rank 1', () => {
+            const game = new CoralClash();
+            // Use FEN: black octopus at f2, whales at a1/a8, white turtle at c1, white to move
+            game.load('h1t5/8/8/8/8/8/5o2/H1T5 w - - 0 1');
+
+            console.log('\n=== Before octopus reaches rank 1 ===');
+
+            // White turtle passes
+            game.move({ from: 'c1', to: 'c2' });
+
+            // Black octopus moves from f2 to g1 (diagonal, reaching rank 1)
+            game.move({ from: 'f2', to: 'g1' });
+
+            console.log('\n=== After black octopus reaches rank 1 ===');
+            console.log('Octopus at g1');
+            console.log(
+                'Should trigger coral scoring?',
+                (game as any)._shouldTriggerCoralScoring(),
+            );
+
+            expect((game as any)._shouldTriggerCoralScoring()).toBe(true);
+            expect(game.isGameOver()).toBe(true);
+        });
+
+        it('should NOT trigger coral scoring for other piece types on back row', () => {
+            const game = new CoralClash();
+            // Use FEN: white turtle at f7, whales at a1/a8, black turtle at c8, black to move
+            game.load('h1t5/5T2/8/8/8/8/8/H1T5 b - - 0 1');
+
+            console.log('\n=== Before turtle reaches rank 8 ===');
+
+            // Black turtle passes
+            game.move({ from: 'c8', to: 'c7' });
+
+            // White turtle moves from f7 to f8 (reaching rank 8)
+            game.move({ from: 'f7', to: 'f8' });
+
+            console.log('\n=== After turtle reaches rank 8 ===');
+            console.log('Turtle at f8');
+            console.log(
+                'Should trigger coral scoring?',
+                (game as any)._shouldTriggerCoralScoring(),
+            );
+
+            // Should NOT trigger coral scoring (only crab/octopus trigger it)
+            expect((game as any)._shouldTriggerCoralScoring()).toBe(false);
+            expect(game.isGameOver()).toBe(false);
+        });
     });
 });

@@ -1060,7 +1060,7 @@ export class CoralClash {
             this.isCheckmate() ||
             this.isStalemate() ||
             this.isDraw() ||
-            this.isCoralVictory() !== null
+            this._shouldTriggerCoralScoring()
         );
     }
 
