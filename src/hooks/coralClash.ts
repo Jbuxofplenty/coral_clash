@@ -150,7 +150,7 @@ type InternalMove = {
     // Coral Clash specific
     coralPlaced?: boolean; // Gatherer placed coral
     coralRemoved?: boolean; // Hunter removed coral
-    // whaleOtherHalf removed - no longer needed with new whale data structure
+    whaleOtherSquare?: number; // For whale moves: where the other half ends up (0x88 format)
 };
 
 interface History {
@@ -1272,7 +1272,8 @@ export class CoralClash {
         color: Color,
         them: Color,
     ) {
-        // Only orthogonal directions for sliding (not diagonal)
+        // For single-half sliding (TYPE 1 & 2), only orthogonal directions work
+        // (diagonal sliding of one half can't maintain orthogonal adjacency with stationary half)
         const slideOffsets = [-16, 1, 16, -1]; // up, right, down, left
 
         // Helper to add whale move
@@ -1280,28 +1281,10 @@ export class CoralClash {
         const addWhaleMove = (
             from: number,
             to: number,
-            stationarySq: number,
+            otherSquareAfterMove: number, // Where the OTHER half of whale will be after this move
             captured?: PieceSymbol,
             capturedRole?: PieceRole,
         ) => {
-            // Calculate where the OTHER half will be after this move
-            // If moving from firstSq, the other half is at secondSq (or moves with it)
-            // If moving from secondSq, the other half is at firstSq (or moves with it)
-            const movingSquare = from;
-            const offset = to - movingSquare;
-
-            // Check if 'to' is adjacent to stationarySq (rotation)
-            const toFile = to & 0xf;
-            const toRank = to >> 4;
-            const stationaryFile = stationarySq & 0xf;
-            const stationaryRank = stationarySq >> 4;
-            const fileDiff = Math.abs(toFile - stationaryFile);
-            const rankDiff = Math.abs(toRank - stationaryRank);
-            const isAdjacent =
-                (fileDiff === 1 && rankDiff === 0) || (fileDiff === 0 && rankDiff === 1);
-
-            // whaleOtherHalf is no longer needed - frontend calculates orientation from 'from' and 'to'
-
             const flags = captured ? BITS.CAPTURE : BITS.NORMAL;
             moves.push({
                 color,
@@ -1311,6 +1294,7 @@ export class CoralClash {
                 captured,
                 capturedRole,
                 flags,
+                whaleOtherSquare: otherSquareAfterMove, // Store where the other half ends up
             });
         };
 
@@ -1326,12 +1310,22 @@ export class CoralClash {
         // TYPE 1: Slide FIRST half while SECOND half stays fixed
         for (const offset of slideOffsets) {
             let to = firstSq;
+            let prevTo = firstSq;
             while (true) {
                 to += offset;
                 if (to & 0x88) break; // Off board
 
+                // For moves involving horizontal component (±1), check if we wrapped to another rank
+                if (Math.abs(offset) === 1 || Math.abs(offset) === 15 || Math.abs(offset) === 17) {
+                    // Check that file changed by exactly 1 (or 0 for vertical-only moves)
+                    const fileDiff = Math.abs((to & 0xf) - (prevTo & 0xf));
+                    if (fileDiff !== 1 && fileDiff !== 0) break; // Wrapped around board edge
+                }
+
                 // Check if destination would overlap with second half
                 if (to === secondSq) break;
+
+                prevTo = to;
 
                 // CRITICAL: Whale must remain as 2 adjacent orthogonal squares
                 if (!areOrthogonallyAdjacent(to, secondSq)) break;
@@ -1358,12 +1352,22 @@ export class CoralClash {
         // TYPE 2: Slide SECOND half while FIRST half stays fixed
         for (const offset of slideOffsets) {
             let to = secondSq;
+            let prevTo = secondSq;
             while (true) {
                 to += offset;
                 if (to & 0x88) break; // Off board
 
+                // For moves involving horizontal component (±1), check if we wrapped to another rank
+                if (Math.abs(offset) === 1 || Math.abs(offset) === 15 || Math.abs(offset) === 17) {
+                    // Check that file changed by exactly 1 (or 0 for vertical-only moves)
+                    const fileDiff = Math.abs((to & 0xf) - (prevTo & 0xf));
+                    if (fileDiff !== 1 && fileDiff !== 0) break; // Wrapped around board edge
+                }
+
                 // Check if destination would overlap with first half
                 if (to === firstSq) break;
+
+                prevTo = to;
 
                 // CRITICAL: Whale must remain as 2 adjacent orthogonal squares
                 if (!areOrthogonallyAdjacent(to, firstSq)) break;
@@ -1385,8 +1389,9 @@ export class CoralClash {
         }
 
         // TYPE 3: Parallel sliding - both halves move together in the same direction
-        // Whale can slide in any orthogonal direction (up/down/left/right) maintaining orientation
-        const parallelOffsets = [-16, 16, -1, 1]; // up, down, left, right
+        // This is the ONLY way to move diagonally (both halves slide diagonally together)
+        // Maintains whale orientation (horizontal stays horizontal, vertical stays vertical)
+        const parallelOffsets = [-16, 16, -1, 1, -17, -15, 15, 17]; // up, down, left, right, up-left, up-right, down-left, down-right
 
         for (const offset of parallelOffsets) {
             let dist = 1;
@@ -1399,9 +1404,13 @@ export class CoralClash {
                     break;
                 }
 
-                // For horizontal moves (offset ±1), check if we wrapped to another rank
-                if (Math.abs(offset) === 1) {
-                    if (newFirst >> 4 !== firstSq >> 4 || newSecond >> 4 !== secondSq >> 4) {
+                // For moves with horizontal component (±1), check if we wrapped to another rank
+                if (Math.abs(offset) === 1 || Math.abs(offset) === 15 || Math.abs(offset) === 17) {
+                    // Check that files changed consistently (no wrapping)
+                    const firstFileDiff = Math.abs((newFirst & 0xf) - (firstSq & 0xf));
+                    const secondFileDiff = Math.abs((newSecond & 0xf) - (secondSq & 0xf));
+                    // For each step, file should change by 0 (vertical) or 1 (horizontal/diagonal)
+                    if (firstFileDiff > dist || secondFileDiff > dist) {
                         break;
                     }
                 }
@@ -1418,13 +1427,12 @@ export class CoralClash {
                     newFirst !== secondSq;
                 const secondBlocked =
                     this._isSquareOccupied(newSecond) &&
-                    newSecond !== firstSq &&
+                    newFirst !== firstSq &&
                     newSecond !== secondSq;
 
                 // Both must be empty to slide through
                 if (!firstBlocked && !secondBlocked) {
                     // Generate moves from BOTH starting squares for parallel sliding
-                    // (since clicking either square should show this option)
                     addWhaleMove(firstSq, newFirst, newSecond);
                     addWhaleMove(secondSq, newSecond, newFirst);
                     dist++;
@@ -1541,6 +1549,18 @@ export class CoralClash {
                 continue;
             }
 
+            // Special handling for whale when querying specific square
+            // Whale might not be stored in this._board at this square, but could be one of its positions
+            if (singleSquare && !this._board[from]) {
+                // Check if this square is one of the whale's positions
+                const [firstSq, secondSq] = this._kings[us];
+                if (from === firstSq || from === secondSq) {
+                    // This is a whale square! Generate whale moves
+                    this._generateWhaleMoves(moves, firstSq, secondSq, us, them);
+                }
+                continue;
+            }
+
             // empty square or opponent, skip
             if (!this._board[from] || this._board[from].color === them) {
                 continue;
@@ -1582,8 +1602,7 @@ export class CoralClash {
                 // Get both squares the whale occupies
                 const [firstSq, secondSq] = this._kings[us];
 
-                // Generate all whale moves (only once, even though piece is at both squares)
-                // Check if this is the first occurrence to avoid duplicates
+                // Generate all whale moves (only once to avoid duplicates)
                 if (from === firstSq) {
                     this._generateWhaleMoves(moves, firstSq, secondSq, us, them);
                 }
@@ -1660,7 +1679,7 @@ export class CoralClash {
     }
 
     move(
-        move: string | { from: string; to: string; promotion?: string },
+        move: string | { from: string; to: string; promotion?: string; whaleSecondSquare?: string },
         { strict = false }: { strict?: boolean } = {},
     ) {
         /*
@@ -1685,14 +1704,42 @@ export class CoralClash {
             const moves = this._moves();
 
             // convert the pretty move object to an ugly move object
+            // For whale moves, there might be multiple moves with same from-to (e.g., rotation vs parallel slide)
+            let candidates: InternalMove[] = [];
             for (let i = 0, len = moves.length; i < len; i++) {
                 if (
                     move.from === algebraic(moves[i].from) &&
                     move.to === algebraic(moves[i].to) &&
                     (!('promotion' in moves[i]) || move.promotion === moves[i].promotion)
                 ) {
-                    moveObj = moves[i];
-                    break;
+                    candidates.push(moves[i]);
+                }
+            }
+
+            if (candidates.length > 0) {
+                // If whale move and whaleSecondSquare specified, use it to disambiguate
+                if (
+                    candidates.length > 1 &&
+                    candidates[0].piece === WHALE &&
+                    'whaleSecondSquare' in move
+                ) {
+                    const whaleSecondSquare = move.whaleSecondSquare;
+                    const exactMatch = candidates.find(
+                        (m) => algebraic(m.whaleOtherSquare!) === whaleSecondSquare,
+                    );
+                    moveObj = exactMatch || candidates[0];
+                }
+                // If there are multiple candidates, prefer one where whaleOtherSquare is at an original position
+                else if (candidates.length > 1 && candidates[0].piece === WHALE) {
+                    const originalPositions = this._kings[candidates[0].color];
+                    const preferredMove = candidates.find(
+                        (m) =>
+                            m.whaleOtherSquare === originalPositions[0] ||
+                            m.whaleOtherSquare === originalPositions[1],
+                    );
+                    moveObj = preferredMove || candidates[0];
+                } else {
+                    moveObj = candidates[0];
                 }
             }
         }
@@ -1765,25 +1812,31 @@ export class CoralClash {
                 role: undefined,
             };
 
-            // Determine the other square's position after the move
-            // Check if this is a parallel slide (both halves move same offset) or rotation (one stays fixed)
-            const movingSquare = move.from;
-            const stationarySquare = movingSquare === oldFirst ? oldSecond : oldFirst;
-            const offset = move.to - movingSquare;
+            // Use stored whaleOtherSquare if available, otherwise infer it
+            const newOtherSquare =
+                move.whaleOtherSquare !== undefined
+                    ? move.whaleOtherSquare
+                    : (() => {
+                          // Fallback logic for moves without whaleOtherSquare
+                          const movingSquare = move.from;
+                          const otherSquare = movingSquare === oldFirst ? oldSecond : oldFirst;
+                          const offset = move.to - movingSquare;
 
-            // Check if the move is orthogonally adjacent to stationary square
-            // If yes, it's a rotation (stationary stays fixed)
-            // If no, it's a parallel slide or single-half slide
-            const toFile = move.to & 0xf;
-            const toRank = move.to >> 4;
-            const stationaryFile = stationarySquare & 0xf;
-            const stationaryRank = stationarySquare >> 4;
-            const fileDiff = Math.abs(toFile - stationaryFile);
-            const rankDiff = Math.abs(toRank - stationaryRank);
-            const isAdjacent =
-                (fileDiff === 1 && rankDiff === 0) || (fileDiff === 0 && rankDiff === 1);
+                          // Check if move.to is adjacent to otherSquare
+                          const toFile = move.to & 0xf;
+                          const toRank = move.to >> 4;
+                          const otherFile = otherSquare & 0xf;
+                          const otherRank = otherSquare >> 4;
+                          const fileDiff = Math.abs(toFile - otherFile);
+                          const rankDiff = Math.abs(toRank - otherRank);
+                          const isAdjacentToOther =
+                              (fileDiff === 1 && rankDiff === 0) ||
+                              (fileDiff === 0 && rankDiff === 1);
 
-            const newOtherSquare = isAdjacent ? stationarySquare : stationarySquare + offset;
+                          // If adjacent: single-half slide/rotation, other stays fixed
+                          // Otherwise: parallel slide, both move by same offset
+                          return isAdjacentToOther ? otherSquare : otherSquare + offset;
+                      })();
 
             // Delete whale from its single storage position (always at oldFirst)
             delete this._board[oldFirst];

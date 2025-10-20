@@ -1,11 +1,22 @@
 import { useState } from 'react';
-import { useWindowDimensions, View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import {
+    useWindowDimensions,
+    View,
+    Text,
+    StyleSheet,
+    TouchableOpacity,
+    Share,
+    Alert,
+} from 'react-native';
 import { Icon } from 'galio-framework';
 import useCoralClash from '../hooks/useCoralClash';
 import { WHALE } from '../hooks/coralClash';
 import EmptyBoard from './EmptyBoard';
 import Moves from './Moves';
 import Pieces from './Pieces';
+
+// Game state schema version for fixtures
+const GAME_STATE_VERSION = '1.0.0';
 
 const useRandomMove = (coralClash) => {
     while (!coralClash.isGameOver() && coralClash.turn() === 'b') {
@@ -201,9 +212,13 @@ const CoralClash = () => {
             });
 
             if (selectedMove) {
-                coralClash.move(
-                    selectedMove.promotion ? { ...selectedMove, promotion: 'q' } : selectedMove,
-                );
+                // Execute whale move with whaleSecondSquare to disambiguate orientation
+                coralClash.move({
+                    from: selectedMove.from,
+                    to: selectedMove.to,
+                    whaleSecondSquare: selectedMove.whaleSecondSquare,
+                    ...(selectedMove.promotion && { promotion: 'q' }),
+                });
                 setVisibleMoves([]);
                 setSelectedSquare(null);
                 setWhaleDestination(null);
@@ -237,6 +252,37 @@ const CoralClash = () => {
         setIsViewingEnemyMoves(false);
     };
 
+    const handleExportState = async () => {
+        try {
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+            const gameState = {
+                schemaVersion: GAME_STATE_VERSION,
+                exportedAt: new Date().toISOString(),
+                state: {
+                    fen: coralClash.fen(),
+                    board: coralClash.board(),
+                    history: coralClash.history(),
+                    turn: coralClash.turn(),
+                    isGameOver: coralClash.isGameOver(),
+                    inCheck: coralClash.inCheck(),
+                    isCheckmate: coralClash.isCheckmate(),
+                    isStalemate: coralClash.isStalemate(),
+                    isDraw: coralClash.isDraw(),
+                    isCoralVictory: coralClash.isCoralVictory(),
+                },
+            };
+
+            const jsonString = JSON.stringify(gameState, null, 2);
+
+            await Share.share({
+                message: jsonString,
+                title: `coral-clash-state-${timestamp}.json`,
+            });
+        } catch (error) {
+            Alert.alert('Export Failed', error.message);
+        }
+    };
+
     return (
         <View style={{ alignItems: 'center', flex: 1, width: '100%' }}>
             {/* Control Bar */}
@@ -255,6 +301,23 @@ const CoralClash = () => {
                         style={styles.controlIcon}
                     />
                 </TouchableOpacity>
+
+                {/* Export Button - Center (Dev Only) */}
+                {__DEV__ && (
+                    <TouchableOpacity
+                        style={styles.controlButton}
+                        onPress={handleExportState}
+                        activeOpacity={0.7}
+                    >
+                        <Icon
+                            name='ios-share'
+                            family='Ionicons'
+                            size={45}
+                            color='#ffffff'
+                            style={styles.controlIcon}
+                        />
+                    </TouchableOpacity>
+                )}
 
                 {/* Undo Button - Right */}
                 <TouchableOpacity
