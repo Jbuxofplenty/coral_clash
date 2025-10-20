@@ -280,7 +280,7 @@ const PIECE_OFFSETS = {
 // Coral Clash ATTACKS array
 // c=crab(0x1), t=turtle(0x2), o=octopus(0x4), f=pufferfish(0x8), d=dolphin(0x10), h=whale(0x20)
 // Orthogonal: turtle + dolphin = 2+16 = 18
-// Orthogonal adjacent: turtle + dolphin + whale = 2+16+32 = 50
+// Orthogonal adjacent: crab + turtle + dolphin + whale = 1+2+16+32 = 51
 // Diagonal distance>1: pufferfish + dolphin = 8+16 = 24
 // Diagonal adjacent: octopus + pufferfish + dolphin + whale = 4+8+16+32 = 60
 const ATTACKS = [
@@ -290,9 +290,9 @@ const ATTACKS = [
    0, 0, 0,24, 0, 0, 0, 18,  0, 0, 0,24, 0, 0, 0, 0,
    0, 0, 0, 0,24, 0, 0, 18,  0, 0,24, 0, 0, 0, 0, 0,
    0, 0, 0, 0, 0,24, 2, 18,  2,24, 0, 0, 0, 0, 0, 0,  // crab can attack from here
-   0, 0, 0, 0, 0, 2,60, 50, 60, 2, 0, 0, 0, 0, 0, 0,  // adjacent squares (dist=1)
-  18,18,18,18,18,18,50,  0, 50,18,18,18,18,18,18, 0,  // horizontal (same rank)
-   0, 0, 0, 0, 0, 2,60, 50, 60, 2, 0, 0, 0, 0, 0, 0,  // adjacent squares (dist=1)
+   0, 0, 0, 0, 0, 2,60, 51, 60, 2, 0, 0, 0, 0, 0, 0,  // adjacent squares (dist=1) - includes crab
+  18,18,18,18,18,18,51,  0, 51,18,18,18,18,18,18, 0,  // horizontal (same rank) - includes crab
+   0, 0, 0, 0, 0, 2,60, 51, 60, 2, 0, 0, 0, 0, 0, 0,  // adjacent squares (dist=1) - includes crab
    0, 0, 0, 0, 0,24, 2, 18,  2,24, 0, 0, 0, 0, 0, 0,  // crab can attack from here
    0, 0, 0, 0,24, 0, 0, 18,  0, 0,24, 0, 0, 0, 0, 0,
    0, 0, 0,24, 0, 0, 0, 18,  0, 0, 0,24, 0, 0, 0, 0,
@@ -907,12 +907,9 @@ export class CoralClash {
 
             if (ATTACKS[index] & PIECE_MASKS[piece.type]) {
                 if (piece.type === CRAB) {
-                    if (difference > 0) {
-                        if (piece.color === WHITE) return true;
-                    } else {
-                        if (piece.color === BLACK) return true;
-                    }
-                    continue;
+                    // Crabs attack one square in any orthogonal direction (forward, back, left, right)
+                    // No directional restriction - if it's in the ATTACKS array, it can attack
+                    return true;
                 }
 
                 // Octopus moves only 1 square diagonally

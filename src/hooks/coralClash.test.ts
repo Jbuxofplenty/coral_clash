@@ -762,5 +762,150 @@ describe('CoralClash Whale Mechanics', () => {
             expect(game2.get('d2')?.type).toBe('h');
             expect(game2.get('e1')).toBeFalsy(); // Should NOT be at e1
         });
+
+        it('REGRESSION: whale captures should properly delete captured pieces', () => {
+            // Bug: When a whale captured a piece during parallel slide, it didn't delete
+            // the captured piece from the board before placing the whale
+            const game = new CoralClash();
+            game.clear();
+
+            // Setup: White whale at d1-e1, black turtle at f1
+            game.put({ type: 'h', color: 'w' }, 'd1'); // Creates whale at d1-e1
+            game.put({ type: 't', color: 'b', role: 'gatherer' }, 'f1');
+            game.put({ type: 'h', color: 'b' }, 'd8'); // Black whale at d8-e8
+
+            console.log('\n=== Before whale capture ===');
+            console.log('White whale:', game.whalePositions().w);
+            console.log('f1:', game.get('f1'));
+
+            // Get whale moves - should be able to capture f1 via parallel slide
+            const whaleMoves = game.moves({ verbose: true, piece: 'h', color: 'w' });
+            const captureMove = whaleMoves.find((m) => m.to === 'f1' && m.captured === 't');
+
+            expect(captureMove).toBeDefined();
+            console.log('Capture move:', captureMove?.san);
+
+            // Execute the capture
+            if (captureMove) {
+                game.move({ from: captureMove.from, to: captureMove.to });
+
+                console.log('\n=== After whale capture ===');
+                console.log('White whale:', game.whalePositions().w);
+                console.log('e1:', game.get('e1'));
+                console.log('f1:', game.get('f1'));
+
+                // The whale should now occupy e1-f1
+                const whalePos = game.whalePositions().w;
+                expect(whalePos).toContain('e1');
+                expect(whalePos).toContain('f1');
+
+                // Both squares should have the whale
+                expect(game.get('e1')?.type).toBe('h');
+                expect(game.get('f1')?.type).toBe('h');
+
+                // The black turtle should be gone (captured)
+                expect(game.get('f1')?.color).toBe('w'); // Should be white whale, not black turtle
+            }
+        });
+
+        it('REGRESSION: whale capture undo should restore to correct square', () => {
+            // Bug: When undoing a whale parallel slide capture, the captured piece
+            // was restored to move.to instead of the actual capture square
+            const game = new CoralClash();
+            game.clear();
+
+            // Setup: White whale at d1-e1, black turtle at f1
+            game.put({ type: 'h', color: 'w' }, 'd1'); // Creates whale at d1-e1
+            game.put({ type: 't', color: 'b', role: 'gatherer' }, 'f1');
+            game.put({ type: 'h', color: 'b' }, 'd8'); // Black whale
+
+            // Capture f1
+            const whaleMoves = game.moves({ verbose: true, piece: 'h', color: 'w' });
+            const captureMove = whaleMoves.find((m) => m.to === 'f1' && m.captured);
+
+            expect(captureMove).toBeDefined();
+            game.move({ from: captureMove!.from, to: captureMove!.to });
+
+            // Now undo
+            game.undo();
+
+            console.log('\n=== After undo ===');
+            console.log('White whale:', game.whalePositions().w);
+            console.log('d1:', game.get('d1'));
+            console.log('e1:', game.get('e1'));
+            console.log('f1:', game.get('f1'));
+
+            // Whale should be back at d1-e1
+            expect(game.whalePositions().w).toEqual(['d1', 'e1']);
+            expect(game.get('d1')?.type).toBe('h');
+            expect(game.get('e1')?.type).toBe('h');
+
+            // Black turtle should be back at f1 (not lost!)
+            expect(game.get('f1')?.type).toBe('t');
+            expect(game.get('f1')?.color).toBe('b');
+        });
+
+        it('REGRESSION: crabs should be able to put whale in check', () => {
+            // Bug: Crabs weren't included in the ATTACKS array, so they couldn't
+            // attack/check the whale
+            const game = new CoralClash();
+            game.clear();
+
+            // Setup: White crab at d5, black whale at d7-d8
+            game.put({ type: 'c', color: 'w', role: 'hunter' }, 'd5');
+            game.put({ type: 'h', color: 'b' }, 'd7'); // Black whale at d7-d8
+            game.put({ type: 'h', color: 'w' }, 'd1'); // White whale at d1-e1
+
+            console.log('\n=== Before crab move ===');
+            console.log('White crab at d5');
+            console.log('Black whale:', game.whalePositions().b);
+            console.log('Black in check?', game.inCheck());
+
+            expect(game.inCheck()).toBe(false);
+
+            // Move crab from d5 to d6
+            game.move({ from: 'd5', to: 'd6' });
+
+            console.log('\n=== After crab d5->d6 ===');
+            console.log('White crab at d6');
+            console.log('Black whale:', game.whalePositions().b);
+            console.log('Black in check?', game.inCheck());
+
+            // Black should now be in check from the crab at d6 attacking d7
+            expect(game.inCheck()).toBe(true);
+
+            // Verify the crab can attack d7
+            expect(game.isAttacked('d7', 'w')).toBe(true);
+        });
+
+        it('REGRESSION: crabs should attack in all orthogonal directions', () => {
+            // Crabs can attack forward, backward, left, and right
+            const game = new CoralClash();
+            game.clear();
+
+            // Setup: White crab at d4
+            game.put({ type: 'c', color: 'w', role: 'hunter' }, 'd4');
+            game.put({ type: 'h', color: 'w' }, 'd1'); // White whale
+            game.put({ type: 'h', color: 'b' }, 'd8'); // Black whale
+
+            console.log('\n=== Crab at d4 can attack all orthogonal directions ===');
+
+            // Check all 4 orthogonal squares around d4
+            expect(game.isAttacked('d5', 'w')).toBe(true); // Forward (toward rank 8)
+            expect(game.isAttacked('d3', 'w')).toBe(true); // Backward (toward rank 1)
+            expect(game.isAttacked('c4', 'w')).toBe(true); // Left
+            expect(game.isAttacked('e4', 'w')).toBe(true); // Right
+
+            console.log('  d5 (forward):', game.isAttacked('d5', 'w'));
+            console.log('  d3 (backward):', game.isAttacked('d3', 'w'));
+            console.log('  c4 (left):', game.isAttacked('c4', 'w'));
+            console.log('  e4 (right):', game.isAttacked('e4', 'w'));
+
+            // Diagonal squares should NOT be attacked by crab
+            expect(game.isAttacked('c5', 'w')).toBe(false);
+            expect(game.isAttacked('e5', 'w')).toBe(false);
+            expect(game.isAttacked('c3', 'w')).toBe(false);
+            expect(game.isAttacked('e3', 'w')).toBe(false);
+        });
     });
 });
