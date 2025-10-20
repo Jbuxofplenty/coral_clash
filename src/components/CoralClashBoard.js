@@ -22,6 +22,7 @@ const CoralClash = () => {
     const [selectedSquare, setSelectedSquare] = useState(null);
     const [whaleDestination, setWhaleDestination] = useState(null);
     const [whaleOrientationMoves, setWhaleOrientationMoves] = useState([]);
+    const [isViewingEnemyMoves, setIsViewingEnemyMoves] = useState(false);
     const boardSize = Math.min(width, 400);
 
     useRandomMove(coralClash);
@@ -66,6 +67,7 @@ const CoralClash = () => {
         setSelectedSquare(null);
         setWhaleDestination(null);
         setWhaleOrientationMoves([]);
+        setIsViewingEnemyMoves(false);
     };
 
     // Can only undo if at least 2 moves have been made (user + computer)
@@ -73,18 +75,19 @@ const CoralClash = () => {
 
     const handleSelectPiece = (square) => {
         const piece = coralClash.get(square);
+        const currentTurn = coralClash.turn();
+
+        // Check if this is an enemy piece
+        const isEnemyPiece = piece && piece.color !== currentTurn;
 
         // Check if this is a whale
         if (piece && piece.type === WHALE) {
-            // Whale selected - get ALL moves (from BOTH squares of the whale)
-            // Moves are generated separately from each square, so we need to get all moves
-            const allMoves = coralClash.moves({ verbose: true });
+            // Whale selected - get ALL moves for this whale's color
+            const whaleColor = piece.color;
+            const allMoves = coralClash.moves({ verbose: true, color: whaleColor });
 
             // Filter to only THIS whale's moves
-            const whaleColor = piece.color.toLowerCase();
-            const whaleMoves = allMoves.filter(
-                (m) => m.piece === WHALE && m.color.toLowerCase() === whaleColor,
-            );
+            const whaleMoves = allMoves.filter((m) => m.piece === WHALE);
 
             const allDestinations = new Set();
             whaleMoves.forEach((move) => {
@@ -93,25 +96,38 @@ const CoralClash = () => {
 
             // Create a simple move list with just destinations (we'll filter later)
             const destinationMoves = Array.from(allDestinations).map((dest) => {
-                // Find a whale move that goes to this destination
                 return whaleMoves.find((m) => m.to === dest);
             });
 
             setVisibleMoves(destinationMoves);
-            setSelectedSquare(square);
+            setSelectedSquare(isEnemyPiece ? null : square);
             setWhaleDestination(null);
             setWhaleOrientationMoves([]);
-        } else {
-            // Regular piece
-            const moves = coralClash.moves({ square: square, verbose: true });
+            setIsViewingEnemyMoves(isEnemyPiece);
+        } else if (piece) {
+            // Regular piece - get moves for this piece's color
+            const moves = coralClash.moves({ square: square, verbose: true, color: piece.color });
             setVisibleMoves(moves);
+            setSelectedSquare(isEnemyPiece ? null : square);
+            setWhaleDestination(null);
+            setWhaleOrientationMoves([]);
+            setIsViewingEnemyMoves(isEnemyPiece);
+        } else {
+            // No piece on this square
+            setVisibleMoves([]);
             setSelectedSquare(null);
             setWhaleDestination(null);
             setWhaleOrientationMoves([]);
+            setIsViewingEnemyMoves(false);
         }
     };
 
     const handleSelectMove = (move) => {
+        // Don't allow executing enemy moves - only show them
+        if (isViewingEnemyMoves) {
+            return;
+        }
+
         const piece = coralClash.get(selectedSquare || move.from);
 
         // Check if this is a whale move and we haven't selected the first square yet
@@ -218,6 +234,7 @@ const CoralClash = () => {
         setSelectedSquare(null);
         setWhaleDestination(null);
         setWhaleOrientationMoves([]);
+        setIsViewingEnemyMoves(false);
     };
 
     return (
@@ -269,6 +286,7 @@ const CoralClash = () => {
                     size={boardSize}
                     showOrientations={whaleDestination !== null}
                     selectedDestination={whaleDestination}
+                    isEnemyMoves={isViewingEnemyMoves}
                 />
             </View>
             {gameStatus && (

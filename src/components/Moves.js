@@ -7,8 +7,24 @@ const Moves = ({
     onSelectMove,
     showOrientations = false,
     selectedDestination = null,
+    isEnemyMoves = false,
 }) => {
     const cellSize = size / 8;
+
+    // Define colors based on whether these are enemy moves
+    const colors = isEnemyMoves
+        ? {
+              fillLight: 'rgba(255, 0, 0, 0.25)',
+              fillNormal: 'rgba(255, 0, 0, 0.5)',
+              strokeLight: 'rgba(200, 0, 0, 0.4)',
+              strokeNormal: 'rgba(200, 0, 0, 0.8)',
+          }
+        : {
+              fillLight: 'rgba(0, 255, 0, 0.25)',
+              fillNormal: 'rgba(0, 255, 0, 0.5)',
+              strokeLight: 'rgba(0, 200, 0, 0.4)',
+              strokeNormal: 'rgba(0, 200, 0, 0.8)',
+          };
 
     return visibleMoves.map((move, index) => {
         const { to, from, isDestinationMarker } = move;
@@ -40,8 +56,8 @@ const Moves = ({
                             cx={cellSize / 2}
                             cy={cellSize / 2}
                             r={cellSize / 6}
-                            fill={isDestination ? 'rgba(0, 255, 0, 0.25)' : 'rgba(0, 255, 0, 0.5)'}
-                            stroke={isDestination ? 'rgba(0, 200, 0, 0.4)' : 'rgba(0, 200, 0, 0.8)'}
+                            fill={isDestination ? colors.fillLight : colors.fillNormal}
+                            stroke={isDestination ? colors.strokeLight : colors.strokeNormal}
                             strokeWidth='2'
                         />
                     </Svg>
@@ -49,14 +65,6 @@ const Moves = ({
             </TouchableWithoutFeedback>
         );
     });
-
-    return (
-        <>
-            {checkIndicators}
-            {attackingIndicators}
-            {moveIndicators}
-        </>
-    );
 };
 
 export default Moves;

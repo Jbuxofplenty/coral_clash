@@ -430,4 +430,112 @@ describe('CoralClash Whale Mechanics', () => {
             expect(dolphin?.role).toBe('gatherer');
         });
     });
+
+    describe('Color Parameter for Move Generation', () => {
+        test('should generate moves for white pieces when color=w is specified', () => {
+            game.clear();
+            game.put({ type: 'd', color: 'w', role: 'hunter' }, 'e2');
+            game.put({ type: 'd', color: 'b', role: 'hunter' }, 'e7');
+
+            // Even though it's white's turn, explicitly request white's moves
+            const whiteMoves = game.moves({ verbose: true, color: 'w' });
+
+            expect(whiteMoves.length).toBeGreaterThan(0);
+            expect(whiteMoves.every((m) => m.color === 'w')).toBe(true);
+        });
+
+        test('should generate moves for black pieces when color=b is specified, even on whites turn', () => {
+            game.clear();
+            game.put({ type: 'd', color: 'w', role: 'hunter' }, 'e2');
+            game.put({ type: 'd', color: 'b', role: 'hunter' }, 'e7');
+
+            // It's white's turn, but request black's moves
+            expect(game.turn()).toBe('w');
+            const blackMoves = game.moves({ verbose: true, color: 'b' });
+
+            expect(blackMoves.length).toBeGreaterThan(0);
+            expect(blackMoves.every((m) => m.color === 'b')).toBe(true);
+        });
+
+        test('should generate whale moves for specified color', () => {
+            game.clear();
+            game.put({ type: 'h', color: 'w' }, 'a1'); // White whale at a1-b1
+            game.put({ type: 'h', color: 'b' }, 'g8'); // Black whale at g8-h8 (far apart)
+
+            // Get white whale moves (should work since it's white's turn)
+            const whiteWhaleMoves = game.moves({ verbose: true, color: 'w' });
+            const whiteWhaleMovesFiltered = whiteWhaleMoves.filter((m) => m.piece === 'h');
+
+            expect(whiteWhaleMovesFiltered.length).toBeGreaterThan(0);
+            expect(whiteWhaleMovesFiltered.every((m) => m.color === 'w')).toBe(true);
+
+            // Get black whale moves even though it's white's turn
+            const blackWhaleMoves = game.moves({ verbose: true, color: 'b' });
+            const blackWhaleMovesFiltered = blackWhaleMoves.filter((m) => m.piece === 'h');
+
+            expect(blackWhaleMovesFiltered.length).toBeGreaterThan(0);
+            expect(blackWhaleMovesFiltered.every((m) => m.color === 'b')).toBe(true);
+        });
+
+        test('should generate moves for specific square of enemy piece', () => {
+            game.clear();
+            game.put({ type: 'd', color: 'w', role: 'hunter' }, 'e2');
+            game.put({ type: 'd', color: 'b', role: 'hunter' }, 'e7');
+
+            // It's white's turn, but get moves for specific black piece
+            expect(game.turn()).toBe('w');
+            const blackDolphinMoves = game.moves({
+                square: 'e7',
+                verbose: true,
+                color: 'b',
+            });
+
+            expect(blackDolphinMoves.length).toBeGreaterThan(0);
+            expect(blackDolphinMoves.every((m) => m.from === 'e7')).toBe(true);
+            expect(blackDolphinMoves.every((m) => m.color === 'b')).toBe(true);
+        });
+
+        test('should default to current turn when color not specified', () => {
+            game.clear();
+            game.put({ type: 'd', color: 'w', role: 'hunter' }, 'e2');
+            game.put({ type: 'd', color: 'b', role: 'hunter' }, 'e7');
+
+            // Without color parameter, should return current turn's moves
+            const moves = game.moves({ verbose: true });
+
+            expect(moves.length).toBeGreaterThan(0);
+            expect(moves.every((m) => m.color === 'w')).toBe(true);
+        });
+
+        test('should return empty array for color with no pieces', () => {
+            game.clear();
+            game.put({ type: 'd', color: 'w', role: 'hunter' }, 'e2');
+
+            // Request black moves when there are no black pieces
+            const blackMoves = game.moves({ verbose: true, color: 'b' });
+
+            expect(blackMoves.length).toBe(0);
+        });
+
+        test('should allow viewing enemy piece moves without switching turn', () => {
+            game.clear();
+            game.put({ type: 't', color: 'w', role: 'hunter' }, 'a1');
+            game.put({ type: 't', color: 'b', role: 'hunter' }, 'a8');
+
+            const turnBefore = game.turn();
+
+            // Get enemy moves
+            const enemyMoves = game.moves({ verbose: true, color: 'b' });
+
+            const turnAfter = game.turn();
+
+            // Turn should not have changed
+            expect(turnBefore).toBe(turnAfter);
+            expect(turnBefore).toBe('w');
+
+            // But we should have gotten black's moves
+            expect(enemyMoves.length).toBeGreaterThan(0);
+            expect(enemyMoves.every((m) => m.color === 'b')).toBe(true);
+        });
+    });
 });

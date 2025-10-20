@@ -1224,8 +1224,9 @@ export class CoralClash {
         verbose = false,
         square = undefined,
         piece = undefined,
-    }: { verbose?: boolean; square?: Square; piece?: PieceSymbol } = {}) {
-        const moves = this._moves({ square, piece });
+        color = undefined,
+    }: { verbose?: boolean; square?: Square; piece?: PieceSymbol; color?: Color } = {}) {
+        const moves = this._moves({ square, piece, color });
 
         if (verbose) {
             return moves.map((move) => this._makePretty(move));
@@ -1501,16 +1502,18 @@ export class CoralClash {
         legal = true,
         piece = undefined,
         square = undefined,
+        color = undefined,
     }: {
         legal?: boolean;
         piece?: PieceSymbol;
         square?: Square;
+        color?: Color;
     } = {}) {
         const forSquare = square ? (square.toLowerCase() as Square) : undefined;
         const forPiece = piece?.toLowerCase();
 
         const moves: InternalMove[] = [];
-        const us = this._turn;
+        const us = color ?? this._turn; // Use provided color or default to current turn
         const them = swapColor(us);
 
         let firstSquare = Ox88.a8;
