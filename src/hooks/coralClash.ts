@@ -28,24 +28,16 @@
 export const WHITE = 'w';
 export const BLACK = 'b';
 
-// Ocean-themed piece names (Coral Clash)
-export const PAWN = 'p'; // Crab
-export const KNIGHT = 'n'; // Turtle
-export const BISHOP = 'b'; // Octopus
-export const ROOK = 'r'; // Pufferfish
-export const QUEEN = 'q'; // Dolphin
-export const KING = 'k'; // Whale
-
-// Aliases for ocean theme
-export const CRAB = PAWN;
-export const TURTLE = KNIGHT;
-export const OCTOPUS = BISHOP;
-export const PUFFERFISH = ROOK;
-export const DOLPHIN = QUEEN;
-export const WHALE = KING;
+// Coral Clash piece symbols
+export const CRAB = 'c';
+export const TURTLE = 't';
+export const OCTOPUS = 'o';
+export const PUFFERFISH = 'f';
+export const DOLPHIN = 'd';
+export const WHALE = 'h';
 
 export type Color = 'w' | 'b';
-export type PieceSymbol = 'p' | 'n' | 'b' | 'r' | 'q' | 'k';
+export type PieceSymbol = 'c' | 't' | 'o' | 'f' | 'd' | 'h';
 
 // prettier-ignore
 export type Square =
@@ -60,8 +52,8 @@ export type Square =
 
 // Helper function to determine piece role in Coral Clash starting position
 function getStartingRole(square: Square, type: PieceSymbol, color: Color): PieceRole | undefined {
-    // Whale (King) doesn't have a role
-    if (type === KING) return undefined;
+    // Whale doesn't have a role
+    if (type === WHALE) return undefined;
 
     const file = square[0];
     const rank = parseInt(square[1]);
@@ -69,51 +61,51 @@ function getStartingRole(square: Square, type: PieceSymbol, color: Color): Piece
     // Define roles based on Coral Clash setup rules
     if (color === WHITE) {
         if (rank === 1) {
-            // Back rank: a1=Hunter Puffer, b1=Hunter Turtle, c1=Gatherer Turtle, d1/e1=Whale, f1=Gatherer Turtle, g1=Hunter Turtle, h1=Gatherer Puffer
-            if (file === 'a' && type === ROOK) return 'hunter'; // Pufferfish
-            if (file === 'b' && type === KNIGHT) return 'hunter'; // Turtle
-            if (file === 'c' && type === KNIGHT) return 'gatherer'; // Turtle
-            if (file === 'f' && type === KNIGHT) return 'gatherer'; // Turtle
-            if (file === 'g' && type === KNIGHT) return 'hunter'; // Turtle
-            if (file === 'h' && type === ROOK) return 'gatherer'; // Pufferfish
+            // Back rank: a1=Hunter Pufferfish, b1=Hunter Turtle, c1=Gatherer Turtle, d1/e1=Whale, f1=Gatherer Turtle, g1=Hunter Turtle, h1=Gatherer Pufferfish
+            if (file === 'a' && type === PUFFERFISH) return 'hunter';
+            if (file === 'b' && type === TURTLE) return 'hunter';
+            if (file === 'c' && type === TURTLE) return 'gatherer';
+            if (file === 'f' && type === TURTLE) return 'gatherer';
+            if (file === 'g' && type === TURTLE) return 'hunter';
+            if (file === 'h' && type === PUFFERFISH) return 'gatherer';
         } else if (rank === 2) {
             // Second rank: a2=Hunter Crab, b2=Gatherer Octopus, c2=Gatherer Crab, d2=Hunter Dolphin, e2=Gatherer Dolphin, f2=Hunter Crab, g2=Hunter Octopus, h2=Gatherer Crab
-            if (file === 'a' && type === PAWN) return 'hunter'; // Crab
-            if (file === 'b' && type === BISHOP) return 'gatherer'; // Octopus
-            if (file === 'c' && type === PAWN) return 'gatherer'; // Crab
-            if (file === 'd' && type === QUEEN) return 'hunter'; // Dolphin
-            if (file === 'e' && type === QUEEN) return 'gatherer'; // Dolphin
-            if (file === 'f' && type === PAWN) return 'hunter'; // Crab
-            if (file === 'g' && type === BISHOP) return 'hunter'; // Octopus
-            if (file === 'h' && type === PAWN) return 'gatherer'; // Crab
+            if (file === 'a' && type === CRAB) return 'hunter';
+            if (file === 'b' && type === OCTOPUS) return 'gatherer';
+            if (file === 'c' && type === CRAB) return 'gatherer';
+            if (file === 'd' && type === DOLPHIN) return 'hunter';
+            if (file === 'e' && type === DOLPHIN) return 'gatherer';
+            if (file === 'f' && type === CRAB) return 'hunter';
+            if (file === 'g' && type === OCTOPUS) return 'hunter';
+            if (file === 'h' && type === CRAB) return 'gatherer';
         } else if (rank === 3) {
             // Third rank octopuses from setup
-            if (file === 'd' && type === BISHOP) return 'gatherer'; // Octopus with coral
-            if (file === 'e' && type === BISHOP) return 'gatherer'; // Octopus with coral
+            if (file === 'd' && type === OCTOPUS) return 'gatherer'; // Octopus with coral
+            if (file === 'e' && type === OCTOPUS) return 'gatherer'; // Octopus with coral
         }
     } else if (color === BLACK) {
         if (rank === 8) {
             // Back rank (mirror of white)
-            if (file === 'a' && type === ROOK) return 'hunter'; // Pufferfish
-            if (file === 'b' && type === KNIGHT) return 'hunter'; // Turtle
-            if (file === 'c' && type === KNIGHT) return 'gatherer'; // Turtle
-            if (file === 'f' && type === KNIGHT) return 'gatherer'; // Turtle
-            if (file === 'g' && type === KNIGHT) return 'hunter'; // Turtle
-            if (file === 'h' && type === ROOK) return 'gatherer'; // Pufferfish
+            if (file === 'a' && type === PUFFERFISH) return 'hunter';
+            if (file === 'b' && type === TURTLE) return 'hunter';
+            if (file === 'c' && type === TURTLE) return 'gatherer';
+            if (file === 'f' && type === TURTLE) return 'gatherer';
+            if (file === 'g' && type === TURTLE) return 'hunter';
+            if (file === 'h' && type === PUFFERFISH) return 'gatherer';
         } else if (rank === 7) {
             // Seventh rank (mirror of white's second rank)
-            if (file === 'a' && type === PAWN) return 'hunter'; // Crab
-            if (file === 'b' && type === BISHOP) return 'gatherer'; // Octopus
-            if (file === 'c' && type === PAWN) return 'gatherer'; // Crab
-            if (file === 'd' && type === QUEEN) return 'hunter'; // Dolphin
-            if (file === 'e' && type === QUEEN) return 'gatherer'; // Dolphin
-            if (file === 'f' && type === PAWN) return 'hunter'; // Crab
-            if (file === 'g' && type === BISHOP) return 'hunter'; // Octopus
-            if (file === 'h' && type === PAWN) return 'gatherer'; // Crab
+            if (file === 'a' && type === CRAB) return 'hunter';
+            if (file === 'b' && type === OCTOPUS) return 'gatherer';
+            if (file === 'c' && type === CRAB) return 'gatherer';
+            if (file === 'd' && type === DOLPHIN) return 'hunter';
+            if (file === 'e' && type === DOLPHIN) return 'gatherer';
+            if (file === 'f' && type === CRAB) return 'hunter';
+            if (file === 'g' && type === OCTOPUS) return 'hunter';
+            if (file === 'h' && type === CRAB) return 'gatherer';
         } else if (rank === 6) {
             // Sixth rank octopuses
-            if (file === 'd' && type === BISHOP) return 'gatherer'; // Octopus with coral
-            if (file === 'e' && type === BISHOP) return 'gatherer'; // Octopus with coral
+            if (file === 'd' && type === OCTOPUS) return 'gatherer'; // Octopus with coral
+            if (file === 'e' && type === OCTOPUS) return 'gatherer'; // Octopus with coral
         }
     }
 
@@ -122,15 +114,21 @@ function getStartingRole(square: Square, type: PieceSymbol, color: Color): Piece
 }
 
 // Coral Clash starting position based on official rules:
-// Back rank (rank 1/8): Pufferfish (R) in corners, Turtles (N) next to them, Whale (K) in center spanning d-e
+// Back rank (rank 1/8): Pufferfish (f) in corners, Turtles (t) next to them, Whale (h) in center spanning d-e
 // Second rank (rank 2/7): Crab-Octopus-Crab-Dolphin-Dolphin-Crab-Octopus-Crab pattern
 // Third rank (rank 3/6): Octopuses with coral underneath (d3, e3 for white; d6, e6 for black)
-// Whale spans 2 squares (d1-e1 for white, d8-e8 for black) - represented as K on d-file, empty on e-file
+//
+// IMPORTANT: Whale FEN notation
+// - Whale spans 2 squares (d1-e1 for white, d8-e8 for black)
+// - In FEN: 'H' appears only at first square (d-file), second square (e-file) shown as '1' (empty)
+// - Internally: Whale occupies BOTH squares (stored in _kings array)
+// - This is a simplified FEN representation since standard FEN doesn't support 2-square pieces
+//
 // Coral placement (tracked separately, initialized in _initializeStartingCoral):
 //   - White: d3, e3 have coral (under Gatherer Octopuses)
 //   - Black: d6, e6 have coral (under Gatherer Octopuses)
 //   - Blue player (black) places one additional coral
-export const DEFAULT_POSITION = 'rnnk1nnr/pbpqqpbp/3bb3/8/8/3BB3/PBPQQPBP/RNNK1NNR w - - 0 1';
+export const DEFAULT_POSITION = 'ftth1ttf/cocddcoc/3oo3/8/8/3OO3/COCDDCOC/FTTH1TTF w - - 0 1';
 
 export type PieceRole = 'hunter' | 'gatherer';
 
@@ -159,7 +157,6 @@ interface History {
     move: InternalMove;
     kings: Record<Color, [number, number]>; // Whale positions (both squares)
     turn: Color;
-    castling: Record<Color, number>;
     epSquare: number;
     halfMoves: number;
     moveNumber: number;
@@ -180,6 +177,9 @@ export type Move = {
     lan: string;
     before: string;
     after: string;
+    // Whale-specific fields for 2-square piece
+    whaleSecondSquare?: Square; // Where the other half of the whale ends up after this move
+    whaleOrientation?: 'horizontal' | 'vertical'; // Final orientation after move
 };
 
 const EMPTY = -1;
@@ -190,8 +190,6 @@ const FLAGS: Record<string, string> = {
     BIG_PAWN: 'b',
     EP_CAPTURE: 'e',
     PROMOTION: 'p',
-    KSIDE_CASTLE: 'k',
-    QSIDE_CASTLE: 'q',
 };
 
 // prettier-ignore
@@ -212,8 +210,7 @@ const BITS: Record<string, number> = {
     BIG_PAWN: 4,
     EP_CAPTURE: 8,
     PROMOTION: 16,
-    KSIDE_CASTLE: 32,
-    QSIDE_CASTLE: 64,
+    // Castle bits removed - not used in Coral Clash
 };
 
 /*
@@ -273,11 +270,11 @@ const Ox88: Record<Square, number> = {
 const CRAB_OFFSETS = [-16, 1, 16, -1];
 
 const PIECE_OFFSETS = {
-    n: [-16, 1, 16, -1], // Turtle: moves any distance orthogonally (like chess rook)
-    b: [-17, -15, 17, 15], // Octopus: moves 1 square diagonally
-    r: [-17, -15, 17, 15], // Pufferfish: moves any distance diagonally (like chess bishop)
-    q: [-17, -16, -15, 1, 17, 16, 15, -1], // Dolphin: moves any distance in all 8 directions (same as chess queen)
-    k: [-17, -16, -15, 1, 17, 16, 15, -1], // Whale: special 2-square piece (keeping queen pattern for now, needs custom logic)
+    t: [-16, 1, 16, -1], // Turtle: moves any distance orthogonally
+    o: [-17, -15, 17, 15], // Octopus: moves 1 square diagonally
+    f: [-17, -15, 17, 15], // Pufferfish: moves any distance diagonally
+    d: [-17, -16, -15, 1, 17, 16, 15, -1], // Dolphin: moves any distance in all 8 directions
+    h: [-17, -16, -15, 1, 17, 16, 15, -1], // Whale: special 2-square piece (needs custom logic)
 };
 
 // prettier-ignore
@@ -318,11 +315,11 @@ const RAYS = [
   -15,  0,  0,  0,  0,  0,  0,-16,  0,  0,  0,  0,  0,  0,-17
 ];
 
-const PIECE_MASKS = { p: 0x1, n: 0x2, b: 0x4, r: 0x8, q: 0x10, k: 0x20 };
+const PIECE_MASKS = { c: 0x1, t: 0x2, o: 0x4, f: 0x8, d: 0x10, h: 0x20 };
 
-const SYMBOLS = 'pnbrqkPNBRQK';
+const SYMBOLS = 'ctofdhCTOFDH';
 
-const PROMOTIONS: PieceSymbol[] = [KNIGHT, BISHOP, ROOK, QUEEN];
+const PROMOTIONS: PieceSymbol[] = [TURTLE, OCTOPUS, PUFFERFISH, DOLPHIN];
 
 const RANK_1 = 7;
 const RANK_2 = 6;
@@ -334,22 +331,6 @@ const RANK_2 = 6;
  */
 const RANK_7 = 1;
 const RANK_8 = 0;
-
-const SIDES = {
-    [KING]: BITS.KSIDE_CASTLE,
-    [QUEEN]: BITS.QSIDE_CASTLE,
-};
-
-const ROOKS = {
-    w: [
-        { square: Ox88.a1, flag: BITS.QSIDE_CASTLE },
-        { square: Ox88.h1, flag: BITS.KSIDE_CASTLE },
-    ],
-    b: [
-        { square: Ox88.a8, flag: BITS.QSIDE_CASTLE },
-        { square: Ox88.h8, flag: BITS.KSIDE_CASTLE },
-    ],
-};
 
 const SECOND_RANK = { b: RANK_7, w: RANK_2 };
 
@@ -413,9 +394,12 @@ export function validateFen(fen: string) {
         return { ok: false, error: 'Invalid FEN: en-passant square is invalid' };
     }
 
-    // 5th criterion: 3th field is a valid castle-string?
-    if (/[^kKqQ-]/.test(tokens[2])) {
-        return { ok: false, error: 'Invalid FEN: castling availability is invalid' };
+    // 5th criterion: 3rd field is castling (not used in Coral Clash, but must be valid format)
+    if (!/^(-|[kKqQ]{1,4})$/.test(tokens[2])) {
+        return {
+            ok: false,
+            error: 'Invalid FEN: castling field must be - or valid castling string',
+        };
     }
 
     // 6th criterion: 2nd field is "w" (white) or "b" (black)?
@@ -449,7 +433,7 @@ export function validateFen(fen: string) {
                 sumFields += parseInt(rows[i][k], 10);
                 previousWasNumber = true;
             } else {
-                if (!/^[prnbqkPRNBQK]$/.test(rows[i][k])) {
+                if (!/^[ctofdhCTOFDH]$/.test(rows[i][k])) {
                     return {
                         ok: false,
                         error: 'Invalid FEN: piece data is invalid (invalid piece)',
@@ -472,27 +456,27 @@ export function validateFen(fen: string) {
         return { ok: false, error: 'Invalid FEN: illegal en-passant square' };
     }
 
-    // 10th criterion: does chess position contain exact two kings?
-    const kings = [
-        { color: 'white', regex: /K/g },
-        { color: 'black', regex: /k/g },
+    // 10th criterion: does position contain exactly two whales?
+    const whales = [
+        { color: 'white', regex: /H/g },
+        { color: 'black', regex: /h/g },
     ];
 
-    for (const { color, regex } of kings) {
+    for (const { color, regex } of whales) {
         if (!regex.test(tokens[0])) {
-            return { ok: false, error: `Invalid FEN: missing ${color} king` };
+            return { ok: false, error: `Invalid FEN: missing ${color} whale` };
         }
 
         if ((tokens[0].match(regex) || []).length > 1) {
-            return { ok: false, error: `Invalid FEN: too many ${color} kings` };
+            return { ok: false, error: `Invalid FEN: too many ${color} whales` };
         }
     }
 
-    // 11th criterion: are any pawns on the first or eighth rows?
-    if (Array.from(rows[0] + rows[7]).some((char) => char.toUpperCase() === 'P')) {
+    // 11th criterion: are any crabs on the first or eighth rows?
+    if (Array.from(rows[0] + rows[7]).some((char) => char.toUpperCase() === 'C')) {
         return {
             ok: false,
-            error: 'Invalid FEN: some pawns are on the edge rows',
+            error: 'Invalid FEN: some crabs are on the edge rows',
         };
     }
 
@@ -583,12 +567,11 @@ function inferPieceType(san: string) {
         if (matches) {
             return undefined;
         }
-        return PAWN;
+        return CRAB;
     }
     pieceType = pieceType.toLowerCase();
-    if (pieceType === 'o') {
-        return KING;
-    }
+    // In Coral Clash: c=crab, t=turtle, o=octopus, f=pufferfish, d=dolphin, h=whale
+    // No special cases needed - just return the piece type
     return pieceType as PieceSymbol;
 }
 
@@ -620,7 +603,6 @@ export class CoralClash {
     private _moveNumber = 0;
     private _history: History[] = [];
     private _comments: Record<string, string> = {};
-    private _castling: Record<Color, number> = { w: 0, b: 0 };
 
     // Coral Clash specific state
     private _coral = new Array<Color | null>(128); // Tracks which squares have coral and which color
@@ -663,7 +645,6 @@ export class CoralClash {
         this._board = new Array<Piece>(128);
         this._kings = { w: [EMPTY, EMPTY], b: [EMPTY, EMPTY] };
         this._turn = WHITE;
-        this._castling = { w: 0, b: 0 };
         this._epSquare = EMPTY;
         this._halfMoves = 0;
         this._moveNumber = 1;
@@ -734,18 +715,7 @@ export class CoralClash {
 
         this._turn = tokens[1] as Color;
 
-        if (tokens[2].indexOf('K') > -1) {
-            this._castling.w |= BITS.KSIDE_CASTLE;
-        }
-        if (tokens[2].indexOf('Q') > -1) {
-            this._castling.w |= BITS.QSIDE_CASTLE;
-        }
-        if (tokens[2].indexOf('k') > -1) {
-            this._castling.b |= BITS.KSIDE_CASTLE;
-        }
-        if (tokens[2].indexOf('q') > -1) {
-            this._castling.b |= BITS.QSIDE_CASTLE;
-        }
+        // Castling is not used in Coral Clash (tokens[2] is ignored)
 
         this._epSquare = tokens[3] === '-' ? EMPTY : Ox88[tokens[3] as Square];
         this._halfMoves = parseInt(tokens[4], 10);
@@ -786,22 +756,8 @@ export class CoralClash {
             }
         }
 
-        let castling = '';
-        if (this._castling[WHITE] & BITS.KSIDE_CASTLE) {
-            castling += 'K';
-        }
-        if (this._castling[WHITE] & BITS.QSIDE_CASTLE) {
-            castling += 'Q';
-        }
-        if (this._castling[BLACK] & BITS.KSIDE_CASTLE) {
-            castling += 'k';
-        }
-        if (this._castling[BLACK] & BITS.QSIDE_CASTLE) {
-            castling += 'q';
-        }
-
-        // do we have an empty castling flag?
-        castling = castling || '-';
+        // Castling is not used in Coral Clash
+        const castling = '-';
 
         let epSquare = '-';
         /*
@@ -820,15 +776,15 @@ export class CoralClash {
 
                 const color = this._turn;
 
-                // is there a pawn that can capture the epSquare?
-                if (this._board[square]?.color === color && this._board[square]?.type === PAWN) {
-                    // if the pawn makes an ep capture, does it leave it's king in check?
+                // is there a crab that can capture the epSquare?
+                if (this._board[square]?.color === color && this._board[square]?.type === CRAB) {
+                    // if the crab makes an ep capture, does it leave its whale in check?
                     this._makeMove({
                         color,
                         from: square,
                         to: this._epSquare,
-                        piece: PAWN,
-                        captured: PAWN,
+                        piece: CRAB,
+                        captured: CRAB,
                         flags: BITS.EP_CAPTURE,
                     });
                     const isLegal = !this._isKingAttacked(color);
@@ -871,8 +827,22 @@ export class CoralClash {
     get(square: Square) {
         const sq = Ox88[square];
 
-        // Whale is now stored at both squares in _board, so just read from _board
-        return this._board[sq] || false;
+        // Check if piece is in _board first
+        if (this._board[sq]) {
+            return this._board[sq];
+        }
+
+        // Check if this square is the second square of a whale
+        if (this._kings.w[1] === sq && this._kings.w[0] !== EMPTY) {
+            // Return the whale piece from the first square
+            return this._board[this._kings.w[0]] || false;
+        }
+        if (this._kings.b[1] === sq && this._kings.b[0] !== EMPTY) {
+            // Return the whale piece from the first square
+            return this._board[this._kings.b[0]] || false;
+        }
+
+        return false;
     }
 
     put(
@@ -880,8 +850,6 @@ export class CoralClash {
         square: Square,
     ) {
         if (this._put({ type, color, role }, square)) {
-            this._updateCastlingRights();
-            this._updateEnPassantSquare();
             this._updateSetup(this.fen());
             return true;
         }
@@ -905,14 +873,14 @@ export class CoralClash {
         const sq = Ox88[square];
 
         // don't let the user place more than one king
-        if (type == KING && !(this._kings[color][0] == EMPTY || this._kings[color][0] == sq)) {
+        if (type == WHALE && !(this._kings[color][0] == EMPTY || this._kings[color][0] == sq)) {
             return false;
         }
 
         const currentPieceOnSquare = this._board[sq];
 
         // if one of the kings will be replaced by the piece from args, remove it from both squares
-        if (currentPieceOnSquare && currentPieceOnSquare.type === KING) {
+        if (currentPieceOnSquare && currentPieceOnSquare.type === WHALE) {
             const [first, second] = this._kings[currentPieceOnSquare.color];
             if (first !== EMPTY) delete this._board[first];
             if (second !== EMPTY) delete this._board[second];
@@ -922,7 +890,7 @@ export class CoralClash {
         const piece = { type: type as PieceSymbol, color: color as Color, role };
         this._board[sq] = piece;
 
-        if (type === KING) {
+        if (type === WHALE) {
             // Whale spans 2 squares - initially placed horizontally in starting position
             const secondSq = sq + 1; // Second square starts one to the right (can change via rotation)
 
@@ -937,7 +905,7 @@ export class CoralClash {
     remove(square: Square) {
         const piece = this.get(square);
         delete this._board[Ox88[square]];
-        if (piece && piece.type === KING) {
+        if (piece && piece.type === WHALE) {
             // Remove whale from both squares
             const [first, second] = this._kings[piece.color];
             if (first !== EMPTY) delete this._board[first];
@@ -945,82 +913,14 @@ export class CoralClash {
             this._kings[piece.color] = [EMPTY, EMPTY];
         }
 
-        this._updateCastlingRights();
-        this._updateEnPassantSquare();
         this._updateSetup(this.fen());
 
         return piece;
     }
 
-    private _updateCastlingRights() {
-        const whiteKingInPlace =
-            this._board[Ox88.e1]?.type === KING && this._board[Ox88.e1]?.color === WHITE;
-        const blackKingInPlace =
-            this._board[Ox88.e8]?.type === KING && this._board[Ox88.e8]?.color === BLACK;
-
-        if (
-            !whiteKingInPlace ||
-            this._board[Ox88.a1]?.type !== ROOK ||
-            this._board[Ox88.a1]?.color !== WHITE
-        ) {
-            this._castling.w &= ~BITS.QSIDE_CASTLE;
-        }
-
-        if (
-            !whiteKingInPlace ||
-            this._board[Ox88.h1]?.type !== ROOK ||
-            this._board[Ox88.h1]?.color !== WHITE
-        ) {
-            this._castling.w &= ~BITS.KSIDE_CASTLE;
-        }
-
-        if (
-            !blackKingInPlace ||
-            this._board[Ox88.a8]?.type !== ROOK ||
-            this._board[Ox88.a8]?.color !== BLACK
-        ) {
-            this._castling.b &= ~BITS.QSIDE_CASTLE;
-        }
-
-        if (
-            !blackKingInPlace ||
-            this._board[Ox88.h8]?.type !== ROOK ||
-            this._board[Ox88.h8]?.color !== BLACK
-        ) {
-            this._castling.b &= ~BITS.KSIDE_CASTLE;
-        }
-    }
-
-    private _updateEnPassantSquare() {
-        if (this._epSquare === EMPTY) {
-            return;
-        }
-
-        const startSquare = this._epSquare + (this._turn === WHITE ? -16 : 16);
-        const currentSquare = this._epSquare + (this._turn === WHITE ? 16 : -16);
-        const attackers = [currentSquare + 1, currentSquare - 1];
-
-        if (
-            this._board[startSquare] !== null ||
-            this._board[this._epSquare] !== null ||
-            this._board[currentSquare]?.color !== swapColor(this._turn) ||
-            this._board[currentSquare]?.type !== PAWN
-        ) {
-            this._epSquare = EMPTY;
-            return;
-        }
-
-        const canCapture = (square: number) =>
-            !(square & 0x88) &&
-            this._board[square]?.color === this._turn &&
-            this._board[square]?.type === PAWN;
-
-        if (!attackers.some(canCapture)) {
-            this._epSquare = EMPTY;
-        }
-    }
-
     private _attacked(color: Color, square: number) {
+        const targetSquare = algebraic(square);
+
         for (let i = Ox88.a8; i <= Ox88.h1; i++) {
             // did we run off the end of the board
             if (i & 0x88) {
@@ -1044,7 +944,7 @@ export class CoralClash {
             const index = difference + 119;
 
             if (ATTACKS[index] & PIECE_MASKS[piece.type]) {
-                if (piece.type === PAWN) {
+                if (piece.type === CRAB) {
                     if (difference > 0) {
                         if (piece.color === WHITE) return true;
                     } else {
@@ -1053,15 +953,16 @@ export class CoralClash {
                     continue;
                 }
 
-                // if the piece is a knight or a king
-                if (piece.type === 'n' || piece.type === 'k') return true;
+                // if the piece is a turtle or a whale
+                if (piece.type === 't' || piece.type === 'h') return true;
 
                 const offset = RAYS[index];
                 let j = i + offset;
 
                 let blocked = false;
                 while (j !== square) {
-                    if (this._board[j] != null) {
+                    // Check if square is occupied (including whale's second square)
+                    if (this._isSquareOccupied(j)) {
                         blocked = true;
                         break;
                     }
@@ -1114,21 +1015,18 @@ export class CoralClash {
 
     isInsufficientMaterial() {
         /*
-         * k.b. vs k.b. (of opposite colors) with mate in 1:
-         * 8/8/8/8/1b6/8/B1k5/K7 b - - 0 1
-         *
-         * k.b. vs k.n. with mate in 1:
-         * 8/8/8/8/1n6/8/B7/K1k5 b - - 2 1
+         * Coral Clash insufficient material checks
+         * Based on piece combinations that cannot achieve coral victory
          */
         const pieces: Record<PieceSymbol, number> = {
-            b: 0,
-            n: 0,
-            r: 0,
-            q: 0,
-            k: 0,
-            p: 0,
+            o: 0,
+            t: 0,
+            f: 0,
+            d: 0,
+            h: 0,
+            c: 0,
         };
-        const bishops = [];
+        const octopuses = [];
         let numPieces = 0;
         let squareColor = 0;
 
@@ -1142,28 +1040,28 @@ export class CoralClash {
             const piece = this._board[i];
             if (piece) {
                 pieces[piece.type] = piece.type in pieces ? pieces[piece.type] + 1 : 1;
-                if (piece.type === BISHOP) {
-                    bishops.push(squareColor);
+                if (piece.type === OCTOPUS) {
+                    octopuses.push(squareColor);
                 }
                 numPieces++;
             }
         }
 
-        // k vs. k
+        // whale vs. whale
         if (numPieces === 2) {
             return true;
         } else if (
-            // k vs. kn .... or .... k vs. kb
+            // whale vs. whale + turtle .... or .... whale vs. whale + octopus
             numPieces === 3 &&
-            (pieces[BISHOP] === 1 || pieces[KNIGHT] === 1)
+            (pieces[OCTOPUS] === 1 || pieces[TURTLE] === 1)
         ) {
             return true;
-        } else if (numPieces === pieces[BISHOP] + 2) {
-            // kb vs. kb where any number of bishops are all on the same color
+        } else if (numPieces === pieces[OCTOPUS] + 2) {
+            // whale + octopus vs. whale + octopus where all octopuses are on the same color
             let sum = 0;
-            const len = bishops.length;
+            const len = octopuses.length;
             for (let i = 0; i < len; i++) {
-                sum += bishops[i];
+                sum += octopuses[i];
             }
             if (sum === 0 || sum === len) {
                 return true;
@@ -1213,10 +1111,10 @@ export class CoralClash {
                 continue;
             }
             if (this._board[i]) {
-                if (this._board[i].color === WHITE && this._board[i].type !== KING) {
+                if (this._board[i].color === WHITE && this._board[i].type !== WHALE) {
                     whitePieceCount++;
                 }
-                if (this._board[i].color === BLACK && this._board[i].type !== KING) {
+                if (this._board[i].color === BLACK && this._board[i].type !== WHALE) {
                     blackPieceCount++;
                 }
             }
@@ -1240,7 +1138,7 @@ export class CoralClash {
             if (
                 piece.color === WHITE &&
                 r === RANK_8 &&
-                (piece.type === PAWN || piece.type === BISHOP)
+                (piece.type === CRAB || piece.type === OCTOPUS)
             ) {
                 return true;
             }
@@ -1248,7 +1146,7 @@ export class CoralClash {
             if (
                 piece.color === BLACK &&
                 r === RANK_1 &&
-                (piece.type === PAWN || piece.type === BISHOP)
+                (piece.type === CRAB || piece.type === OCTOPUS)
             ) {
                 return true;
             }
@@ -1408,7 +1306,7 @@ export class CoralClash {
                 color,
                 from,
                 to,
-                piece: KING,
+                piece: WHALE,
                 captured,
                 capturedRole,
                 flags,
@@ -1445,7 +1343,7 @@ export class CoralClash {
                     addWhaleMove(firstSq, to, secondSq);
                 } else if (this._isSquareOccupied(to, them)) {
                     // Capture
-                    const capturedType = this._board[to]?.type || KING;
+                    const capturedType = this._board[to]?.type || WHALE;
                     const capturedRole = this._board[to]?.role;
                     addWhaleMove(firstSq, to, secondSq, capturedType, capturedRole);
                     break;
@@ -1474,7 +1372,7 @@ export class CoralClash {
                     addWhaleMove(secondSq, to, firstSq);
                 } else if (this._isSquareOccupied(to, them)) {
                     // Capture
-                    const capturedType = this._board[to]?.type || KING;
+                    const capturedType = this._board[to]?.type || WHALE;
                     const capturedRole = this._board[to]?.role;
                     addWhaleMove(secondSq, to, firstSq, capturedType, capturedRole);
                     break;
@@ -1541,7 +1439,7 @@ export class CoralClash {
                     ) {
                         // At least one capture, other square empty or capturable
                         const capturedType =
-                            this._board[newFirst]?.type || this._board[newSecond]?.type || KING;
+                            this._board[newFirst]?.type || this._board[newSecond]?.type || WHALE;
                         const capturedRole =
                             this._board[newFirst]?.role || this._board[newSecond]?.role;
                         // Generate captures from BOTH starting squares
@@ -1572,7 +1470,7 @@ export class CoralClash {
             if (!this._isSquareOccupied(to)) {
                 addWhaleMove(firstSq, to, secondSq);
             } else if (this._isSquareOccupied(to, them)) {
-                const capturedType = this._board[to]?.type || KING;
+                const capturedType = this._board[to]?.type || WHALE;
                 const capturedRole = this._board[to]?.role;
                 addWhaleMove(firstSq, to, secondSq, capturedType, capturedRole);
             }
@@ -1592,7 +1490,7 @@ export class CoralClash {
             if (!this._isSquareOccupied(to)) {
                 addWhaleMove(secondSq, to, firstSq);
             } else if (this._isSquareOccupied(to, them)) {
-                const capturedType = this._board[to]?.type || KING;
+                const capturedType = this._board[to]?.type || WHALE;
                 const capturedRole = this._board[to]?.role;
                 addWhaleMove(secondSq, to, firstSq, capturedType, capturedRole);
             }
@@ -1647,7 +1545,7 @@ export class CoralClash {
             const { type } = this._board[from];
 
             let to: number;
-            if (type === PAWN) {
+            if (type === CRAB) {
                 // Crabs move 1 square orthogonally (no double moves, no en passant in Coral Clash)
                 if (forPiece && forPiece !== type) continue;
 
@@ -1657,24 +1555,24 @@ export class CoralClash {
 
                     if (!this._isSquareOccupied(to)) {
                         // Empty square - crab can move there
-                        addMove(moves, us, from, to, PAWN);
+                        addMove(moves, us, from, to, CRAB);
                     } else if (this._isSquareOccupied(to, them)) {
                         // Capture opponent's piece
-                        const capturedType = this._board[to]?.type || KING; // Could be whale
+                        const capturedType = this._board[to]?.type || WHALE; // Could be whale
                         const capturedRole = this._board[to]?.role; // Preserve role for Coral Clash
                         addMove(
                             moves,
                             us,
                             from,
                             to,
-                            PAWN,
+                            CRAB,
                             capturedType,
                             BITS.CAPTURE,
                             capturedRole,
                         );
                     }
                 }
-            } else if (type === KING) {
+            } else if (type === WHALE) {
                 // Whale - special 2-square piece with unique movement
                 if (forPiece && forPiece !== type) continue;
 
@@ -1703,9 +1601,17 @@ export class CoralClash {
                             // own color, stop loop
                             if (this._isSquareOccupied(to, us)) break;
 
-                            // Capture opponent's piece (including whale)
-                            const capturedType = this._board[to]?.type || KING;
-                            const capturedRole = this._board[to]?.role; // Preserve role for Coral Clash
+                            // Capture opponent's piece
+                            // Get the piece type - if not in _board, must be opponent whale's second square
+                            let capturedType: PieceSymbol;
+                            if (this._board[to]) {
+                                capturedType = this._board[to].type;
+                            } else {
+                                // Square is occupied but not in _board = must be whale's second square
+                                capturedType = WHALE;
+                            }
+
+                            const capturedRole = this._board[to]?.role;
                             addMove(
                                 moves,
                                 us,
@@ -1720,7 +1626,7 @@ export class CoralClash {
                         }
 
                         /* break, if octopus (moves 1 square) */
-                        if (type === BISHOP) break;
+                        if (type === OCTOPUS) break;
                     }
                 }
             }
@@ -1816,7 +1722,6 @@ export class CoralClash {
                 w: [this._kings.w[0], this._kings.w[1]],
             },
             turn: this._turn,
-            castling: { b: this._castling.b, w: this._castling.w },
             epSquare: this._epSquare,
             halfMoves: this._halfMoves,
             moveNumber: this._moveNumber,
@@ -1831,28 +1736,31 @@ export class CoralClash {
         const them = swapColor(us);
         this._push(move);
 
-        // Check if we're capturing a whale (need to clear both squares)
-        if (move.captured === KING) {
-            // Clear the opponent's whale from both squares
-            const [enemyFirst, enemySecond] = this._kings[them];
-            if (enemyFirst !== EMPTY) delete this._board[enemyFirst];
-            if (enemySecond !== EMPTY) delete this._board[enemySecond];
-            this._kings[them] = [EMPTY, EMPTY];
+        // Whale should NEVER be captured - game ends at checkmate first
+        // If this happens, it indicates a bug in move generation or validation
+        if (move.captured === WHALE) {
+            console.error('[_makeMove] ILLEGAL: Whale capture attempted!', {
+                from: algebraic(move.from),
+                to: algebraic(move.to),
+                piece: move.piece,
+                turn: us,
+                captured: move.captured,
+            });
+            console.error('This should never happen in normal play. Game should end at checkmate.');
         }
 
         // Move piece in _board
         // For whale: piece is stored at BOTH squares it occupies
-        if (move.piece === KING) {
+        if (move.piece === WHALE) {
             // Whale move: Remove piece from both old squares
             const [oldFirst, oldSecond] = this._kings[us];
 
-            // Get the piece object (should be at one of the old positions)
-            const whalePiece = this._board[oldFirst] ||
-                this._board[oldSecond] || {
-                    type: KING,
-                    color: us,
-                    role: undefined,
-                };
+            // Always use a clean whale piece (don't trust stored data which might be corrupted)
+            const whalePiece: Piece = {
+                type: WHALE,
+                color: us,
+                role: undefined,
+            };
 
             // Determine the other square's position after the move
             // Check if this is a parallel slide (both halves move same offset) or rotation (one stays fixed)
@@ -1891,24 +1799,7 @@ export class CoralClash {
             this._kings[us] = [newFirst, newSecond];
         } else {
             // Normal piece move
-            // Safety check: don't overwrite whale squares
-            const [whiteFirst, whiteSecond] = this._kings.w;
-            const [blackFirst, blackSecond] = this._kings.b;
-
-            if (
-                move.to !== whiteFirst &&
-                move.to !== whiteSecond &&
-                move.to !== blackFirst &&
-                move.to !== blackSecond
-            ) {
-                this._board[move.to] = this._board[move.from];
-            } else {
-                console.error('[_makeMove] Attempted to overwrite whale square!', {
-                    from: algebraic(move.from),
-                    to: algebraic(move.to),
-                    piece: move.piece,
-                });
-            }
+            this._board[move.to] = this._board[move.from];
             delete this._board[move.from];
         }
 
@@ -1932,48 +1823,10 @@ export class CoralClash {
             };
         }
 
-        // if we moved the whale (no additional logic needed, handled above)
-        if (move.piece === KING) {
-            // No castling in Coral Clash (removed)
-            this._castling[us] = 0;
-        }
+        // No castling logic in Coral Clash
 
-        // turn off castling if we move a rook
-        if (this._castling[us]) {
-            for (let i = 0, len = ROOKS[us].length; i < len; i++) {
-                if (move.from === ROOKS[us][i].square && this._castling[us] & ROOKS[us][i].flag) {
-                    this._castling[us] ^= ROOKS[us][i].flag;
-                    break;
-                }
-            }
-        }
-
-        // turn off castling if we capture a rook
-        if (this._castling[them]) {
-            for (let i = 0, len = ROOKS[them].length; i < len; i++) {
-                if (
-                    move.to === ROOKS[them][i].square &&
-                    this._castling[them] & ROOKS[them][i].flag
-                ) {
-                    this._castling[them] ^= ROOKS[them][i].flag;
-                    break;
-                }
-            }
-        }
-
-        // if big pawn move, update the en passant square
-        if (move.flags & BITS.BIG_PAWN) {
-            if (us === BLACK) {
-                this._epSquare = move.to - 16;
-            } else {
-                this._epSquare = move.to + 16;
-            }
-        } else {
-            this._epSquare = EMPTY;
-        }
-
-        // reset the 50 move counter if a pawn is moved or a piece is captured
-        if (move.piece === PAWN) {
+        // reset the 50 move counter if a crab is moved or a piece is captured
+        if (move.piece === CRAB) {
             this._halfMoves = 0;
         } else if (move.flags & (BITS.CAPTURE | BITS.EP_CAPTURE)) {
             this._halfMoves = 0;
@@ -2011,7 +1864,7 @@ export class CoralClash {
 
         // Special handling for whale moves - save current position BEFORE restoring history
         let whaleCurrentPositions: [number, number] | null = null;
-        if (move.piece === KING) {
+        if (move.piece === WHALE) {
             // Save where the whale is NOW (before we restore history)
             whaleCurrentPositions = [this._kings[us][0], this._kings[us][1]];
         }
@@ -2022,7 +1875,6 @@ export class CoralClash {
             w: [old.kings.w[0], old.kings.w[1]],
         };
         this._turn = old.turn;
-        this._castling = { b: old.castling.b, w: old.castling.w };
         this._epSquare = old.epSquare;
         this._halfMoves = old.halfMoves;
         this._moveNumber = old.moveNumber;
@@ -2031,7 +1883,7 @@ export class CoralClash {
         this._coralRemaining = { b: old.coralRemaining.b, w: old.coralRemaining.w };
 
         // Special handling for whale moves - whale is stored at both positions
-        if (move.piece === KING && whaleCurrentPositions) {
+        if (move.piece === WHALE && whaleCurrentPositions) {
             // This is a whale move - restore whale to both old positions
             // old.kings[us] tells us where the whale WAS before the move (both squares)
             const [oldFirst, oldSecond] = old.kings[us];
@@ -2040,7 +1892,7 @@ export class CoralClash {
             const [currentFirst, currentSecond] = whaleCurrentPositions;
             const whalePiece = this._board[currentFirst] ||
                 this._board[currentSecond] || {
-                    type: KING,
+                    type: WHALE,
                     color: us,
                     role: undefined,
                 };
@@ -2076,17 +1928,10 @@ export class CoralClash {
                 } else {
                     index = move.to + 16;
                 }
-                this._board[index] = { type: PAWN, color: them, role: move.capturedRole };
-            } else if (move.captured === KING) {
-                // Whale was captured - restore it at only the first position
-                // Use the restored _kings[them] from history
-                const [whaleFirstPos, whaleSecondPos] = old.kings[them];
-                const whalePiece: Piece = {
-                    type: KING as PieceSymbol,
-                    color: them,
-                    role: undefined,
-                };
-                this._board[whaleFirstPos] = whalePiece;
+                this._board[index] = { type: CRAB, color: them, role: move.capturedRole };
+            } else if (move.captured === WHALE) {
+                // Whale capture should never happen in normal play
+                console.error('[_undoMove] Undoing illegal whale capture');
             } else {
                 // regular capture - restore with role
                 this._board[move.to] = {
@@ -2097,19 +1942,7 @@ export class CoralClash {
             }
         }
 
-        if (move.flags & (BITS.KSIDE_CASTLE | BITS.QSIDE_CASTLE)) {
-            let castlingTo: number, castlingFrom: number;
-            if (move.flags & BITS.KSIDE_CASTLE) {
-                castlingTo = move.to + 1;
-                castlingFrom = move.to - 1;
-            } else {
-                castlingTo = move.to - 2;
-                castlingFrom = move.to + 1;
-            }
-
-            this._board[castlingTo] = this._board[castlingFrom];
-            delete this._board[castlingFrom];
-        }
+        // No castling in Coral Clash
 
         return move;
     }
@@ -2501,28 +2334,23 @@ export class CoralClash {
     private _moveToSan(move: InternalMove, moves: InternalMove[]) {
         let output = '';
 
-        if (move.flags & BITS.KSIDE_CASTLE) {
-            output = 'O-O';
-        } else if (move.flags & BITS.QSIDE_CASTLE) {
-            output = 'O-O-O';
-        } else {
-            if (move.piece !== PAWN) {
-                const disambiguator = getDisambiguator(move, moves);
-                output += move.piece.toUpperCase() + disambiguator;
-            }
+        // No castling in Coral Clash
+        if (move.piece !== CRAB) {
+            const disambiguator = getDisambiguator(move, moves);
+            output += move.piece.toUpperCase() + disambiguator;
+        }
 
-            if (move.flags & (BITS.CAPTURE | BITS.EP_CAPTURE)) {
-                if (move.piece === PAWN) {
-                    output += algebraic(move.from)[0];
-                }
-                output += 'x';
+        if (move.flags & (BITS.CAPTURE | BITS.EP_CAPTURE)) {
+            if (move.piece === CRAB) {
+                output += algebraic(move.from)[0];
             }
+            output += 'x';
+        }
 
-            output += algebraic(move.to);
+        output += algebraic(move.to);
 
-            if (move.promotion) {
-                output += '=' + move.promotion.toUpperCase();
-            }
+        if (move.promotion) {
+            output += '=' + move.promotion.toUpperCase();
         }
 
         this._makeMove(move);
@@ -2741,9 +2569,28 @@ export class CoralClash {
             after: '',
         };
 
-        // generate the FEN for the 'after' key
+        // generate the FEN for the 'after' key and calculate whale positions
         this._makeMove(uglyMove);
         move.after = this.fen();
+
+        // If this is a whale move, add whale-specific metadata
+        if (piece === WHALE) {
+            const [firstSq, secondSq] = this._kings[color];
+            const firstSquare = algebraic(firstSq);
+            const secondSquare = algebraic(secondSq);
+
+            // Determine which square is NOT the 'to' square - that's the other half
+            move.whaleSecondSquare = toAlgebraic === firstSquare ? secondSquare : firstSquare;
+
+            // Determine orientation based on squares
+            const toFile = toAlgebraic.charCodeAt(0);
+            const toRank = parseInt(toAlgebraic[1]);
+            const secondFile = move.whaleSecondSquare.charCodeAt(0);
+            const secondRank = parseInt(move.whaleSecondSquare[1]);
+
+            move.whaleOrientation = toRank === secondRank ? 'horizontal' : 'vertical';
+        }
+
         this._undoMove();
 
         if (captured) {
@@ -2794,7 +2641,7 @@ export class CoralClash {
                     // Show the whale at its second square too
                     row.push({
                         square: algebraic(i),
-                        type: KING,
+                        type: WHALE,
                         color: whaleColor,
                         role: undefined, // Whale has no role
                     });
@@ -2934,33 +2781,6 @@ export class CoralClash {
             delete this._comments[fen];
             return { fen: fen, comment: comment };
         });
-    }
-
-    setCastlingRights(color: Color, rights: Partial<Record<typeof KING | typeof QUEEN, boolean>>) {
-        for (const side of [KING, QUEEN] as const) {
-            if (rights[side] !== undefined) {
-                if (rights[side]) {
-                    this._castling[color] |= SIDES[side];
-                } else {
-                    this._castling[color] &= ~SIDES[side];
-                }
-            }
-        }
-
-        this._updateCastlingRights();
-        const result = this.getCastlingRights(color);
-
-        return (
-            (rights[KING] === undefined || rights[KING] === result[KING]) &&
-            (rights[QUEEN] === undefined || rights[QUEEN] === result[QUEEN])
-        );
-    }
-
-    getCastlingRights(color: Color) {
-        return {
-            [KING]: (this._castling[color] & SIDES[KING]) !== 0,
-            [QUEEN]: (this._castling[color] & SIDES[QUEEN]) !== 0,
-        };
     }
 
     moveNumber() {

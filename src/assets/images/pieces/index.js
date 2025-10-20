@@ -1,28 +1,28 @@
 const PieceImages = {
     // Black pieces - greyscale (Ocean themed)
-    BR: require('./greyscale/grey-puffer.png'), // Rook = Pufferfish
-    BRC: require('./greyscale/grey-puffer-coral.png'), // Rook with Coral
-    BQ: require('./greyscale/grey-dolphin.png'), // Queen = Dolphin
-    BQC: require('./greyscale/grey-dolphin-coral.png'), // Queen with Coral
-    BP: require('./greyscale/grey-crab.png'), // Pawn = Crab
-    BPC: require('./greyscale/grey-crab-coral.png'), // Pawn with Coral
-    BK: require('./greyscale/grey-whale.png'), // King = Whale
-    BN: require('./greyscale/grey-turtle.png'), // Knight = Turtle
-    BNC: require('./greyscale/grey-turtle-coral.png'), // Knight with Coral
-    BB: require('./greyscale/grey-octopus.png'), // Bishop = Octopus
-    BBC: require('./greyscale/grey-octopus-coral.png'), // Bishop with Coral
+    BF: require('./greyscale/grey-puffer.png'), // Pufferfish (f)
+    BFC: require('./greyscale/grey-puffer-coral.png'), // Pufferfish with Coral
+    BD: require('./greyscale/grey-dolphin.png'), // Dolphin (d)
+    BDC: require('./greyscale/grey-dolphin-coral.png'), // Dolphin with Coral
+    BC: require('./greyscale/grey-crab.png'), // Crab (c)
+    BCC: require('./greyscale/grey-crab-coral.png'), // Crab with Coral
+    BH: require('./greyscale/grey-whale.png'), // Whale (h)
+    BT: require('./greyscale/grey-turtle.png'), // Turtle (t)
+    BTC: require('./greyscale/grey-turtle-coral.png'), // Turtle with Coral
+    BO: require('./greyscale/grey-octopus.png'), // Octopus (o)
+    BOC: require('./greyscale/grey-octopus-coral.png'), // Octopus with Coral
     // White pieces - colored (Ocean themed)
-    WR: require('./transparent/puffer.png'), // Rook = Pufferfish
-    WRC: require('./transparent/puffer-coral.png'), // Rook with Coral
-    WQ: require('./transparent/dolphin.png'), // Queen = Dolphin
-    WQC: require('./transparent/dolphin-coral.png'), // Queen with Coral
-    WP: require('./transparent/crab.png'), // Pawn = Crab
-    WPC: require('./transparent/crab-coral.png'), // Pawn with Coral
-    WK: require('./transparent/whale.png'), // King = Whale
-    WN: require('./transparent/turtle.png'), // Knight = Turtle
-    WNC: require('./transparent/turtle-coral.png'), // Knight with Coral
-    WB: require('./transparent/octopus.png'), // Bishop = Octopus
-    WBC: require('./transparent/octopus-coral.png'), // Bishop with Coral
+    WF: require('./transparent/puffer.png'), // Pufferfish (f)
+    WFC: require('./transparent/puffer-coral.png'), // Pufferfish with Coral
+    WD: require('./transparent/dolphin.png'), // Dolphin (d)
+    WDC: require('./transparent/dolphin-coral.png'), // Dolphin with Coral
+    WC: require('./transparent/crab.png'), // Crab (c)
+    WCC: require('./transparent/crab-coral.png'), // Crab with Coral
+    WH: require('./transparent/whale.png'), // Whale (h)
+    WT: require('./transparent/turtle.png'), // Turtle (t)
+    WTC: require('./transparent/turtle-coral.png'), // Turtle with Coral
+    WO: require('./transparent/octopus.png'), // Octopus (o)
+    WOC: require('./transparent/octopus-coral.png'), // Octopus with Coral
 };
 
 export default PieceImages;

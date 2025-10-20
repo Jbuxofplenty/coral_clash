@@ -1,4 +1,5 @@
 import PieceImages from '../assets/images/pieces';
+import { WHALE } from '../hooks/coralClash';
 
 import { Image, TouchableWithoutFeedback, View } from 'react-native';
 
@@ -10,8 +11,8 @@ const Pieces = ({ board, size, onSelectPiece }) => {
     const whaleSquares = {};
 
     flatBoard.forEach((piece) => {
-        if (piece.type.toUpperCase() === 'K') {
-            const whaleKey = `${piece.color}K`;
+        if (piece.type === WHALE) {
+            const whaleKey = `${piece.color}${WHALE}`;
             if (!whaleSquares[whaleKey]) {
                 whaleSquares[whaleKey] = [];
             }
@@ -30,8 +31,8 @@ const Pieces = ({ board, size, onSelectPiece }) => {
         const bottom = (rank - 1) * cellSize;
 
         // For whale, render image only once but touchable areas for both squares
-        const isWhale = type.toUpperCase() === 'K';
-        const whaleKey = `${color}K`;
+        const isWhale = type === WHALE;
+        const whaleKey = `${color}${WHALE}`;
 
         // Determine if piece should have coral decoration based on role
         const hasCoral = role === 'gatherer';

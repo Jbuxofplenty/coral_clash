@@ -49,6 +49,14 @@ const Moves = ({
             </TouchableWithoutFeedback>
         );
     });
+
+    return (
+        <>
+            {checkIndicators}
+            {attackingIndicators}
+            {moveIndicators}
+        </>
+    );
 };
 
 export default Moves;

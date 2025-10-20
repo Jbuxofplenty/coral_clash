@@ -10,12 +10,12 @@ describe('CoralClash Whale Mechanics', () => {
     describe('Whale Position and State', () => {
         test('whale should occupy two squares', () => {
             game.clear();
-            game.put({ type: 'k', color: 'w' }, 'd1');
+            game.put({ type: 'h', color: 'w' }, 'd1');
 
             const board = game.board();
             const flatBoard = board.flat().filter((cell) => cell);
             const whaleSquares = flatBoard.filter(
-                (cell) => cell.type === 'k' && cell.color === 'w',
+                (cell) => cell.type === 'h' && cell.color === 'w',
             );
 
             expect(whaleSquares.length).toBe(2);
@@ -23,26 +23,26 @@ describe('CoralClash Whale Mechanics', () => {
 
         test('get() should return whale piece from either square', () => {
             game.clear();
-            game.put({ type: 'k', color: 'w' }, 'd1');
+            game.put({ type: 'h', color: 'w' }, 'd1');
 
             const piece1 = game.get('d1');
             const piece2 = game.get('e1');
 
             expect(piece1).toBeTruthy();
             expect(piece2).toBeTruthy();
-            expect(piece1.type).toBe('k');
-            expect(piece2.type).toBe('k');
+            expect(piece1.type).toBe('h');
+            expect(piece2.type).toBe('h');
         });
     });
 
     describe('Parallel Sliding - Horizontal Whale', () => {
         test('horizontal whale should slide up maintaining horizontal orientation', () => {
             game.clear();
-            game.put({ type: 'k', color: 'w' }, 'd1'); // Creates whale at d1-e1
+            game.put({ type: 'h', color: 'w' }, 'd1'); // Creates whale at d1-e1
 
             const moves = game.moves({ verbose: true });
             const parallelUp = moves.filter(
-                (m) => m.piece === 'k' && m.to === 'd2' && m.whaleOtherHalf !== undefined,
+                (m) => m.piece === 'h' && m.to === 'd2' && m.whaleOtherHalf !== undefined,
             );
 
             // Should be able to move from both d1 and e1 to d2-e2
@@ -51,18 +51,18 @@ describe('CoralClash Whale Mechanics', () => {
 
         test('horizontal whale should slide left/right', () => {
             game.clear();
-            game.put({ type: 'k', color: 'w' }, 'd1'); // d1-e1
+            game.put({ type: 'h', color: 'w' }, 'd1'); // d1-e1
 
             const moves = game.moves({ verbose: true });
 
             // Check for left slide (d1-e1 → c1-d1)
             const leftSlide = moves.filter(
-                (m) => m.piece === 'k' && (m.to === 'c1' || m.to === 'd1'),
+                (m) => m.piece === 'h' && (m.to === 'c1' || m.to === 'd1'),
             );
 
             // Check for right slide (d1-e1 → e1-f1)
             const rightSlide = moves.filter(
-                (m) => m.piece === 'k' && (m.to === 'e1' || m.to === 'f1'),
+                (m) => m.piece === 'h' && (m.to === 'e1' || m.to === 'f1'),
             );
 
             expect(leftSlide.length + rightSlide.length).toBeGreaterThan(0);
@@ -72,14 +72,14 @@ describe('CoralClash Whale Mechanics', () => {
     describe('Parallel Sliding - Vertical Whale', () => {
         test('vertical whale should slide up maintaining vertical orientation', () => {
             game.clear();
-            game.put({ type: 'k', color: 'w' }, 'd1');
+            game.put({ type: 'h', color: 'w' }, 'd1');
 
             console.log(
                 'After put, whale squares:',
                 game
                     .board()
                     .flat()
-                    .filter((c) => c && c.type === 'k')
+                    .filter((c) => c && c.type === 'h')
                     .map((c, i) => ({
                         square: game
                             .board()
@@ -95,7 +95,7 @@ describe('CoralClash Whale Mechanics', () => {
             const board = game.board();
             const flatBoard = board.flat().filter((cell) => cell);
             const whaleSquares = flatBoard.filter(
-                (cell) => cell.type === 'k' && cell.color === 'w',
+                (cell) => cell.type === 'h' && cell.color === 'w',
             );
 
             console.log('After rotation, whale squares:', whaleSquares.length);
@@ -105,8 +105,8 @@ describe('CoralClash Whale Mechanics', () => {
                 const rowStr = row
                     .map((cell, file) => {
                         const fileChar = 'abcdefgh'[file];
-                        return cell && cell.type === 'k'
-                            ? `K@${fileChar}${rankNum}`
+                        return cell && cell.type === 'h'
+                            ? `H@${fileChar}${rankNum}`
                             : cell
                               ? cell.type
                               : '.';
@@ -118,10 +118,10 @@ describe('CoralClash Whale Mechanics', () => {
             const moves = game.moves({ verbose: true });
             console.log(
                 'All whale moves:',
-                moves.filter((m) => m.piece === 'k').map((m) => `${m.from}->${m.to}`),
+                moves.filter((m) => m.piece === 'h').map((m) => `${m.from}->${m.to}`),
             );
             const parallelUp = moves.filter(
-                (m) => m.piece === 'k' && (m.to === 'd3' || m.to === 'd4'),
+                (m) => m.piece === 'h' && (m.to === 'd3' || m.to === 'd4'),
             );
 
             expect(parallelUp.length).toBeGreaterThan(0);
@@ -131,12 +131,12 @@ describe('CoralClash Whale Mechanics', () => {
     describe('Single-Half Sliding', () => {
         test('whale should slide one half while keeping other stationary', () => {
             game.clear();
-            game.put({ type: 'k', color: 'w' }, 'd2'); // d2-e2
+            game.put({ type: 'h', color: 'w' }, 'd2'); // d2-e2
 
             const moves = game.moves({ verbose: true });
 
             // Look for single-half slides (e.g., d2 slides to d3 while e2 stays)
-            const singleHalfMoves = moves.filter((m) => m.piece === 'k' && m.to === 'd3');
+            const singleHalfMoves = moves.filter((m) => m.piece === 'h' && m.to === 'd3');
 
             expect(singleHalfMoves.length).toBeGreaterThan(0);
         });
@@ -145,7 +145,7 @@ describe('CoralClash Whale Mechanics', () => {
     describe('Rotation Moves', () => {
         test('REGRESSION: whale should still occupy 2 squares after rotation', () => {
             game.clear();
-            game.put({ type: 'k', color: 'w' }, 'd1'); // d1-e1 horizontal
+            game.put({ type: 'h', color: 'w' }, 'd1'); // d1-e1 horizontal
 
             // Check what moves are available from e1 to d2
             const moves = game.moves({ verbose: true });
@@ -172,7 +172,7 @@ describe('CoralClash Whale Mechanics', () => {
             const board = game.board();
             const flatBoard = board.flat().filter((cell) => cell);
             const whaleSquares = flatBoard.filter(
-                (cell) => cell.type === 'k' && cell.color === 'w',
+                (cell) => cell.type === 'h' && cell.color === 'w',
             );
             console.log(
                 'Whale squares from board():',
@@ -185,25 +185,25 @@ describe('CoralClash Whale Mechanics', () => {
 
         test('horizontal whale should rotate to vertical', () => {
             game.clear();
-            game.put({ type: 'k', color: 'w' }, 'd1'); // d1-e1
+            game.put({ type: 'h', color: 'w' }, 'd1'); // d1-e1
 
             const moves = game.moves({ verbose: true });
 
             // Rotation: d1-e1 → d1-d2 (vertical)
-            const rotationMoves = moves.filter((m) => m.piece === 'k' && m.to === 'd2');
+            const rotationMoves = moves.filter((m) => m.piece === 'h' && m.to === 'd2');
 
             expect(rotationMoves.length).toBeGreaterThan(0);
         });
 
         test('whale must remain orthogonally adjacent after move', () => {
             game.clear();
-            game.put({ type: 'k', color: 'w' }, 'd1');
+            game.put({ type: 'h', color: 'w' }, 'd1');
 
             const moves = game.moves({ verbose: true });
 
             // Check that no moves result in diagonal placement
             const diagonalMoves = moves.filter((m) => {
-                if (m.piece !== 'k' || !m.whaleOtherHalf) return false;
+                if (m.piece !== 'h' || !m.whaleOtherHalf) return false;
 
                 // Convert whaleOtherHalf from 0x88 to file/rank
                 const toFile = m.to.charCodeAt(0) - 'a'.charCodeAt(0);
@@ -225,7 +225,7 @@ describe('CoralClash Whale Mechanics', () => {
     describe('Whale Movement Edge Cases', () => {
         test('whale should be blocked by other pieces', () => {
             game.clear();
-            game.put({ type: 'k', color: 'w' }, 'd1'); // d1-e1
+            game.put({ type: 'h', color: 'w' }, 'd1'); // d1-e1
             game.put({ type: 'p', color: 'w' }, 'd2'); // Block upward movement
             game.put({ type: 'p', color: 'w' }, 'e2'); // Block upward movement
 
@@ -233,7 +233,7 @@ describe('CoralClash Whale Mechanics', () => {
 
             // Should NOT be able to parallel slide up
             const blockedUp = moves.filter(
-                (m) => m.piece === 'k' && (m.to === 'd2' || m.to === 'e2'),
+                (m) => m.piece === 'h' && (m.to === 'd2' || m.to === 'e2'),
             );
 
             expect(blockedUp.length).toBe(0);
@@ -241,7 +241,7 @@ describe('CoralClash Whale Mechanics', () => {
 
         test('whale should capture enemy pieces while parallel sliding', () => {
             game.clear();
-            game.put({ type: 'k', color: 'w' }, 'd1'); // d1-e1
+            game.put({ type: 'h', color: 'w' }, 'd1'); // d1-e1
             game.put({ type: 'p', color: 'b' }, 'd2'); // Enemy piece
             game.put({ type: 'p', color: 'b' }, 'e2'); // Enemy piece
 
@@ -249,7 +249,7 @@ describe('CoralClash Whale Mechanics', () => {
 
             // Should be able to capture while parallel sliding
             const captureMoves = moves.filter(
-                (m) => m.piece === 'k' && m.captured && (m.to === 'd2' || m.to === 'e2'),
+                (m) => m.piece === 'h' && m.captured && (m.to === 'd2' || m.to === 'e2'),
             );
 
             expect(captureMoves.length).toBeGreaterThan(0);
@@ -257,7 +257,7 @@ describe('CoralClash Whale Mechanics', () => {
 
         test('whale should not move off board', () => {
             game.clear();
-            game.put({ type: 'k', color: 'w' }, 'a1'); // a1-b1 (left edge)
+            game.put({ type: 'h', color: 'w' }, 'a1'); // a1-b1 (left edge)
 
             const moves = game.moves({ verbose: true });
 
@@ -265,7 +265,7 @@ describe('CoralClash Whale Mechanics', () => {
             const offBoardMoves = moves.filter((m) => {
                 // This would require checking if to/whaleOtherHalf are off board
                 // For now, just check that we have some valid moves
-                return m.piece === 'k';
+                return m.piece === 'h';
             });
 
             expect(offBoardMoves.length).toBeGreaterThan(0);
@@ -275,7 +275,7 @@ describe('CoralClash Whale Mechanics', () => {
     describe('Whale Move Execution', () => {
         test('parallel slide should update both whale squares correctly', () => {
             game.clear();
-            game.put({ type: 'k', color: 'w' }, 'd1'); // d1-e1
+            game.put({ type: 'h', color: 'w' }, 'd1'); // d1-e1
 
             // Get board before move
             const boardBefore = game
@@ -283,14 +283,14 @@ describe('CoralClash Whale Mechanics', () => {
                 .flat()
                 .filter((cell) => cell);
             const whaleBefore = boardBefore.filter(
-                (cell) => cell.type === 'k' && cell.color === 'w',
+                (cell) => cell.type === 'h' && cell.color === 'w',
             );
             console.log('  Before:', whaleBefore.map((s) => s.square).sort());
 
             // Execute parallel slide up (d1-e1 → d2-e2)
             const moves = game.moves({ verbose: true });
             const parallelUp = moves.find(
-                (m) => m.piece === 'k' && m.to === 'd2' && m.from !== 'd2', // Make sure it's actually a move
+                (m) => m.piece === 'h' && m.to === 'd2' && m.from !== 'd2', // Make sure it's actually a move
             );
 
             if (parallelUp) {
@@ -302,7 +302,7 @@ describe('CoralClash Whale Mechanics', () => {
                     .flat()
                     .filter((cell) => cell);
                 const whaleAfter = boardAfter.filter(
-                    (cell) => cell.type === 'k' && cell.color === 'w',
+                    (cell) => cell.type === 'h' && cell.color === 'w',
                 );
                 console.log('  After:', whaleAfter.map((s) => s.square).sort());
 
@@ -314,7 +314,7 @@ describe('CoralClash Whale Mechanics', () => {
 
         test('rotation should update whale orientation correctly', () => {
             game.clear();
-            game.put({ type: 'k', color: 'w' }, 'd1'); // d1-e1 (horizontal)
+            game.put({ type: 'h', color: 'w' }, 'd1'); // d1-e1 (horizontal)
 
             // Rotate to vertical (e1 moves to d2)
             game.move({ from: 'e1', to: 'd2' });
@@ -323,7 +323,7 @@ describe('CoralClash Whale Mechanics', () => {
                 .board()
                 .flat()
                 .filter((cell) => cell);
-            const whaleAfter = boardAfter.filter((cell) => cell.type === 'k' && cell.color === 'w');
+            const whaleAfter = boardAfter.filter((cell) => cell.type === 'h' && cell.color === 'w');
             const squares = whaleAfter.map((s) => s.square).sort();
 
             // Should be vertical (d1-d2)
@@ -420,7 +420,7 @@ describe('CoralClash Whale Mechanics', () => {
             game.clear();
             // Start with white's turn
             game.put({ type: 'q', color: 'w', role: 'gatherer' }, 'c3');
-            game.put({ type: 'k', color: 'b' }, 'd5'); // Black whale at d5-e5
+            game.put({ type: 'h', color: 'b' }, 'd5'); // Black whale at d5-e5
 
             // White captures one of the black whale squares
             game.move({ from: 'c3', to: 'd5' });
