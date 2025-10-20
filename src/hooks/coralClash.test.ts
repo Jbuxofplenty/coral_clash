@@ -1034,5 +1034,36 @@ describe('CoralClash Whale Mechanics', () => {
             expect((game as any)._shouldTriggerCoralScoring()).toBe(false);
             expect(game.isGameOver()).toBe(false);
         });
+
+        it('should end in a tie when crab reaches back row with no coral on board', () => {
+            const game = new CoralClash();
+            // Setup: White crab at f7, no coral pieces on board
+            // This simulates a game where all coral has been captured
+            game.load('h1t5/5C2/8/8/8/8/8/H1T5 w - - 0 1');
+
+            console.log('\n=== Before crab reaches rank 8 (no coral) ===');
+            console.log('FEN:', game.fen());
+            console.log('Crab at f7');
+            console.log('Game over?', game.isGameOver());
+
+            // White crab moves from f7 to f8 (reaches black's back row)
+            game.move({ from: 'f7', to: 'f8' });
+
+            console.log('\n=== After crab reaches rank 8 ===');
+            console.log('Crab at f8');
+            console.log(
+                'Should trigger coral scoring?',
+                (game as any)._shouldTriggerCoralScoring(),
+            );
+            console.log('Coral victory result:', game.isCoralVictory());
+            console.log('Game over?', game.isGameOver());
+
+            // Game should trigger coral scoring
+            expect((game as any)._shouldTriggerCoralScoring()).toBe(true);
+            // With no coral, it should be a tie (null)
+            expect(game.isCoralVictory()).toBe(null);
+            // But game should still be over
+            expect(game.isGameOver()).toBe(true);
+        });
     });
 });

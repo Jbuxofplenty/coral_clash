@@ -73,6 +73,15 @@ const CoralClash = ({ fixture }) => {
             return { message: `${winner} wins by Coral Victory! 🪸`, color: '#1976d2' };
         }
 
+        // Check if coral scoring was triggered but ended in a tie
+        // This happens when a crab/octopus reaches the back row but coral control is equal
+        if (coralClash.isGameOver() && coralWinner === null) {
+            // Check if it was triggered by coral scoring (not stalemate or draw)
+            if (!coralClash.isStalemate() && !coralClash.isDraw()) {
+                return { message: 'Game Over - Tie! No coral advantage! 🤝🪸', color: '#757575' };
+            }
+        }
+
         if (coralClash.isStalemate()) {
             return { message: 'Stalemate - Draw! 🤝', color: '#757575' };
         }
@@ -107,6 +116,11 @@ const CoralClash = ({ fixture }) => {
     const canUndo = coralClash.history().length >= 2;
 
     const handleSelectPiece = (square) => {
+        // Don't allow piece selection if game is over
+        if (coralClash.isGameOver()) {
+            return;
+        }
+
         const piece = coralClash.get(square);
         const currentTurn = coralClash.turn();
 
@@ -156,6 +170,11 @@ const CoralClash = ({ fixture }) => {
     };
 
     const handleSelectMove = (move) => {
+        // Don't allow moves if game is over
+        if (coralClash.isGameOver()) {
+            return;
+        }
+
         // Don't allow executing enemy moves - only show them
         if (isViewingEnemyMoves) {
             return;
