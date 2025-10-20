@@ -1,5 +1,11 @@
 import { CoralClash } from './coralClash';
-import { loadFixture, applyFixture, validateFixtureVersion } from './__fixtures__/fixtureLoader';
+import { applyFixture, validateFixtureVersion } from './__fixtures__/fixtureLoader';
+
+// Import fixtures directly (works in Jest, not in React Native)
+const exampleInitialState = require('./__fixtures__/example-initial-state.json');
+const whaleMoveDigonally = require('./__fixtures__/whale-move-diagonally.json');
+const octopusCheck = require('./__fixtures__/octopus-check.json');
+const multipleChecks = require('./__fixtures__/multiple-checks.json');
 
 describe('CoralClash Whale Mechanics', () => {
     let game: CoralClash;
@@ -326,7 +332,7 @@ describe('CoralClash Whale Mechanics', () => {
     describe('Game State Fixtures', () => {
         test('should load and apply a game state fixture', () => {
             // Load a fixture from the __fixtures__ directory
-            const fixture = loadFixture('example-initial-state');
+            const fixture = exampleInitialState;
 
             // Validate the fixture schema version
             validateFixtureVersion(fixture, '1.0.0');
@@ -346,7 +352,7 @@ describe('CoralClash Whale Mechanics', () => {
             // from the UI, then load it here to test specific scenarios
 
             // For now, using the example initial state
-            const fixture = loadFixture('example-initial-state');
+            const fixture = exampleInitialState;
             const game = new CoralClash();
             applyFixture(game, fixture);
 
@@ -360,7 +366,7 @@ describe('CoralClash Whale Mechanics', () => {
 
         test('whale should be able to move diagonally', () => {
             // Load the whale diagonal movement fixture
-            const fixture = loadFixture('whale-move-diagonally');
+            const fixture = whaleMoveDigonally;
             const game = new CoralClash();
             applyFixture(game, fixture);
 
@@ -393,7 +399,7 @@ describe('CoralClash Whale Mechanics', () => {
 
         test('whale can move diagonally when path is clear', () => {
             // Use the fixture where pieces have been moved
-            const fixture = loadFixture('whale-move-diagonally');
+            const fixture = whaleMoveDigonally;
             const game = new CoralClash();
             applyFixture(game, fixture);
 
@@ -529,6 +535,232 @@ describe('CoralClash Whale Mechanics', () => {
             expect(f2Piece?.type).toBe('h');
             expect(e1Piece).toBeFalsy();
             expect(d1Piece).toBeFalsy();
+        });
+
+        it('vertical whale at d1-d2 should be able to slide to column E', () => {
+            const game = new CoralClash();
+            game.clear();
+
+            // Manually create a vertical whale at d1-d2
+            game.put({ type: 'h', color: 'w' }, 'd1');
+            game.put({ type: 'h', color: 'w' }, 'd2');
+
+            // @ts-ignore - Set _kings for vertical whale
+            game._kings.w = [0x73, 0x63]; // d1=0x73, d2=0x63
+
+            // Add a turtle at f1 as blocker
+            game.put({ type: 't', color: 'w', role: 'gatherer' }, 'f1');
+
+            // Get all whale moves
+            const allMoves = game.moves({ verbose: true, color: 'w' });
+            const whaleMoves = allMoves.filter((m) => m.piece === 'h');
+
+            // Should be able to move to e1 and e2 (parallel slide right)
+            const toE1 = whaleMoves.filter((m) => m.to === 'e1');
+            const toE2 = whaleMoves.filter((m) => m.to === 'e2');
+
+            // Expect parallel slide to e1-e2 (vertical whale sliding right)
+            expect(toE1.some((m) => m.whaleSecondSquare === 'e2')).toBe(true);
+            expect(toE2.some((m) => m.whaleSecondSquare === 'e1')).toBe(true);
+        });
+
+        it('REGRESSION: should not allow moves that leave whale in check', () => {
+            // Load the check-pinned scenario - fixture is at white's turn after black made illegal Tf7
+            const fixture = require('./__fixtures__/check-pinned.json');
+            const game = new CoralClash();
+            applyFixture(game, fixture);
+
+            // Undo the last move (Tf7 by black) to get to the position before
+            game.undo(); // Undo Tf7
+            game.undo(); // Undo Tb7 (white's previous move)
+
+            console.log('\n=== Testing position before Tf7 ===');
+            console.log('Turn:', game.turn());
+            console.log('Black whale at:', game.whalePositions().b);
+
+            // Now it should be black's turn, and black should be in check from Tb7
+            const wasInCheck = game.inCheck();
+            console.log('Is black in check?', wasInCheck);
+
+            // Get all legal moves for black
+            const blackMoves = game.moves({ verbose: true });
+            console.log('Total legal moves for black:', blackMoves.length);
+
+            // Check if Tf7 is in the legal moves list
+            const tf7Move = blackMoves.find((m) => m.to === 'f7' && m.piece === 't');
+            console.log('Is Tf7 in legal moves?', !!tf7Move);
+            console.log('Tf7 move:', tf7Move);
+
+            if (wasInCheck) {
+                // If in check, ALL legal moves must get black out of check
+                blackMoves.forEach((move) => {
+                    game.move({
+                        from: move.from,
+                        to: move.to,
+                        ...(move.whaleSecondSquare && {
+                            whaleSecondSquare: move.whaleSecondSquare,
+                        }),
+                    });
+
+                    const stillInCheck = game.inCheck();
+
+                    if (stillInCheck) {
+                        console.error(
+                            `ILLEGAL MOVE ALLOWED: ${move.san} (${move.from}->${move.to}) leaves black in check!`,
+                        );
+                    }
+
+                    game.undo();
+
+                    // Assert that the move gets us out of check
+                    expect(stillInCheck).toBe(false);
+                });
+            }
+        });
+
+        it('REGRESSION: whale captures should never be generated as moves', () => {
+            // Create a scenario where a piece can attack the whale
+            const game = new CoralClash();
+            game.clear();
+
+            // Place black whale at e7-e8
+            game.put({ type: 'h', color: 'b' }, 'e8');
+            // @ts-ignore
+            game._kings.b = [0x04, 0x14]; // e8=0x04, e7=0x14
+
+            // Place white turtle at b7 that can reach e7
+            game.put({ type: 't', color: 'w', role: 'hunter' }, 'b7');
+
+            // Place white whale for FEN validation
+            game.put({ type: 'h', color: 'w' }, 'd1');
+
+            console.log('\n=== Testing whale capture prevention ===');
+            console.log('Black whale at:', game.whalePositions().b);
+            console.log('White turtle at: b7');
+
+            // Get all legal moves for white
+            const whiteMoves = game.moves({ verbose: true });
+            console.log('Total white moves:', whiteMoves.length);
+
+            // Check if any move captures the whale
+            const whaleCaptureMove = whiteMoves.find((m) => m.captured === 'h');
+
+            if (whaleCaptureMove) {
+                console.error('FOUND WHALE CAPTURE MOVE:', whaleCaptureMove);
+            }
+
+            // NO move should capture the whale
+            expect(whaleCaptureMove).toBeUndefined();
+            expect(whiteMoves.every((m) => m.captured !== 'h')).toBe(true);
+        });
+
+        it('REGRESSION: octopus check - white should not be in false check', () => {
+            const game = new CoralClash();
+            applyFixture(game, octopusCheck);
+
+            // White should NOT be in check (octopus at b4 is too far from whale at d1-e1)
+            expect(game.inCheck()).toBe(false);
+
+            // White should have many legal moves available (not restricted by false check)
+            const whiteMoves = game.moves({ verbose: true });
+            expect(whiteMoves.length).toBeGreaterThan(30);
+
+            // Octopus should only be able to move 1 square diagonally
+            const blackOctopusMoves = game.moves({ verbose: true, color: 'b', square: 'b4' });
+            // b4 can move diagonally to adjacent squares: a3 (capture), a5, c5, c3
+            expect(blackOctopusMoves.length).toBeLessThanOrEqual(4);
+
+            // All octopus moves should only be to adjacent diagonal squares
+            blackOctopusMoves.forEach((m) => {
+                const fromFile = m.from.charCodeAt(0) - 'a'.charCodeAt(0);
+                const fromRank = parseInt(m.from[1]);
+                const toFile = m.to.charCodeAt(0) - 'a'.charCodeAt(0);
+                const toRank = parseInt(m.to[1]);
+
+                const fileDiff = Math.abs(toFile - fromFile);
+                const rankDiff = Math.abs(toRank - fromRank);
+
+                // Octopus moves 1 square diagonally (both file and rank must change by exactly 1)
+                expect(fileDiff).toBe(1);
+                expect(rankDiff).toBe(1);
+            });
+        });
+
+        it('REGRESSION: pinned piece should not be able to move (multiple checks)', () => {
+            const game = new CoralClash();
+            applyFixture(game, multipleChecks);
+
+            // White moves dolphin from b4 to e4, putting black whale in check
+            game.move({ from: 'b4', to: 'e4' });
+
+            // Now it's black's turn
+            // Black octopus at d7 is pinned - it's blocking the check from white turtle at b7 to black whale at e7
+            // If the octopus moves away from d7, the whale would be in check from b7
+            const blackOctopusMoves = game.moves({ verbose: true, square: 'd7' });
+
+            // The octopus should NOT be able to move to e6 (or any other square that leaves the whale in check)
+            const moveToE6 = blackOctopusMoves.find((m) => m.to === 'e6');
+
+            // This should be undefined because the move would leave the whale in check
+            expect(moveToE6).toBeUndefined();
+
+            // In fact, the octopus at d7 is completely pinned
+            // It cannot move at all without exposing the whale to check from the turtle at b7
+            // So ALL moves should have been filtered out
+            expect(blackOctopusMoves.length).toBe(0);
+        });
+
+        it('v1.1.0: should preserve whale orientation when exporting/importing', () => {
+            // Create a game with a vertical whale
+            const game1 = new CoralClash();
+            game1.clear();
+
+            // Add white whale vertically at d1-d2
+            game1.put({ type: 'h', color: 'w' }, 'd1');
+            game1.put({ type: 'h', color: 'w' }, 'd2');
+            // @ts-ignore - Set _kings for vertical whale
+            game1._kings.w = [0x73, 0x63]; // d1=0x73, d2=0x63
+
+            // Add black whale for FEN validation
+            game1.put({ type: 'h', color: 'b' }, 'd8');
+
+            // Export whale positions
+            const whalePos = game1.whalePositions();
+            expect(whalePos.w).toEqual(['d1', 'd2']);
+
+            // Simulate fixture export/import
+            const fixture = {
+                schemaVersion: '1.1.0',
+                exportedAt: new Date().toISOString(),
+                state: {
+                    fen: game1.fen(),
+                    board: game1.board(),
+                    history: [],
+                    turn: 'w' as const,
+                    whalePositions: whalePos,
+                    isGameOver: false,
+                    inCheck: false,
+                    isCheckmate: false,
+                    isStalemate: false,
+                    isDraw: false,
+                    isCoralVictory: false as const,
+                },
+            };
+
+            // Import into a new game
+            const game2 = new CoralClash();
+            applyFixture(game2, fixture);
+
+            // Verify whale is still vertical (d1-d2), not horizontal (d1-e1)
+            const restoredPos = game2.whalePositions();
+            expect(restoredPos.w).toEqual(['d1', 'd2']);
+
+            // Verify the whale is actually at d1 and d2
+            expect(game2.get('d1')).toBeTruthy();
+            expect(game2.get('d1')?.type).toBe('h');
+            expect(game2.get('d2')).toBeTruthy();
+            expect(game2.get('d2')?.type).toBe('h');
+            expect(game2.get('e1')).toBeFalsy(); // Should NOT be at e1
         });
     });
 });

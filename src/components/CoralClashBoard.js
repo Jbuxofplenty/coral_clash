@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
     useWindowDimensions,
     View,
@@ -11,12 +11,13 @@ import {
 import { Icon } from 'galio-framework';
 import useCoralClash from '../hooks/useCoralClash';
 import { WHALE } from '../hooks/coralClash';
+import { applyFixture } from '../hooks/__fixtures__/fixtureLoader';
 import EmptyBoard from './EmptyBoard';
 import Moves from './Moves';
 import Pieces from './Pieces';
 
 // Game state schema version for fixtures
-const GAME_STATE_VERSION = '1.0.0';
+const GAME_STATE_VERSION = '1.1.0';
 
 const useRandomMove = (coralClash) => {
     while (!coralClash.isGameOver() && coralClash.turn() === 'b') {
@@ -26,7 +27,7 @@ const useRandomMove = (coralClash) => {
     }
 };
 
-const CoralClash = () => {
+const CoralClash = ({ fixture }) => {
     const { width } = useWindowDimensions();
     const coralClash = useCoralClash();
     const [visibleMoves, setVisibleMoves] = useState([]);
@@ -34,9 +35,27 @@ const CoralClash = () => {
     const [whaleDestination, setWhaleDestination] = useState(null);
     const [whaleOrientationMoves, setWhaleOrientationMoves] = useState([]);
     const [isViewingEnemyMoves, setIsViewingEnemyMoves] = useState(false);
+    const [fixtureLoaded, setFixtureLoaded] = useState(false);
     const boardSize = Math.min(width, 400);
 
-    useRandomMove(coralClash);
+    // Load fixture if provided
+    useEffect(() => {
+        if (fixture && !fixtureLoaded) {
+            try {
+                applyFixture(coralClash, fixture);
+                setFixtureLoaded(true);
+                console.log('Fixture loaded successfully');
+            } catch (error) {
+                console.error('Failed to load fixture:', error);
+                Alert.alert('Error', 'Failed to load game state');
+            }
+        }
+    }, [fixture, fixtureLoaded]);
+
+    // Only run random moves if not loading a fixture, or if fixture is loaded and it's black's turn
+    if (!fixture || fixtureLoaded) {
+        useRandomMove(coralClash);
+    }
 
     // Get game status message
     const getGameStatus = () => {
@@ -263,6 +282,7 @@ const CoralClash = () => {
                     board: coralClash.board(),
                     history: coralClash.history(),
                     turn: coralClash.turn(),
+                    whalePositions: coralClash.whalePositions(), // v1.1.0: preserve whale orientation
                     isGameOver: coralClash.isGameOver(),
                     inCheck: coralClash.inCheck(),
                     isCheckmate: coralClash.isCheckmate(),

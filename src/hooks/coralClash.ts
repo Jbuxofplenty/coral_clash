@@ -278,22 +278,28 @@ const PIECE_OFFSETS = {
 };
 
 // prettier-ignore
+// Coral Clash ATTACKS array
+// c=crab(0x1), t=turtle(0x2), o=octopus(0x4), f=pufferfish(0x8), d=dolphin(0x10), h=whale(0x20)
+// Orthogonal: turtle + dolphin = 2+16 = 18
+// Orthogonal adjacent: turtle + dolphin + whale = 2+16+32 = 50
+// Diagonal distance>1: pufferfish + dolphin = 8+16 = 24
+// Diagonal adjacent: octopus + pufferfish + dolphin + whale = 4+8+16+32 = 60
 const ATTACKS = [
-  20, 0, 0, 0, 0, 0, 0, 24,  0, 0, 0, 0, 0, 0,20, 0,
-   0,20, 0, 0, 0, 0, 0, 24,  0, 0, 0, 0, 0,20, 0, 0,
-   0, 0,20, 0, 0, 0, 0, 24,  0, 0, 0, 0,20, 0, 0, 0,
-   0, 0, 0,20, 0, 0, 0, 24,  0, 0, 0,20, 0, 0, 0, 0,
-   0, 0, 0, 0,20, 0, 0, 24,  0, 0,20, 0, 0, 0, 0, 0,
-   0, 0, 0, 0, 0,20, 2, 24,  2,20, 0, 0, 0, 0, 0, 0,
-   0, 0, 0, 0, 0, 2,53, 56, 53, 2, 0, 0, 0, 0, 0, 0,
-  24,24,24,24,24,24,56,  0, 56,24,24,24,24,24,24, 0,
-   0, 0, 0, 0, 0, 2,53, 56, 53, 2, 0, 0, 0, 0, 0, 0,
-   0, 0, 0, 0, 0,20, 2, 24,  2,20, 0, 0, 0, 0, 0, 0,
-   0, 0, 0, 0,20, 0, 0, 24,  0, 0,20, 0, 0, 0, 0, 0,
-   0, 0, 0,20, 0, 0, 0, 24,  0, 0, 0,20, 0, 0, 0, 0,
-   0, 0,20, 0, 0, 0, 0, 24,  0, 0, 0, 0,20, 0, 0, 0,
-   0,20, 0, 0, 0, 0, 0, 24,  0, 0, 0, 0, 0,20, 0, 0,
-  20, 0, 0, 0, 0, 0, 0, 24,  0, 0, 0, 0, 0, 0,20
+  24, 0, 0, 0, 0, 0, 0, 18,  0, 0, 0, 0, 0, 0,24, 0,  // diagonal, vertical, diagonal
+   0,24, 0, 0, 0, 0, 0, 18,  0, 0, 0, 0, 0,24, 0, 0,
+   0, 0,24, 0, 0, 0, 0, 18,  0, 0, 0, 0,24, 0, 0, 0,
+   0, 0, 0,24, 0, 0, 0, 18,  0, 0, 0,24, 0, 0, 0, 0,
+   0, 0, 0, 0,24, 0, 0, 18,  0, 0,24, 0, 0, 0, 0, 0,
+   0, 0, 0, 0, 0,24, 2, 18,  2,24, 0, 0, 0, 0, 0, 0,  // crab can attack from here
+   0, 0, 0, 0, 0, 2,60, 50, 60, 2, 0, 0, 0, 0, 0, 0,  // adjacent squares (dist=1)
+  18,18,18,18,18,18,50,  0, 50,18,18,18,18,18,18, 0,  // horizontal (same rank)
+   0, 0, 0, 0, 0, 2,60, 50, 60, 2, 0, 0, 0, 0, 0, 0,  // adjacent squares (dist=1)
+   0, 0, 0, 0, 0,24, 2, 18,  2,24, 0, 0, 0, 0, 0, 0,  // crab can attack from here
+   0, 0, 0, 0,24, 0, 0, 18,  0, 0,24, 0, 0, 0, 0, 0,
+   0, 0, 0,24, 0, 0, 0, 18,  0, 0, 0,24, 0, 0, 0, 0,
+   0, 0,24, 0, 0, 0, 0, 18,  0, 0, 0, 0,24, 0, 0, 0,
+   0,24, 0, 0, 0, 0, 0, 18,  0, 0, 0, 0, 0,24, 0, 0,
+  24, 0, 0, 0, 0, 0, 0, 18,  0, 0, 0, 0, 0, 0,24
 ];
 
 // prettier-ignore
@@ -919,8 +925,6 @@ export class CoralClash {
     }
 
     private _attacked(color: Color, square: number) {
-        const targetSquare = algebraic(square);
-
         for (let i = Ox88.a8; i <= Ox88.h1; i++) {
             // did we run off the end of the board
             if (i & 0x88) {
@@ -953,9 +957,19 @@ export class CoralClash {
                     continue;
                 }
 
-                // if the piece is a turtle or a whale
-                if (piece.type === 't' || piece.type === 'h') return true;
+                // Octopus moves only 1 square diagonally
+                // Must verify it's exactly 1 square away (distance must be one of: -17, -15, 15, 17)
+                if (piece.type === OCTOPUS) {
+                    const absDistance = Math.abs(difference);
+                    if (absDistance === 15 || absDistance === 17) {
+                        return true;
+                    }
+                    // Not exactly 1 square away, continue checking other pieces
+                    continue;
+                }
 
+                // For sliding pieces (turtle, pufferfish, dolphin, whale),
+                // check if there are blocking pieces in the path
                 const offset = RAYS[index];
                 let j = i + offset;
 
@@ -969,7 +983,9 @@ export class CoralClash {
                     j += offset;
                 }
 
-                if (!blocked) return true;
+                if (!blocked) {
+                    return true;
+                }
             }
         }
 
@@ -1339,8 +1355,11 @@ export class CoralClash {
                 } else if (this._isSquareOccupied(to, them)) {
                     // Capture
                     const capturedType = this._board[to]?.type || WHALE;
-                    const capturedRole = this._board[to]?.role;
-                    addWhaleMove(firstSq, to, secondSq, capturedType, capturedRole);
+                    // NEVER generate whale captures - game ends at checkmate
+                    if (capturedType !== WHALE) {
+                        const capturedRole = this._board[to]?.role;
+                        addWhaleMove(firstSq, to, secondSq, capturedType, capturedRole);
+                    }
                     break;
                 } else {
                     // Own piece blocks
@@ -1378,8 +1397,11 @@ export class CoralClash {
                 } else if (this._isSquareOccupied(to, them)) {
                     // Capture
                     const capturedType = this._board[to]?.type || WHALE;
-                    const capturedRole = this._board[to]?.role;
-                    addWhaleMove(secondSq, to, firstSq, capturedType, capturedRole);
+                    // NEVER generate whale captures - game ends at checkmate
+                    if (capturedType !== WHALE) {
+                        const capturedRole = this._board[to]?.role;
+                        addWhaleMove(secondSq, to, firstSq, capturedType, capturedRole);
+                    }
                     break;
                 } else {
                     // Own piece blocks
@@ -1427,7 +1449,7 @@ export class CoralClash {
                     newFirst !== secondSq;
                 const secondBlocked =
                     this._isSquareOccupied(newSecond) &&
-                    newFirst !== firstSq &&
+                    newSecond !== firstSq &&
                     newSecond !== secondSq;
 
                 // Both must be empty to slide through
@@ -1449,11 +1471,15 @@ export class CoralClash {
                         // At least one capture, other square empty or capturable
                         const capturedType =
                             this._board[newFirst]?.type || this._board[newSecond]?.type || WHALE;
-                        const capturedRole =
-                            this._board[newFirst]?.role || this._board[newSecond]?.role;
-                        // Generate captures from BOTH starting squares
-                        addWhaleMove(firstSq, newFirst, newSecond, capturedType, capturedRole);
-                        addWhaleMove(secondSq, newSecond, newFirst, capturedType, capturedRole);
+
+                        // NEVER generate whale captures - game ends at checkmate
+                        if (capturedType !== WHALE) {
+                            const capturedRole =
+                                this._board[newFirst]?.role || this._board[newSecond]?.role;
+                            // Generate captures from BOTH starting squares
+                            addWhaleMove(firstSq, newFirst, newSecond, capturedType, capturedRole);
+                            addWhaleMove(secondSq, newSecond, newFirst, capturedType, capturedRole);
+                        }
                     }
                     break;
                 }
@@ -1582,17 +1608,21 @@ export class CoralClash {
                     } else if (this._isSquareOccupied(to, them)) {
                         // Capture opponent's piece
                         const capturedType = this._board[to]?.type || WHALE; // Could be whale
-                        const capturedRole = this._board[to]?.role; // Preserve role for Coral Clash
-                        addMove(
-                            moves,
-                            us,
-                            from,
-                            to,
-                            CRAB,
-                            capturedType,
-                            BITS.CAPTURE,
-                            capturedRole,
-                        );
+
+                        // NEVER generate whale captures - game ends at checkmate
+                        if (capturedType !== WHALE) {
+                            const capturedRole = this._board[to]?.role; // Preserve role for Coral Clash
+                            addMove(
+                                moves,
+                                us,
+                                from,
+                                to,
+                                CRAB,
+                                capturedType,
+                                BITS.CAPTURE,
+                                capturedRole,
+                            );
+                        }
                     }
                 }
             } else if (type === WHALE) {
@@ -1631,6 +1661,11 @@ export class CoralClash {
                             } else {
                                 // Square is occupied but not in _board = must be whale's second square
                                 capturedType = WHALE;
+                            }
+
+                            // NEVER generate whale captures - game ends at checkmate
+                            if (capturedType === WHALE) {
+                                break;
                             }
 
                             const capturedRole = this._board[to]?.role;
@@ -2662,6 +2697,24 @@ export class CoralClash {
 
     turn() {
         return this._turn;
+    }
+
+    /**
+     * Get whale positions for both colors
+     * Returns the two squares each whale occupies in algebraic notation
+     * @returns Object with white and black whale positions
+     */
+    whalePositions() {
+        return {
+            w:
+                this._kings.w[0] !== EMPTY
+                    ? [algebraic(this._kings.w[0]), algebraic(this._kings.w[1])]
+                    : null,
+            b:
+                this._kings.b[0] !== EMPTY
+                    ? [algebraic(this._kings.b[0]), algebraic(this._kings.b[1])]
+                    : null,
+        };
     }
 
     board() {

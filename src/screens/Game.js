@@ -9,6 +9,9 @@ const { width, height } = Dimensions.get('screen');
 
 export default class Game extends React.Component {
     render() {
+        // Get fixture from route params if available
+        const fixture = this.props.route?.params?.fixture;
+
         return (
             <LinearGradient
                 colors={['#1e3c72', '#2a5298', '#7e8ba3']}
@@ -17,7 +20,7 @@ export default class Game extends React.Component {
                 end={{ x: 0, y: 1 }}
             >
                 <Block flex center>
-                    <CoralClash />
+                    <CoralClash fixture={fixture} />
                 </Block>
             </LinearGradient>
         );
