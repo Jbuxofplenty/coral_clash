@@ -19,14 +19,6 @@ import Pieces from './Pieces';
 // Game state schema version for fixtures
 const GAME_STATE_VERSION = '1.1.0';
 
-const useRandomMove = (coralClash) => {
-    while (!coralClash.isGameOver() && coralClash.turn() === 'b') {
-        const moves = coralClash.moves();
-        const move = moves[Math.floor(Math.random() * moves.length)];
-        coralClash.move(move);
-    }
-};
-
 const CoralClash = ({ fixture }) => {
     const { width } = useWindowDimensions();
     const coralClash = useCoralClash();
@@ -36,6 +28,7 @@ const CoralClash = ({ fixture }) => {
     const [whaleOrientationMoves, setWhaleOrientationMoves] = useState([]);
     const [isViewingEnemyMoves, setIsViewingEnemyMoves] = useState(false);
     const [fixtureLoaded, setFixtureLoaded] = useState(false);
+    const [, forceUpdate] = useState(0);
     const boardSize = Math.min(width, 400);
 
     // Load fixture if provided
@@ -52,10 +45,20 @@ const CoralClash = ({ fixture }) => {
         }
     }, [fixture, fixtureLoaded]);
 
-    // Only run random moves if not loading a fixture, or if fixture is loaded and it's black's turn
-    if (!fixture || fixtureLoaded) {
-        useRandomMove(coralClash);
-    }
+    // Handle random black moves - runs after render, not during
+    useEffect(() => {
+        // Only run if not loading a fixture, or if fixture is loaded
+        if (!fixture || fixtureLoaded) {
+            // Make black moves if it's black's turn
+            while (!coralClash.isGameOver() && coralClash.turn() === 'b') {
+                const moves = coralClash.moves();
+                const move = moves[Math.floor(Math.random() * moves.length)];
+                coralClash.move(move);
+            }
+            // Force re-render to show the updated board
+            forceUpdate((n) => n + 1);
+        }
+    }, [coralClash.history().length, fixture, fixtureLoaded]);
 
     // Get game status message
     const getGameStatus = () => {

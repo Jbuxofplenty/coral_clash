@@ -22,6 +22,7 @@ const FIXTURE_FILES = {
     'octopus-check': require('../hooks/__fixtures__/octopus-check.json'),
     'multiple-checks': require('../hooks/__fixtures__/multiple-checks.json'),
     'check-pinned': require('../hooks/__fixtures__/check-pinned.json'),
+    'check-pinned-2': require('../hooks/__fixtures__/check-pinned-2.json'),
 };
 
 // Available fixtures - keep this list updated when adding new fixtures
@@ -32,6 +33,7 @@ const FIXTURES = [
     { name: 'octopus-check', label: 'Octopus Check (Debug)' },
     { name: 'multiple-checks', label: 'Multiple Checks (Pinned Piece)' },
     { name: 'check-pinned', label: 'Check with Pinned Piece' },
+    { name: 'check-pinned-2', label: 'Check with Pinned Piece #2' },
 ];
 
 const FixtureLoaderModal = ({ visible, onClose, onSelectFixture }) => {

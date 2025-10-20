@@ -145,6 +145,7 @@ type InternalMove = {
     piece: PieceSymbol;
     captured?: PieceSymbol;
     capturedRole?: PieceRole; // Role of captured piece (for proper undo in Coral Clash)
+    captureSquare?: number; // For whale captures: which square (0x88) had the captured piece
     promotion?: PieceSymbol;
     flags: number;
     // Coral Clash specific
@@ -188,7 +189,6 @@ const FLAGS: Record<string, string> = {
     NORMAL: 'n',
     CAPTURE: 'c',
     BIG_PAWN: 'b',
-    EP_CAPTURE: 'e',
     PROMOTION: 'p',
 };
 
@@ -208,7 +208,6 @@ const BITS: Record<string, number> = {
     NORMAL: 1,
     CAPTURE: 2,
     BIG_PAWN: 4,
-    EP_CAPTURE: 8,
     PROMOTION: 16,
     // Castle bits removed - not used in Coral Clash
 };
@@ -604,7 +603,6 @@ export class CoralClash {
         w: [EMPTY, EMPTY],
         b: [EMPTY, EMPTY],
     };
-    private _epSquare = -1;
     private _halfMoves = 0;
     private _moveNumber = 0;
     private _history: History[] = [];
@@ -651,7 +649,6 @@ export class CoralClash {
         this._board = new Array<Piece>(128);
         this._kings = { w: [EMPTY, EMPTY], b: [EMPTY, EMPTY] };
         this._turn = WHITE;
-        this._epSquare = EMPTY;
         this._halfMoves = 0;
         this._moveNumber = 1;
         this._history = [];
@@ -722,8 +719,8 @@ export class CoralClash {
         this._turn = tokens[1] as Color;
 
         // Castling is not used in Coral Clash (tokens[2] is ignored)
+        // En passant not used in Coral Clash (tokens[3] is ignored)
 
-        this._epSquare = tokens[3] === '-' ? EMPTY : Ox88[tokens[3] as Square];
         this._halfMoves = parseInt(tokens[4], 10);
         this._moveNumber = parseInt(tokens[5], 10);
 
@@ -762,48 +759,9 @@ export class CoralClash {
             }
         }
 
-        // Castling is not used in Coral Clash
+        // Castling and en passant not used in Coral Clash
         const castling = '-';
-
-        let epSquare = '-';
-        /*
-         * only print the ep square if en passant is a valid move (pawn is present
-         * and ep capture is not pinned)
-         */
-        if (this._epSquare !== EMPTY) {
-            const bigPawnSquare = this._epSquare + (this._turn === WHITE ? 16 : -16);
-            const squares = [bigPawnSquare + 1, bigPawnSquare - 1];
-
-            for (const square of squares) {
-                // is the square off the board?
-                if (square & 0x88) {
-                    continue;
-                }
-
-                const color = this._turn;
-
-                // is there a crab that can capture the epSquare?
-                if (this._board[square]?.color === color && this._board[square]?.type === CRAB) {
-                    // if the crab makes an ep capture, does it leave its whale in check?
-                    this._makeMove({
-                        color,
-                        from: square,
-                        to: this._epSquare,
-                        piece: CRAB,
-                        captured: CRAB,
-                        flags: BITS.EP_CAPTURE,
-                    });
-                    const isLegal = !this._isKingAttacked(color);
-                    this._undoMove();
-
-                    // if ep is legal, break and set the ep square in the FEN output
-                    if (isLegal) {
-                        epSquare = algebraic(this._epSquare);
-                        break;
-                    }
-                }
-            }
-        }
+        const epSquare = '-';
 
         return [fen, this._turn, castling, epSquare, this._halfMoves, this._moveNumber].join(' ');
     }
@@ -1300,6 +1258,7 @@ export class CoralClash {
             otherSquareAfterMove: number, // Where the OTHER half of whale will be after this move
             captured?: PieceSymbol,
             capturedRole?: PieceRole,
+            captureSquare?: number, // Which square had the captured piece (for proper undo)
         ) => {
             const flags = captured ? BITS.CAPTURE : BITS.NORMAL;
             moves.push({
@@ -1309,6 +1268,7 @@ export class CoralClash {
                 piece: WHALE,
                 captured,
                 capturedRole,
+                captureSquare, // Store WHERE the capture happened
                 flags,
                 whaleOtherSquare: otherSquareAfterMove, // Store where the other half ends up
             });
@@ -1358,7 +1318,7 @@ export class CoralClash {
                     // NEVER generate whale captures - game ends at checkmate
                     if (capturedType !== WHALE) {
                         const capturedRole = this._board[to]?.role;
-                        addWhaleMove(firstSq, to, secondSq, capturedType, capturedRole);
+                        addWhaleMove(firstSq, to, secondSq, capturedType, capturedRole, to);
                     }
                     break;
                 } else {
@@ -1400,7 +1360,7 @@ export class CoralClash {
                     // NEVER generate whale captures - game ends at checkmate
                     if (capturedType !== WHALE) {
                         const capturedRole = this._board[to]?.role;
-                        addWhaleMove(secondSq, to, firstSq, capturedType, capturedRole);
+                        addWhaleMove(secondSq, to, firstSq, capturedType, capturedRole, to);
                     }
                     break;
                 } else {
@@ -1476,9 +1436,27 @@ export class CoralClash {
                         if (capturedType !== WHALE) {
                             const capturedRole =
                                 this._board[newFirst]?.role || this._board[newSecond]?.role;
+                            // Determine which square has the captured piece
+                            const captureSquare = this._board[newFirst]?.type
+                                ? newFirst
+                                : newSecond;
                             // Generate captures from BOTH starting squares
-                            addWhaleMove(firstSq, newFirst, newSecond, capturedType, capturedRole);
-                            addWhaleMove(secondSq, newSecond, newFirst, capturedType, capturedRole);
+                            addWhaleMove(
+                                firstSq,
+                                newFirst,
+                                newSecond,
+                                capturedType,
+                                capturedRole,
+                                captureSquare,
+                            );
+                            addWhaleMove(
+                                secondSq,
+                                newSecond,
+                                newFirst,
+                                capturedType,
+                                capturedRole,
+                                captureSquare,
+                            );
                         }
                     }
                     break;
@@ -1507,7 +1485,7 @@ export class CoralClash {
             } else if (this._isSquareOccupied(to, them)) {
                 const capturedType = this._board[to]?.type || WHALE;
                 const capturedRole = this._board[to]?.role;
-                addWhaleMove(firstSq, to, secondSq, capturedType, capturedRole);
+                addWhaleMove(firstSq, to, secondSq, capturedType, capturedRole, to);
             }
         }
 
@@ -1527,7 +1505,7 @@ export class CoralClash {
             } else if (this._isSquareOccupied(to, them)) {
                 const capturedType = this._board[to]?.type || WHALE;
                 const capturedRole = this._board[to]?.role;
-                addWhaleMove(secondSq, to, firstSq, capturedType, capturedRole);
+                addWhaleMove(secondSq, to, firstSq, capturedType, capturedRole, to);
             }
         }
     }
@@ -1807,7 +1785,6 @@ export class CoralClash {
                 w: [this._kings.w[0], this._kings.w[1]],
             },
             turn: this._turn,
-            epSquare: this._epSquare,
             halfMoves: this._halfMoves,
             moveNumber: this._moveNumber,
             // Save coral state for undo
@@ -1884,23 +1861,33 @@ export class CoralClash {
             const newFirst = move.to < newOtherSquare ? move.to : newOtherSquare;
             const newSecond = move.to < newOtherSquare ? newOtherSquare : move.to;
 
+            // IMPORTANT: Delete any captured pieces at the new whale positions BEFORE placing the whale
+            // Whale captures can happen during parallel slides where one or both destination squares are occupied
+            if (move.captured) {
+                // Delete captured piece at newFirst if it's an opponent piece
+                if (this._board[newFirst] && this._board[newFirst].color === them) {
+                    delete this._board[newFirst];
+                }
+                // Delete captured piece at newSecond if it's an opponent piece
+                if (this._board[newSecond] && this._board[newSecond].color === them) {
+                    delete this._board[newSecond];
+                }
+            }
+
             this._board[newFirst] = { ...whalePiece };
 
             // Update whale positions
             this._kings[us] = [newFirst, newSecond];
         } else {
             // Normal piece move
-            this._board[move.to] = this._board[move.from];
-            delete this._board[move.from];
-        }
-
-        // if ep capture, remove the captured pawn
-        if (move.flags & BITS.EP_CAPTURE) {
-            if (this._turn === BLACK) {
-                delete this._board[move.to - 16];
+            // IMPORTANT: Create a COPY to avoid reference issues
+            const pieceToMove = this._board[move.from];
+            if (pieceToMove) {
+                this._board[move.to] = { ...pieceToMove };
             } else {
-                delete this._board[move.to + 16];
+                this._board[move.to] = pieceToMove;
             }
+            delete this._board[move.from];
         }
 
         // if pawn promotion, replace with new piece
@@ -1919,7 +1906,7 @@ export class CoralClash {
         // reset the 50 move counter if a crab is moved or a piece is captured
         if (move.piece === CRAB) {
             this._halfMoves = 0;
-        } else if (move.flags & (BITS.CAPTURE | BITS.EP_CAPTURE)) {
+        } else if (move.flags & BITS.CAPTURE) {
             this._halfMoves = 0;
         } else {
             this._halfMoves++;
@@ -1966,7 +1953,6 @@ export class CoralClash {
             w: [old.kings.w[0], old.kings.w[1]],
         };
         this._turn = old.turn;
-        this._epSquare = old.epSquare;
         this._halfMoves = old.halfMoves;
         this._moveNumber = old.moveNumber;
         // Restore coral state (create copies to avoid reference issues)
@@ -2003,29 +1989,28 @@ export class CoralClash {
             }
         } else {
             // Normal piece move
-            this._board[move.from] = this._board[move.to];
-            if (this._board[move.from]) {
-                this._board[move.from].type = move.piece; // to undo any promotions
+            // IMPORTANT: Create a COPY to avoid reference issues
+            const pieceToRestore = this._board[move.to];
+            if (pieceToRestore) {
+                this._board[move.from] = { ...pieceToRestore, type: move.piece }; // to undo any promotions
+            } else {
+                this._board[move.from] = pieceToRestore;
             }
+
             delete this._board[move.to];
         }
 
         if (move.captured) {
-            if (move.flags & BITS.EP_CAPTURE) {
-                // en passant capture
-                let index: number;
-                if (us === BLACK) {
-                    index = move.to - 16;
-                } else {
-                    index = move.to + 16;
-                }
-                this._board[index] = { type: CRAB, color: them, role: move.capturedRole };
-            } else if (move.captured === WHALE) {
+            if (move.captured === WHALE) {
                 // Whale capture should never happen in normal play
                 console.error('[_undoMove] Undoing illegal whale capture');
             } else {
-                // regular capture - restore with role
-                this._board[move.to] = {
+                // Regular capture - restore with role
+                // For whale captures, use captureSquare (which square had the captured piece)
+                // For normal captures, use move.to
+                const restoreSquare =
+                    move.captureSquare !== undefined ? move.captureSquare : move.to;
+                this._board[restoreSquare] = {
                     type: move.captured,
                     color: them,
                     role: move.capturedRole,
@@ -2431,7 +2416,7 @@ export class CoralClash {
             output += move.piece.toUpperCase() + disambiguator;
         }
 
-        if (move.flags & (BITS.CAPTURE | BITS.EP_CAPTURE)) {
+        if (move.flags & BITS.CAPTURE) {
             if (move.piece === CRAB) {
                 output += algebraic(move.from)[0];
             }
@@ -2444,15 +2429,17 @@ export class CoralClash {
             output += '=' + move.promotion.toUpperCase();
         }
 
-        this._makeMove(move);
-        if (this.isCheck()) {
-            if (this.isCheckmate()) {
-                output += '#';
-            } else {
-                output += '+';
-            }
-        }
-        this._undoMove();
+        // Don't call _makeMove/_undoMove here - causes recursion bug!
+        // Check symbols should be added by the caller if needed
+        // this._makeMove(move);
+        // if (this.isCheck()) {
+        //     if (this.isCheckmate()) {
+        //         output += '#';
+        //     } else {
+        //         output += '+';
+        //     }
+        // }
+        // this._undoMove();
 
         return output;
     }
@@ -2653,7 +2640,7 @@ export class CoralClash {
             piece,
             from: fromAlgebraic,
             to: toAlgebraic,
-            san: this._moveToSan(uglyMove, this._moves({ legal: true })),
+            san: this._moveToSan(uglyMove, []), // Don't generate moves recursively - causes exponential cost and state corruption
             flags: prettyFlags,
             lan: fromAlgebraic + toAlgebraic,
             before: this.fen(),
