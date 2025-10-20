@@ -11,6 +11,8 @@ export interface GameStateFixture {
         history: any[];
         turn: 'w' | 'b';
         whalePositions?: { w: [string, string] | null; b: [string, string] | null }; // v1.1.0+
+        coral?: { square: string; color: 'w' | 'b' }[]; // v1.2.0+ coral placement
+        coralRemaining?: { w: number; b: number }; // v1.2.0+ coral counts
         isGameOver: boolean;
         inCheck: boolean;
         isCheckmate: boolean;
@@ -28,7 +30,7 @@ export interface GameStateFixture {
  * For React Native: Import fixtures statically at the top of your file
  *
  * Example:
- *   const fixture = require('./__fixtures__/example-initial-state.json');
+ *   const fixture = require('./__fixtures__/whale-move-diagonally.json');
  *   applyFixture(game, fixture);
  */
 
@@ -122,6 +124,18 @@ export function applyFixture(coralClash: any, fixture: GameStateFixture): void {
             const [first, second] = fixture.state.whalePositions.b;
             coralClash._kings.b = [Ox88[first], Ox88[second]];
         }
+    }
+
+    // v1.2.0+: Restore coral state if present
+    if (fixture.state.coral) {
+        fixture.state.coral.forEach(({ square, color }) => {
+            coralClash.placeCoral(square, color);
+        });
+    }
+
+    // v1.2.0+: Restore coral remaining counts if present
+    if (fixture.state.coralRemaining) {
+        coralClash._coralRemaining = { ...fixture.state.coralRemaining };
     }
 }
 

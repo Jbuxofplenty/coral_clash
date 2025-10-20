@@ -151,6 +151,7 @@ type InternalMove = {
     // Coral Clash specific
     coralPlaced?: boolean; // Gatherer placed coral
     coralRemoved?: boolean; // Hunter removed coral
+    coralRemovedSquares?: number[]; // Whale: specific squares (0x88) where coral was removed
     whaleOtherSquare?: number; // For whale moves: where the other half ends up (0x88 format)
 };
 
@@ -181,6 +182,10 @@ export type Move = {
     // Whale-specific fields for 2-square piece
     whaleSecondSquare?: Square; // Where the other half of the whale ends up after this move
     whaleOrientation?: 'horizontal' | 'vertical'; // Final orientation after move
+    // Coral Clash specific fields
+    coralPlaced?: boolean; // Gatherer placed coral on destination square
+    coralRemoved?: boolean; // Hunter removed coral from destination square
+    coralRemovedSquares?: Square[]; // Whale: specific squares where coral was removed
 };
 
 const EMPTY = -1;
@@ -551,10 +556,13 @@ function addMove(
     captured: PieceSymbol | undefined = undefined,
     flags: number = BITS.NORMAL,
     capturedRole: PieceRole | undefined = undefined,
+    role: PieceRole | undefined = undefined,
+    coral: Array<Color | null> = [],
+    coralRemaining: Record<Color, number> = { w: 0, b: 0 },
 ) {
     // In Coral Clash, no automatic promotions - reaching back row triggers scoring phase
     // This will be handled separately in game logic
-    moves.push({
+    const baseMove: InternalMove = {
         color,
         from,
         to,
@@ -562,7 +570,42 @@ function addMove(
         captured,
         capturedRole,
         flags,
-    });
+    };
+
+    // Check if this move can have coral effects
+    const toSquareCoral = coral[to] || null;
+    const hasCoralOnDestination = toSquareCoral !== null;
+
+    // Gatherer pieces can place coral on empty squares (if they have coral remaining)
+    if (role === 'gatherer' && !hasCoralOnDestination && coralRemaining[color] > 0) {
+        // Generate move with coral placement
+        moves.push({
+            ...baseMove,
+            coralPlaced: true,
+        });
+        // Also generate move without coral placement (player's choice)
+        moves.push({
+            ...baseMove,
+            coralPlaced: false,
+        });
+    }
+    // Hunter pieces can remove coral from squares they land on
+    else if (role === 'hunter' && hasCoralOnDestination) {
+        // Generate move with coral removal
+        moves.push({
+            ...baseMove,
+            coralRemoved: true,
+        });
+        // Also generate move without coral removal (player's choice)
+        moves.push({
+            ...baseMove,
+            coralRemoved: false,
+        });
+    }
+    // No coral effect possible
+    else {
+        moves.push(baseMove);
+    }
 }
 
 function inferPieceType(san: string) {
@@ -611,16 +654,13 @@ export class CoralClash {
     // Coral Clash specific state
     private _coral = new Array<Color | null>(128); // Tracks which squares have coral and which color
     private _coralRemaining: Record<Color, number> = { w: 17, b: 17 }; // Each player starts with 17 coral
+    private _resigned: Color | null = null; // Tracks which player resigned, if any
 
     // tracks number of times a position has been seen for repetition checking
     private _positionCount: Record<string, number> = {};
 
     constructor(fen = DEFAULT_POSITION) {
         this.load(fen);
-        // Initialize starting coral if loading default position
-        if (fen === DEFAULT_POSITION) {
-            this._initializeStartingCoral();
-        }
     }
 
     /**
@@ -659,6 +699,7 @@ export class CoralClash {
         // Clear Coral Clash specific state
         this._coral = new Array<Color | null>(128);
         this._coralRemaining = { w: 17, b: 17 };
+        this._resigned = null;
 
         /*
          * Delete the SetUp and FEN headers (if preserved), the board is empty and
@@ -726,6 +767,11 @@ export class CoralClash {
 
         this._updateSetup(fen);
         this._incPositionCount(fen);
+
+        // Initialize starting coral if loading default position
+        if (fen === DEFAULT_POSITION) {
+            this._initializeStartingCoral();
+        }
     }
 
     fen() {
@@ -909,6 +955,7 @@ export class CoralClash {
                 if (piece.type === CRAB) {
                     // Crabs attack one square in any orthogonal direction (forward, back, left, right)
                     // No directional restriction - if it's in the ATTACKS array, it can attack
+                    // Note: Hunters can land on coral (their movement stops there), so they CAN attack coral squares
                     return true;
                 }
 
@@ -917,6 +964,7 @@ export class CoralClash {
                 if (piece.type === OCTOPUS) {
                     const absDistance = Math.abs(difference);
                     if (absDistance === 15 || absDistance === 17) {
+                        // Note: Hunters can land on coral (their movement stops there), so they CAN attack coral squares
                         return true;
                     }
                     // Not exactly 1 square away, continue checking other pieces
@@ -932,6 +980,11 @@ export class CoralClash {
                 while (j !== square) {
                     // Check if square is occupied (including whale's second square)
                     if (this._isSquareOccupied(j)) {
+                        blocked = true;
+                        break;
+                    }
+                    // Hunter pieces are blocked by coral
+                    if (piece.role === 'hunter' && this._coral[j]) {
                         blocked = true;
                         break;
                     }
@@ -1047,11 +1100,16 @@ export class CoralClash {
     }
 
     isDraw() {
+        // Check if coral scoring triggered with a tie
+        const coralScoringTriggered = this._shouldTriggerCoralScoring();
+        const coralTie = coralScoringTriggered && this.isCoralVictory() === null;
+
         return (
             this._halfMoves >= 100 || // 50 moves per side = 100 half moves
             this.isStalemate() ||
             this.isInsufficientMaterial() ||
-            this.isThreefoldRepetition()
+            this.isThreefoldRepetition() ||
+            coralTie // Coral scoring triggered but area control is tied
         );
     }
 
@@ -1060,8 +1118,24 @@ export class CoralClash {
             this.isCheckmate() ||
             this.isStalemate() ||
             this.isDraw() ||
-            this._shouldTriggerCoralScoring()
+            this._shouldTriggerCoralScoring() ||
+            this._resigned !== null
         );
+    }
+
+    /**
+     * Resign the game for the specified player
+     */
+    resign(color: Color): void {
+        this._resigned = color;
+    }
+
+    /**
+     * Check if a player has resigned
+     * @returns The color of the player who resigned, or null if no one has resigned
+     */
+    isResigned(): Color | null {
+        return this._resigned;
     }
 
     /**
@@ -1258,17 +1332,111 @@ export class CoralClash {
             captureSquare?: number, // Which square had the captured piece (for proper undo)
         ) => {
             const flags = captured ? BITS.CAPTURE : BITS.NORMAL;
-            moves.push({
-                color,
-                from,
-                to,
-                piece: WHALE,
-                captured,
-                capturedRole,
-                captureSquare, // Store WHERE the capture happened
-                flags,
-                whaleOtherSquare: otherSquareAfterMove, // Store where the other half ends up
-            });
+
+            // Check if whale will land on coral (whale is a hunter piece, can remove coral)
+            const toHasCoral = this._coral[to] !== null && this._coral[to] !== undefined;
+            const otherHasCoral =
+                this._coral[otherSquareAfterMove] !== null &&
+                this._coral[otherSquareAfterMove] !== undefined;
+
+            // Generate move variants based on which squares have coral
+            if (toHasCoral && otherHasCoral) {
+                // Both squares have coral - generate 4 variants
+                // 1. Remove neither
+                moves.push({
+                    color,
+                    from,
+                    to,
+                    piece: WHALE,
+                    captured,
+                    capturedRole,
+                    captureSquare,
+                    flags,
+                    whaleOtherSquare: otherSquareAfterMove,
+                    coralRemovedSquares: [],
+                });
+                // 2. Remove from 'to' square only
+                moves.push({
+                    color,
+                    from,
+                    to,
+                    piece: WHALE,
+                    captured,
+                    capturedRole,
+                    captureSquare,
+                    flags,
+                    whaleOtherSquare: otherSquareAfterMove,
+                    coralRemovedSquares: [to],
+                });
+                // 3. Remove from 'other' square only
+                moves.push({
+                    color,
+                    from,
+                    to,
+                    piece: WHALE,
+                    captured,
+                    capturedRole,
+                    captureSquare,
+                    flags,
+                    whaleOtherSquare: otherSquareAfterMove,
+                    coralRemovedSquares: [otherSquareAfterMove],
+                });
+                // 4. Remove from both squares
+                moves.push({
+                    color,
+                    from,
+                    to,
+                    piece: WHALE,
+                    captured,
+                    capturedRole,
+                    captureSquare,
+                    flags,
+                    whaleOtherSquare: otherSquareAfterMove,
+                    coralRemovedSquares: [to, otherSquareAfterMove],
+                });
+            } else if (toHasCoral || otherHasCoral) {
+                // One square has coral - generate 2 variants
+                const coralSquare = toHasCoral ? to : otherSquareAfterMove;
+                // 1. Don't remove coral
+                moves.push({
+                    color,
+                    from,
+                    to,
+                    piece: WHALE,
+                    captured,
+                    capturedRole,
+                    captureSquare,
+                    flags,
+                    whaleOtherSquare: otherSquareAfterMove,
+                    coralRemovedSquares: [],
+                });
+                // 2. Remove coral
+                moves.push({
+                    color,
+                    from,
+                    to,
+                    piece: WHALE,
+                    captured,
+                    capturedRole,
+                    captureSquare,
+                    flags,
+                    whaleOtherSquare: otherSquareAfterMove,
+                    coralRemovedSquares: [coralSquare],
+                });
+            } else {
+                // No coral, just generate normal move
+                moves.push({
+                    color,
+                    from,
+                    to,
+                    piece: WHALE,
+                    captured,
+                    capturedRole,
+                    captureSquare,
+                    flags,
+                    whaleOtherSquare: otherSquareAfterMove,
+                });
+            }
         };
 
         // Helper to check if two squares are orthogonally adjacent
@@ -1573,13 +1741,30 @@ export class CoralClash {
                 // Crabs move 1 square orthogonally (no double moves, no en passant in Coral Clash)
                 if (forPiece && forPiece !== type) continue;
 
+                const { role } = this._board[from];
+
                 for (let j = 0; j < CRAB_OFFSETS.length; j++) {
                     to = from + CRAB_OFFSETS[j];
                     if (to & 0x88) continue;
 
+                    // Crabs can move onto coral (movement stops there, but they can land on it)
+                    // The blocking rule only applies to sliding pieces moving THROUGH coral
+
                     if (!this._isSquareOccupied(to)) {
                         // Empty square - crab can move there
-                        addMove(moves, us, from, to, CRAB);
+                        addMove(
+                            moves,
+                            us,
+                            from,
+                            to,
+                            CRAB,
+                            undefined,
+                            BITS.NORMAL,
+                            undefined,
+                            role,
+                            this._coral,
+                            this._coralRemaining,
+                        );
                     } else if (this._isSquareOccupied(to, them)) {
                         // Capture opponent's piece
                         const capturedType = this._board[to]?.type || WHALE; // Could be whale
@@ -1596,6 +1781,9 @@ export class CoralClash {
                                 capturedType,
                                 BITS.CAPTURE,
                                 capturedRole,
+                                role,
+                                this._coral,
+                                this._coralRemaining,
                             );
                         }
                     }
@@ -1614,6 +1802,8 @@ export class CoralClash {
             } else {
                 if (forPiece && forPiece !== type) continue;
 
+                const { role } = this._board[from];
+
                 for (let j = 0, len = PIECE_OFFSETS[type].length; j < len; j++) {
                     const offset = PIECE_OFFSETS[type][j];
                     to = from;
@@ -1622,8 +1812,30 @@ export class CoralClash {
                         to += offset;
                         if (to & 0x88) break;
 
+                        // Hunter pieces are blocked by coral - they stop when they hit it
+                        // (can land on it, but can't move through it)
+                        const hasCoralAtDestination =
+                            this._coral[to] !== null && this._coral[to] !== undefined;
+
                         if (!this._isSquareOccupied(to)) {
-                            addMove(moves, us, from, to, type);
+                            addMove(
+                                moves,
+                                us,
+                                from,
+                                to,
+                                type,
+                                undefined,
+                                BITS.NORMAL,
+                                undefined,
+                                role,
+                                this._coral,
+                                this._coralRemaining,
+                            );
+
+                            // Hunter pieces stop at coral (can't move through)
+                            if (role === 'hunter' && hasCoralAtDestination) {
+                                break;
+                            }
                         } else {
                             // own color, stop loop
                             if (this._isSquareOccupied(to, us)) break;
@@ -1653,6 +1865,9 @@ export class CoralClash {
                                 capturedType,
                                 BITS.CAPTURE,
                                 capturedRole,
+                                role,
+                                this._coral,
+                                this._coralRemaining,
                             );
                             break;
                         }
@@ -1689,7 +1904,17 @@ export class CoralClash {
     }
 
     move(
-        move: string | { from: string; to: string; promotion?: string; whaleSecondSquare?: string },
+        move:
+            | string
+            | {
+                  from: string;
+                  to: string;
+                  promotion?: string;
+                  whaleSecondSquare?: string;
+                  coralPlaced?: boolean;
+                  coralRemoved?: boolean;
+                  coralRemovedSquares?: string[];
+              },
         { strict = false }: { strict?: boolean } = {},
     ) {
         /*
@@ -1727,8 +1952,27 @@ export class CoralClash {
             }
 
             if (candidates.length > 0) {
+                // If coral action specified, use it to disambiguate
+                if (candidates.length > 1 && 'coralPlaced' in move) {
+                    const exactMatch = candidates.find((m) => m.coralPlaced === move.coralPlaced);
+                    moveObj = exactMatch || candidates[0];
+                } else if (candidates.length > 1 && 'coralRemovedSquares' in move) {
+                    // Whale-specific: match specific squares where coral is removed
+                    const exactMatch = candidates.find((m) => {
+                        const candidateSquares = m.coralRemovedSquares || [];
+                        const requestedSquares = move.coralRemovedSquares || [];
+                        if (candidateSquares.length !== requestedSquares.length) return false;
+                        const candidateAlg = candidateSquares.map((sq) => algebraic(sq)).sort();
+                        const requestedAlg = requestedSquares.sort();
+                        return JSON.stringify(candidateAlg) === JSON.stringify(requestedAlg);
+                    });
+                    moveObj = exactMatch || candidates[0];
+                } else if (candidates.length > 1 && 'coralRemoved' in move) {
+                    const exactMatch = candidates.find((m) => m.coralRemoved === move.coralRemoved);
+                    moveObj = exactMatch || candidates[0];
+                }
                 // If whale move and whaleSecondSquare specified, use it to disambiguate
-                if (
+                else if (
                     candidates.length > 1 &&
                     candidates[0].piece === WHALE &&
                     'whaleSecondSquare' in move
@@ -1782,6 +2026,7 @@ export class CoralClash {
                 w: [this._kings.w[0], this._kings.w[1]],
             },
             turn: this._turn,
+            epSquare: -1, // En passant not used in Coral Clash
             halfMoves: this._halfMoves,
             moveNumber: this._moveNumber,
             // Save coral state for undo
@@ -1899,6 +2144,31 @@ export class CoralClash {
         }
 
         // No castling logic in Coral Clash
+
+        // Handle coral placement (gatherer effect)
+        if (move.coralPlaced) {
+            this._coral[move.to] = us;
+            this._coralRemaining[us]--;
+        }
+
+        // Handle coral removal (hunter effect)
+        if (move.piece === WHALE && move.coralRemovedSquares) {
+            // Whale: remove coral from specific squares
+            for (const sq of move.coralRemovedSquares) {
+                const coralColor = this._coral[sq];
+                if (coralColor) {
+                    this._coral[sq] = null;
+                    this._coralRemaining[coralColor]++;
+                }
+            }
+        } else if (move.coralRemoved) {
+            // Regular piece - remove coral from destination square only
+            const coralColor = this._coral[move.to];
+            if (coralColor) {
+                this._coral[move.to] = null;
+                this._coralRemaining[coralColor]++;
+            }
+        }
 
         // reset the 50 move counter if a crab is moved or a piece is captured
         if (move.piece === CRAB) {
@@ -2619,7 +2889,18 @@ export class CoralClash {
 
     // pretty = external move object
     private _makePretty(uglyMove: InternalMove): Move {
-        const { color, piece, from, to, flags, captured, promotion } = uglyMove;
+        const {
+            color,
+            piece,
+            from,
+            to,
+            flags,
+            captured,
+            promotion,
+            coralPlaced,
+            coralRemoved,
+            coralRemovedSquares,
+        } = uglyMove;
 
         let prettyFlags = '';
 
@@ -2643,6 +2924,17 @@ export class CoralClash {
             before: this.fen(),
             after: '',
         };
+
+        // Add coral action information
+        if (coralPlaced !== undefined) {
+            move.coralPlaced = coralPlaced;
+        }
+        if (coralRemoved !== undefined) {
+            move.coralRemoved = coralRemoved;
+        }
+        if (coralRemovedSquares !== undefined) {
+            move.coralRemovedSquares = coralRemovedSquares.map((sq) => algebraic(sq));
+        }
 
         // generate the FEN for the 'after' key and calculate whale positions
         this._makeMove(uglyMove);
@@ -2934,6 +3226,13 @@ export class CoralClash {
     }
 
     /**
+     * Get remaining coral counts for both players (for export)
+     */
+    getCoralRemainingCounts(): Record<Color, number> {
+        return { w: this._coralRemaining.w, b: this._coralRemaining.b };
+    }
+
+    /**
      * Get all squares with coral of a specific color
      */
     getCoralSquares(color: Color): Square[] {
@@ -2948,6 +3247,26 @@ export class CoralClash {
             }
         }
         return squares;
+    }
+
+    /**
+     * Get all coral placements for export
+     */
+    getAllCoral(): { square: Square; color: Color }[] {
+        const coral: { square: Square; color: Color }[] = [];
+        for (let i = Ox88.a8; i <= Ox88.h1; i++) {
+            if (i & 0x88) {
+                i += 7;
+                continue;
+            }
+            if (this._coral[i]) {
+                coral.push({
+                    square: algebraic(i),
+                    color: this._coral[i]!,
+                });
+            }
+        }
+        return coral;
     }
 
     /**

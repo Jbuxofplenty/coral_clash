@@ -2,10 +2,11 @@ import { CoralClash } from './coralClash';
 import { applyFixture, validateFixtureVersion } from './__fixtures__/fixtureLoader';
 
 // Import fixtures directly (works in Jest, not in React Native)
-const exampleInitialState = require('./__fixtures__/example-initial-state.json');
 const whaleMoveDigonally = require('./__fixtures__/whale-move-diagonally.json');
 const octopusCheck = require('./__fixtures__/octopus-check.json');
 const multipleChecks = require('./__fixtures__/multiple-checks.json');
+const coralBlocksAttack = require('./__fixtures__/coral-blocks-attack.json');
+const whaleRemovesCoral = require('./__fixtures__/whale-removes-coral.json');
 
 describe('CoralClash Whale Mechanics', () => {
     let game: CoralClash;
@@ -330,40 +331,6 @@ describe('CoralClash Whale Mechanics', () => {
     });
 
     describe('Game State Fixtures', () => {
-        test('should load and apply a game state fixture', () => {
-            // Load a fixture from the __fixtures__ directory
-            const fixture = exampleInitialState;
-
-            // Validate the fixture schema version
-            validateFixtureVersion(fixture, '1.0.0');
-
-            // Apply the fixture to a game instance
-            const game = new CoralClash();
-            applyFixture(game, fixture);
-
-            // Verify the game state matches the fixture
-            expect(game.fen()).toBe(fixture.state.fen);
-            expect(game.turn()).toBe(fixture.state.turn);
-            expect(game.isGameOver()).toBe(fixture.state.isGameOver);
-        });
-
-        test('should use fixture to test specific game scenarios', () => {
-            // Example: Create your own fixture by exporting a game state
-            // from the UI, then load it here to test specific scenarios
-
-            // For now, using the example initial state
-            const fixture = exampleInitialState;
-            const game = new CoralClash();
-            applyFixture(game, fixture);
-
-            // Test that white can move first
-            expect(game.turn()).toBe('w');
-
-            // Test that the board is in the initial state
-            const moves = game.moves();
-            expect(moves.length).toBeGreaterThan(0);
-        });
-
         test('whale should be able to move diagonally', () => {
             // Load the whale diagonal movement fixture
             const fixture = whaleMoveDigonally;
@@ -1064,6 +1031,226 @@ describe('CoralClash Whale Mechanics', () => {
             expect(game.isCoralVictory()).toBe(null);
             // But game should still be over
             expect(game.isGameOver()).toBe(true);
+        });
+    });
+
+    describe('Coral Blocking Mechanics', () => {
+        it('should block hunter piece attacks through coral', () => {
+            const game = new CoralClash();
+            applyFixture(game, coralBlocksAttack);
+
+            console.log('\n=== Coral Blocks Attack Test ===');
+            console.log('FEN:', game.fen());
+            console.log('Turn:', game.turn());
+
+            // Check if black pufferfish at a8 is a hunter
+            const a8Piece = game.get('a8');
+            console.log('a8 piece:', a8Piece);
+            expect(a8Piece).toBeTruthy();
+            expect(a8Piece.type).toBe('f');
+            expect(a8Piece.role).toBe('hunter');
+
+            // Check if there's coral at c6
+            const c6Coral = game.getCoral('c6');
+            console.log('c6 coral:', c6Coral);
+            expect(c6Coral).toBeTruthy();
+
+            // The black pufferfish at a8 should NOT be able to attack f3
+            // because there is coral at c6 blocking the diagonal path (a8->b7->c6->d5->e4->f3)
+            const f3Attacked = game.isAttacked('f3', 'b');
+            console.log('Is f3 attacked by black?', f3Attacked);
+
+            // f3 should NOT be attacked through the coral
+            expect(f3Attacked).toBe(false);
+
+            // White whale should be able to move to f3
+            const whaleMoves = game.moves({ verbose: true, square: 'e2' });
+            const moveToF3 = whaleMoves.find((m) => m.to === 'f3');
+            console.log('Can white whale move to f3?', !!moveToF3);
+            expect(moveToF3).toBeDefined();
+
+            // Similarly, white whale should be able to move to f2
+            const moveToF2 = whaleMoves.find((m) => m.to === 'f2');
+            console.log('Can white whale move to f2?', !!moveToF2);
+            expect(moveToF2).toBeDefined();
+        });
+
+        it('should allow hunter pieces to attack squares WITH coral (movement stops there)', () => {
+            const game = new CoralClash();
+            game.clear();
+
+            // Place black hunter pufferfish at a8
+            game.put({ type: 'f', color: 'b', role: 'hunter' }, 'a8');
+            // Place coral at c6
+            game.placeCoral('c6', 'b');
+            // Place white whale at c6
+            game.put({ type: 'h', color: 'w' }, 'c6');
+
+            console.log('\n=== Hunter Can Attack Coral Square ===');
+
+            // The pufferfish SHOULD be able to attack c6 (where the coral is)
+            // because hunters can land on coral (movement stops there)
+            const c6Attacked = game.isAttacked('c6', 'b');
+            console.log('Is c6 (with coral) attacked by black pufferfish?', c6Attacked);
+            expect(c6Attacked).toBe(true);
+
+            // But it should NOT be able to attack d5 (beyond the coral)
+            const d5Attacked = game.isAttacked('d5', 'b');
+            console.log('Is d5 (beyond coral) attacked by black pufferfish?', d5Attacked);
+            expect(d5Attacked).toBe(false);
+        });
+
+        it('should NOT block gatherer piece attacks through coral', () => {
+            const game = new CoralClash();
+            game.clear();
+
+            // Place black gatherer pufferfish at a8
+            game.put({ type: 'f', color: 'b', role: 'gatherer' }, 'a8');
+            // Place coral at c6
+            game.placeCoral('c6', 'b');
+            // Place white whale at f3
+            game.put({ type: 'h', color: 'w' }, 'f3');
+
+            console.log('\n=== Gatherer Can Attack Through Coral ===');
+
+            // Gatherer pieces should be able to attack THROUGH coral
+            const f3Attacked = game.isAttacked('f3', 'b');
+            console.log('Is f3 attacked by black gatherer pufferfish through coral?', f3Attacked);
+            expect(f3Attacked).toBe(true);
+        });
+
+        it('should allow whale to remove coral from both squares it occupies', () => {
+            const game = new CoralClash();
+            applyFixture(game, whaleRemovesCoral);
+
+            console.log('\n=== Whale Removes Coral Test ===');
+            console.log('FEN:', game.fen());
+            console.log('Turn:', game.turn());
+
+            // Check initial coral state
+            const c1Coral = game.getCoral('c1');
+            const d1Coral = game.getCoral('d1');
+            console.log('c1 coral:', c1Coral);
+            console.log('d1 coral:', d1Coral);
+            expect(c1Coral).toBe('w');
+            expect(d1Coral).toBe('w');
+
+            // Check whale position
+            const whalePositions = game.whalePositions();
+            console.log('White whale at:', whalePositions.w);
+            expect(whalePositions.w).toEqual(['e2', 'e1']);
+
+            // Get moves for white whale to d1
+            const whaleMoves = game.moves({ verbose: true, square: 'e1' });
+            const moveToD1 = whaleMoves.filter((m) => m.to === 'd1');
+            console.log('Moves to d1:', moveToD1.length);
+
+            // Should have moves with different coral removal options
+            const moveNoRemoval = moveToD1.find(
+                (m) => m.coralRemovedSquares && m.coralRemovedSquares.length === 0,
+            );
+            const moveRemoveOne = moveToD1.find(
+                (m) => m.coralRemovedSquares && m.coralRemovedSquares.length === 1,
+            );
+
+            expect(moveNoRemoval).toBeDefined();
+            expect(moveRemoveOne).toBeDefined();
+
+            // Execute move with coral removal from d1
+            game.move({
+                from: 'e1',
+                to: 'd1',
+                whaleSecondSquare: 'd2',
+                coralRemovedSquares: ['d1'],
+            });
+
+            // Verify whale moved
+            const newWhalePositions = game.whalePositions();
+            console.log('White whale after move:', newWhalePositions.w);
+
+            // Verify coral was removed from squares whale now occupies (d2-d1)
+            const c1CoralAfter = game.getCoral('c1');
+            const d1CoralAfter = game.getCoral('d1');
+            const d2CoralAfter = game.getCoral('d2');
+            console.log('c1 coral after:', c1CoralAfter);
+            console.log('d1 coral after:', d1CoralAfter);
+            console.log('d2 coral after:', d2CoralAfter);
+
+            // Only d1 should have coral removed (whale occupies d2-d1 now, d2 had no coral)
+            // c1 still has coral since whale is not on it
+            expect(c1CoralAfter).toBe('w'); // Still has white coral
+            expect(d1CoralAfter).toBeNull(); // Removed by whale
+            expect(d2CoralAfter).toBeNull(); // No coral here
+
+            // Verify coral count was restored (only 1 white coral removed)
+            const whiteCoralRemaining = game.getCoralRemaining('w');
+            console.log('White coral remaining after removal:', whiteCoralRemaining);
+            expect(whiteCoralRemaining).toBe(13); // Started with 12, removed 1
+        });
+
+        it('should export coral data in game state', () => {
+            const game = new CoralClash();
+            applyFixture(game, whaleRemovesCoral);
+
+            console.log('\n=== Export Coral Data Test ===');
+
+            // Get all coral
+            const allCoral = game.getAllCoral();
+            console.log('All coral:', allCoral);
+            expect(allCoral.length).toBe(14); // 14 coral placements in fixture
+            expect(allCoral).toContainEqual({ square: 'c1', color: 'w' });
+            expect(allCoral).toContainEqual({ square: 'd1', color: 'w' });
+
+            // Get coral remaining counts
+            const coralRemaining = game.getCoralRemainingCounts();
+            console.log('Coral remaining:', coralRemaining);
+            expect(coralRemaining).toEqual({ w: 12, b: 8 });
+        });
+    });
+
+    describe('Crab Movement Debug', () => {
+        it('should show moves for white crab at f4', () => {
+            const game = new CoralClash();
+            const crabMovement = require('./__fixtures__/crab-movement.json');
+            applyFixture(game, crabMovement);
+
+            console.log('\n=== Crab Movement Debug ===');
+            console.log('FEN:', game.fen());
+            console.log('Turn:', game.turn());
+
+            // Get the white crab at f4
+            const piece = game.get('f4');
+            console.log('Piece at f4:', piece);
+
+            // Get all moves for f4
+            const moves = game.moves({ verbose: true, square: 'f4' });
+            console.log('Moves from f4:', moves.length);
+            moves.forEach((m) => {
+                console.log(`  ${m.from} -> ${m.to} (${m.san})`);
+            });
+
+            // Check what's at surrounding squares
+            console.log('\nSurrounding squares:');
+            console.log('  e4 (left):', game.get('e4'), 'coral:', game.getCoral('e4'));
+            console.log('  g4 (right):', game.get('g4'), 'coral:', game.getCoral('g4'));
+            console.log('  f3 (down):', game.get('f3'), 'coral:', game.getCoral('f3'));
+            console.log('  f5 (up):', game.get('f5'), 'coral:', game.getCoral('f5'));
+
+            // Check all white crab positions
+            console.log('\nAll white pieces:');
+            const board = game.board();
+            board.forEach((row, rankIdx) => {
+                row.forEach((square, fileIdx) => {
+                    if (square && square.color === 'w' && square.type === 'c') {
+                        console.log(`  White crab at ${square.square}: ${square.role}`);
+                        const crabMoves = game.moves({ verbose: true, square: square.square });
+                        console.log(
+                            `    Moves (${crabMoves.length}):`,
+                            crabMoves.map((m) => m.to).join(', '),
+                        );
+                    }
+                });
+            });
         });
     });
 });

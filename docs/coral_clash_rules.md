@@ -22,19 +22,19 @@ Threefold repetition: If the same position occurs three times with the same play
 
 # **Setup**
 
-1	The board consists of 64 squares arranged in an 8x8 grid.
+1 The board consists of 64 squares arranged in an 8x8 grid.
 
 2\. Place the board so each player has a green square on their right-hand side.
 
-3	Position the pieces on the board as follows: Each player has:
+3 Position the pieces on the board as follows: Each player has:
 
 1. 17 Coral
 
 2. 17 pieces: 1 Whale, 2 Dolphins (1 Hunter, 1 Gatherer), 4 Turtles (2 Hunters, 2
 
-   Gatherers), 2 Pufferfish (1 Hunter, 1 Gatherer), 4 Crab (2 Hunters, 2 Gatherers), and 4
+    Gatherers), 2 Pufferfish (1 Hunter, 1 Gatherer), 4 Crab (2 Hunters, 2 Gatherers), and 4
 
-   Octopus (2 Hunters, 2 Gatherers).
+    Octopus (2 Hunters, 2 Gatherers).
 
 **Gatherer Pieces:** Pieces that have four Coral icons.
 
@@ -42,7 +42,7 @@ Threefold repetition: If the same position occurs three times with the same play
 
 1. Pufferfish in the corners
 
-   1	Hunter Pufferfish on the left, Gatherer Pufferfish on the right
+    1 Hunter Pufferfish on the left, Gatherer Pufferfish on the right
 
 2. Hunter Turtles next to the Pufferfish
 
@@ -50,19 +50,18 @@ Threefold repetition: If the same position occurs three times with the same play
 
 4. Whale occupies the two remaining squares in the middle
 
-   Dolphins occupy the two squares in the row above the Whale
+    Dolphins occupy the two squares in the row above the Whale
+    1. Hunter Dolphin on the left, Gatherer Dolphin on the right
 
-   1. Hunter Dolphin on the left, Gatherer Dolphin on the right
+5. Crab and Octopus are placed in the following pattern in front of all the other pieces
 
-6. Crab and Octopus are placed in the following pattern in front of all the other pieces
+    1 The pattern is: Hunter Crab, Gatherer Octopus, Gatherer Crab, Hunter Octopus,
 
-   1	The pattern is: Hunter Crab, Gatherer Octopus, Gatherer Crab, Hunter Octopus,
+    Gatherer Octopus, Hunter Crab, Hunter Octopus, Gatherer Crab
 
-   Gatherer Octopus, Hunter Crab, Hunter Octopus, Gatherer Crab
+6. Place a Coral under each Octopus in the third row (for a total of two)
 
-7. Place a Coral under each Octopus in the third row (for a total of two)
-
-8. The blue player places an additional coral underneath one of their pieces that doesn't already have Coral underneath it.
+7. The blue player places an additional coral underneath one of their pieces that doesn't already have Coral underneath it.
 
 Turn Overview
 
@@ -92,9 +91,9 @@ Example of a Whale moving through a threatened square
 
 **Pufferfish:** Moves any number of squares diagonally.
 
-**Octopus:** Moves one square vertically or horizontally.
+**Octopus:** Moves one square diagonally.
 
-**Crab:** Moves one square diagonally.
+**Crab:** Moves one square vertically or horizontally.
 
 **Capture:** A piece captures an opponent's piece by moving to the square occupied by the enemy piece. Whales can capture two pieces with the same movement.
 
@@ -103,4 +102,3 @@ Example of a Whale moving through a threatened square
 **Hunter Effect:** When pieces that do not have the four coral icons move to a square with Coral, the piece can remove the Coral from the square. Whales can remove two Coral in the same move (or just one Coral if the Whale is in on two Coral).
 
 **Gatherer Effect:** When pieces that have the four coral icons move to a square without Coral, the piece can place Coral on the square.
-

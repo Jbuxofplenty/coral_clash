@@ -16,7 +16,6 @@ const { width } = Dimensions.get('screen');
 
 // Import all fixtures statically (required for React Native bundler)
 const FIXTURE_FILES = {
-    'example-initial-state': require('../hooks/__fixtures__/example-initial-state.json'),
     'whale-move-diagonally': require('../hooks/__fixtures__/whale-move-diagonally.json'),
     'whale-move-diagonally-2': require('../hooks/__fixtures__/whale-move-diagonally-2.json'),
     'octopus-check': require('../hooks/__fixtures__/octopus-check.json'),
@@ -24,11 +23,13 @@ const FIXTURE_FILES = {
     'check-pinned': require('../hooks/__fixtures__/check-pinned.json'),
     'check-pinned-2': require('../hooks/__fixtures__/check-pinned-2.json'),
     'crab-end-of-board': require('../hooks/__fixtures__/crab-end-of-board.json'),
+    'coral-blocks-attack': require('../hooks/__fixtures__/coral-blocks-attack.json'),
+    'whale-removes-coral': require('../hooks/__fixtures__/whale-removes-coral.json'),
+    'crab-movement': require('../hooks/__fixtures__/crab-movement.json'),
 };
 
 // Available fixtures - keep this list updated when adding new fixtures
 const FIXTURES = [
-    { name: 'example-initial-state', label: 'Example Initial State' },
     { name: 'whale-move-diagonally', label: 'Whale Diagonal Movement' },
     { name: 'whale-move-diagonally-2', label: 'Whale Diagonal #2' },
     { name: 'octopus-check', label: 'Octopus Check (Debug)' },
@@ -36,6 +37,9 @@ const FIXTURES = [
     { name: 'check-pinned', label: 'Check with Pinned Piece' },
     { name: 'check-pinned-2', label: 'Check with Pinned Piece #2' },
     { name: 'crab-end-of-board', label: 'Crab Reaches End (Tie Game)' },
+    { name: 'coral-blocks-attack', label: 'Coral Blocks Attack' },
+    { name: 'whale-removes-coral', label: 'Whale Removes Coral' },
+    { name: 'crab-movement', label: 'Crab Movement Debug' },
 ];
 
 const FixtureLoaderModal = ({ visible, onClose, onSelectFixture }) => {

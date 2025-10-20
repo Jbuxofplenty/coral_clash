@@ -8,7 +8,7 @@ Coral Clash is a mobile board game application featuring ocean-themed pieces and
 
 ## Prerequisites
 
-- Node.js 22+ (LTS) or Node.js 23+
+- Node.js 22+ (LTS) or Node.js 24+
 - Yarn or npm
 - Expo CLI
 - iOS Simulator (for macOS) or Android Emulator
@@ -74,7 +74,7 @@ coral_clash/
 │   │   ├── EmptyBoard.js
 │   │   ├── Moves.js
 │   │   └── Pieces.js
-│   ├── hooks/            # Custom React hooks
+│   ├── hooks/            # Custom React hooks (contains coral clash game logic)
 │   ├── screens/          # Screen components
 │   └── images/           # Image assets
 ├── components/           # JavaScript components

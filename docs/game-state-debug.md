@@ -1,185 +1,202 @@
-# Game State Auto-Save in React Native
+# Game State Export for Debugging
 
-Game states are now automatically saved after every white move when running in development mode!
+The game includes an export feature to help debug issues by saving the exact game state as JSON.
 
 ## How It Works
 
-✅ **Auto-save is automatically enabled** when running in `__DEV__` mode  
-✅ **Saves after every white move** to your device  
-✅ **Keeps the last 20 saves** (automatically cleans up old files)  
-✅ **No performance impact** - saves happen asynchronously in the background
+✅ **Export button available in DEV mode only** (`__DEV__`)  
+✅ **One-click export** via the share icon in the control bar  
+✅ **Complete game state** exported as JSON  
+✅ **Use for creating test fixtures** and reproducing bugs
 
-## File Locations
+## Using the Export Feature
 
-### iOS Simulator/Device
+### In the App
 
-Files are saved to the app's documents directory:
+When running in development mode, you'll see a share icon (↗️) in the control bar between the reset and undo buttons.
 
-```
-<App Documents>/debug/move-001-2025-10-20T12-34-56.json
-```
+**Control Bar Layout:**
 
-### Accessing Saved Files
+- **Reset** (↻) - Reset game
+- **Export** (↗️) - **Export game state (DEV only)**
+- **Undo** (↶) - Undo move
+- **Resign** (⚑) - Resign game
 
-**From iOS Simulator:**
+### Export Process
 
-1. Check Metro console for the file path
-2. Or use Xcode: Window → Devices and Simulators → Select your device → Download Container
+1. **Click the share icon** when you want to capture the current game state
+2. **Choose how to share:**
+    - Copy to clipboard
+    - Save to Files app
+    - AirDrop to Mac
+    - Share via Messages/Email
+3. **The exported JSON contains:**
+    - Current board position (FEN)
+    - All pieces and their roles (hunter/gatherer)
+    - Whale positions and orientations
+    - Coral placements and remaining counts
+    - Move history
+    - Game status (check, checkmate, draws, etc.)
 
-**From iOS Device:**
-
-1. Connect device to Mac
-2. Open Xcode
-3. Window → Devices and Simulators
-4. Select your device
-5. Select Coral Clash app
-6. Click the gear icon → Download Container
-7. Browse to `AppData/Documents/debug/`
-
-**Alternative (iTunes File Sharing):**
-If you enable File Sharing in Info.plist, you can access via Finder.
-
-## File Naming
-
-Auto-saved files are named with move number and timestamp:
-
-- `move-001-2025-10-20T08-10-23.json` - After white's 1st move
-- `move-002-2025-10-20T08-10-45.json` - After white's 2nd move
-- `move-015-2025-10-20T08-15-30.json` - After white's 15th move
-
-## When You Hit a Bug
-
-1. **Note the move number** where the bug occurred
-2. **Check the Metro console** - it logs each save
-3. **The most recent file** contains the state right before the bug
-4. **Download the file** from the device/simulator
-5. **Copy to test fixtures**:
-    ```bash
-    cp /path/to/downloaded/move-015-*.json src/hooks/__fixtures__/bug-name.json
-    ```
-6. **Write regression test**:
-
-    ```typescript
-    import { loadGameStateFixture } from '../../test-utils/gameStateHelpers';
-
-    test('REGRESSION: bug description', () => {
-        const game = loadGameStateFixture('bug-name');
-
-        // Game is now in the exact state before the bug
-        // Replay the moves that caused it
-        game.move({ from: 'e1', to: 'd2' });
-
-        // Test the fix
-        expect(
-            game
-                .board()
-                .flat()
-                .filter((c) => c?.type === 'h').length,
-        ).toBe(2);
-    });
-    ```
-
-## Console Output
-
-When auto-save is enabled, you'll see:
-
-```
-🐛 Debug mode enabled
-📁 Game states will be saved to: file:///Users/.../Documents/debug/
-💡 Access files via iTunes File Sharing or Xcode device manager
-✓ Auto-saved game state: move-001-2025-10-20T12-34-56.json
-✓ Auto-saved game state: move-002-2025-10-20T12-35-12.json
-```
-
-## Disabling Auto-Save
-
-To disable auto-save (e.g., for performance testing):
-
-```typescript
-import { disableAutoSave } from './src/utils/gameStateHelpers.native';
-
-// In your code
-disableAutoSave();
-```
-
-Or remove the debug mode import from `App.js`:
-
-```javascript
-// Comment out or remove this:
-// if (__DEV__) {
-//     require('./src/utils/enableDebugMode');
-// }
-```
-
-## Manual Saving
-
-You can also manually save a game state at any point:
-
-```typescript
-import { saveGameStateDebug } from '../utils/gameStateHelpers.native';
-
-// Somewhere in your component
-const handleBug = async () => {
-    await saveGameStateDebug(game, 'bug-description', {
-        bug: 'Whale disappeared',
-        moveNumber: game.history().length,
-        notes: 'After rotating whale',
-    });
-
-    alert('Game state saved!');
-};
-```
-
-## File Format
-
-Each saved file contains:
+## Exported JSON Format
 
 ```json
 {
-  "version": 1,
-  "timestamp": "2025-10-20T12:34:56.789Z",
-  "metadata": {
-    "autoSaved": true,
-    "moveNumber": 15,
-    "fen": "...",
-    "lastMove": { ... }
-  },
-  "gameState": {
-    "fen": "...",
-    "turn": "w",
-    "moveNumber": 15,
-    "board": { ... },
-    "coral": { ... },
-    "history": [ ... ]
-  }
+    "schemaVersion": "1.2.0",
+    "exportedAt": "2025-10-20T19:58:05.887Z",
+    "state": {
+        "fen": "1tth1ttf/c1cddco1/2fo2c1/8/2o1OCD1/2D1O3/COC1H1OC/FTT2TTF w - - 2 11",
+        "board": [
+            /* 8x8 array of pieces */
+        ],
+        "history": [
+            /* move history */
+        ],
+        "turn": "w",
+        "whalePositions": {
+            "w": ["e2", "e1"],
+            "b": ["d8", "e8"]
+        },
+        "coral": [
+            { "square": "d1", "color": "w" },
+            { "square": "c1", "color": "w" }
+        ],
+        "coralRemaining": {
+            "w": 12,
+            "b": 8
+        },
+        "isGameOver": false,
+        "inCheck": false,
+        "isCheckmate": false,
+        "isStalemate": false,
+        "isDraw": false,
+        "isCoralVictory": null
+    }
 }
 ```
 
-## Troubleshooting
+## Creating Test Fixtures from Exports
 
-**Files not being saved?**
+When you hit a bug or want to test a specific game state:
 
-- Check Metro console for errors
-- Ensure you're in DEV mode (`__DEV__` is true)
-- Check that auto-save is enabled (look for the 🐛 Debug mode message)
+### 1. Export the Game State
 
-**Can't find saved files?**
+Click the share icon and save the JSON file.
 
-- Check Metro console for the full path
-- Use Xcode device manager to download app container
-- Files are in the app's Documents/debug/ folder
+### 2. Add to Test Fixtures
 
-**Too many files?**
+```bash
+# Copy the exported file to fixtures directory
+cp ~/Downloads/coral-clash-state-*.json src/hooks/__fixtures__/my-bug-name.json
+```
 
-- Auto-cleanup keeps only the last 20 files
-- Older files are automatically deleted
+### 3. Add to Fixture Loader (Optional)
 
-## Integration with Tests
+To make it loadable in the UI, edit `src/components/FixtureLoaderModal.js`:
 
-The same game state format works in both React Native and Node.js tests:
+```javascript
+const FIXTURE_FILES = {
+    // ... existing fixtures ...
+    'my-bug-name': require('../hooks/__fixtures__/my-bug-name.json'),
+};
 
-**React Native** → Save with `expo-file-system`  
-**Node.js Tests** → Load with Node.js `fs` module  
-**Same Format** → Files are compatible between both!
+const FIXTURES = [
+    // ... existing fixtures ...
+    { name: 'my-bug-name', label: 'My Bug Description' },
+];
+```
 
-Copy a file from your device to `src/hooks/__fixtures__/` and it's instantly usable in tests.
+### 4. Write a Test
+
+```typescript
+import { CoralClash } from './coralClash';
+import { applyFixture } from './__fixtures__/fixtureLoader';
+
+const myBugFixture = require('./__fixtures__/my-bug-name.json');
+
+test('REGRESSION: description of bug', () => {
+    const game = new CoralClash();
+    applyFixture(game, myBugFixture);
+
+    // Game is now in the exact state when the bug occurred
+    // Test the behavior
+    const moves = game.moves({ verbose: true });
+
+    // Make assertions
+    expect(moves.length).toBeGreaterThan(0);
+    // etc...
+});
+```
+
+## Common Use Cases
+
+### Bug Reproduction
+
+1. Play until you encounter a bug
+2. Export the game state immediately
+3. Load the fixture in a test
+4. Reproduce and fix the bug
+5. The test prevents regression
+
+### Testing Edge Cases
+
+1. Play to set up an interesting position
+2. Export the state
+3. Use as a fixture for testing:
+    - Checkmate scenarios
+    - Coral victory conditions
+    - Complex whale movements
+    - Coral blocking mechanics
+
+### Sharing Bug Reports
+
+When reporting a bug:
+
+1. Export the game state
+2. Include the JSON in your bug report
+3. Developer can load it exactly and see the issue
+
+## Example: Testing Crab Movement
+
+```typescript
+// 1. Play a game to get crabs in interesting positions
+// 2. Export: "crab-movement.json"
+// 3. Add to fixtures and loader
+// 4. Write test:
+
+test('crab should move to coral squares', () => {
+    const game = new CoralClash();
+    applyFixture(game, crabMovement);
+
+    const moves = game.moves({ verbose: true, square: 'f4' });
+
+    // White crab at f4 should be able to move to e4 (coral) and g4 (coral)
+    expect(moves.find((m) => m.to === 'e4')).toBeDefined();
+    expect(moves.find((m) => m.to === 'g4')).toBeDefined();
+});
+```
+
+## Schema Versions
+
+The export format uses semantic versioning:
+
+- **1.0.0** - Initial format (basic game state)
+- **1.1.0** - Added whale positions and orientations
+- **1.2.0** - Added coral data (placements and remaining counts)
+
+Older fixtures will automatically upgrade when loaded.
+
+## Tips
+
+- **Export early and often** when testing new features
+- **Name fixtures descriptively** (e.g., `whale-coral-removal.json`, `crab-blocks-check.json`)
+- **Add comments in tests** explaining what the fixture tests
+- **Keep fixtures minimal** - only save positions that test specific behavior
+- **Export works offline** - no network required
+
+## Limitations
+
+- Export button only appears in development mode
+- Production builds don't have export functionality
+- Each export is manual (no auto-save)
+- Exports don't include animation state or UI preferences

@@ -15,9 +15,10 @@ import { applyFixture } from '../hooks/__fixtures__/fixtureLoader';
 import EmptyBoard from './EmptyBoard';
 import Moves from './Moves';
 import Pieces from './Pieces';
+import Coral from './Coral';
 
 // Game state schema version for fixtures
-const GAME_STATE_VERSION = '1.1.0';
+const GAME_STATE_VERSION = '1.2.0';
 
 const CoralClash = ({ fixture }) => {
     const { width } = useWindowDimensions();
@@ -67,19 +68,21 @@ const CoralClash = ({ fixture }) => {
             return { message: `Checkmate! ${winner} wins! 🏆`, color: '#d32f2f' };
         }
 
+        const resigned = coralClash.isResigned();
+        if (resigned) {
+            const winner = resigned === 'w' ? 'Black' : 'White';
+            return { message: `${winner} wins by resignation! 🏳️`, color: '#d32f2f' };
+        }
+
         const coralWinner = coralClash.isCoralVictory();
         if (coralWinner) {
             const winner = coralWinner === 'w' ? 'White' : 'Black';
-            return { message: `${winner} wins by Coral Victory! 🪸`, color: '#1976d2' };
-        }
-
-        // Check if coral scoring was triggered but ended in a tie
-        // This happens when a crab/octopus reaches the back row but coral control is equal
-        if (coralClash.isGameOver() && coralWinner === null) {
-            // Check if it was triggered by coral scoring (not stalemate or draw)
-            if (!coralClash.isStalemate() && !coralClash.isDraw()) {
-                return { message: 'Game Over - Tie! No coral advantage! 🤝🪸', color: '#757575' };
-            }
+            const whiteScore = coralClash.getCoralAreaControl('w');
+            const blackScore = coralClash.getCoralAreaControl('b');
+            return {
+                message: `${winner} wins by Coral Victory! 🪸\n${whiteScore} White - ${blackScore} Black`,
+                color: '#1976d2',
+            };
         }
 
         if (coralClash.isStalemate()) {
@@ -87,6 +90,21 @@ const CoralClash = ({ fixture }) => {
         }
 
         if (coralClash.isDraw()) {
+            // Check if this is specifically a coral tie
+            // Coral tie happens when coral scoring triggered but control is equal
+            const coralScoringTriggered =
+                coralClash.getCoralRemaining('w') === 0 ||
+                coralClash.getCoralRemaining('b') === 0 ||
+                coralClash.isGameOver();
+
+            if (coralScoringTriggered && coralWinner === null && coralClash.isGameOver()) {
+                const score = coralClash.getCoralAreaControl('w');
+                return {
+                    message: `Draw - Coral Tie! 🤝🪸\n${score} - ${score}`,
+                    color: '#757575',
+                };
+            }
+
             return { message: 'Draw! 🤝', color: '#757575' };
         }
 
@@ -114,6 +132,30 @@ const CoralClash = ({ fixture }) => {
 
     // Can only undo if at least 2 moves have been made (user + computer)
     const canUndo = coralClash.history().length >= 2;
+
+    const handleResign = () => {
+        // Confirm resignation
+        Alert.alert('Resign Game', 'Are you sure you want to resign? You will lose the game.', [
+            {
+                text: 'Cancel',
+                style: 'cancel',
+            },
+            {
+                text: 'Resign',
+                style: 'destructive',
+                onPress: () => {
+                    // Current player resigns
+                    coralClash.resign(coralClash.turn());
+                    // Clear selection state
+                    setVisibleMoves([]);
+                    setSelectedSquare(null);
+                    setWhaleDestination(null);
+                    setWhaleOrientationMoves([]);
+                    setIsViewingEnemyMoves(false);
+                },
+            },
+        ]);
+    };
 
     const handleSelectPiece = (square) => {
         // Don't allow piece selection if game is over
@@ -253,18 +295,69 @@ const CoralClash = ({ fixture }) => {
             });
 
             if (selectedMove) {
-                // Execute whale move with whaleSecondSquare to disambiguate orientation
-                coralClash.move({
-                    from: selectedMove.from,
-                    to: selectedMove.to,
-                    whaleSecondSquare: selectedMove.whaleSecondSquare,
-                    ...(selectedMove.promotion && { promotion: 'q' }),
-                });
-                setVisibleMoves([]);
-                setSelectedSquare(null);
-                setWhaleDestination(null);
-                setWhaleOrientationMoves([]);
-                return;
+                // Check if whale has coral removal options
+                const allOrientationMoves = whaleOrientationMoves.filter(
+                    (m) =>
+                        m.to === selectedMove.to &&
+                        m.whaleSecondSquare === selectedMove.whaleSecondSquare,
+                );
+
+                if (allOrientationMoves.length > 1) {
+                    // Has coral removal options - show dialog
+                    const coralOptions = allOrientationMoves.map((m) => ({
+                        move: m,
+                        squares: m.coralRemovedSquares || [],
+                    }));
+
+                    // Build alert options based on available coral removal variants
+                    const alertButtons = coralOptions.map((option) => {
+                        let label = '';
+                        if (option.squares.length === 0) {
+                            label = "Don't remove coral";
+                        } else if (option.squares.length === 1) {
+                            label = `Remove coral from ${option.squares[0]}`;
+                        } else {
+                            label = `Remove coral from both (${option.squares.join(', ')})`;
+                        }
+
+                        return {
+                            text: label,
+                            onPress: () => {
+                                coralClash.move({
+                                    from: option.move.from,
+                                    to: option.move.to,
+                                    whaleSecondSquare: option.move.whaleSecondSquare,
+                                    coralRemovedSquares: option.squares,
+                                    ...(option.move.promotion && { promotion: 'q' }),
+                                });
+                                setVisibleMoves([]);
+                                setSelectedSquare(null);
+                                setWhaleDestination(null);
+                                setWhaleOrientationMoves([]);
+                            },
+                        };
+                    });
+
+                    Alert.alert(
+                        'Hunter Effect (Whale)',
+                        'Choose coral removal option:',
+                        alertButtons,
+                    );
+                    return;
+                } else {
+                    // No coral options, execute move directly
+                    coralClash.move({
+                        from: selectedMove.from,
+                        to: selectedMove.to,
+                        whaleSecondSquare: selectedMove.whaleSecondSquare,
+                        ...(selectedMove.promotion && { promotion: 'q' }),
+                    });
+                    setVisibleMoves([]);
+                    setSelectedSquare(null);
+                    setWhaleDestination(null);
+                    setWhaleOrientationMoves([]);
+                    return;
+                }
             } else {
                 return;
             }
@@ -276,7 +369,110 @@ const CoralClash = ({ fixture }) => {
             return;
         }
 
-        // Execute the move (non-whale pieces only)
+        // Check if there are coral action options for this move
+        const allMoves = coralClash.moves({ verbose: true });
+        const movesToThisSquare = allMoves.filter((m) => m.from === move.from && m.to === move.to);
+
+        // Check if there are multiple variants (with/without coral actions)
+        if (movesToThisSquare.length > 1) {
+            // There are coral action options - prompt the user
+            const hasCoralPlaced = movesToThisSquare.some((m) => m.coralPlaced === true);
+            const hasCoralRemoved = movesToThisSquare.some((m) => m.coralRemoved === true);
+
+            if (hasCoralPlaced) {
+                // Gatherer can place coral
+                Alert.alert('Gatherer Effect', 'Place coral on this square?', [
+                    {
+                        text: 'No',
+                        onPress: () => {
+                            const moveWithoutCoral = movesToThisSquare.find(
+                                (m) => m.coralPlaced === false,
+                            );
+                            if (moveWithoutCoral) {
+                                coralClash.move({
+                                    from: moveWithoutCoral.from,
+                                    to: moveWithoutCoral.to,
+                                    coralPlaced: false,
+                                    ...(moveWithoutCoral.promotion && { promotion: 'q' }),
+                                });
+                                setVisibleMoves([]);
+                                setSelectedSquare(null);
+                                setWhaleDestination(null);
+                                setWhaleOrientationMoves([]);
+                            }
+                        },
+                    },
+                    {
+                        text: 'Yes',
+                        onPress: () => {
+                            const moveWithCoral = movesToThisSquare.find(
+                                (m) => m.coralPlaced === true,
+                            );
+                            if (moveWithCoral) {
+                                coralClash.move({
+                                    from: moveWithCoral.from,
+                                    to: moveWithCoral.to,
+                                    coralPlaced: true,
+                                    ...(moveWithCoral.promotion && { promotion: 'q' }),
+                                });
+                                setVisibleMoves([]);
+                                setSelectedSquare(null);
+                                setWhaleDestination(null);
+                                setWhaleOrientationMoves([]);
+                            }
+                        },
+                    },
+                ]);
+                return;
+            } else if (hasCoralRemoved) {
+                // Hunter can remove coral
+                Alert.alert('Hunter Effect', 'Remove coral from this square?', [
+                    {
+                        text: 'No',
+                        onPress: () => {
+                            const moveWithoutCoralRemoval = movesToThisSquare.find(
+                                (m) => m.coralRemoved === false,
+                            );
+                            if (moveWithoutCoralRemoval) {
+                                coralClash.move({
+                                    from: moveWithoutCoralRemoval.from,
+                                    to: moveWithoutCoralRemoval.to,
+                                    coralRemoved: false,
+                                    ...(moveWithoutCoralRemoval.promotion && { promotion: 'q' }),
+                                });
+                                setVisibleMoves([]);
+                                setSelectedSquare(null);
+                                setWhaleDestination(null);
+                                setWhaleOrientationMoves([]);
+                            }
+                        },
+                    },
+                    {
+                        text: 'Yes',
+                        onPress: () => {
+                            const moveWithCoralRemoval = movesToThisSquare.find(
+                                (m) => m.coralRemoved === true,
+                            );
+                            if (moveWithCoralRemoval) {
+                                coralClash.move({
+                                    from: moveWithCoralRemoval.from,
+                                    to: moveWithCoralRemoval.to,
+                                    coralRemoved: true,
+                                    ...(moveWithCoralRemoval.promotion && { promotion: 'q' }),
+                                });
+                                setVisibleMoves([]);
+                                setSelectedSquare(null);
+                                setWhaleDestination(null);
+                                setWhaleOrientationMoves([]);
+                            }
+                        },
+                    },
+                ]);
+                return;
+            }
+        }
+
+        // Execute the move (non-whale pieces only, no coral actions)
         // Only pass the fields that move() expects: from, to, promotion
         coralClash.move({
             from: move.from,
@@ -310,6 +506,8 @@ const CoralClash = ({ fixture }) => {
                     history: coralClash.history(),
                     turn: coralClash.turn(),
                     whalePositions: coralClash.whalePositions(), // v1.1.0: preserve whale orientation
+                    coral: coralClash.getAllCoral(), // v1.2.0: coral placements
+                    coralRemaining: coralClash.getCoralRemainingCounts(), // v1.2.0: coral counts
                     isGameOver: coralClash.isGameOver(),
                     inCheck: coralClash.inCheck(),
                     isCheckmate: coralClash.isCheckmate(),
@@ -366,7 +564,7 @@ const CoralClash = ({ fixture }) => {
                     </TouchableOpacity>
                 )}
 
-                {/* Undo Button - Right */}
+                {/* Undo Button */}
                 <TouchableOpacity
                     style={styles.controlButton}
                     onPress={handleUndo}
@@ -381,10 +579,27 @@ const CoralClash = ({ fixture }) => {
                         style={styles.controlIcon}
                     />
                 </TouchableOpacity>
+
+                {/* Resign Button - Right */}
+                <TouchableOpacity
+                    style={styles.controlButton}
+                    onPress={handleResign}
+                    disabled={coralClash.isGameOver()}
+                    activeOpacity={0.7}
+                >
+                    <Icon
+                        name='flag'
+                        family='MaterialIcons'
+                        size={45}
+                        color={coralClash.isGameOver() ? '#666666' : '#ffffff'}
+                        style={styles.controlIcon}
+                    />
+                </TouchableOpacity>
             </View>
 
             <View style={{ position: 'relative' }}>
                 <EmptyBoard size={boardSize} />
+                <Coral coralClash={coralClash} size={boardSize} />
                 <Pieces
                     board={coralClash.board()}
                     onSelectPiece={handleSelectPiece}
