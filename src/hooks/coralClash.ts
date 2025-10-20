@@ -58,22 +58,86 @@ export type Square =
     'a2' | 'b2' | 'c2' | 'd2' | 'e2' | 'f2' | 'g2' | 'h2' |
     'a1' | 'b1' | 'c1' | 'd1' | 'e1' | 'f1' | 'g1' | 'h1'
 
-// Coral Clash custom starting position:
-// - Whale (K) on d-file (back rank) for white
-// - Turtles (N) on b1, g1 (white) and b8, g8 (black) - standard knight positions
-// - Original Octopuses (B) remain on c1, f1 (white) and c8, f8 (black)
-// - Crabs (P) on columns b, d, e, g REPLACED with Octopuses (B)
-//   * b2, e3 (white) -> Octopuses with coral
-//   * g2, d3 (white) -> Regular octopuses
-//   * b7, e6 (black) -> Regular octopuses
-//   * g7, d6 (black) -> Octopuses with coral
-// - Two dolphins (Q) at d2,e2 (white) and d7,e7 (black)
-// - Remaining crabs (P) on a, c, f, h files
-export const DEFAULT_POSITION = 'rnbk1bnr/pbpqqpbp/3bb3/8/8/3BB3/PBPQQPBP/RNBK1BNR w - - 0 1';
+// Helper function to determine piece role in Coral Clash starting position
+function getStartingRole(square: Square, type: PieceSymbol, color: Color): PieceRole | undefined {
+    // Whale (King) doesn't have a role
+    if (type === KING) return undefined;
+
+    const file = square[0];
+    const rank = parseInt(square[1]);
+
+    // Define roles based on Coral Clash setup rules
+    if (color === WHITE) {
+        if (rank === 1) {
+            // Back rank: a1=Hunter Puffer, b1=Hunter Turtle, c1=Gatherer Turtle, d1/e1=Whale, f1=Gatherer Turtle, g1=Hunter Turtle, h1=Gatherer Puffer
+            if (file === 'a' && type === ROOK) return 'hunter'; // Pufferfish
+            if (file === 'b' && type === KNIGHT) return 'hunter'; // Turtle
+            if (file === 'c' && type === KNIGHT) return 'gatherer'; // Turtle
+            if (file === 'f' && type === KNIGHT) return 'gatherer'; // Turtle
+            if (file === 'g' && type === KNIGHT) return 'hunter'; // Turtle
+            if (file === 'h' && type === ROOK) return 'gatherer'; // Pufferfish
+        } else if (rank === 2) {
+            // Second rank: a2=Hunter Crab, b2=Gatherer Octopus, c2=Gatherer Crab, d2=Hunter Dolphin, e2=Gatherer Dolphin, f2=Hunter Crab, g2=Hunter Octopus, h2=Gatherer Crab
+            if (file === 'a' && type === PAWN) return 'hunter'; // Crab
+            if (file === 'b' && type === BISHOP) return 'gatherer'; // Octopus
+            if (file === 'c' && type === PAWN) return 'gatherer'; // Crab
+            if (file === 'd' && type === QUEEN) return 'hunter'; // Dolphin
+            if (file === 'e' && type === QUEEN) return 'gatherer'; // Dolphin
+            if (file === 'f' && type === PAWN) return 'hunter'; // Crab
+            if (file === 'g' && type === BISHOP) return 'hunter'; // Octopus
+            if (file === 'h' && type === PAWN) return 'gatherer'; // Crab
+        } else if (rank === 3) {
+            // Third rank octopuses from setup
+            if (file === 'd' && type === BISHOP) return 'gatherer'; // Octopus with coral
+            if (file === 'e' && type === BISHOP) return 'gatherer'; // Octopus with coral
+        }
+    } else if (color === BLACK) {
+        if (rank === 8) {
+            // Back rank (mirror of white)
+            if (file === 'a' && type === ROOK) return 'hunter'; // Pufferfish
+            if (file === 'b' && type === KNIGHT) return 'hunter'; // Turtle
+            if (file === 'c' && type === KNIGHT) return 'gatherer'; // Turtle
+            if (file === 'f' && type === KNIGHT) return 'gatherer'; // Turtle
+            if (file === 'g' && type === KNIGHT) return 'hunter'; // Turtle
+            if (file === 'h' && type === ROOK) return 'gatherer'; // Pufferfish
+        } else if (rank === 7) {
+            // Seventh rank (mirror of white's second rank)
+            if (file === 'a' && type === PAWN) return 'hunter'; // Crab
+            if (file === 'b' && type === BISHOP) return 'gatherer'; // Octopus
+            if (file === 'c' && type === PAWN) return 'gatherer'; // Crab
+            if (file === 'd' && type === QUEEN) return 'hunter'; // Dolphin
+            if (file === 'e' && type === QUEEN) return 'gatherer'; // Dolphin
+            if (file === 'f' && type === PAWN) return 'hunter'; // Crab
+            if (file === 'g' && type === BISHOP) return 'hunter'; // Octopus
+            if (file === 'h' && type === PAWN) return 'gatherer'; // Crab
+        } else if (rank === 6) {
+            // Sixth rank octopuses
+            if (file === 'd' && type === BISHOP) return 'gatherer'; // Octopus with coral
+            if (file === 'e' && type === BISHOP) return 'gatherer'; // Octopus with coral
+        }
+    }
+
+    // Default to hunter if not specified (safety fallback)
+    return 'hunter';
+}
+
+// Coral Clash starting position based on official rules:
+// Back rank (rank 1/8): Pufferfish (R) in corners, Turtles (N) next to them, Whale (K) in center spanning d-e
+// Second rank (rank 2/7): Crab-Octopus-Crab-Dolphin-Dolphin-Crab-Octopus-Crab pattern
+// Third rank (rank 3/6): Octopuses with coral underneath (d3, e3 for white; d6, e6 for black)
+// Whale spans 2 squares (d1-e1 for white, d8-e8 for black) - represented as K on d-file, empty on e-file
+// Coral placement (tracked separately, initialized in _initializeStartingCoral):
+//   - White: d3, e3 have coral (under Gatherer Octopuses)
+//   - Black: d6, e6 have coral (under Gatherer Octopuses)
+//   - Blue player (black) places one additional coral
+export const DEFAULT_POSITION = 'rnnk1nnr/pbpqqpbp/3bb3/8/8/3BB3/PBPQQPBP/RNNK1NNR w - - 0 1';
+
+export type PieceRole = 'hunter' | 'gatherer';
 
 export type Piece = {
     color: Color;
     type: PieceSymbol;
+    role?: PieceRole; // Hunter or Gatherer (Whale doesn't have a role)
 };
 
 type InternalMove = {
@@ -82,18 +146,26 @@ type InternalMove = {
     to: number;
     piece: PieceSymbol;
     captured?: PieceSymbol;
+    capturedRole?: PieceRole; // Role of captured piece (for proper undo in Coral Clash)
     promotion?: PieceSymbol;
     flags: number;
+    // Coral Clash specific
+    coralPlaced?: boolean; // Gatherer placed coral
+    coralRemoved?: boolean; // Hunter removed coral
+    // whaleOtherHalf removed - no longer needed with new whale data structure
 };
 
 interface History {
     move: InternalMove;
-    kings: Record<Color, number>;
+    kings: Record<Color, [number, number]>; // Whale positions (both squares)
     turn: Color;
     castling: Record<Color, number>;
     epSquare: number;
     halfMoves: number;
     moveNumber: number;
+    // Coral Clash specific
+    coral: Array<Color | null>; // Snapshot of coral state
+    coralRemaining: Record<Color, number>; // Snapshot of remaining coral
 }
 
 export type Move = {
@@ -196,17 +268,16 @@ const Ox88: Record<Square, number> = {
   a1: 112, b1: 113, c1: 114, d1: 115, e1: 116, f1: 117, g1: 118, h1: 119
 }
 
-const PAWN_OFFSETS = {
-    b: [16, 32, 17, 15],
-    w: [-16, -32, -17, -15],
-};
+// Coral Clash Movement Patterns
+// Crabs move 1 square orthogonally (vertical/horizontal)
+const CRAB_OFFSETS = [-16, 1, 16, -1];
 
 const PIECE_OFFSETS = {
-    n: [-18, -33, -31, -14, 18, 33, 31, 14],
-    b: [-17, -15, 17, 15],
-    r: [-16, 1, 16, -1],
-    q: [-17, -16, -15, 1, 17, 16, 15, -1],
-    k: [-17, -16, -15, 1, 17, 16, 15, -1],
+    n: [-16, 1, 16, -1], // Turtle: moves any distance orthogonally (like chess rook)
+    b: [-17, -15, 17, 15], // Octopus: moves 1 square diagonally
+    r: [-17, -15, 17, 15], // Pufferfish: moves any distance diagonally (like chess bishop)
+    q: [-17, -16, -15, 1, 17, 16, 15, -1], // Dolphin: moves any distance in all 8 directions (same as chess queen)
+    k: [-17, -16, -15, 1, 17, 16, 15, -1], // Whale: special 2-square piece (keeping queen pattern for now, needs custom logic)
 };
 
 // prettier-ignore
@@ -490,32 +561,19 @@ function addMove(
     piece: PieceSymbol,
     captured: PieceSymbol | undefined = undefined,
     flags: number = BITS.NORMAL,
+    capturedRole: PieceRole | undefined = undefined,
 ) {
-    const r = rank(to);
-
-    if (piece === PAWN && (r === RANK_1 || r === RANK_8)) {
-        for (let i = 0; i < PROMOTIONS.length; i++) {
-            const promotion = PROMOTIONS[i];
-            moves.push({
-                color,
-                from,
-                to,
-                piece,
-                captured,
-                promotion,
-                flags: flags | BITS.PROMOTION,
-            });
-        }
-    } else {
-        moves.push({
-            color,
-            from,
-            to,
-            piece,
-            captured,
-            flags,
-        });
-    }
+    // In Coral Clash, no automatic promotions - reaching back row triggers scoring phase
+    // This will be handled separately in game logic
+    moves.push({
+        color,
+        from,
+        to,
+        piece,
+        captured,
+        capturedRole,
+        flags,
+    });
 }
 
 function inferPieceType(san: string) {
@@ -551,7 +609,12 @@ export class CoralClash {
     private _board = new Array<Piece>(128);
     private _turn: Color = WHITE;
     private _header: Record<string, string> = {};
-    private _kings: Record<Color, number> = { w: EMPTY, b: EMPTY };
+    // Whale always occupies TWO adjacent squares
+    // _kings stores both squares as [firstSquare, secondSquare]
+    private _kings: Record<Color, [number, number]> = {
+        w: [EMPTY, EMPTY],
+        b: [EMPTY, EMPTY],
+    };
     private _epSquare = -1;
     private _halfMoves = 0;
     private _moveNumber = 0;
@@ -559,16 +622,46 @@ export class CoralClash {
     private _comments: Record<string, string> = {};
     private _castling: Record<Color, number> = { w: 0, b: 0 };
 
+    // Coral Clash specific state
+    private _coral = new Array<Color | null>(128); // Tracks which squares have coral and which color
+    private _coralRemaining: Record<Color, number> = { w: 17, b: 17 }; // Each player starts with 17 coral
+
     // tracks number of times a position has been seen for repetition checking
     private _positionCount: Record<string, number> = {};
 
     constructor(fen = DEFAULT_POSITION) {
         this.load(fen);
+        // Initialize starting coral if loading default position
+        if (fen === DEFAULT_POSITION) {
+            this._initializeStartingCoral();
+        }
+    }
+
+    /**
+     * Initialize coral placement for the Coral Clash starting position
+     */
+    private _initializeStartingCoral() {
+        // Place coral under Gatherer Octopuses for white (d3, e3)
+        this._coral[Ox88.d3] = WHITE;
+        this._coralRemaining.w--;
+        this._coral[Ox88.e3] = WHITE;
+        this._coralRemaining.w--;
+
+        // Place coral under Gatherer Octopuses for black (d6, e6)
+        this._coral[Ox88.d6] = BLACK;
+        this._coralRemaining.b--;
+        this._coral[Ox88.e6] = BLACK;
+        this._coralRemaining.b--;
+
+        // Blue player (black) places one additional coral - defaulting to a6 for now
+        // In actual game, this would be chosen by the player
+        this._coral[Ox88.a6] = BLACK;
+        this._coralRemaining.b--;
     }
 
     clear({ preserveHeaders = false } = {}) {
         this._board = new Array<Piece>(128);
-        this._kings = { w: EMPTY, b: EMPTY };
+        this._kings = { w: [EMPTY, EMPTY], b: [EMPTY, EMPTY] };
         this._turn = WHITE;
         this._castling = { w: 0, b: 0 };
         this._epSquare = EMPTY;
@@ -578,6 +671,10 @@ export class CoralClash {
         this._comments = {};
         this._header = preserveHeaders ? this._header : {};
         this._positionCount = {};
+
+        // Clear Coral Clash specific state
+        this._coral = new Array<Color | null>(128);
+        this._coralRemaining = { w: 17, b: 17 };
 
         /*
          * Delete the SetUp and FEN headers (if preserved), the board is empty and
@@ -626,7 +723,11 @@ export class CoralClash {
                 square += parseInt(piece, 10);
             } else {
                 const color = piece < 'a' ? WHITE : BLACK;
-                this._put({ type: piece.toLowerCase() as PieceSymbol, color }, algebraic(square));
+                const type = piece.toLowerCase() as PieceSymbol;
+                const sq = algebraic(square);
+                // Assign role based on starting position in Coral Clash
+                const role = getStartingRole(sq, type, color);
+                this._put({ type, color, role }, sq);
                 square++;
             }
         }
@@ -768,11 +869,17 @@ export class CoralClash {
     }
 
     get(square: Square) {
-        return this._board[Ox88[square]] || false;
+        const sq = Ox88[square];
+
+        // Whale is now stored at both squares in _board, so just read from _board
+        return this._board[sq] || false;
     }
 
-    put({ type, color }: { type: PieceSymbol; color: Color }, square: Square) {
-        if (this._put({ type, color }, square)) {
+    put(
+        { type, color, role }: { type: PieceSymbol; color: Color; role?: PieceRole },
+        square: Square,
+    ) {
+        if (this._put({ type, color, role }, square)) {
             this._updateCastlingRights();
             this._updateEnPassantSquare();
             this._updateSetup(this.fen());
@@ -781,7 +888,10 @@ export class CoralClash {
         return false;
     }
 
-    private _put({ type, color }: { type: PieceSymbol; color: Color }, square: Square) {
+    private _put(
+        { type, color, role }: { type: PieceSymbol; color: Color; role?: PieceRole },
+        square: Square,
+    ) {
         // check for piece
         if (SYMBOLS.indexOf(type.toLowerCase()) === -1) {
             return false;
@@ -795,21 +905,30 @@ export class CoralClash {
         const sq = Ox88[square];
 
         // don't let the user place more than one king
-        if (type == KING && !(this._kings[color] == EMPTY || this._kings[color] == sq)) {
+        if (type == KING && !(this._kings[color][0] == EMPTY || this._kings[color][0] == sq)) {
             return false;
         }
 
         const currentPieceOnSquare = this._board[sq];
 
-        // if one of the kings will be replaced by the piece from args, set the `_kings` respective entry to `EMPTY`
+        // if one of the kings will be replaced by the piece from args, remove it from both squares
         if (currentPieceOnSquare && currentPieceOnSquare.type === KING) {
-            this._kings[currentPieceOnSquare.color] = EMPTY;
+            const [first, second] = this._kings[currentPieceOnSquare.color];
+            if (first !== EMPTY) delete this._board[first];
+            if (second !== EMPTY) delete this._board[second];
+            this._kings[currentPieceOnSquare.color] = [EMPTY, EMPTY];
         }
 
-        this._board[sq] = { type: type as PieceSymbol, color: color as Color };
+        const piece = { type: type as PieceSymbol, color: color as Color, role };
+        this._board[sq] = piece;
 
         if (type === KING) {
-            this._kings[color] = sq;
+            // Whale spans 2 squares - initially placed horizontally in starting position
+            const secondSq = sq + 1; // Second square starts one to the right (can change via rotation)
+
+            // Store whale at only the first square (board() will show both)
+            this._kings[color] = [sq, secondSq];
+            // piece already stored at sq by line above, no need to duplicate
         }
 
         return true;
@@ -819,7 +938,11 @@ export class CoralClash {
         const piece = this.get(square);
         delete this._board[Ox88[square]];
         if (piece && piece.type === KING) {
-            this._kings[piece.color] = EMPTY;
+            // Remove whale from both squares
+            const [first, second] = this._kings[piece.color];
+            if (first !== EMPTY) delete this._board[first];
+            if (second !== EMPTY) delete this._board[second];
+            this._kings[piece.color] = [EMPTY, EMPTY];
         }
 
         this._updateCastlingRights();
@@ -953,8 +1076,20 @@ export class CoralClash {
     }
 
     private _isKingAttacked(color: Color) {
-        const square = this._kings[color];
-        return square === -1 ? false : this._attacked(swapColor(color), square);
+        // Whale occupies 2 squares - it's in check if EITHER square is attacked
+        const [firstSquare, secondSquare] = this._kings[color];
+
+        if (firstSquare === -1) return false;
+
+        const attackingColor = swapColor(color);
+
+        // Check if first square is attacked
+        if (this._attacked(attackingColor, firstSquare)) return true;
+
+        // Check if second square is attacked
+        if (secondSquare !== -1 && this._attacked(attackingColor, secondSquare)) return true;
+
+        return false;
     }
 
     isAttacked(square: Square, attackedBy: Color) {
@@ -1052,7 +1187,95 @@ export class CoralClash {
     }
 
     isGameOver() {
-        return this.isCheckmate() || this.isStalemate() || this.isDraw();
+        return (
+            this.isCheckmate() ||
+            this.isStalemate() ||
+            this.isDraw() ||
+            this.isCoralVictory() !== null
+        );
+    }
+
+    /**
+     * Check if coral scoring should be triggered
+     */
+    private _shouldTriggerCoralScoring(): boolean {
+        // Trigger if any player has placed all their coral
+        if (this._coralRemaining.w === 0 || this._coralRemaining.b === 0) {
+            return true;
+        }
+
+        // Trigger if any player only has the Whale remaining
+        let whitePieceCount = 0;
+        let blackPieceCount = 0;
+        for (let i = Ox88.a8; i <= Ox88.h1; i++) {
+            if (i & 0x88) {
+                i += 7;
+                continue;
+            }
+            if (this._board[i]) {
+                if (this._board[i].color === WHITE && this._board[i].type !== KING) {
+                    whitePieceCount++;
+                }
+                if (this._board[i].color === BLACK && this._board[i].type !== KING) {
+                    blackPieceCount++;
+                }
+            }
+        }
+        if (whitePieceCount === 0 || blackPieceCount === 0) {
+            return true;
+        }
+
+        // Trigger if a Crab or Octopus reaches the opponent's back row
+        // White back row is rank 1, Black back row is rank 8
+        for (let i = Ox88.a8; i <= Ox88.h1; i++) {
+            if (i & 0x88) {
+                i += 7;
+                continue;
+            }
+            const piece = this._board[i];
+            if (!piece) continue;
+
+            const r = rank(i);
+            // White pieces reaching rank 8 (black's back row)
+            if (
+                piece.color === WHITE &&
+                r === RANK_8 &&
+                (piece.type === PAWN || piece.type === BISHOP)
+            ) {
+                return true;
+            }
+            // Black pieces reaching rank 1 (white's back row)
+            if (
+                piece.color === BLACK &&
+                r === RANK_1 &&
+                (piece.type === PAWN || piece.type === BISHOP)
+            ) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Check for coral victory and return the winner, or null if no coral victory
+     */
+    isCoralVictory(): Color | null {
+        if (!this._shouldTriggerCoralScoring()) {
+            return null;
+        }
+
+        const whiteControl = this.getCoralAreaControl(WHITE);
+        const blackControl = this.getCoralAreaControl(BLACK);
+
+        if (whiteControl > blackControl) {
+            return WHITE;
+        } else if (blackControl > whiteControl) {
+            return BLACK;
+        }
+
+        // Tie in coral control - game continues (or could be a draw)
+        return null;
     }
 
     moves(): string[];
@@ -1113,6 +1336,269 @@ export class CoralClash {
         }
     }
 
+    /**
+     * Check if a square is occupied (including by whale's second square)
+     */
+    private _isSquareOccupied(square: number, color?: Color): boolean {
+        // Check if piece is in _board
+        if (this._board[square]) {
+            if (color === undefined) return true;
+            return this._board[square].color === color;
+        }
+
+        // Check if square is the second square of a whale
+        if (this._kings.w[1] === square && this._kings.w[0] !== EMPTY) {
+            if (color === undefined) return true;
+            return color === WHITE;
+        }
+        if (this._kings.b[1] === square && this._kings.b[0] !== EMPTY) {
+            if (color === undefined) return true;
+            return color === BLACK;
+        }
+
+        return false;
+    }
+
+    /**
+     * Generate whale moves - handles the complex 2-square spanning mechanic
+     * Whale can either:
+     * 1. Slide one half any distance in 8 directions while other half stays
+     * 2. Rotate one half to adjacent orthogonal square
+     * 3. Slide both halves together in parallel (maintaining orientation)
+     */
+    private _generateWhaleMoves(
+        moves: InternalMove[],
+        firstSq: number,
+        secondSq: number,
+        color: Color,
+        them: Color,
+    ) {
+        // Only orthogonal directions for sliding (not diagonal)
+        const slideOffsets = [-16, 1, 16, -1]; // up, right, down, left
+
+        // Helper to add whale move
+        // Calculate whaleOtherHalf for frontend display (where the other half will be after the move)
+        const addWhaleMove = (
+            from: number,
+            to: number,
+            stationarySq: number,
+            captured?: PieceSymbol,
+            capturedRole?: PieceRole,
+        ) => {
+            // Calculate where the OTHER half will be after this move
+            // If moving from firstSq, the other half is at secondSq (or moves with it)
+            // If moving from secondSq, the other half is at firstSq (or moves with it)
+            const movingSquare = from;
+            const offset = to - movingSquare;
+
+            // Check if 'to' is adjacent to stationarySq (rotation)
+            const toFile = to & 0xf;
+            const toRank = to >> 4;
+            const stationaryFile = stationarySq & 0xf;
+            const stationaryRank = stationarySq >> 4;
+            const fileDiff = Math.abs(toFile - stationaryFile);
+            const rankDiff = Math.abs(toRank - stationaryRank);
+            const isAdjacent =
+                (fileDiff === 1 && rankDiff === 0) || (fileDiff === 0 && rankDiff === 1);
+
+            // whaleOtherHalf is no longer needed - frontend calculates orientation from 'from' and 'to'
+
+            const flags = captured ? BITS.CAPTURE : BITS.NORMAL;
+            moves.push({
+                color,
+                from,
+                to,
+                piece: KING,
+                captured,
+                capturedRole,
+                flags,
+            });
+        };
+
+        // Helper to check if two squares are orthogonally adjacent
+        const areOrthogonallyAdjacent = (sq1: number, sq2: number): boolean => {
+            const fileDiff = Math.abs((sq1 & 0xf) - (sq2 & 0xf));
+            const rankDiff = Math.abs((sq1 >> 4) - (sq2 >> 4));
+
+            // Orthogonal = exactly one of file or rank differs by 1, the other is same
+            return (fileDiff === 1 && rankDiff === 0) || (fileDiff === 0 && rankDiff === 1);
+        };
+
+        // TYPE 1: Slide FIRST half while SECOND half stays fixed
+        for (const offset of slideOffsets) {
+            let to = firstSq;
+            while (true) {
+                to += offset;
+                if (to & 0x88) break; // Off board
+
+                // Check if destination would overlap with second half
+                if (to === secondSq) break;
+
+                // CRITICAL: Whale must remain as 2 adjacent orthogonal squares
+                if (!areOrthogonallyAdjacent(to, secondSq)) break;
+
+                // Check if blocked by second half along the path
+                // (whale cannot slide through its own other half)
+
+                if (!this._isSquareOccupied(to)) {
+                    // Empty square - can move
+                    addWhaleMove(firstSq, to, secondSq);
+                } else if (this._isSquareOccupied(to, them)) {
+                    // Capture
+                    const capturedType = this._board[to]?.type || KING;
+                    const capturedRole = this._board[to]?.role;
+                    addWhaleMove(firstSq, to, secondSq, capturedType, capturedRole);
+                    break;
+                } else {
+                    // Own piece blocks
+                    break;
+                }
+            }
+        }
+
+        // TYPE 2: Slide SECOND half while FIRST half stays fixed
+        for (const offset of slideOffsets) {
+            let to = secondSq;
+            while (true) {
+                to += offset;
+                if (to & 0x88) break; // Off board
+
+                // Check if destination would overlap with first half
+                if (to === firstSq) break;
+
+                // CRITICAL: Whale must remain as 2 adjacent orthogonal squares
+                if (!areOrthogonallyAdjacent(to, firstSq)) break;
+
+                if (!this._isSquareOccupied(to)) {
+                    // Empty square - can move
+                    addWhaleMove(secondSq, to, firstSq);
+                } else if (this._isSquareOccupied(to, them)) {
+                    // Capture
+                    const capturedType = this._board[to]?.type || KING;
+                    const capturedRole = this._board[to]?.role;
+                    addWhaleMove(secondSq, to, firstSq, capturedType, capturedRole);
+                    break;
+                } else {
+                    // Own piece blocks
+                    break;
+                }
+            }
+        }
+
+        // TYPE 3: Parallel sliding - both halves move together in the same direction
+        // Whale can slide in any orthogonal direction (up/down/left/right) maintaining orientation
+        const parallelOffsets = [-16, 16, -1, 1]; // up, down, left, right
+
+        for (const offset of parallelOffsets) {
+            let dist = 1;
+            while (true) {
+                const newFirst = firstSq + offset * dist;
+                const newSecond = secondSq + offset * dist;
+
+                // Check if either square goes off board
+                if (newFirst & 0x88 || newSecond & 0x88) {
+                    break;
+                }
+
+                // For horizontal moves (offset ±1), check if we wrapped to another rank
+                if (Math.abs(offset) === 1) {
+                    if (newFirst >> 4 !== firstSq >> 4 || newSecond >> 4 !== secondSq >> 4) {
+                        break;
+                    }
+                }
+
+                // Check if the two squares are still orthogonally adjacent after the move
+                if (!areOrthogonallyAdjacent(newFirst, newSecond)) {
+                    break;
+                }
+
+                // Check occupancy (excluding the whale's current squares)
+                const firstBlocked =
+                    this._isSquareOccupied(newFirst) &&
+                    newFirst !== firstSq &&
+                    newFirst !== secondSq;
+                const secondBlocked =
+                    this._isSquareOccupied(newSecond) &&
+                    newSecond !== firstSq &&
+                    newSecond !== secondSq;
+
+                // Both must be empty to slide through
+                if (!firstBlocked && !secondBlocked) {
+                    // Generate moves from BOTH starting squares for parallel sliding
+                    // (since clicking either square should show this option)
+                    addWhaleMove(firstSq, newFirst, newSecond);
+                    addWhaleMove(secondSq, newSecond, newFirst);
+                    dist++;
+                } else {
+                    // Check for captures (can capture with one or both squares)
+                    const firstCapture = this._isSquareOccupied(newFirst, them);
+                    const secondCapture = this._isSquareOccupied(newSecond, them);
+
+                    if (
+                        (firstCapture || !firstBlocked) &&
+                        (secondCapture || !secondBlocked) &&
+                        (firstCapture || secondCapture)
+                    ) {
+                        // At least one capture, other square empty or capturable
+                        const capturedType =
+                            this._board[newFirst]?.type || this._board[newSecond]?.type || KING;
+                        const capturedRole =
+                            this._board[newFirst]?.role || this._board[newSecond]?.role;
+                        // Generate captures from BOTH starting squares
+                        addWhaleMove(firstSq, newFirst, newSecond, capturedType, capturedRole);
+                        addWhaleMove(secondSq, newSecond, newFirst, capturedType, capturedRole);
+                    }
+                    break;
+                }
+            }
+        }
+
+        // TYPE 4: Rotation moves - one half moves to any square adjacent to the stationary half
+        // The key insight: we try all 4 orthogonal squares adjacent to the stationary half,
+        // not just orthogonal moves of the moving half
+        const orthogonalOffsets = [-16, 1, 16, -1]; // up, right, down, left
+
+        // Rotate FIRST half around SECOND half (second stays fixed)
+        // Try all squares adjacent to secondSq (the stationary half)
+        for (const offset of orthogonalOffsets) {
+            const to = secondSq + offset; // Square adjacent to stationary half
+            if (to & 0x88) continue; // Off board
+            if (to === firstSq) continue; // Already occupied by the moving half
+
+            // The result is always valid: 'to' is adjacent to secondSq by construction
+            // (we're iterating through orthogonal offsets from secondSq)
+
+            // Check if square is empty or capturable
+            if (!this._isSquareOccupied(to)) {
+                addWhaleMove(firstSq, to, secondSq);
+            } else if (this._isSquareOccupied(to, them)) {
+                const capturedType = this._board[to]?.type || KING;
+                const capturedRole = this._board[to]?.role;
+                addWhaleMove(firstSq, to, secondSq, capturedType, capturedRole);
+            }
+        }
+
+        // Rotate SECOND half around FIRST half (first stays fixed)
+        // Try all squares adjacent to firstSq (the stationary half)
+        for (const offset of orthogonalOffsets) {
+            const to = firstSq + offset; // Square adjacent to stationary half
+            if (to & 0x88) continue; // Off board
+            if (to === secondSq) continue; // Already occupied by the moving half
+
+            // The result is always valid: 'to' is adjacent to firstSq by construction
+            // (we're iterating through orthogonal offsets from firstSq)
+
+            // Check if square is empty or capturable
+            if (!this._isSquareOccupied(to)) {
+                addWhaleMove(secondSq, to, firstSq);
+            } else if (this._isSquareOccupied(to, them)) {
+                const capturedType = this._board[to]?.type || KING;
+                const capturedRole = this._board[to]?.role;
+                addWhaleMove(secondSq, to, firstSq, capturedType, capturedRole);
+            }
+        }
+    }
+
     private _moves({
         legal = true,
         piece = undefined,
@@ -1139,7 +1625,10 @@ export class CoralClash {
             if (!(forSquare in Ox88)) {
                 return [];
             } else {
-                firstSquare = lastSquare = Ox88[forSquare];
+                const targetSq = Ox88[forSquare];
+
+                // Whale piece is now stored at both squares, so just use the target square
+                firstSquare = lastSquare = targetSq;
                 singleSquare = true;
             }
         }
@@ -1159,30 +1648,43 @@ export class CoralClash {
 
             let to: number;
             if (type === PAWN) {
+                // Crabs move 1 square orthogonally (no double moves, no en passant in Coral Clash)
                 if (forPiece && forPiece !== type) continue;
 
-                // single square, non-capturing
-                to = from + PAWN_OFFSETS[us][0];
-                if (!this._board[to]) {
-                    addMove(moves, us, from, to, PAWN);
-
-                    // double square
-                    to = from + PAWN_OFFSETS[us][1];
-                    if (SECOND_RANK[us] === rank(from) && !this._board[to]) {
-                        addMove(moves, us, from, to, PAWN, undefined, BITS.BIG_PAWN);
-                    }
-                }
-
-                // pawn captures
-                for (let j = 2; j < 4; j++) {
-                    to = from + PAWN_OFFSETS[us][j];
+                for (let j = 0; j < CRAB_OFFSETS.length; j++) {
+                    to = from + CRAB_OFFSETS[j];
                     if (to & 0x88) continue;
 
-                    if (this._board[to]?.color === them) {
-                        addMove(moves, us, from, to, PAWN, this._board[to].type, BITS.CAPTURE);
-                    } else if (to === this._epSquare) {
-                        addMove(moves, us, from, to, PAWN, PAWN, BITS.EP_CAPTURE);
+                    if (!this._isSquareOccupied(to)) {
+                        // Empty square - crab can move there
+                        addMove(moves, us, from, to, PAWN);
+                    } else if (this._isSquareOccupied(to, them)) {
+                        // Capture opponent's piece
+                        const capturedType = this._board[to]?.type || KING; // Could be whale
+                        const capturedRole = this._board[to]?.role; // Preserve role for Coral Clash
+                        addMove(
+                            moves,
+                            us,
+                            from,
+                            to,
+                            PAWN,
+                            capturedType,
+                            BITS.CAPTURE,
+                            capturedRole,
+                        );
                     }
+                }
+            } else if (type === KING) {
+                // Whale - special 2-square piece with unique movement
+                if (forPiece && forPiece !== type) continue;
+
+                // Get both squares the whale occupies
+                const [firstSq, secondSq] = this._kings[us];
+
+                // Generate all whale moves (only once, even though piece is at both squares)
+                // Check if this is the first occurrence to avoid duplicates
+                if (from === firstSq) {
+                    this._generateWhaleMoves(moves, firstSq, secondSq, us, them);
                 }
             } else {
                 if (forPiece && forPiece !== type) continue;
@@ -1195,87 +1697,42 @@ export class CoralClash {
                         to += offset;
                         if (to & 0x88) break;
 
-                        if (!this._board[to]) {
+                        if (!this._isSquareOccupied(to)) {
                             addMove(moves, us, from, to, type);
                         } else {
                             // own color, stop loop
-                            if (this._board[to].color === us) break;
+                            if (this._isSquareOccupied(to, us)) break;
 
-                            addMove(moves, us, from, to, type, this._board[to].type, BITS.CAPTURE);
+                            // Capture opponent's piece (including whale)
+                            const capturedType = this._board[to]?.type || KING;
+                            const capturedRole = this._board[to]?.role; // Preserve role for Coral Clash
+                            addMove(
+                                moves,
+                                us,
+                                from,
+                                to,
+                                type,
+                                capturedType,
+                                BITS.CAPTURE,
+                                capturedRole,
+                            );
                             break;
                         }
 
-                        /* break, if knight or king */
-                        if (type === KNIGHT || type === KING) break;
+                        /* break, if octopus (moves 1 square) */
+                        if (type === BISHOP) break;
                     }
                 }
             }
         }
 
-        /*
-         * check for castling if we're:
-         *   a) generating all moves, or
-         *   b) doing single square move generation on the king's square
-         */
-
-        if (forPiece === undefined || forPiece === KING) {
-            if (!singleSquare || lastSquare === this._kings[us]) {
-                // king-side castling
-                if (this._castling[us] & BITS.KSIDE_CASTLE) {
-                    const castlingFrom = this._kings[us];
-                    const castlingTo = castlingFrom + 2;
-
-                    if (
-                        !this._board[castlingFrom + 1] &&
-                        !this._board[castlingTo] &&
-                        !this._attacked(them, this._kings[us]) &&
-                        !this._attacked(them, castlingFrom + 1) &&
-                        !this._attacked(them, castlingTo)
-                    ) {
-                        addMove(
-                            moves,
-                            us,
-                            this._kings[us],
-                            castlingTo,
-                            KING,
-                            undefined,
-                            BITS.KSIDE_CASTLE,
-                        );
-                    }
-                }
-
-                // queen-side castling
-                if (this._castling[us] & BITS.QSIDE_CASTLE) {
-                    const castlingFrom = this._kings[us];
-                    const castlingTo = castlingFrom - 2;
-
-                    if (
-                        !this._board[castlingFrom - 1] &&
-                        !this._board[castlingFrom - 2] &&
-                        !this._board[castlingFrom - 3] &&
-                        !this._attacked(them, this._kings[us]) &&
-                        !this._attacked(them, castlingFrom - 1) &&
-                        !this._attacked(them, castlingTo)
-                    ) {
-                        addMove(
-                            moves,
-                            us,
-                            this._kings[us],
-                            castlingTo,
-                            KING,
-                            undefined,
-                            BITS.QSIDE_CASTLE,
-                        );
-                    }
-                }
-            }
-        }
+        // No castling in Coral Clash
 
         /*
          * return all pseudo-legal moves (this includes moves that allow the king
          * to be captured)
          */
-        if (!legal || this._kings[us] === -1) {
+        if (!legal || this._kings[us][0] === -1) {
             return moves;
         }
 
@@ -1354,12 +1811,18 @@ export class CoralClash {
     private _push(move: InternalMove) {
         this._history.push({
             move,
-            kings: { b: this._kings.b, w: this._kings.w },
+            kings: {
+                b: [this._kings.b[0], this._kings.b[1]],
+                w: [this._kings.w[0], this._kings.w[1]],
+            },
             turn: this._turn,
             castling: { b: this._castling.b, w: this._castling.w },
             epSquare: this._epSquare,
             halfMoves: this._halfMoves,
             moveNumber: this._moveNumber,
+            // Save coral state for undo
+            coral: [...this._coral],
+            coralRemaining: { b: this._coralRemaining.b, w: this._coralRemaining.w },
         });
     }
 
@@ -1368,8 +1831,86 @@ export class CoralClash {
         const them = swapColor(us);
         this._push(move);
 
-        this._board[move.to] = this._board[move.from];
-        delete this._board[move.from];
+        // Check if we're capturing a whale (need to clear both squares)
+        if (move.captured === KING) {
+            // Clear the opponent's whale from both squares
+            const [enemyFirst, enemySecond] = this._kings[them];
+            if (enemyFirst !== EMPTY) delete this._board[enemyFirst];
+            if (enemySecond !== EMPTY) delete this._board[enemySecond];
+            this._kings[them] = [EMPTY, EMPTY];
+        }
+
+        // Move piece in _board
+        // For whale: piece is stored at BOTH squares it occupies
+        if (move.piece === KING) {
+            // Whale move: Remove piece from both old squares
+            const [oldFirst, oldSecond] = this._kings[us];
+
+            // Get the piece object (should be at one of the old positions)
+            const whalePiece = this._board[oldFirst] ||
+                this._board[oldSecond] || {
+                    type: KING,
+                    color: us,
+                    role: undefined,
+                };
+
+            // Determine the other square's position after the move
+            // Check if this is a parallel slide (both halves move same offset) or rotation (one stays fixed)
+            const movingSquare = move.from;
+            const stationarySquare = movingSquare === oldFirst ? oldSecond : oldFirst;
+            const offset = move.to - movingSquare;
+
+            // Check if the move is orthogonally adjacent to stationary square
+            // If yes, it's a rotation (stationary stays fixed)
+            // If no, it's a parallel slide or single-half slide
+            const toFile = move.to & 0xf;
+            const toRank = move.to >> 4;
+            const stationaryFile = stationarySquare & 0xf;
+            const stationaryRank = stationarySquare >> 4;
+            const fileDiff = Math.abs(toFile - stationaryFile);
+            const rankDiff = Math.abs(toRank - stationaryRank);
+            const isAdjacent =
+                (fileDiff === 1 && rankDiff === 0) || (fileDiff === 0 && rankDiff === 1);
+
+            const newOtherSquare = isAdjacent ? stationarySquare : stationarySquare + offset;
+
+            // Delete whale from its single storage position (always at oldFirst)
+            delete this._board[oldFirst];
+            if (this._board[oldSecond]) {
+                delete this._board[oldSecond]; // Cleanup in case of old bugs
+            }
+
+            // Store whale at ONLY the first position (simpler!)
+            // Determine which square should be "first" (we'll use the leftmost/bottommost)
+            const newFirst = move.to < newOtherSquare ? move.to : newOtherSquare;
+            const newSecond = move.to < newOtherSquare ? newOtherSquare : move.to;
+
+            this._board[newFirst] = { ...whalePiece };
+
+            // Update whale positions
+            this._kings[us] = [newFirst, newSecond];
+        } else {
+            // Normal piece move
+            // Safety check: don't overwrite whale squares
+            const [whiteFirst, whiteSecond] = this._kings.w;
+            const [blackFirst, blackSecond] = this._kings.b;
+
+            if (
+                move.to !== whiteFirst &&
+                move.to !== whiteSecond &&
+                move.to !== blackFirst &&
+                move.to !== blackSecond
+            ) {
+                this._board[move.to] = this._board[move.from];
+            } else {
+                console.error('[_makeMove] Attempted to overwrite whale square!', {
+                    from: algebraic(move.from),
+                    to: algebraic(move.to),
+                    piece: move.piece,
+                });
+            }
+            delete this._board[move.from];
+        }
 
         // if ep capture, remove the captured pawn
         if (move.flags & BITS.EP_CAPTURE) {
@@ -1382,27 +1923,18 @@ export class CoralClash {
 
         // if pawn promotion, replace with new piece
         if (move.promotion) {
-            this._board[move.to] = { type: move.promotion, color: us };
+            // Preserve the role (hunter/gatherer) from the original piece
+            const originalPiece = this._board[move.to];
+            this._board[move.to] = {
+                type: move.promotion,
+                color: us,
+                role: originalPiece?.role, // Preserve gatherer/hunter status in Coral Clash
+            };
         }
 
-        // if we moved the king
-        if (this._board[move.to].type === KING) {
-            this._kings[us] = move.to;
-
-            // if we castled, move the rook next to the king
-            if (move.flags & BITS.KSIDE_CASTLE) {
-                const castlingTo = move.to - 1;
-                const castlingFrom = move.to + 1;
-                this._board[castlingTo] = this._board[castlingFrom];
-                delete this._board[castlingFrom];
-            } else if (move.flags & BITS.QSIDE_CASTLE) {
-                const castlingTo = move.to + 1;
-                const castlingFrom = move.to - 2;
-                this._board[castlingTo] = this._board[castlingFrom];
-                delete this._board[castlingFrom];
-            }
-
-            // turn off castling
+        // if we moved the whale (no additional logic needed, handled above)
+        if (move.piece === KING) {
+            // No castling in Coral Clash (removed)
             this._castling[us] = 0;
         }
 
@@ -1474,19 +2006,66 @@ export class CoralClash {
 
         const move = old.move;
 
-        this._kings = old.kings;
+        const us = old.turn; // Use old.turn, not this._turn (which hasn't been restored yet)
+        const them = swapColor(us);
+
+        // Special handling for whale moves - save current position BEFORE restoring history
+        let whaleCurrentPositions: [number, number] | null = null;
+        if (move.piece === KING) {
+            // Save where the whale is NOW (before we restore history)
+            whaleCurrentPositions = [this._kings[us][0], this._kings[us][1]];
+        }
+
+        // CRITICAL: Create COPIES, not references, to avoid corrupting history
+        this._kings = {
+            b: [old.kings.b[0], old.kings.b[1]],
+            w: [old.kings.w[0], old.kings.w[1]],
+        };
         this._turn = old.turn;
-        this._castling = old.castling;
+        this._castling = { b: old.castling.b, w: old.castling.w };
         this._epSquare = old.epSquare;
         this._halfMoves = old.halfMoves;
         this._moveNumber = old.moveNumber;
+        // Restore coral state (create copies to avoid reference issues)
+        this._coral = [...old.coral];
+        this._coralRemaining = { b: old.coralRemaining.b, w: old.coralRemaining.w };
 
-        const us = this._turn;
-        const them = swapColor(us);
+        // Special handling for whale moves - whale is stored at both positions
+        if (move.piece === KING && whaleCurrentPositions) {
+            // This is a whale move - restore whale to both old positions
+            // old.kings[us] tells us where the whale WAS before the move (both squares)
+            const [oldFirst, oldSecond] = old.kings[us];
 
-        this._board[move.from] = this._board[move.to];
-        this._board[move.from].type = move.piece; // to undo any promotions
-        delete this._board[move.to];
+            // Get the piece object from the CURRENT positions (saved before history restore)
+            const [currentFirst, currentSecond] = whaleCurrentPositions;
+            const whalePiece = this._board[currentFirst] ||
+                this._board[currentSecond] || {
+                    type: KING,
+                    color: us,
+                    role: undefined,
+                };
+
+            // Delete whale from current storage position
+            delete this._board[currentFirst];
+            if (this._board[currentSecond]) {
+                delete this._board[currentSecond]; // Cleanup in case of old bugs
+            }
+
+            // Restore whale to only the first old position
+            this._board[oldFirst] = { ...whalePiece };
+
+            // Fix type in case of promotion
+            if (this._board[oldFirst]) {
+                this._board[oldFirst].type = move.piece;
+            }
+        } else {
+            // Normal piece move
+            this._board[move.from] = this._board[move.to];
+            if (this._board[move.from]) {
+                this._board[move.from].type = move.piece; // to undo any promotions
+            }
+            delete this._board[move.to];
+        }
 
         if (move.captured) {
             if (move.flags & BITS.EP_CAPTURE) {
@@ -1497,10 +2076,24 @@ export class CoralClash {
                 } else {
                     index = move.to + 16;
                 }
-                this._board[index] = { type: PAWN, color: them };
+                this._board[index] = { type: PAWN, color: them, role: move.capturedRole };
+            } else if (move.captured === KING) {
+                // Whale was captured - restore it at only the first position
+                // Use the restored _kings[them] from history
+                const [whaleFirstPos, whaleSecondPos] = old.kings[them];
+                const whalePiece: Piece = {
+                    type: KING as PieceSymbol,
+                    color: them,
+                    role: undefined,
+                };
+                this._board[whaleFirstPos] = whalePiece;
             } else {
-                // regular capture
-                this._board[move.to] = { type: move.captured, color: them };
+                // regular capture - restore with role
+                this._board[move.to] = {
+                    type: move.captured,
+                    color: them,
+                    role: move.capturedRole,
+                };
             }
         }
 
@@ -2173,15 +2766,43 @@ export class CoralClash {
         let row = [];
 
         for (let i = Ox88.a8; i <= Ox88.h1; i++) {
-            if (this._board[i] == null) {
-                row.push(null);
-            } else {
+            // Check if this square has a piece in _board
+            if (this._board[i]) {
                 row.push({
                     square: algebraic(i),
                     type: this._board[i].type,
                     color: this._board[i].color,
+                    role: this._board[i].role,
                 });
+            } else {
+                // Check if this is the SECOND square of a whale (not stored in _board)
+                let isWhaleSecondSquare = false;
+                let whaleColor: Color | null = null;
+
+                // Check white whale's second square
+                if (this._kings.w[1] === i && this._kings.w[0] !== EMPTY) {
+                    isWhaleSecondSquare = true;
+                    whaleColor = WHITE;
+                }
+                // Check black whale's second square
+                else if (this._kings.b[1] === i && this._kings.b[0] !== EMPTY) {
+                    isWhaleSecondSquare = true;
+                    whaleColor = BLACK;
+                }
+
+                if (isWhaleSecondSquare && whaleColor) {
+                    // Show the whale at its second square too
+                    row.push({
+                        square: algebraic(i),
+                        type: KING,
+                        color: whaleColor,
+                        role: undefined, // Whale has no role
+                    });
+                } else {
+                    row.push(null);
+                }
             }
+
             if ((i + 1) & 0x88) {
                 output.push(row);
                 row = [];
@@ -2344,6 +2965,101 @@ export class CoralClash {
 
     moveNumber() {
         return this._moveNumber;
+    }
+
+    // Coral Clash specific methods
+
+    /**
+     * Check if a square has coral and what color
+     */
+    getCoral(square: Square): Color | null {
+        return this._coral[Ox88[square]] || null;
+    }
+
+    /**
+     * Place coral on a square
+     */
+    placeCoral(square: Square, color: Color): boolean {
+        const sq = Ox88[square];
+
+        // Can't place if there's already coral there
+        if (this._coral[sq]) {
+            return false;
+        }
+
+        // Can't place if no coral remaining
+        if (this._coralRemaining[color] <= 0) {
+            return false;
+        }
+
+        this._coral[sq] = color;
+        this._coralRemaining[color]--;
+        return true;
+    }
+
+    /**
+     * Remove coral from a square
+     */
+    removeCoral(square: Square): Color | null {
+        const sq = Ox88[square];
+        const coralColor = this._coral[sq];
+
+        if (coralColor) {
+            this._coral[sq] = null;
+            this._coralRemaining[coralColor]++;
+            return coralColor;
+        }
+
+        return null;
+    }
+
+    /**
+     * Get remaining coral count for a player
+     */
+    getCoralRemaining(color: Color): number {
+        return this._coralRemaining[color];
+    }
+
+    /**
+     * Get all squares with coral of a specific color
+     */
+    getCoralSquares(color: Color): Square[] {
+        const squares: Square[] = [];
+        for (let i = Ox88.a8; i <= Ox88.h1; i++) {
+            if (i & 0x88) {
+                i += 7;
+                continue;
+            }
+            if (this._coral[i] === color) {
+                squares.push(algebraic(i));
+            }
+        }
+        return squares;
+    }
+
+    /**
+     * Calculate coral area control (squares with coral not occupied by opponent)
+     */
+    getCoralAreaControl(color: Color): number {
+        let count = 0;
+        const opponent = swapColor(color);
+
+        for (let i = Ox88.a8; i <= Ox88.h1; i++) {
+            if (i & 0x88) {
+                i += 7;
+                continue;
+            }
+
+            // Count coral of this color that isn't occupied by opponent
+            if (this._coral[i] === color) {
+                const piece = this._board[i];
+                if (!piece || piece.color !== opponent) {
+                    count++;
+                }
+            }
+        }
+
+        return count;
     }
 }
 

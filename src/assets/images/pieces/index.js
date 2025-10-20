@@ -8,6 +8,7 @@ const PieceImages = {
     BPC: require('./greyscale/grey-crab-coral.png'), // Pawn with Coral
     BK: require('./greyscale/grey-whale.png'), // King = Whale
     BN: require('./greyscale/grey-turtle.png'), // Knight = Turtle
+    BNC: require('./greyscale/grey-turtle-coral.png'), // Knight with Coral
     BB: require('./greyscale/grey-octopus.png'), // Bishop = Octopus
     BBC: require('./greyscale/grey-octopus-coral.png'), // Bishop with Coral
     // White pieces - colored (Ocean themed)
@@ -19,6 +20,7 @@ const PieceImages = {
     WPC: require('./transparent/crab-coral.png'), // Pawn with Coral
     WK: require('./transparent/whale.png'), // King = Whale
     WN: require('./transparent/turtle.png'), // Knight = Turtle
+    WNC: require('./transparent/turtle-coral.png'), // Knight with Coral
     WB: require('./transparent/octopus.png'), // Bishop = Octopus
     WBC: require('./transparent/octopus-coral.png'), // Bishop with Coral
 };

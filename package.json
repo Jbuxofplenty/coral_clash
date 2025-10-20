@@ -46,6 +46,7 @@
         "@babel/core": "^7.25.9",
         "@babel/preset-env": "^7.25.9",
         "@expo/webpack-config": "^19.0.1",
+        "@types/jest": "^30.0.0",
         "@types/moment-duration-format": "^2.2.6",
         "@types/react": "~19.1.10",
         "babel-preset-expo": "~54.0.0",
