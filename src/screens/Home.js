@@ -1,52 +1,33 @@
 import { Block, Input, theme } from 'galio-framework';
-import React from 'react';
+import React, { useState } from 'react';
 import { Dimensions, ScrollView, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 import { Icon, Product } from '../components/';
 import FixtureLoaderModal from '../components/FixtureLoaderModal';
 import products from '../constants/products';
+import { useTheme } from '../contexts/ThemeContext';
 
 const { width, height } = Dimensions.get('screen');
 
-export default class Home extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            fixtureModalVisible: false,
-        };
-    }
-    renderSearch = () => {
-        const { navigation } = this.props;
-        const iconCamera = (
-            <Icon size={16} color={theme.COLORS.MUTED} name='zoom-in' family='material' />
-        );
+export default function Home({ navigation }) {
+    const { colors, isDarkMode } = useTheme();
+    const [fixtureModalVisible, setFixtureModalVisible] = useState(false);
 
-        return (
-            <Input
-                right
-                color='black'
-                style={styles.search}
-                iconContent={iconCamera}
-                placeholder='What are you looking for?'
-            />
-        );
-    };
-
-    handleProductPress = (product) => {
+    const handleProductPress = (product) => {
         if (product.isDevFixtureLoader) {
             // Open fixture loader modal
-            this.setState({ fixtureModalVisible: true });
+            setFixtureModalVisible(true);
         } else {
             // Navigate to game
-            this.props.navigation.navigate('Game', { product: product });
+            navigation.navigate('Game', { product: product });
         }
     };
 
-    handleSelectFixture = (fixture, fixtureName) => {
+    const handleSelectFixture = (fixture, fixtureName) => {
         console.log('Loading fixture:', fixtureName);
         // Navigate to game with the fixture
-        this.props.navigation.navigate('Game', {
+        navigation.navigate('Game', {
             product: {
                 title: `Loaded: ${fixtureName}`,
                 isFixture: true,
@@ -55,41 +36,36 @@ export default class Home extends React.Component {
         });
     };
 
-    renderProducts = () => {
-        return (
-            <ScrollView
-                showsVerticalScrollIndicator={false}
-                contentContainerStyle={styles.products}
-            >
-                <Block flex style={styles.productContainer}>
-                    {products.map((product, index) => (
-                        <Product
-                            key={index}
-                            product={product}
-                            horizontal
-                            onPress={() => this.handleProductPress(product)}
-                        />
-                    ))}
-                </Block>
-            </ScrollView>
-        );
-    };
+    return (
+        <LinearGradient
+            colors={[colors.GRADIENT_START, colors.GRADIENT_MID, colors.GRADIENT_END]}
+            style={styles.gradient}
+        >
+            <Block flex center style={styles.home}>
+                <ScrollView
+                    showsVerticalScrollIndicator={false}
+                    contentContainerStyle={styles.products}
+                >
+                    <Block flex style={styles.productContainer}>
+                        {products.map((product, index) => (
+                            <Product
+                                key={index}
+                                product={product}
+                                horizontal
+                                onPress={() => handleProductPress(product)}
+                            />
+                        ))}
+                    </Block>
+                </ScrollView>
+            </Block>
 
-    render() {
-        return (
-            <LinearGradient colors={['#1e3c72', '#2a5298', '#7e8ba3']} style={styles.gradient}>
-                <Block flex center style={styles.home}>
-                    {this.renderProducts()}
-                </Block>
-
-                <FixtureLoaderModal
-                    visible={this.state.fixtureModalVisible}
-                    onClose={() => this.setState({ fixtureModalVisible: false })}
-                    onSelectFixture={this.handleSelectFixture}
-                />
-            </LinearGradient>
-        );
-    }
+            <FixtureLoaderModal
+                visible={fixtureModalVisible}
+                onClose={() => setFixtureModalVisible(false)}
+                onSelectFixture={handleSelectFixture}
+            />
+        </LinearGradient>
+    );
 }
 
 const styles = StyleSheet.create({

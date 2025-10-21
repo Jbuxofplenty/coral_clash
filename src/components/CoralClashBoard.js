@@ -16,12 +16,14 @@ import EmptyBoard from './EmptyBoard';
 import Moves from './Moves';
 import Pieces from './Pieces';
 import Coral from './Coral';
+import { useTheme } from '../contexts/ThemeContext';
 
 // Game state schema version for fixtures
 const GAME_STATE_VERSION = '1.2.0';
 
 const CoralClash = ({ fixture }) => {
     const { width } = useWindowDimensions();
+    const { colors, isDarkMode } = useTheme();
     const coralClash = useCoralClash();
     const [visibleMoves, setVisibleMoves] = useState([]);
     const [selectedSquare, setSelectedSquare] = useState(null);
@@ -542,7 +544,7 @@ const CoralClash = ({ fixture }) => {
                         name='refresh'
                         family='MaterialIcons'
                         size={45}
-                        color='#ffffff'
+                        color={colors.WHITE}
                         style={styles.controlIcon}
                     />
                 </TouchableOpacity>
@@ -558,7 +560,7 @@ const CoralClash = ({ fixture }) => {
                             name='ios-share'
                             family='Ionicons'
                             size={45}
-                            color='#ffffff'
+                            color={colors.WHITE}
                             style={styles.controlIcon}
                         />
                     </TouchableOpacity>
@@ -575,7 +577,7 @@ const CoralClash = ({ fixture }) => {
                         name='undo'
                         family='MaterialIcons'
                         size={45}
-                        color={canUndo ? '#ffffff' : '#666666'}
+                        color={canUndo ? colors.WHITE : colors.MUTED}
                         style={styles.controlIcon}
                     />
                 </TouchableOpacity>
@@ -591,7 +593,7 @@ const CoralClash = ({ fixture }) => {
                         name='flag'
                         family='MaterialIcons'
                         size={45}
-                        color={coralClash.isGameOver() ? '#666666' : '#ffffff'}
+                        color={coralClash.isGameOver() ? colors.MUTED : colors.WHITE}
                         style={styles.controlIcon}
                     />
                 </TouchableOpacity>

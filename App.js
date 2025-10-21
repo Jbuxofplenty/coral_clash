@@ -19,7 +19,7 @@ import { Image, Platform, StatusBar } from 'react-native';
 import { Images, materialTheme, products } from './src/constants/';
 import Screens from './src/navigation/Screens';
 import { AuthProvider } from './src/contexts/AuthContext';
-import { ThemeProvider } from './src/contexts/ThemeContext';
+import { ThemeProvider, useTheme } from './src/contexts/ThemeContext';
 
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
@@ -42,6 +42,21 @@ function cacheImages(images) {
             return Asset.fromModule(image).downloadAsync();
         }
     });
+}
+
+function AppContent() {
+    const { isDarkMode } = useTheme();
+
+    return (
+        <Block flex>
+            <StatusBar
+                barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+                backgroundColor='transparent'
+                translucent
+            />
+            <Screens />
+        </Block>
+    );
 }
 
 export default function App() {
@@ -85,10 +100,7 @@ export default function App() {
             <ThemeProvider>
                 <NavigationContainer onReady={onLayoutRootView}>
                     <GalioProvider theme={materialTheme}>
-                        <Block flex>
-                            {Platform.OS === 'ios' && <StatusBar barStyle='default' />}
-                            <Screens />
-                        </Block>
+                        <AppContent />
                     </GalioProvider>
                 </NavigationContainer>
             </ThemeProvider>

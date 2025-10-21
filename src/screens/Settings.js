@@ -1,5 +1,5 @@
 import { Block, Button, Switch, Text, theme } from 'galio-framework';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
     ActivityIndicator,
     Alert,
@@ -11,11 +11,13 @@ import {
 
 import { materialTheme } from '../constants';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import { useFirebaseFunctions } from '../hooks/useFirebaseFunctions';
 import { DEFAULT_AVATARS, getRandomAvatarKey } from '../constants/avatars';
 
 export default function Settings({ navigation }) {
     const { user, refreshUserData } = useAuth();
+    const { colors, isDarkMode, setThemePreference } = useTheme();
     const { getUserSettings, updateUserSettings, resetUserSettings } = useFirebaseFunctions();
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -35,32 +37,31 @@ export default function Settings({ navigation }) {
             const result = await getUserSettings();
             setSettings(result.settings);
         } catch (error) {
-            // Silently fail for new users - just use default settings with random avatar
+            // Silently fail for new users - just use default settirngs with random avatar
             setSettings({ theme: 'auto', avatarKey: getRandomAvatarKey() });
         } finally {
             setLoading(false);
         }
     };
 
-    const updateAvatar = (avatarKey) => {
-        setSettings((prev) => ({
-            ...prev,
+    const updateAvatar = async (avatarKey) => {
+        const newSettings = {
+            ...settings,
             avatarKey,
-        }));
-    };
+        };
+        setSettings(newSettings);
 
-    const handleSaveSettings = async () => {
         try {
             setSaving(true);
-            await updateUserSettings(settings);
+            await updateUserSettings(newSettings);
 
             // Refresh user data to update avatar in header/drawer
             await refreshUserData();
-
-            Alert.alert('Success', 'Settings saved successfully');
         } catch (error) {
-            console.error('Error saving settings:', error);
-            Alert.alert('Error', 'Failed to save settings');
+            console.error('Error saving avatar:', error);
+            Alert.alert('Error', 'Failed to save avatar selection');
+            // Revert on error
+            setSettings(settings);
         } finally {
             setSaving(false);
         }
@@ -76,8 +77,15 @@ export default function Settings({ navigation }) {
                     try {
                         setSaving(true);
                         const result = await resetUserSettings();
+
+                        // Update local state
                         setSettings(result.settings);
-                        Alert.alert('Success', 'Settings reset to defaults');
+
+                        // Update theme context immediately
+                        setThemePreference(result.settings.theme);
+
+                        // Refresh user data to update avatar in header/drawer
+                        await refreshUserData();
                     } catch (error) {
                         console.error('Error resetting settings:', error);
                         Alert.alert('Error', 'Failed to reset settings');
@@ -89,42 +97,59 @@ export default function Settings({ navigation }) {
         ]);
     };
 
-    const updateTheme = (theme) => {
-        setSettings((prev) => ({
-            ...prev,
-            theme,
-        }));
+    const updateTheme = async (themeValue) => {
+        const newSettings = {
+            ...settings,
+            theme: themeValue,
+        };
+        setSettings(newSettings);
+        // Update theme context immediately for instant preview
+        setThemePreference(themeValue);
+
+        try {
+            setSaving(true);
+            await updateUserSettings(newSettings);
+            await refreshUserData();
+        } catch (error) {
+            console.error('Error saving theme:', error);
+            Alert.alert('Error', 'Failed to save theme preference');
+            // Revert on error
+            setSettings(settings);
+            setThemePreference(settings.theme);
+        } finally {
+            setSaving(false);
+        }
     };
 
     if (loading) {
         return (
-            <Block flex center middle>
-                <ActivityIndicator size='large' color={materialTheme.COLORS.PRIMARY} />
+            <Block flex center middle style={{ backgroundColor: colors.BACKGROUND }}>
+                <ActivityIndicator size='large' color={colors.PRIMARY} />
             </Block>
         );
     }
 
     if (!settings) {
         return (
-            <Block flex center middle>
-                <Text>Failed to load settings</Text>
+            <Block flex center middle style={{ backgroundColor: colors.BACKGROUND }}>
+                <Text color={colors.TEXT}>Failed to load settings</Text>
             </Block>
         );
     }
 
     return (
-        <Block flex style={styles.container}>
+        <Block flex style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
             <ScrollView showsVerticalScrollIndicator={false}>
                 {/* User Info */}
                 <Block style={styles.section}>
-                    <Text h5 bold color={materialTheme.COLORS.TEXT}>
+                    <Text h5 bold color={colors.TEXT}>
                         Account
                     </Text>
-                    <Block style={styles.card}>
-                        <Text size={16} bold>
+                    <Block style={[styles.card, { backgroundColor: colors.CARD_BACKGROUND }]}>
+                        <Text size={16} bold color={colors.TEXT}>
                             {user?.displayName || 'User'}
                         </Text>
-                        <Text size={14} color={materialTheme.COLORS.MUTED} style={{ marginTop: 4 }}>
+                        <Text size={14} color={colors.TEXT_SECONDARY} style={{ marginTop: 4 }}>
                             {user?.email}
                         </Text>
                     </Block>
@@ -132,15 +157,11 @@ export default function Settings({ navigation }) {
 
                 {/* Avatar Selection */}
                 <Block style={styles.section}>
-                    <Text h5 bold color={materialTheme.COLORS.TEXT}>
+                    <Text h5 bold color={colors.TEXT}>
                         Profile Avatar
                     </Text>
-                    <Block style={styles.card}>
-                        <Text
-                            size={14}
-                            color={materialTheme.COLORS.MUTED}
-                            style={{ marginBottom: 16 }}
-                        >
+                    <Block style={[styles.card, { backgroundColor: colors.CARD_BACKGROUND }]}>
+                        <Text size={14} color={colors.TEXT_SECONDARY} style={{ marginBottom: 16 }}>
                             Choose your ocean-themed avatar
                         </Text>
                         <Block row style={styles.avatarGrid}>
@@ -150,6 +171,7 @@ export default function Settings({ navigation }) {
                                     avatarKey={avatarKey}
                                     selected={settings.avatarKey === avatarKey}
                                     onSelect={() => updateAvatar(avatarKey)}
+                                    colors={colors}
                                 />
                             ))}
                         </Block>
@@ -158,27 +180,30 @@ export default function Settings({ navigation }) {
 
                 {/* Theme Settings */}
                 <Block style={styles.section}>
-                    <Text h5 bold color={materialTheme.COLORS.TEXT}>
+                    <Text h5 bold color={colors.TEXT}>
                         Appearance
                     </Text>
-                    <Block style={styles.card}>
+                    <Block style={[styles.card, { backgroundColor: colors.CARD_BACKGROUND }]}>
                         <ThemeOption
                             label='Light'
                             description='Always use light theme'
                             selected={settings.theme === 'light'}
                             onSelect={() => updateTheme('light')}
+                            colors={colors}
                         />
                         <ThemeOption
                             label='Dark'
                             description='Always use dark theme'
                             selected={settings.theme === 'dark'}
                             onSelect={() => updateTheme('dark')}
+                            colors={colors}
                         />
                         <ThemeOption
                             label='Auto'
                             description='Match system theme'
                             selected={settings.theme === 'auto'}
                             onSelect={() => updateTheme('auto')}
+                            colors={colors}
                             last
                         />
                     </Block>
@@ -186,27 +211,12 @@ export default function Settings({ navigation }) {
 
                 {/* Action Buttons */}
                 <Block style={styles.section}>
-                    <Button
-                        color={materialTheme.COLORS.PRIMARY}
-                        style={styles.button}
-                        onPress={handleSaveSettings}
-                        disabled={saving}
-                    >
-                        {saving ? (
-                            <ActivityIndicator color='#fff' />
-                        ) : (
-                            <Text bold size={16} color='#fff'>
-                                Save Settings
-                            </Text>
-                        )}
-                    </Button>
-
                     <TouchableOpacity
                         style={styles.textButton}
                         onPress={handleResetSettings}
                         disabled={saving}
                     >
-                        <Text size={14} color={materialTheme.COLORS.MUTED} center>
+                        <Text size={14} color={colors.PRIMARY} center style={{ fontWeight: '600' }}>
                             Reset to Defaults
                         </Text>
                     </TouchableOpacity>
@@ -216,11 +226,17 @@ export default function Settings({ navigation }) {
     );
 }
 
-function AvatarOption({ avatarKey, selected, onSelect }) {
+function AvatarOption({ avatarKey, selected, onSelect, colors }) {
     return (
         <TouchableOpacity
             onPress={onSelect}
-            style={[styles.avatarOption, selected && styles.avatarOptionSelected]}
+            style={[
+                styles.avatarOption,
+                {
+                    backgroundColor: selected ? colors.PRIMARY + '20' : colors.BACKGROUND,
+                    borderColor: selected ? colors.PRIMARY : 'transparent',
+                },
+            ]}
         >
             <Image
                 source={DEFAULT_AVATARS[avatarKey]}
@@ -231,6 +247,7 @@ function AvatarOption({ avatarKey, selected, onSelect }) {
                 size={12}
                 center
                 bold={selected}
+                color={colors.TEXT}
                 style={{ marginTop: 4, textTransform: 'capitalize' }}
             >
                 {avatarKey}
@@ -239,17 +256,21 @@ function AvatarOption({ avatarKey, selected, onSelect }) {
     );
 }
 
-function ThemeOption({ label, description, selected, onSelect, last = false }) {
+function ThemeOption({ label, description, selected, onSelect, colors, last = false }) {
     return (
         <TouchableOpacity
             onPress={onSelect}
-            style={[styles.themeOption, last && styles.themeOptionLast]}
+            style={[
+                styles.themeOption,
+                { borderBottomColor: colors.BORDER_COLOR },
+                last && styles.themeOptionLast,
+            ]}
         >
             <Block flex>
-                <Text size={16} bold={selected}>
+                <Text size={16} bold={selected} color={colors.TEXT}>
                     {label}
                 </Text>
-                <Text size={14} color={materialTheme.COLORS.MUTED} style={{ marginTop: 4 }}>
+                <Text size={14} color={colors.TEXT_SECONDARY} style={{ marginTop: 4 }}>
                     {description}
                 </Text>
             </Block>
@@ -259,7 +280,7 @@ function ThemeOption({ label, description, selected, onSelect, last = false }) {
                         width: 24,
                         height: 24,
                         borderRadius: 12,
-                        backgroundColor: materialTheme.COLORS.PRIMARY,
+                        backgroundColor: colors.PRIMARY,
                         justifyContent: 'center',
                         alignItems: 'center',
                     }}
@@ -275,14 +296,13 @@ function ThemeOption({ label, description, selected, onSelect, last = false }) {
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: '#f9f9f9',
+        flex: 1,
     },
     section: {
         paddingHorizontal: theme.SIZES.BASE * 2,
         marginTop: theme.SIZES.BASE * 2,
     },
     card: {
-        backgroundColor: theme.COLORS.WHITE,
         borderRadius: 12,
         marginTop: theme.SIZES.BASE,
         padding: theme.SIZES.BASE * 2,
@@ -295,7 +315,6 @@ const styles = StyleSheet.create({
     themeOption: {
         paddingVertical: theme.SIZES.BASE * 2,
         borderBottomWidth: 1,
-        borderBottomColor: '#e8e8e8',
         flexDirection: 'row',
         alignItems: 'center',
     },
@@ -320,17 +339,11 @@ const styles = StyleSheet.create({
         width: '30%',
         aspectRatio: 1,
         padding: theme.SIZES.BASE,
-        backgroundColor: '#f5f5f5',
         borderRadius: 12,
         marginBottom: theme.SIZES.BASE,
         alignItems: 'center',
         justifyContent: 'center',
         borderWidth: 2,
-        borderColor: 'transparent',
-    },
-    avatarOptionSelected: {
-        borderColor: materialTheme.COLORS.PRIMARY,
-        backgroundColor: '#e3f2fd',
     },
     avatarImage: {
         width: '60%',

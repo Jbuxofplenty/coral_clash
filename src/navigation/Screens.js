@@ -10,6 +10,7 @@ import Login from '../screens/Login';
 import Settings from '../screens/Settings';
 import CustomDrawerContent from './Menu';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 
 const { width } = Dimensions.get('screen');
 
@@ -28,20 +29,29 @@ function HomeStack(props) {
                     ),
                 }}
             />
-            <Stack.Screen name='Game' component={GameScreen} />
+            <Stack.Screen
+                name='Game'
+                component={GameScreen}
+                options={{
+                    header: ({ navigation, scene }) => (
+                        <Header title='Game' navigation={navigation} scene={scene} back />
+                    ),
+                }}
+            />
         </Stack.Navigator>
     );
 }
 
 export default function AppStack(props) {
     const { user, logOut } = useAuth();
+    const { colors } = useTheme();
 
     return (
         <Drawer.Navigator
             drawerContent={(props) => <CustomDrawerContent {...props} />}
             screenOptions={{
                 drawerStyle: {
-                    backgroundColor: '#1e3c72',
+                    backgroundColor: 'transparent',
                     width: width * 0.75,
                 },
                 drawerActiveTintColor: '#fff',
@@ -54,7 +64,7 @@ export default function AppStack(props) {
                     marginVertical: 5,
                     borderRadius: 8,
                 },
-                drawerActiveBackgroundColor: '#2a5298',
+                drawerActiveBackgroundColor: 'rgba(255, 255, 255, 0.15)',
             }}
             initialRouteName='Home'
         >
@@ -142,6 +152,9 @@ export default function AppStack(props) {
                             marginTop: 'auto',
                             marginBottom: 20,
                         },
+                        header: ({ navigation, scene }) => (
+                            <Header title='Log In' navigation={navigation} scene={scene} />
+                        ),
                     }}
                 />
             )}

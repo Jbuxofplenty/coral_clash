@@ -54,12 +54,19 @@ export const AuthProvider = ({ children }) => {
                 const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
                 const userData = userDoc.exists() ? userDoc.data() : {};
 
+                // Also get user settings from subcollection
+                const settingsDoc = await getDoc(
+                    doc(db, 'users', firebaseUser.uid, 'settings', 'preferences'),
+                );
+                const settings = settingsDoc.exists() ? settingsDoc.data() : null;
+
                 setUser({
                     uid: firebaseUser.uid,
                     email: firebaseUser.email,
                     displayName: firebaseUser.displayName,
                     photoURL: firebaseUser.photoURL,
                     ...userData,
+                    settings, // Add settings to user object
                 });
             } else {
                 setUser(null);
@@ -226,12 +233,19 @@ export const AuthProvider = ({ children }) => {
                 const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
                 const userData = userDoc.exists() ? userDoc.data() : {};
 
+                // Also reload user settings from subcollection
+                const settingsDoc = await getDoc(
+                    doc(db, 'users', currentUser.uid, 'settings', 'preferences'),
+                );
+                const settings = settingsDoc.exists() ? settingsDoc.data() : null;
+
                 setUser({
                     uid: currentUser.uid,
                     email: currentUser.email,
                     displayName: currentUser.displayName,
                     photoURL: currentUser.photoURL,
                     ...userData,
+                    settings, // Add settings to user object
                 });
             }
         } catch (err) {

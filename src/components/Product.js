@@ -3,65 +3,78 @@ import { Block, Text, theme } from 'galio-framework';
 import React from 'react';
 import { Dimensions, Image, StyleSheet, TouchableWithoutFeedback, View } from 'react-native';
 import Icon from './Icon';
+import { useTheme } from '../contexts/ThemeContext';
 
 const { width } = Dimensions.get('screen');
 
-class Product extends React.Component {
-    render() {
-        const { navigation, product, horizontal, full, style, priceColor, imageStyle, onPress } =
-            this.props;
-        const imageStyles = [
-            styles.image,
-            full ? styles.fullImage : styles.horizontalImage,
-            imageStyle,
-        ];
+function Product({
+    navigation,
+    product,
+    horizontal,
+    full,
+    style,
+    priceColor,
+    imageStyle,
+    onPress,
+}) {
+    const { colors } = useTheme();
 
-        const handlePress = () => {
-            if (onPress) {
-                onPress();
-            } else {
-                navigation.navigate('Game', { product: product });
-            }
-        };
+    const imageStyles = [
+        styles.image,
+        full ? styles.fullImage : styles.horizontalImage,
+        imageStyle,
+    ];
 
-        return (
-            <TouchableWithoutFeedback onPress={handlePress}>
-                <Block row={horizontal} card style={[styles.product, styles.shadow, style]}>
-                    <Block style={[styles.imageContainer, styles.shadow]}>
-                        {product.icon ? (
-                            <View style={[imageStyles, styles.iconContainer]}>
-                                <Icon
-                                    name={product.icon}
-                                    family={product.iconFamily}
-                                    size={80}
-                                    color='#1e3c72'
-                                />
-                            </View>
-                        ) : (
-                            <Image source={product.image} style={imageStyles} />
-                        )}
-                    </Block>
-                    <Block flex space='between' style={styles.productDescription}>
-                        <Text size={18} bold style={styles.productTitle}>
-                            {product.title}
-                        </Text>
-                        {product.description && (
-                            <Text
-                                size={14}
-                                color={theme.COLORS.MUTED}
-                                style={styles.productSubtitle}
-                            >
-                                {product.description}
-                            </Text>
-                        )}
-                    </Block>
+    const handlePress = () => {
+        if (onPress) {
+            onPress();
+        } else {
+            navigation.navigate('Game', { product: product });
+        }
+    };
+
+    return (
+        <TouchableWithoutFeedback onPress={handlePress}>
+            <Block
+                row={horizontal}
+                card
+                style={[
+                    styles.product,
+                    styles.shadow,
+                    { backgroundColor: colors.CARD_BACKGROUND },
+                    style,
+                ]}
+            >
+                <Block style={[styles.imageContainer, styles.shadow]}>
+                    {product.icon ? (
+                        <View style={[imageStyles, styles.iconContainer]}>
+                            <Icon
+                                name={product.icon}
+                                family={product.iconFamily}
+                                size={80}
+                                color={colors.PRIMARY}
+                            />
+                        </View>
+                    ) : (
+                        <Image source={product.image} style={imageStyles} />
+                    )}
                 </Block>
-            </TouchableWithoutFeedback>
-        );
-    }
+                <Block flex space='between' style={styles.productDescription}>
+                    <Text size={18} bold style={[styles.productTitle, { color: colors.TEXT }]}>
+                        {product.title}
+                    </Text>
+                    {product.description && (
+                        <Text size={14} style={[styles.productSubtitle, { color: colors.TEXT_SECONDARY }]}>
+                            {product.description}
+                        </Text>
+                    )}
+                </Block>
+            </Block>
+        </TouchableWithoutFeedback>
+    );
 }
 
-// HOC to inject navigation prop from hook into class component
+// HOC to inject navigation prop from hook into component
 const ProductWithNavigation = (props) => {
     const navigation = useNavigation();
     return <Product {...props} navigation={navigation} />;
@@ -71,7 +84,6 @@ export default ProductWithNavigation;
 
 const styles = StyleSheet.create({
     product: {
-        backgroundColor: theme.COLORS.WHITE,
         marginVertical: theme.SIZES.BASE,
         borderWidth: 0,
         minHeight: 140,
@@ -110,7 +122,7 @@ const styles = StyleSheet.create({
         width: width - theme.SIZES.BASE * 3,
     },
     shadow: {
-        shadowColor: theme.COLORS.BLACK,
+        shadowColor: '#000',
         shadowOffset: { width: 0, height: 4 },
         shadowRadius: 8,
         shadowOpacity: 0.2,

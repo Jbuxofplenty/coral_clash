@@ -4,27 +4,27 @@ import { LinearGradient } from 'expo-linear-gradient';
 
 import { Block } from 'galio-framework';
 import CoralClash from '../components/CoralClashBoard';
+import { useTheme } from '../contexts/ThemeContext';
 
 const { width, height } = Dimensions.get('screen');
 
-export default class Game extends React.Component {
-    render() {
-        // Get fixture from route params if available
-        const fixture = this.props.route?.params?.fixture;
+export default function Game({ route }) {
+    const { colors } = useTheme();
+    // Get fixture from route params if available
+    const fixture = route?.params?.fixture;
 
-        return (
-            <LinearGradient
-                colors={['#1e3c72', '#2a5298', '#7e8ba3']}
-                style={styles.game}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 0, y: 1 }}
-            >
-                <Block flex center>
-                    <CoralClash fixture={fixture} />
-                </Block>
-            </LinearGradient>
-        );
-    }
+    return (
+        <LinearGradient
+            colors={[colors.GRADIENT_START, colors.GRADIENT_MID, colors.GRADIENT_END]}
+            style={styles.game}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 0, y: 1 }}
+        >
+            <Block flex center>
+                <CoralClash fixture={fixture} />
+            </Block>
+        </LinearGradient>
+    );
 }
 
 const styles = StyleSheet.create({

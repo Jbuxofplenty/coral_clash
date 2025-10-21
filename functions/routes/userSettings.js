@@ -112,6 +112,13 @@ exports.resetUserSettings = functions.https.onCall(async (data, context) => {
                 updatedAt: new Date().toISOString(),
             });
 
+        // Also update the main user document's avatarKey to match
+        if (defaultSettings.avatarKey) {
+            await db.collection('users').doc(userId).update({
+                avatarKey: defaultSettings.avatarKey,
+            });
+        }
+
         return {
             success: true,
             message: 'Settings reset to defaults',

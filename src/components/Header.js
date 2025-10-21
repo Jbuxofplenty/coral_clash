@@ -6,21 +6,23 @@ import { Dimensions, Platform, StyleSheet, View, Image } from 'react-native';
 
 import materialTheme from '../constants/Theme';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import { DEFAULT_AVATARS, DEFAULT_AVATAR_NAME } from '../constants/avatars';
 
 const { height, width } = Dimensions.get('window');
 const iPhoneX = () =>
     Platform.OS === 'ios' && (height === 812 || width === 812 || height === 896 || width === 896);
 
-class Header extends React.Component {
-    handleLeftPress = () => {
-        const { back, navigation } = this.props;
+function Header({ back, title, transparent }) {
+    const navigation = useNavigation();
+    const { user } = useAuth();
+    const { colors } = useTheme();
+
+    const handleLeftPress = () => {
         return back ? navigation.goBack() : navigation.openDrawer();
     };
 
-    renderRight = () => {
-        const { user } = this.props;
-
+    const renderRight = () => {
         if (!user) {
             return null;
         }
@@ -30,49 +32,53 @@ class Header extends React.Component {
         const avatarSource = DEFAULT_AVATARS[avatarKey] || DEFAULT_AVATARS[DEFAULT_AVATAR_NAME];
 
         return (
-            <View style={styles.profileButton}>
+            <View
+                style={[
+                    styles.profileButton,
+                    { borderColor: colors.BORDER_COLOR, backgroundColor: colors.CARD_BACKGROUND },
+                ]}
+            >
                 <Image source={avatarSource} style={styles.profileAvatar} resizeMode='contain' />
             </View>
         );
     };
 
-    render() {
-        const { back, title, white, transparent, user } = this.props;
-        const headerStyles = [
-            styles.shadow,
-            transparent ? { backgroundColor: 'rgba(0,0,0,0)' } : null,
-            { marginTop: 10 },
-        ];
+    const headerStyles = {
+        backgroundColor: transparent ? 'rgba(0,0,0,0)' : colors.CARD_BACKGROUND,
+        paddingVertical: 10,
+        shadowColor: colors.SHADOW,
+        shadowOffset: { width: 0, height: 2 },
+        shadowRadius: 6,
+        shadowOpacity: 0.2,
+        elevation: 3,
+    };
 
-        return (
-            <Block style={headerStyles}>
-                <NavBar
-                    back={back}
-                    title={title}
-                    style={styles.navbar}
-                    transparent={transparent}
-                    right={this.renderRight()}
-                    rightStyle={{ alignItems: 'center' }}
-                    leftStyle={{ flex: 0.3, paddingTop: 2 }}
-                    leftIconName={back ? 'chevron-left' : 'navicon'}
-                    leftIconSize={30}
-                    leftIconColor={white ? theme.COLORS.WHITE : theme.COLORS.ICON}
-                    titleStyle={[styles.title, { color: theme.COLORS[white ? 'WHITE' : 'ICON'] }]}
-                    onLeftPress={this.handleLeftPress}
-                />
-            </Block>
-        );
-    }
+    const navbarStyles = {
+        ...styles.navbar,
+        backgroundColor: colors.CARD_BACKGROUND,
+    };
+
+    return (
+        <Block style={headerStyles}>
+            <NavBar
+                back={back}
+                title={title}
+                style={navbarStyles}
+                transparent={transparent}
+                right={renderRight()}
+                rightStyle={{ alignItems: 'center' }}
+                leftStyle={{ flex: 0.3, paddingTop: 2 }}
+                leftIconName={back ? 'chevron-left' : 'navicon'}
+                leftIconSize={back ? 50 : 30}
+                leftIconColor={colors.ICON}
+                titleStyle={[styles.title, { color: colors.TEXT }]}
+                onLeftPress={handleLeftPress}
+            />
+        </Block>
+    );
 }
 
-// HOC to inject navigation prop and auth from hooks into class component
-const HeaderWithNavigation = (props) => {
-    const navigation = useNavigation();
-    const { user } = useAuth();
-    return <Header {...props} navigation={navigation} user={user} />;
-};
-
-export default HeaderWithNavigation;
+export default Header;
 
 const styles = StyleSheet.create({
     button: {
@@ -89,14 +95,6 @@ const styles = StyleSheet.create({
         paddingTop: iPhoneX ? theme.SIZES.BASE * 4 : theme.SIZES.BASE,
         zIndex: 5,
     },
-    shadow: {
-        backgroundColor: theme.COLORS.WHITE,
-        shadowColor: 'black',
-        shadowOffset: { width: 0, height: 2 },
-        shadowRadius: 6,
-        shadowOpacity: 0.2,
-        elevation: 3,
-    },
     notify: {
         backgroundColor: materialTheme.COLORS.LABEL,
         borderRadius: 4,
@@ -105,9 +103,6 @@ const styles = StyleSheet.create({
         position: 'absolute',
         top: 8,
         right: 8,
-    },
-    header: {
-        backgroundColor: theme.COLORS.WHITE,
     },
     divider: {
         borderRightWidth: 0.3,
@@ -125,7 +120,6 @@ const styles = StyleSheet.create({
         height: 44,
         borderRadius: 0,
         borderWidth: 2,
-        borderColor: '#ddd',
         justifyContent: 'center',
         alignItems: 'center',
         marginRight: 8,

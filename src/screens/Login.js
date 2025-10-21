@@ -15,6 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 import { materialTheme } from '../constants';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 
 const { width, height } = Dimensions.get('screen');
 
@@ -29,6 +30,7 @@ function Login({ navigation }) {
         loading: authLoading,
         error: authError,
     } = useAuth();
+    const { colors } = useTheme();
     const [isSignUp, setIsSignUp] = React.useState(false);
     const [showForgotPassword, setShowForgotPassword] = React.useState(false);
     const [email, setEmail] = React.useState('');
@@ -40,16 +42,12 @@ function Login({ navigation }) {
 
     // Redirect to Home if user is already logged in
     React.useEffect(() => {
-        console.log('🔵 User state changed:', user ? `User: ${user.email}` : 'No user');
         if (user) {
-            console.log('🔵 Navigating to Home...');
             navigation.navigate('Home');
         }
     }, [user, navigation]);
 
     const handleSubmit = async () => {
-        console.log('🔵 handleSubmit called', { isSignUp, email, hasPassword: !!password });
-
         if (!email || !password) {
             setError('Please fill in all fields');
             return;
@@ -60,26 +58,20 @@ function Login({ navigation }) {
             return;
         }
 
-        console.log('🔵 Starting auth...', isSignUp ? 'Sign Up' : 'Sign In');
         setLoading(true);
         setError('');
         setSuccessMessage('');
 
         try {
             if (isSignUp) {
-                console.log('🔵 Calling signUp...');
                 await signUp(email, password, displayName);
             } else {
-                console.log('🔵 Calling signIn...');
                 await signIn(email, password);
             }
-            console.log('✅ Auth successful');
             // Navigation will be handled by auth state change
         } catch (err) {
-            console.error('❌ Auth error:', err);
             setError(err.message || 'Authentication failed');
         } finally {
-            console.log('🔵 Setting loading to false');
             setLoading(false);
         }
     };
@@ -132,7 +124,10 @@ function Login({ navigation }) {
     };
 
     return (
-        <LinearGradient colors={['#1e3c72', '#2a5298', '#7e8ba3']} style={styles.gradient}>
+        <LinearGradient
+            colors={[colors.GRADIENT_START, colors.GRADIENT_MID, colors.GRADIENT_END]}
+            style={styles.gradient}
+        >
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 style={styles.keyboardView}
@@ -142,19 +137,15 @@ function Login({ navigation }) {
                     keyboardShouldPersistTaps='handled'
                 >
                     <Block flex center middle style={styles.container}>
-                        <Block style={styles.card}>
-                            <Text h3 bold color='#1e3c72' style={styles.title}>
+                        <Block style={[styles.card, { backgroundColor: colors.CARD_BACKGROUND }]}>
+                            <Text h3 bold color={colors.PRIMARY} style={styles.title}>
                                 {showForgotPassword
                                     ? 'Reset Password'
                                     : isSignUp
                                       ? 'Create Account'
                                       : 'Welcome Back'}
                             </Text>
-                            <Text
-                                size={16}
-                                color={materialTheme.COLORS.MUTED}
-                                style={styles.subtitle}
-                            >
+                            <Text size={16} color={colors.TEXT_SECONDARY} style={styles.subtitle}>
                                 {showForgotPassword
                                     ? 'Enter your email to receive a password reset link'
                                     : isSignUp
@@ -164,7 +155,7 @@ function Login({ navigation }) {
 
                             {error || authError ? (
                                 <Block style={styles.errorContainer}>
-                                    <Text size={14} color='#ff0000' center>
+                                    <Text size={14} color={colors.ERROR} center>
                                         {error || authError}
                                     </Text>
                                 </Block>
@@ -172,7 +163,7 @@ function Login({ navigation }) {
 
                             {successMessage ? (
                                 <Block style={styles.successContainer}>
-                                    <Text size={14} color='#28a745' center>
+                                    <Text size={14} color={colors.SUCCESS} center>
                                         {successMessage}
                                     </Text>
                                 </Block>
@@ -184,9 +175,15 @@ function Login({ navigation }) {
                                         placeholder='Display Name'
                                         value={displayName}
                                         onChangeText={setDisplayName}
-                                        style={styles.input}
-                                        color='#333'
-                                        placeholderTextColor='#999'
+                                        style={[
+                                            styles.input,
+                                            {
+                                                backgroundColor: colors.BACKGROUND,
+                                                borderColor: colors.BORDER_COLOR,
+                                            },
+                                        ]}
+                                        color={colors.TEXT}
+                                        placeholderTextColor={colors.PLACEHOLDER}
                                         autoCapitalize='words'
                                     />
                                 )}
@@ -194,9 +191,15 @@ function Login({ navigation }) {
                                     placeholder='Email'
                                     value={email}
                                     onChangeText={setEmail}
-                                    style={styles.input}
-                                    color='#333'
-                                    placeholderTextColor='#999'
+                                    style={[
+                                        styles.input,
+                                        {
+                                            backgroundColor: colors.BACKGROUND,
+                                            borderColor: colors.BORDER_COLOR,
+                                        },
+                                    ]}
+                                    color={colors.TEXT}
+                                    placeholderTextColor={colors.PLACEHOLDER}
                                     keyboardType='email-address'
                                     autoCapitalize='none'
                                 />
@@ -205,9 +208,15 @@ function Login({ navigation }) {
                                         placeholder='Password'
                                         value={password}
                                         onChangeText={setPassword}
-                                        style={styles.input}
-                                        color='#333'
-                                        placeholderTextColor='#999'
+                                        style={[
+                                            styles.input,
+                                            {
+                                                backgroundColor: colors.BACKGROUND,
+                                                borderColor: colors.BORDER_COLOR,
+                                            },
+                                        ]}
+                                        color={colors.TEXT}
+                                        placeholderTextColor={colors.PLACEHOLDER}
                                         password
                                         viewPass
                                         autoCapitalize='none'
@@ -215,7 +224,7 @@ function Login({ navigation }) {
                                 )}
 
                                 <Button
-                                    color='#1e3c72'
+                                    color={colors.PRIMARY}
                                     style={styles.button}
                                     onPress={
                                         showForgotPassword ? handleForgotPassword : handleSubmit
@@ -240,7 +249,7 @@ function Login({ navigation }) {
                                         onPress={toggleForgotPassword}
                                         style={styles.forgotPasswordButton}
                                     >
-                                        <Text size={14} color='#1e3c72' center>
+                                        <Text size={14} color={colors.PRIMARY} center>
                                             Forgot Password?
                                         </Text>
                                     </TouchableOpacity>
@@ -249,20 +258,34 @@ function Login({ navigation }) {
                                 {!showForgotPassword && (
                                     <>
                                         <View style={styles.dividerContainer}>
-                                            <View style={styles.divider} />
+                                            <View
+                                                style={[
+                                                    styles.divider,
+                                                    { backgroundColor: colors.BORDER_COLOR },
+                                                ]}
+                                            />
                                             <Text
                                                 size={14}
-                                                color={materialTheme.COLORS.MUTED}
+                                                color={colors.TEXT_SECONDARY}
                                                 style={styles.dividerText}
                                             >
                                                 OR
                                             </Text>
-                                            <View style={styles.divider} />
+                                            <View
+                                                style={[
+                                                    styles.divider,
+                                                    { backgroundColor: colors.BORDER_COLOR },
+                                                ]}
+                                            />
                                         </View>
 
                                         <TouchableOpacity
                                             style={[
                                                 styles.googleButton,
+                                                {
+                                                    backgroundColor: colors.CARD_BACKGROUND,
+                                                    borderColor: colors.BORDER_COLOR,
+                                                },
                                                 !googleSignInAvailable &&
                                                     styles.googleButtonDisabled,
                                             ]}
@@ -278,6 +301,7 @@ function Login({ navigation }) {
                                             />
                                             <Text
                                                 size={16}
+                                                color={colors.TEXT}
                                                 style={[
                                                     styles.googleButtonText,
                                                     !googleSignInAvailable &&
@@ -297,7 +321,7 @@ function Login({ navigation }) {
                                     onPress={showForgotPassword ? toggleForgotPassword : toggleMode}
                                     style={styles.toggleButton}
                                 >
-                                    <Text size={14} color={materialTheme.COLORS.MUTED} center>
+                                    <Text size={14} color={colors.PRIMARY} center>
                                         {showForgotPassword
                                             ? 'Back to Sign In'
                                             : isSignUp
@@ -332,7 +356,6 @@ const styles = StyleSheet.create({
         paddingVertical: theme.SIZES.BASE * 4,
     },
     card: {
-        backgroundColor: theme.COLORS.WHITE,
         borderRadius: 12,
         padding: theme.SIZES.BASE * 3,
         width: '100%',
@@ -395,7 +418,6 @@ const styles = StyleSheet.create({
     divider: {
         flex: 1,
         height: 1,
-        backgroundColor: '#e8e8e8',
     },
     dividerText: {
         marginHorizontal: theme.SIZES.BASE,
@@ -404,9 +426,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: '#fff',
         borderWidth: 1,
-        borderColor: '#e8e8e8',
         borderRadius: 8,
         paddingVertical: 12,
         paddingHorizontal: theme.SIZES.BASE,
@@ -418,15 +438,13 @@ const styles = StyleSheet.create({
     },
     googleButtonText: {
         marginLeft: theme.SIZES.BASE,
-        color: '#333',
         fontWeight: '600',
     },
     googleButtonDisabled: {
         opacity: 0.5,
-        backgroundColor: '#f5f5f5',
     },
     googleButtonTextDisabled: {
-        color: '#999',
+        opacity: 0.5,
     },
 });
 
