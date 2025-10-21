@@ -1,9 +1,11 @@
 import PieceImages from '../assets/images/pieces';
 import { WHALE } from '../../shared';
+import { useGamePreferences } from '../contexts/GamePreferencesContext';
 
 import { Image, TouchableWithoutFeedback, View } from 'react-native';
 
 const Pieces = ({ board, size, onSelectPiece }) => {
+    const { isBoardFlipped } = useGamePreferences();
     const cellSize = size / 8;
 
     // Find all whale positions to determine orientation
@@ -27,8 +29,9 @@ const Pieces = ({ board, size, onSelectPiece }) => {
     flatBoard.forEach((piece) => {
         const { square, type, color, role } = piece;
         const [file, rank] = square.split('');
-        const left = (file.charCodeAt(0) - 'a'.charCodeAt(0)) * cellSize;
-        const bottom = (rank - 1) * cellSize;
+        const fileIndex = file.charCodeAt(0) - 'a'.charCodeAt(0);
+        const left = isBoardFlipped ? (7 - fileIndex) * cellSize : fileIndex * cellSize;
+        const bottom = isBoardFlipped ? (8 - parseInt(rank)) * cellSize : (rank - 1) * cellSize;
 
         // For whale, render image only once but touchable areas for both squares
         const isWhale = type === WHALE;
@@ -85,8 +88,17 @@ const Pieces = ({ board, size, onSelectPiece }) => {
                 }
 
                 // Calculate position from the render square
-                let renderLeft = renderFile * cellSize;
-                let renderBottom = renderRank * cellSize;
+                let renderLeft = isBoardFlipped
+                    ? (7 - renderFile) * cellSize
+                    : renderFile * cellSize;
+                let renderBottom = isBoardFlipped
+                    ? (8 - renderRank - 1) * cellSize
+                    : renderRank * cellSize;
+
+                // For horizontal whales when flipped, we need to account for the 2-square width
+                if (isHorizontal && isBoardFlipped) {
+                    renderLeft -= cellSize; // Shift left by one cell since we're rendering from the right edge
+                }
 
                 // For vertical whales, adjust position so the rotated 2×1 image fits correctly in the 1×2 space
                 if (!isHorizontal) {
@@ -95,6 +107,11 @@ const Pieces = ({ board, size, onSelectPiece }) => {
                     // to make the rotated image align with the two vertical squares
                     renderLeft -= cellSize / 2; // Shift left to align the now-vertical image
                     renderBottom += cellSize / 2; // Shift up to align the bottom edge
+
+                    // When board is flipped, adjust the vertical whale position
+                    if (isBoardFlipped) {
+                        renderBottom -= cellSize; // Compensate for the flip
+                    }
                 }
 
                 // For vertical orientation, we need to rotate the image
@@ -107,7 +124,7 @@ const Pieces = ({ board, size, onSelectPiece }) => {
                     bottom: renderBottom,
                 };
 
-                // Apply rotation for vertical whales
+                // Apply rotation for vertical whales only
                 if (!isHorizontal) {
                     // Rotate 90 degrees clockwise around the center of the image
                     imageStyle.transform = [{ rotate: '90deg' }];

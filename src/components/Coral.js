@@ -1,7 +1,9 @@
 import { View, StyleSheet } from 'react-native';
 import { SQUARES } from '../../shared';
+import { useGamePreferences } from '../contexts/GamePreferencesContext';
 
 const Coral = ({ coralClash, size }) => {
+    const { isBoardFlipped } = useGamePreferences();
     const cellSize = size / 8;
 
     // Get all squares with coral
@@ -17,8 +19,11 @@ const Coral = ({ coralClash, size }) => {
         <>
             {coralSquares.map(({ square, color }) => {
                 const [file, rank] = square.split('');
-                const left = (file.charCodeAt(0) - 'a'.charCodeAt(0)) * cellSize;
-                const bottom = (rank - 1) * cellSize;
+                const fileIndex = file.charCodeAt(0) - 'a'.charCodeAt(0);
+                const left = isBoardFlipped ? (7 - fileIndex) * cellSize : fileIndex * cellSize;
+                const bottom = isBoardFlipped
+                    ? (8 - parseInt(rank)) * cellSize
+                    : (rank - 1) * cellSize;
 
                 // Use different colors/styles for white vs black coral
                 const coralStyle = color === 'w' ? styles.coralWhite : styles.coralBlack;

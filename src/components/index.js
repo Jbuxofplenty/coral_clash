@@ -6,6 +6,7 @@ import LoadingScreen from './LoadingScreen';
 import NotificationDropdown from './NotificationDropdown';
 import ActiveGamesCard from './ActiveGamesCard';
 import GameHistoryCard from './GameHistoryCard';
+import PlayerStatusBar from './PlayerStatusBar';
 
 export {
     Icon,
@@ -16,4 +17,5 @@ export {
     NotificationDropdown,
     ActiveGamesCard,
     GameHistoryCard,
+    PlayerStatusBar,
 };

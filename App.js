@@ -21,6 +21,7 @@ import Screens from './src/navigation/Screens';
 import { AuthProvider } from './src/contexts/AuthContext';
 import { ThemeProvider, useTheme } from './src/contexts/ThemeContext';
 import { NotificationProvider, useNotifications } from './src/contexts/NotificationContext';
+import { GamePreferencesProvider } from './src/contexts/GamePreferencesContext';
 import { NotificationDropdown } from './src/components';
 import { httpsCallable } from 'firebase/functions';
 import { functions } from './src/config/firebase';
@@ -222,13 +223,15 @@ export default function App() {
         <SafeAreaProvider>
             <AuthProvider>
                 <ThemeProvider>
-                    <NotificationProvider>
-                        <NavigationContainer ref={navigationRef} onReady={onLayoutRootView}>
-                            <GalioProvider theme={materialTheme}>
-                                <AppContent navigationRef={navigationRef} />
-                            </GalioProvider>
-                        </NavigationContainer>
-                    </NotificationProvider>
+                    <GamePreferencesProvider>
+                        <NotificationProvider>
+                            <NavigationContainer ref={navigationRef} onReady={onLayoutRootView}>
+                                <GalioProvider theme={materialTheme}>
+                                    <AppContent navigationRef={navigationRef} />
+                                </GalioProvider>
+                            </NavigationContainer>
+                        </NotificationProvider>
+                    </GamePreferencesProvider>
                 </ThemeProvider>
             </AuthProvider>
         </SafeAreaProvider>

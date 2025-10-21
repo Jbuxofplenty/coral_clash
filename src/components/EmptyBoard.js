@@ -1,12 +1,16 @@
 import { Block, Text } from 'galio-framework';
 import { FlatGrid } from 'react-native-super-grid';
+import { useGamePreferences } from '../contexts/GamePreferencesContext';
 
 const BOARD_SIZE = 8;
 const RANKS = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
 const FILES = ['8', '7', '6', '5', '4', '3', '2', '1'];
 
 const EmptyBoard = ({ size }) => {
+    const { isBoardFlipped } = useGamePreferences();
     const squareSize = size / BOARD_SIZE;
+    const displayFiles = isBoardFlipped ? [...FILES].reverse() : FILES;
+    const displayRanks = isBoardFlipped ? [...RANKS].reverse() : RANKS;
 
     return (
         <Block
@@ -54,7 +58,7 @@ const EmptyBoard = ({ size }) => {
                                         opacity: 0.8,
                                     }}
                                 >
-                                    {RANKS[row]}
+                                    {displayRanks[row]}
                                 </Text>
                             )}
                             {showFile && (
@@ -69,7 +73,7 @@ const EmptyBoard = ({ size }) => {
                                         opacity: 0.8,
                                     }}
                                 >
-                                    {FILES[col]}
+                                    {displayFiles[col]}
                                 </Text>
                             )}
                         </Block>

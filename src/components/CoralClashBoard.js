@@ -18,7 +18,10 @@ import EmptyBoard from './EmptyBoard';
 import Moves from './Moves';
 import Pieces from './Pieces';
 import Coral from './Coral';
+import PlayerStatusBar from './PlayerStatusBar';
 import { useTheme } from '../contexts/ThemeContext';
+import { useGamePreferences } from '../contexts/GamePreferencesContext';
+import { useAuth } from '../contexts/AuthContext';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -28,6 +31,8 @@ const GAME_STATE_VERSION = '1.2.0';
 const CoralClash = ({ fixture }) => {
     const { width } = useWindowDimensions();
     const { colors, isDarkMode } = useTheme();
+    const { isBoardFlipped, toggleBoardFlip } = useGamePreferences();
+    const { user } = useAuth();
     const coralClash = useCoralClash();
     const [visibleMoves, setVisibleMoves] = useState([]);
     const [selectedSquare, setSelectedSquare] = useState(null);
@@ -86,6 +91,15 @@ const CoralClash = ({ fixture }) => {
             forceUpdate((n) => n + 1);
         }
     }, [coralClash.history().length, fixture, fixtureLoaded]);
+
+    // Clear selection state when board is flipped
+    useEffect(() => {
+        setVisibleMoves([]);
+        setSelectedSquare(null);
+        setWhaleDestination(null);
+        setWhaleOrientationMoves([]);
+        setIsViewingEnemyMoves(false);
+    }, [isBoardFlipped]);
 
     // Get game status message
     const getGameStatus = () => {
@@ -569,31 +583,99 @@ const CoralClash = ({ fixture }) => {
         }
     };
 
+    const handleFlipBoard = () => {
+        closeMenu();
+        toggleBoardFlip();
+    };
+
     const translateY = slideAnim.interpolate({
         inputRange: [0, 1],
         outputRange: [400, 0],
     });
 
+    // Determine which player is on top/bottom based on board flip
+    const topPlayer = isBoardFlipped
+        ? { name: user?.displayName || 'Player', avatarKey: user?.avatarKey, isComputer: false }
+        : { name: 'Computer', isComputer: true };
+
+    const bottomPlayer = isBoardFlipped
+        ? { name: 'Computer', isComputer: true }
+        : { name: user?.displayName || 'Player', avatarKey: user?.avatarKey, isComputer: false };
+
+    // Determine which player's turn it is
+    const currentTurn = coralClash.turn();
+    const isTopPlayerActive = isBoardFlipped ? currentTurn === 'w' : currentTurn === 'b';
+    const isBottomPlayerActive = isBoardFlipped ? currentTurn === 'b' : currentTurn === 'w';
+
     return (
-        <View style={{ alignItems: 'center', flex: 1, width: '100%' }}>
-            {/* Control Bar */}
+        <View style={styles.container}>
+            {/* Content Area */}
+            <View style={{ width: '100%', alignItems: 'center' }}>
+                {/* Top Player Status Bar */}
+                <View style={[styles.topPlayerBar, { width: boardSize }]}>
+                    <PlayerStatusBar
+                        playerName={topPlayer.name}
+                        avatarKey={topPlayer.avatarKey}
+                        isComputer={topPlayer.isComputer}
+                        isActive={isTopPlayerActive}
+                    />
+                </View>
+
+                {/* Spacer */}
+                <View style={styles.spacer} />
+
+                {/* Game Board */}
+                <View style={{ position: 'relative', alignSelf: 'center' }}>
+                    <EmptyBoard size={boardSize} />
+                    <Coral coralClash={coralClash} size={boardSize} />
+                    <Pieces
+                        board={coralClash.board()}
+                        onSelectPiece={handleSelectPiece}
+                        size={boardSize}
+                    />
+                    <Moves
+                        visibleMoves={visibleMoves}
+                        onSelectMove={handleSelectMove}
+                        size={boardSize}
+                        showOrientations={whaleDestination !== null}
+                        selectedDestination={whaleDestination}
+                        isEnemyMoves={isViewingEnemyMoves}
+                    />
+                </View>
+
+                {/* Game Status Banner */}
+                {gameStatus && (
+                    <View style={[styles.statusBanner, { backgroundColor: gameStatus.color }]}>
+                        <Text style={styles.statusText}>{gameStatus.message}</Text>
+                    </View>
+                )}
+
+                {/* Spacer */}
+                <View style={styles.spacer} />
+
+                {/* Bottom Player Status Bar */}
+                <View style={[styles.bottomPlayerBar, { width: boardSize }]}>
+                    <PlayerStatusBar
+                        playerName={bottomPlayer.name}
+                        avatarKey={bottomPlayer.avatarKey}
+                        isComputer={bottomPlayer.isComputer}
+                        isActive={isBottomPlayerActive}
+                    />
+                </View>
+            </View>
+
+            {/* Control Bar at Bottom - Always Visible */}
             <View style={styles.controlBar}>
-                {/* Menu Button - Left */}
+                {/* Menu Button */}
                 <TouchableOpacity
                     style={styles.controlButton}
                     onPress={openMenu}
                     activeOpacity={0.7}
                 >
-                    <Icon
-                        name='menu'
-                        family='MaterialIcons'
-                        size={45}
-                        color={colors.WHITE}
-                        style={styles.controlIcon}
-                    />
+                    <Icon name='menu' family='MaterialIcons' size={44} color={colors.WHITE} />
                 </TouchableOpacity>
 
-                {/* Undo Button - Center */}
+                {/* Undo Button */}
                 <TouchableOpacity
                     style={styles.controlButton}
                     onPress={handleUndo}
@@ -603,35 +685,11 @@ const CoralClash = ({ fixture }) => {
                     <Icon
                         name='undo'
                         family='MaterialIcons'
-                        size={45}
+                        size={44}
                         color={canUndo ? colors.WHITE : colors.MUTED}
-                        style={styles.controlIcon}
                     />
                 </TouchableOpacity>
             </View>
-
-            <View style={{ position: 'relative' }}>
-                <EmptyBoard size={boardSize} />
-                <Coral coralClash={coralClash} size={boardSize} />
-                <Pieces
-                    board={coralClash.board()}
-                    onSelectPiece={handleSelectPiece}
-                    size={boardSize}
-                />
-                <Moves
-                    visibleMoves={visibleMoves}
-                    onSelectMove={handleSelectMove}
-                    size={boardSize}
-                    showOrientations={whaleDestination !== null}
-                    selectedDestination={whaleDestination}
-                    isEnemyMoves={isViewingEnemyMoves}
-                />
-            </View>
-            {gameStatus && (
-                <View style={[styles.statusBanner, { backgroundColor: gameStatus.color }]}>
-                    <Text style={styles.statusText}>{gameStatus.message}</Text>
-                </View>
-            )}
 
             {/* Bottom Drawer Menu */}
             <Modal
@@ -682,6 +740,38 @@ const CoralClash = ({ fixture }) => {
                                         ]}
                                     >
                                         Export current game position
+                                    </Text>
+                                </View>
+                            </TouchableOpacity>
+
+                            {/* Flip Board */}
+                            <TouchableOpacity
+                                style={[
+                                    styles.menuItem,
+                                    { borderBottomColor: colors.BORDER_COLOR },
+                                ]}
+                                onPress={handleFlipBoard}
+                                activeOpacity={0.7}
+                            >
+                                <Icon
+                                    name='swap-vert'
+                                    family='MaterialIcons'
+                                    size={28}
+                                    color='#4caf50'
+                                />
+                                <View style={styles.menuItemText}>
+                                    <Text style={[styles.menuItemTitle, { color: colors.TEXT }]}>
+                                        Flip Board
+                                    </Text>
+                                    <Text
+                                        style={[
+                                            styles.menuItemSubtitle,
+                                            { color: colors.TEXT_SECONDARY },
+                                        ]}
+                                    >
+                                        {isBoardFlipped
+                                            ? 'Currently showing black on bottom'
+                                            : 'Currently showing white on bottom'}
                                     </Text>
                                 </View>
                             </TouchableOpacity>
@@ -779,26 +869,41 @@ const CoralClash = ({ fixture }) => {
 };
 
 const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        width: '100%',
+    },
+    topPlayerBar: {
+        paddingTop: 8,
+        alignSelf: 'center',
+    },
+    bottomPlayerBar: {
+        alignSelf: 'center',
+    },
+    spacer: {
+        height: 12,
+    },
     controlBar: {
+        position: 'absolute',
+        bottom: 100,
+        left: 0,
+        right: 0,
         width: '100%',
         flexDirection: 'row',
         justifyContent: 'space-between',
-        paddingHorizontal: 20,
-        paddingVertical: 5,
-        marginBottom: 5,
-    },
-    controlButton: {
+        alignItems: 'center',
+        paddingHorizontal: 24,
+        paddingVertical: 12,
         backgroundColor: 'transparent',
     },
-    controlIcon: {
-        textShadowColor: 'rgba(0, 0, 0, 0.3)',
-        textShadowOffset: { width: 0, height: 2 },
-        textShadowRadius: 3,
+    controlButton: {
+        padding: 12,
+        backgroundColor: 'transparent',
     },
     statusBanner: {
-        marginTop: 20,
-        paddingVertical: 12,
-        paddingHorizontal: 24,
+        marginTop: 8,
+        paddingVertical: 10,
+        paddingHorizontal: 20,
         borderRadius: 8,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
@@ -808,7 +913,7 @@ const styles = StyleSheet.create({
     },
     statusText: {
         color: '#ffffff',
-        fontSize: 18,
+        fontSize: 16,
         fontWeight: 'bold',
         textAlign: 'center',
     },

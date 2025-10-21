@@ -20,7 +20,7 @@ export default function Game({ route }) {
             start={{ x: 0, y: 0 }}
             end={{ x: 0, y: 1 }}
         >
-            <Block flex center>
+            <Block flex>
                 <CoralClash fixture={fixture} />
             </Block>
         </LinearGradient>
