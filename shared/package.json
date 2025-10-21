@@ -1,0 +1,19 @@
+{
+    "name": "@coral-clash/shared",
+    "version": "1.0.0",
+    "description": "Shared game logic for Coral Clash",
+    "main": "game/index.ts",
+    "types": "game/index.ts",
+    "scripts": {
+        "build": "tsc"
+    },
+    "keywords": [
+        "coral-clash",
+        "game-logic"
+    ],
+    "author": "",
+    "license": "MIT",
+    "devDependencies": {
+        "typescript": "~5.9.2"
+    }
+}

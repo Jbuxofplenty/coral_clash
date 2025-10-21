@@ -1,5 +1,5 @@
 node_modules/**/*
-.expo/*
+.expo/
 npm-debug.*
 package-lock.json
 yarn.lock
@@ -7,6 +7,15 @@ yarn.lock
 *.p12
 *.key
 *.mobileprovision
+
+# Environment variables
+.env
+.env.local
+
+# Firebase Emulator logs
+firestore-debug.log
+ui-debug.log
+firebase-debug.log
 
 # macOS
 .DS_Store

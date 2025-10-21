@@ -3,9 +3,6 @@ import products from './products';
 import materialTheme from './Theme';
 import utils from './utils';
 
-export {
-  Images,
-  products,
-  materialTheme,
-  utils,
-}
+export { Images, products, materialTheme, utils };
+
+export * from './avatars';

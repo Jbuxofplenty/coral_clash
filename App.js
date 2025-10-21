@@ -18,6 +18,8 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Image, Platform, StatusBar } from 'react-native';
 import { Images, materialTheme, products } from './src/constants/';
 import Screens from './src/navigation/Screens';
+import { AuthProvider } from './src/contexts/AuthContext';
+import { ThemeProvider } from './src/contexts/ThemeContext';
 
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
@@ -79,13 +81,17 @@ export default function App() {
     }
 
     return (
-        <NavigationContainer onReady={onLayoutRootView}>
-            <GalioProvider theme={materialTheme}>
-                <Block flex>
-                    {Platform.OS === 'ios' && <StatusBar barStyle='default' />}
-                    <Screens />
-                </Block>
-            </GalioProvider>
-        </NavigationContainer>
+        <AuthProvider>
+            <ThemeProvider>
+                <NavigationContainer onReady={onLayoutRootView}>
+                    <GalioProvider theme={materialTheme}>
+                        <Block flex>
+                            {Platform.OS === 'ios' && <StatusBar barStyle='default' />}
+                            <Screens />
+                        </Block>
+                    </GalioProvider>
+                </NavigationContainer>
+            </ThemeProvider>
+        </AuthProvider>
     );
 }

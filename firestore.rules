@@ -1,0 +1,72 @@
+rules_version = '2';
+service cloud.firestore {
+    match /databases/{database}/documents {
+        // Helper function to check if user is authenticated
+        function isAuthenticated() {
+            return request.auth != null;
+        }
+
+        // Helper function to check if user is owner
+        function isOwner(userId) {
+            return isAuthenticated() && request.auth.uid == userId;
+        }
+
+        // Users collection
+        match /users/{userId} {
+            // Users can read their own profile and profiles of their friends
+            allow read: if isOwner(userId) || 
+                exists(/databases/$(database)/documents/users/$(request.auth.uid)/friends/$(userId));
+            
+            // Users can only write to their own profile
+            allow write: if isOwner(userId);
+
+            // Friends subcollection
+            match /friends/{friendId} {
+                allow read: if isOwner(userId);
+                allow write: if false; // Managed by Cloud Functions
+            }
+
+            // User settings subcollection
+            match /settings/{settingId} {
+                // Users can only read and write their own settings
+                allow read, write: if isOwner(userId);
+            }
+        }
+
+        // Games collection
+        match /games/{gameId} {
+            // Players can read games they're part of
+            allow read: if isAuthenticated() && 
+                (resource.data.creatorId == request.auth.uid || 
+                 resource.data.opponentId == request.auth.uid);
+            
+            // Only Cloud Functions can write games
+            allow write: if false;
+        }
+
+        // Friend requests
+        match /friendRequests/{requestId} {
+            // Users can read requests they sent or received
+            allow read: if isAuthenticated() && 
+                (resource.data.from == request.auth.uid || 
+                 resource.data.to == request.auth.uid);
+            
+            // Only Cloud Functions can write friend requests
+            allow write: if false;
+        }
+
+        // Notifications
+        match /notifications/{notificationId} {
+            // Users can read their own notifications
+            allow read: if isOwner(resource.data.userId);
+            
+            // Users can update their own notifications (mark as read)
+            allow update: if isOwner(resource.data.userId) && 
+                request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']);
+            
+            // Only Cloud Functions can create/delete notifications
+            allow create, delete: if false;
+        }
+    }
+}
+

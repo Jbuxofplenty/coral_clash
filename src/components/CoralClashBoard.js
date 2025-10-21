@@ -548,7 +548,7 @@ const CoralClash = ({ fixture }) => {
                 </TouchableOpacity>
 
                 {/* Export Button - Center (Dev Only) */}
-                {__DEV__ && (
+                {process.env.EXPO_PUBLIC_ENABLE_DEV_FEATURES === 'true' && (
                     <TouchableOpacity
                         style={styles.controlButton}
                         onPress={handleExportState}

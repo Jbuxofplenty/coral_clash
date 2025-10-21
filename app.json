@@ -3,7 +3,6 @@
         "name": "coral-clash",
         "description": "Coral Clash Board Game",
         "slug": "coral-clash",
-        "privacy": "unlisted",
         "platforms": ["ios", "android"],
         "version": "1.8.0",
         "orientation": "portrait",
@@ -36,6 +35,7 @@
             "eas": {
                 "projectId": "416801e2-5620-4693-8729-161decbd0b5b"
             }
-        }
+        },
+        "scheme": "coralclash"
     }
 }

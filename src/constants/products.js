@@ -23,5 +23,6 @@ const devProducts = [
     },
 ];
 
-// Export products with dev card in development mode
-export default __DEV__ ? [...products, ...devProducts] : products;
+// Export products with dev card when dev features are enabled
+const enableDevFeatures = process.env.EXPO_PUBLIC_ENABLE_DEV_FEATURES === 'true';
+export default enableDevFeatures ? [...products, ...devProducts] : products;
