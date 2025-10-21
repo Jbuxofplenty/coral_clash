@@ -10,11 +10,13 @@ import {
     Dimensions,
     View,
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 
 import { Icon, Avatar, LoadingScreen } from '../components';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { useFirebaseFunctions } from '../hooks/useFirebaseFunctions';
+import { usePvPGame } from '../hooks/usePvPGame';
 
 const { width } = Dimensions.get('screen');
 
@@ -23,6 +25,7 @@ export default function Friends({ navigation }) {
     const { colors, isDarkMode } = useTheme();
     const { getFriends, sendFriendRequest, respondToFriendRequest, removeFriend, searchUsers } =
         useFirebaseFunctions();
+    const { sendGameRequest } = usePvPGame();
 
     const [loading, setLoading] = useState(true);
     const [friends, setFriends] = useState([]);
@@ -35,11 +38,14 @@ export default function Friends({ navigation }) {
     const [sending, setSending] = useState(false);
     const searchTimeoutRef = React.useRef(null);
 
-    useEffect(() => {
-        if (user && user.uid) {
-            loadFriends();
-        }
-    }, [user]);
+    // Load friends when screen comes into focus
+    useFocusEffect(
+        React.useCallback(() => {
+            if (user && user.uid) {
+                loadFriends();
+            }
+        }, [user]),
+    );
 
     const loadFriends = async () => {
         if (!user || !user.uid) return;
@@ -188,15 +194,8 @@ export default function Friends({ navigation }) {
         ]);
     };
 
-    const handleStartGame = (friendId, friendName) => {
-        navigation.navigate('Game', {
-            product: {
-                title: `vs ${friendName}`,
-                horizontal: true,
-                isPvP: true,
-            },
-            opponentId: friendId,
-        });
+    const handleStartGame = async (friendId, friendName) => {
+        await sendGameRequest(friendId, friendName);
     };
 
     const renderFriendItem = (friend) => {

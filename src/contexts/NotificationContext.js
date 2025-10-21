@@ -72,6 +72,12 @@ export function NotificationProvider({ children }) {
                 if (data?.type === 'friend_request') {
                     // Navigate to Friends screen
                     // This will be handled by the navigation prop passed down
+                } else if (data?.type === 'game_request') {
+                    // Navigate to Game screen or show notification
+                    // This will be handled by the notification dropdown
+                } else if (data?.type === 'game_accepted') {
+                    // Navigate to the game
+                    // This will be handled by the navigation prop passed down
                 }
             },
         );

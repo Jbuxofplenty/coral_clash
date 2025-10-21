@@ -49,36 +49,108 @@ function cacheImages(images) {
     });
 }
 
-function AppContent() {
+function AppContent({ navigationRef }) {
     const { isDarkMode } = useTheme();
     const { notification, dismissNotification, decrementBadge } = useNotifications();
 
     const handleAccept = async (notificationData) => {
         try {
-            const respondToFriendRequest = httpsCallable(functions, 'respondToFriendRequest');
-            await respondToFriendRequest({
-                requestId: notificationData.data.requestId,
-                accept: true,
-            });
+            const notificationType = notificationData.data.type;
+
+            if (notificationType === 'game_request') {
+                // Accept game request
+                const respondToGameInvite = httpsCallable(functions, 'respondToGameInvite');
+                const result = await respondToGameInvite({
+                    gameId: notificationData.data.gameId,
+                    accept: true,
+                });
+
+                // Navigate to game
+                if (result.data.gameId && navigationRef.current) {
+                    navigationRef.current.navigate('Game', {
+                        gameId: result.data.gameId,
+                        isPvP: true,
+                    });
+                }
+            } else if (notificationType === 'friend_request') {
+                // Accept friend request
+                const respondToFriendRequest = httpsCallable(functions, 'respondToFriendRequest');
+                await respondToFriendRequest({
+                    requestId: notificationData.data.requestId,
+                    accept: true,
+                });
+            }
 
             decrementBadge();
         } catch (error) {
-            console.error('Error accepting friend request:', error);
+            console.error('Error accepting request:', error);
         }
     };
 
     const handleDecline = async (notificationData) => {
         try {
-            const respondToFriendRequest = httpsCallable(functions, 'respondToFriendRequest');
-            await respondToFriendRequest({
-                requestId: notificationData.data.requestId,
-                accept: false,
-            });
+            const notificationType = notificationData.data.type;
+
+            if (notificationType === 'game_request') {
+                // Decline game request
+                const respondToGameInvite = httpsCallable(functions, 'respondToGameInvite');
+                await respondToGameInvite({
+                    gameId: notificationData.data.gameId,
+                    accept: false,
+                });
+            } else if (notificationType === 'friend_request') {
+                // Decline friend request
+                const respondToFriendRequest = httpsCallable(functions, 'respondToFriendRequest');
+                await respondToFriendRequest({
+                    requestId: notificationData.data.requestId,
+                    accept: false,
+                });
+            }
 
             decrementBadge();
         } catch (error) {
-            console.error('Error declining friend request:', error);
+            console.error('Error declining request:', error);
         }
+    };
+
+    const handleNotificationTap = (notificationData) => {
+        const notificationType = notificationData.data.type;
+
+        // Navigate based on notification type
+        if (navigationRef.current) {
+            switch (notificationType) {
+                case 'move_made':
+                case 'game_accepted':
+                    // Navigate to the game
+                    if (notificationData.data.gameId) {
+                        navigationRef.current.navigate('Game', {
+                            gameId: notificationData.data.gameId,
+                            isPvP: true,
+                        });
+                    }
+                    break;
+
+                case 'friend_accepted':
+                    // Navigate to Friends screen
+                    navigationRef.current.navigate('Friends');
+                    break;
+
+                case 'game_over':
+                    // Could navigate to game history or results
+                    if (notificationData.data.gameId) {
+                        navigationRef.current.navigate('Game', {
+                            gameId: notificationData.data.gameId,
+                            isPvP: true,
+                        });
+                    }
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
+        decrementBadge();
     };
 
     // Extract notification data for the dropdown
@@ -102,6 +174,7 @@ function AppContent() {
                 onAccept={handleAccept}
                 onDecline={handleDecline}
                 onDismiss={dismissNotification}
+                onTap={handleNotificationTap}
             />
             <Screens />
         </Block>
@@ -110,6 +183,7 @@ function AppContent() {
 
 export default function App() {
     const [appIsReady, setAppIsReady] = useState(false);
+    const navigationRef = React.useRef(null);
 
     useEffect(() => {
         async function prepare() {
@@ -149,9 +223,9 @@ export default function App() {
             <AuthProvider>
                 <ThemeProvider>
                     <NotificationProvider>
-                        <NavigationContainer onReady={onLayoutRootView}>
+                        <NavigationContainer ref={navigationRef} onReady={onLayoutRootView}>
                             <GalioProvider theme={materialTheme}>
-                                <AppContent />
+                                <AppContent navigationRef={navigationRef} />
                             </GalioProvider>
                         </NavigationContainer>
                     </NotificationProvider>

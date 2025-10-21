@@ -30,6 +30,7 @@ exports.createPvPGame = pvpGame.createPvPGame;
 exports.respondToGameInvite = pvpGame.respondToGameInvite;
 exports.makeMove = pvpGame.makeMove;
 exports.getActiveGames = pvpGame.getActiveGames;
+exports.getGameHistory = pvpGame.getGameHistory;
 
 // ==================== Friends APIs ====================
 exports.sendFriendRequest = friends.sendFriendRequest;

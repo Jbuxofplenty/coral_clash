@@ -128,6 +128,17 @@ export const useFirebaseFunctions = () => {
         }
     };
 
+    const getGameHistory = async () => {
+        try {
+            const callable = httpsCallable(functions, 'getGameHistory');
+            const result = await callable();
+            return result.data;
+        } catch (error) {
+            console.error('Error getting game history:', error);
+            throw error;
+        }
+    };
+
     // ==================== Friends Functions ====================
 
     /**
@@ -208,6 +219,7 @@ export const useFirebaseFunctions = () => {
         respondToGameInvite,
         makeMove,
         getActiveGames,
+        getGameHistory,
         // Friends
         sendFriendRequest,
         respondToFriendRequest,

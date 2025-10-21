@@ -160,8 +160,53 @@ async function sendFriendAcceptedNotification(recipientId, accepterId, accepterN
     });
 }
 
+/**
+ * Send game request notification
+ * @param {string} recipientId - User receiving the notification
+ * @param {string} senderId - User sending the game request
+ * @param {string} senderName - Name of the sender
+ * @param {string} gameId - Game ID
+ * @param {string} avatarKey - Avatar key of the sender
+ */
+async function sendGameRequestNotification(recipientId, senderId, senderName, gameId, avatarKey) {
+    return sendPushNotification(recipientId, {
+        title: 'Game Request',
+        body: `${senderName} wants to play Coral Clash with you`,
+        data: {
+            type: 'game_request',
+            from: senderId,
+            fromName: senderName,
+            gameId: gameId,
+            displayName: senderName,
+            avatarKey: avatarKey || 'dolphin',
+        },
+    });
+}
+
+/**
+ * Send game request accepted notification
+ * @param {string} recipientId - User receiving the notification
+ * @param {string} accepterId - User who accepted the request
+ * @param {string} accepterName - Name of the accepter
+ * @param {string} gameId - Game ID
+ */
+async function sendGameAcceptedNotification(recipientId, accepterId, accepterName, gameId) {
+    return sendPushNotification(recipientId, {
+        title: 'Game Request Accepted',
+        body: `${accepterName} accepted your game request`,
+        data: {
+            type: 'game_accepted',
+            from: accepterId,
+            fromName: accepterName,
+            gameId: gameId,
+        },
+    });
+}
+
 module.exports = {
     sendPushNotification,
     sendFriendRequestNotification,
     sendFriendAcceptedNotification,
+    sendGameRequestNotification,
+    sendGameAcceptedNotification,
 };

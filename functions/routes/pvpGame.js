@@ -2,8 +2,28 @@ const functions = require('firebase-functions/v1');
 const admin = require('firebase-admin');
 const { initializeGameState, serverTimestamp, increment } = require('../utils/helpers');
 const { validateMove, getGameResult } = require('../utils/gameValidator');
+const {
+    sendGameRequestNotification,
+    sendGameAcceptedNotification,
+} = require('../utils/notifications');
 
 const db = admin.firestore();
+
+/**
+ * Helper function to format display name with discriminator
+ * @param {string} displayName - The user's display name
+ * @param {string} discriminator - The 4-digit discriminator
+ * @returns {string} Formatted name like "Username #1234"
+ */
+function formatDisplayName(displayName, discriminator) {
+    if (!displayName) {
+        return 'User';
+    }
+    if (!discriminator) {
+        return displayName;
+    }
+    return `${displayName} #${discriminator}`;
+}
 
 /**
  * Create a new PvP game
@@ -48,6 +68,23 @@ exports.createPvPGame = functions.https.onCall(async (data, context) => {
             read: false,
             createdAt: serverTimestamp(),
         });
+
+        // Get creator's info for push notification
+        const creatorDoc = await db.collection('users').doc(creatorId).get();
+        const creatorData = creatorDoc.data();
+        const creatorName = formatDisplayName(creatorData.displayName, creatorData.discriminator);
+
+        // Get opponent's info for response
+        const opponentData = opponentDoc.data();
+
+        // Send push notification
+        sendGameRequestNotification(
+            opponentId,
+            creatorId,
+            creatorName,
+            gameRef.id,
+            creatorData.settings?.avatarKey || 'dolphin',
+        ).catch((error) => console.error('Error sending push notification:', error));
 
         return {
             success: true,
@@ -95,9 +132,25 @@ exports.respondToGameInvite = functions.https.onCall(async (data, context) => {
                 updatedAt: serverTimestamp(),
             });
 
+        // If accepted, notify the creator
+        if (accept) {
+            const accepterDoc = await db.collection('users').doc(userId).get();
+            const accepterData = accepterDoc.data();
+            const accepterName = formatDisplayName(
+                accepterData.displayName,
+                accepterData.discriminator,
+            );
+
+            // Send push notification to game creator
+            sendGameAcceptedNotification(gameData.creatorId, userId, accepterName, gameId).catch(
+                (error) => console.error('Error sending push notification:', error),
+            );
+        }
+
         return {
             success: true,
             message: accept ? 'Game started' : 'Game declined',
+            gameId: gameId,
         };
     } catch (error) {
         console.error('Error responding to game invite:', error);
@@ -271,6 +324,90 @@ exports.makeMove = functions.https.onCall(async (data, context) => {
 });
 
 /**
+ * Get user's game history (completed and cancelled games)
+ * GET /api/games/history
+ */
+exports.getGameHistory = functions.https.onCall(async (data, context) => {
+    try {
+        if (!context.auth) {
+            throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
+        }
+
+        const userId = context.auth.uid;
+
+        // Get games where user is creator or opponent and status is completed or cancelled
+        const creatorGames = await db
+            .collection('games')
+            .where('creatorId', '==', userId)
+            .where('status', 'in', ['completed', 'cancelled'])
+            .orderBy('updatedAt', 'desc')
+            .limit(10)
+            .get();
+
+        const opponentGames = await db
+            .collection('games')
+            .where('opponentId', '==', userId)
+            .where('status', 'in', ['completed', 'cancelled'])
+            .orderBy('updatedAt', 'desc')
+            .limit(10)
+            .get();
+
+        const games = [];
+
+        // Process creator games
+        for (const doc of creatorGames.docs) {
+            const gameData = doc.data();
+            // Get opponent info
+            const opponentDoc = await db.collection('users').doc(gameData.opponentId).get();
+            const opponentData = opponentDoc.exists ? opponentDoc.data() : {};
+
+            games.push({
+                id: doc.id,
+                ...gameData,
+                opponentDisplayName: formatDisplayName(
+                    opponentData.displayName,
+                    opponentData.discriminator,
+                ),
+                opponentAvatarKey: opponentData.settings?.avatarKey || 'dolphin',
+            });
+        }
+
+        // Process opponent games
+        for (const doc of opponentGames.docs) {
+            const gameData = doc.data();
+            // Get creator info (they are the opponent from user's perspective)
+            const creatorDoc = await db.collection('users').doc(gameData.creatorId).get();
+            const creatorData = creatorDoc.exists ? creatorDoc.data() : {};
+
+            games.push({
+                id: doc.id,
+                ...gameData,
+                opponentDisplayName: formatDisplayName(
+                    creatorData.displayName,
+                    creatorData.discriminator,
+                ),
+                opponentAvatarKey: creatorData.settings?.avatarKey || 'dolphin',
+            });
+        }
+
+        // Sort by most recently updated and take top 5
+        games.sort((a, b) => {
+            const aTime = a.updatedAt?.toMillis() || 0;
+            const bTime = b.updatedAt?.toMillis() || 0;
+            return bTime - aTime;
+        });
+
+        return {
+            success: true,
+            games: games.slice(0, 5),
+        };
+    } catch (error) {
+        console.error('Error getting game history:', error);
+        throw new functions.https.HttpsError('internal', error.message);
+    }
+});
+
+/**
  * Get user's active games
  * GET /api/games/active
  */
@@ -297,12 +434,47 @@ exports.getActiveGames = functions.https.onCall(async (data, context) => {
 
         const games = [];
 
-        creatorGames.forEach((doc) => {
-            games.push({ id: doc.id, ...doc.data() });
-        });
+        // Process creator games
+        for (const doc of creatorGames.docs) {
+            const gameData = doc.data();
+            // Get opponent info
+            const opponentDoc = await db.collection('users').doc(gameData.opponentId).get();
+            const opponentData = opponentDoc.exists ? opponentDoc.data() : {};
 
-        opponentGames.forEach((doc) => {
-            games.push({ id: doc.id, ...doc.data() });
+            games.push({
+                id: doc.id,
+                ...gameData,
+                opponentDisplayName: formatDisplayName(
+                    opponentData.displayName,
+                    opponentData.discriminator,
+                ),
+                opponentAvatarKey: opponentData.settings?.avatarKey || 'dolphin',
+            });
+        }
+
+        // Process opponent games
+        for (const doc of opponentGames.docs) {
+            const gameData = doc.data();
+            // Get creator info (they are the opponent from user's perspective)
+            const creatorDoc = await db.collection('users').doc(gameData.creatorId).get();
+            const creatorData = creatorDoc.exists ? creatorDoc.data() : {};
+
+            games.push({
+                id: doc.id,
+                ...gameData,
+                opponentDisplayName: formatDisplayName(
+                    creatorData.displayName,
+                    creatorData.discriminator,
+                ),
+                opponentAvatarKey: creatorData.settings?.avatarKey || 'dolphin',
+            });
+        }
+
+        // Sort by most recently updated
+        games.sort((a, b) => {
+            const aTime = a.updatedAt?.toMillis() || 0;
+            const bTime = b.updatedAt?.toMillis() || 0;
+            return bTime - aTime;
         });
 
         return {

@@ -8,13 +8,101 @@ import Avatar from './Avatar';
 const { width } = Dimensions.get('window');
 
 /**
- * Notification dropdown that appears at the top of the screen
- * Automatically dismisses after a timeout
+ * Get notification display configuration based on type
  */
-export default function NotificationDropdown({ notification, onAccept, onDecline, onDismiss }) {
+const getNotificationConfig = (type) => {
+    const configs = {
+        friend_request: {
+            title: 'Friend Request',
+            getMessage: (displayName) => `${displayName || 'Someone'} wants to be your friend`,
+            icon: { name: 'user-plus', family: 'font-awesome' },
+            showAvatar: true,
+            showActions: true,
+        },
+        game_request: {
+            title: 'Game Request',
+            getMessage: (displayName) =>
+                `${displayName || 'Someone'} wants to play Coral Clash with you`,
+            icon: { name: 'gamepad', family: 'font-awesome' },
+            showAvatar: true,
+            showActions: true,
+        },
+        game_accepted: {
+            title: 'Game Started',
+            getMessage: (displayName) => `${displayName || 'Someone'} accepted your game request`,
+            icon: { name: 'check-circle', family: 'font-awesome' },
+            showAvatar: true,
+            showActions: false,
+        },
+        move_made: {
+            title: 'Your Turn',
+            getMessage: (displayName) => `${displayName || 'Someone'} made a move`,
+            icon: { name: 'play-circle', family: 'font-awesome' },
+            showAvatar: true,
+            showActions: false,
+        },
+        game_over: {
+            title: 'Game Over',
+            getMessage: (displayName, result) => {
+                if (result?.winner) {
+                    return result.winner === 'you'
+                        ? 'You won!'
+                        : `${displayName || 'Opponent'} won`;
+                }
+                return 'Game ended in a draw';
+            },
+            icon: { name: 'trophy', family: 'font-awesome' },
+            showAvatar: true,
+            showActions: false,
+        },
+        friend_accepted: {
+            title: 'Friend Request Accepted',
+            getMessage: (displayName) => `${displayName || 'Someone'} accepted your friend request`,
+            icon: { name: 'check-circle', family: 'font-awesome' },
+            showAvatar: true,
+            showActions: false,
+        },
+    };
+
+    return (
+        configs[type] || {
+            title: 'Notification',
+            getMessage: () => 'You have a new notification',
+            icon: { name: 'bell', family: 'font-awesome' },
+            showAvatar: false,
+            showActions: false,
+        }
+    );
+};
+
+/**
+ * Generic notification dropdown that appears at the top of the screen
+ * Automatically dismisses after a timeout
+ * Supports multiple notification types with custom actions
+ *
+ * @param {Object} notification - Notification data object
+ * @param {string} notification.displayName - Display name to show
+ * @param {string} notification.avatarKey - Avatar key for display
+ * @param {Object} notification.data - Additional notification data
+ * @param {string} notification.data.type - Type of notification (friend_request, game_request, move_made, etc.)
+ * @param {Function} onAccept - Optional callback for accept action
+ * @param {Function} onDecline - Optional callback for decline action
+ * @param {Function} onDismiss - Callback when notification is dismissed
+ * @param {Function} onTap - Optional callback when notification body is tapped
+ */
+export default function NotificationDropdown({
+    notification,
+    onAccept,
+    onDecline,
+    onDismiss,
+    onTap,
+}) {
     const { colors } = useTheme();
     const insets = useSafeAreaInsets();
     const slideAnim = React.useRef(new Animated.Value(-200)).current;
+
+    const notificationType = notification?.data?.type || 'friend_request';
+    const config = getNotificationConfig(notificationType);
 
     useEffect(() => {
         if (notification) {
@@ -55,7 +143,16 @@ export default function NotificationDropdown({ notification, onAccept, onDecline
         setTimeout(() => onDecline?.(notification), 300);
     };
 
+    const handleTap = () => {
+        if (onTap) {
+            handleDismiss();
+            setTimeout(() => onTap(notification), 300);
+        }
+    };
+
     if (!notification) return null;
+
+    const message = config.getMessage(notification.displayName, notification.data?.result);
 
     return (
         <Animated.View
@@ -85,45 +182,79 @@ export default function NotificationDropdown({ notification, onAccept, onDecline
                 </TouchableOpacity>
 
                 {/* Notification content */}
-                <View style={styles.mainContent}>
-                    <Avatar
-                        avatarKey={notification.avatarKey}
-                        size='medium'
-                        style={styles.avatar}
-                    />
+                <TouchableOpacity
+                    activeOpacity={onTap ? 0.7 : 1}
+                    onPress={onTap ? handleTap : undefined}
+                    style={styles.mainContent}
+                >
+                    {config.showAvatar && notification.avatarKey && (
+                        <Avatar
+                            avatarKey={notification.avatarKey}
+                            size='medium'
+                            style={styles.avatar}
+                        />
+                    )}
+
+                    {!config.showAvatar && config.icon && (
+                        <View
+                            style={[
+                                styles.iconContainer,
+                                { backgroundColor: colors.PRIMARY + '15' },
+                            ]}
+                        >
+                            <Icon
+                                name={config.icon.name}
+                                family={config.icon.family}
+                                size={24}
+                                color={colors.PRIMARY}
+                            />
+                        </View>
+                    )}
 
                     <View style={styles.textContent}>
                         <Text style={[styles.title, { color: colors.TEXT }]} numberOfLines={1}>
-                            Friend Request
+                            {config.title}
                         </Text>
                         <Text
                             style={[styles.message, { color: colors.TEXT_SECONDARY }]}
                             numberOfLines={2}
                         >
-                            {notification.displayName || 'Someone'} wants to be your friend
+                            {message}
                         </Text>
                     </View>
-                </View>
+                </TouchableOpacity>
 
-                {/* Action buttons */}
-                <View style={styles.actions}>
-                    <TouchableOpacity
-                        onPress={handleDecline}
-                        style={[styles.button, { backgroundColor: colors.ERROR + '15' }]}
-                    >
-                        <Icon name='times' family='font-awesome' size={16} color={colors.ERROR} />
-                    </TouchableOpacity>
+                {/* Action buttons - only show if needed */}
+                {config.showActions && onAccept && onDecline && (
+                    <View style={styles.actions}>
+                        <TouchableOpacity
+                            onPress={handleDecline}
+                            style={[styles.button, { backgroundColor: colors.ERROR + '15' }]}
+                        >
+                            <Icon
+                                name='times'
+                                family='font-awesome'
+                                size={16}
+                                color={colors.ERROR}
+                            />
+                        </TouchableOpacity>
 
-                    <TouchableOpacity
-                        onPress={handleAccept}
-                        style={[
-                            styles.button,
-                            { backgroundColor: colors.SUCCESS + '15', marginLeft: 8 },
-                        ]}
-                    >
-                        <Icon name='check' family='font-awesome' size={16} color={colors.SUCCESS} />
-                    </TouchableOpacity>
-                </View>
+                        <TouchableOpacity
+                            onPress={handleAccept}
+                            style={[
+                                styles.button,
+                                { backgroundColor: colors.SUCCESS + '15', marginLeft: 8 },
+                            ]}
+                        >
+                            <Icon
+                                name='check'
+                                family='font-awesome'
+                                size={16}
+                                color={colors.SUCCESS}
+                            />
+                        </TouchableOpacity>
+                    </View>
+                )}
             </View>
         </Animated.View>
     );
@@ -160,6 +291,14 @@ const styles = StyleSheet.create({
         paddingRight: 32,
     },
     avatar: {
+        marginRight: 12,
+    },
+    iconContainer: {
+        width: 48,
+        height: 48,
+        borderRadius: 24,
+        justifyContent: 'center',
+        alignItems: 'center',
         marginRight: 12,
     },
     textContent: {

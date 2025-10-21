@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Dimensions, ScrollView, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
-import { Icon, Product } from '../components/';
+import { Icon, Product, ActiveGamesCard, GameHistoryCard } from '../components/';
 import FixtureLoaderModal from '../components/FixtureLoaderModal';
 import products from '../constants/products';
 import { useTheme } from '../contexts/ThemeContext';
@@ -41,23 +41,27 @@ export default function Home({ navigation }) {
             colors={[colors.GRADIENT_START, colors.GRADIENT_MID, colors.GRADIENT_END]}
             style={styles.gradient}
         >
-            <Block flex center style={styles.home}>
-                <ScrollView
-                    showsVerticalScrollIndicator={false}
-                    contentContainerStyle={styles.products}
-                >
-                    <Block flex style={styles.productContainer}>
-                        {products.map((product, index) => (
-                            <Product
-                                key={index}
-                                product={product}
-                                horizontal
-                                onPress={() => handleProductPress(product)}
-                            />
-                        ))}
-                    </Block>
-                </ScrollView>
-            </Block>
+            <ScrollView
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={styles.scrollContent}
+                style={styles.scrollView}
+            >
+                {/* Active Games Card */}
+                <ActiveGamesCard navigation={navigation} />
+
+                {/* Game Mode Cards */}
+                {products.map((product, index) => (
+                    <Product
+                        key={index}
+                        product={product}
+                        horizontal
+                        onPress={() => handleProductPress(product)}
+                    />
+                ))}
+
+                {/* Game History Card */}
+                <GameHistoryCard navigation={navigation} />
+            </ScrollView>
 
             <FixtureLoaderModal
                 visible={fixtureModalVisible}
@@ -74,11 +78,13 @@ const styles = StyleSheet.create({
         width: width,
         height: height,
     },
-    home: {
-        width: width,
+    scrollView: {
+        flex: 1,
     },
-    productContainer: {
+    scrollContent: {
+        paddingVertical: theme.SIZES.BASE * 2,
         paddingHorizontal: theme.SIZES.BASE,
+        paddingBottom: theme.SIZES.BASE * 3,
     },
     search: {
         height: 48,
@@ -119,10 +125,5 @@ const styles = StyleSheet.create({
     divider: {
         borderRightWidth: 0.3,
         borderRightColor: theme.COLORS.MUTED,
-    },
-    products: {
-        width: width,
-        paddingVertical: theme.SIZES.BASE * 2,
-        paddingHorizontal: theme.SIZES.BASE,
     },
 });
