@@ -9,6 +9,7 @@ import HomeScreen from '../screens/Home';
 import Login from '../screens/Login';
 import Settings from '../screens/Settings';
 import Friends from '../screens/Friends';
+import Stats from '../screens/Stats';
 import CustomDrawerContent from './Menu';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -92,6 +93,28 @@ export default function AppStack(props) {
                             header: ({ navigation, scene }) => (
                                 <Header
                                     title='Friends'
+                                    navigation={navigation}
+                                    scene={scene}
+                                    user={user}
+                                />
+                            ),
+                        }}
+                    />
+                    <Drawer.Screen
+                        name='Stats'
+                        component={Stats}
+                        options={{
+                            drawerIcon: ({ focused, color }) => (
+                                <Icon
+                                    size={24}
+                                    name='line-chart'
+                                    family='font-awesome'
+                                    color={color}
+                                />
+                            ),
+                            header: ({ navigation, scene }) => (
+                                <Header
+                                    title='Stats'
                                     navigation={navigation}
                                     scene={scene}
                                     user={user}
