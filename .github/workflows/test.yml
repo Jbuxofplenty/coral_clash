@@ -19,7 +19,9 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '24'
+          # Firebase Cloud Functions only supports Node.js 22 currently
+          # Expo app uses Node.js 24, but functions must use 22
+          node-version: '22'
           cache: 'yarn'
           cache-dependency-path: |
             yarn.lock
