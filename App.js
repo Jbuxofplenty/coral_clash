@@ -20,6 +20,11 @@ import { Images, materialTheme, products } from './src/constants/';
 import Screens from './src/navigation/Screens';
 import { AuthProvider } from './src/contexts/AuthContext';
 import { ThemeProvider, useTheme } from './src/contexts/ThemeContext';
+import { NotificationProvider, useNotifications } from './src/contexts/NotificationContext';
+import { NotificationDropdown } from './src/components';
+import { httpsCallable } from 'firebase/functions';
+import { functions } from './src/config/firebase';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
@@ -46,6 +51,44 @@ function cacheImages(images) {
 
 function AppContent() {
     const { isDarkMode } = useTheme();
+    const { notification, dismissNotification, decrementBadge } = useNotifications();
+
+    const handleAccept = async (notificationData) => {
+        try {
+            const respondToFriendRequest = httpsCallable(functions, 'respondToFriendRequest');
+            await respondToFriendRequest({
+                requestId: notificationData.data.requestId,
+                accept: true,
+            });
+
+            decrementBadge();
+        } catch (error) {
+            console.error('Error accepting friend request:', error);
+        }
+    };
+
+    const handleDecline = async (notificationData) => {
+        try {
+            const respondToFriendRequest = httpsCallable(functions, 'respondToFriendRequest');
+            await respondToFriendRequest({
+                requestId: notificationData.data.requestId,
+                accept: false,
+            });
+
+            decrementBadge();
+        } catch (error) {
+            console.error('Error declining friend request:', error);
+        }
+    };
+
+    // Extract notification data for the dropdown
+    const notificationDropdownData = notification
+        ? {
+              displayName: notification.request.content.data.displayName,
+              avatarKey: notification.request.content.data.avatarKey,
+              data: notification.request.content.data,
+          }
+        : null;
 
     return (
         <Block flex>
@@ -53,6 +96,12 @@ function AppContent() {
                 barStyle={isDarkMode ? 'light-content' : 'dark-content'}
                 backgroundColor='transparent'
                 translucent
+            />
+            <NotificationDropdown
+                notification={notificationDropdownData}
+                onAccept={handleAccept}
+                onDecline={handleDecline}
+                onDismiss={dismissNotification}
             />
             <Screens />
         </Block>
@@ -96,14 +145,18 @@ export default function App() {
     }
 
     return (
-        <AuthProvider>
-            <ThemeProvider>
-                <NavigationContainer onReady={onLayoutRootView}>
-                    <GalioProvider theme={materialTheme}>
-                        <AppContent />
-                    </GalioProvider>
-                </NavigationContainer>
-            </ThemeProvider>
-        </AuthProvider>
+        <SafeAreaProvider>
+            <AuthProvider>
+                <ThemeProvider>
+                    <NotificationProvider>
+                        <NavigationContainer onReady={onLayoutRootView}>
+                            <GalioProvider theme={materialTheme}>
+                                <AppContent />
+                            </GalioProvider>
+                        </NavigationContainer>
+                    </NotificationProvider>
+                </ThemeProvider>
+            </AuthProvider>
+        </SafeAreaProvider>
     );
 }

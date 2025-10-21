@@ -2,12 +2,12 @@ import { useNavigation } from '@react-navigation/native';
 import { Block, NavBar, theme } from 'galio-framework';
 
 import React from 'react';
-import { Dimensions, Platform, StyleSheet, View, Image } from 'react-native';
+import { Dimensions, Platform, StyleSheet } from 'react-native';
 
 import materialTheme from '../constants/Theme';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
-import { DEFAULT_AVATARS, DEFAULT_AVATAR_NAME } from '../constants/avatars';
+import Avatar from './Avatar';
 
 const { height, width } = Dimensions.get('window');
 const iPhoneX = () =>
@@ -27,20 +27,7 @@ function Header({ back, title, transparent }) {
             return null;
         }
 
-        // Get avatar key from user data, fallback to default
-        const avatarKey = user.avatarKey || DEFAULT_AVATAR_NAME;
-        const avatarSource = DEFAULT_AVATARS[avatarKey] || DEFAULT_AVATARS[DEFAULT_AVATAR_NAME];
-
-        return (
-            <View
-                style={[
-                    styles.profileButton,
-                    { borderColor: colors.BORDER_COLOR, backgroundColor: colors.CARD_BACKGROUND },
-                ]}
-            >
-                <Image source={avatarSource} style={styles.profileAvatar} resizeMode='contain' />
-            </View>
-        );
+        return <Avatar size='medium' style={{ marginRight: 8 }} />;
     };
 
     const headerStyles = {
@@ -114,19 +101,5 @@ const styles = StyleSheet.create({
         marginHorizontal: 16,
         borderWidth: 1,
         borderRadius: 3,
-    },
-    profileButton: {
-        width: 44,
-        height: 44,
-        borderRadius: 0,
-        borderWidth: 2,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginRight: 8,
-        overflow: 'hidden',
-    },
-    profileAvatar: {
-        width: 36,
-        height: 36,
     },
 });

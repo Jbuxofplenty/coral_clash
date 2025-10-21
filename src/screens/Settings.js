@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 
 import { materialTheme } from '../constants';
+import { LoadingScreen } from '../components';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { useFirebaseFunctions } from '../hooks/useFirebaseFunctions';
@@ -122,11 +123,7 @@ export default function Settings({ navigation }) {
     };
 
     if (loading) {
-        return (
-            <Block flex center middle style={{ backgroundColor: colors.BACKGROUND }}>
-                <ActivityIndicator size='large' color={colors.PRIMARY} />
-            </Block>
-        );
+        return <LoadingScreen />;
     }
 
     if (!settings) {

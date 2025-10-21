@@ -12,10 +12,12 @@ yarn.lock
 .env
 .env.local
 
-# Firebase Emulator logs
+# Firebase Emulator logs and data
 firestore-debug.log
 ui-debug.log
 firebase-debug.log
+.emulator-data/
+firebase-data/
 
 # macOS
 .DS_Store
@@ -24,3 +26,6 @@ firebase-debug.log
 .venv/
 __pycache__/
 *.pyc
+
+# EAS Build artifacts
+build-*.tar.gz

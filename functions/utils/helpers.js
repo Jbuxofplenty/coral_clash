@@ -1,6 +1,7 @@
 // Import from shared library (source of truth)
 const { CoralClash, DEFAULT_POSITION } = require('../../shared/game/coralClash');
 const { createGameSnapshot } = require('../../shared/game/gameState');
+const { FieldValue } = require('firebase-admin/firestore');
 
 /**
  * Initialize game state for a new Coral Clash game
@@ -33,12 +34,31 @@ function getDefaultSettings() {
     return {
         // Theme preference
         theme: 'auto', // 'light', 'dark', 'auto'
-        // Avatar preference (ocean-themed pieces) - random selection
-        avatarKey: getRandomAvatarKey(),
+        // Avatar preference (ocean-themed pieces) - dolphin is default
+        avatarKey: 'dolphin',
     };
+}
+
+/**
+ * Get server timestamp for Firestore
+ * @returns {FieldValue} Server timestamp
+ */
+function serverTimestamp() {
+    return FieldValue.serverTimestamp();
+}
+
+/**
+ * Get Firestore increment value
+ * @param {number} amount - Amount to increment by
+ * @returns {FieldValue} Increment value
+ */
+function increment(amount) {
+    return FieldValue.increment(amount);
 }
 
 module.exports = {
     initializeGameState,
     getDefaultSettings,
+    serverTimestamp,
+    increment,
 };

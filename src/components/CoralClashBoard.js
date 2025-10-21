@@ -7,6 +7,9 @@ import {
     TouchableOpacity,
     Share,
     Alert,
+    Modal,
+    Animated,
+    Dimensions,
 } from 'react-native';
 import { Icon } from 'galio-framework';
 import useCoralClash from '../hooks/useCoralClash';
@@ -17,6 +20,8 @@ import Moves from './Moves';
 import Pieces from './Pieces';
 import Coral from './Coral';
 import { useTheme } from '../contexts/ThemeContext';
+
+const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 // Game state schema version for fixtures
 const GAME_STATE_VERSION = '1.2.0';
@@ -32,7 +37,27 @@ const CoralClash = ({ fixture }) => {
     const [isViewingEnemyMoves, setIsViewingEnemyMoves] = useState(false);
     const [fixtureLoaded, setFixtureLoaded] = useState(false);
     const [, forceUpdate] = useState(0);
+    const [menuVisible, setMenuVisible] = useState(false);
+    const [slideAnim] = useState(new Animated.Value(0));
     const boardSize = Math.min(width, 400);
+
+    const openMenu = () => {
+        setMenuVisible(true);
+        Animated.spring(slideAnim, {
+            toValue: 1,
+            useNativeDriver: true,
+            damping: 20,
+            stiffness: 90,
+        }).start();
+    };
+
+    const closeMenu = () => {
+        Animated.timing(slideAnim, {
+            toValue: 0,
+            duration: 250,
+            useNativeDriver: true,
+        }).start(() => setMenuVisible(false));
+    };
 
     // Load fixture if provided
     useEffect(() => {
@@ -136,6 +161,7 @@ const CoralClash = ({ fixture }) => {
     const canUndo = coralClash.history().length >= 2;
 
     const handleResign = () => {
+        closeMenu();
         // Confirm resignation
         Alert.alert('Resign Game', 'Are you sure you want to resign? You will lose the game.', [
             {
@@ -488,15 +514,29 @@ const CoralClash = ({ fixture }) => {
     };
 
     const handleReset = () => {
-        coralClash.reset();
-        setVisibleMoves([]);
-        setSelectedSquare(null);
-        setWhaleDestination(null);
-        setWhaleOrientationMoves([]);
-        setIsViewingEnemyMoves(false);
+        closeMenu();
+        Alert.alert('Reset Game', 'Are you sure you want to start a new game?', [
+            {
+                text: 'Cancel',
+                style: 'cancel',
+            },
+            {
+                text: 'Reset',
+                style: 'destructive',
+                onPress: () => {
+                    coralClash.reset();
+                    setVisibleMoves([]);
+                    setSelectedSquare(null);
+                    setWhaleDestination(null);
+                    setWhaleOrientationMoves([]);
+                    setIsViewingEnemyMoves(false);
+                },
+            },
+        ]);
     };
 
     const handleExportState = async () => {
+        closeMenu();
         try {
             const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
             const gameState = {
@@ -530,18 +570,23 @@ const CoralClash = ({ fixture }) => {
         }
     };
 
+    const translateY = slideAnim.interpolate({
+        inputRange: [0, 1],
+        outputRange: [400, 0],
+    });
+
     return (
         <View style={{ alignItems: 'center', flex: 1, width: '100%' }}>
             {/* Control Bar */}
             <View style={styles.controlBar}>
-                {/* Reset Button - Left */}
+                {/* Menu Button - Left */}
                 <TouchableOpacity
                     style={styles.controlButton}
-                    onPress={handleReset}
+                    onPress={openMenu}
                     activeOpacity={0.7}
                 >
                     <Icon
-                        name='refresh'
+                        name='menu'
                         family='MaterialIcons'
                         size={45}
                         color={colors.WHITE}
@@ -549,24 +594,7 @@ const CoralClash = ({ fixture }) => {
                     />
                 </TouchableOpacity>
 
-                {/* Export Button - Center (Dev Only) */}
-                {process.env.EXPO_PUBLIC_ENABLE_DEV_FEATURES === 'true' && (
-                    <TouchableOpacity
-                        style={styles.controlButton}
-                        onPress={handleExportState}
-                        activeOpacity={0.7}
-                    >
-                        <Icon
-                            name='ios-share'
-                            family='Ionicons'
-                            size={45}
-                            color={colors.WHITE}
-                            style={styles.controlIcon}
-                        />
-                    </TouchableOpacity>
-                )}
-
-                {/* Undo Button */}
+                {/* Undo Button - Center */}
                 <TouchableOpacity
                     style={styles.controlButton}
                     onPress={handleUndo}
@@ -578,22 +606,6 @@ const CoralClash = ({ fixture }) => {
                         family='MaterialIcons'
                         size={45}
                         color={canUndo ? colors.WHITE : colors.MUTED}
-                        style={styles.controlIcon}
-                    />
-                </TouchableOpacity>
-
-                {/* Resign Button - Right */}
-                <TouchableOpacity
-                    style={styles.controlButton}
-                    onPress={handleResign}
-                    disabled={coralClash.isGameOver()}
-                    activeOpacity={0.7}
-                >
-                    <Icon
-                        name='flag'
-                        family='MaterialIcons'
-                        size={45}
-                        color={coralClash.isGameOver() ? colors.MUTED : colors.WHITE}
                         style={styles.controlIcon}
                     />
                 </TouchableOpacity>
@@ -621,6 +633,148 @@ const CoralClash = ({ fixture }) => {
                     <Text style={styles.statusText}>{gameStatus.message}</Text>
                 </View>
             )}
+
+            {/* Bottom Drawer Menu */}
+            <Modal
+                visible={menuVisible}
+                transparent
+                animationType='fade'
+                onRequestClose={closeMenu}
+            >
+                <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={closeMenu}>
+                    <Animated.View
+                        style={[
+                            styles.drawerContainer,
+                            {
+                                backgroundColor: colors.CARD_BACKGROUND,
+                                transform: [{ translateY }],
+                            },
+                        ]}
+                        onStartShouldSetResponder={() => true}
+                    >
+                        {/* Drawer Handle */}
+                        <View style={styles.drawerHandle} />
+
+                        {/* Menu Items */}
+                        <View style={styles.menuItems}>
+                            {/* Save Game State */}
+                            <TouchableOpacity
+                                style={[
+                                    styles.menuItem,
+                                    { borderBottomColor: colors.BORDER_COLOR },
+                                ]}
+                                onPress={handleExportState}
+                                activeOpacity={0.7}
+                            >
+                                <Icon
+                                    name='save'
+                                    family='MaterialIcons'
+                                    size={28}
+                                    color={colors.PRIMARY}
+                                />
+                                <View style={styles.menuItemText}>
+                                    <Text style={[styles.menuItemTitle, { color: colors.TEXT }]}>
+                                        Save Game State
+                                    </Text>
+                                    <Text
+                                        style={[
+                                            styles.menuItemSubtitle,
+                                            { color: colors.TEXT_SECONDARY },
+                                        ]}
+                                    >
+                                        Export current game position
+                                    </Text>
+                                </View>
+                            </TouchableOpacity>
+
+                            {/* Reset Game */}
+                            <TouchableOpacity
+                                style={[
+                                    styles.menuItem,
+                                    { borderBottomColor: colors.BORDER_COLOR },
+                                ]}
+                                onPress={handleReset}
+                                activeOpacity={0.7}
+                            >
+                                <Icon
+                                    name='refresh'
+                                    family='MaterialIcons'
+                                    size={28}
+                                    color='#f57c00'
+                                />
+                                <View style={styles.menuItemText}>
+                                    <Text style={[styles.menuItemTitle, { color: colors.TEXT }]}>
+                                        Reset Game
+                                    </Text>
+                                    <Text
+                                        style={[
+                                            styles.menuItemSubtitle,
+                                            { color: colors.TEXT_SECONDARY },
+                                        ]}
+                                    >
+                                        Start a new game from the beginning
+                                    </Text>
+                                </View>
+                            </TouchableOpacity>
+
+                            {/* Resign */}
+                            <TouchableOpacity
+                                style={[
+                                    styles.menuItem,
+                                    { opacity: coralClash.isGameOver() ? 0.5 : 1 },
+                                ]}
+                                onPress={handleResign}
+                                disabled={coralClash.isGameOver()}
+                                activeOpacity={0.7}
+                            >
+                                <Icon
+                                    name='flag'
+                                    family='MaterialIcons'
+                                    size={28}
+                                    color={coralClash.isGameOver() ? colors.MUTED : '#d32f2f'}
+                                />
+                                <View style={styles.menuItemText}>
+                                    <Text
+                                        style={[
+                                            styles.menuItemTitle,
+                                            {
+                                                color: coralClash.isGameOver()
+                                                    ? colors.MUTED
+                                                    : colors.TEXT,
+                                            },
+                                        ]}
+                                    >
+                                        Resign Game
+                                    </Text>
+                                    <Text
+                                        style={[
+                                            styles.menuItemSubtitle,
+                                            { color: colors.TEXT_SECONDARY },
+                                        ]}
+                                    >
+                                        {coralClash.isGameOver()
+                                            ? 'Game already ended'
+                                            : 'Forfeit the current game'}
+                                    </Text>
+                                </View>
+                            </TouchableOpacity>
+                        </View>
+
+                        {/* Cancel Button */}
+                        <TouchableOpacity
+                            style={[styles.cancelButton, { borderTopColor: colors.BORDER_COLOR }]}
+                            onPress={closeMenu}
+                            activeOpacity={0.7}
+                        >
+                            <Text
+                                style={[styles.cancelButtonText, { color: colors.TEXT_SECONDARY }]}
+                            >
+                                Cancel
+                            </Text>
+                        </TouchableOpacity>
+                    </Animated.View>
+                </TouchableOpacity>
+            </Modal>
         </View>
     );
 };
@@ -658,6 +812,61 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: 'bold',
         textAlign: 'center',
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'flex-end',
+    },
+    drawerContainer: {
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
+        paddingBottom: 34,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: -2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 10,
+        elevation: 10,
+    },
+    drawerHandle: {
+        width: 40,
+        height: 4,
+        backgroundColor: '#CCCCCC',
+        borderRadius: 2,
+        alignSelf: 'center',
+        marginTop: 12,
+        marginBottom: 20,
+    },
+    menuItems: {
+        paddingHorizontal: 20,
+    },
+    menuItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 16,
+        borderBottomWidth: 1,
+    },
+    menuItemText: {
+        flex: 1,
+        marginLeft: 16,
+    },
+    menuItemTitle: {
+        fontSize: 18,
+        fontWeight: '600',
+        marginBottom: 4,
+    },
+    menuItemSubtitle: {
+        fontSize: 14,
+    },
+    cancelButton: {
+        paddingVertical: 16,
+        alignItems: 'center',
+        borderTopWidth: 1,
+        marginTop: 8,
+    },
+    cancelButtonText: {
+        fontSize: 16,
+        fontWeight: '600',
     },
 });
 

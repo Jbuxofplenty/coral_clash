@@ -1,12 +1,12 @@
 import { DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer';
 import { Block, Text } from 'galio-framework';
 import React from 'react';
-import { StyleSheet, View, Image } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
-import { DEFAULT_AVATARS, DEFAULT_AVATAR_NAME } from '../constants/avatars';
+import { Avatar } from '../components';
 
 // Re-export for backward compatibility
 export {
@@ -21,9 +21,15 @@ function CustomDrawerContent(props) {
     const { user } = useAuth();
     const { colors } = useTheme();
 
-    // Get avatar key from user data, fallback to default
-    const avatarKey = user?.avatarKey || DEFAULT_AVATAR_NAME;
-    const avatarSource = DEFAULT_AVATARS[avatarKey] || DEFAULT_AVATARS[DEFAULT_AVATAR_NAME];
+    // Format display name with discriminator
+    const getDisplayName = () => {
+        if (!user) return '';
+        const name = user.displayName || user.email || 'User';
+        if (user.discriminator) {
+            return `${name} #${user.discriminator}`;
+        }
+        return name;
+    };
 
     return (
         <LinearGradient
@@ -38,13 +44,9 @@ function CustomDrawerContent(props) {
                 <Block style={[styles.header, { paddingTop: insets.top + 20 }]}>
                     {user && (
                         <View style={styles.profileContainer}>
-                            <Image
-                                source={avatarSource}
-                                style={[styles.avatar, { backgroundColor: colors.CARD_BACKGROUND }]}
-                                resizeMode='contain'
-                            />
+                            <Avatar size='xlarge' style={styles.avatar} showBorder={true} />
                             <Text size={16} color='white' style={styles.userName}>
-                                {user.displayName || user.email}
+                                {getDisplayName()}
                             </Text>
                         </View>
                     )}
@@ -86,13 +88,8 @@ const styles = StyleSheet.create({
         marginBottom: 20,
     },
     avatar: {
-        width: 80,
-        height: 80,
-        borderRadius: 0,
-        borderWidth: 3,
-        borderColor: '#fff',
         marginBottom: 12,
-        padding: 8,
+        borderColor: '#fff',
     },
     userName: {
         fontWeight: '600',

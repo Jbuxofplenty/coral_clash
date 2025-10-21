@@ -53,9 +53,31 @@ function Login({ navigation }) {
             return;
         }
 
-        if (isSignUp && !displayName) {
-            setError('Please enter a display name');
-            return;
+        if (isSignUp) {
+            const trimmedDisplayName = displayName?.trim();
+
+            if (!trimmedDisplayName) {
+                setError('Username is required');
+                return;
+            }
+
+            if (trimmedDisplayName.length < 2) {
+                setError('Username must be at least 2 characters');
+                return;
+            }
+
+            if (trimmedDisplayName.length > 30) {
+                setError('Username must be less than 30 characters');
+                return;
+            }
+
+            // Check for valid characters (alphanumeric, spaces, underscores, hyphens)
+            if (!/^[a-zA-Z0-9 _-]+$/.test(trimmedDisplayName)) {
+                setError(
+                    'Username can only contain letters, numbers, spaces, underscores, and hyphens',
+                );
+                return;
+            }
         }
 
         setLoading(true);
@@ -64,7 +86,7 @@ function Login({ navigation }) {
 
         try {
             if (isSignUp) {
-                await signUp(email, password, displayName);
+                await signUp(email, password, displayName.trim());
             } else {
                 await signIn(email, password);
             }
@@ -149,7 +171,7 @@ function Login({ navigation }) {
                                 {showForgotPassword
                                     ? 'Enter your email to receive a password reset link'
                                     : isSignUp
-                                      ? 'Sign up to start playing Coral Clash online'
+                                      ? 'Create an account to play online. Choose a unique username!'
                                       : 'Sign in to play against the computer or challenge other players online'}
                             </Text>
 
@@ -172,7 +194,7 @@ function Login({ navigation }) {
                             <Block style={styles.form}>
                                 {!showForgotPassword && isSignUp && (
                                     <Input
-                                        placeholder='Display Name'
+                                        placeholder='Username (required)'
                                         value={displayName}
                                         onChangeText={setDisplayName}
                                         style={[

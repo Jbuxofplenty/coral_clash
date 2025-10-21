@@ -8,6 +8,7 @@ import GameScreen from '../screens/Game';
 import HomeScreen from '../screens/Home';
 import Login from '../screens/Login';
 import Settings from '../screens/Settings';
+import Friends from '../screens/Friends';
 import CustomDrawerContent from './Menu';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -81,6 +82,23 @@ export default function AppStack(props) {
 
             {user ? (
                 <>
+                    <Drawer.Screen
+                        name='Friends'
+                        component={Friends}
+                        options={{
+                            drawerIcon: ({ focused, color }) => (
+                                <Icon size={24} name='users' family='font-awesome' color={color} />
+                            ),
+                            header: ({ navigation, scene }) => (
+                                <Header
+                                    title='Friends'
+                                    navigation={navigation}
+                                    scene={scene}
+                                    user={user}
+                                />
+                            ),
+                        }}
+                    />
                     <Drawer.Screen
                         name='Settings'
                         component={Settings}

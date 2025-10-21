@@ -1,6 +1,6 @@
 const functions = require('firebase-functions/v1');
 const admin = require('firebase-admin');
-const { initializeGameState } = require('../utils/helpers');
+const { initializeGameState, serverTimestamp, increment } = require('../utils/helpers');
 const { validateMove, getGameResult } = require('../utils/gameValidator');
 
 const db = admin.firestore();
@@ -33,8 +33,8 @@ exports.createPvPGame = functions.https.onCall(async (data, context) => {
             timeControl: timeControl || { type: 'unlimited' },
             moves: [],
             gameState: initializeGameState(),
-            createdAt: admin.firestore.FieldValue.serverTimestamp(),
-            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp(),
         };
 
         const gameRef = await db.collection('games').add(gameData);
@@ -46,7 +46,7 @@ exports.createPvPGame = functions.https.onCall(async (data, context) => {
             gameId: gameRef.id,
             from: creatorId,
             read: false,
-            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+            createdAt: serverTimestamp(),
         });
 
         return {
@@ -92,7 +92,7 @@ exports.respondToGameInvite = functions.https.onCall(async (data, context) => {
             .doc(gameId)
             .update({
                 status: accept ? 'active' : 'cancelled',
-                updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+                updatedAt: serverTimestamp(),
             });
 
         return {
@@ -153,7 +153,7 @@ exports.makeMove = functions.https.onCall(async (data, context) => {
         moves.push({
             playerId: userId,
             move: validation.result,
-            timestamp: admin.firestore.FieldValue.serverTimestamp(),
+            timestamp: serverTimestamp(),
         });
 
         // Toggle turn (unless game is over)
@@ -192,7 +192,7 @@ exports.makeMove = functions.https.onCall(async (data, context) => {
                 gameId: gameId,
                 from: userId,
                 read: false,
-                createdAt: admin.firestore.FieldValue.serverTimestamp(),
+                createdAt: serverTimestamp(),
             });
         }
 
@@ -204,7 +204,7 @@ exports.makeMove = functions.https.onCall(async (data, context) => {
                 gameId: gameId,
                 result: gameResult,
                 read: false,
-                createdAt: admin.firestore.FieldValue.serverTimestamp(),
+                createdAt: serverTimestamp(),
             });
             await db.collection('notifications').add({
                 userId: gameData.opponentId,
@@ -212,7 +212,7 @@ exports.makeMove = functions.https.onCall(async (data, context) => {
                 gameId: gameId,
                 result: gameResult,
                 read: false,
-                createdAt: admin.firestore.FieldValue.serverTimestamp(),
+                createdAt: serverTimestamp(),
             });
 
             // Update player stats
@@ -226,16 +226,16 @@ exports.makeMove = functions.https.onCall(async (data, context) => {
                     .collection('users')
                     .doc(winnerId)
                     .update({
-                        'stats.gamesPlayed': admin.firestore.FieldValue.increment(1),
-                        'stats.gamesWon': admin.firestore.FieldValue.increment(1),
+                        'stats.gamesPlayed': increment(1),
+                        'stats.gamesWon': increment(1),
                     });
 
                 await db
                     .collection('users')
                     .doc(loserId)
                     .update({
-                        'stats.gamesPlayed': admin.firestore.FieldValue.increment(1),
-                        'stats.gamesLost': admin.firestore.FieldValue.increment(1),
+                        'stats.gamesPlayed': increment(1),
+                        'stats.gamesLost': increment(1),
                     });
             } else {
                 // Draw
@@ -243,16 +243,16 @@ exports.makeMove = functions.https.onCall(async (data, context) => {
                     .collection('users')
                     .doc(gameData.creatorId)
                     .update({
-                        'stats.gamesPlayed': admin.firestore.FieldValue.increment(1),
-                        'stats.gamesDraw': admin.firestore.FieldValue.increment(1),
+                        'stats.gamesPlayed': increment(1),
+                        'stats.gamesDraw': increment(1),
                     });
 
                 await db
                     .collection('users')
                     .doc(gameData.opponentId)
                     .update({
-                        'stats.gamesPlayed': admin.firestore.FieldValue.increment(1),
-                        'stats.gamesDraw': admin.firestore.FieldValue.increment(1),
+                        'stats.gamesPlayed': increment(1),
+                        'stats.gamesDraw': increment(1),
                     });
             }
         }

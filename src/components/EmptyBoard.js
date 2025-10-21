@@ -1,9 +1,13 @@
-import { Block } from 'galio-framework';
+import { Block, Text } from 'galio-framework';
 import { FlatGrid } from 'react-native-super-grid';
 
 const BOARD_SIZE = 8;
+const RANKS = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+const FILES = ['8', '7', '6', '5', '4', '3', '2', '1'];
 
 const EmptyBoard = ({ size }) => {
+    const squareSize = size / BOARD_SIZE;
+
     return (
         <Block
             height={size}
@@ -14,7 +18,7 @@ const EmptyBoard = ({ size }) => {
         >
             <FlatGrid
                 staticDimension={size}
-                itemDimension={size / BOARD_SIZE}
+                itemDimension={squareSize}
                 fixed
                 spacing={0}
                 scrollEnabled={false}
@@ -23,13 +27,52 @@ const EmptyBoard = ({ size }) => {
                     const col = Math.floor(index / BOARD_SIZE);
                     const row = index % BOARD_SIZE;
                     const color = (row + col) % 2 === 0 ? '#e8d7c3' : '#5b8fa3';
+                    const textColor = (row + col) % 2 === 0 ? '#5b8fa3' : '#e8d7c3';
+
+                    // Show rank number (8-1) in bottom-left corner of first column
+                    const showRank = col === 7;
+                    // Show file letter (a-h) in bottom-left corner of last row
+                    const showFile = row === 0;
+
                     return (
                         <Block
                             key={index.toString()}
-                            height={size / BOARD_SIZE}
-                            width={size / BOARD_SIZE}
+                            height={squareSize}
+                            width={squareSize}
                             backgroundColor={color}
-                        />
+                            style={{ position: 'relative' }}
+                        >
+                            {showRank && (
+                                <Text
+                                    size={squareSize * 0.2}
+                                    color={textColor}
+                                    style={{
+                                        position: 'absolute',
+                                        bottom: 2,
+                                        right: 2,
+                                        fontWeight: 'bold',
+                                        opacity: 0.8,
+                                    }}
+                                >
+                                    {RANKS[row]}
+                                </Text>
+                            )}
+                            {showFile && (
+                                <Text
+                                    size={squareSize * 0.2}
+                                    color={textColor}
+                                    style={{
+                                        position: 'absolute',
+                                        top: 2,
+                                        left: 2,
+                                        fontWeight: 'bold',
+                                        opacity: 0.8,
+                                    }}
+                                >
+                                    {FILES[col]}
+                                </Text>
+                            )}
+                        </Block>
                     );
                 }}
             />

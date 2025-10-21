@@ -13,9 +13,7 @@ import { doc, setDoc, getDoc } from 'firebase/firestore';
 import * as WebBrowser from 'expo-web-browser';
 import * as Google from 'expo-auth-session/providers/google';
 import Constants from 'expo-constants';
-import { httpsCallable } from 'firebase/functions';
-import { auth, db, functions } from '../config/firebase';
-import { getRandomAvatarKey } from '../constants/avatars';
+import { auth, db } from '../config/firebase';
 
 // Required for Google Sign-In on web
 WebBrowser.maybeCompleteAuthSession();
@@ -87,14 +85,12 @@ export const AuthProvider = ({ children }) => {
                     // Check if this is a new user and create Firestore document
                     const userDoc = await getDoc(doc(db, 'users', userCredential.user.uid));
                     if (!userDoc.exists()) {
-                        // Pick a random avatar for the new user
-                        const randomAvatar = getRandomAvatarKey();
-
+                        // Create the basic user document
+                        // The Firestore trigger will automatically add discriminator and default settings
                         await setDoc(doc(db, 'users', userCredential.user.uid), {
                             displayName: userCredential.user.displayName,
                             email: userCredential.user.email,
                             photoURL: userCredential.user.photoURL,
-                            avatarKey: randomAvatar,
                             createdAt: new Date().toISOString(),
                             stats: {
                                 gamesPlayed: 0,
@@ -105,14 +101,10 @@ export const AuthProvider = ({ children }) => {
                             friends: [],
                         });
 
-                        // Create default user settings
-                        const updateUserSettings = httpsCallable(functions, 'updateUserSettings');
-                        await updateUserSettings({
-                            settings: {
-                                theme: 'auto',
-                                avatarKey: randomAvatar,
-                            },
-                        });
+                        // Wait for discriminator and settings to be assigned by Firestore trigger
+                        setTimeout(() => {
+                            refreshUserData();
+                        }, 500);
                     }
                 })
                 .catch((error) => {
@@ -132,14 +124,11 @@ export const AuthProvider = ({ children }) => {
             // Update profile with display name
             await updateProfile(userCredential.user, { displayName });
 
-            // Pick a random avatar for the new user
-            const randomAvatar = getRandomAvatarKey();
-
-            // Create user document in Firestore
+            // Create the basic user document
+            // The Firestore trigger will automatically add discriminator and default settings
             await setDoc(doc(db, 'users', userCredential.user.uid), {
                 displayName,
                 email,
-                avatarKey: randomAvatar,
                 createdAt: new Date().toISOString(),
                 stats: {
                     gamesPlayed: 0,
@@ -150,14 +139,11 @@ export const AuthProvider = ({ children }) => {
                 friends: [],
             });
 
-            // Create default user settings (theme and avatar)
-            const updateUserSettings = httpsCallable(functions, 'updateUserSettings');
-            await updateUserSettings({
-                settings: {
-                    theme: 'auto',
-                    avatarKey: randomAvatar,
-                },
-            });
+            // Wait a moment for the Firestore trigger to assign discriminator and settings
+            // Then refresh user data to get the discriminator and settings
+            setTimeout(() => {
+                refreshUserData();
+            }, 500);
 
             return userCredential.user;
         } catch (err) {

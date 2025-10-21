@@ -1,5 +1,6 @@
 const functions = require('firebase-functions/v1');
 const admin = require('firebase-admin');
+const { serverTimestamp } = require('../utils/helpers');
 
 const db = admin.firestore();
 
@@ -64,7 +65,7 @@ exports.updateUserProfile = functions.https.onCall(async (data, context) => {
         const userId = context.auth.uid;
 
         const updateData = {
-            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+            updatedAt: serverTimestamp(),
         };
 
         if (displayName) updateData.displayName = displayName;

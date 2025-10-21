@@ -184,6 +184,17 @@ export const useFirebaseFunctions = () => {
         }
     };
 
+    const searchUsers = async (query) => {
+        try {
+            const callable = httpsCallable(functions, 'searchUsers');
+            const result = await callable({ query });
+            return result.data;
+        } catch (error) {
+            console.error('Error searching users:', error);
+            throw error;
+        }
+    };
+
     return {
         // User Profile
         getUserProfile,
@@ -202,6 +213,7 @@ export const useFirebaseFunctions = () => {
         respondToFriendRequest,
         getFriends,
         removeFriend,
+        searchUsers,
     };
 };
 
