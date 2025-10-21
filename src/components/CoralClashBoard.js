@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { Icon } from 'galio-framework';
 import useCoralClash from '../hooks/useCoralClash';
-import { WHALE, applyFixture } from '../../shared';
+import { WHALE, applyFixture, restoreGameFromSnapshot } from '../../shared';
 import EmptyBoard from './EmptyBoard';
 import Moves from './Moves';
 import Pieces from './Pieces';
@@ -22,17 +22,19 @@ import PlayerStatusBar from './PlayerStatusBar';
 import { useTheme } from '../contexts/ThemeContext';
 import { useGamePreferences } from '../contexts/GamePreferencesContext';
 import { useAuth } from '../contexts/AuthContext';
+import useFirebaseFunctions from '../hooks/useFirebaseFunctions';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 // Game state schema version for fixtures
 const GAME_STATE_VERSION = '1.2.0';
 
-const CoralClash = ({ fixture }) => {
+const CoralClash = ({ fixture, gameId, gameState }) => {
     const { width } = useWindowDimensions();
     const { colors, isDarkMode } = useTheme();
     const { isBoardFlipped, toggleBoardFlip } = useGamePreferences();
     const { user } = useAuth();
+    const { makeMove: makeMoveAPI } = useFirebaseFunctions();
     const coralClash = useCoralClash();
     const [visibleMoves, setVisibleMoves] = useState([]);
     const [selectedSquare, setSelectedSquare] = useState(null);
@@ -40,10 +42,16 @@ const CoralClash = ({ fixture }) => {
     const [whaleOrientationMoves, setWhaleOrientationMoves] = useState([]);
     const [isViewingEnemyMoves, setIsViewingEnemyMoves] = useState(false);
     const [fixtureLoaded, setFixtureLoaded] = useState(false);
+    const [gameStateLoaded, setGameStateLoaded] = useState(false);
     const [, forceUpdate] = useState(0);
     const [menuVisible, setMenuVisible] = useState(false);
     const [slideAnim] = useState(new Animated.Value(0));
     const boardSize = Math.min(width, 400);
+
+    // Safety check - return null if coralClash is not initialized
+    if (!coralClash) {
+        return null;
+    }
 
     const openMenu = () => {
         setMenuVisible(true);
@@ -63,7 +71,22 @@ const CoralClash = ({ fixture }) => {
         }).start(() => setMenuVisible(false));
     };
 
-    // Load fixture if provided
+    // Load game state from active game if provided
+    useEffect(() => {
+        if (gameState && !gameStateLoaded && !fixture) {
+            try {
+                restoreGameFromSnapshot(coralClash, gameState);
+                setGameStateLoaded(true);
+                console.log('Game state loaded successfully');
+                forceUpdate((n) => n + 1); // Force re-render after loading
+            } catch (error) {
+                console.error('Failed to load game state:', error);
+                Alert.alert('Error', 'Failed to load game state');
+            }
+        }
+    }, [gameState, gameStateLoaded, fixture]);
+
+    // Load fixture if provided (for dev mode scenarios)
     useEffect(() => {
         if (fixture && !fixtureLoaded) {
             try {
@@ -198,6 +221,42 @@ const CoralClash = ({ fixture }) => {
         ]);
     };
 
+    // Send move to backend API for online games
+    const sendMoveToBackend = async (move) => {
+        // Only send moves for online games (when gameId is provided)
+        if (!gameId) {
+            return;
+        }
+
+        try {
+            console.log('Sending move to backend:', { gameId, move });
+            const result = await makeMoveAPI({ gameId, move });
+            console.log('Move result:', result);
+
+            // If the result contains a computer move, it will be reflected
+            // when the game state is refreshed or the notification is received
+            if (result.computerMove) {
+                console.log('Computer made a move:', result.computerMove);
+            }
+        } catch (error) {
+            console.error('Error sending move to backend:', error);
+            Alert.alert(
+                'Error',
+                'Failed to send move to server. The move was made locally but may not be saved.',
+            );
+        }
+    };
+
+    // Execute a move locally and send to backend
+    const executeMove = (moveParams) => {
+        const moveResult = coralClash.move(moveParams);
+        if (moveResult) {
+            // Move was successful, send to backend
+            sendMoveToBackend(moveParams);
+        }
+        return moveResult;
+    };
+
     const handleSelectPiece = (square) => {
         // Don't allow piece selection if game is over
         if (coralClash.isGameOver()) {
@@ -292,7 +351,7 @@ const CoralClash = ({ fixture }) => {
                 // If only one orientation, execute immediately
                 if (orientationMap.size === 1) {
                     const onlyMove = Array.from(orientationMap.values())[0];
-                    coralClash.move({ from: onlyMove.from, to: onlyMove.to });
+                    executeMove({ from: onlyMove.from, to: onlyMove.to });
                     setSelectedSquare(null);
                     setVisibleMoves([]);
                     setWhaleDestination(null);
@@ -364,7 +423,7 @@ const CoralClash = ({ fixture }) => {
                         return {
                             text: label,
                             onPress: () => {
-                                coralClash.move({
+                                executeMove({
                                     from: option.move.from,
                                     to: option.move.to,
                                     whaleSecondSquare: option.move.whaleSecondSquare,
@@ -387,7 +446,7 @@ const CoralClash = ({ fixture }) => {
                     return;
                 } else {
                     // No coral options, execute move directly
-                    coralClash.move({
+                    executeMove({
                         from: selectedMove.from,
                         to: selectedMove.to,
                         whaleSecondSquare: selectedMove.whaleSecondSquare,
@@ -430,7 +489,7 @@ const CoralClash = ({ fixture }) => {
                                 (m) => m.coralPlaced === false,
                             );
                             if (moveWithoutCoral) {
-                                coralClash.move({
+                                executeMove({
                                     from: moveWithoutCoral.from,
                                     to: moveWithoutCoral.to,
                                     coralPlaced: false,
@@ -450,7 +509,7 @@ const CoralClash = ({ fixture }) => {
                                 (m) => m.coralPlaced === true,
                             );
                             if (moveWithCoral) {
-                                coralClash.move({
+                                executeMove({
                                     from: moveWithCoral.from,
                                     to: moveWithCoral.to,
                                     coralPlaced: true,
@@ -475,7 +534,7 @@ const CoralClash = ({ fixture }) => {
                                 (m) => m.coralRemoved === false,
                             );
                             if (moveWithoutCoralRemoval) {
-                                coralClash.move({
+                                executeMove({
                                     from: moveWithoutCoralRemoval.from,
                                     to: moveWithoutCoralRemoval.to,
                                     coralRemoved: false,
@@ -495,7 +554,7 @@ const CoralClash = ({ fixture }) => {
                                 (m) => m.coralRemoved === true,
                             );
                             if (moveWithCoralRemoval) {
-                                coralClash.move({
+                                executeMove({
                                     from: moveWithCoralRemoval.from,
                                     to: moveWithCoralRemoval.to,
                                     coralRemoved: true,
@@ -515,7 +574,7 @@ const CoralClash = ({ fixture }) => {
 
         // Execute the move (non-whale pieces only, no coral actions)
         // Only pass the fields that move() expects: from, to, promotion
-        coralClash.move({
+        executeMove({
             from: move.from,
             to: move.to,
             ...(move.promotion && { promotion: 'q' }),
@@ -621,6 +680,13 @@ const CoralClash = ({ fixture }) => {
                     />
                 </View>
 
+                {/* Game Status Banner */}
+                {gameStatus && (
+                    <View style={[styles.statusBanner, { backgroundColor: gameStatus.color }]}>
+                        <Text style={styles.statusText}>{gameStatus.message}</Text>
+                    </View>
+                )}
+
                 {/* Spacer */}
                 <View style={styles.spacer} />
 
@@ -642,13 +708,6 @@ const CoralClash = ({ fixture }) => {
                         isEnemyMoves={isViewingEnemyMoves}
                     />
                 </View>
-
-                {/* Game Status Banner */}
-                {gameStatus && (
-                    <View style={[styles.statusBanner, { backgroundColor: gameStatus.color }]}>
-                        <Text style={styles.statusText}>{gameStatus.message}</Text>
-                    </View>
-                )}
 
                 {/* Spacer */}
                 <View style={styles.spacer} />

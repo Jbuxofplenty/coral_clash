@@ -203,10 +203,35 @@ async function sendGameAcceptedNotification(recipientId, accepterId, accepterNam
     });
 }
 
+/**
+ * Send opponent move notification (works for both PvP and computer)
+ * @param {string} userId - User receiving the notification
+ * @param {string} gameId - Game ID
+ * @param {string} opponentId - Opponent's ID ('computer' or user ID)
+ * @param {string} opponentName - Opponent's display name
+ */
+async function sendOpponentMoveNotification(userId, gameId, opponentId, opponentName) {
+    const isComputer = opponentId === 'computer';
+    const body = isComputer ? 'The computer made a move' : `${opponentName} made a move`;
+
+    return sendPushNotification(userId, {
+        title: 'Your Turn',
+        body: body,
+        data: {
+            type: 'move_made',
+            gameId: gameId,
+            from: opponentId,
+            fromName: opponentName,
+            isComputer: isComputer,
+        },
+    });
+}
+
 module.exports = {
     sendPushNotification,
     sendFriendRequestNotification,
     sendFriendAcceptedNotification,
     sendGameRequestNotification,
     sendGameAcceptedNotification,
+    sendOpponentMoveNotification,
 };

@@ -1,6 +1,5 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { Icon } from 'galio-framework';
 import Avatar from './Avatar';
 import { useTheme } from '../contexts/ThemeContext';
 
@@ -39,21 +38,7 @@ export default function PlayerStatusBar({
                 },
             ]}
         >
-            {isComputer ? (
-                <View
-                    style={[
-                        styles.iconContainer,
-                        {
-                            backgroundColor: colors.CARD_BACKGROUND,
-                            borderColor: colors.BORDER_COLOR,
-                        },
-                    ]}
-                >
-                    <Icon name='android' family='MaterialIcons' size={32} color={colors.PRIMARY} />
-                </View>
-            ) : (
-                <Avatar avatarKey={avatarKey} size='medium' showBorder={true} />
-            )}
+            <Avatar avatarKey={avatarKey} computer={isComputer} size='medium' showBorder={true} />
 
             <View style={styles.info}>
                 <Text style={[styles.playerName, { color: 'white' }]} numberOfLines={1}>
@@ -77,13 +62,6 @@ const styles = StyleSheet.create({
         paddingVertical: 8,
         borderWidth: 2,
         borderRadius: 0,
-    },
-    iconContainer: {
-        width: 44,
-        height: 44,
-        borderWidth: 2,
-        justifyContent: 'center',
-        alignItems: 'center',
     },
     info: {
         flex: 1,

@@ -3,11 +3,13 @@ import { View, Image, StyleSheet } from 'react-native';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { DEFAULT_AVATARS, DEFAULT_AVATAR_NAME } from '../constants/avatars';
+import Icon from './Icon';
 
 /**
  * Avatar component with consistent styling across the app
  * @param {Object} props
  * @param {string} props.avatarKey - The avatar key to display (optional, defaults to user's avatar)
+ * @param {boolean} props.computer - Whether to display a computer icon instead of avatar
  * @param {number} props.size - Size preset: 'small' (36), 'medium' (44), 'large' (60), 'xlarge' (80)
  * @param {Object} props.style - Additional container styles
  * @param {Object} props.imageStyle - Additional image styles
@@ -15,6 +17,7 @@ import { DEFAULT_AVATARS, DEFAULT_AVATAR_NAME } from '../constants/avatars';
  */
 export default function Avatar({
     avatarKey,
+    computer = false,
     size = 'medium',
     style,
     imageStyle,
@@ -23,7 +26,7 @@ export default function Avatar({
     const { user } = useAuth();
     const { colors } = useTheme();
 
-    // Get avatar key from props or user data
+    // Get avatar key from props or user data (only if not computer)
     const finalAvatarKey =
         avatarKey || user?.avatarKey || user?.settings?.avatarKey || DEFAULT_AVATAR_NAME;
     const avatarSource = DEFAULT_AVATARS[finalAvatarKey] || DEFAULT_AVATARS[DEFAULT_AVATAR_NAME];
@@ -57,11 +60,20 @@ export default function Avatar({
 
     return (
         <View style={[containerStyle, style]}>
-            <Image
-                source={avatarSource}
-                style={[avatarImageStyle, imageStyle]}
-                resizeMode='contain'
-            />
+            {computer ? (
+                <Icon
+                    name='desktop'
+                    family='font-awesome'
+                    size={config.image * 0.7}
+                    color={colors.PRIMARY}
+                />
+            ) : (
+                <Image
+                    source={avatarSource}
+                    style={[avatarImageStyle, imageStyle]}
+                    resizeMode='contain'
+                />
+            )}
         </View>
     );
 }

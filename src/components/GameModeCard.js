@@ -1,4 +1,3 @@
-import { useNavigation } from '@react-navigation/native';
 import { Block, Text, theme } from 'galio-framework';
 import React from 'react';
 import { Dimensions, StyleSheet, TouchableWithoutFeedback, View } from 'react-native';

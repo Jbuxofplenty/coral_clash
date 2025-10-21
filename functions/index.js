@@ -12,7 +12,7 @@ const db = admin.firestore();
 // Import route modules
 const userProfile = require('./routes/userProfile');
 const userSettings = require('./routes/userSettings');
-const pvpGame = require('./routes/pvpGame');
+const game = require('./routes/game');
 const friends = require('./routes/friends');
 const { getDefaultSettings } = require('./utils/helpers');
 
@@ -25,12 +25,13 @@ exports.getUserSettings = userSettings.getUserSettings;
 exports.updateUserSettings = userSettings.updateUserSettings;
 exports.resetUserSettings = userSettings.resetUserSettings;
 
-// ==================== PvP Game APIs ====================
-exports.createPvPGame = pvpGame.createPvPGame;
-exports.respondToGameInvite = pvpGame.respondToGameInvite;
-exports.makeMove = pvpGame.makeMove;
-exports.getActiveGames = pvpGame.getActiveGames;
-exports.getGameHistory = pvpGame.getGameHistory;
+// ==================== Game APIs ====================
+exports.createGame = game.createGame;
+exports.createComputerGame = game.createComputerGame;
+exports.respondToGameInvite = game.respondToGameInvite;
+exports.makeMove = game.makeMove;
+exports.getActiveGames = game.getActiveGames;
+exports.getGameHistory = game.getGameHistory;
 
 // ==================== Friends APIs ====================
 exports.sendFriendRequest = friends.sendFriendRequest;

@@ -1,38 +1,44 @@
-import { Block, Input, theme } from 'galio-framework';
+import { theme } from 'galio-framework';
 import React, { useState } from 'react';
 import { Dimensions, ScrollView, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
-import { Icon, Product, ActiveGamesCard, GameHistoryCard } from '../components/';
+import { GameModeCard, ActiveGamesCard, GameHistoryCard } from '../components/';
 import FixtureLoaderModal from '../components/FixtureLoaderModal';
-import products from '../constants/products';
 import { useTheme } from '../contexts/ThemeContext';
+import { useGame } from '../hooks/useGame';
 
 const { width, height } = Dimensions.get('screen');
 
-export default function Home({ navigation }) {
-    const { colors, isDarkMode } = useTheme();
-    const [fixtureModalVisible, setFixtureModalVisible] = useState(false);
+// Check if dev features are enabled
+const enableDevFeatures = process.env.EXPO_PUBLIC_ENABLE_DEV_FEATURES === 'true';
 
-    const handleProductPress = (product) => {
-        if (product.isDevFixtureLoader) {
-            // Open fixture loader modal
-            setFixtureModalVisible(true);
-        } else {
-            // Navigate to game
-            navigation.navigate('Game', { product: product });
+export default function Home({ navigation }) {
+    const { colors } = useTheme();
+    const [fixtureModalVisible, setFixtureModalVisible] = useState(false);
+    const { startComputerGame } = useGame();
+
+    const handleStartComputerGame = async () => {
+        try {
+            const result = await startComputerGame();
+            if (result.gameId) {
+                navigation.navigate('Game', { gameId: result.gameId });
+            }
+        } catch (error) {
+            console.error('Failed to start computer game:', error);
         }
+    };
+
+    const handleOpenFixtureLoader = () => {
+        setFixtureModalVisible(true);
     };
 
     const handleSelectFixture = (fixture, fixtureName) => {
         console.log('Loading fixture:', fixtureName);
         // Navigate to game with the fixture
         navigation.navigate('Game', {
-            product: {
-                title: `Loaded: ${fixtureName}`,
-                isFixture: true,
-            },
             fixture: fixture,
+            fixtureName: fixtureName,
         });
     };
 
@@ -50,14 +56,23 @@ export default function Home({ navigation }) {
                 <ActiveGamesCard navigation={navigation} />
 
                 {/* Game Mode Cards */}
-                {products.map((product, index) => (
-                    <Product
-                        key={index}
-                        product={product}
-                        horizontal
-                        onPress={() => handleProductPress(product)}
+                <GameModeCard
+                    title='Play vs Computer'
+                    description='Start a new game against the AI'
+                    icon='desktop'
+                    iconFamily='font-awesome'
+                    onPress={handleStartComputerGame}
+                />
+
+                {enableDevFeatures && (
+                    <GameModeCard
+                        title='Load Game State (Dev)'
+                        description='Load a saved game state from fixtures'
+                        icon='folder-open'
+                        iconFamily='font-awesome'
+                        onPress={handleOpenFixtureLoader}
                     />
-                ))}
+                )}
 
                 {/* Game History Card */}
                 <GameHistoryCard navigation={navigation} />
@@ -85,45 +100,5 @@ const styles = StyleSheet.create({
         paddingVertical: theme.SIZES.BASE * 2,
         paddingHorizontal: theme.SIZES.BASE,
         paddingBottom: theme.SIZES.BASE * 3,
-    },
-    search: {
-        height: 48,
-        width: width - 32,
-        marginHorizontal: 16,
-        borderWidth: 1,
-        borderRadius: 3,
-    },
-    header: {
-        backgroundColor: theme.COLORS.WHITE,
-        shadowColor: theme.COLORS.BLACK,
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowRadius: 8,
-        shadowOpacity: 0.2,
-        elevation: 4,
-        zIndex: 2,
-    },
-    tabs: {
-        marginBottom: 24,
-        marginTop: 10,
-        elevation: 4,
-    },
-    tab: {
-        backgroundColor: theme.COLORS.TRANSPARENT,
-        width: width * 0.5,
-        borderRadius: 0,
-        borderWidth: 0,
-        height: 24,
-        elevation: 0,
-    },
-    tabTitle: {
-        lineHeight: 19,
-        fontWeight: '300',
-    },
-    divider: {
-        borderRightWidth: 0.3,
-        borderRightColor: theme.COLORS.MUTED,
     },
 });

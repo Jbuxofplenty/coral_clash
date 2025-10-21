@@ -10,8 +10,10 @@ const { width, height } = Dimensions.get('screen');
 
 export default function Game({ route }) {
     const { colors } = useTheme();
-    // Get fixture from route params if available
+    // Get game params from route
     const fixture = route?.params?.fixture;
+    const gameId = route?.params?.gameId;
+    const gameState = route?.params?.gameState;
 
     return (
         <LinearGradient
@@ -21,7 +23,7 @@ export default function Game({ route }) {
             end={{ x: 0, y: 1 }}
         >
             <Block flex>
-                <CoralClash fixture={fixture} />
+                <CoralClash fixture={fixture} gameId={gameId} gameState={gameState} />
             </Block>
         </LinearGradient>
     );

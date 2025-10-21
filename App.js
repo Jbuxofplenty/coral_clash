@@ -16,7 +16,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { Block, GalioProvider } from 'galio-framework';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Image, Platform, StatusBar } from 'react-native';
-import { Images, materialTheme, products } from './src/constants/';
+import { Images, materialTheme } from './src/constants/';
 import Screens from './src/navigation/Screens';
 import { AuthProvider } from './src/contexts/AuthContext';
 import { ThemeProvider, useTheme } from './src/contexts/ThemeContext';
@@ -36,9 +36,6 @@ enableScreens();
 
 // cache app images
 const assetImages = [Images.Home];
-
-// cache product images
-products.map((product) => product.image && assetImages.push(product.image));
 
 function cacheImages(images) {
     return images.map((image) => {

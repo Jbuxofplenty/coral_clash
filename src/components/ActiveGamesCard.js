@@ -3,7 +3,7 @@ import { Block, Text, theme } from 'galio-framework';
 import { View, StyleSheet, TouchableOpacity, ActivityIndicator, Dimensions } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTheme } from '../contexts/ThemeContext';
-import { usePvPGame } from '../hooks/usePvPGame';
+import { useGame } from '../hooks/useGame';
 import { useAuth } from '../contexts/AuthContext';
 import Icon from './Icon';
 import Avatar from './Avatar';
@@ -11,13 +11,13 @@ import Avatar from './Avatar';
 const { width } = Dimensions.get('screen');
 
 /**
- * Card component that displays active PvP games on the home screen
+ * Card component that displays active games (PvP and Computer) on the home screen
  * Shows game status, opponent avatar, and whose turn it is
  */
 export default function ActiveGamesCard({ navigation }) {
     const { colors } = useTheme();
     const { user } = useAuth();
-    const { activeGames, loading, loadActiveGames } = usePvPGame();
+    const { activeGames, loading, loadActiveGames } = useGame();
 
     // Load active games when screen comes into focus
     useFocusEffect(
@@ -31,6 +31,7 @@ export default function ActiveGamesCard({ navigation }) {
     const handleGamePress = (game) => {
         navigation.navigate('Game', {
             gameId: game.id,
+            gameState: game.gameState,
             isPvP: true,
         });
     };
@@ -74,13 +75,28 @@ export default function ActiveGamesCard({ navigation }) {
     };
 
     const getOpponentData = (game) => {
-        if (!user) return { id: null, avatarKey: 'dolphin', displayName: 'Opponent' };
+        if (!user)
+            return { id: null, avatarKey: 'dolphin', displayName: 'Opponent', isComputer: false };
 
         const opponentId = game.creatorId === user.uid ? game.opponentId : game.creatorId;
+
+        // Check if this is a computer game
+        const isComputer = opponentId === 'computer' || game.opponentType === 'computer';
+
+        if (isComputer) {
+            return {
+                id: 'computer',
+                avatarKey: null,
+                displayName: 'Computer',
+                isComputer: true,
+            };
+        }
+
         return {
             id: opponentId,
             avatarKey: game.opponentAvatarKey || 'dolphin',
             displayName: game.opponentDisplayName || 'Opponent',
+            isComputer: false,
         };
     };
 
@@ -172,6 +188,7 @@ export default function ActiveGamesCard({ navigation }) {
                                     <Block row middle flex>
                                         <Avatar
                                             avatarKey={opponent.avatarKey}
+                                            computer={opponent.isComputer}
                                             size='small'
                                             style={styles.avatar}
                                         />

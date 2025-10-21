@@ -16,7 +16,7 @@ import { Icon, Avatar, LoadingScreen } from '../components';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { useFirebaseFunctions } from '../hooks/useFirebaseFunctions';
-import { usePvPGame } from '../hooks/usePvPGame';
+import { useGame } from '../hooks/useGame';
 
 const { width } = Dimensions.get('screen');
 
@@ -25,7 +25,7 @@ export default function Friends({ navigation }) {
     const { colors, isDarkMode } = useTheme();
     const { getFriends, sendFriendRequest, respondToFriendRequest, removeFriend, searchUsers } =
         useFirebaseFunctions();
-    const { sendGameRequest } = usePvPGame();
+    const { sendGameRequest } = useGame();
 
     const [loading, setLoading] = useState(true);
     const [friends, setFriends] = useState([]);

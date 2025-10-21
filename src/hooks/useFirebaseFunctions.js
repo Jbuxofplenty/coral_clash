@@ -82,15 +82,26 @@ export const useFirebaseFunctions = () => {
         }
     };
 
-    // ==================== PvP Game Functions ====================
+    // ==================== Game Functions ====================
 
-    const createPvPGame = async (opponentId, timeControl = null) => {
+    const createGame = async (opponentId, timeControl = null) => {
         try {
-            const callable = httpsCallable(functions, 'createPvPGame');
+            const callable = httpsCallable(functions, 'createGame');
             const result = await callable({ opponentId, timeControl });
             return result.data;
         } catch (error) {
-            console.error('Error creating PvP game:', error);
+            console.error('Error creating game:', error);
+            throw error;
+        }
+    };
+
+    const createComputerGame = async (timeControl = null, difficulty = 'random') => {
+        try {
+            const callable = httpsCallable(functions, 'createComputerGame');
+            const result = await callable({ timeControl, difficulty });
+            return result.data;
+        } catch (error) {
+            console.error('Error creating computer game:', error);
             throw error;
         }
     };
@@ -214,8 +225,9 @@ export const useFirebaseFunctions = () => {
         getUserSettings,
         updateUserSettings,
         resetUserSettings,
-        // PvP Games
-        createPvPGame,
+        // Games
+        createGame,
+        createComputerGame,
         respondToGameInvite,
         makeMove,
         getActiveGames,

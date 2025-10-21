@@ -32,7 +32,7 @@ coral_clash/
 │   ├── routes/
 │   │   ├── userProfile.js       # User profile APIs
 │   │   ├── userSettings.js      # User settings APIs
-│   │   ├── pvpGame.js          # ⭐ PvP game APIs (with validation)
+│   │   ├── game.js              # ⭐ PvP/Computer game APIs (with validation)
 │   │   └── friends.js          # Friends APIs
 │   ├── utils/
 │   │   ├── helpers.js          # Helper functions
@@ -51,6 +51,7 @@ coral_clash/
 **Technology**: React Native (Expo)
 
 **Key Features**:
+
 - Local game play vs AI
 - PvP multiplayer
 - User authentication
@@ -58,6 +59,7 @@ coral_clash/
 - Real-time game updates
 
 **Key Files**:
+
 - `src/hooks/coralClash.ts` - Core game engine
 - `src/hooks/useCoralClash.ts` - React integration
 - `src/screens/Game.js` - Game UI
@@ -73,6 +75,7 @@ coral_clash/
 **Purpose**: Single source of truth for game rules used by both client and server
 
 **Key Features**:
+
 - Complete Coral Clash rules
 - Move generation and validation
 - Win condition checking
@@ -80,6 +83,7 @@ coral_clash/
 - Coral mechanics
 
 **Security Model**:
+
 - Client uses for UI and move preview
 - Server uses for authoritative validation
 
@@ -92,6 +96,7 @@ coral_clash/
 **Key APIs**:
 
 **User Management**:
+
 - `getUserProfile(userId)` - Get user profile
 - `updateUserProfile(data)` - Update profile
 - `getUserSettings()` - Get theme/settings
@@ -99,18 +104,21 @@ coral_clash/
 - `resetUserSettings()` - Reset to defaults
 
 **PvP Games**:
+
 - `createPvPGame(opponentId, timeControl)` - Create new game
 - `respondToGameInvite(gameId, accept)` - Accept/decline invitation
 - `makeMove(gameId, move)` - **Make move with server-side validation**
 - `getActiveGames()` - Get user's active games
 
 **Friends**:
+
 - `sendFriendRequest(friendId)` - Send request
 - `respondToFriendRequest(requestId, accept)` - Accept/decline
 - `getFriends()` - Get friends list
 - `removeFriend(friendId)` - Remove friend
 
 **Security Features**:
+
 - Server-side move validation (prevents cheating)
 - Authentication required for all APIs
 - Firestore security rules enforce data access
@@ -204,16 +212,19 @@ Client                    Server (Functions)              Firestore
 ## Security
 
 ### Authentication
+
 - Firebase Auth with email/password
 - JWT tokens for API authentication
 - Persistent sessions with AsyncStorage
 
 ### Authorization
+
 - Firestore security rules prevent unauthorized access
 - Cloud Functions verify user permissions
 - Server-side move validation prevents cheating
 
 ### Data Protection
+
 - Users can only access their own data and friends' data
 - Games only accessible by participants
 - All writes go through Cloud Functions (except settings)
@@ -221,6 +232,7 @@ Client                    Server (Functions)              Firestore
 ## Deployment
 
 ### Mobile App
+
 ```bash
 # Development
 npm start
@@ -233,6 +245,7 @@ eas build --platform android
 ```
 
 ### Cloud Functions
+
 ```bash
 # Install dependencies
 cd functions && npm install
@@ -248,6 +261,7 @@ firebase deploy --only functions:makeMove
 ```
 
 ### Firestore Rules & Indexes
+
 ```bash
 # Deploy rules
 firebase deploy --only firestore:rules
@@ -259,6 +273,7 @@ firebase deploy --only firestore:indexes
 ## Testing
 
 ### Game Logic Tests
+
 ```bash
 # Run all tests
 npm test
@@ -271,6 +286,7 @@ npm test -- coralClash.test.ts
 ```
 
 ### Functions Testing
+
 ```bash
 # Local emulator
 cd functions
@@ -283,6 +299,7 @@ npm test
 ## Environment Variables
 
 **Client** (`.env`):
+
 ```
 EXPO_PUBLIC_FIREBASE_API_KEY=...
 EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN=...
@@ -291,6 +308,7 @@ EXPO_PUBLIC_FIREBASE_PROJECT_ID=...
 ```
 
 **Server** (configured in Firebase Console):
+
 - Automatic via Firebase Admin SDK
 
 ## Key Design Decisions
@@ -311,4 +329,3 @@ EXPO_PUBLIC_FIREBASE_PROJECT_ID=...
 - [ ] Push notifications
 - [ ] Social features (chat, achievements)
 - [ ] Analytics and player statistics
-

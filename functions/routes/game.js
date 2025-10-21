@@ -5,6 +5,7 @@ const { validateMove, getGameResult } = require('../utils/gameValidator');
 const {
     sendGameRequestNotification,
     sendGameAcceptedNotification,
+    sendOpponentMoveNotification,
 } = require('../utils/notifications');
 
 const db = admin.firestore();
@@ -29,7 +30,7 @@ function formatDisplayName(displayName, discriminator) {
  * Create a new PvP game
  * POST /api/game/create
  */
-exports.createPvPGame = functions.https.onCall(async (data, context) => {
+exports.createGame = functions.https.onCall(async (data, context) => {
     try {
         if (!context.auth) {
             throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
@@ -93,6 +94,47 @@ exports.createPvPGame = functions.https.onCall(async (data, context) => {
         };
     } catch (error) {
         console.error('Error creating PvP game:', error);
+        throw new functions.https.HttpsError('internal', error.message);
+    }
+});
+
+/**
+ * Create a new game against the computer
+ * POST /api/game/createComputer
+ */
+exports.createComputerGame = functions.https.onCall(async (data, context) => {
+    try {
+        if (!context.auth) {
+            throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
+        }
+
+        const { timeControl, difficulty } = data;
+        const userId = context.auth.uid;
+
+        // Create game document with computer opponent
+        const gameData = {
+            creatorId: userId,
+            opponentId: 'computer', // Special ID for computer opponent
+            opponentType: 'computer',
+            difficulty: difficulty || 'random', // 'random', 'easy', 'medium', 'hard'
+            status: 'active', // Computer games start immediately
+            currentTurn: userId, // User goes first (white)
+            timeControl: timeControl || { type: 'unlimited' },
+            moves: [],
+            gameState: initializeGameState(),
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp(),
+        };
+
+        const gameRef = await db.collection('games').add(gameData);
+
+        return {
+            success: true,
+            gameId: gameRef.id,
+            message: 'Computer game created successfully',
+        };
+    } catch (error) {
+        console.error('Error creating computer game:', error);
         throw new functions.https.HttpsError('internal', error.message);
     }
 });
@@ -237,8 +279,23 @@ exports.makeMove = functions.https.onCall(async (data, context) => {
 
         await db.collection('games').doc(gameId).update(updateData);
 
-        // Notify opponent (if game continues)
-        if (!gameResult.isOver && nextTurn) {
+        // Check if this is a computer game and if computer should move
+        const isComputerGame = gameData.opponentType === 'computer';
+        let computerMoveResult = null;
+
+        if (isComputerGame && !gameResult.isOver && nextTurn === 'computer') {
+            // Computer's turn - make a move
+            try {
+                computerMoveResult = await makeComputerMove(gameId);
+            } catch (error) {
+                console.error('Error making computer move:', error);
+                // Don't fail the user's move if computer move fails
+            }
+        }
+
+        // Notify opponent (if game continues and not computer)
+        if (!gameResult.isOver && nextTurn && nextTurn !== 'computer') {
+            // Create notification document
             await db.collection('notifications').add({
                 userId: nextTurn,
                 type: 'move_made',
@@ -247,6 +304,18 @@ exports.makeMove = functions.https.onCall(async (data, context) => {
                 read: false,
                 createdAt: serverTimestamp(),
             });
+
+            // Send push notification
+            const currentUserDoc = await db.collection('users').doc(userId).get();
+            const currentUserData = currentUserDoc.data();
+            const currentUserName = formatDisplayName(
+                currentUserData.displayName,
+                currentUserData.discriminator,
+            );
+
+            await sendOpponentMoveNotification(nextTurn, gameId, userId, currentUserName).catch(
+                (error) => console.error('Error sending opponent move notification:', error),
+            );
         }
 
         // Notify both players if game is over
@@ -316,12 +385,155 @@ exports.makeMove = functions.https.onCall(async (data, context) => {
             gameState: validation.gameState,
             gameOver: gameResult.isOver,
             result: gameResult.isOver ? gameResult : undefined,
+            computerMove: computerMoveResult, // Include computer move if applicable
         };
     } catch (error) {
         console.error('Error making move:', error);
         throw new functions.https.HttpsError('internal', error.message);
     }
 });
+
+/**
+ * Helper function to make a computer move
+ * @param {string} gameId - The game ID
+ * @returns {Promise<Object>} Computer move result
+ */
+async function makeComputerMove(gameId) {
+    const gameDoc = await db.collection('games').doc(gameId).get();
+    if (!gameDoc.exists) {
+        throw new Error('Game not found');
+    }
+
+    const gameData = gameDoc.data();
+
+    // Get current FEN from game state
+    const currentFen = gameData.gameState?.fen || gameData.fen;
+
+    // For now, we'll use simple random move selection
+    // In the future, this could be enhanced with difficulty levels
+    const { CoralClash } = require('../../shared/game/coralClash');
+    const game = new CoralClash();
+    game.load(currentFen, { skipValidation: false });
+
+    // Get all legal moves
+    const moves = game.moves({ verbose: true });
+    if (moves.length === 0) {
+        throw new Error('No legal moves available for computer');
+    }
+
+    // Select random move
+    const selectedMove = moves[Math.floor(Math.random() * moves.length)];
+
+    // Make the move
+    const moveResult = game.move({
+        from: selectedMove.from,
+        to: selectedMove.to,
+        promotion: selectedMove.promotion,
+    });
+
+    // Validate the move
+    const validation = validateMove(currentFen, {
+        from: selectedMove.from,
+        to: selectedMove.to,
+        promotion: selectedMove.promotion,
+    });
+
+    if (!validation.valid) {
+        throw new Error(`Computer move validation failed: ${validation.error}`);
+    }
+
+    // Add computer move to moves array
+    const moves_array = gameData.moves || [];
+    moves_array.push({
+        playerId: 'computer',
+        move: validation.result,
+        timestamp: serverTimestamp(),
+    });
+
+    // Toggle turn back to player
+    const nextTurn = gameData.creatorId;
+
+    // Check if game is over
+    const gameResult = getGameResult(validation.newFen);
+
+    // Update game with computer move
+    const updateData = {
+        moves: moves_array,
+        currentTurn: gameResult.isOver ? null : nextTurn,
+        gameState: validation.gameState,
+        fen: validation.newFen,
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    };
+
+    if (gameResult.isOver) {
+        updateData.status = 'completed';
+        updateData.result = gameResult.result;
+        updateData.resultReason = gameResult.reason;
+        updateData.winner = gameResult.winner || null;
+
+        // Update player stats
+        if (gameResult.winner) {
+            const winnerId = gameResult.winner === 'w' ? gameData.creatorId : 'computer';
+            const loserId = gameResult.winner === 'w' ? 'computer' : gameData.creatorId;
+
+            if (winnerId !== 'computer') {
+                await db
+                    .collection('users')
+                    .doc(winnerId)
+                    .update({
+                        'stats.gamesPlayed': increment(1),
+                        'stats.gamesWon': increment(1),
+                    });
+            }
+
+            if (loserId !== 'computer') {
+                await db
+                    .collection('users')
+                    .doc(loserId)
+                    .update({
+                        'stats.gamesPlayed': increment(1),
+                        'stats.gamesLost': increment(1),
+                    });
+            }
+        } else {
+            // Draw
+            await db
+                .collection('users')
+                .doc(gameData.creatorId)
+                .update({
+                    'stats.gamesPlayed': increment(1),
+                    'stats.gamesDraw': increment(1),
+                });
+        }
+
+        // Notify player game is over
+        await db.collection('notifications').add({
+            userId: gameData.creatorId,
+            type: 'game_over',
+            gameId: gameId,
+            result: gameResult,
+            read: false,
+            createdAt: serverTimestamp(),
+        });
+    } else {
+        // Notify player that opponent made a move
+        await sendOpponentMoveNotification(
+            gameData.creatorId,
+            gameId,
+            'computer',
+            'Computer',
+        ).catch((error) => console.error('Error sending opponent move notification:', error));
+    }
+
+    await db.collection('games').doc(gameId).update(updateData);
+
+    return {
+        move: moveResult,
+        gameState: validation.gameState,
+        gameOver: gameResult.isOver,
+        result: gameResult.isOver ? gameResult : undefined,
+    };
+}
 
 /**
  * Get user's game history (completed and cancelled games)

@@ -1,5 +1,6 @@
 import Icon from './Icon';
 import Product from './Product';
+import GameModeCard from './GameModeCard';
 import Header from './Header';
 import Avatar from './Avatar';
 import LoadingScreen from './LoadingScreen';
@@ -11,6 +12,7 @@ import PlayerStatusBar from './PlayerStatusBar';
 export {
     Icon,
     Product,
+    GameModeCard,
     Header,
     Avatar,
     LoadingScreen,

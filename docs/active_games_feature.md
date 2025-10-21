@@ -38,7 +38,7 @@ Location: `src/components/ActiveGamesCard.js`
 
 #### `getActiveGames`
 
-Location: `functions/routes/pvpGame.js`
+Location: `functions/routes/game.js`
 
 **Enhancements:**
 
@@ -182,7 +182,7 @@ src/
 
 functions/
 └── routes/
-    └── pvpGame.js               # Backend API
+    └── game.js                  # Backend API
 ```
 
 ## Testing Checklist

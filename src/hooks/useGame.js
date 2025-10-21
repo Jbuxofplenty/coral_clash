@@ -3,11 +3,12 @@ import { Alert } from 'react-native';
 import { useFirebaseFunctions } from './useFirebaseFunctions';
 
 /**
- * Custom hook for managing PvP game operations
+ * Custom hook for managing game operations (PvP and Computer)
  * Provides high-level game management with state and error handling
  */
-export const usePvPGame = () => {
-    const { createPvPGame, respondToGameInvite, getActiveGames } = useFirebaseFunctions();
+export const useGame = () => {
+    const { createGame, createComputerGame, respondToGameInvite, getActiveGames } =
+        useFirebaseFunctions();
     const [loading, setLoading] = useState(false);
     const [activeGames, setActiveGames] = useState([]);
 
@@ -23,13 +24,13 @@ export const usePvPGame = () => {
             try {
                 setLoading(true);
 
-                const result = await createPvPGame(opponentId, timeControl);
+                const result = await createGame(opponentId, timeControl);
 
                 // Show success message
                 Alert.alert(
                     'Game Request Sent',
                     `Your game request has been sent to ${opponentName}. They will be notified.`,
-                    [{ text: 'OK' }]
+                    [{ text: 'OK' }],
                 );
 
                 return result;
@@ -41,7 +42,30 @@ export const usePvPGame = () => {
                 setLoading(false);
             }
         },
-        [createPvPGame]
+        [createGame],
+    );
+
+    /**
+     * Start a game against the computer
+     * @param {Object} timeControl - Optional time control settings
+     * @param {string} difficulty - Difficulty level (random, easy, medium, hard)
+     * @returns {Promise<Object>} Result with success status and gameId
+     */
+    const startComputerGame = useCallback(
+        async (timeControl = null, difficulty = 'random') => {
+            try {
+                setLoading(true);
+
+                return await createComputerGame(timeControl, difficulty);
+            } catch (error) {
+                console.error('Error starting computer game:', error);
+                Alert.alert('Error', error.message || 'Failed to start computer game');
+                throw error;
+            } finally {
+                setLoading(false);
+            }
+        },
+        [createComputerGame],
     );
 
     /**
@@ -71,7 +95,7 @@ export const usePvPGame = () => {
                 setLoading(false);
             }
         },
-        [respondToGameInvite]
+        [respondToGameInvite],
     );
 
     /**
@@ -95,7 +119,7 @@ export const usePvPGame = () => {
                 setLoading(false);
             }
         },
-        [respondToGameInvite]
+        [respondToGameInvite],
     );
 
     /**
@@ -144,6 +168,7 @@ export const usePvPGame = () => {
 
         // Actions
         sendGameRequest,
+        startComputerGame,
         acceptGameInvite,
         declineGameInvite,
         loadActiveGames,
@@ -156,5 +181,4 @@ export const usePvPGame = () => {
     };
 };
 
-export default usePvPGame;
-
+export default useGame;

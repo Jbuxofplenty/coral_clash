@@ -36,7 +36,13 @@ const getNotificationConfig = (type) => {
         },
         move_made: {
             title: 'Your Turn',
-            getMessage: (displayName) => `${displayName || 'Someone'} made a move`,
+            getMessage: (displayName, result, data) => {
+                // Check if it's a computer move
+                if (data?.isComputer || displayName === 'Computer') {
+                    return 'The computer made a move';
+                }
+                return `${displayName || 'Someone'} made a move`;
+            },
             icon: { name: 'play-circle', family: 'font-awesome' },
             showAvatar: true,
             showActions: false,
@@ -152,7 +158,11 @@ export default function NotificationDropdown({
 
     if (!notification) return null;
 
-    const message = config.getMessage(notification.displayName, notification.data?.result);
+    const message = config.getMessage(
+        notification.displayName,
+        notification.data?.result,
+        notification.data,
+    );
 
     return (
         <Animated.View
