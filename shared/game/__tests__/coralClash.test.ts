@@ -1,12 +1,14 @@
-import { CoralClash } from './coralClash';
-import { applyFixture, validateFixtureVersion } from './__fixtures__/fixtureLoader';
+import { CoralClash } from '../coralClash';
+import { applyFixture, validateFixtureVersion } from '../gameState';
 
 // Import fixtures directly (works in Jest, not in React Native)
-const whaleMoveDigonally = require('./__fixtures__/whale-move-diagonally.json');
-const octopusCheck = require('./__fixtures__/octopus-check.json');
-const multipleChecks = require('./__fixtures__/multiple-checks.json');
-const coralBlocksAttack = require('./__fixtures__/coral-blocks-attack.json');
-const whaleRemovesCoral = require('./__fixtures__/whale-removes-coral.json');
+import whaleMoveDigonally from '../__fixtures__/whale-move-diagonally.json';
+import octopusCheck from '../__fixtures__/octopus-check.json';
+import multipleChecks from '../__fixtures__/multiple-checks.json';
+import coralBlocksAttack from '../__fixtures__/coral-blocks-attack.json';
+import whaleRemovesCoral from '../__fixtures__/whale-removes-coral.json';
+import checkPinned from '../__fixtures__/check-pinned.json';
+import crabMovement from '../__fixtures__/crab-movement.json';
 
 describe('CoralClash Whale Mechanics', () => {
     let game: CoralClash;
@@ -21,7 +23,9 @@ describe('CoralClash Whale Mechanics', () => {
             game.put({ type: 'h', color: 'w' }, 'd1');
 
             const board = game.board();
-            const flatBoard = board.flat().filter((cell) => cell);
+            const flatBoard = board
+                .flat()
+                .filter((cell): cell is Piece & { square: string } => cell !== null);
             const whaleSquares = flatBoard.filter(
                 (cell) => cell.type === 'h' && cell.color === 'w',
             );
@@ -533,9 +537,8 @@ describe('CoralClash Whale Mechanics', () => {
 
         it('REGRESSION: should not allow moves that leave whale in check', () => {
             // Load the check-pinned scenario - fixture is at white's turn after black made illegal Tf7
-            const fixture = require('./__fixtures__/check-pinned.json');
             const game = new CoralClash();
-            applyFixture(game, fixture);
+            applyFixture(game, checkPinned);
 
             // Undo the last move (Tf7 by black) to get to the position before
             game.undo(); // Undo Tf7
@@ -1211,7 +1214,6 @@ describe('CoralClash Whale Mechanics', () => {
     describe('Crab Movement Debug', () => {
         it('should show moves for white crab at f4', () => {
             const game = new CoralClash();
-            const crabMovement = require('./__fixtures__/crab-movement.json');
             applyFixture(game, crabMovement);
 
             console.log('\n=== Crab Movement Debug ===');

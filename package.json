@@ -15,10 +15,15 @@
         "build:ios:device": "eas build --profile development-device --platform ios",
         "build:install": "eas build:run --profile development-device --platform ios",
         "eject": "expo eject",
-        "test": "node ./node_modules/jest/bin/jest.js --watchAll"
+        "test": "node ./node_modules/jest/bin/jest.js --watchAll",
+        "test:ci": "node ./node_modules/jest/bin/jest.js --watchAll=false --ci"
     },
     "jest": {
-        "preset": "jest-expo"
+        "preset": "jest-expo",
+        "testPathIgnorePatterns": [
+            "/node_modules/",
+            "/functions/"
+        ]
     },
     "dependencies": {
         "@react-native-async-storage/async-storage": "2.2.0",

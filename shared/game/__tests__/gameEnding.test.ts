@@ -2,7 +2,7 @@
  * Tests for game ending conditions in Coral Clash
  */
 
-import { CoralClash } from './coralClash';
+import { CoralClash } from '../coralClash';
 
 describe('Game Ending Conditions', () => {
     describe('Checkmate', () => {
@@ -106,14 +106,15 @@ describe('Game Ending Conditions', () => {
         it('should trigger coral scoring when a player has only whale remaining', () => {
             const game = new CoralClash();
 
-            // Remove all white pieces except whale
-            for (let i = 0; i < 128; i++) {
-                if (i & 0x88) continue;
-                const piece = game.get(game['_algebraic'](i));
-                if (piece && piece.color === 'w' && piece.type !== 'h') {
-                    game['_board'][i] = null;
-                }
-            }
+            // Remove all white pieces except whale using the board representation
+            const board = game.board();
+            board.forEach((row) => {
+                row.forEach((cell) => {
+                    if (cell && cell.color === 'w' && cell.type !== 'h') {
+                        game.remove(cell.square);
+                    }
+                });
+            });
 
             expect(game['_shouldTriggerCoralScoring']()).toBe(true);
             expect(game.isGameOver()).toBe(true);
@@ -165,6 +166,9 @@ describe('Game Ending Conditions', () => {
     describe('Coral Area Control Calculation', () => {
         it('should count coral not occupied by opponent pieces', () => {
             const game = new CoralClash();
+            game.clear(); // Start with empty board
+            game.put({ type: 'h', color: 'w' }, 'd1'); // Add whales for valid game
+            game.put({ type: 'h', color: 'b' }, 'd8');
 
             // Place coral on empty squares
             game.placeCoral('e4', 'w');
@@ -179,12 +183,15 @@ describe('Game Ending Conditions', () => {
 
         it('should not count coral occupied by opponent pieces', () => {
             const game = new CoralClash();
+            game.clear(); // Start with empty board
+            game.put({ type: 'h', color: 'w' }, 'd1'); // Add whales for valid game
+            game.put({ type: 'h', color: 'b' }, 'd8');
 
             // Place white coral
             game.placeCoral('e4', 'w');
 
             // Place black piece on the coral
-            game['_board'][game['_ox88'].e4] = { type: 'c', color: 'b', role: 'hunter' };
+            game.put({ type: 'c', color: 'b', role: 'hunter' }, 'e4');
 
             // White should have 0 coral control (occupied by opponent)
             expect(game.getCoralAreaControl('w')).toBe(0);
@@ -192,12 +199,15 @@ describe('Game Ending Conditions', () => {
 
         it('should count coral occupied by own pieces', () => {
             const game = new CoralClash();
+            game.clear(); // Start with empty board
+            game.put({ type: 'h', color: 'w' }, 'd1'); // Add whales for valid game
+            game.put({ type: 'h', color: 'b' }, 'd8');
 
             // Place white coral
             game.placeCoral('e4', 'w');
 
             // Place white piece on the coral
-            game['_board'][game['_ox88'].e4] = { type: 'c', color: 'w', role: 'hunter' };
+            game.put({ type: 'c', color: 'w', role: 'hunter' }, 'e4');
 
             // White should have 1 coral control (occupied by own piece is OK)
             expect(game.getCoralAreaControl('w')).toBe(1);
@@ -229,14 +239,15 @@ describe('Game Ending Conditions', () => {
         it('should detect insufficient material with only whales', () => {
             const game = new CoralClash();
 
-            // Remove all pieces except whales
-            for (let i = 0; i < 128; i++) {
-                if (i & 0x88) continue;
-                const piece = game['_board'][i];
-                if (piece && piece.type !== 'h') {
-                    game['_board'][i] = null;
-                }
-            }
+            // Remove all pieces except whales using proper API
+            const board = game.board();
+            board.forEach((row) => {
+                row.forEach((cell) => {
+                    if (cell && cell.type !== 'h') {
+                        game.remove(cell.square);
+                    }
+                });
+            });
 
             expect(game.isInsufficientMaterial()).toBe(true);
             expect(game.isDraw()).toBe(true);
@@ -266,15 +277,15 @@ describe('Game Ending Conditions', () => {
             expect(game.isGameOver()).toBe(true);
         });
 
-        it('should reset resignation on clear', () => {
+        it('should reset resignation on reset', () => {
             const game = new CoralClash();
 
             // White resigns
             game.resign('w');
             expect(game.isResigned()).toBe('w');
 
-            // Reset game
-            game.clear();
+            // Reset game to starting position
+            game.reset();
 
             expect(game.isResigned()).toBeNull();
             expect(game.isGameOver()).toBe(false);

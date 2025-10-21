@@ -11,22 +11,9 @@ import {
 } from 'react-native';
 import { Block, theme } from 'galio-framework';
 import Icon from './Icon';
+import { FIXTURES as FIXTURE_FILES } from '../../shared/game/__fixtures__';
 
 const { width } = Dimensions.get('screen');
-
-// Import all fixtures statically (required for React Native bundler)
-const FIXTURE_FILES = {
-    'whale-move-diagonally': require('../hooks/__fixtures__/whale-move-diagonally.json'),
-    'whale-move-diagonally-2': require('../hooks/__fixtures__/whale-move-diagonally-2.json'),
-    'octopus-check': require('../hooks/__fixtures__/octopus-check.json'),
-    'multiple-checks': require('../hooks/__fixtures__/multiple-checks.json'),
-    'check-pinned': require('../hooks/__fixtures__/check-pinned.json'),
-    'check-pinned-2': require('../hooks/__fixtures__/check-pinned-2.json'),
-    'crab-end-of-board': require('../hooks/__fixtures__/crab-end-of-board.json'),
-    'coral-blocks-attack': require('../hooks/__fixtures__/coral-blocks-attack.json'),
-    'whale-removes-coral': require('../hooks/__fixtures__/whale-removes-coral.json'),
-    'crab-movement': require('../hooks/__fixtures__/crab-movement.json'),
-};
 
 // Available fixtures - keep this list updated when adding new fixtures
 const FIXTURES = [
@@ -108,7 +95,7 @@ const FixtureLoaderModal = ({ visible, onClose, onSelectFixture }) => {
 
                     <View style={styles.modalFooter}>
                         <Text style={styles.footerText}>
-                            💡 Fixtures are from src/hooks/__fixtures__/
+                            💡 Fixtures are from shared/game/__fixtures__/
                         </Text>
                     </View>
                 </View>

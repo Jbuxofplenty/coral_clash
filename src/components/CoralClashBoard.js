@@ -13,8 +13,7 @@ import {
 } from 'react-native';
 import { Icon } from 'galio-framework';
 import useCoralClash from '../hooks/useCoralClash';
-import { WHALE } from '../hooks/coralClash';
-import { applyFixture } from '../hooks/__fixtures__/fixtureLoader';
+import { WHALE, applyFixture } from '../../shared';
 import EmptyBoard from './EmptyBoard';
 import Moves from './Moves';
 import Pieces from './Pieces';

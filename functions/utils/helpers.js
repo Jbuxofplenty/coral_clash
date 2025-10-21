@@ -1,6 +1,5 @@
 // Import from shared library (source of truth)
-const { CoralClash, DEFAULT_POSITION } = require('../../shared/game/coralClash');
-const { createGameSnapshot } = require('../../shared/game/gameState');
+const { CoralClash, DEFAULT_POSITION, createGameSnapshot } = require('../../shared/game');
 const { FieldValue } = require('firebase-admin/firestore');
 
 /**

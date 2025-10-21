@@ -1,5 +1,5 @@
 import PieceImages from '../assets/images/pieces';
-import { WHALE } from '../hooks/coralClash';
+import { WHALE } from '../../shared';
 
 import { Image, TouchableWithoutFeedback, View } from 'react-native';
 

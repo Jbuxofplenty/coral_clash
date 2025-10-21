@@ -1,5 +1,5 @@
 import { View, StyleSheet } from 'react-native';
-import { SQUARES } from '../hooks/coralClash';
+import { SQUARES } from '../../shared';
 
 const Coral = ({ coralClash, size }) => {
     const cellSize = size / 8;
