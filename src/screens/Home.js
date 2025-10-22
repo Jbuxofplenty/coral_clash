@@ -2,11 +2,13 @@ import { theme } from 'galio-framework';
 import React, { useState } from 'react';
 import { Dimensions, ScrollView, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useFocusEffect } from '@react-navigation/native';
 
 import { GameModeCard, ActiveGamesCard, GameHistoryCard } from '../components/';
 import FixtureLoaderModal from '../components/FixtureLoaderModal';
 import { useTheme } from '../contexts/ThemeContext';
 import { useGame } from '../hooks/useGame';
+import { useAuth } from '../contexts/AuthContext';
 
 const { width, height } = Dimensions.get('screen');
 
@@ -15,8 +17,18 @@ const enableDevFeatures = process.env.EXPO_PUBLIC_ENABLE_DEV_FEATURES === 'true'
 
 export default function Home({ navigation }) {
     const { colors } = useTheme();
+    const { user } = useAuth();
     const [fixtureModalVisible, setFixtureModalVisible] = useState(false);
-    const { startComputerGame } = useGame();
+    const { startComputerGame, activeGames, loadActiveGames } = useGame();
+
+    // Load active games when screen comes into focus
+    useFocusEffect(
+        React.useCallback(() => {
+            if (user) {
+                loadActiveGames();
+            }
+        }, [user, loadActiveGames]),
+    );
 
     const handleStartComputerGame = async () => {
         try {
@@ -52,8 +64,8 @@ export default function Home({ navigation }) {
                 contentContainerStyle={styles.scrollContent}
                 style={styles.scrollView}
             >
-                {/* Active Games Card */}
-                <ActiveGamesCard navigation={navigation} />
+                {/* Active Games Card - show at top if there are games */}
+                {activeGames.length > 0 && <ActiveGamesCard navigation={navigation} />}
 
                 {/* Game Mode Cards */}
                 <GameModeCard
@@ -73,6 +85,9 @@ export default function Home({ navigation }) {
                         onPress={handleOpenFixtureLoader}
                     />
                 )}
+
+                {/* Active Games Card - show at bottom if there are no games */}
+                {activeGames.length === 0 && <ActiveGamesCard navigation={navigation} />}
 
                 {/* Game History Card */}
                 <GameHistoryCard navigation={navigation} />

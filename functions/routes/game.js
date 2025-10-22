@@ -7,6 +7,7 @@ const {
     sendGameAcceptedNotification,
     sendOpponentMoveNotification,
 } = require('../utils/notifications');
+const { GAME_VERSION } = require('../../shared/dist/game');
 
 const db = admin.firestore();
 
@@ -24,6 +25,26 @@ function formatDisplayName(displayName, discriminator) {
         return displayName;
     }
     return `${displayName} #${discriminator}`;
+}
+
+/**
+ * Validate game engine version
+ * @param {string} clientVersion - Version from client
+ * @throws {HttpsError} If version is invalid or unsupported
+ */
+function validateGameVersion(clientVersion) {
+    // If no version provided, use current version (for backward compatibility)
+    const version = clientVersion || GAME_VERSION;
+
+    // Check if version is supported
+    if (version !== GAME_VERSION) {
+        throw new functions.https.HttpsError(
+            'failed-precondition',
+            `Game version mismatch. Client: ${version}, Server: ${GAME_VERSION}. Please update your app.`,
+        );
+    }
+
+    return version;
 }
 
 /**
@@ -54,6 +75,7 @@ exports.createGame = functions.https.onCall(async (data, context) => {
             timeControl: timeControl || { type: 'unlimited' },
             moves: [],
             gameState: initializeGameState(),
+            version: GAME_VERSION, // Store game engine version
             createdAt: serverTimestamp(),
             updatedAt: serverTimestamp(),
         };
@@ -122,6 +144,7 @@ exports.createComputerGame = functions.https.onCall(async (data, context) => {
             timeControl: timeControl || { type: 'unlimited' },
             moves: [],
             gameState: initializeGameState(),
+            version: GAME_VERSION, // Store game engine version
             createdAt: serverTimestamp(),
             updatedAt: serverTimestamp(),
         };
@@ -211,8 +234,11 @@ exports.makeMove = functions.https.onCall(async (data, context) => {
             throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
         }
 
-        const { gameId, move } = data;
+        const { gameId, move, version } = data;
         const userId = context.auth.uid;
+
+        // Validate game version
+        validateGameVersion(version);
 
         const gameDoc = await db.collection('games').doc(gameId).get();
 
@@ -233,8 +259,9 @@ exports.makeMove = functions.https.onCall(async (data, context) => {
         }
 
         // CRITICAL: Validate move using game engine to prevent cheating
-        const currentFen = gameData.gameState?.fen || gameData.fen;
-        const validation = validateMove(currentFen, move);
+        // Pass full game state (includes coral data) not just FEN
+        const currentGameState = gameData.gameState || { fen: gameData.fen };
+        const validation = validateMove(currentGameState, move);
 
         if (!validation.valid) {
             throw new functions.https.HttpsError(
@@ -248,7 +275,7 @@ exports.makeMove = functions.https.onCall(async (data, context) => {
         moves.push({
             playerId: userId,
             move: validation.result,
-            timestamp: serverTimestamp(),
+            timestamp: new Date(),
         });
 
         // Toggle turn (unless game is over)
@@ -258,8 +285,8 @@ exports.makeMove = functions.https.onCall(async (data, context) => {
               ? gameData.opponentId
               : gameData.creatorId;
 
-        // Check if game is over
-        const gameResult = getGameResult(validation.newFen);
+        // Check if game is over (use full game state, not just FEN)
+        const gameResult = getGameResult(validation.gameState);
 
         // Update game with validated state
         const updateData = {
@@ -267,7 +294,7 @@ exports.makeMove = functions.https.onCall(async (data, context) => {
             currentTurn: nextTurn,
             gameState: validation.gameState,
             fen: validation.newFen,
-            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+            updatedAt: serverTimestamp(),
         };
 
         if (gameResult.isOver) {
@@ -278,20 +305,6 @@ exports.makeMove = functions.https.onCall(async (data, context) => {
         }
 
         await db.collection('games').doc(gameId).update(updateData);
-
-        // Check if this is a computer game and if computer should move
-        const isComputerGame = gameData.opponentType === 'computer';
-        let computerMoveResult = null;
-
-        if (isComputerGame && !gameResult.isOver && nextTurn === 'computer') {
-            // Computer's turn - make a move
-            try {
-                computerMoveResult = await makeComputerMove(gameId);
-            } catch (error) {
-                console.error('Error making computer move:', error);
-                // Don't fail the user's move if computer move fails
-            }
-        }
 
         // Notify opponent (if game continues and not computer)
         if (!gameResult.isOver && nextTurn && nextTurn !== 'computer') {
@@ -320,6 +333,7 @@ exports.makeMove = functions.https.onCall(async (data, context) => {
 
         // Notify both players if game is over
         if (gameResult.isOver) {
+            // Notify creator
             await db.collection('notifications').add({
                 userId: gameData.creatorId,
                 type: 'game_over',
@@ -328,39 +342,49 @@ exports.makeMove = functions.https.onCall(async (data, context) => {
                 read: false,
                 createdAt: serverTimestamp(),
             });
-            await db.collection('notifications').add({
-                userId: gameData.opponentId,
-                type: 'game_over',
-                gameId: gameId,
-                result: gameResult,
-                read: false,
-                createdAt: serverTimestamp(),
-            });
 
-            // Update player stats
+            // Notify opponent (only if not computer)
+            if (gameData.opponentId !== 'computer') {
+                await db.collection('notifications').add({
+                    userId: gameData.opponentId,
+                    type: 'game_over',
+                    gameId: gameId,
+                    result: gameResult,
+                    read: false,
+                    createdAt: serverTimestamp(),
+                });
+            }
+
+            // Update player stats (skip computer)
             if (gameResult.winner) {
                 const winnerId =
                     gameResult.winner === 'w' ? gameData.creatorId : gameData.opponentId;
                 const loserId =
                     gameResult.winner === 'w' ? gameData.opponentId : gameData.creatorId;
 
-                await db
-                    .collection('users')
-                    .doc(winnerId)
-                    .update({
-                        'stats.gamesPlayed': increment(1),
-                        'stats.gamesWon': increment(1),
-                    });
+                // Update winner stats (if not computer)
+                if (winnerId !== 'computer') {
+                    await db
+                        .collection('users')
+                        .doc(winnerId)
+                        .update({
+                            'stats.gamesPlayed': increment(1),
+                            'stats.gamesWon': increment(1),
+                        });
+                }
 
-                await db
-                    .collection('users')
-                    .doc(loserId)
-                    .update({
-                        'stats.gamesPlayed': increment(1),
-                        'stats.gamesLost': increment(1),
-                    });
+                // Update loser stats (if not computer)
+                if (loserId !== 'computer') {
+                    await db
+                        .collection('users')
+                        .doc(loserId)
+                        .update({
+                            'stats.gamesPlayed': increment(1),
+                            'stats.gamesLost': increment(1),
+                        });
+                }
             } else {
-                // Draw
+                // Draw - update creator stats
                 await db
                     .collection('users')
                     .doc(gameData.creatorId)
@@ -369,13 +393,16 @@ exports.makeMove = functions.https.onCall(async (data, context) => {
                         'stats.gamesDraw': increment(1),
                     });
 
-                await db
-                    .collection('users')
-                    .doc(gameData.opponentId)
-                    .update({
-                        'stats.gamesPlayed': increment(1),
-                        'stats.gamesDraw': increment(1),
-                    });
+                // Update opponent stats (only if not computer)
+                if (gameData.opponentId !== 'computer') {
+                    await db
+                        .collection('users')
+                        .doc(gameData.opponentId)
+                        .update({
+                            'stats.gamesPlayed': increment(1),
+                            'stats.gamesDraw': increment(1),
+                        });
+                }
             }
         }
 
@@ -385,7 +412,7 @@ exports.makeMove = functions.https.onCall(async (data, context) => {
             gameState: validation.gameState,
             gameOver: gameResult.isOver,
             result: gameResult.isOver ? gameResult : undefined,
-            computerMove: computerMoveResult, // Include computer move if applicable
+            opponentType: gameData.opponentType, // Include to determine if computer move needed
         };
     } catch (error) {
         console.error('Error making move:', error);
@@ -394,26 +421,84 @@ exports.makeMove = functions.https.onCall(async (data, context) => {
 });
 
 /**
+ * Make a computer move
+ * POST /api/game/makeComputerMove
+ * @param {string} gameId - The game ID
+ */
+exports.makeComputerMove = functions.https.onCall(async (data, context) => {
+    try {
+        const { gameId, version } = data;
+
+        if (!gameId) {
+            throw new functions.https.HttpsError('invalid-argument', 'Game ID is required');
+        }
+
+        // Validate game version
+        validateGameVersion(version);
+
+        const gameDoc = await db.collection('games').doc(gameId).get();
+        if (!gameDoc.exists) {
+            throw new functions.https.HttpsError('not-found', 'Game not found');
+        }
+
+        const gameData = gameDoc.data();
+
+        // Verify this is a computer game
+        if (gameData.opponentType !== 'computer') {
+            throw new functions.https.HttpsError('failed-precondition', 'Not a computer game');
+        }
+
+        // Verify it's the computer's turn
+        if (gameData.currentTurn !== 'computer') {
+            throw new functions.https.HttpsError('failed-precondition', "Not the computer's turn");
+        }
+
+        // Verify game is not over
+        if (gameData.status !== 'active') {
+            throw new functions.https.HttpsError('failed-precondition', 'Game is not active');
+        }
+
+        const result = await makeComputerMoveHelper(gameId, gameData);
+
+        return {
+            success: true,
+            message: 'Computer move made successfully',
+            ...result,
+        };
+    } catch (error) {
+        console.error('Error making computer move:', error);
+        if (error instanceof functions.https.HttpsError) {
+            throw error;
+        }
+        throw new functions.https.HttpsError('internal', error.message);
+    }
+});
+
+/**
  * Helper function to make a computer move
  * @param {string} gameId - The game ID
+ * @param {Object} gameData - Game data (optional, will fetch if not provided)
  * @returns {Promise<Object>} Computer move result
  */
-async function makeComputerMove(gameId) {
-    const gameDoc = await db.collection('games').doc(gameId).get();
-    if (!gameDoc.exists) {
-        throw new Error('Game not found');
+async function makeComputerMoveHelper(gameId, gameData = null) {
+    if (!gameData) {
+        const gameDoc = await db.collection('games').doc(gameId).get();
+        if (!gameDoc.exists) {
+            throw new Error('Game not found');
+        }
+        gameData = gameDoc.data();
     }
 
-    const gameData = gameDoc.data();
-
-    // Get current FEN from game state
-    const currentFen = gameData.gameState?.fen || gameData.fen;
+    // Get current game state (includes coral data)
+    const currentGameState = gameData.gameState || { fen: gameData.fen };
 
     // For now, we'll use simple random move selection
     // In the future, this could be enhanced with difficulty levels
-    const { CoralClash } = require('../../shared/game/coralClash');
+    const { CoralClash, restoreGameFromSnapshot } = require('../../shared/dist/game');
     const game = new CoralClash();
-    game.load(currentFen, { skipValidation: false });
+
+    // Restore full game state including coral
+    restoreGameFromSnapshot(game, currentGameState);
 
     // Get all legal moves
     const moves = game.moves({ verbose: true });
@@ -431,8 +516,8 @@ async function makeComputerMove(gameId) {
         promotion: selectedMove.promotion,
     });
 
-    // Validate the move
-    const validation = validateMove(currentFen, {
+    // Validate the move (pass full game state for proper validation)
+    const validation = validateMove(currentGameState, {
         from: selectedMove.from,
         to: selectedMove.to,
         promotion: selectedMove.promotion,
@@ -447,14 +532,14 @@ async function makeComputerMove(gameId) {
     moves_array.push({
         playerId: 'computer',
         move: validation.result,
-        timestamp: serverTimestamp(),
+        timestamp: new Date(),
     });
 
     // Toggle turn back to player
     const nextTurn = gameData.creatorId;
 
-    // Check if game is over
-    const gameResult = getGameResult(validation.newFen);
+    // Check if game is over (use full game state, not just FEN)
+    const gameResult = getGameResult(validation.gameState);
 
     // Update game with computer move
     const updateData = {
@@ -462,7 +547,7 @@ async function makeComputerMove(gameId) {
         currentTurn: gameResult.isOver ? null : nextTurn,
         gameState: validation.gameState,
         fen: validation.newFen,
-        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        updatedAt: serverTimestamp(),
     };
 
     if (gameResult.isOver) {
@@ -536,6 +621,93 @@ async function makeComputerMove(gameId) {
 }
 
 /**
+ * Resign from a game
+ * POST /api/game/resign
+ */
+exports.resignGame = functions.https.onCall(async (data, context) => {
+    try {
+        if (!context.auth) {
+            throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
+        }
+
+        const { gameId } = data;
+        const userId = context.auth.uid;
+
+        const gameDoc = await db.collection('games').doc(gameId).get();
+
+        if (!gameDoc.exists) {
+            throw new functions.https.HttpsError('not-found', 'Game not found');
+        }
+
+        const gameData = gameDoc.data();
+
+        // Verify user is a player in this game
+        if (gameData.creatorId !== userId && gameData.opponentId !== userId) {
+            throw new functions.https.HttpsError('permission-denied', 'Not a player in this game');
+        }
+
+        // Check if game is already over
+        if (gameData.status === 'completed' || gameData.status === 'cancelled') {
+            throw new functions.https.HttpsError('failed-precondition', 'Game is already finished');
+        }
+
+        // Determine winner (opponent wins when user resigns)
+        const winner = gameData.creatorId === userId ? gameData.opponentId : gameData.creatorId;
+
+        // Update game status
+        await db
+            .collection('games')
+            .doc(gameId)
+            .update({
+                status: 'completed',
+                result: winner === gameData.creatorId ? 'creator_wins' : 'opponent_wins',
+                resultReason: 'resignation',
+                winner: winner,
+                updatedAt: serverTimestamp(),
+            });
+
+        // Update stats for both players (skip if opponent is computer)
+        if (gameData.opponentId !== 'computer') {
+            // Winner gets a win
+            await db
+                .collection('users')
+                .doc(winner)
+                .update({
+                    'stats.gamesPlayed': increment(1),
+                    'stats.gamesWon': increment(1),
+                });
+
+            // Loser (user who resigned) gets a loss
+            await db
+                .collection('users')
+                .doc(userId)
+                .update({
+                    'stats.gamesPlayed': increment(1),
+                    'stats.gamesLost': increment(1),
+                });
+        } else {
+            // Computer game - only update user stats
+            await db
+                .collection('users')
+                .doc(userId)
+                .update({
+                    'stats.gamesPlayed': increment(1),
+                    'stats.gamesLost': increment(1),
+                });
+        }
+
+        return {
+            success: true,
+            message: 'Game resigned successfully',
+            winner: winner,
+        };
+    } catch (error) {
+        console.error('Error resigning game:', error);
+        throw new functions.https.HttpsError('internal', error.message);
+    }
+});
+
+/**
  * Get user's game history (completed and cancelled games)
  * GET /api/games/history
  */
@@ -569,22 +741,33 @@ exports.getGameHistory = functions.https.onCall(async (data, context) => {
         // Process creator games
         for (const doc of creatorGames.docs) {
             const gameData = doc.data();
-            // Get opponent info
-            const opponentDoc = await db.collection('users').doc(gameData.opponentId).get();
-            const opponentData = opponentDoc.exists ? opponentDoc.data() : {};
 
-            games.push({
-                id: doc.id,
-                ...gameData,
-                opponentDisplayName: formatDisplayName(
-                    opponentData.displayName,
-                    opponentData.discriminator,
-                ),
-                opponentAvatarKey: opponentData.settings?.avatarKey || 'dolphin',
-            });
+            // Handle computer opponent
+            if (gameData.opponentId === 'computer') {
+                games.push({
+                    id: doc.id,
+                    ...gameData,
+                    opponentDisplayName: 'Computer',
+                    opponentAvatarKey: 'computer',
+                });
+            } else {
+                // Get opponent info for human player
+                const opponentDoc = await db.collection('users').doc(gameData.opponentId).get();
+                const opponentData = opponentDoc.exists ? opponentDoc.data() : {};
+
+                games.push({
+                    id: doc.id,
+                    ...gameData,
+                    opponentDisplayName: formatDisplayName(
+                        opponentData.displayName,
+                        opponentData.discriminator,
+                    ),
+                    opponentAvatarKey: opponentData.settings?.avatarKey || 'dolphin',
+                });
+            }
         }
 
-        // Process opponent games
+        // Process opponent games (computer games won't be here since opponentId is 'computer')
         for (const doc of opponentGames.docs) {
             const gameData = doc.data();
             // Get creator info (they are the opponent from user's perspective)
@@ -649,22 +832,33 @@ exports.getActiveGames = functions.https.onCall(async (data, context) => {
         // Process creator games
         for (const doc of creatorGames.docs) {
             const gameData = doc.data();
-            // Get opponent info
-            const opponentDoc = await db.collection('users').doc(gameData.opponentId).get();
-            const opponentData = opponentDoc.exists ? opponentDoc.data() : {};
 
-            games.push({
-                id: doc.id,
-                ...gameData,
-                opponentDisplayName: formatDisplayName(
-                    opponentData.displayName,
-                    opponentData.discriminator,
-                ),
-                opponentAvatarKey: opponentData.settings?.avatarKey || 'dolphin',
-            });
+            // Handle computer opponent
+            if (gameData.opponentId === 'computer') {
+                games.push({
+                    id: doc.id,
+                    ...gameData,
+                    opponentDisplayName: 'Computer',
+                    opponentAvatarKey: 'computer',
+                });
+            } else {
+                // Get opponent info for human player
+                const opponentDoc = await db.collection('users').doc(gameData.opponentId).get();
+                const opponentData = opponentDoc.exists ? opponentDoc.data() : {};
+
+                games.push({
+                    id: doc.id,
+                    ...gameData,
+                    opponentDisplayName: formatDisplayName(
+                        opponentData.displayName,
+                        opponentData.discriminator,
+                    ),
+                    opponentAvatarKey: opponentData.settings?.avatarKey || 'dolphin',
+                });
+            }
         }
 
-        // Process opponent games
+        // Process opponent games (computer games won't be here since opponentId is 'computer')
         for (const doc of opponentGames.docs) {
             const gameData = doc.data();
             // Get creator info (they are the opponent from user's perspective)

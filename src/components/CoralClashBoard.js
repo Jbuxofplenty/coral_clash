@@ -34,7 +34,11 @@ const CoralClash = ({ fixture, gameId, gameState }) => {
     const { colors, isDarkMode } = useTheme();
     const { isBoardFlipped, toggleBoardFlip } = useGamePreferences();
     const { user } = useAuth();
-    const { makeMove: makeMoveAPI } = useFirebaseFunctions();
+    const {
+        makeMove: makeMoveAPI,
+        makeComputerMove: makeComputerMoveAPI,
+        resignGame: resignGameAPI,
+    } = useFirebaseFunctions();
     const coralClash = useCoralClash();
     const [visibleMoves, setVisibleMoves] = useState([]);
     const [selectedSquare, setSelectedSquare] = useState(null);
@@ -77,7 +81,6 @@ const CoralClash = ({ fixture, gameId, gameState }) => {
             try {
                 restoreGameFromSnapshot(coralClash, gameState);
                 setGameStateLoaded(true);
-                console.log('Game state loaded successfully');
                 forceUpdate((n) => n + 1); // Force re-render after loading
             } catch (error) {
                 console.error('Failed to load game state:', error);
@@ -92,7 +95,6 @@ const CoralClash = ({ fixture, gameId, gameState }) => {
             try {
                 applyFixture(coralClash, fixture);
                 setFixtureLoaded(true);
-                console.log('Fixture loaded successfully');
             } catch (error) {
                 console.error('Failed to load fixture:', error);
                 Alert.alert('Error', 'Failed to load game state');
@@ -101,7 +103,13 @@ const CoralClash = ({ fixture, gameId, gameState }) => {
     }, [fixture, fixtureLoaded]);
 
     // Handle random black moves - runs after render, not during
+    // ONLY for offline/local games (when gameId is not present)
     useEffect(() => {
+        // Skip if this is an online game
+        if (gameId) {
+            return;
+        }
+
         // Only run if not loading a fixture, or if fixture is loaded
         if (!fixture || fixtureLoaded) {
             // Make black moves if it's black's turn
@@ -113,7 +121,7 @@ const CoralClash = ({ fixture, gameId, gameState }) => {
             // Force re-render to show the updated board
             forceUpdate((n) => n + 1);
         }
-    }, [coralClash.history().length, fixture, fixtureLoaded]);
+    }, [coralClash.history().length, fixture, fixtureLoaded, gameId]);
 
     // Clear selection state when board is flipped
     useEffect(() => {
@@ -193,8 +201,8 @@ const CoralClash = ({ fixture, gameId, gameState }) => {
         setIsViewingEnemyMoves(false);
     };
 
-    // Can only undo if at least 2 moves have been made (user + computer)
-    const canUndo = coralClash.history().length >= 2;
+    // Can only undo if at least 2 moves have been made (user + computer) and game is not over
+    const canUndo = coralClash.history().length >= 2 && !coralClash.isGameOver();
 
     const handleResign = () => {
         closeMenu();
@@ -207,15 +215,17 @@ const CoralClash = ({ fixture, gameId, gameState }) => {
             {
                 text: 'Resign',
                 style: 'destructive',
-                onPress: () => {
-                    // Current player resigns
-                    coralClash.resign(coralClash.turn());
-                    // Clear selection state
-                    setVisibleMoves([]);
-                    setSelectedSquare(null);
-                    setWhaleDestination(null);
-                    setWhaleOrientationMoves([]);
-                    setIsViewingEnemyMoves(false);
+                onPress: async () => {
+                    // Execute resignation (sends to backend for online games)
+                    const success = await executeResign();
+                    if (success) {
+                        // Clear selection state
+                        setVisibleMoves([]);
+                        setSelectedSquare(null);
+                        setWhaleDestination(null);
+                        setWhaleOrientationMoves([]);
+                        setIsViewingEnemyMoves(false);
+                    }
                 },
             },
         ]);
@@ -229,14 +239,34 @@ const CoralClash = ({ fixture, gameId, gameState }) => {
         }
 
         try {
-            console.log('Sending move to backend:', { gameId, move });
             const result = await makeMoveAPI({ gameId, move });
-            console.log('Move result:', result);
 
-            // If the result contains a computer move, it will be reflected
-            // when the game state is refreshed or the notification is received
-            if (result.computerMove) {
-                console.log('Computer made a move:', result.computerMove);
+            // Apply the backend's validated game state (ensures sync)
+            if (result.gameState) {
+                restoreGameFromSnapshot(coralClash, result.gameState);
+            }
+
+            // If it's a computer game and computer's turn, trigger computer move
+            if (
+                result.opponentType === 'computer' &&
+                result.gameState?.turn === 'b' &&
+                !result.gameOver
+            ) {
+                // Computer's turn (black) - trigger computer move
+                // Use setTimeout to avoid blocking the UI
+                setTimeout(async () => {
+                    try {
+                        const computerResult = await makeComputerMoveAPI({ gameId });
+                        // Apply computer's move to local game state
+                        if (computerResult.gameState) {
+                            restoreGameFromSnapshot(coralClash, computerResult.gameState);
+                            // Force re-render to show computer's move
+                            forceUpdate((n) => n + 1);
+                        }
+                    } catch (error) {
+                        console.error('Error making computer move:', error);
+                    }
+                }, 500); // Small delay for better UX
             }
         } catch (error) {
             console.error('Error sending move to backend:', error);
@@ -255,6 +285,33 @@ const CoralClash = ({ fixture, gameId, gameState }) => {
             sendMoveToBackend(moveParams);
         }
         return moveResult;
+    };
+
+    const executeResign = async () => {
+        // Only send resign to backend for online games (when gameId is provided)
+        if (!gameId) {
+            // Local game - just resign locally
+            const currentTurn = coralClash.turn();
+            coralClash.resign(currentTurn);
+            return true;
+        }
+
+        try {
+            const result = await resignGameAPI({ gameId });
+
+            // Backend accepted, now apply locally
+            const currentTurn = coralClash.turn();
+            coralClash.resign(currentTurn);
+
+            return true;
+        } catch (error) {
+            console.error('Error sending resignation to backend:', error);
+            Alert.alert(
+                'Error',
+                'Failed to resign game. Please check your connection and try again.',
+            );
+            return false;
+        }
     };
 
     const handleSelectPiece = (square) => {
@@ -680,13 +737,6 @@ const CoralClash = ({ fixture, gameId, gameState }) => {
                     />
                 </View>
 
-                {/* Game Status Banner */}
-                {gameStatus && (
-                    <View style={[styles.statusBanner, { backgroundColor: gameStatus.color }]}>
-                        <Text style={styles.statusText}>{gameStatus.message}</Text>
-                    </View>
-                )}
-
                 {/* Spacer */}
                 <View style={styles.spacer} />
 
@@ -721,6 +771,13 @@ const CoralClash = ({ fixture, gameId, gameState }) => {
                         isActive={isBottomPlayerActive}
                     />
                 </View>
+
+                {/* Game Status Banner */}
+                {gameStatus && (
+                    <View style={[styles.statusBanner, { backgroundColor: gameStatus.color }]}>
+                        <Text style={styles.statusText}>{gameStatus.message}</Text>
+                    </View>
+                )}
             </View>
 
             {/* Control Bar at Bottom - Always Visible */}

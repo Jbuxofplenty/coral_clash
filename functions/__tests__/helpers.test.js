@@ -19,7 +19,7 @@ describe('Helpers', () => {
 
         it('should create a game state that matches DEFAULT_POSITION', () => {
             const gameState = initializeGameState();
-            const { CoralClash, DEFAULT_POSITION } = require('../../shared/game');
+            const { CoralClash, DEFAULT_POSITION } = require('../../shared/dist/game');
             const game = new CoralClash(DEFAULT_POSITION);
 
             expect(gameState.fen).toBe(game.fen());

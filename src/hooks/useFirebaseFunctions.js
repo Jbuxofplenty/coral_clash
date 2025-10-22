@@ -1,5 +1,6 @@
 import { httpsCallable } from 'firebase/functions';
 import { functions, auth } from '../config/firebase';
+import { GAME_VERSION } from '../../shared/game';
 
 /**
  * Custom hook for calling Firebase Cloud Functions
@@ -117,13 +118,35 @@ export const useFirebaseFunctions = () => {
         }
     };
 
-    const makeMove = async (gameId, move) => {
+    const makeMove = async ({ gameId, move }) => {
         try {
             const callable = httpsCallable(functions, 'makeMove');
-            const result = await callable({ gameId, move });
+            const result = await callable({ gameId, move, version: GAME_VERSION });
             return result.data;
         } catch (error) {
             console.error('Error making move:', error);
+            throw error;
+        }
+    };
+
+    const resignGame = async ({ gameId }) => {
+        try {
+            const callable = httpsCallable(functions, 'resignGame');
+            const result = await callable({ gameId });
+            return result.data;
+        } catch (error) {
+            console.error('Error resigning game:', error);
+            throw error;
+        }
+    };
+
+    const makeComputerMove = async ({ gameId }) => {
+        try {
+            const callable = httpsCallable(functions, 'makeComputerMove');
+            const result = await callable({ gameId, version: GAME_VERSION });
+            return result.data;
+        } catch (error) {
+            console.error('Error making computer move:', error);
             throw error;
         }
     };
@@ -230,6 +253,8 @@ export const useFirebaseFunctions = () => {
         createComputerGame,
         respondToGameInvite,
         makeMove,
+        makeComputerMove,
+        resignGame,
         getActiveGames,
         getGameHistory,
         // Friends

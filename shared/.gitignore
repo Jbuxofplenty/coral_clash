@@ -1,0 +1,23 @@
+# Compiled output
+dist/
+
+# Test coverage
+coverage/
+
+# Node modules
+node_modules/
+
+# Package manager lock files
+package-lock.json
+
+# Compiled JS/TS files in source folders (should only be in dist/)
+game/**/*.js
+game/**/*.d.ts
+game/**/*.js.map
+
+# Except fixtures
+!game/__fixtures__/**/*.js
+
+# OS files
+.DS_Store
+

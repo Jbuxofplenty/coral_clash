@@ -2,7 +2,7 @@
  * Tests for game ending conditions in Coral Clash
  */
 
-import { CoralClash } from '../coralClash';
+import { CoralClash } from '../index';
 
 describe('Game Ending Conditions', () => {
     describe('Checkmate', () => {

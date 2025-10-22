@@ -21,6 +21,7 @@ Creates a new game against another player.
 **Cloud Function:** `createGame`
 
 **Parameters:**
+
 ```javascript
 {
   opponentId: 'user123',  // Opponent's user ID
@@ -31,6 +32,7 @@ Creates a new game against another player.
 ```
 
 **Returns:**
+
 ```javascript
 {
   success: true,
@@ -388,7 +390,7 @@ console.log('Computer move:', result.computerMove);
 
 ## Related Files
 
-- `functions/routes/pvpGame.js` - Backend game logic
+- `functions/routes/game.js` - Backend game logic
 - `functions/utils/notifications.js` - Notification sending
 - `src/hooks/usePvPGame.js` - Frontend game hook
 - `src/hooks/useFirebaseFunctions.js` - Firebase function calls

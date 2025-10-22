@@ -117,7 +117,7 @@ coral_clash/
 │       └── fonts/             # Custom fonts
 ├── functions/                 # Firebase Cloud Functions
 │   ├── routes/               # API route handlers
-│   │   ├── pvpGame.js        # PvP game logic
+│   │   ├── game.js           # PvP/Computer game logic
 │   │   ├── friends.js        # Friends management
 │   │   ├── userProfile.js    # User profiles
 │   │   └── userSettings.js   # User settings

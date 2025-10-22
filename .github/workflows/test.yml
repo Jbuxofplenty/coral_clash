@@ -26,12 +26,19 @@ jobs:
           cache-dependency-path: |
             yarn.lock
             functions/yarn.lock
+            shared/yarn.lock
           
       - name: Install dependencies
         run: yarn install --frozen-lockfile
         
       - name: Run tests
         run: yarn test:ci
+        
+      - name: Install Shared dependencies
+        run: cd shared && yarn install --frozen-lockfile
+        
+      - name: Run Shared tests
+        run: cd shared && yarn test
         
       - name: Install Functions dependencies
         run: cd functions && yarn install --frozen-lockfile

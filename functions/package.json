@@ -2,13 +2,15 @@
     "name": "functions",
     "description": "Cloud Functions for Coral Clash",
     "scripts": {
-        "serve": "firebase emulators:start --only functions",
+        "serve": "npm run build:shared && firebase emulators:start --only functions",
         "shell": "firebase functions:shell",
         "start": "npm run shell",
-        "deploy": "firebase deploy --only functions",
+        "deploy": "npm run build:shared && firebase deploy --only functions",
         "logs": "firebase functions:log",
+        "build:shared": "cd ../shared && npm run build",
         "test": "jest --coverage",
-        "test:ci": "jest --coverage --watchAll=false --ci"
+        "test:ci": "jest --coverage --watchAll=false --ci",
+        "pretest": "npm run build:shared"
     },
     "engines": {
         "node": "22"

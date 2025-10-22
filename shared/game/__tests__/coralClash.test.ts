@@ -1,5 +1,4 @@
-import { CoralClash } from '../coralClash';
-import { applyFixture, validateFixtureVersion } from '../gameState';
+import { CoralClash, applyFixture, validateFixtureVersion } from '../index';
 
 // Import fixtures directly (works in Jest, not in React Native)
 import whaleMoveDigonally from '../__fixtures__/whale-move-diagonally.json';

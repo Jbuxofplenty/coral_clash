@@ -104,7 +104,7 @@ Location: `functions/utils/notifications.js`
 
 #### 4. PvP Game Endpoints
 
-Location: `functions/routes/pvpGame.js`
+Location: `functions/routes/game.js`
 
 **Updated Endpoints:**
 

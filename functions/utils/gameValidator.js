@@ -1,15 +1,28 @@
 // Import from shared library (source of truth)
-const { CoralClash, createGameSnapshot } = require('../../shared/game');
+const {
+    CoralClash,
+    createGameSnapshot,
+    restoreGameFromSnapshot,
+} = require('../../shared/dist/game');
 
 /**
  * Validate a move on the server side to prevent cheating
- * @param {string} fen - Current game FEN
+ * @param {Object} gameState - Current game state (includes FEN, coral, etc)
  * @param {Object} move - Move object {from, to, promotion?, coralPlaced?, coralRemoved?}
  * @returns {Object} { valid: boolean, result?: Move, error?: string }
  */
-function validateMove(fen, move) {
+function validateMove(gameState, move) {
     try {
-        const game = new CoralClash(fen);
+        // Create game instance and restore full state (including coral)
+        const game = new CoralClash();
+
+        // If we have a full game state, restore it (includes coral)
+        if (gameState && typeof gameState === 'object' && gameState.fen) {
+            restoreGameFromSnapshot(game, gameState);
+        } else {
+            // Fallback: if just a FEN string was passed (backward compatibility)
+            game.load(gameState);
+        }
 
         // Try to make the move
         const result = game.move(move);
@@ -53,12 +66,14 @@ function getLegalMoves(fen, square = undefined) {
 
 /**
  * Check if a game is over and get the result
- * @param {string} fen - Current game FEN
+ * @param {Object} gameState - Full game state object (with coral, piece roles, etc.)
  * @returns {Object} { isOver: boolean, result?: string, reason?: string }
  */
-function getGameResult(fen) {
+function getGameResult(gameState) {
     try {
-        const game = new CoralClash(fen);
+        const game = new CoralClash();
+        // Restore full game state including coral, piece roles, resignation, etc.
+        restoreGameFromSnapshot(game, gameState);
 
         if (!game.isGameOver()) {
             return { isOver: false };

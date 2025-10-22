@@ -1,10 +1,36 @@
 /**
  * Coral Clash Game Logic Library - Source of Truth
  * Shared between React Native app and Firebase Functions
- * 
+ *
  * This is the authoritative source for all game logic.
  * Both the mobile app and cloud functions import from here.
+ *
+ * VERSIONING:
+ * - Current version: 1.0.0
+ * - Game logic is versioned to maintain backward compatibility
+ * - Frontend and backend must use matching versions
  */
 
-export * from './coralClash';
-export * from './gameState';
+// Current game engine version
+export const GAME_VERSION = '1.0.0';
+
+// Export current version (v1.0.0) as default for easy imports
+// All game logic imports should come from versioned folders
+export * from './v1.0.0';
+
+/**
+ * Get game engine for a specific version
+ * Useful for supporting multiple versions or testing
+ * @param version - Semantic version string (e.g., '1.0.0')
+ * @returns Game engine modules for the specified version
+ */
+export function getGameEngine(version: string = GAME_VERSION) {
+    switch (version) {
+        case '1.0.0':
+            return require('./v1.0.0');
+        default:
+            throw new Error(
+                `Unsupported game version: ${version}. Current version: ${GAME_VERSION}`,
+            );
+    }
+}

@@ -46,11 +46,53 @@ export default function GameHistoryCard({ navigation }) {
         }
     };
 
-    const handleGamePress = (game) => {
-        navigation.navigate('Game', {
-            gameId: game.id,
-            isPvP: true,
-        });
+    const formatGameDate = (timestamp) => {
+        if (!timestamp) return '';
+
+        try {
+            let date;
+            // Handle Firestore timestamp (has _seconds property or toDate method)
+            if (timestamp.toDate && typeof timestamp.toDate === 'function') {
+                date = timestamp.toDate();
+            } else if (timestamp._seconds) {
+                date = new Date(timestamp._seconds * 1000);
+            } else if (timestamp.seconds) {
+                date = new Date(timestamp.seconds * 1000);
+            } else {
+                date = new Date(timestamp);
+            }
+
+            // Check if date is valid
+            if (isNaN(date.getTime())) {
+                return '';
+            }
+
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMs / 3600000);
+            const diffDays = Math.floor(diffMs / 86400000);
+
+            if (diffMins < 1) {
+                return 'Just now';
+            } else if (diffMins < 60) {
+                return `${diffMins}m ago`;
+            } else if (diffHours < 24) {
+                return `${diffHours}h ago`;
+            } else if (diffDays < 7) {
+                return `${diffDays}d ago`;
+            } else {
+                // Format as date
+                return date.toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined,
+                });
+            }
+        } catch (error) {
+            console.error('Error formatting date:', error, timestamp);
+            return '';
+        }
     };
 
     const getGameResult = (game) => {
@@ -101,13 +143,19 @@ export default function GameHistoryCard({ navigation }) {
     };
 
     const getOpponentData = (game) => {
-        if (!user) return { id: null, avatarKey: 'dolphin', displayName: 'Opponent' };
+        if (!user)
+            return { id: null, avatarKey: 'dolphin', displayName: 'Opponent', isComputer: false };
 
         const opponentId = game.creatorId === user.uid ? game.opponentId : game.creatorId;
+
+        // Check if this is a computer game
+        const isComputer = opponentId === 'computer' || game.opponentType === 'computer';
+
         return {
             id: opponentId,
             avatarKey: game.opponentAvatarKey || 'dolphin',
-            displayName: game.opponentDisplayName || 'Opponent',
+            displayName: isComputer ? 'Computer' : game.opponentDisplayName || 'Opponent',
+            isComputer: isComputer,
         };
     };
 
@@ -179,11 +227,11 @@ export default function GameHistoryCard({ navigation }) {
                     gameHistory.slice(0, 5).map((game, index) => {
                         const opponent = getOpponentData(game);
                         const result = getGameResult(game);
+                        const completedDate = formatGameDate(game.updatedAt);
 
                         return (
-                            <TouchableOpacity
+                            <View
                                 key={game.id || index}
-                                onPress={() => handleGamePress(game)}
                                 style={[
                                     styles.gameItem,
                                     {
@@ -193,12 +241,12 @@ export default function GameHistoryCard({ navigation }) {
                                     index === Math.min(gameHistory.length - 1, 4) &&
                                         styles.lastGameItem,
                                 ]}
-                                activeOpacity={0.7}
                             >
                                 <Block row middle space='between' flex>
                                     <Block row middle flex>
                                         <Avatar
                                             avatarKey={opponent.avatarKey}
+                                            computer={opponent.isComputer}
                                             size='small'
                                             style={styles.avatar}
                                         />
@@ -214,34 +262,36 @@ export default function GameHistoryCard({ navigation }) {
                                             >
                                                 vs {opponent.displayName}
                                             </Text>
-                                            <Block row middle>
-                                                <Icon
-                                                    name={result.icon}
-                                                    family='font-awesome'
-                                                    size={12}
-                                                    color={result.color}
-                                                />
+                                            {completedDate && (
                                                 <Text
-                                                    size={13}
+                                                    size={11}
                                                     style={[
-                                                        styles.resultText,
-                                                        { color: result.color },
+                                                        styles.dateText,
+                                                        { color: colors.TEXT_SECONDARY },
                                                     ]}
                                                 >
-                                                    {result.text}
+                                                    {completedDate}
                                                 </Text>
-                                            </Block>
+                                            )}
                                         </Block>
                                     </Block>
 
-                                    <Icon
-                                        name='chevron-right'
-                                        family='font-awesome'
-                                        size={16}
-                                        color={colors.TEXT_SECONDARY}
-                                    />
+                                    <Block row middle style={styles.resultContainer}>
+                                        <Icon
+                                            name={result.icon}
+                                            family='font-awesome'
+                                            size={12}
+                                            color={result.color}
+                                        />
+                                        <Text
+                                            size={13}
+                                            style={[styles.resultText, { color: result.color }]}
+                                        >
+                                            {result.text}
+                                        </Text>
+                                    </Block>
                                 </Block>
-                            </TouchableOpacity>
+                            </View>
                         );
                     })
                 )}
@@ -305,8 +355,16 @@ const styles = StyleSheet.create({
     opponentName: {
         marginBottom: 3,
     },
+    resultContainer: {
+        flexShrink: 0,
+        marginLeft: theme.SIZES.BASE,
+    },
     resultText: {
         marginLeft: 6,
+    },
+    dateText: {
+        marginTop: 4,
+        opacity: 0.8,
     },
     loadingContainer: {
         paddingVertical: theme.SIZES.BASE * 1.5,

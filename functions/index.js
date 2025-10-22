@@ -30,6 +30,8 @@ exports.createGame = game.createGame;
 exports.createComputerGame = game.createComputerGame;
 exports.respondToGameInvite = game.respondToGameInvite;
 exports.makeMove = game.makeMove;
+exports.makeComputerMove = game.makeComputerMove;
+exports.resignGame = game.resignGame;
 exports.getActiveGames = game.getActiveGames;
 exports.getGameHistory = game.getGameHistory;
 

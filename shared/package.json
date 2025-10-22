@@ -2,10 +2,14 @@
     "name": "@coral-clash/shared",
     "version": "1.0.0",
     "description": "Shared game logic for Coral Clash",
-    "main": "game/index.ts",
-    "types": "game/index.ts",
+    "main": "dist/game/index.js",
+    "types": "dist/game/index.d.ts",
     "scripts": {
-        "build": "tsc"
+        "build": "tsc",
+        "build:watch": "tsc --watch",
+        "clean": "rm -rf dist game/**/*.js game/**/*.d.ts !game/__fixtures__/*.js",
+        "test": "jest",
+        "test:watch": "jest --watch"
     },
     "keywords": [
         "coral-clash",
@@ -14,6 +18,9 @@
     "author": "",
     "license": "MIT",
     "devDependencies": {
+        "@types/jest": "^29.5.0",
+        "jest": "^29.7.0",
+        "ts-jest": "^29.1.0",
         "typescript": "~5.9.2"
     }
 }
