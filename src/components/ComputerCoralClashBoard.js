@@ -7,6 +7,22 @@ import { useGamePreferences } from '../contexts/GamePreferencesContext';
 import useFirebaseFunctions from '../hooks/useFirebaseFunctions';
 
 /**
+ * Format display name with discriminator
+ * @param {string} displayName - The display name
+ * @param {string} discriminator - The 4-digit discriminator
+ * @returns {string} Formatted name like "Username #1234"
+ */
+const formatDisplayName = (displayName, discriminator) => {
+    if (!displayName) {
+        return 'Player';
+    }
+    if (!discriminator) {
+        return displayName;
+    }
+    return `${displayName} #${discriminator}`;
+};
+
+/**
  * ComputerCoralClashBoard - Board for games against the computer
  * Extends BaseCoralClashBoard with:
  * - Undo functionality (undo both player and computer moves)
@@ -204,13 +220,16 @@ const ComputerCoralClashBoard = ({ fixture, gameId, gameState }) => {
     };
 
     // Determine which player is on top/bottom based on board flip
+    // Format user's name with discriminator
+    const userName = formatDisplayName(user?.displayName, user?.discriminator);
+
     const topPlayer = isBoardFlipped
-        ? { name: user?.displayName || 'Player', avatarKey: user?.avatarKey, isComputer: false }
+        ? { name: userName, avatarKey: user?.avatarKey, isComputer: false }
         : { name: 'Computer', isComputer: true };
 
     const bottomPlayer = isBoardFlipped
         ? { name: 'Computer', isComputer: true }
-        : { name: user?.displayName || 'Player', avatarKey: user?.avatarKey, isComputer: false };
+        : { name: userName, avatarKey: user?.avatarKey, isComputer: false };
 
     return (
         <BaseCoralClashBoard

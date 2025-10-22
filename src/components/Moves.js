@@ -9,22 +9,26 @@ const Moves = ({
     selectedDestination = null,
     isEnemyMoves = false,
     boardFlipped = false,
+    isPlayerTurn = true,
 }) => {
     const cellSize = size / 8;
 
     // Define colors based on whether these are enemy moves
+    // Reduce opacity when it's not the player's turn
+    const opacityMultiplier = isPlayerTurn ? 1 : 0.4;
+
     const colors = isEnemyMoves
         ? {
-              fillLight: 'rgba(255, 0, 0, 0.25)',
-              fillNormal: 'rgba(255, 0, 0, 0.5)',
-              strokeLight: 'rgba(200, 0, 0, 0.4)',
-              strokeNormal: 'rgba(200, 0, 0, 0.8)',
+              fillLight: `rgba(255, 0, 0, ${0.25 * opacityMultiplier})`,
+              fillNormal: `rgba(255, 0, 0, ${0.5 * opacityMultiplier})`,
+              strokeLight: `rgba(200, 0, 0, ${0.4 * opacityMultiplier})`,
+              strokeNormal: `rgba(200, 0, 0, ${0.8 * opacityMultiplier})`,
           }
         : {
-              fillLight: 'rgba(0, 255, 0, 0.25)',
-              fillNormal: 'rgba(0, 255, 0, 0.5)',
-              strokeLight: 'rgba(0, 200, 0, 0.4)',
-              strokeNormal: 'rgba(0, 200, 0, 0.8)',
+              fillLight: `rgba(0, 255, 0, ${0.25 * opacityMultiplier})`,
+              fillNormal: `rgba(0, 255, 0, ${0.5 * opacityMultiplier})`,
+              strokeLight: `rgba(0, 200, 0, ${0.4 * opacityMultiplier})`,
+              strokeNormal: `rgba(0, 200, 0, ${0.8 * opacityMultiplier})`,
           };
 
     return visibleMoves.map((move, index) => {

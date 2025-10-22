@@ -31,6 +31,10 @@ export default function ActiveGamesCard({ navigation }) {
             gameId: game.id,
             gameState: game.gameState,
             opponentType: game.opponentType, // 'computer' or undefined for PvP
+            opponentData: {
+                displayName: game.opponentDisplayName,
+                avatarKey: game.opponentAvatarKey,
+            },
         });
     };
 
@@ -45,6 +49,10 @@ export default function ActiveGamesCard({ navigation }) {
                     gameId: game.id,
                     gameState: game.gameState,
                     opponentType: game.opponentType,
+                    opponentData: {
+                        displayName: game.opponentDisplayName,
+                        avatarKey: game.opponentAvatarKey,
+                    },
                 });
             }
         } catch (error) {

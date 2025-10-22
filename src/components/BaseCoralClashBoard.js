@@ -445,7 +445,9 @@ const BaseCoralClashBoard = ({
 
         const piece = coralClash.get(square);
         const currentTurn = coralClash.turn();
-        const isEnemyPiece = piece && piece.color !== currentTurn;
+        // For online games (PvP or computer), check against userColor
+        // For offline games, check against currentTurn
+        const isEnemyPiece = piece && piece.color !== (userColor || currentTurn);
 
         if (piece && piece.type === WHALE) {
             const whaleColor = piece.color;
@@ -818,6 +820,7 @@ const BaseCoralClashBoard = ({
                         selectedDestination={whaleDestination}
                         isEnemyMoves={isViewingEnemyMoves}
                         boardFlipped={isBoardFlipped}
+                        isPlayerTurn={userColor ? coralClash.turn() === userColor : true}
                     />
                 </View>
 

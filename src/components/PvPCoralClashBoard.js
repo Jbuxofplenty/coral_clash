@@ -8,6 +8,22 @@ import useFirebaseFunctions from '../hooks/useFirebaseFunctions';
 import { db, doc, onSnapshot } from '../config/firebase';
 
 /**
+ * Format display name with discriminator
+ * @param {string} displayName - The display name
+ * @param {string} discriminator - The 4-digit discriminator
+ * @returns {string} Formatted name like "Username #1234"
+ */
+const formatDisplayName = (displayName, discriminator) => {
+    if (!displayName) {
+        return 'Player';
+    }
+    if (!discriminator) {
+        return displayName;
+    }
+    return `${displayName} #${discriminator}`;
+};
+
+/**
  * PvPCoralClashBoard - Board for player vs player games
  * Extends BaseCoralClashBoard with:
  * - No undo (requires opponent consent)
@@ -249,9 +265,12 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData }) => {
     // - User is white AND board IS manually flipped
     const shouldFlipBoard = userIsBlack !== isBoardFlipped;
 
-    // Get opponent info from game data or from creatorId/opponentId
+    // Get opponent info from game data (already formatted with discriminator from backend)
     let opponentName = opponentData?.displayName || 'Opponent';
     let opponentAvatar = opponentData?.avatarKey || 'dolphin';
+
+    // Format current user's name with discriminator
+    const userName = formatDisplayName(user?.displayName, user?.discriminator);
 
     const topPlayer = shouldFlipBoard
         ? {
@@ -260,14 +279,14 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData }) => {
               isComputer: false,
           }
         : {
-              name: user?.displayName || 'Player',
+              name: userName,
               avatarKey: user?.avatarKey,
               isComputer: false,
           };
 
     const bottomPlayer = shouldFlipBoard
         ? {
-              name: user?.displayName || 'Player',
+              name: userName,
               avatarKey: user?.avatarKey,
               isComputer: false,
           }
