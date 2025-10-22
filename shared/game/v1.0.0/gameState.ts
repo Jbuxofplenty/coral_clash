@@ -10,16 +10,16 @@ export interface GameStateFixture {
         fen: string;
         board: any[][];
         history: any[];
-        turn: 'w' | 'b';
-        whalePositions?: { w: [string, string] | null; b: [string, string] | null }; // v1.1.0+
-        coral?: { square: string; color: 'w' | 'b' }[]; // v1.2.0+ coral placement
+        turn: string; // 'w' | 'b' at runtime, but JSON import loses literal types
+        whalePositions?: { w: string[] | null; b: string[] | null }; // v1.1.0+, accepts array or tuple
+        coral?: { square: string; color: string }[]; // v1.2.0+ coral placement
         coralRemaining?: { w: number; b: number }; // v1.2.0+ coral counts
         isGameOver: boolean;
         inCheck: boolean;
         isCheckmate: boolean;
         isStalemate: boolean;
         isDraw: boolean;
-        isCoralVictory: false | 'w' | 'b';
+        isCoralVictory: false | string | null; // 'w' | 'b' at runtime
     };
 }
 

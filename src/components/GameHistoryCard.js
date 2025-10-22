@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import { Block, Text, theme } from 'galio-framework';
 import { View, StyleSheet, TouchableOpacity, ActivityIndicator, Dimensions } from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
 import { useTheme } from '../contexts/ThemeContext';
 import { useFirebaseFunctions } from '../hooks/useFirebaseFunctions';
 import { useAuth } from '../contexts/AuthContext';
@@ -14,24 +13,22 @@ const { width } = Dimensions.get('screen');
  * Card component that displays recent game history on the home screen
  * Shows the 5 most recent completed or cancelled games
  */
-export default function GameHistoryCard({ navigation }) {
+export default function GameHistoryCard({ navigation, refreshTrigger = 0 }) {
     const { colors } = useTheme();
     const { user } = useAuth();
     const { getGameHistory } = useFirebaseFunctions();
     const [gameHistory, setGameHistory] = React.useState([]);
     const [loading, setLoading] = React.useState(true);
 
-    // Load game history when screen comes into focus
-    useFocusEffect(
-        React.useCallback(() => {
-            if (user) {
-                loadGameHistory();
-            } else {
-                // Not logged in - stop loading
-                setLoading(false);
-            }
-        }, [user]),
-    );
+    // Load game history when triggered by parent
+    useEffect(() => {
+        if (user && refreshTrigger > 0) {
+            loadGameHistory();
+        } else if (!user) {
+            setLoading(false);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [user, refreshTrigger]);
 
     const loadGameHistory = async () => {
         try {

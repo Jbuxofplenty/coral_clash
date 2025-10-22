@@ -1222,48 +1222,94 @@ export class CoralClash {
     }
 
     moves(): string[];
-    moves({ square }: { square: Square }): string[];
-    moves({ piece }: { piece: PieceSymbol }): string[];
+    moves({ square, color }: { square: Square; color?: Color }): string[];
+    moves({ piece, color }: { piece: PieceSymbol; color?: Color }): string[];
 
-    moves({ square, piece }: { square: Square; piece: PieceSymbol }): string[];
+    moves({
+        square,
+        piece,
+        color,
+    }: {
+        square: Square;
+        piece: PieceSymbol;
+        color?: Color;
+    }): string[];
 
-    moves({ verbose, square }: { verbose: true; square?: Square }): Move[];
-    moves({ verbose, square }: { verbose: false; square?: Square }): string[];
-    moves({ verbose, square }: { verbose?: boolean; square?: Square }): string[] | Move[];
+    moves({ verbose, square, color }: { verbose: true; square?: Square; color?: Color }): Move[];
+    moves({ verbose, square, color }: { verbose: false; square?: Square; color?: Color }): string[];
+    moves({
+        verbose,
+        square,
+        color,
+    }: {
+        verbose?: boolean;
+        square?: Square;
+        color?: Color;
+    }): string[] | Move[];
 
-    moves({ verbose, piece }: { verbose: true; piece?: PieceSymbol }): Move[];
-    moves({ verbose, piece }: { verbose: false; piece?: PieceSymbol }): string[];
-    moves({ verbose, piece }: { verbose?: boolean; piece?: PieceSymbol }): string[] | Move[];
+    moves({ verbose, piece, color }: { verbose: true; piece?: PieceSymbol; color?: Color }): Move[];
+    moves({
+        verbose,
+        piece,
+        color,
+    }: {
+        verbose: false;
+        piece?: PieceSymbol;
+        color?: Color;
+    }): string[];
+    moves({
+        verbose,
+        piece,
+        color,
+    }: {
+        verbose?: boolean;
+        piece?: PieceSymbol;
+        color?: Color;
+    }): string[] | Move[];
 
     moves({
         verbose,
         square,
         piece,
+        color,
     }: {
         verbose: true;
         square?: Square;
         piece?: PieceSymbol;
+        color?: Color;
     }): Move[];
     moves({
         verbose,
         square,
         piece,
+        color,
     }: {
         verbose: false;
         square?: Square;
         piece?: PieceSymbol;
+        color?: Color;
     }): string[];
     moves({
         verbose,
         square,
         piece,
+        color,
     }: {
         verbose?: boolean;
         square?: Square;
         piece?: PieceSymbol;
+        color?: Color;
     }): string[] | Move[];
 
-    moves({ square, piece }: { square?: Square; piece?: PieceSymbol }): Move[];
+    moves({
+        square,
+        piece,
+        color,
+    }: {
+        square?: Square;
+        piece?: PieceSymbol;
+        color?: Color;
+    }): Move[];
 
     moves({
         verbose = false,

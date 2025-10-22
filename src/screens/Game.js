@@ -14,6 +14,7 @@ export default function Game({ route }) {
     const fixture = route?.params?.fixture;
     const gameId = route?.params?.gameId;
     const gameState = route?.params?.gameState;
+    const opponentType = route?.params?.opponentType; // 'computer' or undefined for PvP
 
     return (
         <LinearGradient
@@ -23,7 +24,12 @@ export default function Game({ route }) {
             end={{ x: 0, y: 1 }}
         >
             <Block flex>
-                <CoralClash fixture={fixture} gameId={gameId} gameState={gameState} />
+                <CoralClash
+                    fixture={fixture}
+                    gameId={gameId}
+                    gameState={gameState}
+                    opponentType={opponentType}
+                />
             </Block>
         </LinearGradient>
     );

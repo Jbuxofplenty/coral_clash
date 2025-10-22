@@ -1,7 +1,6 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Block, Text, theme } from 'galio-framework';
 import { View, StyleSheet, TouchableOpacity, ActivityIndicator, Dimensions } from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
 import { useTheme } from '../contexts/ThemeContext';
 import { useGame } from '../hooks/useGame';
 import { useAuth } from '../contexts/AuthContext';
@@ -13,26 +12,18 @@ const { width } = Dimensions.get('screen');
 /**
  * Card component that displays active games (PvP and Computer) on the home screen
  * Shows game status, opponent avatar, and whose turn it is
+ * Note: Data loading is handled by the parent screen
  */
 export default function ActiveGamesCard({ navigation }) {
     const { colors } = useTheme();
     const { user } = useAuth();
-    const { activeGames, loading, loadActiveGames } = useGame();
-
-    // Load active games when screen comes into focus
-    useFocusEffect(
-        React.useCallback(() => {
-            if (user) {
-                loadActiveGames();
-            }
-        }, [user]),
-    );
+    const { activeGames, loading } = useGame();
 
     const handleGamePress = (game) => {
         navigation.navigate('Game', {
             gameId: game.id,
             gameState: game.gameState,
-            isPvP: true,
+            opponentType: game.opponentType, // 'computer' or undefined for PvP
         });
     };
 

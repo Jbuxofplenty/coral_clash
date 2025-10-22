@@ -5,7 +5,15 @@ import {
     getReactNativePersistence,
     connectAuthEmulator,
 } from 'firebase/auth';
-import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
+import {
+    getFirestore,
+    connectFirestoreEmulator,
+    doc,
+    onSnapshot,
+    collection,
+    query,
+    where,
+} from 'firebase/firestore';
 import { getFunctions, connectFunctionsEmulator } from 'firebase/functions';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
@@ -70,4 +78,4 @@ if (USE_EMULATOR) {
     connectFunctionsEmulator(functions, EMULATOR_HOST, 5001);
 }
 
-export { app, auth, db, functions };
+export { app, auth, db, functions, doc, onSnapshot, collection, query, where };

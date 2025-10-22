@@ -17,6 +17,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { useFirebaseFunctions } from '../hooks/useFirebaseFunctions';
 import { useGame } from '../hooks/useGame';
+import { db, collection, query, where, onSnapshot } from '../config/firebase';
 
 const { width } = Dimensions.get('screen');
 
@@ -36,14 +37,154 @@ export default function Friends({ navigation }) {
     const [searching, setSearching] = useState(false);
     const [showDropdown, setShowDropdown] = useState(false);
     const [sending, setSending] = useState(false);
+    const [removingFriendId, setRemovingFriendId] = useState(null);
+    const [acceptingRequestId, setAcceptingRequestId] = useState(null);
+    const [decliningRequestId, setDecliningRequestId] = useState(null);
     const searchTimeoutRef = React.useRef(null);
 
-    // Load friends when screen comes into focus
+    // Set up real-time Firestore listeners when screen comes into focus
     useFocusEffect(
         React.useCallback(() => {
-            if (user && user.uid) {
-                loadFriends();
-            }
+            if (!user || !user.uid) return;
+
+            let friendsUnsubscribe = null;
+            let incomingUnsubscribe = null;
+            let outgoingUnsubscribe = null;
+
+            const setupListeners = async () => {
+                try {
+                    setLoading(true);
+
+                    // Listen to user's friends subcollection
+                    const friendsRef = collection(db, 'users', user.uid, 'friends');
+                    friendsUnsubscribe = onSnapshot(
+                        friendsRef,
+                        async (snapshot) => {
+                            // Whenever the friends subcollection changes (add, delete, modify),
+                            // fetch the updated friends list
+                            try {
+                                const result = await getFriends();
+                                setFriends(result.friends || []);
+
+                                // Clear loading state if the friend being removed is no longer in the list
+                                setRemovingFriendId((currentId) => {
+                                    if (
+                                        currentId &&
+                                        !result.friends.some((f) => f.id === currentId)
+                                    ) {
+                                        return null;
+                                    }
+                                    return currentId;
+                                });
+                            } catch (error) {
+                                console.error('Error fetching friends:', error);
+                            }
+                        },
+                        (error) => {
+                            console.error('Error in friends listener:', error);
+                        },
+                    );
+
+                    // Listen to incoming friend requests
+                    const incomingQuery = query(
+                        collection(db, 'friendRequests'),
+                        where('to', '==', user.uid),
+                        where('status', '==', 'pending'),
+                    );
+                    incomingUnsubscribe = onSnapshot(
+                        incomingQuery,
+                        async () => {
+                            try {
+                                const result = await getFriends();
+                                setIncomingRequests(result.incomingRequests || []);
+
+                                // Clear loading states if requests no longer exist
+                                setAcceptingRequestId((currentId) => {
+                                    if (
+                                        currentId &&
+                                        !result.incomingRequests.some(
+                                            (r) => r.requestId === currentId,
+                                        )
+                                    ) {
+                                        return null;
+                                    }
+                                    return currentId;
+                                });
+                                setDecliningRequestId((currentId) => {
+                                    if (
+                                        currentId &&
+                                        !result.incomingRequests.some(
+                                            (r) => r.requestId === currentId,
+                                        )
+                                    ) {
+                                        return null;
+                                    }
+                                    return currentId;
+                                });
+                            } catch (error) {
+                                console.error('Error fetching incoming requests:', error);
+                            }
+                        },
+                        (error) => {
+                            console.error('Error in incoming requests listener:', error);
+                        },
+                    );
+
+                    // Listen to outgoing friend requests
+                    const outgoingQuery = query(
+                        collection(db, 'friendRequests'),
+                        where('from', '==', user.uid),
+                        where('status', '==', 'pending'),
+                    );
+                    outgoingUnsubscribe = onSnapshot(
+                        outgoingQuery,
+                        async () => {
+                            try {
+                                const result = await getFriends();
+                                setOutgoingRequests(result.outgoingRequests || []);
+
+                                // Clear declining state if request no longer exists (for cancellations)
+                                setDecliningRequestId((currentId) => {
+                                    if (
+                                        currentId &&
+                                        !result.outgoingRequests.some(
+                                            (r) => r.requestId === currentId,
+                                        )
+                                    ) {
+                                        return null;
+                                    }
+                                    return currentId;
+                                });
+                            } catch (error) {
+                                console.error('Error fetching outgoing requests:', error);
+                            }
+                        },
+                        (error) => {
+                            console.error('Error in outgoing requests listener:', error);
+                        },
+                    );
+
+                    // Initial load
+                    const result = await getFriends();
+                    setFriends(result.friends || []);
+                    setIncomingRequests(result.incomingRequests || []);
+                    setOutgoingRequests(result.outgoingRequests || []);
+                } catch (error) {
+                    console.error('Error setting up listeners:', error);
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            setupListeners();
+
+            // Cleanup listeners when screen loses focus or unmounts
+            return () => {
+                if (friendsUnsubscribe) friendsUnsubscribe();
+                if (incomingUnsubscribe) incomingUnsubscribe();
+                if (outgoingUnsubscribe) outgoingUnsubscribe();
+            };
+            // eslint-disable-next-line react-hooks/exhaustive-deps
         }, [user]),
     );
 
@@ -97,6 +238,20 @@ export default function Friends({ navigation }) {
         }, 300);
     };
 
+    const handleSearchFocus = () => {
+        // Show dropdown only if there's a valid search query and results exist
+        if (searchQuery.trim().length >= 2 && (searchResults.length > 0 || searching)) {
+            setShowDropdown(true);
+        }
+    };
+
+    const handleSearchBlur = () => {
+        // Hide dropdown when focus is lost
+        setTimeout(() => {
+            setShowDropdown(false);
+        }, 200);
+    };
+
     const handleSelectUser = async (selectedUser) => {
         if (selectedUser.hasPendingRequest) {
             Alert.alert(
@@ -106,29 +261,24 @@ export default function Friends({ navigation }) {
             return;
         }
 
-        Alert.alert('Send Friend Request', `Send friend request to ${selectedUser.displayName}?`, [
-            { text: 'Cancel', style: 'cancel' },
-            {
-                text: 'Send',
-                onPress: async () => {
-                    try {
-                        setSending(true);
-                        await sendFriendRequest(selectedUser.id);
-                        Alert.alert('Success', 'Friend request sent!');
-                        setSearchQuery('');
-                        setShowDropdown(false);
-                        setSearchResults([]);
-                        // Reload friends to show in outgoing requests
-                        await loadFriends();
-                    } catch (error) {
-                        console.error('Error sending friend request:', error);
-                        Alert.alert('Error', error.message || 'Failed to send friend request');
-                    } finally {
-                        setSending(false);
-                    }
-                },
-            },
-        ]);
+        try {
+            setSending(true);
+            await sendFriendRequest(selectedUser.id);
+            // Clear search state completely
+            setSearchQuery('');
+            setShowDropdown(false);
+            setSearchResults([]);
+            // Clear any pending search timeouts
+            if (searchTimeoutRef.current) {
+                clearTimeout(searchTimeoutRef.current);
+            }
+            // Note: Real-time listener will auto-update the UI
+        } catch (error) {
+            console.error('Error sending friend request:', error);
+            Alert.alert('Error', error.message || 'Failed to send friend request');
+        } finally {
+            setSending(false);
+        }
     };
 
     const handleRemoveFriend = (friendId, friendDisplayName) => {
@@ -142,12 +292,13 @@ export default function Friends({ navigation }) {
                     style: 'destructive',
                     onPress: async () => {
                         try {
+                            setRemovingFriendId(friendId);
                             await removeFriend(friendId);
-                            // Reload friends list
-                            await loadFriends();
+                            // Note: Real-time listener will auto-update the UI
                         } catch (error) {
                             console.error('Error removing friend:', error);
                             Alert.alert('Error', 'Failed to remove friend');
+                            setRemovingFriendId(null);
                         }
                     },
                 },
@@ -157,21 +308,25 @@ export default function Friends({ navigation }) {
 
     const handleAcceptRequest = async (requestId, userId) => {
         try {
+            setAcceptingRequestId(requestId);
             await respondToFriendRequest(requestId, true);
-            await loadFriends();
+            // Note: Real-time listener will auto-update the UI
         } catch (error) {
             console.error('Error accepting friend request:', error);
             Alert.alert('Error', 'Failed to accept friend request');
+            setAcceptingRequestId(null);
         }
     };
 
     const handleDeclineRequest = async (requestId) => {
         try {
+            setDecliningRequestId(requestId);
             await respondToFriendRequest(requestId, false);
-            await loadFriends();
+            // Note: Real-time listener will auto-update the UI
         } catch (error) {
             console.error('Error declining friend request:', error);
             Alert.alert('Error', 'Failed to decline friend request');
+            setDecliningRequestId(null);
         }
     };
 
@@ -183,11 +338,13 @@ export default function Friends({ navigation }) {
                 style: 'destructive',
                 onPress: async () => {
                     try {
+                        setDecliningRequestId(requestId);
                         await respondToFriendRequest(requestId, false);
-                        await loadFriends();
+                        // Note: Real-time listener will auto-update the UI
                     } catch (error) {
                         console.error('Error canceling friend request:', error);
                         Alert.alert('Error', 'Failed to cancel friend request');
+                        setDecliningRequestId(null);
                     }
                 },
             },
@@ -200,6 +357,7 @@ export default function Friends({ navigation }) {
 
     const renderFriendItem = (friend) => {
         const displayName = friend.displayName || 'User';
+        const isRemoving = removingFriendId === friend.id;
 
         return (
             <Block
@@ -210,6 +368,7 @@ export default function Friends({ navigation }) {
                         backgroundColor: colors.CARD_BACKGROUND,
                         borderColor: colors.BORDER_COLOR,
                         shadowColor: colors.SHADOW,
+                        opacity: isRemoving ? 0.6 : 1,
                     },
                 ]}
             >
@@ -245,6 +404,7 @@ export default function Friends({ navigation }) {
                     <Block row>
                         <TouchableOpacity
                             onPress={() => handleStartGame(friend.id, displayName)}
+                            disabled={isRemoving}
                             style={[
                                 styles.actionButton,
                                 { backgroundColor: colors.SUCCESS + '10', marginRight: 8 },
@@ -257,17 +417,31 @@ export default function Friends({ navigation }) {
                                 color={colors.SUCCESS}
                             />
                         </TouchableOpacity>
-                        <TouchableOpacity
-                            onPress={() => handleRemoveFriend(friend.id, displayName)}
-                            style={[styles.removeButton, { backgroundColor: colors.ERROR + '10' }]}
-                        >
-                            <Icon
-                                name='user-times'
-                                family='font-awesome'
-                                size={18}
-                                color={colors.ERROR}
-                            />
-                        </TouchableOpacity>
+                        {isRemoving ? (
+                            <View
+                                style={[
+                                    styles.removeButton,
+                                    { backgroundColor: colors.ERROR + '10' },
+                                ]}
+                            >
+                                <ActivityIndicator size='small' color={colors.ERROR} />
+                            </View>
+                        ) : (
+                            <TouchableOpacity
+                                onPress={() => handleRemoveFriend(friend.id, displayName)}
+                                style={[
+                                    styles.removeButton,
+                                    { backgroundColor: colors.ERROR + '10' },
+                                ]}
+                            >
+                                <Icon
+                                    name='user-times'
+                                    family='font-awesome'
+                                    size={18}
+                                    color={colors.ERROR}
+                                />
+                            </TouchableOpacity>
+                        )}
                     </Block>
                 </Block>
             </Block>
@@ -307,6 +481,8 @@ export default function Friends({ navigation }) {
                                         placeholderTextColor={colors.PLACEHOLDER}
                                         value={searchQuery}
                                         onChangeText={handleSearch}
+                                        onFocus={handleSearchFocus}
+                                        onBlur={handleSearchBlur}
                                         autoCapitalize='none'
                                         style={[
                                             styles.input,
@@ -330,7 +506,7 @@ export default function Friends({ navigation }) {
                             </Block>
 
                             {/* Search Results Dropdown */}
-                            {showDropdown && (
+                            {showDropdown && searchQuery.trim().length >= 2 && (
                                 <Block
                                     style={[
                                         styles.dropdown,
@@ -417,6 +593,9 @@ export default function Friends({ navigation }) {
                             <Block style={styles.friendsList}>
                                 {incomingRequests.map((request) => {
                                     const displayName = request.displayName || 'User';
+                                    const isProcessing =
+                                        acceptingRequestId === request.requestId ||
+                                        decliningRequestId === request.requestId;
                                     return (
                                         <Block
                                             key={request.id}
@@ -426,6 +605,7 @@ export default function Friends({ navigation }) {
                                                     backgroundColor: colors.CARD_BACKGROUND,
                                                     borderColor: colors.BORDER_COLOR,
                                                     shadowColor: colors.SHADOW,
+                                                    opacity: isProcessing ? 0.6 : 1,
                                                 },
                                             ]}
                                         >
@@ -449,48 +629,93 @@ export default function Friends({ navigation }) {
                                                     </Block>
                                                 </Block>
                                                 <Block row>
-                                                    <TouchableOpacity
-                                                        onPress={() =>
-                                                            handleAcceptRequest(
-                                                                request.requestId,
-                                                                request.id,
-                                                            )
-                                                        }
-                                                        style={[
-                                                            styles.actionButton,
-                                                            {
-                                                                backgroundColor:
-                                                                    colors.SUCCESS + '10',
-                                                            },
-                                                        ]}
-                                                    >
-                                                        <Icon
-                                                            name='check'
-                                                            family='font-awesome'
-                                                            size={18}
-                                                            color={colors.SUCCESS}
-                                                        />
-                                                    </TouchableOpacity>
-                                                    <TouchableOpacity
-                                                        onPress={() =>
-                                                            handleDeclineRequest(request.requestId)
-                                                        }
-                                                        style={[
-                                                            styles.actionButton,
-                                                            {
-                                                                backgroundColor:
-                                                                    colors.ERROR + '10',
-                                                                marginLeft: 8,
-                                                            },
-                                                        ]}
-                                                    >
-                                                        <Icon
-                                                            name='times'
-                                                            family='font-awesome'
-                                                            size={18}
-                                                            color={colors.ERROR}
-                                                        />
-                                                    </TouchableOpacity>
+                                                    {acceptingRequestId === request.requestId ? (
+                                                        <View
+                                                            style={[
+                                                                styles.actionButton,
+                                                                {
+                                                                    backgroundColor:
+                                                                        colors.SUCCESS + '10',
+                                                                },
+                                                            ]}
+                                                        >
+                                                            <ActivityIndicator
+                                                                size='small'
+                                                                color={colors.SUCCESS}
+                                                            />
+                                                        </View>
+                                                    ) : (
+                                                        <TouchableOpacity
+                                                            onPress={() =>
+                                                                handleAcceptRequest(
+                                                                    request.requestId,
+                                                                    request.id,
+                                                                )
+                                                            }
+                                                            disabled={
+                                                                decliningRequestId ===
+                                                                request.requestId
+                                                            }
+                                                            style={[
+                                                                styles.actionButton,
+                                                                {
+                                                                    backgroundColor:
+                                                                        colors.SUCCESS + '10',
+                                                                },
+                                                            ]}
+                                                        >
+                                                            <Icon
+                                                                name='check'
+                                                                family='font-awesome'
+                                                                size={18}
+                                                                color={colors.SUCCESS}
+                                                            />
+                                                        </TouchableOpacity>
+                                                    )}
+                                                    {decliningRequestId === request.requestId ? (
+                                                        <View
+                                                            style={[
+                                                                styles.actionButton,
+                                                                {
+                                                                    backgroundColor:
+                                                                        colors.ERROR + '10',
+                                                                    marginLeft: 8,
+                                                                },
+                                                            ]}
+                                                        >
+                                                            <ActivityIndicator
+                                                                size='small'
+                                                                color={colors.ERROR}
+                                                            />
+                                                        </View>
+                                                    ) : (
+                                                        <TouchableOpacity
+                                                            onPress={() =>
+                                                                handleDeclineRequest(
+                                                                    request.requestId,
+                                                                )
+                                                            }
+                                                            disabled={
+                                                                acceptingRequestId ===
+                                                                request.requestId
+                                                            }
+                                                            style={[
+                                                                styles.actionButton,
+                                                                {
+                                                                    backgroundColor:
+                                                                        colors.ERROR + '10',
+                                                                    marginLeft: 8,
+                                                                },
+                                                            ]}
+                                                        >
+                                                            <Icon
+                                                                name='times'
+                                                                family='font-awesome'
+                                                                size={18}
+                                                                color={colors.ERROR}
+                                                            />
+                                                        </TouchableOpacity>
+                                                    )}
                                                 </Block>
                                             </Block>
                                         </Block>
@@ -514,6 +739,7 @@ export default function Friends({ navigation }) {
                             <Block style={styles.friendsList}>
                                 {outgoingRequests.map((request) => {
                                     const displayName = request.displayName || 'User';
+                                    const isCanceling = decliningRequestId === request.requestId;
                                     return (
                                         <Block
                                             key={request.id}
@@ -523,6 +749,7 @@ export default function Friends({ navigation }) {
                                                     backgroundColor: colors.CARD_BACKGROUND,
                                                     borderColor: colors.BORDER_COLOR,
                                                     shadowColor: colors.SHADOW,
+                                                    opacity: isCanceling ? 0.6 : 1,
                                                 },
                                             ]}
                                         >
@@ -545,25 +772,45 @@ export default function Friends({ navigation }) {
                                                         </Text>
                                                     </Block>
                                                 </Block>
-                                                <TouchableOpacity
-                                                    onPress={() =>
-                                                        handleCancelRequest(
-                                                            request.requestId,
-                                                            displayName,
-                                                        )
-                                                    }
-                                                    style={[
-                                                        styles.actionButton,
-                                                        { backgroundColor: colors.ERROR + '10' },
-                                                    ]}
-                                                >
-                                                    <Icon
-                                                        name='times'
-                                                        family='font-awesome'
-                                                        size={18}
-                                                        color={colors.ERROR}
-                                                    />
-                                                </TouchableOpacity>
+                                                {isCanceling ? (
+                                                    <View
+                                                        style={[
+                                                            styles.actionButton,
+                                                            {
+                                                                backgroundColor:
+                                                                    colors.ERROR + '10',
+                                                            },
+                                                        ]}
+                                                    >
+                                                        <ActivityIndicator
+                                                            size='small'
+                                                            color={colors.ERROR}
+                                                        />
+                                                    </View>
+                                                ) : (
+                                                    <TouchableOpacity
+                                                        onPress={() =>
+                                                            handleCancelRequest(
+                                                                request.requestId,
+                                                                displayName,
+                                                            )
+                                                        }
+                                                        style={[
+                                                            styles.actionButton,
+                                                            {
+                                                                backgroundColor:
+                                                                    colors.ERROR + '10',
+                                                            },
+                                                        ]}
+                                                    >
+                                                        <Icon
+                                                            name='times'
+                                                            family='font-awesome'
+                                                            size={18}
+                                                            color={colors.ERROR}
+                                                        />
+                                                    </TouchableOpacity>
+                                                )}
                                             </Block>
                                         </Block>
                                     );

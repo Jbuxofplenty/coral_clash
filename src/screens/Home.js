@@ -19,22 +19,29 @@ export default function Home({ navigation }) {
     const { colors } = useTheme();
     const { user } = useAuth();
     const [fixtureModalVisible, setFixtureModalVisible] = useState(false);
+    const [refreshTrigger, setRefreshTrigger] = useState(0);
     const { startComputerGame, activeGames, loadActiveGames } = useGame();
 
-    // Load active games when screen comes into focus
+    // Load data when screen comes into focus
     useFocusEffect(
         React.useCallback(() => {
             if (user) {
                 loadActiveGames();
+                // Trigger refresh for child components
+                setRefreshTrigger((prev) => prev + 1);
             }
-        }, [user, loadActiveGames]),
+            // eslint-disable-next-line react-hooks/exhaustive-deps
+        }, [user]),
     );
 
     const handleStartComputerGame = async () => {
         try {
             const result = await startComputerGame();
             if (result.gameId) {
-                navigation.navigate('Game', { gameId: result.gameId });
+                navigation.navigate('Game', {
+                    gameId: result.gameId,
+                    opponentType: 'computer',
+                });
             }
         } catch (error) {
             console.error('Failed to start computer game:', error);
@@ -90,7 +97,7 @@ export default function Home({ navigation }) {
                 {activeGames.length === 0 && <ActiveGamesCard navigation={navigation} />}
 
                 {/* Game History Card */}
-                <GameHistoryCard navigation={navigation} />
+                <GameHistoryCard navigation={navigation} refreshTrigger={refreshTrigger} />
             </ScrollView>
 
             <FixtureLoaderModal

@@ -23,13 +23,14 @@ import { useTheme } from '../contexts/ThemeContext';
 import { useGamePreferences } from '../contexts/GamePreferencesContext';
 import { useAuth } from '../contexts/AuthContext';
 import useFirebaseFunctions from '../hooks/useFirebaseFunctions';
+import { db, doc, onSnapshot } from '../config/firebase';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 // Game state schema version for fixtures
 const GAME_STATE_VERSION = '1.2.0';
 
-const CoralClash = ({ fixture, gameId, gameState }) => {
+const CoralClash = ({ fixture, gameId, gameState, opponentType }) => {
     const { width } = useWindowDimensions();
     const { colors, isDarkMode } = useTheme();
     const { isBoardFlipped, toggleBoardFlip } = useGamePreferences();
@@ -51,6 +52,11 @@ const CoralClash = ({ fixture, gameId, gameState }) => {
     const [menuVisible, setMenuVisible] = useState(false);
     const [slideAnim] = useState(new Animated.Value(0));
     const boardSize = Math.min(width, 400);
+
+    // Determine game type
+    const isOfflineGame = !gameId;
+    const isComputerGame = opponentType === 'computer';
+    const isPvPGame = gameId && !isComputerGame;
 
     // Safety check - return null if coralClash is not initialized
     if (!coralClash) {
@@ -101,6 +107,34 @@ const CoralClash = ({ fixture, gameId, gameState }) => {
             }
         }
     }, [fixture, fixtureLoaded]);
+
+    // Real-time listener for online games (PvP and Computer)
+    // Automatically updates board when opponent makes a move
+    useEffect(() => {
+        if (!gameId) return; // Skip for offline games
+
+        // Subscribe to game document
+        const unsubscribe = onSnapshot(
+            doc(db, 'games', gameId),
+            (docSnap) => {
+                if (docSnap.exists()) {
+                    const gameData = docSnap.data();
+
+                    // Apply the updated game state
+                    if (gameData.gameState) {
+                        restoreGameFromSnapshot(coralClash, gameData.gameState);
+                        forceUpdate((n) => n + 1);
+                    }
+                }
+            },
+            (error) => {
+                console.error('Error listening to game updates:', error);
+            },
+        );
+
+        // Cleanup subscription on unmount or gameId change
+        return () => unsubscribe();
+    }, [gameId]);
 
     // Handle random black moves - runs after render, not during
     // ONLY for offline/local games (when gameId is not present)
@@ -190,10 +224,19 @@ const CoralClash = ({ fixture, gameId, gameState }) => {
     const gameStatus = getGameStatus();
 
     const handleUndo = () => {
-        // Undo computer's move (black)
-        coralClash.undo();
-        // Undo user's move (white)
-        coralClash.undo();
+        if (isComputerGame || isOfflineGame) {
+            // Computer/offline game: Undo both moves (computer + player)
+            coralClash.undo();
+            coralClash.undo();
+        } else {
+            // PvP game: Would need opponent consent (not implemented yet)
+            Alert.alert(
+                'Undo Not Available',
+                'Cannot undo moves in PvP games without opponent consent.',
+            );
+            return;
+        }
+
         setVisibleMoves([]);
         setSelectedSquare(null);
         setWhaleDestination(null);
@@ -201,8 +244,11 @@ const CoralClash = ({ fixture, gameId, gameState }) => {
         setIsViewingEnemyMoves(false);
     };
 
-    // Can only undo if at least 2 moves have been made (user + computer) and game is not over
-    const canUndo = coralClash.history().length >= 2 && !coralClash.isGameOver();
+    // Can undo in computer/offline games, but not in PvP games
+    const canUndo =
+        (isComputerGame || isOfflineGame) &&
+        coralClash.history().length >= 2 &&
+        !coralClash.isGameOver();
 
     const handleResign = () => {
         closeMenu();
@@ -241,10 +287,8 @@ const CoralClash = ({ fixture, gameId, gameState }) => {
         try {
             const result = await makeMoveAPI({ gameId, move });
 
-            // Apply the backend's validated game state (ensures sync)
-            if (result.gameState) {
-                restoreGameFromSnapshot(coralClash, result.gameState);
-            }
+            // Firestore listener will automatically apply the validated state!
+            // No need to manually update here
 
             // If it's a computer game and computer's turn, trigger computer move
             if (
@@ -252,21 +296,10 @@ const CoralClash = ({ fixture, gameId, gameState }) => {
                 result.gameState?.turn === 'b' &&
                 !result.gameOver
             ) {
-                // Computer's turn (black) - trigger computer move
-                // Use setTimeout to avoid blocking the UI
-                setTimeout(async () => {
-                    try {
-                        const computerResult = await makeComputerMoveAPI({ gameId });
-                        // Apply computer's move to local game state
-                        if (computerResult.gameState) {
-                            restoreGameFromSnapshot(coralClash, computerResult.gameState);
-                            // Force re-render to show computer's move
-                            forceUpdate((n) => n + 1);
-                        }
-                    } catch (error) {
-                        console.error('Error making computer move:', error);
-                    }
-                }, 500); // Small delay for better UX
+                // Trigger computer move (Firestore listener will apply it automatically)
+                makeComputerMoveAPI({ gameId }).catch((error) => {
+                    console.error('Error making computer move:', error);
+                });
             }
         } catch (error) {
             console.error('Error sending move to backend:', error);
@@ -644,6 +677,16 @@ const CoralClash = ({ fixture, gameId, gameState }) => {
 
     const handleReset = () => {
         closeMenu();
+
+        // Only allow reset in offline/computer games
+        if (isPvPGame) {
+            Alert.alert(
+                'Reset Not Available',
+                'Cannot reset PvP games. Please resign if you want to end the game.',
+            );
+            return;
+        }
+
         Alert.alert('Reset Game', 'Are you sure you want to start a new game?', [
             {
                 text: 'Cancel',
@@ -791,20 +834,22 @@ const CoralClash = ({ fixture, gameId, gameState }) => {
                     <Icon name='menu' family='MaterialIcons' size={44} color={colors.WHITE} />
                 </TouchableOpacity>
 
-                {/* Undo Button */}
-                <TouchableOpacity
-                    style={styles.controlButton}
-                    onPress={handleUndo}
-                    disabled={!canUndo}
-                    activeOpacity={0.7}
-                >
-                    <Icon
-                        name='undo'
-                        family='MaterialIcons'
-                        size={44}
-                        color={canUndo ? colors.WHITE : colors.MUTED}
-                    />
-                </TouchableOpacity>
+                {/* Undo Button - Only for computer/offline games */}
+                {(isComputerGame || isOfflineGame) && (
+                    <TouchableOpacity
+                        style={styles.controlButton}
+                        onPress={handleUndo}
+                        disabled={!canUndo}
+                        activeOpacity={0.7}
+                    >
+                        <Icon
+                            name='undo'
+                            family='MaterialIcons'
+                            size={44}
+                            color={canUndo ? colors.WHITE : colors.MUTED}
+                        />
+                    </TouchableOpacity>
+                )}
             </View>
 
             {/* Bottom Drawer Menu */}
@@ -892,35 +937,39 @@ const CoralClash = ({ fixture, gameId, gameState }) => {
                                 </View>
                             </TouchableOpacity>
 
-                            {/* Reset Game */}
-                            <TouchableOpacity
-                                style={[
-                                    styles.menuItem,
-                                    { borderBottomColor: colors.BORDER_COLOR },
-                                ]}
-                                onPress={handleReset}
-                                activeOpacity={0.7}
-                            >
-                                <Icon
-                                    name='refresh'
-                                    family='MaterialIcons'
-                                    size={28}
-                                    color='#f57c00'
-                                />
-                                <View style={styles.menuItemText}>
-                                    <Text style={[styles.menuItemTitle, { color: colors.TEXT }]}>
-                                        Reset Game
-                                    </Text>
-                                    <Text
-                                        style={[
-                                            styles.menuItemSubtitle,
-                                            { color: colors.TEXT_SECONDARY },
-                                        ]}
-                                    >
-                                        Start a new game from the beginning
-                                    </Text>
-                                </View>
-                            </TouchableOpacity>
+                            {/* Reset Game - Only for computer/offline games */}
+                            {(isComputerGame || isOfflineGame) && (
+                                <TouchableOpacity
+                                    style={[
+                                        styles.menuItem,
+                                        { borderBottomColor: colors.BORDER_COLOR },
+                                    ]}
+                                    onPress={handleReset}
+                                    activeOpacity={0.7}
+                                >
+                                    <Icon
+                                        name='refresh'
+                                        family='MaterialIcons'
+                                        size={28}
+                                        color='#f57c00'
+                                    />
+                                    <View style={styles.menuItemText}>
+                                        <Text
+                                            style={[styles.menuItemTitle, { color: colors.TEXT }]}
+                                        >
+                                            Reset Game
+                                        </Text>
+                                        <Text
+                                            style={[
+                                                styles.menuItemSubtitle,
+                                                { color: colors.TEXT_SECONDARY },
+                                            ]}
+                                        >
+                                            Start a new game from the beginning
+                                        </Text>
+                                    </View>
+                                </TouchableOpacity>
+                            )}
 
                             {/* Resign */}
                             <TouchableOpacity
