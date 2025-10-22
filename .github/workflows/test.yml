@@ -40,6 +40,9 @@ jobs:
       - name: Run Shared tests
         run: cd shared && yarn test
         
+      - name: Build Shared module
+        run: cd shared && yarn build
+        
       - name: Install Functions dependencies
         run: cd functions && yarn install --frozen-lockfile
         
