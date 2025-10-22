@@ -1,16 +1,102 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Alert } from 'react-native';
 import { useFirebaseFunctions } from './useFirebaseFunctions';
+import { useAuth } from '../contexts/AuthContext';
+import { db, collection, query, where, onSnapshot } from '../config/firebase';
 
 /**
  * Custom hook for managing game operations (PvP and Computer)
  * Provides high-level game management with state and error handling
+ * Automatically listens to Firestore for real-time updates
  */
 export const useGame = () => {
+    const { user } = useAuth();
     const { createGame, createComputerGame, respondToGameInvite, getActiveGames } =
         useFirebaseFunctions();
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [activeGames, setActiveGames] = useState([]);
+
+    // Set up real-time Firestore listeners for active games
+    useEffect(() => {
+        if (!user || !user.uid) {
+            setActiveGames([]);
+            setLoading(false);
+            return;
+        }
+
+        // Track initial snapshots to skip them (they fire immediately)
+        let creatorInitialSnapshot = true;
+        let opponentInitialSnapshot = true;
+
+        // Listen to active games where user is creator
+        const activeCreatorQuery = query(
+            collection(db, 'games'),
+            where('creatorId', '==', user.uid),
+            where('status', 'in', ['active', 'pending']),
+        );
+
+        // Listen to active games where user is opponent
+        const activeOpponentQuery = query(
+            collection(db, 'games'),
+            where('opponentId', '==', user.uid),
+            where('status', 'in', ['active', 'pending']),
+        );
+
+        const activeCreatorUnsubscribe = onSnapshot(
+            activeCreatorQuery,
+            async () => {
+                if (creatorInitialSnapshot) {
+                    creatorInitialSnapshot = false;
+                    try {
+                        const result = await getActiveGames();
+                        setActiveGames(result.games || []);
+                        setLoading(false);
+                    } catch (error) {
+                        console.error('[useGame] Error in initial load:', error);
+                        setLoading(false);
+                    }
+                    return;
+                }
+                try {
+                    const result = await getActiveGames();
+                    setActiveGames(result.games || []);
+                } catch (error) {
+                    console.error('[useGame] Error fetching active games:', error);
+                }
+            },
+            (error) => {
+                console.error('[useGame] Error in creator games listener:', error);
+                setLoading(false);
+            },
+        );
+
+        const activeOpponentUnsubscribe = onSnapshot(
+            activeOpponentQuery,
+            async () => {
+                if (opponentInitialSnapshot) {
+                    opponentInitialSnapshot = false;
+                    return;
+                }
+                try {
+                    const result = await getActiveGames();
+                    setActiveGames(result.games || []);
+                } catch (error) {
+                    console.error('[useGame] Error fetching active games:', error);
+                }
+            },
+            (error) => {
+                console.error('[useGame] Error in opponent games listener:', error);
+                setLoading(false);
+            },
+        );
+
+        // Cleanup on unmount
+        return () => {
+            activeCreatorUnsubscribe();
+            activeOpponentUnsubscribe();
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [user]); // Only depend on user, not getActiveGames (it changes every render)
 
     /**
      * Send a game request to a friend
@@ -56,6 +142,16 @@ export const useGame = () => {
             try {
                 setLoading(true);
 
+                // If user is not authenticated, start an offline game
+                if (!user) {
+                    return {
+                        success: true,
+                        gameId: null, // null gameId indicates offline game
+                        offline: true,
+                    };
+                }
+
+                // User is authenticated, create online game via Firebase
                 return await createComputerGame(timeControl, difficulty);
             } catch (error) {
                 console.error('Error starting computer game:', error);
@@ -65,7 +161,7 @@ export const useGame = () => {
                 setLoading(false);
             }
         },
-        [createComputerGame],
+        [createComputerGame, user],
     );
 
     /**
@@ -137,7 +233,7 @@ export const useGame = () => {
 
             return games;
         } catch (error) {
-            console.error('Error loading active games:', error);
+            console.error('[useGame] Error loading active games:', error);
             setActiveGames([]);
             return [];
         } finally {

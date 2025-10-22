@@ -421,4 +421,119 @@ describe('Game State Snapshot and Restore', () => {
             expect(game2.isGameOver()).toBe(true);
         });
     });
+
+    describe('Move History Preservation', () => {
+        it('should save and restore move history for undo functionality', () => {
+            const game1 = new CoralClash();
+
+            // Make several moves
+            const moves = game1.moves();
+            game1.move(moves[0]); // White move
+            const moves2 = game1.moves();
+            game1.move(moves2[0]); // Black move
+            const moves3 = game1.moves();
+            game1.move(moves3[0]); // White move
+            const moves4 = game1.moves();
+            game1.move(moves4[0]); // Black move
+
+            // Verify history exists
+            const history1 = game1.history();
+            expect(history1.length).toBe(4);
+
+            // Create snapshot
+            const snapshot = createGameSnapshot(game1);
+            expect(snapshot.pgn).toBeDefined();
+            expect(snapshot.pgn.length).toBeGreaterThan(0);
+
+            // Restore to new game
+            const game2 = new CoralClash();
+            restoreGameFromSnapshot(game2, snapshot);
+
+            // Verify move history is preserved
+            const history2 = game2.history();
+            expect(history2.length).toBe(4);
+            expect(history2).toEqual(history1);
+
+            // Verify FEN matches
+            expect(game2.fen()).toBe(game1.fen());
+
+            // Verify undo works
+            game2.undo();
+            expect(game2.history().length).toBe(3);
+        });
+
+        it('should support empty history (starting position)', () => {
+            const game1 = new CoralClash();
+
+            // No moves made
+            expect(game1.history().length).toBe(0);
+
+            // Create and restore snapshot
+            const snapshot = createGameSnapshot(game1);
+            const game2 = new CoralClash();
+            restoreGameFromSnapshot(game2, snapshot);
+
+            // Verify history is still empty
+            expect(game2.history().length).toBe(0);
+            expect(game2.fen()).toBe(game1.fen());
+        });
+
+        it('should preserve move history after multiple moves', () => {
+            const game1 = new CoralClash();
+
+            // Make multiple moves
+            const moves1 = game1.moves();
+            game1.move(moves1[0]); // White move
+            const moves2 = game1.moves();
+            game1.move(moves2[0]); // Black move
+            const moves3 = game1.moves();
+            game1.move(moves3[0]); // White move
+
+            // Verify history includes all moves
+            expect(game1.history().length).toBe(3);
+
+            // Create and restore snapshot
+            const snapshot = createGameSnapshot(game1);
+            const game2 = new CoralClash();
+            restoreGameFromSnapshot(game2, snapshot);
+
+            // Verify move history is preserved
+            expect(game2.history().length).toBe(3);
+            expect(game2.history()).toEqual(game1.history());
+
+            // Verify board position matches
+            expect(game2.fen()).toBe(game1.fen());
+        });
+
+        it('should support backward compatibility with FEN-only snapshots', () => {
+            const game1 = new CoralClash();
+
+            // Make some moves
+            const moves = game1.moves();
+            game1.move(moves[0]);
+            const moves2 = game1.moves();
+            game1.move(moves2[0]);
+
+            // Create old-style snapshot (without PGN)
+            const legacySnapshot = {
+                fen: game1.fen(),
+                turn: game1.turn(),
+                whalePositions: game1.whalePositions(),
+                coral: game1.getAllCoral(),
+                coralRemaining: game1.getCoralRemainingCounts(),
+                pieceRoles: {},
+                // No PGN field
+            };
+
+            // Restore from legacy snapshot
+            const game2 = new CoralClash();
+            restoreGameFromSnapshot(game2, legacySnapshot);
+
+            // Board position should match
+            expect(game2.fen()).toBe(game1.fen());
+
+            // But history will be empty (expected for legacy snapshots)
+            expect(game2.history().length).toBe(0);
+        });
+    });
 });

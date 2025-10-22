@@ -708,6 +708,208 @@ exports.resignGame = functions.https.onCall(async (data, context) => {
 });
 
 /**
+ * Request to reset a game
+ * For computer games: Auto-approves and resets immediately
+ * For PvP games: Sends request to opponent for approval
+ */
+exports.requestGameReset = functions.https.onCall(async (data, context) => {
+    try {
+        if (!context.auth) {
+            throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
+        }
+
+        const { gameId } = data;
+        const userId = context.auth.uid;
+
+        const gameDoc = await db.collection('games').doc(gameId).get();
+
+        if (!gameDoc.exists) {
+            throw new functions.https.HttpsError('not-found', 'Game not found');
+        }
+
+        const gameData = gameDoc.data();
+
+        // Verify user is a player in this game
+        if (gameData.creatorId !== userId && gameData.opponentId !== userId) {
+            throw new functions.https.HttpsError('permission-denied', 'Not a player in this game');
+        }
+
+        // Check if game is already over
+        if (gameData.status === 'completed' || gameData.status === 'cancelled') {
+            throw new functions.https.HttpsError('failed-precondition', 'Game is already finished');
+        }
+
+        // Check if there's already a pending reset request
+        if (gameData.resetRequestedBy) {
+            throw new functions.https.HttpsError(
+                'failed-precondition',
+                'A reset request is already pending',
+            );
+        }
+
+        const isComputerGame = gameData.opponentType === 'computer';
+
+        if (isComputerGame) {
+            // Computer game: Auto-approve and reset immediately
+            const { CoralClash } = require('../../shared/dist/game');
+            const { createGameSnapshot } = require('../../shared/dist/game');
+
+            const newGame = new CoralClash();
+            const initialGameState = createGameSnapshot(newGame);
+
+            await db.collection('games').doc(gameId).update({
+                gameState: initialGameState,
+                fen: newGame.fen(),
+                moves: [],
+                currentTurn: gameData.creatorId, // White always starts
+                resetRequestedBy: null,
+                resetRequestStatus: null,
+                updatedAt: serverTimestamp(),
+            });
+
+            return {
+                success: true,
+                message: 'Game reset successfully',
+                autoApproved: true,
+            };
+        } else {
+            // PvP game: Set pending status and notify opponent
+            const opponentId =
+                gameData.creatorId === userId ? gameData.opponentId : gameData.creatorId;
+
+            await db.collection('games').doc(gameId).update({
+                resetRequestedBy: userId,
+                resetRequestStatus: 'pending',
+                updatedAt: serverTimestamp(),
+            });
+
+            // Send notification to opponent
+            await db.collection('notifications').add({
+                userId: opponentId,
+                type: 'reset_requested',
+                gameId: gameId,
+                from: userId,
+                read: false,
+                createdAt: serverTimestamp(),
+            });
+
+            return {
+                success: true,
+                message: 'Reset request sent to opponent',
+                autoApproved: false,
+            };
+        }
+    } catch (error) {
+        console.error('Error requesting game reset:', error);
+        throw new functions.https.HttpsError('internal', error.message);
+    }
+});
+
+/**
+ * Respond to a game reset request (approve or reject)
+ * Only for PvP games
+ */
+exports.respondToResetRequest = functions.https.onCall(async (data, context) => {
+    try {
+        if (!context.auth) {
+            throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
+        }
+
+        const { gameId, approve } = data;
+        const userId = context.auth.uid;
+
+        if (typeof approve !== 'boolean') {
+            throw new functions.https.HttpsError('invalid-argument', 'approve must be a boolean');
+        }
+
+        const gameDoc = await db.collection('games').doc(gameId).get();
+
+        if (!gameDoc.exists) {
+            throw new functions.https.HttpsError('not-found', 'Game not found');
+        }
+
+        const gameData = gameDoc.data();
+
+        // Verify user is the opponent (not the requester)
+        if (!gameData.resetRequestedBy) {
+            throw new functions.https.HttpsError('failed-precondition', 'No reset request pending');
+        }
+
+        if (gameData.resetRequestedBy === userId) {
+            throw new functions.https.HttpsError(
+                'permission-denied',
+                'Cannot respond to your own reset request',
+            );
+        }
+
+        if (gameData.creatorId !== userId && gameData.opponentId !== userId) {
+            throw new functions.https.HttpsError('permission-denied', 'Not a player in this game');
+        }
+
+        if (approve) {
+            // Approved: Reset the game
+            const { CoralClash } = require('../../shared/dist/game');
+            const { createGameSnapshot } = require('../../shared/dist/game');
+
+            const newGame = new CoralClash();
+            const initialGameState = createGameSnapshot(newGame);
+
+            await db.collection('games').doc(gameId).update({
+                gameState: initialGameState,
+                fen: newGame.fen(),
+                moves: [],
+                currentTurn: gameData.creatorId, // White always starts
+                resetRequestedBy: null,
+                resetRequestStatus: 'approved',
+                updatedAt: serverTimestamp(),
+            });
+
+            // Notify the requester that reset was approved
+            await db.collection('notifications').add({
+                userId: gameData.resetRequestedBy,
+                type: 'reset_approved',
+                gameId: gameId,
+                from: userId,
+                read: false,
+                createdAt: serverTimestamp(),
+            });
+
+            return {
+                success: true,
+                message: 'Reset request approved',
+                approved: true,
+            };
+        } else {
+            // Rejected: Clear the request
+            await db.collection('games').doc(gameId).update({
+                resetRequestedBy: null,
+                resetRequestStatus: 'rejected',
+                updatedAt: serverTimestamp(),
+            });
+
+            // Notify the requester that reset was rejected
+            await db.collection('notifications').add({
+                userId: gameData.resetRequestedBy,
+                type: 'reset_rejected',
+                gameId: gameId,
+                from: userId,
+                read: false,
+                createdAt: serverTimestamp(),
+            });
+
+            return {
+                success: true,
+                message: 'Reset request rejected',
+                approved: false,
+            };
+        }
+    } catch (error) {
+        console.error('Error responding to reset request:', error);
+        throw new functions.https.HttpsError('internal', error.message);
+    }
+});
+
+/**
  * Get user's game history (completed and cancelled games)
  * GET /api/games/history
  */
@@ -889,6 +1091,242 @@ exports.getActiveGames = functions.https.onCall(async (data, context) => {
         };
     } catch (error) {
         console.error('Error getting active games:', error);
+        throw new functions.https.HttpsError('internal', error.message);
+    }
+});
+
+/**
+ * Request to undo a move
+ * POST /api/game/requestUndo
+ */
+exports.requestUndo = functions.https.onCall(async (data, context) => {
+    try {
+        if (!context.auth) {
+            throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
+        }
+
+        const { gameId, moveCount = 2 } = data; // moveCount = how many moves to undo (default 2 for computer games)
+        const userId = context.auth.uid;
+
+        const gameDoc = await db.collection('games').doc(gameId).get();
+
+        if (!gameDoc.exists) {
+            throw new functions.https.HttpsError('not-found', 'Game not found');
+        }
+
+        const gameData = gameDoc.data();
+
+        // Verify user is a player in this game
+        if (gameData.creatorId !== userId && gameData.opponentId !== userId) {
+            throw new functions.https.HttpsError('permission-denied', 'Not a player in this game');
+        }
+
+        // Check if game is over
+        if (gameData.status !== 'active') {
+            throw new functions.https.HttpsError('failed-precondition', 'Game is not active');
+        }
+
+        // Check if there are enough moves to undo
+        const moveHistory = gameData.moves || [];
+        if (moveHistory.length < moveCount) {
+            throw new functions.https.HttpsError(
+                'failed-precondition',
+                `Not enough moves to undo (have ${moveHistory.length}, need ${moveCount})`,
+            );
+        }
+
+        // Handle computer game - auto-approve and undo immediately
+        if (gameData.opponentId === 'computer') {
+            // Load game state and undo moves
+            const {
+                CoralClash,
+                restoreGameFromSnapshot,
+                createGameSnapshot,
+            } = require('../../shared/dist/game');
+            const coralClash = new CoralClash();
+            restoreGameFromSnapshot(coralClash, gameData.gameState);
+
+            // Undo the specified number of moves
+            for (let i = 0; i < moveCount; i++) {
+                coralClash.undo();
+            }
+
+            // Create new game state
+            const newGameState = createGameSnapshot(coralClash);
+
+            // Update game document
+            await db.collection('games').doc(gameId).update({
+                gameState: newGameState,
+                updatedAt: serverTimestamp(),
+            });
+
+            return {
+                success: true,
+                message: 'Undo completed',
+            };
+        }
+
+        // PvP game - request undo from opponent
+        const opponentId = gameData.creatorId === userId ? gameData.opponentId : gameData.creatorId;
+
+        // Set undo request status
+        await db.collection('games').doc(gameId).update({
+            undoRequestedBy: userId,
+            undoRequestMoveCount: moveCount,
+            undoRequestStatus: 'pending',
+            updatedAt: serverTimestamp(),
+        });
+
+        // Send notification to opponent
+        const { sendNotification } = require('../utils/notifications');
+        const userDoc = await db.collection('users').doc(userId).get();
+        const userData = userDoc.exists ? userDoc.data() : {};
+
+        await sendNotification({
+            recipientId: opponentId,
+            senderId: userId,
+            senderDisplayName: formatDisplayName(userData.displayName, userData.discriminator),
+            senderAvatarKey: userData.settings?.avatarKey || 'dolphin',
+            type: 'undo_requested',
+            data: {
+                gameId,
+                moveCount,
+            },
+        });
+
+        return {
+            success: true,
+            message: 'Undo request sent to opponent',
+        };
+    } catch (error) {
+        console.error('Error requesting undo:', error);
+        throw new functions.https.HttpsError('internal', error.message);
+    }
+});
+
+/**
+ * Respond to an undo request
+ * POST /api/game/respondToUndoRequest
+ */
+exports.respondToUndoRequest = functions.https.onCall(async (data, context) => {
+    try {
+        if (!context.auth) {
+            throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
+        }
+
+        const { gameId, approve } = data;
+        const userId = context.auth.uid;
+
+        const gameDoc = await db.collection('games').doc(gameId).get();
+
+        if (!gameDoc.exists) {
+            throw new functions.https.HttpsError('not-found', 'Game not found');
+        }
+
+        const gameData = gameDoc.data();
+
+        // Verify there's a pending undo request
+        if (!gameData.undoRequestedBy || gameData.undoRequestStatus !== 'pending') {
+            throw new functions.https.HttpsError('failed-precondition', 'No pending undo request');
+        }
+
+        // Verify user is the opponent (not the requester)
+        if (gameData.undoRequestedBy === userId) {
+            throw new functions.https.HttpsError(
+                'permission-denied',
+                'Cannot respond to your own undo request',
+            );
+        }
+
+        // Verify user is a player in this game
+        if (gameData.creatorId !== userId && gameData.opponentId !== userId) {
+            throw new functions.https.HttpsError('permission-denied', 'Not a player in this game');
+        }
+
+        const requesterId = gameData.undoRequestedBy;
+        const moveCount = gameData.undoRequestMoveCount || 2;
+
+        if (approve) {
+            // Undo approved - perform the undo
+            const {
+                CoralClash,
+                restoreGameFromSnapshot,
+                createGameSnapshot,
+            } = require('../../shared/dist/game');
+            const coralClash = new CoralClash();
+            restoreGameFromSnapshot(coralClash, gameData.gameState);
+
+            // Undo the specified number of moves
+            for (let i = 0; i < moveCount; i++) {
+                coralClash.undo();
+            }
+
+            // Create new game state
+            const newGameState = createGameSnapshot(coralClash);
+
+            // Update game document - clear undo request and update state
+            await db.collection('games').doc(gameId).update({
+                gameState: newGameState,
+                undoRequestedBy: null,
+                undoRequestMoveCount: null,
+                undoRequestStatus: null,
+                updatedAt: serverTimestamp(),
+            });
+
+            // Send notification to requester
+            const { sendNotification } = require('../utils/notifications');
+            const userDoc = await db.collection('users').doc(userId).get();
+            const userData = userDoc.exists ? userDoc.data() : {};
+
+            await sendNotification({
+                recipientId: requesterId,
+                senderId: userId,
+                senderDisplayName: formatDisplayName(userData.displayName, userData.discriminator),
+                senderAvatarKey: userData.settings?.avatarKey || 'dolphin',
+                type: 'undo_approved',
+                data: {
+                    gameId,
+                    moveCount,
+                },
+            });
+
+            return {
+                success: true,
+                message: 'Undo approved',
+            };
+        } else {
+            // Undo rejected - just clear the request
+            await db.collection('games').doc(gameId).update({
+                undoRequestedBy: null,
+                undoRequestMoveCount: null,
+                undoRequestStatus: null,
+                updatedAt: serverTimestamp(),
+            });
+
+            // Send notification to requester
+            const { sendNotification } = require('../utils/notifications');
+            const userDoc = await db.collection('users').doc(userId).get();
+            const userData = userDoc.exists ? userDoc.data() : {};
+
+            await sendNotification({
+                recipientId: requesterId,
+                senderId: userId,
+                senderDisplayName: formatDisplayName(userData.displayName, userData.discriminator),
+                senderAvatarKey: userData.settings?.avatarKey || 'dolphin',
+                type: 'undo_rejected',
+                data: {
+                    gameId,
+                    moveCount,
+                },
+            });
+
+            return {
+                success: true,
+                message: 'Undo rejected',
+            };
+        }
+    } catch (error) {
+        console.error('Error responding to undo request:', error);
         throw new functions.https.HttpsError('internal', error.message);
     }
 });

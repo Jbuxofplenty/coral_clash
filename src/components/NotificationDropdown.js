@@ -68,6 +68,60 @@ const getNotificationConfig = (type) => {
             showAvatar: true,
             showActions: false,
         },
+        reset_requested: {
+            title: 'Reset Game Request',
+            getMessage: (displayName) => `${displayName || 'Someone'} wants to reset the game`,
+            icon: { name: 'refresh', family: 'font-awesome' },
+            showAvatar: true,
+            showActions: true,
+        },
+        reset_approved: {
+            title: 'Reset Approved',
+            getMessage: (displayName) => `${displayName || 'Someone'} approved the game reset`,
+            icon: { name: 'check-circle', family: 'font-awesome' },
+            showAvatar: true,
+            showActions: false,
+        },
+        reset_rejected: {
+            title: 'Reset Rejected',
+            getMessage: (displayName) => `${displayName || 'Someone'} rejected the game reset`,
+            icon: { name: 'times-circle', family: 'font-awesome' },
+            showAvatar: true,
+            showActions: false,
+        },
+        undo_requested: {
+            title: 'Undo Request',
+            getMessage: (displayName, result, data) => {
+                const moveCount = data?.moveCount || 1;
+                const moveText = moveCount === 1 ? 'move' : 'moves';
+                return `${displayName || 'Someone'} wants to undo ${moveCount} ${moveText}`;
+            },
+            icon: { name: 'undo', family: 'font-awesome' },
+            showAvatar: true,
+            showActions: true,
+        },
+        undo_approved: {
+            title: 'Undo Approved',
+            getMessage: (displayName, result, data) => {
+                const moveCount = data?.moveCount || 1;
+                const moveText = moveCount === 1 ? 'move' : 'moves';
+                return `${displayName || 'Someone'} approved undoing ${moveCount} ${moveText}`;
+            },
+            icon: { name: 'check-circle', family: 'font-awesome' },
+            showAvatar: true,
+            showActions: false,
+        },
+        undo_rejected: {
+            title: 'Undo Rejected',
+            getMessage: (displayName, result, data) => {
+                const moveCount = data?.moveCount || 1;
+                const moveText = moveCount === 1 ? 'move' : 'moves';
+                return `${displayName || 'Someone'} rejected undoing ${moveCount} ${moveText}`;
+            },
+            icon: { name: 'times-circle', family: 'font-awesome' },
+            showAvatar: true,
+            showActions: false,
+        },
     };
 
     return (

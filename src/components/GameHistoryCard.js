@@ -1,8 +1,7 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Block, Text, theme } from 'galio-framework';
 import { View, StyleSheet, TouchableOpacity, ActivityIndicator, Dimensions } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
-import { useFirebaseFunctions } from '../hooks/useFirebaseFunctions';
 import { useAuth } from '../contexts/AuthContext';
 import Icon from './Icon';
 import Avatar from './Avatar';
@@ -12,36 +11,11 @@ const { width } = Dimensions.get('screen');
 /**
  * Card component that displays recent game history on the home screen
  * Shows the 5 most recent completed or cancelled games
+ * Note: Data loading and real-time updates are handled by the parent screen
  */
-export default function GameHistoryCard({ navigation, refreshTrigger = 0 }) {
+export default function GameHistoryCard({ navigation, gameHistory = [], loading = false }) {
     const { colors } = useTheme();
     const { user } = useAuth();
-    const { getGameHistory } = useFirebaseFunctions();
-    const [gameHistory, setGameHistory] = React.useState([]);
-    const [loading, setLoading] = React.useState(true);
-
-    // Load game history when triggered by parent
-    useEffect(() => {
-        if (user && refreshTrigger > 0) {
-            loadGameHistory();
-        } else if (!user) {
-            setLoading(false);
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [user, refreshTrigger]);
-
-    const loadGameHistory = async () => {
-        try {
-            setLoading(true);
-            const result = await getGameHistory();
-            setGameHistory(result.games || []);
-        } catch (error) {
-            console.error('Error loading game history:', error);
-            setGameHistory([]);
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const formatGameDate = (timestamp) => {
         if (!timestamp) return '';

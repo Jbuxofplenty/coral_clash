@@ -13,7 +13,7 @@ describe('Helpers', () => {
             expect(gameState).toBeDefined();
             expect(gameState.fen).toBeDefined();
             expect(gameState.turn).toBe('w'); // White starts
-            expect(gameState.coralRemaining).toEqual({ w: 5, b: 5 });
+            expect(gameState.coralRemaining).toEqual({ w: 15, b: 14 });
             // Snapshot doesn't include moveHistory (it's in FEN)
         });
 

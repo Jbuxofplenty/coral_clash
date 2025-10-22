@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { Icon } from 'galio-framework';
 import useCoralClash from '../hooks/useCoralClash';
-import { WHALE, applyFixture, restoreGameFromSnapshot } from '../../shared';
+import { WHALE, applyFixture, restoreGameFromSnapshot, CoralClash } from '../../shared';
 import EmptyBoard from './EmptyBoard';
 import Moves from './Moves';
 import Pieces from './Pieces';
@@ -30,16 +30,43 @@ const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 // Game state schema version for fixtures
 const GAME_STATE_VERSION = '1.2.0';
 
-const CoralClash = ({ fixture, gameId, gameState, opponentType }) => {
+// Check if dev features are enabled
+const DEV_FEATURES_ENABLED = process.env.EXPO_PUBLIC_ENABLE_DEV_FEATURES === 'true';
+
+/**
+ * BaseCoralClashBoard - Core game board component with all shared logic
+ *
+ * Props:
+ * - fixture: Fixture data for dev mode
+ * - gameId: Online game ID (null for offline)
+ * - gameState: Initial game state
+ * - opponentType: 'computer' or undefined for PvP
+ * - topPlayerData: { name, avatarKey, isComputer }
+ * - bottomPlayerData: { name, avatarKey, isComputer }
+ * - renderControls: Function to render control buttons
+ * - renderMenuItems: Function to render menu drawer items
+ * - onMoveComplete: Callback after a move is successfully made
+ * - enableUndo: Boolean indicating if undo feature is enabled
+ * - onUndo: Callback for undo action
+ */
+const BaseCoralClashBoard = ({
+    fixture,
+    gameId,
+    gameState,
+    opponentType,
+    topPlayerData,
+    bottomPlayerData,
+    renderControls,
+    renderMenuItems,
+    onMoveComplete,
+    enableUndo = false,
+    onUndo,
+}) => {
     const { width } = useWindowDimensions();
-    const { colors, isDarkMode } = useTheme();
+    const { colors } = useTheme();
     const { isBoardFlipped, toggleBoardFlip } = useGamePreferences();
     const { user } = useAuth();
-    const {
-        makeMove: makeMoveAPI,
-        makeComputerMove: makeComputerMoveAPI,
-        resignGame: resignGameAPI,
-    } = useFirebaseFunctions();
+    const { makeMove: makeMoveAPI, resignGame: resignGameAPI } = useFirebaseFunctions();
     const coralClash = useCoralClash();
     const [visibleMoves, setVisibleMoves] = useState([]);
     const [selectedSquare, setSelectedSquare] = useState(null);
@@ -48,15 +75,12 @@ const CoralClash = ({ fixture, gameId, gameState, opponentType }) => {
     const [isViewingEnemyMoves, setIsViewingEnemyMoves] = useState(false);
     const [fixtureLoaded, setFixtureLoaded] = useState(false);
     const [gameStateLoaded, setGameStateLoaded] = useState(false);
-    const [, forceUpdate] = useState(0);
+    const [updateCounter, forceUpdate] = useState(0);
     const [menuVisible, setMenuVisible] = useState(false);
     const [slideAnim] = useState(new Animated.Value(0));
+    const [historyIndex, setHistoryIndex] = useState(null); // null = current state, 0+ = viewing history
+    const [historicalBoard, setHistoricalBoard] = useState(null);
     const boardSize = Math.min(width, 400);
-
-    // Determine game type
-    const isOfflineGame = !gameId;
-    const isComputerGame = opponentType === 'computer';
-    const isPvPGame = gameId && !isComputerGame;
 
     // Safety check - return null if coralClash is not initialized
     if (!coralClash) {
@@ -87,13 +111,13 @@ const CoralClash = ({ fixture, gameId, gameState, opponentType }) => {
             try {
                 restoreGameFromSnapshot(coralClash, gameState);
                 setGameStateLoaded(true);
-                forceUpdate((n) => n + 1); // Force re-render after loading
+                forceUpdate((n) => n + 1);
             } catch (error) {
                 console.error('Failed to load game state:', error);
                 Alert.alert('Error', 'Failed to load game state');
             }
         }
-    }, [gameState, gameStateLoaded, fixture]);
+    }, [gameState, gameStateLoaded, fixture, coralClash]);
 
     // Load fixture if provided (for dev mode scenarios)
     useEffect(() => {
@@ -106,7 +130,7 @@ const CoralClash = ({ fixture, gameId, gameState, opponentType }) => {
                 Alert.alert('Error', 'Failed to load game state');
             }
         }
-    }, [fixture, fixtureLoaded]);
+    }, [fixture, fixtureLoaded, coralClash]);
 
     // Real-time listener for online games (PvP and Computer)
     // Automatically updates board when opponent makes a move
@@ -123,6 +147,8 @@ const CoralClash = ({ fixture, gameId, gameState, opponentType }) => {
                     // Apply the updated game state
                     if (gameData.gameState) {
                         restoreGameFromSnapshot(coralClash, gameData.gameState);
+                        // Exit history view when game state is updated
+                        setHistoryIndex(null);
                         forceUpdate((n) => n + 1);
                     }
                 }
@@ -134,13 +160,13 @@ const CoralClash = ({ fixture, gameId, gameState, opponentType }) => {
 
         // Cleanup subscription on unmount or gameId change
         return () => unsubscribe();
-    }, [gameId]);
+    }, [gameId, coralClash]);
 
-    // Handle random black moves - runs after render, not during
-    // ONLY for offline/local games (when gameId is not present)
+    // Handle offline computer moves (for offline games only)
+    // Makes automatic black moves when it's black's turn in offline computer games
     useEffect(() => {
-        // Skip if this is an online game
-        if (gameId) {
+        // Only run for offline computer games
+        if (gameId || opponentType !== 'computer') {
             return;
         }
 
@@ -155,7 +181,7 @@ const CoralClash = ({ fixture, gameId, gameState, opponentType }) => {
             // Force re-render to show the updated board
             forceUpdate((n) => n + 1);
         }
-    }, [coralClash.history().length, fixture, fixtureLoaded, gameId]);
+    }, [coralClash.history().length, fixture, fixtureLoaded, gameId, opponentType, coralClash]);
 
     // Clear selection state when board is flipped
     useEffect(() => {
@@ -165,6 +191,85 @@ const CoralClash = ({ fixture, gameId, gameState, opponentType }) => {
         setWhaleOrientationMoves([]);
         setIsViewingEnemyMoves(false);
     }, [isBoardFlipped]);
+
+    // Update historical board state when historyIndex changes
+    useEffect(() => {
+        if (historyIndex === null) {
+            setHistoricalBoard(null);
+            return;
+        }
+
+        try {
+            // Create a new game instance and replay moves up to historyIndex
+            const tempGame = new CoralClash();
+
+            // Get the move history
+            const moveHistory = coralClash.history({ verbose: true });
+
+            // Replay moves up to the historyIndex
+            for (let i = 0; i <= historyIndex && i < moveHistory.length; i++) {
+                const move = moveHistory[i];
+                tempGame.move(move);
+            }
+
+            // Store the board state
+            setHistoricalBoard(tempGame.board());
+        } catch (error) {
+            console.error('Error creating historical board state:', error);
+            setHistoryIndex(null);
+            setHistoricalBoard(null);
+        }
+    }, [historyIndex, coralClash]);
+
+    // Compute if we're viewing history
+    const isViewingHistory = historyIndex !== null;
+    const currentHistoryLength = coralClash.history().length;
+
+    // History navigation functions
+    // canGoBack: true if there are moves and we're either at current state or not at starting position
+    const canGoBack = currentHistoryLength > 0 && (historyIndex === null || historyIndex >= 0);
+    // canGoForward: true if we're viewing history (not at current state)
+    const canGoForward = historyIndex !== null;
+
+    const handleHistoryBack = () => {
+        if (!canGoBack) return;
+
+        if (historyIndex === null) {
+            // Start viewing history from one move back
+            // If length is 1, go to -1 (starting position)
+            // If length is 2+, go to length - 2 (one move back from current)
+            setHistoryIndex(currentHistoryLength - 2);
+        } else if (historyIndex >= 0) {
+            // Go back one more move (can go to -1 for starting position)
+            setHistoryIndex(historyIndex - 1);
+        }
+
+        // Clear selection state
+        setVisibleMoves([]);
+        setSelectedSquare(null);
+        setWhaleDestination(null);
+        setWhaleOrientationMoves([]);
+        setIsViewingEnemyMoves(false);
+    };
+
+    const handleHistoryForward = () => {
+        if (!canGoForward) return;
+
+        if (historyIndex >= currentHistoryLength - 2) {
+            // We're at or near the end, go to current state
+            setHistoryIndex(null);
+        } else {
+            // Go forward one move
+            setHistoryIndex(historyIndex + 1);
+        }
+
+        // Clear selection state
+        setVisibleMoves([]);
+        setSelectedSquare(null);
+        setWhaleDestination(null);
+        setWhaleOrientationMoves([]);
+        setIsViewingEnemyMoves(false);
+    };
 
     // Get game status message
     const getGameStatus = () => {
@@ -196,7 +301,6 @@ const CoralClash = ({ fixture, gameId, gameState, opponentType }) => {
 
         if (coralClash.isDraw()) {
             // Check if this is specifically a coral tie
-            // Coral tie happens when coral scoring triggered but control is equal
             const coralScoringTriggered =
                 coralClash.getCoralRemaining('w') === 0 ||
                 coralClash.getCoralRemaining('b') === 0 ||
@@ -223,20 +327,19 @@ const CoralClash = ({ fixture, gameId, gameState, opponentType }) => {
 
     const gameStatus = getGameStatus();
 
-    const handleUndo = () => {
-        if (isComputerGame || isOfflineGame) {
-            // Computer/offline game: Undo both moves (computer + player)
-            coralClash.undo();
-            coralClash.undo();
-        } else {
-            // PvP game: Would need opponent consent (not implemented yet)
-            Alert.alert(
-                'Undo Not Available',
-                'Cannot undo moves in PvP games without opponent consent.',
-            );
-            return;
-        }
+    // Compute if undo is actually available based on enableUndo prop and game state
+    const historyLength = coralClash.history().length;
+    const isGameOver = coralClash.isGameOver();
+    const canUndo = enableUndo && historyLength >= 2 && !isGameOver;
 
+    const handleUndo = () => {
+        if (onUndo) {
+            onUndo(coralClash);
+            // Exit history view when undo is performed
+            setHistoryIndex(null);
+            // Force re-render to show updated board after undo
+            forceUpdate((n) => n + 1);
+        }
         setVisibleMoves([]);
         setSelectedSquare(null);
         setWhaleDestination(null);
@@ -244,15 +347,8 @@ const CoralClash = ({ fixture, gameId, gameState, opponentType }) => {
         setIsViewingEnemyMoves(false);
     };
 
-    // Can undo in computer/offline games, but not in PvP games
-    const canUndo =
-        (isComputerGame || isOfflineGame) &&
-        coralClash.history().length >= 2 &&
-        !coralClash.isGameOver();
-
     const handleResign = () => {
         closeMenu();
-        // Confirm resignation
         Alert.alert('Resign Game', 'Are you sure you want to resign? You will lose the game.', [
             {
                 text: 'Cancel',
@@ -262,10 +358,8 @@ const CoralClash = ({ fixture, gameId, gameState, opponentType }) => {
                 text: 'Resign',
                 style: 'destructive',
                 onPress: async () => {
-                    // Execute resignation (sends to backend for online games)
                     const success = await executeResign();
                     if (success) {
-                        // Clear selection state
                         setVisibleMoves([]);
                         setSelectedSquare(null);
                         setWhaleDestination(null);
@@ -279,7 +373,6 @@ const CoralClash = ({ fixture, gameId, gameState, opponentType }) => {
 
     // Send move to backend API for online games
     const sendMoveToBackend = async (move) => {
-        // Only send moves for online games (when gameId is provided)
         if (!gameId) {
             return;
         }
@@ -287,19 +380,9 @@ const CoralClash = ({ fixture, gameId, gameState, opponentType }) => {
         try {
             const result = await makeMoveAPI({ gameId, move });
 
-            // Firestore listener will automatically apply the validated state!
-            // No need to manually update here
-
-            // If it's a computer game and computer's turn, trigger computer move
-            if (
-                result.opponentType === 'computer' &&
-                result.gameState?.turn === 'b' &&
-                !result.gameOver
-            ) {
-                // Trigger computer move (Firestore listener will apply it automatically)
-                makeComputerMoveAPI({ gameId }).catch((error) => {
-                    console.error('Error making computer move:', error);
-                });
+            // Call the onMoveComplete callback if provided
+            if (onMoveComplete) {
+                await onMoveComplete(result, move);
             }
         } catch (error) {
             console.error('Error sending move to backend:', error);
@@ -314,6 +397,10 @@ const CoralClash = ({ fixture, gameId, gameState, opponentType }) => {
     const executeMove = (moveParams) => {
         const moveResult = coralClash.move(moveParams);
         if (moveResult) {
+            // Exit history view when a move is made
+            setHistoryIndex(null);
+            // Force re-render to update UI (e.g., enable undo button)
+            forceUpdate((n) => n + 1);
             // Move was successful, send to backend
             sendMoveToBackend(moveParams);
         }
@@ -321,7 +408,6 @@ const CoralClash = ({ fixture, gameId, gameState, opponentType }) => {
     };
 
     const executeResign = async () => {
-        // Only send resign to backend for online games (when gameId is provided)
         if (!gameId) {
             // Local game - just resign locally
             const currentTurn = coralClash.turn();
@@ -330,12 +416,9 @@ const CoralClash = ({ fixture, gameId, gameState, opponentType }) => {
         }
 
         try {
-            const result = await resignGameAPI({ gameId });
-
-            // Backend accepted, now apply locally
+            await resignGameAPI({ gameId });
             const currentTurn = coralClash.turn();
             coralClash.resign(currentTurn);
-
             return true;
         } catch (error) {
             console.error('Error sending resignation to backend:', error);
@@ -348,24 +431,18 @@ const CoralClash = ({ fixture, gameId, gameState, opponentType }) => {
     };
 
     const handleSelectPiece = (square) => {
-        // Don't allow piece selection if game is over
-        if (coralClash.isGameOver()) {
+        // Disable interaction when viewing history or game is over
+        if (coralClash.isGameOver() || isViewingHistory) {
             return;
         }
 
         const piece = coralClash.get(square);
         const currentTurn = coralClash.turn();
-
-        // Check if this is an enemy piece
         const isEnemyPiece = piece && piece.color !== currentTurn;
 
-        // Check if this is a whale
         if (piece && piece.type === WHALE) {
-            // Whale selected - get ALL moves for this whale's color
             const whaleColor = piece.color;
             const allMoves = coralClash.moves({ verbose: true, color: whaleColor });
-
-            // Filter to only THIS whale's moves
             const whaleMoves = allMoves.filter((m) => m.piece === WHALE);
 
             const allDestinations = new Set();
@@ -373,7 +450,6 @@ const CoralClash = ({ fixture, gameId, gameState, opponentType }) => {
                 allDestinations.add(move.to);
             });
 
-            // Create a simple move list with just destinations (we'll filter later)
             const destinationMoves = Array.from(allDestinations).map((dest) => {
                 return whaleMoves.find((m) => m.to === dest);
             });
@@ -384,7 +460,6 @@ const CoralClash = ({ fixture, gameId, gameState, opponentType }) => {
             setWhaleOrientationMoves([]);
             setIsViewingEnemyMoves(isEnemyPiece);
         } else if (piece) {
-            // Regular piece - get moves for this piece's color
             const moves = coralClash.moves({ square: square, verbose: true, color: piece.color });
             setVisibleMoves(moves);
             setSelectedSquare(isEnemyPiece ? null : square);
@@ -392,7 +467,6 @@ const CoralClash = ({ fixture, gameId, gameState, opponentType }) => {
             setWhaleOrientationMoves([]);
             setIsViewingEnemyMoves(isEnemyPiece);
         } else {
-            // No piece on this square
             setVisibleMoves([]);
             setSelectedSquare(null);
             setWhaleDestination(null);
@@ -402,12 +476,10 @@ const CoralClash = ({ fixture, gameId, gameState, opponentType }) => {
     };
 
     const handleSelectMove = (move) => {
-        // Don't allow moves if game is over
         if (coralClash.isGameOver()) {
             return;
         }
 
-        // Don't allow executing enemy moves - only show them
         if (isViewingEnemyMoves) {
             return;
         }
@@ -416,11 +488,7 @@ const CoralClash = ({ fixture, gameId, gameState, opponentType }) => {
 
         // Check if this is a whale move and we haven't selected the first square yet
         if (piece && piece.type === WHALE && !whaleDestination) {
-            // First click - user selected where one whale half should go
-            // Get ALL verbose moves (whale moves come from both squares)
             const allMoves = coralClash.moves({ verbose: true });
-
-            // Find WHALE moves that go to the clicked destination from THIS whale (not opponent)
             const whaleColor = piece.color.toLowerCase();
             const movesToThisSquare = allMoves.filter(
                 (m) =>
@@ -428,17 +496,14 @@ const CoralClash = ({ fixture, gameId, gameState, opponentType }) => {
             );
 
             if (movesToThisSquare.length > 0) {
-                // Group moves by whaleSecondSquare - each unique second square is a different orientation
                 const orientationMap = new Map();
 
                 movesToThisSquare.forEach((m) => {
-                    // Use whaleSecondSquare as the key - different second squares = different orientations
                     if (m.whaleSecondSquare && !orientationMap.has(m.whaleSecondSquare)) {
                         orientationMap.set(m.whaleSecondSquare, m);
                     }
                 });
 
-                // If only one orientation, execute immediately
                 if (orientationMap.size === 1) {
                     const onlyMove = Array.from(orientationMap.values())[0];
                     executeMove({ from: onlyMove.from, to: onlyMove.to });
@@ -449,21 +514,17 @@ const CoralClash = ({ fixture, gameId, gameState, opponentType }) => {
                     return;
                 }
 
-                // Multiple orientations - show them to the user
-                // Show where the whale's second square will be for each orientation
                 setWhaleDestination(move.to);
                 setWhaleOrientationMoves(movesToThisSquare);
 
-                // Create "moves" for each unique orientation to render
                 const orientationMoves = Array.from(orientationMap.values()).map((m) => {
                     return {
                         ...m,
-                        to: m.whaleSecondSquare, // Show where the other half will be
+                        to: m.whaleSecondSquare,
                         isOrientationOption: true,
                     };
                 });
 
-                // Also add the selected destination square to keep it highlighted
                 const destinationSquareMove = {
                     ...movesToThisSquare[0],
                     to: move.to,
@@ -473,19 +534,15 @@ const CoralClash = ({ fixture, gameId, gameState, opponentType }) => {
                 setVisibleMoves([destinationSquareMove, ...orientationMoves]);
                 return;
             } else {
-                // No moves found to this square - shouldn't happen
                 console.error('No whale moves found to square:', move.to);
                 return;
             }
         } else if (whaleDestination) {
-            // Second click - user selected which orientation by clicking the second square position
-            // Find the move where destination matches and whaleSecondSquare matches what they clicked
             const selectedMove = whaleOrientationMoves.find((m) => {
                 return m.to === whaleDestination && m.whaleSecondSquare === move.to;
             });
 
             if (selectedMove) {
-                // Check if whale has coral removal options
                 const allOrientationMoves = whaleOrientationMoves.filter(
                     (m) =>
                         m.to === selectedMove.to &&
@@ -493,13 +550,11 @@ const CoralClash = ({ fixture, gameId, gameState, opponentType }) => {
                 );
 
                 if (allOrientationMoves.length > 1) {
-                    // Has coral removal options - show dialog
                     const coralOptions = allOrientationMoves.map((m) => ({
                         move: m,
                         squares: m.coralRemovedSquares || [],
                     }));
 
-                    // Build alert options based on available coral removal variants
                     const alertButtons = coralOptions.map((option) => {
                         let label = '';
                         if (option.squares.length === 0) {
@@ -535,7 +590,6 @@ const CoralClash = ({ fixture, gameId, gameState, opponentType }) => {
                     );
                     return;
                 } else {
-                    // No coral options, execute move directly
                     executeMove({
                         from: selectedMove.from,
                         to: selectedMove.to,
@@ -553,8 +607,6 @@ const CoralClash = ({ fixture, gameId, gameState, opponentType }) => {
             }
         }
 
-        // Only execute moves for non-whale pieces
-        // Whale moves should have returned by now
         if (piece && piece.type === WHALE) {
             return;
         }
@@ -563,14 +615,11 @@ const CoralClash = ({ fixture, gameId, gameState, opponentType }) => {
         const allMoves = coralClash.moves({ verbose: true });
         const movesToThisSquare = allMoves.filter((m) => m.from === move.from && m.to === move.to);
 
-        // Check if there are multiple variants (with/without coral actions)
         if (movesToThisSquare.length > 1) {
-            // There are coral action options - prompt the user
             const hasCoralPlaced = movesToThisSquare.some((m) => m.coralPlaced === true);
             const hasCoralRemoved = movesToThisSquare.some((m) => m.coralRemoved === true);
 
             if (hasCoralPlaced) {
-                // Gatherer can place coral
                 Alert.alert('Gatherer Effect', 'Place coral on this square?', [
                     {
                         text: 'No',
@@ -615,7 +664,6 @@ const CoralClash = ({ fixture, gameId, gameState, opponentType }) => {
                 ]);
                 return;
             } else if (hasCoralRemoved) {
-                // Hunter can remove coral
                 Alert.alert('Hunter Effect', 'Remove coral from this square?', [
                     {
                         text: 'No',
@@ -662,8 +710,6 @@ const CoralClash = ({ fixture, gameId, gameState, opponentType }) => {
             }
         }
 
-        // Execute the move (non-whale pieces only, no coral actions)
-        // Only pass the fields that move() expects: from, to, promotion
         executeMove({
             from: move.from,
             to: move.to,
@@ -675,43 +721,11 @@ const CoralClash = ({ fixture, gameId, gameState, opponentType }) => {
         setWhaleOrientationMoves([]);
     };
 
-    const handleReset = () => {
-        closeMenu();
-
-        // Only allow reset in offline/computer games
-        if (isPvPGame) {
-            Alert.alert(
-                'Reset Not Available',
-                'Cannot reset PvP games. Please resign if you want to end the game.',
-            );
-            return;
-        }
-
-        Alert.alert('Reset Game', 'Are you sure you want to start a new game?', [
-            {
-                text: 'Cancel',
-                style: 'cancel',
-            },
-            {
-                text: 'Reset',
-                style: 'destructive',
-                onPress: () => {
-                    coralClash.reset();
-                    setVisibleMoves([]);
-                    setSelectedSquare(null);
-                    setWhaleDestination(null);
-                    setWhaleOrientationMoves([]);
-                    setIsViewingEnemyMoves(false);
-                },
-            },
-        ]);
-    };
-
     const handleExportState = async () => {
         closeMenu();
         try {
             const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-            const gameState = {
+            const gameStateData = {
                 schemaVersion: GAME_STATE_VERSION,
                 exportedAt: new Date().toISOString(),
                 state: {
@@ -719,9 +733,9 @@ const CoralClash = ({ fixture, gameId, gameState, opponentType }) => {
                     board: coralClash.board(),
                     history: coralClash.history(),
                     turn: coralClash.turn(),
-                    whalePositions: coralClash.whalePositions(), // v1.1.0: preserve whale orientation
-                    coral: coralClash.getAllCoral(), // v1.2.0: coral placements
-                    coralRemaining: coralClash.getCoralRemainingCounts(), // v1.2.0: coral counts
+                    whalePositions: coralClash.whalePositions(),
+                    coral: coralClash.getAllCoral(),
+                    coralRemaining: coralClash.getCoralRemainingCounts(),
                     isGameOver: coralClash.isGameOver(),
                     inCheck: coralClash.inCheck(),
                     isCheckmate: coralClash.isCheckmate(),
@@ -731,7 +745,7 @@ const CoralClash = ({ fixture, gameId, gameState, opponentType }) => {
                 },
             };
 
-            const jsonString = JSON.stringify(gameState, null, 2);
+            const jsonString = JSON.stringify(gameStateData, null, 2);
 
             await Share.share({
                 message: jsonString,
@@ -752,35 +766,26 @@ const CoralClash = ({ fixture, gameId, gameState, opponentType }) => {
         outputRange: [400, 0],
     });
 
-    // Determine which player is on top/bottom based on board flip
-    const topPlayer = isBoardFlipped
-        ? { name: user?.displayName || 'Player', avatarKey: user?.avatarKey, isComputer: false }
-        : { name: 'Computer', isComputer: true };
-
-    const bottomPlayer = isBoardFlipped
-        ? { name: 'Computer', isComputer: true }
-        : { name: user?.displayName || 'Player', avatarKey: user?.avatarKey, isComputer: false };
-
-    // Determine which player's turn it is
     const currentTurn = coralClash.turn();
     const isTopPlayerActive = isBoardFlipped ? currentTurn === 'w' : currentTurn === 'b';
     const isBottomPlayerActive = isBoardFlipped ? currentTurn === 'b' : currentTurn === 'w';
+    const topPlayerColor = isBoardFlipped ? 'w' : 'b';
+    const bottomPlayerColor = isBoardFlipped ? 'b' : 'w';
 
     return (
         <View style={styles.container}>
-            {/* Content Area */}
             <View style={{ width: '100%', alignItems: 'center' }}>
                 {/* Top Player Status Bar */}
                 <View style={[styles.topPlayerBar, { width: boardSize }]}>
                     <PlayerStatusBar
-                        playerName={topPlayer.name}
-                        avatarKey={topPlayer.avatarKey}
-                        isComputer={topPlayer.isComputer}
+                        playerName={topPlayerData.name}
+                        avatarKey={topPlayerData.avatarKey}
+                        isComputer={topPlayerData.isComputer}
                         isActive={isTopPlayerActive}
+                        color={topPlayerColor}
                     />
                 </View>
 
-                {/* Spacer */}
                 <View style={styles.spacer} />
 
                 {/* Game Board */}
@@ -788,7 +793,11 @@ const CoralClash = ({ fixture, gameId, gameState, opponentType }) => {
                     <EmptyBoard size={boardSize} />
                     <Coral coralClash={coralClash} size={boardSize} />
                     <Pieces
-                        board={coralClash.board()}
+                        board={
+                            isViewingHistory && historicalBoard
+                                ? historicalBoard
+                                : coralClash.board()
+                        }
                         onSelectPiece={handleSelectPiece}
                         size={boardSize}
                     />
@@ -802,16 +811,16 @@ const CoralClash = ({ fixture, gameId, gameState, opponentType }) => {
                     />
                 </View>
 
-                {/* Spacer */}
                 <View style={styles.spacer} />
 
                 {/* Bottom Player Status Bar */}
                 <View style={[styles.bottomPlayerBar, { width: boardSize }]}>
                     <PlayerStatusBar
-                        playerName={bottomPlayer.name}
-                        avatarKey={bottomPlayer.avatarKey}
-                        isComputer={bottomPlayer.isComputer}
+                        playerName={bottomPlayerData.name}
+                        avatarKey={bottomPlayerData.avatarKey}
+                        isComputer={bottomPlayerData.isComputer}
                         isActive={isBottomPlayerActive}
+                        color={bottomPlayerColor}
                     />
                 </View>
 
@@ -823,34 +832,20 @@ const CoralClash = ({ fixture, gameId, gameState, opponentType }) => {
                 )}
             </View>
 
-            {/* Control Bar at Bottom - Always Visible */}
-            <View style={styles.controlBar}>
-                {/* Menu Button */}
-                <TouchableOpacity
-                    style={styles.controlButton}
-                    onPress={openMenu}
-                    activeOpacity={0.7}
-                >
-                    <Icon name='menu' family='MaterialIcons' size={44} color={colors.WHITE} />
-                </TouchableOpacity>
-
-                {/* Undo Button - Only for computer/offline games */}
-                {(isComputerGame || isOfflineGame) && (
-                    <TouchableOpacity
-                        style={styles.controlButton}
-                        onPress={handleUndo}
-                        disabled={!canUndo}
-                        activeOpacity={0.7}
-                    >
-                        <Icon
-                            name='undo'
-                            family='MaterialIcons'
-                            size={44}
-                            color={canUndo ? colors.WHITE : colors.MUTED}
-                        />
-                    </TouchableOpacity>
-                )}
-            </View>
+            {/* Control Bar */}
+            {renderControls &&
+                renderControls({
+                    openMenu,
+                    canUndo,
+                    handleUndo,
+                    colors,
+                    // History navigation
+                    canGoBack,
+                    canGoForward,
+                    handleHistoryBack,
+                    handleHistoryForward,
+                    isViewingHistory,
+                })}
 
             {/* Bottom Drawer Menu */}
             <Modal
@@ -870,40 +865,42 @@ const CoralClash = ({ fixture, gameId, gameState, opponentType }) => {
                         ]}
                         onStartShouldSetResponder={() => true}
                     >
-                        {/* Drawer Handle */}
                         <View style={styles.drawerHandle} />
 
-                        {/* Menu Items */}
                         <View style={styles.menuItems}>
-                            {/* Save Game State */}
-                            <TouchableOpacity
-                                style={[
-                                    styles.menuItem,
-                                    { borderBottomColor: colors.BORDER_COLOR },
-                                ]}
-                                onPress={handleExportState}
-                                activeOpacity={0.7}
-                            >
-                                <Icon
-                                    name='save'
-                                    family='MaterialIcons'
-                                    size={28}
-                                    color={colors.PRIMARY}
-                                />
-                                <View style={styles.menuItemText}>
-                                    <Text style={[styles.menuItemTitle, { color: colors.TEXT }]}>
-                                        Save Game State
-                                    </Text>
-                                    <Text
-                                        style={[
-                                            styles.menuItemSubtitle,
-                                            { color: colors.TEXT_SECONDARY },
-                                        ]}
-                                    >
-                                        Export current game position
-                                    </Text>
-                                </View>
-                            </TouchableOpacity>
+                            {/* Save Game State - Only show when dev features are enabled */}
+                            {DEV_FEATURES_ENABLED && (
+                                <TouchableOpacity
+                                    style={[
+                                        styles.menuItem,
+                                        { borderBottomColor: colors.BORDER_COLOR },
+                                    ]}
+                                    onPress={handleExportState}
+                                    activeOpacity={0.7}
+                                >
+                                    <Icon
+                                        name='save'
+                                        family='MaterialIcons'
+                                        size={28}
+                                        color={colors.PRIMARY}
+                                    />
+                                    <View style={styles.menuItemText}>
+                                        <Text
+                                            style={[styles.menuItemTitle, { color: colors.TEXT }]}
+                                        >
+                                            Save Game State
+                                        </Text>
+                                        <Text
+                                            style={[
+                                                styles.menuItemSubtitle,
+                                                { color: colors.TEXT_SECONDARY },
+                                            ]}
+                                        >
+                                            Export current game position
+                                        </Text>
+                                    </View>
+                                </TouchableOpacity>
+                            )}
 
                             {/* Flip Board */}
                             <TouchableOpacity
@@ -937,39 +934,14 @@ const CoralClash = ({ fixture, gameId, gameState, opponentType }) => {
                                 </View>
                             </TouchableOpacity>
 
-                            {/* Reset Game - Only for computer/offline games */}
-                            {(isComputerGame || isOfflineGame) && (
-                                <TouchableOpacity
-                                    style={[
-                                        styles.menuItem,
-                                        { borderBottomColor: colors.BORDER_COLOR },
-                                    ]}
-                                    onPress={handleReset}
-                                    activeOpacity={0.7}
-                                >
-                                    <Icon
-                                        name='refresh'
-                                        family='MaterialIcons'
-                                        size={28}
-                                        color='#f57c00'
-                                    />
-                                    <View style={styles.menuItemText}>
-                                        <Text
-                                            style={[styles.menuItemTitle, { color: colors.TEXT }]}
-                                        >
-                                            Reset Game
-                                        </Text>
-                                        <Text
-                                            style={[
-                                                styles.menuItemSubtitle,
-                                                { color: colors.TEXT_SECONDARY },
-                                            ]}
-                                        >
-                                            Start a new game from the beginning
-                                        </Text>
-                                    </View>
-                                </TouchableOpacity>
-                            )}
+                            {/* Custom menu items from subclasses */}
+                            {renderMenuItems &&
+                                renderMenuItems({
+                                    closeMenu,
+                                    coralClash,
+                                    colors,
+                                    styles,
+                                })}
 
                             {/* Resign */}
                             <TouchableOpacity
@@ -1139,4 +1111,5 @@ const styles = StyleSheet.create({
     },
 });
 
-export default CoralClash;
+export default BaseCoralClashBoard;
+export { styles as baseStyles };

@@ -140,6 +140,50 @@ export const useFirebaseFunctions = () => {
         }
     };
 
+    const requestGameReset = async ({ gameId }) => {
+        try {
+            const callable = httpsCallable(functions, 'requestGameReset');
+            const result = await callable({ gameId });
+            return result.data;
+        } catch (error) {
+            console.error('Error requesting game reset:', error);
+            throw error;
+        }
+    };
+
+    const respondToResetRequest = async ({ gameId, approve }) => {
+        try {
+            const callable = httpsCallable(functions, 'respondToResetRequest');
+            const result = await callable({ gameId, approve });
+            return result.data;
+        } catch (error) {
+            console.error('Error responding to reset request:', error);
+            throw error;
+        }
+    };
+
+    const requestUndo = async ({ gameId, moveCount = 2 }) => {
+        try {
+            const callable = httpsCallable(functions, 'requestUndo');
+            const result = await callable({ gameId, moveCount });
+            return result.data;
+        } catch (error) {
+            console.error('Error requesting undo:', error);
+            throw error;
+        }
+    };
+
+    const respondToUndoRequest = async ({ gameId, approve }) => {
+        try {
+            const callable = httpsCallable(functions, 'respondToUndoRequest');
+            const result = await callable({ gameId, approve });
+            return result.data;
+        } catch (error) {
+            console.error('Error responding to undo request:', error);
+            throw error;
+        }
+    };
+
     const makeComputerMove = async ({ gameId }) => {
         try {
             const callable = httpsCallable(functions, 'makeComputerMove');
@@ -255,6 +299,10 @@ export const useFirebaseFunctions = () => {
         makeMove,
         makeComputerMove,
         resignGame,
+        requestGameReset,
+        respondToResetRequest,
+        requestUndo,
+        respondToUndoRequest,
         getActiveGames,
         getGameHistory,
         // Friends

@@ -243,6 +243,10 @@ export function createGameSnapshot(coralClash: any) {
         }
     });
 
+    // Get PGN for move history (includes initial FEN and all moves)
+    // This is essential for undo functionality
+    const pgn = coralClash.pgn();
+
     return {
         fen: coralClash.fen(),
         turn: coralClash.turn(),
@@ -250,6 +254,7 @@ export function createGameSnapshot(coralClash: any) {
         coral: coralClash.getAllCoral(),
         coralRemaining: coralClash.getCoralRemainingCounts(),
         pieceRoles: pieceRoles, // Save hunter/gatherer status for each piece
+        pgn: pgn, // Save PGN for move history and undo functionality
         isCheck: coralClash.inCheck(),
         isCheckmate: coralClash.isCheckmate(),
         isGameOver: coralClash.isGameOver(),
@@ -265,8 +270,13 @@ export function createGameSnapshot(coralClash: any) {
  * @param snapshot - The game snapshot from Firestore
  */
 export function restoreGameFromSnapshot(coralClash: any, snapshot: any): void {
-    // Load from FEN
-    coralClash.load(snapshot.fen);
+    // If PGN is available, load from it (includes move history for undo)
+    // Otherwise fall back to FEN for backward compatibility
+    if (snapshot.pgn) {
+        coralClash.loadPgn(snapshot.pgn);
+    } else {
+        coralClash.load(snapshot.fen);
+    }
 
     // Restore whale positions if present
     if (snapshot.whalePositions) {

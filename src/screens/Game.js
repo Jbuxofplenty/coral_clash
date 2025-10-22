@@ -3,7 +3,8 @@ import { Dimensions, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 import { Block } from 'galio-framework';
-import CoralClash from '../components/CoralClashBoard';
+import ComputerCoralClashBoard from '../components/ComputerCoralClashBoard';
+import PvPCoralClashBoard from '../components/PvPCoralClashBoard';
 import { useTheme } from '../contexts/ThemeContext';
 
 const { width, height } = Dimensions.get('screen');
@@ -15,6 +16,11 @@ export default function Game({ route }) {
     const gameId = route?.params?.gameId;
     const gameState = route?.params?.gameState;
     const opponentType = route?.params?.opponentType; // 'computer' or undefined for PvP
+    const opponentData = route?.params?.opponentData; // For PvP games
+
+    // Select the appropriate board component
+    const BoardComponent =
+        opponentType === 'computer' || !gameId ? ComputerCoralClashBoard : PvPCoralClashBoard;
 
     return (
         <LinearGradient
@@ -24,11 +30,11 @@ export default function Game({ route }) {
             end={{ x: 0, y: 1 }}
         >
             <Block flex>
-                <CoralClash
+                <BoardComponent
                     fixture={fixture}
                     gameId={gameId}
                     gameState={gameState}
-                    opponentType={opponentType}
+                    opponentData={opponentData}
                 />
             </Block>
         </LinearGradient>

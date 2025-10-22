@@ -32,6 +32,10 @@ exports.respondToGameInvite = game.respondToGameInvite;
 exports.makeMove = game.makeMove;
 exports.makeComputerMove = game.makeComputerMove;
 exports.resignGame = game.resignGame;
+exports.requestGameReset = game.requestGameReset;
+exports.respondToResetRequest = game.respondToResetRequest;
+exports.requestUndo = game.requestUndo;
+exports.respondToUndoRequest = game.respondToUndoRequest;
 exports.getActiveGames = game.getActiveGames;
 exports.getGameHistory = game.getGameHistory;
 

@@ -77,6 +77,20 @@ function AppContent({ navigationRef }) {
                     requestId: notificationData.data.requestId,
                     accept: true,
                 });
+            } else if (notificationType === 'reset_requested') {
+                // Approve reset request
+                const respondToResetRequest = httpsCallable(functions, 'respondToResetRequest');
+                await respondToResetRequest({
+                    gameId: notificationData.data.gameId,
+                    approve: true,
+                });
+            } else if (notificationType === 'undo_requested') {
+                // Approve undo request
+                const respondToUndoRequest = httpsCallable(functions, 'respondToUndoRequest');
+                await respondToUndoRequest({
+                    gameId: notificationData.data.gameId,
+                    approve: true,
+                });
             }
 
             decrementBadge();
@@ -103,6 +117,20 @@ function AppContent({ navigationRef }) {
                     requestId: notificationData.data.requestId,
                     accept: false,
                 });
+            } else if (notificationType === 'reset_requested') {
+                // Reject reset request
+                const respondToResetRequest = httpsCallable(functions, 'respondToResetRequest');
+                await respondToResetRequest({
+                    gameId: notificationData.data.gameId,
+                    approve: false,
+                });
+            } else if (notificationType === 'undo_requested') {
+                // Reject undo request
+                const respondToUndoRequest = httpsCallable(functions, 'respondToUndoRequest');
+                await respondToUndoRequest({
+                    gameId: notificationData.data.gameId,
+                    approve: false,
+                });
             }
 
             decrementBadge();
@@ -119,6 +147,10 @@ function AppContent({ navigationRef }) {
             switch (notificationType) {
                 case 'move_made':
                 case 'game_accepted':
+                case 'reset_approved':
+                case 'reset_rejected':
+                case 'undo_approved':
+                case 'undo_rejected':
                     // Navigate to the game
                     if (notificationData.data.gameId) {
                         navigationRef.current.navigate('Game', {

@@ -1,14 +1,15 @@
 import { theme } from 'galio-framework';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dimensions, ScrollView, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useFocusEffect } from '@react-navigation/native';
 
 import { GameModeCard, ActiveGamesCard, GameHistoryCard } from '../components/';
 import FixtureLoaderModal from '../components/FixtureLoaderModal';
 import { useTheme } from '../contexts/ThemeContext';
 import { useGame } from '../hooks/useGame';
 import { useAuth } from '../contexts/AuthContext';
+import { useFirebaseFunctions } from '../hooks/useFirebaseFunctions';
+import { db, collection, query, where, onSnapshot } from '../config/firebase';
 
 const { width, height } = Dimensions.get('screen');
 
@@ -19,27 +20,80 @@ export default function Home({ navigation }) {
     const { colors } = useTheme();
     const { user } = useAuth();
     const [fixtureModalVisible, setFixtureModalVisible] = useState(false);
-    const [refreshTrigger, setRefreshTrigger] = useState(0);
-    const { startComputerGame, activeGames, loadActiveGames } = useGame();
+    const [gameHistory, setGameHistory] = useState([]);
+    const [historyLoading, setHistoryLoading] = useState(true);
+    const { startComputerGame, activeGames } = useGame(); // useGame now handles listeners internally
+    const { getGameHistory } = useFirebaseFunctions();
 
-    // Load data when screen comes into focus
-    useFocusEffect(
-        React.useCallback(() => {
-            if (user) {
-                loadActiveGames();
-                // Trigger refresh for child components
-                setRefreshTrigger((prev) => prev + 1);
+    // Initial load and set up game history listeners on mount
+    useEffect(() => {
+        if (!user || !user.uid) {
+            setHistoryLoading(false);
+            return;
+        }
+
+        // Initial load
+        const initialLoad = async () => {
+            try {
+                const result = await getGameHistory();
+                setGameHistory(result.games || []);
+            } catch (error) {
+                console.error('[Home] Error loading game history:', error);
+            } finally {
+                setHistoryLoading(false);
             }
-            // eslint-disable-next-line react-hooks/exhaustive-deps
-        }, [user]),
-    );
+        };
+
+        initialLoad();
+
+        // Listen to completed/cancelled games where user is creator
+        const historyCreatorQuery = query(
+            collection(db, 'games'),
+            where('creatorId', '==', user.uid),
+            where('status', 'in', ['completed', 'cancelled']),
+        );
+
+        // Listen to completed/cancelled games where user is opponent
+        const historyOpponentQuery = query(
+            collection(db, 'games'),
+            where('opponentId', '==', user.uid),
+            where('status', 'in', ['completed', 'cancelled']),
+        );
+
+        const historyCreatorUnsubscribe = onSnapshot(historyCreatorQuery, async () => {
+            try {
+                const result = await getGameHistory();
+                setGameHistory(result.games || []);
+            } catch (error) {
+                console.error('[Home] Error fetching game history:', error);
+            }
+        });
+
+        const historyOpponentUnsubscribe = onSnapshot(historyOpponentQuery, async () => {
+            try {
+                const result = await getGameHistory();
+                setGameHistory(result.games || []);
+            } catch (error) {
+                console.error('[Home] Error fetching game history:', error);
+            }
+        });
+
+        // Cleanup on unmount
+        return () => {
+            historyCreatorUnsubscribe();
+            historyOpponentUnsubscribe();
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [user]);
 
     const handleStartComputerGame = async () => {
         try {
             const result = await startComputerGame();
-            if (result.gameId) {
+            if (result.success) {
+                // Navigate to game screen
+                // If gameId is null, it's an offline game
                 navigation.navigate('Game', {
-                    gameId: result.gameId,
+                    gameId: result.gameId || null,
                     opponentType: 'computer',
                 });
             }
@@ -53,7 +107,6 @@ export default function Home({ navigation }) {
     };
 
     const handleSelectFixture = (fixture, fixtureName) => {
-        console.log('Loading fixture:', fixtureName);
         // Navigate to game with the fixture
         navigation.navigate('Game', {
             fixture: fixture,
@@ -97,7 +150,11 @@ export default function Home({ navigation }) {
                 {activeGames.length === 0 && <ActiveGamesCard navigation={navigation} />}
 
                 {/* Game History Card */}
-                <GameHistoryCard navigation={navigation} refreshTrigger={refreshTrigger} />
+                <GameHistoryCard
+                    navigation={navigation}
+                    gameHistory={gameHistory}
+                    loading={historyLoading}
+                />
             </ScrollView>
 
             <FixtureLoaderModal

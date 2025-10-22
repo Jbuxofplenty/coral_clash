@@ -11,6 +11,7 @@ import { useTheme } from '../contexts/ThemeContext';
  * @param {boolean} props.isComputer - Whether this is a computer player
  * @param {number} props.timeRemaining - Time remaining in seconds (optional)
  * @param {boolean} props.isActive - Whether it's this player's turn
+ * @param {string} props.color - Player's color ('w' or 'b')
  */
 export default function PlayerStatusBar({
     playerName = 'Player',
@@ -18,6 +19,7 @@ export default function PlayerStatusBar({
     isComputer = false,
     timeRemaining,
     isActive = false,
+    color = 'w',
 }) {
     const { colors } = useTheme();
 
@@ -50,6 +52,17 @@ export default function PlayerStatusBar({
                     </Text>
                 )}
             </View>
+
+            {/* Color indicator */}
+            <View
+                style={[
+                    styles.colorIndicator,
+                    {
+                        backgroundColor: color === 'w' ? '#FFFFFF' : '#000000',
+                        borderColor: color === 'w' ? '#666666' : '#CCCCCC',
+                    },
+                ]}
+            />
         </View>
     );
 }
@@ -75,5 +88,12 @@ const styles = StyleSheet.create({
     timer: {
         fontSize: 14,
         marginTop: 2,
+    },
+    colorIndicator: {
+        width: 32,
+        height: 32,
+        borderRadius: 4,
+        borderWidth: 1,
+        marginLeft: 12,
     },
 });
