@@ -66,6 +66,31 @@ exports.createGame = functions.https.onCall(async (data, context) => {
             throw new functions.https.HttpsError('not-found', 'Opponent not found');
         }
 
+        // Check for existing pending games between these players
+        // Check both directions: creator->opponent and opponent->creator
+        const existingGamesQuery1 = await db
+            .collection('games')
+            .where('creatorId', '==', creatorId)
+            .where('opponentId', '==', opponentId)
+            .where('status', '==', 'pending')
+            .limit(1)
+            .get();
+
+        const existingGamesQuery2 = await db
+            .collection('games')
+            .where('creatorId', '==', opponentId)
+            .where('opponentId', '==', creatorId)
+            .where('status', '==', 'pending')
+            .limit(1)
+            .get();
+
+        if (!existingGamesQuery1.empty || !existingGamesQuery2.empty) {
+            throw new functions.https.HttpsError(
+                'already-exists',
+                'A pending game request already exists between these players',
+            );
+        }
+
         // Create game document
         const gameData = {
             creatorId,
@@ -163,8 +188,13 @@ exports.createComputerGame = functions.https.onCall(async (data, context) => {
 });
 
 /**
- * Accept or decline a game invitation
+ * Accept, decline, or cancel a game invitation
  * POST /api/game/respond
+ *
+ * Authorization:
+ * - Recipient (opponentId) can accept or decline
+ * - Sender (creatorId) can cancel (decline)
+ * - Both can decline/cancel only if game status is 'pending'
  */
 exports.respondToGameInvite = functions.https.onCall(async (data, context) => {
     try {
@@ -183,9 +213,28 @@ exports.respondToGameInvite = functions.https.onCall(async (data, context) => {
 
         const gameData = gameDoc.data();
 
-        // Verify user is the opponent
-        if (gameData.opponentId !== userId) {
+        // Verify game is in pending status
+        if (gameData.status !== 'pending') {
+            throw new functions.https.HttpsError(
+                'failed-precondition',
+                'Game is not in pending status',
+            );
+        }
+
+        // Authorization: Check if user is the recipient or sender
+        const isRecipient = gameData.opponentId === userId;
+        const isSender = gameData.creatorId === userId;
+
+        if (!isRecipient && !isSender) {
             throw new functions.https.HttpsError('permission-denied', 'Not authorized');
+        }
+
+        // Only recipient can accept (sender cannot accept their own request)
+        if (accept && !isRecipient) {
+            throw new functions.https.HttpsError(
+                'permission-denied',
+                'Only the recipient can accept a game invitation',
+            );
         }
 
         // Update game status
@@ -212,9 +261,17 @@ exports.respondToGameInvite = functions.https.onCall(async (data, context) => {
             );
         }
 
+        // Determine the appropriate message
+        let message = 'Game declined';
+        if (accept) {
+            message = 'Game started';
+        } else if (isSender) {
+            message = 'Game invitation canceled';
+        }
+
         return {
             success: true,
-            message: accept ? 'Game started' : 'Game declined',
+            message,
             gameId: gameId,
         };
     } catch (error) {

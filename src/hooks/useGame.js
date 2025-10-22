@@ -122,8 +122,23 @@ export const useGame = () => {
                 return result;
             } catch (error) {
                 console.error('Error sending game request:', error);
-                Alert.alert('Error', error.message || 'Failed to send game request');
-                throw error;
+
+                // Handle specific error cases
+                if (error.code === 'already-exists') {
+                    // Don't show error for duplicate game requests - just silently ignore
+                    // The pending game already exists, so no action needed
+                    return { success: false, reason: 'duplicate' };
+                } else if (error.code === 'not-found') {
+                    Alert.alert(
+                        'User Not Found',
+                        'The user you are trying to invite could not be found.',
+                        [{ text: 'OK' }],
+                    );
+                    throw error;
+                } else {
+                    Alert.alert('Error', error.message || 'Failed to send game request');
+                    throw error;
+                }
             } finally {
                 setLoading(false);
             }

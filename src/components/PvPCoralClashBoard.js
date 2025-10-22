@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, TouchableOpacity, Alert, Text } from 'react-native';
 import { Icon } from 'galio-framework';
 import BaseCoralClashBoard, { baseStyles } from './BaseCoralClashBoard';
 import { useAuth } from '../contexts/AuthContext';
 import { useGamePreferences } from '../contexts/GamePreferencesContext';
 import useFirebaseFunctions from '../hooks/useFirebaseFunctions';
+import { db, doc, onSnapshot } from '../config/firebase';
 
 /**
  * PvPCoralClashBoard - Board for player vs player games
@@ -17,6 +18,34 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData }) => {
     const { user } = useAuth();
     const { isBoardFlipped } = useGamePreferences();
     const { requestGameReset, requestUndo } = useFirebaseFunctions();
+    const [userColor, setUserColor] = useState(null);
+    const [creatorId, setCreatorId] = useState(null);
+    const [opponentId, setOpponentId] = useState(null);
+
+    // Determine user's color from game document
+    useEffect(() => {
+        if (!gameId || !user) return;
+
+        const unsubscribe = onSnapshot(
+            doc(db, 'games', gameId),
+            (docSnap) => {
+                if (docSnap.exists()) {
+                    const gameData = docSnap.data();
+                    setCreatorId(gameData.creatorId);
+                    setOpponentId(gameData.opponentId);
+
+                    // Creator is white, opponent is black
+                    const color = gameData.creatorId === user.uid ? 'w' : 'b';
+                    setUserColor(color);
+                }
+            },
+            (error) => {
+                console.error('Error listening to game for user color:', error);
+            },
+        );
+
+        return () => unsubscribe();
+    }, [gameId, user]);
 
     // PvP-specific: Render control buttons (menu and history navigation)
     const renderControls = ({
@@ -206,28 +235,45 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData }) => {
         );
     };
 
-    // Determine which player is on top/bottom based on board flip
-    const topPlayer = isBoardFlipped
+    // Determine which player is on top/bottom
+    // User should always see themselves at bottom unless board is manually flipped
+    // userColor: 'w' = white (rows 1-2), 'b' = black (rows 7-8)
+    // Without flip: white at bottom (normal), black at top
+    // With flip: black at bottom, white at top
+
+    // Determine if user is playing as black
+    const userIsBlack = userColor === 'b';
+
+    // Board should be flipped if:
+    // - User is black AND board is NOT manually flipped, OR
+    // - User is white AND board IS manually flipped
+    const shouldFlipBoard = userIsBlack !== isBoardFlipped;
+
+    // Get opponent info from game data or from creatorId/opponentId
+    let opponentName = opponentData?.displayName || 'Opponent';
+    let opponentAvatar = opponentData?.avatarKey || 'dolphin';
+
+    const topPlayer = shouldFlipBoard
         ? {
-              name: user?.displayName || 'Player',
-              avatarKey: user?.avatarKey,
+              name: opponentName,
+              avatarKey: opponentAvatar,
               isComputer: false,
           }
         : {
-              name: opponentData?.displayName || 'Opponent',
-              avatarKey: opponentData?.avatarKey,
+              name: user?.displayName || 'Player',
+              avatarKey: user?.avatarKey,
               isComputer: false,
           };
 
-    const bottomPlayer = isBoardFlipped
+    const bottomPlayer = shouldFlipBoard
         ? {
-              name: opponentData?.displayName || 'Opponent',
-              avatarKey: opponentData?.avatarKey,
+              name: user?.displayName || 'Player',
+              avatarKey: user?.avatarKey,
               isComputer: false,
           }
         : {
-              name: user?.displayName || 'Player',
-              avatarKey: user?.avatarKey,
+              name: opponentName,
+              avatarKey: opponentAvatar,
               isComputer: false,
           };
 
@@ -244,6 +290,8 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData }) => {
             onMoveComplete={undefined} // No special move handling for PvP
             enableUndo={false}
             onUndo={undefined}
+            userColor={userColor}
+            effectiveBoardFlip={shouldFlipBoard}
         />
     );
 };

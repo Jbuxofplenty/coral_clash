@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Block, Text, theme } from 'galio-framework';
 import { View, StyleSheet, TouchableOpacity, ActivityIndicator, Dimensions } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
@@ -17,9 +17,16 @@ const { width } = Dimensions.get('screen');
 export default function ActiveGamesCard({ navigation }) {
     const { colors } = useTheme();
     const { user } = useAuth();
-    const { activeGames, loading } = useGame();
+    const { activeGames, loading, acceptGameInvite, declineGameInvite } = useGame();
+    const [acceptingGameId, setAcceptingGameId] = useState(null);
+    const [decliningGameId, setDecliningGameId] = useState(null);
 
     const handleGamePress = (game) => {
+        // Don't navigate if game is pending
+        if (game.status === 'pending') {
+            return;
+        }
+
         navigation.navigate('Game', {
             gameId: game.id,
             gameState: game.gameState,
@@ -27,27 +34,50 @@ export default function ActiveGamesCard({ navigation }) {
         });
     };
 
+    const handleAcceptGame = async (gameId) => {
+        try {
+            setAcceptingGameId(gameId);
+            await acceptGameInvite(gameId);
+            // Navigate to the game after accepting
+            const game = activeGames.find((g) => g.id === gameId);
+            if (game) {
+                navigation.navigate('Game', {
+                    gameId: game.id,
+                    gameState: game.gameState,
+                    opponentType: game.opponentType,
+                });
+            }
+        } catch (error) {
+            console.error('Error accepting game:', error);
+        } finally {
+            setAcceptingGameId(null);
+        }
+    };
+
+    const handleDeclineGame = async (gameId) => {
+        try {
+            setDecliningGameId(gameId);
+            await declineGameInvite(gameId);
+        } catch (error) {
+            console.error('Error declining game:', error);
+        } finally {
+            setDecliningGameId(null);
+        }
+    };
+
     const getGameStatus = (game) => {
         if (!user) return { text: '', icon: 'question-circle', color: colors.TEXT_SECONDARY };
 
         const isMyTurn = game.currentTurn === user.uid;
         const isPending = game.status === 'pending';
-        const isCreator = game.creatorId === user.uid;
 
         if (isPending) {
-            if (isCreator) {
-                return {
-                    text: 'Waiting for opponent',
-                    icon: 'hourglass',
-                    color: colors.WARNING,
-                };
-            } else {
-                return {
-                    text: 'Your move to accept',
-                    icon: 'exclamation-circle',
-                    color: colors.INFO,
-                };
-            }
+            // No status text for pending games, just show action buttons
+            return {
+                text: '',
+                icon: '',
+                color: colors.TEXT_SECONDARY,
+            };
         }
 
         if (isMyTurn) {
@@ -160,6 +190,10 @@ export default function ActiveGamesCard({ navigation }) {
                     activeGames.map((game, index) => {
                         const opponent = getOpponentData(game);
                         const status = getGameStatus(game);
+                        const isPending = game.status === 'pending';
+                        const isRecipient = game.opponentId === user?.uid;
+                        const isProcessing =
+                            acceptingGameId === game.id || decliningGameId === game.id;
 
                         return (
                             <TouchableOpacity
@@ -170,10 +204,12 @@ export default function ActiveGamesCard({ navigation }) {
                                     {
                                         backgroundColor: colors.INPUT,
                                         borderColor: colors.BORDER_COLOR,
+                                        opacity: isProcessing ? 0.6 : 1,
                                     },
                                     index === activeGames.length - 1 && styles.lastGameItem,
                                 ]}
-                                activeOpacity={0.7}
+                                activeOpacity={isPending ? 1 : 0.7}
+                                disabled={isPending}
                             >
                                 <Block row middle space='between' flex>
                                     <Block row middle flex>
@@ -215,12 +251,93 @@ export default function ActiveGamesCard({ navigation }) {
                                         </Block>
                                     </Block>
 
-                                    <Icon
-                                        name='chevron-right'
-                                        family='font-awesome'
-                                        size={16}
-                                        color={colors.TEXT_SECONDARY}
-                                    />
+                                    {isPending ? (
+                                        <Block row>
+                                            {isRecipient && (
+                                                <>
+                                                    {acceptingGameId === game.id ? (
+                                                        <View
+                                                            style={[
+                                                                styles.actionButton,
+                                                                {
+                                                                    backgroundColor:
+                                                                        colors.SUCCESS + '10',
+                                                                },
+                                                            ]}
+                                                        >
+                                                            <ActivityIndicator
+                                                                size='small'
+                                                                color={colors.SUCCESS}
+                                                            />
+                                                        </View>
+                                                    ) : (
+                                                        <TouchableOpacity
+                                                            onPress={() =>
+                                                                handleAcceptGame(game.id)
+                                                            }
+                                                            disabled={decliningGameId === game.id}
+                                                            style={[
+                                                                styles.actionButton,
+                                                                {
+                                                                    backgroundColor:
+                                                                        colors.SUCCESS + '10',
+                                                                },
+                                                            ]}
+                                                        >
+                                                            <Icon
+                                                                name='check'
+                                                                family='font-awesome'
+                                                                size={18}
+                                                                color={colors.SUCCESS}
+                                                            />
+                                                        </TouchableOpacity>
+                                                    )}
+                                                </>
+                                            )}
+                                            {decliningGameId === game.id ? (
+                                                <View
+                                                    style={[
+                                                        styles.actionButton,
+                                                        {
+                                                            backgroundColor: colors.ERROR + '10',
+                                                            marginLeft: isRecipient ? 8 : 0,
+                                                        },
+                                                    ]}
+                                                >
+                                                    <ActivityIndicator
+                                                        size='small'
+                                                        color={colors.ERROR}
+                                                    />
+                                                </View>
+                                            ) : (
+                                                <TouchableOpacity
+                                                    onPress={() => handleDeclineGame(game.id)}
+                                                    disabled={acceptingGameId === game.id}
+                                                    style={[
+                                                        styles.actionButton,
+                                                        {
+                                                            backgroundColor: colors.ERROR + '10',
+                                                            marginLeft: isRecipient ? 8 : 0,
+                                                        },
+                                                    ]}
+                                                >
+                                                    <Icon
+                                                        name='times'
+                                                        family='font-awesome'
+                                                        size={18}
+                                                        color={colors.ERROR}
+                                                    />
+                                                </TouchableOpacity>
+                                            )}
+                                        </Block>
+                                    ) : (
+                                        <Icon
+                                            name='chevron-right'
+                                            family='font-awesome'
+                                            size={16}
+                                            color={colors.TEXT_SECONDARY}
+                                        />
+                                    )}
                                 </Block>
                             </TouchableOpacity>
                         );
@@ -309,5 +426,12 @@ const styles = StyleSheet.create({
     emptySubtext: {
         textAlign: 'center',
         opacity: 0.7,
+    },
+    actionButton: {
+        width: 36,
+        height: 36,
+        borderRadius: 18,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
 });

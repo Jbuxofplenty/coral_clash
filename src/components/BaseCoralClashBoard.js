@@ -48,6 +48,8 @@ const DEV_FEATURES_ENABLED = process.env.EXPO_PUBLIC_ENABLE_DEV_FEATURES === 'tr
  * - onMoveComplete: Callback after a move is successfully made
  * - enableUndo: Boolean indicating if undo feature is enabled
  * - onUndo: Callback for undo action
+ * - userColor: Color the current user is playing as ('w' or 'b', null for spectator/offline)
+ * - effectiveBoardFlip: Override for board flip (for PvP games where user plays as black)
  */
 const BaseCoralClashBoard = ({
     fixture,
@@ -61,11 +63,16 @@ const BaseCoralClashBoard = ({
     onMoveComplete,
     enableUndo = false,
     onUndo,
+    userColor = null,
+    effectiveBoardFlip = null,
 }) => {
     const { width } = useWindowDimensions();
     const { colors } = useTheme();
-    const { isBoardFlipped, toggleBoardFlip } = useGamePreferences();
+    const { isBoardFlipped: contextBoardFlipped, toggleBoardFlip } = useGamePreferences();
     const { user } = useAuth();
+
+    // Use effective board flip if provided, otherwise use context value
+    const isBoardFlipped = effectiveBoardFlip !== null ? effectiveBoardFlip : contextBoardFlipped;
     const { makeMove: makeMoveAPI, resignGame: resignGameAPI } = useFirebaseFunctions();
     const coralClash = useCoralClash();
     const [visibleMoves, setVisibleMoves] = useState([]);
@@ -791,7 +798,7 @@ const BaseCoralClashBoard = ({
                 {/* Game Board */}
                 <View style={{ position: 'relative', alignSelf: 'center' }}>
                     <EmptyBoard size={boardSize} />
-                    <Coral coralClash={coralClash} size={boardSize} />
+                    <Coral coralClash={coralClash} size={boardSize} boardFlipped={isBoardFlipped} />
                     <Pieces
                         board={
                             isViewingHistory && historicalBoard
@@ -800,6 +807,8 @@ const BaseCoralClashBoard = ({
                         }
                         onSelectPiece={handleSelectPiece}
                         size={boardSize}
+                        userColor={userColor}
+                        boardFlipped={isBoardFlipped}
                     />
                     <Moves
                         visibleMoves={visibleMoves}
@@ -808,6 +817,7 @@ const BaseCoralClashBoard = ({
                         showOrientations={whaleDestination !== null}
                         selectedDestination={whaleDestination}
                         isEnemyMoves={isViewingEnemyMoves}
+                        boardFlipped={isBoardFlipped}
                     />
                 </View>
 

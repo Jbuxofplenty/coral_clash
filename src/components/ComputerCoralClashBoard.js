@@ -225,6 +225,7 @@ const ComputerCoralClashBoard = ({ fixture, gameId, gameState }) => {
             onMoveComplete={gameId ? handleMoveComplete : undefined}
             enableUndo={true}
             onUndo={handleUndo}
+            userColor='w' // User always plays as white in computer games
         />
     );
 };

@@ -1,6 +1,5 @@
 import { TouchableWithoutFeedback, View } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
-import { useGamePreferences } from '../contexts/GamePreferencesContext';
 
 const Moves = ({
     visibleMoves,
@@ -9,8 +8,8 @@ const Moves = ({
     showOrientations = false,
     selectedDestination = null,
     isEnemyMoves = false,
+    boardFlipped = false,
 }) => {
-    const { isBoardFlipped } = useGamePreferences();
     const cellSize = size / 8;
 
     // Define colors based on whether these are enemy moves
@@ -32,8 +31,8 @@ const Moves = ({
         const { to, from, isDestinationMarker } = move;
         const [file, rank] = to.split('');
         const fileIndex = file.charCodeAt(0) - 'a'.charCodeAt(0);
-        const left = isBoardFlipped ? (7 - fileIndex) * cellSize : fileIndex * cellSize;
-        const bottom = isBoardFlipped ? (8 - parseInt(rank)) * cellSize : (rank - 1) * cellSize;
+        const left = boardFlipped ? (7 - fileIndex) * cellSize : fileIndex * cellSize;
+        const bottom = boardFlipped ? (8 - parseInt(rank)) * cellSize : (rank - 1) * cellSize;
 
         // The destination marker should be lighter, adjacent squares should be normal
         const isDestination = isDestinationMarker === true;

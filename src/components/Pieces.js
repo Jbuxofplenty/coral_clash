@@ -4,8 +4,10 @@ import { useGamePreferences } from '../contexts/GamePreferencesContext';
 
 import { Image, TouchableWithoutFeedback, View } from 'react-native';
 
-const Pieces = ({ board, size, onSelectPiece }) => {
-    const { isBoardFlipped } = useGamePreferences();
+const Pieces = ({ board, size, onSelectPiece, userColor = null, boardFlipped = null }) => {
+    const { isBoardFlipped: contextBoardFlipped } = useGamePreferences();
+    // Use provided boardFlipped if available, otherwise use context value
+    const isBoardFlipped = boardFlipped !== null ? boardFlipped : contextBoardFlipped;
     const cellSize = size / 8;
 
     // Find all whale positions to determine orientation
@@ -39,9 +41,16 @@ const Pieces = ({ board, size, onSelectPiece }) => {
 
         // Determine if piece should have coral decoration based on role
         const hasCoral = role === 'gatherer';
+
+        // Determine if piece should be rendered in color or greyscale
+        // If userColor is set, render user's pieces in color, opponent's in greyscale
+        // If userColor is null (e.g., offline computer game), use default: white=color, black=grey
+        const isUserPiece = userColor ? color === userColor : color === 'w';
+        const displayColor = isUserPiece ? 'W' : 'B'; // W=colored, B=greyscale
+
         const pieceKey = hasCoral
-            ? `${color}${type}C`.toUpperCase()
-            : `${color}${type}`.toUpperCase();
+            ? `${displayColor}${type.toUpperCase()}C`
+            : `${displayColor}${type.toUpperCase()}`;
 
         if (isWhale) {
             // Render whale image only once from the first square (leftmost/bottommost)
