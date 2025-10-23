@@ -8,6 +8,7 @@ import NotificationDropdown from './NotificationDropdown';
 import ActiveGamesCard from './ActiveGamesCard';
 import GameHistoryCard from './GameHistoryCard';
 import PlayerStatusBar from './PlayerStatusBar';
+import GameStatusBanner from './GameStatusBanner';
 
 export {
     Icon,
@@ -20,4 +21,5 @@ export {
     ActiveGamesCard,
     GameHistoryCard,
     PlayerStatusBar,
+    GameStatusBanner,
 };

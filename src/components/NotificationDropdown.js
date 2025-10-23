@@ -61,6 +61,29 @@ const getNotificationConfig = (type) => {
             showAvatar: true,
             showActions: false,
         },
+        game_result: {
+            title: 'Game Over',
+            getMessage: (displayName, result, data) => {
+                const opponentName = data?.opponentName || displayName || 'Your opponent';
+                const reason = data?.reason || 'unknown';
+
+                if (data?.result === 'win') {
+                    if (reason === 'resignation') {
+                        return `You won! ${opponentName} resigned`;
+                    }
+                    return `You won!`;
+                } else if (data?.result === 'loss') {
+                    if (reason === 'resignation') {
+                        return `You lost. You resigned`;
+                    }
+                    return `You lost`;
+                }
+                return 'Game ended';
+            },
+            icon: { name: 'trophy', family: 'font-awesome' },
+            showAvatar: true,
+            showActions: false,
+        },
         friend_accepted: {
             title: 'Friend Request Accepted',
             getMessage: (displayName) => `${displayName || 'Someone'} accepted your friend request`,

@@ -2001,7 +2001,9 @@ export class CoralClash {
                 // If coral action specified, use it to disambiguate
                 if (candidates.length > 1 && 'coralPlaced' in move) {
                     const exactMatch = candidates.find((m) => m.coralPlaced === move.coralPlaced);
-                    moveObj = exactMatch || candidates[0];
+                    // IMPORTANT: If user explicitly specified coral action, we MUST use exact match
+                    // Falling back to candidates[0] would ignore user's choice
+                    moveObj = exactMatch || null;
                 } else if (candidates.length > 1 && 'coralRemovedSquares' in move) {
                     // Whale-specific: match specific squares where coral is removed
                     const exactMatch = candidates.find((m) => {
@@ -2012,10 +2014,12 @@ export class CoralClash {
                         const requestedAlg = requestedSquares.sort();
                         return JSON.stringify(candidateAlg) === JSON.stringify(requestedAlg);
                     });
-                    moveObj = exactMatch || candidates[0];
+                    // IMPORTANT: If user explicitly specified coral removal, we MUST use exact match
+                    moveObj = exactMatch || null;
                 } else if (candidates.length > 1 && 'coralRemoved' in move) {
                     const exactMatch = candidates.find((m) => m.coralRemoved === move.coralRemoved);
-                    moveObj = exactMatch || candidates[0];
+                    // IMPORTANT: If user explicitly specified coral action, we MUST use exact match
+                    moveObj = exactMatch || null;
                 }
                 // If whale move and whaleSecondSquare specified, use it to disambiguate
                 else if (
@@ -3342,3 +3346,29 @@ export class CoralClash {
 }
 
 export type CoralClashInstance = CoralClash;
+
+/**
+ * Calculate the dynamic move count for an undo request based on current game state
+ * If moves have been made since the undo request, the count increases accordingly
+ *
+ * @param originalMoveCount - The original number of moves requested to undo
+ * @param undoRequestAtMoveNumber - The move number when the undo was requested (optional)
+ * @param currentMoveCount - The current number of moves in the game history
+ * @returns The calculated number of moves to undo
+ */
+export function calculateUndoMoveCount(
+    originalMoveCount: number,
+    undoRequestAtMoveNumber: number | undefined | null,
+    currentMoveCount: number,
+): number {
+    // If we don't have the move number when request was made, just use original count
+    if (undoRequestAtMoveNumber === undefined || undoRequestAtMoveNumber === null) {
+        return originalMoveCount;
+    }
+
+    // Calculate how many additional moves were made since the request
+    const additionalMoves = currentMoveCount - undoRequestAtMoveNumber;
+
+    // Return original count plus any additional moves (can't be negative)
+    return originalMoveCount + Math.max(0, additionalMoves);
+}

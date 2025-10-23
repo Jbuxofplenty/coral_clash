@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { View, TouchableOpacity, Alert, Text } from 'react-native';
+import { View, TouchableOpacity, Alert, Text, Dimensions, Platform } from 'react-native';
 import { Icon } from 'galio-framework';
 import BaseCoralClashBoard, { baseStyles } from './BaseCoralClashBoard';
 import { useAuth } from '../contexts/AuthContext';
 import { useGamePreferences } from '../contexts/GamePreferencesContext';
+import { useTheme } from '../contexts/ThemeContext';
 import useFirebaseFunctions from '../hooks/useFirebaseFunctions';
 import { db, doc, onSnapshot } from '../config/firebase';
+import IconComponent from './Icon';
+import { calculateUndoMoveCount } from '../../shared';
 
 /**
  * Format display name with discriminator
@@ -33,12 +36,17 @@ const formatDisplayName = (displayName, discriminator) => {
 const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData }) => {
     const { user } = useAuth();
     const { isBoardFlipped } = useGamePreferences();
-    const { requestGameReset, requestUndo } = useFirebaseFunctions();
+    const { colors } = useTheme();
+    const { requestGameReset, requestUndo, respondToUndoRequest, respondToResetRequest } =
+        useFirebaseFunctions();
     const [userColor, setUserColor] = useState(null);
     const [creatorId, setCreatorId] = useState(null);
     const [opponentId, setOpponentId] = useState(null);
+    const [undoRequestData, setUndoRequestData] = useState(null);
+    const [resetRequestData, setResetRequestData] = useState(null);
+    const [currentMoveCount, setCurrentMoveCount] = useState(0); // Track move count from Firestore
 
-    // Determine user's color from game document
+    // Determine user's color and track requests from game document
     useEffect(() => {
         if (!gameId || !user) return;
 
@@ -50,9 +58,42 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData }) => {
                     setCreatorId(gameData.creatorId);
                     setOpponentId(gameData.opponentId);
 
-                    // Creator is white, opponent is black
-                    const color = gameData.creatorId === user.uid ? 'w' : 'b';
+                    // Track current move count for dynamic undo calculation
+                    const moveHistoryLength = gameData.moves?.length || 0;
+                    setCurrentMoveCount(moveHistoryLength);
+
+                    // Determine user's color from whitePlayerId/blackPlayerId
+                    // Fall back to old logic (creator=white) for backward compatibility
+                    let color;
+                    if (gameData.whitePlayerId && gameData.blackPlayerId) {
+                        color = gameData.whitePlayerId === user.uid ? 'w' : 'b';
+                    } else {
+                        // Backward compatibility: creator is white, opponent is black
+                        color = gameData.creatorId === user.uid ? 'w' : 'b';
+                    }
                     setUserColor(color);
+
+                    // Track undo request status
+                    if (gameData.undoRequestedBy && gameData.undoRequestStatus === 'pending') {
+                        setUndoRequestData({
+                            requestedBy: gameData.undoRequestedBy,
+                            moveCount: gameData.undoRequestMoveCount || 1,
+                            undoRequestAtMoveNumber: gameData.undoRequestAtMoveNumber,
+                            isUserTheRequester: gameData.undoRequestedBy === user.uid,
+                        });
+                    } else {
+                        setUndoRequestData(null);
+                    }
+
+                    // Track reset request status
+                    if (gameData.resetRequestedBy && gameData.resetRequestStatus === 'pending') {
+                        setResetRequestData({
+                            requestedBy: gameData.resetRequestedBy,
+                            isUserTheRequester: gameData.resetRequestedBy === user.uid,
+                        });
+                    } else {
+                        setResetRequestData(null);
+                    }
                 }
             },
             (error) => {
@@ -63,7 +104,81 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData }) => {
         return () => unsubscribe();
     }, [gameId, user]);
 
-    // PvP-specific: Render control buttons (menu and history navigation)
+    // Handler for undo request from control bar
+    const handleUndoRequest = async () => {
+        Alert.alert(
+            'Request Undo',
+            `Request to undo the last move? ${opponentData?.displayName || 'Your opponent'} will need to approve.`,
+            [
+                {
+                    text: 'Cancel',
+                    style: 'cancel',
+                },
+                {
+                    text: 'Request',
+                    onPress: async () => {
+                        try {
+                            // Undo just the last move (the player's own move)
+                            await requestUndo({ gameId, moveCount: 1 });
+                            Alert.alert(
+                                'Request Sent',
+                                'Your opponent will be notified of your undo request.',
+                            );
+                        } catch (error) {
+                            console.error('Error requesting undo:', error);
+                            Alert.alert('Error', 'Failed to send undo request. Please try again.');
+                        }
+                    },
+                },
+            ],
+        );
+    };
+
+    // Handler for responding to undo request
+    const handleUndoResponse = async (approve) => {
+        try {
+            await respondToUndoRequest({ gameId, approve });
+            // No need to show alert - the banner will disappear automatically via Firestore listener
+        } catch (error) {
+            console.error('Error responding to undo request:', error);
+            Alert.alert('Error', 'Failed to respond to undo request. Please try again.');
+        }
+    };
+
+    // Handler for responding to reset request
+    const handleResetResponse = async (approve) => {
+        try {
+            await respondToResetRequest({ gameId, approve });
+            // No need to show alert - the banner will disappear automatically via Firestore listener
+        } catch (error) {
+            console.error('Error responding to reset request:', error);
+            Alert.alert('Error', 'Failed to respond to reset request. Please try again.');
+        }
+    };
+
+    // Handler for canceling undo request
+    const handleCancelUndoRequest = async () => {
+        try {
+            // Cancel by declining your own request
+            await respondToUndoRequest({ gameId, approve: false });
+        } catch (error) {
+            console.error('Error canceling undo request:', error);
+            Alert.alert('Error', 'Failed to cancel undo request. Please try again.');
+        }
+    };
+
+    // Handler for canceling reset request
+    const handleCancelResetRequest = async () => {
+        try {
+            // Cancel by declining your own request
+            await respondToResetRequest({ gameId, approve: false });
+        } catch (error) {
+            console.error('Error canceling reset request:', error);
+            Alert.alert('Error', 'Failed to cancel reset request. Please try again.');
+        }
+    };
+
+    // PvP-specific: Render control buttons (menu, undo, and history navigation)
     const renderControls = ({
         openMenu,
         colors,
@@ -71,87 +186,75 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData }) => {
         canGoForward,
         handleHistoryBack,
         handleHistoryForward,
-    }) => (
-        <View style={baseStyles.controlBar}>
-            <TouchableOpacity
-                style={baseStyles.controlButton}
-                onPress={openMenu}
-                activeOpacity={0.7}
-            >
-                <Icon name='menu' family='MaterialIcons' size={44} color={colors.WHITE} />
-            </TouchableOpacity>
+        coralClash,
+        isViewingHistory,
+    }) => {
+        const historyLength = coralClash.history().length;
+        const isGameOver = coralClash.isGameOver();
+        const canRequestUndo = historyLength >= 1 && !isGameOver && !isViewingHistory;
 
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        return (
+            <View style={baseStyles.controlBar}>
                 <TouchableOpacity
                     style={baseStyles.controlButton}
-                    onPress={handleHistoryBack}
-                    disabled={!canGoBack}
+                    onPress={openMenu}
                     activeOpacity={0.7}
                 >
-                    <Icon
-                        name='chevron-left'
-                        family='MaterialIcons'
-                        size={44}
-                        color={canGoBack ? colors.WHITE : colors.MUTED}
-                    />
+                    <Icon name='menu' family='MaterialIcons' size={44} color={colors.WHITE} />
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                    style={[baseStyles.controlButton, { marginLeft: 8 }]}
-                    onPress={handleHistoryForward}
-                    disabled={!canGoForward}
+                    style={baseStyles.controlButton}
+                    onPress={handleUndoRequest}
+                    disabled={!canRequestUndo}
                     activeOpacity={0.7}
                 >
                     <Icon
-                        name='chevron-right'
+                        name='undo'
                         family='MaterialIcons'
                         size={44}
-                        color={canGoForward ? colors.WHITE : colors.MUTED}
+                        color={canRequestUndo ? colors.WHITE : colors.MUTED}
                     />
                 </TouchableOpacity>
-            </View>
-        </View>
-    );
 
-    // PvP-specific: Render menu items (undo request and reset request)
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <TouchableOpacity
+                        style={baseStyles.controlButton}
+                        onPress={handleHistoryBack}
+                        disabled={!canGoBack}
+                        activeOpacity={0.7}
+                    >
+                        <Icon
+                            name='chevron-left'
+                            family='MaterialIcons'
+                            size={44}
+                            color={canGoBack ? colors.WHITE : colors.MUTED}
+                        />
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        style={[baseStyles.controlButton, { marginLeft: 8 }]}
+                        onPress={handleHistoryForward}
+                        disabled={!canGoForward}
+                        activeOpacity={0.7}
+                    >
+                        <Icon
+                            name='chevron-right'
+                            family='MaterialIcons'
+                            size={44}
+                            color={canGoForward ? colors.WHITE : colors.MUTED}
+                        />
+                    </TouchableOpacity>
+                </View>
+            </View>
+        );
+    };
+
+    // PvP-specific: Render menu items (reset request and resign)
     const renderMenuItems = ({ closeMenu, coralClash, colors, styles }) => {
         const isGameOver = coralClash.isGameOver();
-        const historyLength = coralClash.history().length;
-        const canRequestUndo = historyLength >= 2 && !isGameOver;
-
-        const handleUndoRequest = async () => {
-            closeMenu();
-
-            Alert.alert(
-                'Request Undo',
-                `Request to undo the last move? ${opponentData?.displayName || 'Your opponent'} will need to approve.`,
-                [
-                    {
-                        text: 'Cancel',
-                        style: 'cancel',
-                    },
-                    {
-                        text: 'Request',
-                        onPress: async () => {
-                            try {
-                                // Undo 2 moves in PvP (one from each player)
-                                await requestUndo({ gameId, moveCount: 2 });
-                                Alert.alert(
-                                    'Request Sent',
-                                    'Your opponent will be notified of your undo request.',
-                                );
-                            } catch (error) {
-                                console.error('Error requesting undo:', error);
-                                Alert.alert(
-                                    'Error',
-                                    'Failed to send undo request. Please try again.',
-                                );
-                            }
-                        },
-                    },
-                ],
-            );
-        };
+        const moveHistory = coralClash.history();
+        const noMovesYet = moveHistory.length === 0;
 
         const handleResetRequest = async () => {
             closeMenu();
@@ -187,63 +290,41 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData }) => {
             );
         };
 
+        const isResetDisabled = isGameOver || noMovesYet;
+        let resetSubtitle = 'Ask opponent to reset the game';
+        if (isGameOver) {
+            resetSubtitle = 'Game already ended';
+        } else if (noMovesYet) {
+            resetSubtitle = 'No moves have been made yet';
+        }
+
         return (
             <>
-                {/* Undo Request */}
+                {/* Reset Request */}
                 <TouchableOpacity
                     style={[
                         styles.menuItem,
                         {
                             borderBottomColor: colors.BORDER_COLOR,
-                            opacity: canRequestUndo ? 1 : 0.5,
+                            opacity: isResetDisabled ? 0.5 : 1,
                         },
                     ]}
-                    onPress={handleUndoRequest}
-                    disabled={!canRequestUndo}
-                    activeOpacity={0.7}
-                >
-                    <Icon
-                        name='undo'
-                        family='MaterialIcons'
-                        size={28}
-                        color={canRequestUndo ? '#2196f3' : colors.MUTED}
-                    />
-                    <View style={styles.menuItemText}>
-                        <Text style={[styles.menuItemTitle, { color: colors.TEXT }]}>
-                            Request Undo
-                        </Text>
-                        <Text style={[styles.menuItemSubtitle, { color: colors.TEXT_SECONDARY }]}>
-                            {!canRequestUndo && historyLength < 2
-                                ? 'Not enough moves to undo'
-                                : isGameOver
-                                  ? 'Game already ended'
-                                  : 'Ask opponent to undo last move'}
-                        </Text>
-                    </View>
-                </TouchableOpacity>
-
-                {/* Reset Request */}
-                <TouchableOpacity
-                    style={[
-                        styles.menuItem,
-                        { borderBottomColor: colors.BORDER_COLOR, opacity: isGameOver ? 0.5 : 1 },
-                    ]}
                     onPress={handleResetRequest}
-                    disabled={isGameOver}
+                    disabled={isResetDisabled}
                     activeOpacity={0.7}
                 >
                     <Icon
                         name='refresh'
                         family='MaterialIcons'
                         size={28}
-                        color={isGameOver ? colors.MUTED : '#f57c00'}
+                        color={isResetDisabled ? colors.MUTED : '#f57c00'}
                     />
                     <View style={styles.menuItemText}>
                         <Text style={[styles.menuItemTitle, { color: colors.TEXT }]}>
                             Request Reset
                         </Text>
                         <Text style={[styles.menuItemSubtitle, { color: colors.TEXT_SECONDARY }]}>
-                            {isGameOver ? 'Game already ended' : 'Ask opponent to reset the game'}
+                            {resetSubtitle}
                         </Text>
                     </View>
                 </TouchableOpacity>
@@ -270,31 +351,266 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData }) => {
     let opponentAvatar = opponentData?.avatarKey || 'dolphin';
 
     // Format current user's name with discriminator
+    // Use fallback if discriminator hasn't loaded yet
     const userName = formatDisplayName(user?.displayName, user?.discriminator);
 
-    const topPlayer = shouldFlipBoard
-        ? {
-              name: opponentName,
-              avatarKey: opponentAvatar,
-              isComputer: false,
-          }
-        : {
-              name: userName,
-              avatarKey: user?.avatarKey,
-              isComputer: false,
-          };
+    // User should ALWAYS see themselves at bottom, opponent at top
+    // The board flip only affects visual rendering, not player positions
+    const topPlayer = {
+        name: opponentName,
+        avatarKey: opponentAvatar,
+        isComputer: false,
+    };
 
-    const bottomPlayer = shouldFlipBoard
-        ? {
-              name: userName,
-              avatarKey: user?.avatarKey,
-              isComputer: false,
-          }
-        : {
-              name: opponentName,
-              avatarKey: opponentAvatar,
-              isComputer: false,
-          };
+    const bottomPlayer = {
+        name: userName,
+        avatarKey: user?.avatarKey,
+        isComputer: false,
+    };
+
+    // Render game request banner (undo or reset) - placed below bottom player status bar
+    const renderGameRequestBanner = ({ coralClash }) => {
+        // Priority: Show undo request first, then reset request
+        if (undoRequestData) {
+            // Calculate dynamic move count based on current game state using shared logic
+            // Use currentMoveCount from Firestore listener instead of coralClash.history().length
+            // to ensure we have the latest value from the server
+            const dynamicMoveCount = calculateUndoMoveCount(
+                undoRequestData.moveCount,
+                undoRequestData.undoRequestAtMoveNumber,
+                currentMoveCount,
+            );
+
+            if (undoRequestData.isUserTheRequester) {
+                // User sent the undo request - show waiting banner with cancel option
+                return (
+                    <View
+                        style={{
+                            backgroundColor: colors.INPUT,
+                            paddingVertical: 14,
+                            paddingHorizontal: 16,
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                        }}
+                    >
+                        <Text
+                            style={{
+                                color: colors.TEXT,
+                                fontSize: 15,
+                                fontWeight: '600',
+                                flex: 1,
+                                marginRight: 12,
+                            }}
+                        >
+                            Waiting for {opponentData?.displayName || 'opponent'} to respond to undo{' '}
+                            {dynamicMoveCount} move(s) request...
+                        </Text>
+                        <TouchableOpacity
+                            onPress={handleCancelUndoRequest}
+                            style={{
+                                width: 40,
+                                height: 40,
+                                borderRadius: 20,
+                                backgroundColor: colors.ERROR + '15',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                            }}
+                        >
+                            <IconComponent
+                                name='times'
+                                family='font-awesome'
+                                size={18}
+                                color={colors.ERROR}
+                            />
+                        </TouchableOpacity>
+                    </View>
+                );
+            } else {
+                // Opponent sent undo request - show approval banner with icon buttons
+                return (
+                    <View
+                        style={{
+                            backgroundColor: colors.INPUT,
+                            paddingVertical: 14,
+                            paddingHorizontal: 16,
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                        }}
+                    >
+                        <Text
+                            style={{
+                                color: colors.TEXT,
+                                fontSize: 15,
+                                fontWeight: '600',
+                                flex: 1,
+                                marginRight: 12,
+                            }}
+                        >
+                            {opponentData?.displayName || 'Opponent'} wants to undo{' '}
+                            {dynamicMoveCount} move(s)
+                        </Text>
+                        <View style={{ flexDirection: 'row' }}>
+                            <TouchableOpacity
+                                onPress={() => handleUndoResponse(false)}
+                                style={{
+                                    width: 40,
+                                    height: 40,
+                                    borderRadius: 20,
+                                    backgroundColor: colors.ERROR + '15',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                }}
+                            >
+                                <IconComponent
+                                    name='times'
+                                    family='font-awesome'
+                                    size={18}
+                                    color={colors.ERROR}
+                                />
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                onPress={() => handleUndoResponse(true)}
+                                style={{
+                                    width: 40,
+                                    height: 40,
+                                    borderRadius: 20,
+                                    backgroundColor: colors.SUCCESS + '15',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    marginLeft: 10,
+                                }}
+                            >
+                                <IconComponent
+                                    name='check'
+                                    family='font-awesome'
+                                    size={18}
+                                    color={colors.SUCCESS}
+                                />
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                );
+            }
+        }
+
+        if (resetRequestData) {
+            if (resetRequestData.isUserTheRequester) {
+                // User sent the reset request - show waiting banner with cancel option
+                return (
+                    <View
+                        style={{
+                            backgroundColor: colors.INPUT,
+                            paddingVertical: 14,
+                            paddingHorizontal: 16,
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                        }}
+                    >
+                        <Text
+                            style={{
+                                color: colors.TEXT,
+                                fontSize: 15,
+                                fontWeight: '600',
+                                flex: 1,
+                                marginRight: 12,
+                            }}
+                        >
+                            Waiting for {opponentData?.displayName || 'opponent'} to respond to
+                            reset request...
+                        </Text>
+                        <TouchableOpacity
+                            onPress={handleCancelResetRequest}
+                            style={{
+                                width: 40,
+                                height: 40,
+                                borderRadius: 20,
+                                backgroundColor: colors.ERROR + '15',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                            }}
+                        >
+                            <IconComponent
+                                name='times'
+                                family='font-awesome'
+                                size={18}
+                                color={colors.ERROR}
+                            />
+                        </TouchableOpacity>
+                    </View>
+                );
+            } else {
+                // Opponent sent reset request - show approval banner with icon buttons
+                return (
+                    <View
+                        style={{
+                            backgroundColor: colors.INPUT,
+                            paddingVertical: 14,
+                            paddingHorizontal: 16,
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                        }}
+                    >
+                        <Text
+                            style={{
+                                color: colors.TEXT,
+                                fontSize: 15,
+                                fontWeight: '600',
+                                flex: 1,
+                                marginRight: 12,
+                            }}
+                        >
+                            {opponentData?.displayName || 'Opponent'} wants to reset the game
+                        </Text>
+                        <View style={{ flexDirection: 'row' }}>
+                            <TouchableOpacity
+                                onPress={() => handleResetResponse(false)}
+                                style={{
+                                    width: 40,
+                                    height: 40,
+                                    borderRadius: 20,
+                                    backgroundColor: colors.ERROR + '15',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                }}
+                            >
+                                <IconComponent
+                                    name='times'
+                                    family='font-awesome'
+                                    size={18}
+                                    color={colors.ERROR}
+                                />
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                onPress={() => handleResetResponse(true)}
+                                style={{
+                                    width: 40,
+                                    height: 40,
+                                    borderRadius: 20,
+                                    backgroundColor: colors.SUCCESS + '15',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    marginLeft: 10,
+                                }}
+                            >
+                                <IconComponent
+                                    name='check'
+                                    family='font-awesome'
+                                    size={18}
+                                    color={colors.SUCCESS}
+                                />
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                );
+            }
+        }
+
+        return null;
+    };
 
     return (
         <BaseCoralClashBoard
@@ -306,6 +622,7 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData }) => {
             bottomPlayerData={bottomPlayer}
             renderControls={renderControls}
             renderMenuItems={renderMenuItems}
+            renderGameRequestBanner={renderGameRequestBanner}
             onMoveComplete={undefined} // No special move handling for PvP
             enableUndo={false}
             onUndo={undefined}

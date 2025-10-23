@@ -1,5 +1,5 @@
-import React from 'react';
-import { Dimensions, StyleSheet } from 'react-native';
+import React, { useEffect } from 'react';
+import { Dimensions, StyleSheet, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 import { Block } from 'galio-framework';

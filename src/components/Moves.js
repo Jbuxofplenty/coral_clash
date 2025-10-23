@@ -5,8 +5,6 @@ const Moves = ({
     visibleMoves,
     size,
     onSelectMove,
-    showOrientations = false,
-    selectedDestination = null,
     isEnemyMoves = false,
     boardFlipped = false,
     isPlayerTurn = true,
@@ -19,26 +17,37 @@ const Moves = ({
 
     const colors = isEnemyMoves
         ? {
-              fillLight: `rgba(255, 0, 0, ${0.25 * opacityMultiplier})`,
-              fillNormal: `rgba(255, 0, 0, ${0.5 * opacityMultiplier})`,
-              strokeLight: `rgba(200, 0, 0, ${0.4 * opacityMultiplier})`,
-              strokeNormal: `rgba(200, 0, 0, ${0.8 * opacityMultiplier})`,
+              fillLight: `rgba(255, 0, 0, ${0.35 * opacityMultiplier})`,
+              fillNormal: `rgba(255, 0, 0, ${0.7 * opacityMultiplier})`,
+              strokeLight: `rgba(200, 0, 0, ${0.6 * opacityMultiplier})`,
+              strokeNormal: `rgba(200, 0, 0, ${1.0 * opacityMultiplier})`,
           }
         : {
-              fillLight: `rgba(0, 255, 0, ${0.25 * opacityMultiplier})`,
-              fillNormal: `rgba(0, 255, 0, ${0.5 * opacityMultiplier})`,
-              strokeLight: `rgba(0, 200, 0, ${0.4 * opacityMultiplier})`,
-              strokeNormal: `rgba(0, 200, 0, ${0.8 * opacityMultiplier})`,
+              fillLight: `rgba(0, 255, 0, ${0.35 * opacityMultiplier})`,
+              fillNormal: `rgba(0, 255, 0, ${0.7 * opacityMultiplier})`,
+              strokeLight: `rgba(0, 200, 0, ${0.6 * opacityMultiplier})`,
+              strokeNormal: `rgba(0, 200, 0, ${1.0 * opacityMultiplier})`,
           };
 
-    return visibleMoves.map((move, index) => {
+    // Deduplicate moves by destination square to prevent overlapping circles
+    // (e.g., moves with/without coral placement go to the same square)
+    const uniqueMoves = visibleMoves.reduce((acc, move) => {
+        const existingMove = acc.find((m) => m.to === move.to);
+        if (!existingMove) {
+            acc.push(move);
+        }
+        return acc;
+    }, []);
+
+    return uniqueMoves.map((move, index) => {
         const { to, from, isDestinationMarker } = move;
         const [file, rank] = to.split('');
         const fileIndex = file.charCodeAt(0) - 'a'.charCodeAt(0);
         const left = boardFlipped ? (7 - fileIndex) * cellSize : fileIndex * cellSize;
         const bottom = boardFlipped ? (8 - parseInt(rank)) * cellSize : (rank - 1) * cellSize;
 
-        // The destination marker should be lighter, adjacent squares should be normal
+        // For whale moves, isDestinationMarker marks the first square (lighter)
+        // For other pieces, this should always be undefined
         const isDestination = isDestinationMarker === true;
 
         return (

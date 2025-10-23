@@ -10,6 +10,7 @@ import {
     connectFirestoreEmulator,
     doc,
     onSnapshot,
+    getDoc,
     collection,
     query,
     where,
@@ -78,4 +79,4 @@ if (USE_EMULATOR) {
     connectFunctionsEmulator(functions, EMULATOR_HOST, 5001);
 }
 
-export { app, auth, db, functions, doc, onSnapshot, collection, query, where };
+export { app, auth, db, functions, doc, onSnapshot, getDoc, collection, query, where };

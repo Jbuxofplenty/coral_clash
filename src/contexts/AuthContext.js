@@ -9,7 +9,7 @@ import {
     onAuthStateChanged,
     updateProfile,
 } from 'firebase/auth';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
+import { doc, setDoc, getDoc, onSnapshot } from 'firebase/firestore';
 import * as WebBrowser from 'expo-web-browser';
 import * as Google from 'expo-auth-session/providers/google';
 import Constants from 'expo-constants';
@@ -46,33 +46,55 @@ export const AuthProvider = ({ children }) => {
     });
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+        let userDataUnsubscribe = null;
+
+        const authUnsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
             if (firebaseUser) {
-                // Get additional user data from Firestore
-                const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
-                const userData = userDoc.exists() ? userDoc.data() : {};
+                // Set up real-time listener for user data and settings
+                // This will automatically update when discriminator is added
+                userDataUnsubscribe = onSnapshot(
+                    doc(db, 'users', firebaseUser.uid),
+                    async (userDoc) => {
+                        const userData = userDoc.exists() ? userDoc.data() : {};
 
-                // Also get user settings from subcollection
-                const settingsDoc = await getDoc(
-                    doc(db, 'users', firebaseUser.uid, 'settings', 'preferences'),
+                        // Also get user settings from subcollection
+                        const settingsDoc = await getDoc(
+                            doc(db, 'users', firebaseUser.uid, 'settings', 'preferences'),
+                        );
+                        const settings = settingsDoc.exists() ? settingsDoc.data() : null;
+
+                        setUser({
+                            uid: firebaseUser.uid,
+                            email: firebaseUser.email,
+                            displayName: firebaseUser.displayName,
+                            photoURL: firebaseUser.photoURL,
+                            ...userData,
+                            settings, // Add settings to user object
+                        });
+                        setLoading(false);
+                    },
+                    (error) => {
+                        console.error('Error listening to user data:', error);
+                        setLoading(false);
+                    },
                 );
-                const settings = settingsDoc.exists() ? settingsDoc.data() : null;
-
-                setUser({
-                    uid: firebaseUser.uid,
-                    email: firebaseUser.email,
-                    displayName: firebaseUser.displayName,
-                    photoURL: firebaseUser.photoURL,
-                    ...userData,
-                    settings, // Add settings to user object
-                });
             } else {
                 setUser(null);
+                setLoading(false);
+                // Clean up user data listener if it exists
+                if (userDataUnsubscribe) {
+                    userDataUnsubscribe();
+                    userDataUnsubscribe = null;
+                }
             }
-            setLoading(false);
         });
 
-        return unsubscribe;
+        return () => {
+            authUnsubscribe();
+            if (userDataUnsubscribe) {
+                userDataUnsubscribe();
+            }
+        };
     }, []);
 
     // Handle Google Sign-In response

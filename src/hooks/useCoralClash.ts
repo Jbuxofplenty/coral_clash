@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Dimensions, Platform } from 'react-native';
 import { CoralClash, CoralClashInstance } from '../../shared';
 
 const useCoralClash = (): CoralClashInstance => {

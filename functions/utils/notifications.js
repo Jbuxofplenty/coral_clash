@@ -227,6 +227,84 @@ async function sendOpponentMoveNotification(userId, gameId, opponentId, opponent
     });
 }
 
+/**
+ * Send undo request notification
+ * @param {string} recipientId - User receiving the notification
+ * @param {string} senderId - User requesting the undo
+ * @param {string} senderName - Name of the requester
+ * @param {string} gameId - Game ID
+ * @param {number} moveCount - Number of moves to undo
+ */
+async function sendUndoRequestNotification(recipientId, senderId, senderName, gameId, moveCount) {
+    return sendPushNotification(recipientId, {
+        title: 'Undo Request',
+        body: `${senderName} wants to undo ${moveCount} move(s)`,
+        data: {
+            type: 'undo_requested',
+            from: senderId,
+            fromName: senderName,
+            gameId: gameId,
+            moveCount: moveCount.toString(),
+        },
+    });
+}
+
+/**
+ * Send undo approved notification
+ * @param {string} recipientId - User receiving the notification
+ * @param {string} approverId - User who approved the undo
+ * @param {string} approverName - Name of the approver
+ * @param {string} gameId - Game ID
+ * @param {number} moveCount - Number of moves undone
+ */
+async function sendUndoApprovedNotification(
+    recipientId,
+    approverId,
+    approverName,
+    gameId,
+    moveCount,
+) {
+    return sendPushNotification(recipientId, {
+        title: 'Undo Approved',
+        body: `${approverName} approved your undo request`,
+        data: {
+            type: 'undo_approved',
+            from: approverId,
+            fromName: approverName,
+            gameId: gameId,
+            moveCount: moveCount.toString(),
+        },
+    });
+}
+
+/**
+ * Send undo rejected notification
+ * @param {string} recipientId - User receiving the notification
+ * @param {string} rejecterId - User who rejected the undo
+ * @param {string} rejecterName - Name of the rejecter
+ * @param {string} gameId - Game ID
+ * @param {number} moveCount - Number of moves requested to undo
+ */
+async function sendUndoRejectedNotification(
+    recipientId,
+    rejecterId,
+    rejecterName,
+    gameId,
+    moveCount,
+) {
+    return sendPushNotification(recipientId, {
+        title: 'Undo Rejected',
+        body: `${rejecterName} declined your undo request`,
+        data: {
+            type: 'undo_rejected',
+            from: rejecterId,
+            fromName: rejecterName,
+            gameId: gameId,
+            moveCount: moveCount.toString(),
+        },
+    });
+}
+
 module.exports = {
     sendPushNotification,
     sendFriendRequestNotification,
@@ -234,4 +312,7 @@ module.exports = {
     sendGameRequestNotification,
     sendGameAcceptedNotification,
     sendOpponentMoveNotification,
+    sendUndoRequestNotification,
+    sendUndoApprovedNotification,
+    sendUndoRejectedNotification,
 };

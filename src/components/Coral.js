@@ -1,17 +1,22 @@
+import { useMemo } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { SQUARES } from '../../shared';
 
-const Coral = ({ coralClash, size, boardFlipped = false }) => {
+const Coral = ({ coralClash, size, boardFlipped = false, userColor = null, updateTrigger = 0 }) => {
     const cellSize = size / 8;
 
-    // Get all squares with coral
-    const coralSquares = [];
-    SQUARES.forEach((square) => {
-        const coralColor = coralClash.getCoral(square);
-        if (coralColor) {
-            coralSquares.push({ square, color: coralColor });
-        }
-    });
+    // Get all squares with coral - memoized and re-computed when updateTrigger changes
+    const coralSquares = useMemo(() => {
+        const squares = [];
+        SQUARES.forEach((square) => {
+            const coralColor = coralClash.getCoral(square);
+            if (coralColor) {
+                squares.push({ square, color: coralColor });
+            }
+        });
+
+        return squares;
+    }, [coralClash, updateTrigger]); // Re-compute when updateTrigger changes
 
     return (
         <>
@@ -23,8 +28,20 @@ const Coral = ({ coralClash, size, boardFlipped = false }) => {
                     ? (8 - parseInt(rank)) * cellSize
                     : (rank - 1) * cellSize;
 
-                // Use different colors/styles for white vs black coral
-                const coralStyle = color === 'w' ? styles.coralWhite : styles.coralBlack;
+                // Use different colors/styles based on whether coral belongs to user or opponent
+                // For PvP games (userColor is provided), user's coral is pink, opponent's is black
+                // For offline games (no userColor), default to white=pink, black=black
+                let coralStyle;
+                if (userColor) {
+                    // PvP game: user's coral is pink, opponent's is black
+                    coralStyle = color === userColor ? styles.coralUser : styles.coralOpponent;
+                } else {
+                    // Offline game: keep original behavior (white=pink, black=black)
+                    coralStyle = color === 'w' ? styles.coralWhite : styles.coralBlack;
+                }
+
+                // Add small inset so adjacent borders don't stack/appear thicker
+                const inset = cellSize * 0.04;
 
                 return (
                     <View
@@ -33,10 +50,10 @@ const Coral = ({ coralClash, size, boardFlipped = false }) => {
                             styles.coralBorder,
                             coralStyle,
                             {
-                                width: cellSize,
-                                height: cellSize,
-                                left: left,
-                                bottom: bottom,
+                                width: cellSize - inset * 2,
+                                height: cellSize - inset * 2,
+                                left: left + inset,
+                                bottom: bottom + inset,
                                 borderWidth: cellSize * 0.08,
                                 borderRadius: cellSize * 0.15,
                             },
@@ -52,21 +69,18 @@ const styles = StyleSheet.create({
     coralBorder: {
         position: 'absolute',
         backgroundColor: 'transparent',
-        // Coral-like irregular border effect
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.2,
-        shadowRadius: 2,
-        elevation: 2,
     },
     coralWhite: {
-        borderColor: '#FF6B9D', // Coral pink for white player
-        // Add a subtle inner glow effect
-        shadowColor: '#FF6B9D',
+        borderColor: '#FF1493', // Deep pink - fully opaque, consistent on all squares
     },
     coralBlack: {
-        borderColor: '#2C3E50', // Dark grey/charcoal for black player
-        shadowColor: '#2C3E50',
+        borderColor: '#1a1a1a', // Solid black - fully opaque, consistent on all squares
+    },
+    coralUser: {
+        borderColor: '#FF1493', // Deep pink - user's coral
+    },
+    coralOpponent: {
+        borderColor: '#1a1a1a', // Solid black - opponent's coral
     },
 });
 

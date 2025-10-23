@@ -123,6 +123,10 @@ const ComputerCoralClashBoard = ({ fixture, gameId, gameState }) => {
 
     // Computer-specific: Render menu items
     const renderMenuItems = ({ closeMenu, coralClash, colors, styles }) => {
+        const isGameOver = coralClash.isGameOver();
+        const moveHistory = coralClash.history();
+        const noMovesYet = moveHistory.length === 0;
+
         const handleReset = async () => {
             closeMenu();
 
@@ -169,28 +173,34 @@ const ComputerCoralClashBoard = ({ fixture, gameId, gameState }) => {
             }
         };
 
-        const isGameOver = coralClash.isGameOver();
+        const isResetDisabled = isGameOver || noMovesYet;
+        let resetSubtitle = 'Start a new game from the beginning';
+        if (isGameOver) {
+            resetSubtitle = 'Game already ended';
+        } else if (noMovesYet) {
+            resetSubtitle = 'No moves have been made yet';
+        }
 
         return (
             <TouchableOpacity
                 style={[
                     styles.menuItem,
-                    { borderBottomColor: colors.BORDER_COLOR, opacity: isGameOver ? 0.5 : 1 },
+                    { borderBottomColor: colors.BORDER_COLOR, opacity: isResetDisabled ? 0.5 : 1 },
                 ]}
                 onPress={handleReset}
-                disabled={isGameOver}
+                disabled={isResetDisabled}
                 activeOpacity={0.7}
             >
                 <Icon
                     name='refresh'
                     family='MaterialIcons'
                     size={28}
-                    color={isGameOver ? colors.MUTED : '#f57c00'}
+                    color={isResetDisabled ? colors.MUTED : '#f57c00'}
                 />
                 <View style={styles.menuItemText}>
                     <Text style={[styles.menuItemTitle, { color: colors.TEXT }]}>Reset Game</Text>
                     <Text style={[styles.menuItemSubtitle, { color: colors.TEXT_SECONDARY }]}>
-                        {isGameOver ? 'Game already ended' : 'Start a new game from the beginning'}
+                        {resetSubtitle}
                     </Text>
                 </View>
             </TouchableOpacity>

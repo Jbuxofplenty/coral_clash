@@ -247,11 +247,13 @@ export function createGameSnapshot(coralClash: any) {
     // This is essential for undo functionality
     const pgn = coralClash.pgn();
 
-    return {
+    const coral = coralClash.getAllCoral();
+
+    const snapshot = {
         fen: coralClash.fen(),
         turn: coralClash.turn(),
         whalePositions: coralClash.whalePositions(),
-        coral: coralClash.getAllCoral(),
+        coral: coral,
         coralRemaining: coralClash.getCoralRemainingCounts(),
         pieceRoles: pieceRoles, // Save hunter/gatherer status for each piece
         pgn: pgn, // Save PGN for move history and undo functionality
@@ -262,6 +264,8 @@ export function createGameSnapshot(coralClash: any) {
         isDraw: coralClash.isDraw(),
         resigned: coralClash.isResigned(), // Include resignation status (Color | null)
     };
+
+    return snapshot;
 }
 
 /**
@@ -359,11 +363,13 @@ export function restoreGameFromSnapshot(coralClash: any, snapshot: any): void {
     }
 
     // Restore coral state
+    // IMPORTANT: PGN doesn't encode coral choices (e.g., whether a gatherer placed coral)
+    // So we ALWAYS need to restore coral from the snapshot to get the exact coral state
     if (snapshot.coral) {
-        // Clear existing coral
+        // Clear existing coral (PGN replay might have placed coral incorrectly)
         coralClash._coral = new Array(128).fill(null);
 
-        // Restore coral placements
+        // Restore coral placements from snapshot (source of truth)
         snapshot.coral.forEach(({ square, color }: { square: any; color: any }) => {
             coralClash.placeCoral(square, color);
         });

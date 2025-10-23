@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Block, Text, theme } from 'galio-framework';
 import { View, StyleSheet, TouchableOpacity, ActivityIndicator, Dimensions } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
-import { useGame } from '../hooks/useGame';
 import { useAuth } from '../contexts/AuthContext';
 import Icon from './Icon';
 import Avatar from './Avatar';
@@ -12,12 +11,17 @@ const { width } = Dimensions.get('screen');
 /**
  * Card component that displays active games (PvP and Computer) on the home screen
  * Shows game status, opponent avatar, and whose turn it is
- * Note: Data loading is handled by the parent screen
+ * Note: Data is passed down as props from the parent screen to avoid duplicate useGame() calls
  */
-export default function ActiveGamesCard({ navigation }) {
+export default function ActiveGamesCard({
+    navigation,
+    activeGames,
+    loading,
+    acceptGameInvite,
+    declineGameInvite,
+}) {
     const { colors } = useTheme();
     const { user } = useAuth();
-    const { activeGames, loading, acceptGameInvite, declineGameInvite } = useGame();
     const [acceptingGameId, setAcceptingGameId] = useState(null);
     const [decliningGameId, setDecliningGameId] = useState(null);
 
@@ -42,19 +46,8 @@ export default function ActiveGamesCard({ navigation }) {
         try {
             setAcceptingGameId(gameId);
             await acceptGameInvite(gameId);
-            // Navigate to the game after accepting
-            const game = activeGames.find((g) => g.id === gameId);
-            if (game) {
-                navigation.navigate('Game', {
-                    gameId: game.id,
-                    gameState: game.gameState,
-                    opponentType: game.opponentType,
-                    opponentData: {
-                        displayName: game.opponentDisplayName,
-                        avatarKey: game.opponentAvatarKey,
-                    },
-                });
-            }
+            // Don't navigate immediately - the onGameAccepted callback in useGame
+            // will handle navigation once Firestore updates the game status to 'active'
         } catch (error) {
             console.error('Error accepting game:', error);
         } finally {

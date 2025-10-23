@@ -1,20 +1,26 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { Alert } from 'react-native';
 import { useFirebaseFunctions } from './useFirebaseFunctions';
 import { useAuth } from '../contexts/AuthContext';
-import { db, collection, query, where, onSnapshot } from '../config/firebase';
+import { db, collection, query, where, onSnapshot, doc, getDoc } from '../config/firebase';
 
 /**
  * Custom hook for managing game operations (PvP and Computer)
  * Provides high-level game management with state and error handling
  * Automatically listens to Firestore for real-time updates
+ *
+ * @param {Object} options - Configuration options
+ * @param {Function} options.onGameAccepted - Callback when a game request is accepted (receives gameId, gameData)
+ * @param {Function} options.onGameInvite - Callback when a new game invite is received (receives gameId, gameData)
  */
-export const useGame = () => {
+export const useGame = (options = {}) => {
+    const { onGameAccepted, onGameInvite } = options;
     const { user } = useAuth();
     const { createGame, createComputerGame, respondToGameInvite, getActiveGames } =
         useFirebaseFunctions();
     const [loading, setLoading] = useState(true);
     const [activeGames, setActiveGames] = useState([]);
+    const previousGamesRef = useRef([]); // Use ref to avoid triggering re-renders
 
     // Set up real-time Firestore listeners for active games
     useEffect(() => {
@@ -24,7 +30,7 @@ export const useGame = () => {
             return;
         }
 
-        // Track initial snapshots to skip them (they fire immediately)
+        // Track initial snapshots to only call Firebase Function on mount
         let creatorInitialSnapshot = true;
         let opponentInitialSnapshot = true;
 
@@ -44,12 +50,15 @@ export const useGame = () => {
 
         const activeCreatorUnsubscribe = onSnapshot(
             activeCreatorQuery,
-            async () => {
+            async (snapshot) => {
                 if (creatorInitialSnapshot) {
                     creatorInitialSnapshot = false;
+                    // Only call Firebase Function on initial mount
                     try {
                         const result = await getActiveGames();
-                        setActiveGames(result.games || []);
+                        const games = result.games || [];
+                        setActiveGames(games);
+                        previousGamesRef.current = games;
                         setLoading(false);
                     } catch (error) {
                         console.error('[useGame] Error in initial load:', error);
@@ -57,11 +66,88 @@ export const useGame = () => {
                     }
                     return;
                 }
-                try {
-                    const result = await getActiveGames();
-                    setActiveGames(result.games || []);
-                } catch (error) {
-                    console.error('[useGame] Error fetching active games:', error);
+
+                // Process snapshot changes locally without calling Firebase Function
+                const updatedGames = [...previousGamesRef.current];
+                let hasChanges = false;
+
+                // Use for...of to handle async operations
+                for (const change of snapshot.docChanges()) {
+                    const gameData = { id: change.doc.id, ...change.doc.data() };
+                    const existingIndex = updatedGames.findIndex((g) => g.id === gameData.id);
+
+                    if (change.type === 'added') {
+                        // New game added (shouldn't happen often for creator query after initial load)
+                        if (existingIndex === -1) {
+                            // Fetch opponent data if it's a PvP game
+                            if (gameData.opponentId && gameData.opponentId !== 'computer') {
+                                const opponentDoc = await getDoc(
+                                    doc(db, 'users', gameData.opponentId),
+                                );
+                                const opponentUserData = opponentDoc.exists()
+                                    ? opponentDoc.data()
+                                    : {};
+
+                                const opponentDisplayName = opponentUserData.displayName
+                                    ? `${opponentUserData.displayName}${opponentUserData.discriminator ? ` #${opponentUserData.discriminator}` : ''}`
+                                    : 'Opponent';
+
+                                updatedGames.push({
+                                    ...gameData,
+                                    opponentDisplayName,
+                                    opponentAvatarKey:
+                                        opponentUserData.settings?.avatarKey || 'dolphin',
+                                    opponentType: 'pvp',
+                                });
+                            } else {
+                                // Computer game or missing opponent
+                                updatedGames.push({
+                                    ...gameData,
+                                    opponentDisplayName:
+                                        gameData.opponentId === 'computer'
+                                            ? 'Computer'
+                                            : 'Opponent',
+                                    opponentAvatarKey:
+                                        gameData.opponentId === 'computer' ? 'computer' : 'dolphin',
+                                    opponentType:
+                                        gameData.opponentId === 'computer' ? 'computer' : 'pvp',
+                                });
+                            }
+                            hasChanges = true;
+                        }
+                    } else if (change.type === 'modified') {
+                        if (existingIndex !== -1) {
+                            const previousGame = updatedGames[existingIndex];
+
+                            // Update game data while preserving opponent info from initial load
+                            updatedGames[existingIndex] = {
+                                ...gameData,
+                                opponentDisplayName: previousGame.opponentDisplayName || 'Opponent',
+                                opponentAvatarKey: previousGame.opponentAvatarKey || 'dolphin',
+                                opponentType: previousGame.opponentType,
+                            };
+                            hasChanges = true;
+
+                            // Check if a pending game was accepted (pending -> active)
+                            if (previousGame.status === 'pending' && gameData.status === 'active') {
+                                // Your game request was accepted!
+                                if (onGameAccepted) {
+                                    onGameAccepted(gameData.id, updatedGames[existingIndex]);
+                                }
+                            }
+                        }
+                    } else if (change.type === 'removed') {
+                        // Game removed (status changed from active/pending)
+                        if (existingIndex !== -1) {
+                            updatedGames.splice(existingIndex, 1);
+                            hasChanges = true;
+                        }
+                    }
+                }
+
+                if (hasChanges) {
+                    setActiveGames(updatedGames);
+                    previousGamesRef.current = updatedGames;
                 }
             },
             (error) => {
@@ -72,16 +158,90 @@ export const useGame = () => {
 
         const activeOpponentUnsubscribe = onSnapshot(
             activeOpponentQuery,
-            async () => {
+            async (snapshot) => {
                 if (opponentInitialSnapshot) {
                     opponentInitialSnapshot = false;
-                    return;
+                    return; // Skip initial snapshot for opponent query (already loaded from creator query)
                 }
-                try {
-                    const result = await getActiveGames();
-                    setActiveGames(result.games || []);
-                } catch (error) {
-                    console.error('[useGame] Error fetching active games:', error);
+
+                // Process snapshot changes locally without calling Firebase Function
+                const updatedGames = [...previousGamesRef.current];
+                let hasChanges = false;
+                const changesWithAcceptedGame = [];
+
+                // Use for...of to handle async operations
+                for (const change of snapshot.docChanges()) {
+                    const gameData = { id: change.doc.id, ...change.doc.data() };
+                    const existingIndex = updatedGames.findIndex((g) => g.id === gameData.id);
+
+                    if (change.type === 'added') {
+                        // New game invite received!
+                        if (gameData.opponentId === user.uid) {
+                            // For new invites, we need opponent data (the creator in this case)
+                            // Fetch opponent (creator) data from Firestore
+                            const opponentUserId = gameData.creatorId;
+                            const opponentDoc = await getDoc(doc(db, 'users', opponentUserId));
+                            const opponentUserData = opponentDoc.exists() ? opponentDoc.data() : {};
+
+                            const opponentDisplayName = opponentUserData.displayName
+                                ? `${opponentUserData.displayName}${opponentUserData.discriminator ? ` #${opponentUserData.discriminator}` : ''}`
+                                : 'Opponent';
+
+                            const newGame = {
+                                ...gameData,
+                                opponentDisplayName,
+                                opponentAvatarKey:
+                                    opponentUserData.settings?.avatarKey || 'dolphin',
+                                opponentType: 'pvp',
+                            };
+
+                            updatedGames.push(newGame);
+                            hasChanges = true;
+
+                            if (gameData.status === 'pending' && onGameInvite) {
+                                onGameInvite(gameData.id, newGame);
+                            }
+                        }
+                    } else if (change.type === 'modified') {
+                        if (existingIndex !== -1) {
+                            const previousGame = updatedGames[existingIndex];
+
+                            // Update game data while preserving opponent info
+                            updatedGames[existingIndex] = {
+                                ...gameData,
+                                opponentDisplayName: previousGame.opponentDisplayName || 'Opponent',
+                                opponentAvatarKey: previousGame.opponentAvatarKey || 'dolphin',
+                                opponentType: previousGame.opponentType,
+                            };
+                            hasChanges = true;
+
+                            // Check if you accepted a game (pending -> active)
+                            if (previousGame.status === 'pending' && gameData.status === 'active') {
+                                changesWithAcceptedGame.push({
+                                    gameId: gameData.id,
+                                    gameData: updatedGames[existingIndex],
+                                });
+                            }
+                        }
+                    } else if (change.type === 'removed') {
+                        // Game removed (status changed from active/pending)
+                        if (existingIndex !== -1) {
+                            updatedGames.splice(existingIndex, 1);
+                            hasChanges = true;
+                        }
+                    }
+                }
+
+                if (hasChanges) {
+                    setActiveGames(updatedGames);
+                    previousGamesRef.current = updatedGames;
+
+                    // Call onGameAccepted for games that were just accepted
+                    if (onGameAccepted && changesWithAcceptedGame.length > 0) {
+                        changesWithAcceptedGame.forEach(({ gameId, gameData }) => {
+                            onGameAccepted(gameId, gameData);
+                        });
+                    }
                 }
             },
             (error) => {
@@ -96,7 +256,7 @@ export const useGame = () => {
             activeOpponentUnsubscribe();
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [user]); // Only depend on user, not getActiveGames (it changes every render)
+    }, [user, onGameAccepted, onGameInvite]); // Include callbacks to ensure latest are used
 
     /**
      * Send a game request to a friend

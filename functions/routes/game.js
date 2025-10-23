@@ -91,12 +91,19 @@ exports.createGame = functions.https.onCall(async (data, context) => {
             );
         }
 
+        // Randomly assign white/black to players
+        const randomizeColors = Math.random() < 0.5;
+        const whitePlayerId = randomizeColors ? creatorId : opponentId;
+        const blackPlayerId = randomizeColors ? opponentId : creatorId;
+
         // Create game document
         const gameData = {
             creatorId,
             opponentId,
+            whitePlayerId, // Randomly assigned
+            blackPlayerId, // Randomly assigned
             status: 'pending', // pending, active, completed, cancelled
-            currentTurn: creatorId,
+            currentTurn: whitePlayerId, // White always starts
             timeControl: timeControl || { type: 'unlimited' },
             moves: [],
             gameState: initializeGameState(),
@@ -246,7 +253,7 @@ exports.respondToGameInvite = functions.https.onCall(async (data, context) => {
                 updatedAt: serverTimestamp(),
             });
 
-        // If accepted, notify the creator
+        // If accepted, notify the creator and cancel other pending games
         if (accept) {
             const accepterDoc = await db.collection('users').doc(userId).get();
             const accepterData = accepterDoc.data();
@@ -254,6 +261,44 @@ exports.respondToGameInvite = functions.https.onCall(async (data, context) => {
                 accepterData.displayName,
                 accepterData.discriminator,
             );
+
+            // Cancel all other pending games involving the accepter
+            // This prevents multiple simultaneous games with the same player
+            const pendingGamesQuery1 = await db
+                .collection('games')
+                .where('creatorId', '==', userId)
+                .where('status', '==', 'pending')
+                .get();
+
+            const pendingGamesQuery2 = await db
+                .collection('games')
+                .where('opponentId', '==', userId)
+                .where('status', '==', 'pending')
+                .get();
+
+            const batch = db.batch();
+
+            // Cancel all pending games (except the one being accepted)
+            [...pendingGamesQuery1.docs, ...pendingGamesQuery2.docs].forEach((doc) => {
+                if (doc.id !== gameId) {
+                    batch.update(doc.ref, {
+                        status: 'cancelled',
+                        updatedAt: serverTimestamp(),
+                    });
+                }
+            });
+
+            await batch.commit();
+
+            // Send in-app notification to game creator
+            await db.collection('notifications').add({
+                userId: gameData.creatorId,
+                type: 'game_accepted',
+                gameId: gameId,
+                from: userId,
+                read: false,
+                createdAt: serverTimestamp(),
+            });
 
             // Send push notification to game creator
             sendGameAcceptedNotification(gameData.creatorId, userId, accepterName, gameId).catch(
@@ -318,9 +363,16 @@ exports.makeMove = functions.https.onCall(async (data, context) => {
         // CRITICAL: Validate move using game engine to prevent cheating
         // Pass full game state (includes coral data) not just FEN
         const currentGameState = gameData.gameState || { fen: gameData.fen };
+
         const validation = validateMove(currentGameState, move);
 
         if (!validation.valid) {
+            console.error('[makeMove] Invalid move:', {
+                error: validation.error,
+                move,
+                fen: currentGameState.fen,
+                turn: currentGameState.turn,
+            });
             throw new functions.https.HttpsError(
                 'invalid-argument',
                 `Invalid move: ${validation.error}`,
@@ -571,13 +623,20 @@ async function makeComputerMoveHelper(gameId, gameData = null) {
         from: selectedMove.from,
         to: selectedMove.to,
         promotion: selectedMove.promotion,
+        coralPlaced: selectedMove.coralPlaced,
+        coralRemoved: selectedMove.coralRemoved,
+        coralRemovedSquares: selectedMove.coralRemovedSquares,
     });
 
     // Validate the move (pass full game state for proper validation)
+    // IMPORTANT: Pass the coral flags so validation uses the SAME move variant
     const validation = validateMove(currentGameState, {
         from: selectedMove.from,
         to: selectedMove.to,
         promotion: selectedMove.promotion,
+        coralPlaced: selectedMove.coralPlaced,
+        coralRemoved: selectedMove.coralRemoved,
+        coralRemovedSquares: selectedMove.coralRemovedSquares,
     });
 
     if (!validation.valid) {
@@ -711,6 +770,16 @@ exports.resignGame = functions.https.onCall(async (data, context) => {
         // Determine winner (opponent wins when user resigns)
         const winner = gameData.creatorId === userId ? gameData.opponentId : gameData.creatorId;
 
+        // Determine which color resigned
+        const resignedColor = gameData.whitePlayerId === userId ? 'w' : 'b';
+
+        // Update the game state with resignation
+        const currentGameState = gameData.gameState || { fen: gameData.fen };
+        const updatedGameState = {
+            ...currentGameState,
+            resigned: resignedColor,
+        };
+
         // Update game status
         await db
             .collection('games')
@@ -720,6 +789,7 @@ exports.resignGame = functions.https.onCall(async (data, context) => {
                 result: winner === gameData.creatorId ? 'creator_wins' : 'opponent_wins',
                 resultReason: 'resignation',
                 winner: winner,
+                gameState: updatedGameState,
                 updatedAt: serverTimestamp(),
             });
 
@@ -742,6 +812,26 @@ exports.resignGame = functions.https.onCall(async (data, context) => {
                     'stats.gamesPlayed': increment(1),
                     'stats.gamesLost': increment(1),
                 });
+
+            // Send notification to opponent that they won
+            const resignerDoc = await db.collection('users').doc(userId).get();
+            const resignerData = resignerDoc.data();
+            const resignerName = formatDisplayName(
+                resignerData.displayName,
+                resignerData.discriminator,
+            );
+
+            await db.collection('notifications').add({
+                userId: winner,
+                type: 'game_result',
+                gameId: gameId,
+                from: userId,
+                result: 'win',
+                reason: 'resignation',
+                opponentName: resignerName,
+                read: false,
+                createdAt: serverTimestamp(),
+            });
         } else {
             // Computer game - only update user stats
             await db
@@ -794,6 +884,14 @@ exports.requestGameReset = functions.https.onCall(async (data, context) => {
         // Check if game is already over
         if (gameData.status === 'completed' || gameData.status === 'cancelled') {
             throw new functions.https.HttpsError('failed-precondition', 'Game is already finished');
+        }
+
+        // Check if any moves have been made
+        if (!gameData.moves || gameData.moves.length === 0) {
+            throw new functions.https.HttpsError(
+                'failed-precondition',
+                'Cannot reset game - no moves have been made yet',
+            );
         }
 
         // Check if there's already a pending reset request
@@ -1088,7 +1186,7 @@ exports.getActiveGames = functions.https.onCall(async (data, context) => {
 
         const games = [];
 
-        // Process creator games
+        // Process creator games (user is the creator)
         for (const doc of creatorGames.docs) {
             const gameData = doc.data();
 
@@ -1099,39 +1197,46 @@ exports.getActiveGames = functions.https.onCall(async (data, context) => {
                     ...gameData,
                     opponentDisplayName: 'Computer',
                     opponentAvatarKey: 'computer',
+                    opponentType: 'computer',
                 });
             } else {
-                // Get opponent info for human player
+                // User is creator, so opponent is the opponentId
                 const opponentDoc = await db.collection('users').doc(gameData.opponentId).get();
                 const opponentData = opponentDoc.exists ? opponentDoc.data() : {};
+
+                const opponentDisplayName = formatDisplayName(
+                    opponentData.displayName,
+                    opponentData.discriminator,
+                );
 
                 games.push({
                     id: doc.id,
                     ...gameData,
-                    opponentDisplayName: formatDisplayName(
-                        opponentData.displayName,
-                        opponentData.discriminator,
-                    ),
+                    opponentDisplayName,
                     opponentAvatarKey: opponentData.settings?.avatarKey || 'dolphin',
+                    opponentType: 'pvp',
                 });
             }
         }
 
-        // Process opponent games (computer games won't be here since opponentId is 'computer')
+        // Process opponent games (user is the opponent, so creator is their opponent)
         for (const doc of opponentGames.docs) {
             const gameData = doc.data();
-            // Get creator info (they are the opponent from user's perspective)
+            // User is opponent, so the creator is their opponent
             const creatorDoc = await db.collection('users').doc(gameData.creatorId).get();
             const creatorData = creatorDoc.exists ? creatorDoc.data() : {};
+
+            const opponentDisplayName = formatDisplayName(
+                creatorData.displayName,
+                creatorData.discriminator,
+            );
 
             games.push({
                 id: doc.id,
                 ...gameData,
-                opponentDisplayName: formatDisplayName(
-                    creatorData.displayName,
-                    creatorData.discriminator,
-                ),
+                opponentDisplayName,
                 opponentAvatarKey: creatorData.settings?.avatarKey || 'dolphin',
+                opponentType: 'pvp',
             });
         }
 
@@ -1227,29 +1332,25 @@ exports.requestUndo = functions.https.onCall(async (data, context) => {
         const opponentId = gameData.creatorId === userId ? gameData.opponentId : gameData.creatorId;
 
         // Set undo request status
+        // Store the move number at which the undo was requested so we can dynamically
+        // calculate how many moves to undo if more moves are made while request is pending
         await db.collection('games').doc(gameId).update({
             undoRequestedBy: userId,
             undoRequestMoveCount: moveCount,
+            undoRequestAtMoveNumber: moveHistory.length,
             undoRequestStatus: 'pending',
             updatedAt: serverTimestamp(),
         });
 
         // Send notification to opponent
-        const { sendNotification } = require('../utils/notifications');
+        const { sendUndoRequestNotification } = require('../utils/notifications');
         const userDoc = await db.collection('users').doc(userId).get();
         const userData = userDoc.exists ? userDoc.data() : {};
+        const userName = formatDisplayName(userData.displayName, userData.discriminator);
 
-        await sendNotification({
-            recipientId: opponentId,
-            senderId: userId,
-            senderDisplayName: formatDisplayName(userData.displayName, userData.discriminator),
-            senderAvatarKey: userData.settings?.avatarKey || 'dolphin',
-            type: 'undo_requested',
-            data: {
-                gameId,
-                moveCount,
-            },
-        });
+        await sendUndoRequestNotification(opponentId, userId, userName, gameId, moveCount).catch(
+            (error) => console.error('Error sending undo request notification:', error),
+        );
 
         return {
             success: true,
@@ -1287,11 +1388,12 @@ exports.respondToUndoRequest = functions.https.onCall(async (data, context) => {
             throw new functions.https.HttpsError('failed-precondition', 'No pending undo request');
         }
 
-        // Verify user is the opponent (not the requester)
-        if (gameData.undoRequestedBy === userId) {
+        // Verify user is the opponent (not the requester), unless they're canceling
+        // Allow requester to reject (cancel) their own request, but not approve it
+        if (gameData.undoRequestedBy === userId && approve) {
             throw new functions.https.HttpsError(
                 'permission-denied',
-                'Cannot respond to your own undo request',
+                'Cannot approve your own undo request',
             );
         }
 
@@ -1301,7 +1403,8 @@ exports.respondToUndoRequest = functions.https.onCall(async (data, context) => {
         }
 
         const requesterId = gameData.undoRequestedBy;
-        const moveCount = gameData.undoRequestMoveCount || 2;
+        const originalMoveCount = gameData.undoRequestMoveCount || 1;
+        const undoRequestAtMoveNumber = gameData.undoRequestAtMoveNumber;
 
         if (approve) {
             // Undo approved - perform the undo
@@ -1309,11 +1412,24 @@ exports.respondToUndoRequest = functions.https.onCall(async (data, context) => {
                 CoralClash,
                 restoreGameFromSnapshot,
                 createGameSnapshot,
+                calculateUndoMoveCount,
             } = require('../../shared/dist/game');
             const coralClash = new CoralClash();
             restoreGameFromSnapshot(coralClash, gameData.gameState);
 
-            // Undo the specified number of moves
+            // Calculate dynamic move count using shared logic
+            // This handles cases where moves were made after the undo request was sent
+            const currentHistoryLength = coralClash.history().length;
+            let moveCount = calculateUndoMoveCount(
+                originalMoveCount,
+                undoRequestAtMoveNumber,
+                currentHistoryLength,
+            );
+
+            // Ensure we don't try to undo more moves than exist
+            moveCount = Math.min(moveCount, currentHistoryLength);
+
+            // Undo the calculated number of moves
             for (let i = 0; i < moveCount; i++) {
                 coralClash.undo();
             }
@@ -1326,26 +1442,24 @@ exports.respondToUndoRequest = functions.https.onCall(async (data, context) => {
                 gameState: newGameState,
                 undoRequestedBy: null,
                 undoRequestMoveCount: null,
+                undoRequestAtMoveNumber: null,
                 undoRequestStatus: null,
                 updatedAt: serverTimestamp(),
             });
 
             // Send notification to requester
-            const { sendNotification } = require('../utils/notifications');
+            const { sendUndoApprovedNotification } = require('../utils/notifications');
             const userDoc = await db.collection('users').doc(userId).get();
             const userData = userDoc.exists ? userDoc.data() : {};
+            const userName = formatDisplayName(userData.displayName, userData.discriminator);
 
-            await sendNotification({
-                recipientId: requesterId,
-                senderId: userId,
-                senderDisplayName: formatDisplayName(userData.displayName, userData.discriminator),
-                senderAvatarKey: userData.settings?.avatarKey || 'dolphin',
-                type: 'undo_approved',
-                data: {
-                    gameId,
-                    moveCount,
-                },
-            });
+            await sendUndoApprovedNotification(
+                requesterId,
+                userId,
+                userName,
+                gameId,
+                moveCount,
+            ).catch((error) => console.error('Error sending undo approved notification:', error));
 
             return {
                 success: true,
@@ -1356,30 +1470,32 @@ exports.respondToUndoRequest = functions.https.onCall(async (data, context) => {
             await db.collection('games').doc(gameId).update({
                 undoRequestedBy: null,
                 undoRequestMoveCount: null,
+                undoRequestAtMoveNumber: null,
                 undoRequestStatus: null,
                 updatedAt: serverTimestamp(),
             });
 
-            // Send notification to requester
-            const { sendNotification } = require('../utils/notifications');
-            const userDoc = await db.collection('users').doc(userId).get();
-            const userData = userDoc.exists ? userDoc.data() : {};
+            // Send notification to requester (only if the responder is not the requester themselves)
+            if (requesterId !== userId) {
+                const { sendUndoRejectedNotification } = require('../utils/notifications');
+                const userDoc = await db.collection('users').doc(userId).get();
+                const userData = userDoc.exists ? userDoc.data() : {};
+                const userName = formatDisplayName(userData.displayName, userData.discriminator);
 
-            await sendNotification({
-                recipientId: requesterId,
-                senderId: userId,
-                senderDisplayName: formatDisplayName(userData.displayName, userData.discriminator),
-                senderAvatarKey: userData.settings?.avatarKey || 'dolphin',
-                type: 'undo_rejected',
-                data: {
+                await sendUndoRejectedNotification(
+                    requesterId,
+                    userId,
+                    userName,
                     gameId,
-                    moveCount,
-                },
-            });
+                    originalMoveCount,
+                ).catch((error) =>
+                    console.error('Error sending undo rejected notification:', error),
+                );
+            }
 
             return {
                 success: true,
-                message: 'Undo rejected',
+                message: requesterId === userId ? 'Undo request cancelled' : 'Undo rejected',
             };
         }
     } catch (error) {
