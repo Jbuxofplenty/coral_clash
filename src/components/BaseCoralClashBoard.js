@@ -269,10 +269,23 @@ const BaseCoralClashBoard = ({
         // Priority 1: Check real-time resignation status from Firestore (for online games)
         // This ensures immediate display when opponent resigns
         if (opponentResigned) {
-            const opponentName =
-                userColor === 'w'
-                    ? topPlayerData?.name || 'Opponent'
-                    : bottomPlayerData?.name || 'Opponent';
+            // Determine opponent name - find the player who is not the computer (for computer games)
+            // or whose color doesn't match userColor (for PvP games)
+            let opponentName = 'Opponent';
+            if (opponentType === 'computer') {
+                // For computer games, opponent is always "Computer" regardless of board flip
+                opponentName = 'Computer';
+            } else if (topPlayerData?.isComputer) {
+                opponentName = 'Computer';
+            } else if (bottomPlayerData?.isComputer) {
+                opponentName = 'Computer';
+            } else if (userColor === 'w') {
+                // For PvP: if user is white, opponent is black (on top when not flipped)
+                opponentName = topPlayerData?.name || 'Opponent';
+            } else {
+                // For PvP: if user is black, opponent is white (on bottom when not flipped)
+                opponentName = bottomPlayerData?.name || 'Opponent';
+            }
             return {
                 message: `You won! ${opponentName} resigned 🏳️`,
                 type: 'win',
@@ -312,10 +325,19 @@ const BaseCoralClashBoard = ({
                 const didUserWin = winnerColor === userColor;
                 const didUserResign = resigned === userColor;
                 if (didUserWin) {
-                    const opponentName =
-                        userColor === 'w'
-                            ? topPlayerData?.name || 'Opponent'
-                            : bottomPlayerData?.name || 'Opponent';
+                    // Determine opponent name - find the computer or the other player
+                    let opponentName = 'Opponent';
+                    if (opponentType === 'computer') {
+                        opponentName = 'Computer';
+                    } else if (topPlayerData?.isComputer) {
+                        opponentName = 'Computer';
+                    } else if (bottomPlayerData?.isComputer) {
+                        opponentName = 'Computer';
+                    } else if (userColor === 'w') {
+                        opponentName = topPlayerData?.name || 'Opponent';
+                    } else {
+                        opponentName = bottomPlayerData?.name || 'Opponent';
+                    }
                     return {
                         message: `You won! ${opponentName} resigned 🏳️`,
                         type: 'win',
