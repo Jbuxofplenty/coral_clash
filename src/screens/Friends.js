@@ -13,10 +13,8 @@ import {
 import { useFocusEffect } from '@react-navigation/native';
 
 import { Icon, Avatar, LoadingScreen } from '../components';
-import { useAuth } from '../contexts/AuthContext';
-import { useTheme } from '../contexts/ThemeContext';
-import { useFirebaseFunctions } from '../hooks/useFirebaseFunctions';
-import { useGame } from '../hooks/useGame';
+import { useAuth, useTheme, useAlert } from '../contexts';
+import { useFirebaseFunctions, useGame } from '../hooks';
 import { db, collection, query, where, onSnapshot } from '../config/firebase';
 
 const { width } = Dimensions.get('screen');
@@ -24,6 +22,7 @@ const { width } = Dimensions.get('screen');
 export default function Friends({ navigation }) {
     const { user } = useAuth();
     const { colors, isDarkMode } = useTheme();
+    const { showAlert } = useAlert();
     const { getFriends, sendFriendRequest, respondToFriendRequest, removeFriend, searchUsers } =
         useFirebaseFunctions();
     const { sendGameRequest } = useGame();
@@ -254,7 +253,7 @@ export default function Friends({ navigation }) {
 
     const handleSelectUser = async (selectedUser) => {
         if (selectedUser.hasPendingRequest) {
-            Alert.alert(
+            showAlert(
                 'Pending Request',
                 'You already have a pending friend request with this user.',
             );
@@ -275,14 +274,14 @@ export default function Friends({ navigation }) {
             // Note: Real-time listener will auto-update the UI
         } catch (error) {
             console.error('Error sending friend request:', error);
-            Alert.alert('Error', error.message || 'Failed to send friend request');
+            showAlert('Error', error.message || 'Failed to send friend request');
         } finally {
             setSending(false);
         }
     };
 
     const handleRemoveFriend = (friendId, friendDisplayName) => {
-        Alert.alert(
+        showAlert(
             'Remove Friend',
             `Are you sure you want to remove ${friendDisplayName} from your friends?`,
             [
@@ -297,7 +296,7 @@ export default function Friends({ navigation }) {
                             // Note: Real-time listener will auto-update the UI
                         } catch (error) {
                             console.error('Error removing friend:', error);
-                            Alert.alert('Error', 'Failed to remove friend');
+                            showAlert('Error', 'Failed to remove friend');
                             setRemovingFriendId(null);
                         }
                     },
@@ -313,7 +312,7 @@ export default function Friends({ navigation }) {
             // Note: Real-time listener will auto-update the UI
         } catch (error) {
             console.error('Error accepting friend request:', error);
-            Alert.alert('Error', 'Failed to accept friend request');
+            showAlert('Error', 'Failed to accept friend request');
             setAcceptingRequestId(null);
         }
     };
@@ -325,13 +324,13 @@ export default function Friends({ navigation }) {
             // Note: Real-time listener will auto-update the UI
         } catch (error) {
             console.error('Error declining friend request:', error);
-            Alert.alert('Error', 'Failed to decline friend request');
+            showAlert('Error', 'Failed to decline friend request');
             setDecliningRequestId(null);
         }
     };
 
     const handleCancelRequest = async (requestId, displayName) => {
-        Alert.alert('Cancel Friend Request', `Cancel friend request to ${displayName}?`, [
+        showAlert('Cancel Friend Request', `Cancel friend request to ${displayName}?`, [
             { text: 'No', style: 'cancel' },
             {
                 text: 'Yes, Cancel',
@@ -343,7 +342,7 @@ export default function Friends({ navigation }) {
                         // Note: Real-time listener will auto-update the UI
                     } catch (error) {
                         console.error('Error canceling friend request:', error);
-                        Alert.alert('Error', 'Failed to cancel friend request');
+                        showAlert('Error', 'Failed to cancel friend request');
                         setDecliningRequestId(null);
                     }
                 },

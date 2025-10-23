@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { Block, theme } from 'galio-framework';
 import Icon from './Icon';
+import { useAlert } from '../contexts';
 import { FIXTURES as FIXTURE_FILES } from '../../shared/game/__fixtures__';
 
 const { width } = Dimensions.get('screen');
@@ -31,6 +32,7 @@ const FIXTURES = [
 
 const FixtureLoaderModal = ({ visible, onClose, onSelectFixture }) => {
     const [selectedFixture, setSelectedFixture] = useState(null);
+    const { showAlert } = useAlert();
 
     const handleSelectFixture = (fixtureName) => {
         setSelectedFixture(fixtureName);
@@ -44,7 +46,7 @@ const FixtureLoaderModal = ({ visible, onClose, onSelectFixture }) => {
             onSelectFixture(fixture, fixtureName);
             onClose();
         } catch (error) {
-            Alert.alert('Error', `Failed to load fixture: ${error.message}`);
+            showAlert('Error', `Failed to load fixture: ${error.message}`);
         }
     };
 

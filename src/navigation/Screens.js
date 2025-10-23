@@ -11,8 +11,7 @@ import Settings from '../screens/Settings';
 import Friends from '../screens/Friends';
 import Stats from '../screens/Stats';
 import CustomDrawerContent from './Menu';
-import { useAuth } from '../contexts/AuthContext';
-import { useTheme } from '../contexts/ThemeContext';
+import { useAuth, useTheme, useAlert } from '../contexts';
 
 const { width } = Dimensions.get('screen');
 
@@ -47,6 +46,7 @@ function HomeStack(props) {
 export default function AppStack(props) {
     const { user, logOut } = useAuth();
     const { colors } = useTheme();
+    const { showAlert } = useAlert();
 
     return (
         <Drawer.Navigator
@@ -161,22 +161,17 @@ export default function AppStack(props) {
                         listeners={{
                             drawerItemPress: (e) => {
                                 e.preventDefault();
-                                Alert.alert(
-                                    'Log Out',
-                                    'Are you sure you want to log out?',
-                                    [
-                                        {
-                                            text: 'Cancel',
-                                            style: 'cancel',
-                                        },
-                                        {
-                                            text: 'Log Out',
-                                            style: 'destructive',
-                                            onPress: () => logOut(),
-                                        },
-                                    ],
-                                    { cancelable: true },
-                                );
+                                showAlert('Log Out', 'Are you sure you want to log out?', [
+                                    {
+                                        text: 'Cancel',
+                                        style: 'cancel',
+                                    },
+                                    {
+                                        text: 'Log Out',
+                                        style: 'destructive',
+                                        onPress: () => logOut(),
+                                    },
+                                ]);
                             },
                         }}
                     />

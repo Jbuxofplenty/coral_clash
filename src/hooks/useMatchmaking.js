@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useFirebaseFunctions } from './useFirebaseFunctions';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../contexts';
 import { db, collection, query, where, onSnapshot, doc } from '../config/firebase';
 import { updateDoc } from 'firebase/firestore';
 

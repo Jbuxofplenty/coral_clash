@@ -5,12 +5,9 @@ import { LinearGradient } from 'expo-linear-gradient';
 
 import { GameModeCard, ActiveGamesCard, GameHistoryCard, MatchmakingCard } from '../components/';
 import FixtureLoaderModal from '../components/FixtureLoaderModal';
-import { useTheme } from '../contexts/ThemeContext';
-import { useGame } from '../hooks/useGame';
-import { useAuth } from '../contexts/AuthContext';
-import { useFirebaseFunctions } from '../hooks/useFirebaseFunctions';
-import { useMatchmaking } from '../hooks/useMatchmaking';
-import { db, collection, query, where, onSnapshot } from '../config/firebase';
+import { useTheme, useAuth } from '../contexts';
+import { useGame, useFirebaseFunctions, useMatchmaking } from '../hooks';
+import { db, collection, query, where, onSnapshot, doc, getDoc } from '../config/firebase';
 
 const { width, height } = Dimensions.get('screen');
 
@@ -102,6 +99,51 @@ export default function Home({ navigation }) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    // Helper function to fetch opponent data from Firestore
+    const fetchOpponentData = async (gameData, userId) => {
+        try {
+            // Determine opponent ID based on user's role in the game
+            const opponentId =
+                gameData.creatorId === userId ? gameData.opponentId : gameData.creatorId;
+
+            // Handle computer opponent
+            if (opponentId === 'computer' || gameData.opponentType === 'computer') {
+                return {
+                    opponentDisplayName: 'Computer',
+                    opponentAvatarKey: 'computer',
+                };
+            }
+
+            // Fetch opponent user data
+            const opponentDoc = await getDoc(doc(db, 'users', opponentId));
+            if (opponentDoc.exists()) {
+                const opponentData = opponentDoc.data();
+                const displayName = opponentData.displayName || 'Player';
+                const discriminator = opponentData.discriminator;
+                const avatarKey = opponentData.settings?.avatarKey || 'dolphin';
+
+                return {
+                    opponentDisplayName: discriminator
+                        ? `${displayName} #${discriminator}`
+                        : displayName,
+                    opponentAvatarKey: avatarKey,
+                };
+            }
+
+            // Fallback if opponent not found
+            return {
+                opponentDisplayName: 'Opponent',
+                opponentAvatarKey: 'dolphin',
+            };
+        } catch (error) {
+            console.error('Error fetching opponent data:', error);
+            return {
+                opponentDisplayName: 'Opponent',
+                opponentAvatarKey: 'dolphin',
+            };
+        }
+    };
+
     // Initial load and set up game history listeners on mount
     useEffect(() => {
         if (!user || !user.uid) {
@@ -142,7 +184,7 @@ export default function Home({ navigation }) {
             where('status', 'in', ['completed', 'cancelled']),
         );
 
-        const historyCreatorUnsubscribe = onSnapshot(historyCreatorQuery, (snapshot) => {
+        const historyCreatorUnsubscribe = onSnapshot(historyCreatorQuery, async (snapshot) => {
             if (creatorInitialSnapshot) {
                 creatorInitialSnapshot = false;
                 return; // Skip initial snapshot (already loaded via initialLoad)
@@ -152,19 +194,26 @@ export default function Home({ navigation }) {
             const updatedHistory = [...historyGames];
             let hasChanges = false;
 
-            snapshot.docChanges().forEach((change) => {
+            // Process changes sequentially to fetch opponent data
+            for (const change of snapshot.docChanges()) {
                 const gameData = { id: change.doc.id, ...change.doc.data() };
                 const existingIndex = updatedHistory.findIndex((g) => g.id === gameData.id);
 
                 if (change.type === 'added') {
                     // New completed/cancelled game (likely just finished)
                     if (existingIndex === -1) {
-                        // Preserve opponent data structure
+                        // Fetch opponent data if not already present
+                        const opponentData = gameData.opponentDisplayName
+                            ? {
+                                  opponentDisplayName: gameData.opponentDisplayName,
+                                  opponentAvatarKey: gameData.opponentAvatarKey || 'dolphin',
+                              }
+                            : await fetchOpponentData(gameData, user.uid);
+
                         updatedHistory.unshift({
                             // Add to start for most recent
                             ...gameData,
-                            opponentDisplayName: gameData.opponentDisplayName || 'Opponent',
-                            opponentAvatarKey: gameData.opponentAvatarKey || 'dolphin',
+                            ...opponentData,
                         });
                         hasChanges = true;
                     }
@@ -187,7 +236,7 @@ export default function Home({ navigation }) {
                         hasChanges = true;
                     }
                 }
-            });
+            }
 
             if (hasChanges) {
                 historyGames = updatedHistory;
@@ -195,7 +244,7 @@ export default function Home({ navigation }) {
             }
         });
 
-        const historyOpponentUnsubscribe = onSnapshot(historyOpponentQuery, (snapshot) => {
+        const historyOpponentUnsubscribe = onSnapshot(historyOpponentQuery, async (snapshot) => {
             if (opponentInitialSnapshot) {
                 opponentInitialSnapshot = false;
                 return; // Skip initial snapshot (already loaded via initialLoad)
@@ -205,18 +254,26 @@ export default function Home({ navigation }) {
             const updatedHistory = [...historyGames];
             let hasChanges = false;
 
-            snapshot.docChanges().forEach((change) => {
+            // Process changes sequentially to fetch opponent data
+            for (const change of snapshot.docChanges()) {
                 const gameData = { id: change.doc.id, ...change.doc.data() };
                 const existingIndex = updatedHistory.findIndex((g) => g.id === gameData.id);
 
                 if (change.type === 'added') {
                     // New completed/cancelled game where user is opponent
                     if (existingIndex === -1) {
+                        // Fetch opponent data if not already present
+                        const opponentData = gameData.opponentDisplayName
+                            ? {
+                                  opponentDisplayName: gameData.opponentDisplayName,
+                                  opponentAvatarKey: gameData.opponentAvatarKey || 'dolphin',
+                              }
+                            : await fetchOpponentData(gameData, user.uid);
+
                         updatedHistory.unshift({
                             // Add to start for most recent
                             ...gameData,
-                            opponentDisplayName: gameData.opponentDisplayName || 'Opponent',
-                            opponentAvatarKey: gameData.opponentAvatarKey || 'dolphin',
+                            ...opponentData,
                         });
                         hasChanges = true;
                     }
@@ -237,7 +294,7 @@ export default function Home({ navigation }) {
                         hasChanges = true;
                     }
                 }
-            });
+            }
 
             if (hasChanges) {
                 historyGames = updatedHistory;

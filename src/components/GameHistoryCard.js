@@ -1,8 +1,7 @@
 import React from 'react';
 import { Block, Text, theme } from 'galio-framework';
 import { View, StyleSheet, TouchableOpacity, ActivityIndicator, Dimensions } from 'react-native';
-import { useTheme } from '../contexts/ThemeContext';
-import { useAuth } from '../contexts/AuthContext';
+import { useTheme, useAuth } from '../contexts';
 import Icon from './Icon';
 import Avatar from './Avatar';
 

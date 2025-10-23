@@ -14,8 +14,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 
 import { materialTheme } from '../constants';
-import { useAuth } from '../contexts/AuthContext';
-import { useTheme } from '../contexts/ThemeContext';
+import { useAuth, useTheme } from '../contexts';
 
 const { width, height } = Dimensions.get('screen');
 

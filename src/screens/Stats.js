@@ -12,9 +12,8 @@ import { useFocusEffect } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 import { Icon, Avatar, LoadingScreen } from '../components';
-import { useAuth } from '../contexts/AuthContext';
-import { useTheme } from '../contexts/ThemeContext';
-import { useFirebaseFunctions } from '../hooks/useFirebaseFunctions';
+import { useAuth, useTheme } from '../contexts';
+import { useFirebaseFunctions } from '../hooks';
 
 const { width } = Dimensions.get('screen');
 

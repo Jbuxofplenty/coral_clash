@@ -1,7 +1,6 @@
 import React from 'react';
 import { View, Image, StyleSheet } from 'react-native';
-import { useAuth } from '../contexts/AuthContext';
-import { useTheme } from '../contexts/ThemeContext';
+import { useAuth, useTheme } from '../contexts';
 import { DEFAULT_AVATARS, DEFAULT_AVATAR_NAME } from '../constants/avatars';
 import Icon from './Icon';
 

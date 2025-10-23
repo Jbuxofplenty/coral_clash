@@ -2,9 +2,8 @@ import React from 'react';
 import { View, TouchableOpacity, Alert, Text } from 'react-native';
 import { Icon } from 'galio-framework';
 import BaseCoralClashBoard, { baseStyles } from './BaseCoralClashBoard';
-import { useAuth } from '../contexts/AuthContext';
-import { useGamePreferences } from '../contexts/GamePreferencesContext';
-import useFirebaseFunctions from '../hooks/useFirebaseFunctions';
+import { useAuth, useGamePreferences, useAlert } from '../contexts';
+import { useFirebaseFunctions } from '../hooks';
 
 /**
  * Format display name with discriminator
@@ -33,6 +32,7 @@ const formatDisplayName = (displayName, discriminator) => {
 const ComputerCoralClashBoard = ({ fixture, gameId, gameState }) => {
     const { user } = useAuth();
     const { isBoardFlipped } = useGamePreferences();
+    const { showAlert } = useAlert();
     const {
         makeComputerMove: makeComputerMoveAPI,
         requestGameReset,
@@ -132,7 +132,7 @@ const ComputerCoralClashBoard = ({ fixture, gameId, gameState }) => {
 
             if (gameId) {
                 // Online game - request reset from server
-                Alert.alert(
+                showAlert(
                     'Reset Game',
                     'Request to reset this game? The computer will automatically approve.',
                     [
@@ -146,10 +146,10 @@ const ComputerCoralClashBoard = ({ fixture, gameId, gameState }) => {
                             onPress: async () => {
                                 try {
                                     await requestGameReset({ gameId });
-                                    Alert.alert('Success', 'Game has been reset!');
+                                    showAlert('Success', 'Game has been reset!');
                                 } catch (error) {
                                     console.error('Error requesting reset:', error);
-                                    Alert.alert('Error', 'Failed to reset game. Please try again.');
+                                    showAlert('Error', 'Failed to reset game. Please try again.');
                                 }
                             },
                         },
@@ -157,7 +157,7 @@ const ComputerCoralClashBoard = ({ fixture, gameId, gameState }) => {
                 );
             } else {
                 // Offline game - local reset
-                Alert.alert('Reset Game', 'Are you sure you want to start a new game?', [
+                showAlert('Reset Game', 'Are you sure you want to start a new game?', [
                     {
                         text: 'Cancel',
                         style: 'cancel',
@@ -218,7 +218,7 @@ const ComputerCoralClashBoard = ({ fixture, gameId, gameState }) => {
                 // Firestore listener will apply the undo automatically
             } catch (error) {
                 console.error('Error requesting undo:', error);
-                Alert.alert('Error', 'Failed to undo. Please try again.');
+                showAlert('Error', 'Failed to undo. Please try again.');
             }
         } else {
             // Offline game - local undo

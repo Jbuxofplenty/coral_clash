@@ -11,14 +11,14 @@ import {
 
 import { materialTheme } from '../constants';
 import { LoadingScreen } from '../components';
-import { useAuth } from '../contexts/AuthContext';
-import { useTheme } from '../contexts/ThemeContext';
-import { useFirebaseFunctions } from '../hooks/useFirebaseFunctions';
+import { useAuth, useTheme, useAlert } from '../contexts';
+import { useFirebaseFunctions } from '../hooks';
 import { DEFAULT_AVATARS, getRandomAvatarKey } from '../constants/avatars';
 
 export default function Settings({ navigation }) {
     const { user, refreshUserData } = useAuth();
     const { colors, isDarkMode, setThemePreference } = useTheme();
+    const { showAlert } = useAlert();
     const { getUserSettings, updateUserSettings, resetUserSettings } = useFirebaseFunctions();
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -60,7 +60,7 @@ export default function Settings({ navigation }) {
             await refreshUserData();
         } catch (error) {
             console.error('Error saving avatar:', error);
-            Alert.alert('Error', 'Failed to save avatar selection');
+            showAlert('Error', 'Failed to save avatar selection');
             // Revert on error
             setSettings(settings);
         } finally {
@@ -69,7 +69,7 @@ export default function Settings({ navigation }) {
     };
 
     const handleResetSettings = () => {
-        Alert.alert('Reset Settings', 'Are you sure you want to reset all settings to defaults?', [
+        showAlert('Reset Settings', 'Are you sure you want to reset all settings to defaults?', [
             { text: 'Cancel', style: 'cancel' },
             {
                 text: 'Reset',
@@ -89,7 +89,7 @@ export default function Settings({ navigation }) {
                         await refreshUserData();
                     } catch (error) {
                         console.error('Error resetting settings:', error);
-                        Alert.alert('Error', 'Failed to reset settings');
+                        showAlert('Error', 'Failed to reset settings');
                     } finally {
                         setSaving(false);
                     }
@@ -113,7 +113,7 @@ export default function Settings({ navigation }) {
             await refreshUserData();
         } catch (error) {
             console.error('Error saving theme:', error);
-            Alert.alert('Error', 'Failed to save theme preference');
+            showAlert('Error', 'Failed to save theme preference');
             // Revert on error
             setSettings(settings);
             setThemePreference(settings.theme);

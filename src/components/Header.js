@@ -5,8 +5,7 @@ import React from 'react';
 import { Dimensions, Platform, StyleSheet } from 'react-native';
 
 import materialTheme from '../constants/Theme';
-import { useAuth } from '../contexts/AuthContext';
-import { useTheme } from '../contexts/ThemeContext';
+import { useAuth, useTheme } from '../contexts';
 import Avatar from './Avatar';
 
 const { height, width } = Dimensions.get('window');

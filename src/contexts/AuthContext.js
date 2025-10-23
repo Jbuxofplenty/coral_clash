@@ -47,44 +47,63 @@ export const AuthProvider = ({ children }) => {
 
     useEffect(() => {
         let userDataUnsubscribe = null;
+        let settingsUnsubscribe = null;
 
         const authUnsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
             if (firebaseUser) {
-                // Set up real-time listener for user data and settings
+                let cachedUserData = {};
+                let cachedSettings = null;
+
+                // Helper function to update user state with latest data
+                const updateUserState = () => {
+                    setUser({
+                        uid: firebaseUser.uid,
+                        email: firebaseUser.email,
+                        displayName: firebaseUser.displayName,
+                        photoURL: firebaseUser.photoURL,
+                        ...cachedUserData,
+                        settings: cachedSettings, // Add settings to user object
+                    });
+                    setLoading(false);
+                };
+
+                // Set up real-time listener for user data
                 // This will automatically update when discriminator is added
                 userDataUnsubscribe = onSnapshot(
                     doc(db, 'users', firebaseUser.uid),
-                    async (userDoc) => {
-                        const userData = userDoc.exists() ? userDoc.data() : {};
-
-                        // Also get user settings from subcollection
-                        const settingsDoc = await getDoc(
-                            doc(db, 'users', firebaseUser.uid, 'settings', 'preferences'),
-                        );
-                        const settings = settingsDoc.exists() ? settingsDoc.data() : null;
-
-                        setUser({
-                            uid: firebaseUser.uid,
-                            email: firebaseUser.email,
-                            displayName: firebaseUser.displayName,
-                            photoURL: firebaseUser.photoURL,
-                            ...userData,
-                            settings, // Add settings to user object
-                        });
-                        setLoading(false);
+                    (userDoc) => {
+                        cachedUserData = userDoc.exists() ? userDoc.data() : {};
+                        updateUserState();
                     },
                     (error) => {
                         console.error('Error listening to user data:', error);
                         setLoading(false);
                     },
                 );
+
+                // Set up real-time listener for user settings
+                // This will automatically update when settings change (like avatar)
+                settingsUnsubscribe = onSnapshot(
+                    doc(db, 'users', firebaseUser.uid, 'settings', 'preferences'),
+                    (settingsDoc) => {
+                        cachedSettings = settingsDoc.exists() ? settingsDoc.data() : null;
+                        updateUserState();
+                    },
+                    (error) => {
+                        console.error('Error listening to user settings:', error);
+                    },
+                );
             } else {
                 setUser(null);
                 setLoading(false);
-                // Clean up user data listener if it exists
+                // Clean up listeners if they exist
                 if (userDataUnsubscribe) {
                     userDataUnsubscribe();
                     userDataUnsubscribe = null;
+                }
+                if (settingsUnsubscribe) {
+                    settingsUnsubscribe();
+                    settingsUnsubscribe = null;
                 }
             }
         });
@@ -93,6 +112,9 @@ export const AuthProvider = ({ children }) => {
             authUnsubscribe();
             if (userDataUnsubscribe) {
                 userDataUnsubscribe();
+            }
+            if (settingsUnsubscribe) {
+                settingsUnsubscribe();
             }
         };
     }, []);

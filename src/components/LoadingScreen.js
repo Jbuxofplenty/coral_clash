@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { Block, Text } from 'galio-framework';
-import { useTheme } from '../contexts/ThemeContext';
+import { useTheme } from '../contexts';
 import Icon from './Icon';
 
 /**

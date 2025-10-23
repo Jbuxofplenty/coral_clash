@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Avatar from './Avatar';
-import { useTheme } from '../contexts/ThemeContext';
+import { useTheme } from '../contexts';
 
 /**
  * PlayerStatusBar component displays player info, avatar, and optional timer

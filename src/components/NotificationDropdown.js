@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Animated, Dimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useTheme } from '../contexts/ThemeContext';
+import { useTheme } from '../contexts';
 import Icon from './Icon';
 import Avatar from './Avatar';
 
@@ -44,6 +44,66 @@ const getNotificationConfig = (type) => {
                 return `${displayName || 'Someone'} made a move`;
             },
             icon: { name: 'play-circle', family: 'font-awesome' },
+            showAvatar: true,
+            showActions: false,
+        },
+        undo_requested: {
+            title: 'Undo Request',
+            getMessage: (displayName, result, data) => {
+                const moveCount = data?.moveCount || 1;
+                return `${displayName || 'Someone'} wants to undo ${moveCount} move(s)`;
+            },
+            icon: { name: 'undo', family: 'MaterialIcons' },
+            showAvatar: true,
+            showActions: false,
+        },
+        undo_approved: {
+            title: 'Undo Approved',
+            getMessage: (displayName) => `${displayName || 'Someone'} approved your undo request`,
+            icon: { name: 'check-circle', family: 'font-awesome' },
+            showAvatar: true,
+            showActions: false,
+        },
+        undo_rejected: {
+            title: 'Undo Rejected',
+            getMessage: (displayName) => `${displayName || 'Someone'} declined your undo request`,
+            icon: { name: 'times-circle', family: 'font-awesome' },
+            showAvatar: true,
+            showActions: false,
+        },
+        undo_cancelled: {
+            title: 'Request Cancelled',
+            getMessage: (displayName) => `${displayName || 'Someone'} cancelled their undo request`,
+            icon: { name: 'ban', family: 'font-awesome' },
+            showAvatar: true,
+            showActions: false,
+        },
+        reset_requested: {
+            title: 'Reset Request',
+            getMessage: (displayName) => `${displayName || 'Someone'} wants to reset the game`,
+            icon: { name: 'refresh', family: 'MaterialIcons' },
+            showAvatar: true,
+            showActions: false,
+        },
+        reset_approved: {
+            title: 'Reset Approved',
+            getMessage: (displayName) => `${displayName || 'Someone'} approved your reset request`,
+            icon: { name: 'check-circle', family: 'font-awesome' },
+            showAvatar: true,
+            showActions: false,
+        },
+        reset_rejected: {
+            title: 'Reset Rejected',
+            getMessage: (displayName) => `${displayName || 'Someone'} declined your reset request`,
+            icon: { name: 'times-circle', family: 'font-awesome' },
+            showAvatar: true,
+            showActions: false,
+        },
+        reset_cancelled: {
+            title: 'Request Cancelled',
+            getMessage: (displayName) =>
+                `${displayName || 'Someone'} cancelled their reset request`,
+            icon: { name: 'ban', family: 'font-awesome' },
             showAvatar: true,
             showActions: false,
         },

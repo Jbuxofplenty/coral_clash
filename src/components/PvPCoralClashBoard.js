@@ -2,10 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { View, TouchableOpacity, Alert, Text, Dimensions, Platform } from 'react-native';
 import { Icon } from 'galio-framework';
 import BaseCoralClashBoard, { baseStyles } from './BaseCoralClashBoard';
-import { useAuth } from '../contexts/AuthContext';
-import { useGamePreferences } from '../contexts/GamePreferencesContext';
-import { useTheme } from '../contexts/ThemeContext';
-import useFirebaseFunctions from '../hooks/useFirebaseFunctions';
+import { useAuth, useGamePreferences, useTheme, useAlert } from '../contexts';
+import { useFirebaseFunctions } from '../hooks';
 import { db, doc, onSnapshot } from '../config/firebase';
 import IconComponent from './Icon';
 import { calculateUndoMoveCount } from '../../shared';
@@ -37,6 +35,7 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData }) => {
     const { user } = useAuth();
     const { isBoardFlipped } = useGamePreferences();
     const { colors } = useTheme();
+    const { showAlert } = useAlert();
     const { requestGameReset, requestUndo, respondToUndoRequest, respondToResetRequest } =
         useFirebaseFunctions();
     const [userColor, setUserColor] = useState(null);
@@ -45,6 +44,7 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData }) => {
     const [undoRequestData, setUndoRequestData] = useState(null);
     const [resetRequestData, setResetRequestData] = useState(null);
     const [currentMoveCount, setCurrentMoveCount] = useState(0); // Track move count from Firestore
+    const [liveOpponentData, setLiveOpponentData] = useState(opponentData); // Track live opponent data
 
     // Determine user's color and track requests from game document
     useEffect(() => {
@@ -104,11 +104,41 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData }) => {
         return () => unsubscribe();
     }, [gameId, user]);
 
+    // Listen to opponent's user profile for real-time avatar updates
+    useEffect(() => {
+        if (!opponentId || !gameId) return;
+
+        const unsubscribe = onSnapshot(
+            doc(db, 'users', opponentId),
+            (docSnap) => {
+                if (docSnap.exists()) {
+                    const userData = docSnap.data();
+                    const displayName = userData.displayName || 'Player';
+                    const discriminator = userData.discriminator;
+                    const avatarKey = userData.settings?.avatarKey || 'dolphin';
+
+                    setLiveOpponentData({
+                        id: opponentId,
+                        displayName: discriminator
+                            ? `${displayName} #${discriminator}`
+                            : displayName,
+                        avatarKey: avatarKey,
+                    });
+                }
+            },
+            (error) => {
+                console.error('Error listening to opponent profile:', error);
+            },
+        );
+
+        return () => unsubscribe();
+    }, [opponentId, gameId]);
+
     // Handler for undo request from control bar
     const handleUndoRequest = async () => {
-        Alert.alert(
+        showAlert(
             'Request Undo',
-            `Request to undo the last move? ${opponentData?.displayName || 'Your opponent'} will need to approve.`,
+            `Request to undo the last move? ${liveOpponentData?.displayName || 'Your opponent'} will need to approve.`,
             [
                 {
                     text: 'Cancel',
@@ -120,13 +150,13 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData }) => {
                         try {
                             // Undo just the last move (the player's own move)
                             await requestUndo({ gameId, moveCount: 1 });
-                            Alert.alert(
+                            showAlert(
                                 'Request Sent',
                                 'Your opponent will be notified of your undo request.',
                             );
                         } catch (error) {
                             console.error('Error requesting undo:', error);
-                            Alert.alert('Error', 'Failed to send undo request. Please try again.');
+                            showAlert('Error', 'Failed to send undo request. Please try again.');
                         }
                     },
                 },
@@ -141,7 +171,7 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData }) => {
             // No need to show alert - the banner will disappear automatically via Firestore listener
         } catch (error) {
             console.error('Error responding to undo request:', error);
-            Alert.alert('Error', 'Failed to respond to undo request. Please try again.');
+            showAlert('Error', 'Failed to respond to undo request. Please try again.');
         }
     };
 
@@ -152,7 +182,7 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData }) => {
             // No need to show alert - the banner will disappear automatically via Firestore listener
         } catch (error) {
             console.error('Error responding to reset request:', error);
-            Alert.alert('Error', 'Failed to respond to reset request. Please try again.');
+            showAlert('Error', 'Failed to respond to reset request. Please try again.');
         }
     };
 
@@ -163,7 +193,7 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData }) => {
             await respondToUndoRequest({ gameId, approve: false });
         } catch (error) {
             console.error('Error canceling undo request:', error);
-            Alert.alert('Error', 'Failed to cancel undo request. Please try again.');
+            showAlert('Error', 'Failed to cancel undo request. Please try again.');
         }
     };
 
@@ -174,7 +204,7 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData }) => {
             await respondToResetRequest({ gameId, approve: false });
         } catch (error) {
             console.error('Error canceling reset request:', error);
-            Alert.alert('Error', 'Failed to cancel reset request. Please try again.');
+            showAlert('Error', 'Failed to cancel reset request. Please try again.');
         }
     };
 
@@ -259,9 +289,9 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData }) => {
         const handleResetRequest = async () => {
             closeMenu();
 
-            Alert.alert(
+            showAlert(
                 'Request Reset',
-                `Request to reset this game? ${opponentData?.displayName || 'Your opponent'} will need to approve.`,
+                `Request to reset this game? ${liveOpponentData?.displayName || 'Your opponent'} will need to approve.`,
                 [
                     {
                         text: 'Cancel',
@@ -273,13 +303,13 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData }) => {
                         onPress: async () => {
                             try {
                                 await requestGameReset({ gameId });
-                                Alert.alert(
+                                showAlert(
                                     'Request Sent',
                                     'Your opponent will be notified of your reset request.',
                                 );
                             } catch (error) {
                                 console.error('Error requesting reset:', error);
-                                Alert.alert(
+                                showAlert(
                                     'Error',
                                     'Failed to send reset request. Please try again.',
                                 );
@@ -347,8 +377,8 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData }) => {
     const shouldFlipBoard = userIsBlack !== isBoardFlipped;
 
     // Get opponent info from game data (already formatted with discriminator from backend)
-    let opponentName = opponentData?.displayName || 'Opponent';
-    let opponentAvatar = opponentData?.avatarKey || 'dolphin';
+    let opponentName = liveOpponentData?.displayName || 'Opponent';
+    let opponentAvatar = liveOpponentData?.avatarKey || 'dolphin';
 
     // Format current user's name with discriminator
     // Use fallback if discriminator hasn't loaded yet
@@ -364,7 +394,7 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData }) => {
 
     const bottomPlayer = {
         name: userName,
-        avatarKey: user?.avatarKey,
+        avatarKey: user?.settings?.avatarKey || 'dolphin',
         isComputer: false,
     };
 
@@ -403,8 +433,8 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData }) => {
                                 marginRight: 12,
                             }}
                         >
-                            Waiting for {opponentData?.displayName || 'opponent'} to respond to undo{' '}
-                            {dynamicMoveCount} move(s) request...
+                            Waiting for {liveOpponentData?.displayName || 'opponent'} to respond to
+                            undo {dynamicMoveCount} move(s) request...
                         </Text>
                         <TouchableOpacity
                             onPress={handleCancelUndoRequest}
@@ -448,7 +478,7 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData }) => {
                                 marginRight: 12,
                             }}
                         >
-                            {opponentData?.displayName || 'Opponent'} wants to undo{' '}
+                            {liveOpponentData?.displayName || 'Opponent'} wants to undo{' '}
                             {dynamicMoveCount} move(s)
                         </Text>
                         <View style={{ flexDirection: 'row' }}>
@@ -518,7 +548,7 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData }) => {
                                 marginRight: 12,
                             }}
                         >
-                            Waiting for {opponentData?.displayName || 'opponent'} to respond to
+                            Waiting for {liveOpponentData?.displayName || 'opponent'} to respond to
                             reset request...
                         </Text>
                         <TouchableOpacity
@@ -563,7 +593,7 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData }) => {
                                 marginRight: 12,
                             }}
                         >
-                            {opponentData?.displayName || 'Opponent'} wants to reset the game
+                            {liveOpponentData?.displayName || 'Opponent'} wants to reset the game
                         </Text>
                         <View style={{ flexDirection: 'row' }}>
                             <TouchableOpacity

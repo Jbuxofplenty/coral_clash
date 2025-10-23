@@ -1,6 +1,6 @@
 import PieceImages from '../assets/images/pieces';
 import { WHALE } from '../../shared';
-import { useGamePreferences } from '../contexts/GamePreferencesContext';
+import { useGamePreferences } from '../contexts';
 
 import { Image, TouchableWithoutFeedback, View } from 'react-native';
 

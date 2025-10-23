@@ -242,7 +242,7 @@ async function sendUndoRequestNotification(recipientId, senderId, senderName, ga
         data: {
             type: 'undo_requested',
             from: senderId,
-            fromName: senderName,
+            displayName: senderName,
             gameId: gameId,
             moveCount: moveCount.toString(),
         },
@@ -270,7 +270,7 @@ async function sendUndoApprovedNotification(
         data: {
             type: 'undo_approved',
             from: approverId,
-            fromName: approverName,
+            displayName: approverName,
             gameId: gameId,
             moveCount: moveCount.toString(),
         },
@@ -298,9 +298,89 @@ async function sendUndoRejectedNotification(
         data: {
             type: 'undo_rejected',
             from: rejecterId,
-            fromName: rejecterName,
+            displayName: rejecterName,
             gameId: gameId,
             moveCount: moveCount.toString(),
+        },
+    });
+}
+
+/**
+ * Send undo cancelled notification (when requester cancels their own request)
+ * @param {string} recipientId - User receiving the notification (the opponent)
+ * @param {string} cancellerId - User who cancelled the undo request
+ * @param {string} cancellerName - Name of the canceller
+ * @param {string} gameId - Game ID
+ */
+async function sendUndoCancelledNotification(recipientId, cancellerId, cancellerName, gameId) {
+    return sendPushNotification(recipientId, {
+        title: 'Undo Request Cancelled',
+        body: `${cancellerName} cancelled their undo request`,
+        data: {
+            type: 'undo_cancelled',
+            from: cancellerId,
+            displayName: cancellerName,
+            gameId: gameId,
+        },
+    });
+}
+
+/**
+ * Send reset approved notification
+ * @param {string} recipientId - User receiving the notification
+ * @param {string} approverId - User who approved the reset
+ * @param {string} approverName - Name of the approver
+ * @param {string} gameId - Game ID
+ */
+async function sendResetApprovedNotification(recipientId, approverId, approverName, gameId) {
+    return sendPushNotification(recipientId, {
+        title: 'Reset Approved',
+        body: `${approverName} approved your reset request`,
+        data: {
+            type: 'reset_approved',
+            from: approverId,
+            displayName: approverName,
+            gameId: gameId,
+        },
+    });
+}
+
+/**
+ * Send reset rejected notification
+ * @param {string} recipientId - User receiving the notification
+ * @param {string} rejecterId - User who rejected the reset
+ * @param {string} rejecterName - Name of the rejecter
+ * @param {string} gameId - Game ID
+ */
+async function sendResetRejectedNotification(recipientId, rejecterId, rejecterName, gameId) {
+    return sendPushNotification(recipientId, {
+        title: 'Reset Rejected',
+        body: `${rejecterName} declined your reset request`,
+        data: {
+            type: 'reset_rejected',
+            from: rejecterId,
+            displayName: rejecterName,
+            gameId: gameId,
+        },
+    });
+}
+
+/**
+ * Send reset cancelled notification (when requester cancels their own request)
+ * @param {string} recipientId - User receiving the notification (the opponent)
+ * @param {string} cancellerId - User who cancelled the reset request
+ * @param {string} cancellerName - Name of the canceller
+ * @param {string} gameId - Game ID
+ */
+async function sendResetCancelledNotification(recipientId, cancellerId, cancellerName, gameId) {
+    return sendPushNotification(recipientId, {
+        title: 'Reset Request Cancelled',
+        body: `${cancellerName} cancelled their reset request`,
+        data: {
+            type: 'reset_cancelled',
+            from: cancellerId,
+            displayName: cancellerName,
+            gameId: gameId,
         },
     });
 }
@@ -315,4 +395,8 @@ module.exports = {
     sendUndoRequestNotification,
     sendUndoApprovedNotification,
     sendUndoRejectedNotification,
+    sendUndoCancelledNotification,
+    sendResetApprovedNotification,
+    sendResetRejectedNotification,
+    sendResetCancelledNotification,
 };

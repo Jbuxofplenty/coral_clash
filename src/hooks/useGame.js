@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { Alert } from 'react-native';
 import { useFirebaseFunctions } from './useFirebaseFunctions';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth, useAlert } from '../contexts';
 import { db, collection, query, where, onSnapshot, doc, getDoc } from '../config/firebase';
 
 /**
@@ -16,6 +16,7 @@ import { db, collection, query, where, onSnapshot, doc, getDoc } from '../config
 export const useGame = (options = {}) => {
     const { onGameAccepted, onGameInvite } = options;
     const { user } = useAuth();
+    const { showAlert } = useAlert();
     const { createGame, createComputerGame, respondToGameInvite, getActiveGames } =
         useFirebaseFunctions();
     const [loading, setLoading] = useState(true);
@@ -119,11 +120,35 @@ export const useGame = (options = {}) => {
                         if (existingIndex !== -1) {
                             const previousGame = updatedGames[existingIndex];
 
-                            // Update game data while preserving opponent info from initial load
+                            // Fetch latest opponent data to get current avatar
+                            let opponentDisplayName =
+                                previousGame.opponentDisplayName || 'Opponent';
+                            let opponentAvatarKey = previousGame.opponentAvatarKey || 'dolphin';
+
+                            if (gameData.opponentId && gameData.opponentId !== 'computer') {
+                                try {
+                                    const opponentDoc = await getDoc(
+                                        doc(db, 'users', gameData.opponentId),
+                                    );
+                                    if (opponentDoc.exists()) {
+                                        const opponentUserData = opponentDoc.data();
+                                        opponentDisplayName = opponentUserData.displayName
+                                            ? `${opponentUserData.displayName}${opponentUserData.discriminator ? ` #${opponentUserData.discriminator}` : ''}`
+                                            : 'Opponent';
+                                        opponentAvatarKey =
+                                            opponentUserData.settings?.avatarKey || 'dolphin';
+                                    }
+                                } catch (error) {
+                                    console.error('Error fetching opponent data:', error);
+                                    // Keep previous values on error
+                                }
+                            }
+
+                            // Update game data with latest opponent info
                             updatedGames[existingIndex] = {
                                 ...gameData,
-                                opponentDisplayName: previousGame.opponentDisplayName || 'Opponent',
-                                opponentAvatarKey: previousGame.opponentAvatarKey || 'dolphin',
+                                opponentDisplayName,
+                                opponentAvatarKey,
                                 opponentType: previousGame.opponentType,
                             };
                             hasChanges = true;
@@ -206,11 +231,37 @@ export const useGame = (options = {}) => {
                         if (existingIndex !== -1) {
                             const previousGame = updatedGames[existingIndex];
 
-                            // Update game data while preserving opponent info
+                            // Fetch latest opponent data to get current avatar
+                            let opponentDisplayName =
+                                previousGame.opponentDisplayName || 'Opponent';
+                            let opponentAvatarKey = previousGame.opponentAvatarKey || 'dolphin';
+
+                            // For opponent query, the creator is the opponent
+                            const opponentUserId = gameData.creatorId;
+                            if (opponentUserId && opponentUserId !== 'computer') {
+                                try {
+                                    const opponentDoc = await getDoc(
+                                        doc(db, 'users', opponentUserId),
+                                    );
+                                    if (opponentDoc.exists()) {
+                                        const opponentUserData = opponentDoc.data();
+                                        opponentDisplayName = opponentUserData.displayName
+                                            ? `${opponentUserData.displayName}${opponentUserData.discriminator ? ` #${opponentUserData.discriminator}` : ''}`
+                                            : 'Opponent';
+                                        opponentAvatarKey =
+                                            opponentUserData.settings?.avatarKey || 'dolphin';
+                                    }
+                                } catch (error) {
+                                    console.error('Error fetching opponent data:', error);
+                                    // Keep previous values on error
+                                }
+                            }
+
+                            // Update game data with latest opponent info
                             updatedGames[existingIndex] = {
                                 ...gameData,
-                                opponentDisplayName: previousGame.opponentDisplayName || 'Opponent',
-                                opponentAvatarKey: previousGame.opponentAvatarKey || 'dolphin',
+                                opponentDisplayName,
+                                opponentAvatarKey,
                                 opponentType: previousGame.opponentType,
                             };
                             hasChanges = true;
@@ -273,7 +324,7 @@ export const useGame = (options = {}) => {
                 const result = await createGame(opponentId, timeControl);
 
                 // Show success message
-                Alert.alert(
+                showAlert(
                     'Game Request Sent',
                     `Your game request has been sent to ${opponentName}. They will be notified.`,
                     [{ text: 'OK' }],
@@ -289,14 +340,14 @@ export const useGame = (options = {}) => {
                     // The pending game already exists, so no action needed
                     return { success: false, reason: 'duplicate' };
                 } else if (error.code === 'not-found') {
-                    Alert.alert(
+                    showAlert(
                         'User Not Found',
                         'The user you are trying to invite could not be found.',
                         [{ text: 'OK' }],
                     );
                     throw error;
                 } else {
-                    Alert.alert('Error', error.message || 'Failed to send game request');
+                    showAlert('Error', error.message || 'Failed to send game request');
                     throw error;
                 }
             } finally {
@@ -330,7 +381,7 @@ export const useGame = (options = {}) => {
                 return await createComputerGame(timeControl, difficulty);
             } catch (error) {
                 console.error('Error starting computer game:', error);
-                Alert.alert('Error', error.message || 'Failed to start computer game');
+                showAlert('Error', error.message || 'Failed to start computer game');
                 throw error;
             } finally {
                 setLoading(false);
@@ -360,7 +411,7 @@ export const useGame = (options = {}) => {
                 return result;
             } catch (error) {
                 console.error('Error accepting game invite:', error);
-                Alert.alert('Error', 'Failed to accept game invitation');
+                showAlert('Error', 'Failed to accept game invitation');
                 throw error;
             } finally {
                 setLoading(false);
@@ -384,7 +435,7 @@ export const useGame = (options = {}) => {
                 return result;
             } catch (error) {
                 console.error('Error declining game invite:', error);
-                Alert.alert('Error', 'Failed to decline game invitation');
+                showAlert('Error', 'Failed to decline game invitation');
                 throw error;
             } finally {
                 setLoading(false);

@@ -2,7 +2,7 @@ import { Block, Text, theme } from 'galio-framework';
 import React from 'react';
 import { Dimensions, StyleSheet, TouchableWithoutFeedback, View } from 'react-native';
 import Icon from './Icon';
-import { useTheme } from '../contexts/ThemeContext';
+import { useTheme } from '../contexts';
 
 const { width } = Dimensions.get('screen');
 

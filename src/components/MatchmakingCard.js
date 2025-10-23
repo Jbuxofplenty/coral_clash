@@ -9,7 +9,7 @@ import {
     Alert,
 } from 'react-native';
 import Icon from './Icon';
-import { useTheme } from '../contexts/ThemeContext';
+import { useTheme, useAlert } from '../contexts';
 
 const { width } = Dimensions.get('screen');
 
@@ -25,6 +25,7 @@ const { width } = Dimensions.get('screen');
  */
 function MatchmakingCard({ searching, queueCount, loading, onStartSearch, onStopSearch, style }) {
     const { colors } = useTheme();
+    const { showAlert } = useAlert();
     const [isProcessing, setIsProcessing] = useState(false);
 
     const handlePress = async () => {
@@ -37,12 +38,12 @@ function MatchmakingCard({ searching, queueCount, loading, onStartSearch, onStop
             } else {
                 const result = await onStartSearch();
                 if (!result.success && result.error) {
-                    Alert.alert('Cannot Join Matchmaking', result.error);
+                    showAlert('Cannot Join Matchmaking', result.error);
                 }
             }
         } catch (error) {
             console.error('Error in matchmaking action:', error);
-            Alert.alert('Error', 'Something went wrong. Please try again.');
+            showAlert('Error', 'Something went wrong. Please try again.');
         } finally {
             setIsProcessing(false);
         }

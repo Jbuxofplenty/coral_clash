@@ -28,6 +28,14 @@ Location: `src/components/NotificationDropdown.js`
 - `move_made` - Tap to navigate to game for your turn
 - `game_over` - Tap to view game results
 - `friend_accepted` - Tap to navigate to Friends screen
+- `undo_requested` - Alert when opponent requests to undo moves
+- `undo_approved` - Alert when opponent approves undo request
+- `undo_rejected` - Alert when opponent rejects undo request
+- `undo_cancelled` - Alert when opponent cancels their undo request
+- `reset_requested` - Alert when opponent requests to reset the game
+- `reset_approved` - Alert when opponent approves reset request
+- `reset_rejected` - Alert when opponent rejects reset request
+- `reset_cancelled` - Alert when opponent cancels their reset request
 
 **Props:**
 
@@ -95,12 +103,25 @@ const handleStartGame = async (friendId, friendName) => {
 
 Location: `functions/utils/notifications.js`
 
-**New Functions:**
+**Notification Functions:**
 
-- `sendGameRequestNotification(recipientId, senderId, senderName, gameId, avatarKey)`
-    - Sends push notification when a game request is created
-- `sendGameAcceptedNotification(recipientId, accepterId, accepterName, gameId)`
-    - Sends push notification when a game request is accepted
+**Game Requests:**
+
+- `sendGameRequestNotification(recipientId, senderId, senderName, gameId, avatarKey)` - Sends push notification when a game request is created
+- `sendGameAcceptedNotification(recipientId, accepterId, accepterName, gameId)` - Sends push notification when a game request is accepted
+
+**Undo Requests:**
+
+- `sendUndoRequestNotification(recipientId, senderId, senderName, gameId, moveCount)` - Sends push notification when a player requests to undo moves
+- `sendUndoApprovedNotification(recipientId, approverId, approverName, gameId, moveCount)` - Sends push notification when undo request is approved
+- `sendUndoRejectedNotification(recipientId, rejecterId, rejecterName, gameId, moveCount)` - Sends push notification when undo request is rejected
+- `sendUndoCancelledNotification(recipientId, cancellerId, cancellerName, gameId)` - Sends push notification when player cancels their own undo request
+
+**Reset Requests:**
+
+- `sendResetApprovedNotification(recipientId, approverId, approverName, gameId)` - Sends push notification when reset request is approved
+- `sendResetRejectedNotification(recipientId, rejecterId, rejecterName, gameId)` - Sends push notification when reset request is rejected
+- `sendResetCancelledNotification(recipientId, cancellerId, cancellerName, gameId)` - Sends push notification when player cancels their own reset request
 
 #### 4. PvP Game Endpoints
 
@@ -112,6 +133,50 @@ Location: `functions/routes/game.js`
 - `respondToGameInvite` - Now sends notifications on acceptance
 
 ## Notification Flow
+
+### Undo Request Flow
+
+1. **Player A requests to undo their last move:**
+    - Player A clicks the undo button during their opponent's turn
+    - Confirms the undo request dialog
+
+2. **Backend processes request:**
+    - Sets `undoRequestedBy`, `undoRequestMoveCount`, and `undoRequestStatus: 'pending'` in game document
+    - Sends push notification to Player B
+    - Player B sees notification: "Player A wants to undo 1 move(s)"
+
+3. **Player B can respond:**
+    - **Accept:** Approves the undo
+        - Backend undoes the move(s) and updates game state
+        - Player A receives "Undo Approved" notification
+    - **Deny:** Rejects the undo
+        - Backend clears the undo request
+        - Player A receives "Undo Rejected" notification
+    - Player A can also cancel their own request
+        - Backend clears the undo request
+        - Player B receives "Request Cancelled" notification
+
+### Reset Request Flow
+
+1. **Player A requests to reset the game:**
+    - Player A selects reset option from game menu
+    - Confirms the reset request
+
+2. **Backend processes request:**
+    - Sets `resetRequestedBy` and `resetRequestStatus: 'pending'` in game document
+    - For computer games: Auto-approves and resets immediately
+    - For PvP games: Sends notification to Player B
+
+3. **Player B can respond (PvP only):**
+    - **Accept:** Approves the reset
+        - Backend resets game to initial state
+        - Player A receives "Reset Approved" notification
+    - **Deny:** Rejects the reset
+        - Backend clears the reset request
+        - Player A receives "Reset Rejected" notification
+    - Player A can also cancel their own request
+        - Backend clears the reset request
+        - Player B receives "Request Cancelled" notification
 
 ### Game Request Flow
 
@@ -221,6 +286,22 @@ const handleNotificationTap = (notificationData) => {
 1. User A makes a move
 2. User B receives "Your Turn" notification
 3. User B taps notification → navigates to game
+
+### Testing Undo Request Notifications
+
+1. User A requests undo during game
+2. User B receives "Undo Request" notification
+3. User B accepts → User A receives "Undo Approved" notification, game state reverts
+4. OR User B denies → User A receives "Undo Rejected" notification
+5. OR User A cancels → User B receives "Request Cancelled" notification
+
+### Testing Reset Request Notifications
+
+1. User A requests reset during game
+2. User B receives notification (PvP only, computer games auto-approve)
+3. User B accepts → User A receives "Reset Approved" notification, game resets
+4. OR User B denies → User A receives "Reset Rejected" notification
+5. OR User A cancels → User B receives "Request Cancelled" notification
 
 ## Future Enhancements
 

@@ -975,21 +975,26 @@ exports.respondToResetRequest = functions.https.onCall(async (data, context) => 
 
         const gameData = gameDoc.data();
 
-        // Verify user is the opponent (not the requester)
-        if (!gameData.resetRequestedBy) {
+        // Verify there's a pending reset request
+        if (!gameData.resetRequestedBy || gameData.resetRequestStatus !== 'pending') {
             throw new functions.https.HttpsError('failed-precondition', 'No reset request pending');
         }
 
-        if (gameData.resetRequestedBy === userId) {
+        // Verify user is the opponent (not the requester), unless they're canceling
+        // Allow requester to reject (cancel) their own request, but not approve it
+        if (gameData.resetRequestedBy === userId && approve) {
             throw new functions.https.HttpsError(
                 'permission-denied',
-                'Cannot respond to your own reset request',
+                'Cannot approve your own reset request',
             );
         }
 
+        // Verify user is a player in this game
         if (gameData.creatorId !== userId && gameData.opponentId !== userId) {
             throw new functions.https.HttpsError('permission-denied', 'Not a player in this game');
         }
+
+        const requesterId = gameData.resetRequestedBy;
 
         if (approve) {
             // Approved: Reset the game
@@ -1009,15 +1014,15 @@ exports.respondToResetRequest = functions.https.onCall(async (data, context) => 
                 updatedAt: serverTimestamp(),
             });
 
-            // Notify the requester that reset was approved
-            await db.collection('notifications').add({
-                userId: gameData.resetRequestedBy,
-                type: 'reset_approved',
-                gameId: gameId,
-                from: userId,
-                read: false,
-                createdAt: serverTimestamp(),
-            });
+            // Send push notification to requester
+            const { sendResetApprovedNotification } = require('../utils/notifications');
+            const userDoc = await db.collection('users').doc(userId).get();
+            const userData = userDoc.exists ? userDoc.data() : {};
+            const userName = formatDisplayName(userData.displayName, userData.discriminator);
+
+            await sendResetApprovedNotification(requesterId, userId, userName, gameId).catch(
+                (error) => console.error('Error sending reset approved notification:', error),
+            );
 
             return {
                 success: true,
@@ -1032,19 +1037,32 @@ exports.respondToResetRequest = functions.https.onCall(async (data, context) => 
                 updatedAt: serverTimestamp(),
             });
 
-            // Notify the requester that reset was rejected
-            await db.collection('notifications').add({
-                userId: gameData.resetRequestedBy,
-                type: 'reset_rejected',
-                gameId: gameId,
-                from: userId,
-                read: false,
-                createdAt: serverTimestamp(),
-            });
+            const userDoc = await db.collection('users').doc(userId).get();
+            const userData = userDoc.exists ? userDoc.data() : {};
+            const userName = formatDisplayName(userData.displayName, userData.discriminator);
+
+            if (requesterId === userId) {
+                // User is cancelling their own request - notify the opponent
+                const opponentId =
+                    gameData.creatorId === userId ? gameData.opponentId : gameData.creatorId;
+                const { sendResetCancelledNotification } = require('../utils/notifications');
+
+                await sendResetCancelledNotification(opponentId, userId, userName, gameId).catch(
+                    (error) => console.error('Error sending reset cancelled notification:', error),
+                );
+            } else {
+                // Opponent is rejecting the request - notify the requester
+                const { sendResetRejectedNotification } = require('../utils/notifications');
+
+                await sendResetRejectedNotification(requesterId, userId, userName, gameId).catch(
+                    (error) => console.error('Error sending reset rejected notification:', error),
+                );
+            }
 
             return {
                 success: true,
-                message: 'Reset request rejected',
+                message:
+                    requesterId === userId ? 'Reset request cancelled' : 'Reset request rejected',
                 approved: false,
             };
         }
@@ -1473,12 +1491,22 @@ exports.respondToUndoRequest = functions.https.onCall(async (data, context) => {
                 updatedAt: serverTimestamp(),
             });
 
-            // Send notification to requester (only if the responder is not the requester themselves)
-            if (requesterId !== userId) {
+            const userDoc = await db.collection('users').doc(userId).get();
+            const userData = userDoc.exists ? userDoc.data() : {};
+            const userName = formatDisplayName(userData.displayName, userData.discriminator);
+
+            if (requesterId === userId) {
+                // User is cancelling their own request - notify the opponent
+                const opponentId =
+                    gameData.creatorId === userId ? gameData.opponentId : gameData.creatorId;
+                const { sendUndoCancelledNotification } = require('../utils/notifications');
+
+                await sendUndoCancelledNotification(opponentId, userId, userName, gameId).catch(
+                    (error) => console.error('Error sending undo cancelled notification:', error),
+                );
+            } else {
+                // Opponent is rejecting the request - notify the requester
                 const { sendUndoRejectedNotification } = require('../utils/notifications');
-                const userDoc = await db.collection('users').doc(userId).get();
-                const userData = userDoc.exists ? userDoc.data() : {};
-                const userName = formatDisplayName(userData.displayName, userData.discriminator);
 
                 await sendUndoRejectedNotification(
                     requesterId,

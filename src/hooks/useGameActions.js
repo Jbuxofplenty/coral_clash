@@ -4,7 +4,7 @@ import useFirebaseFunctions from './useFirebaseFunctions';
 import useIsMounted from './useIsMounted';
 import { db, doc, onSnapshot, getDoc } from '../config/firebase';
 import { restoreGameFromSnapshot } from '../../shared';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth, useAlert } from '../contexts';
 
 /**
  * Hook to handle game actions with backend-first approach
@@ -17,6 +17,7 @@ import { useAuth } from '../contexts/AuthContext';
  */
 export const useGameActions = (coralClash, gameId, onStateUpdate) => {
     const { user } = useAuth();
+    const { showAlert } = useAlert();
     const {
         makeMove: makeMoveAPI,
         resignGame: resignGameAPI,
@@ -120,7 +121,7 @@ export const useGameActions = (coralClash, gameId, onStateUpdate) => {
                     return moveResult;
                 } catch (error) {
                     console.error('Error making local move:', error);
-                    Alert.alert('Invalid Move', error.message);
+                    showAlert('Invalid Move', error.message);
                     return null;
                 }
             }
@@ -144,7 +145,7 @@ export const useGameActions = (coralClash, gameId, onStateUpdate) => {
             } catch (error) {
                 console.error('Error sending move to backend:', error);
                 // Show alert for connection errors
-                Alert.alert(
+                showAlert(
                     'Connection Error',
                     'Failed to send move to server. Please check your connection and try again.',
                 );
@@ -185,7 +186,7 @@ export const useGameActions = (coralClash, gameId, onStateUpdate) => {
             return true;
         } catch (error) {
             console.error('Error sending resignation to backend:', error);
-            Alert.alert('Error', 'Failed to resign. Please check your connection and try again.');
+            showAlert('Error', 'Failed to resign. Please check your connection and try again.');
             return false;
         } finally {
             setIsProcessing(false);
@@ -232,7 +233,7 @@ export const useGameActions = (coralClash, gameId, onStateUpdate) => {
 
                 // For PvP games, show a message that the request was sent
                 if (!isComputerGame) {
-                    Alert.alert(
+                    showAlert(
                         'Undo Request Sent',
                         'Your undo request has been sent to your opponent.',
                     );
@@ -241,7 +242,7 @@ export const useGameActions = (coralClash, gameId, onStateUpdate) => {
                 return result;
             } catch (error) {
                 console.error('Error requesting undo:', error);
-                Alert.alert('Error', 'Failed to send undo request. Please try again.');
+                showAlert('Error', 'Failed to send undo request. Please try again.');
                 return null;
             } finally {
                 setIsProcessing(false);

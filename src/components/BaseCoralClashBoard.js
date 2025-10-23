@@ -13,7 +13,7 @@ import {
     Platform,
 } from 'react-native';
 import { Icon } from 'galio-framework';
-import useCoralClash from '../hooks/useCoralClash';
+import { useCoralClash } from '../hooks';
 import { WHALE, applyFixture, restoreGameFromSnapshot, CoralClash } from '../../shared';
 import EmptyBoard from './EmptyBoard';
 import Moves from './Moves';
@@ -22,10 +22,8 @@ import Coral from './Coral';
 import PlayerStatusBar from './PlayerStatusBar';
 import GameStatusBanner from './GameStatusBanner';
 import LoadingScreen from './LoadingScreen';
-import { useTheme } from '../contexts/ThemeContext';
-import { useGamePreferences } from '../contexts/GamePreferencesContext';
-import { useAuth } from '../contexts/AuthContext';
-import useGameActions from '../hooks/useGameActions';
+import { useTheme, useGamePreferences, useAuth, useAlert } from '../contexts';
+import { useGameActions } from '../hooks';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -73,6 +71,7 @@ const BaseCoralClashBoard = ({
     const { colors } = useTheme();
     const { isBoardFlipped: contextBoardFlipped, toggleBoardFlip } = useGamePreferences();
     const { user } = useAuth();
+    const { showAlert } = useAlert();
 
     // Use effective board flip if provided, otherwise use context value
     const isBoardFlipped = effectiveBoardFlip !== null ? effectiveBoardFlip : contextBoardFlipped;
@@ -134,7 +133,7 @@ const BaseCoralClashBoard = ({
                 forceUpdate((n) => n + 1);
             } catch (error) {
                 console.error(`Failed to load game state on ${Platform.OS}:`, error);
-                Alert.alert('Error', 'Failed to load game state');
+                showAlert('Error', 'Failed to load game state');
             }
         }
     }, [gameState, gameStateLoaded, fixture, coralClash, width]);
@@ -147,7 +146,7 @@ const BaseCoralClashBoard = ({
                 setFixtureLoaded(true);
             } catch (error) {
                 console.error('Failed to load fixture:', error);
-                Alert.alert('Error', 'Failed to load game state');
+                showAlert('Error', 'Failed to load game state');
             }
         }
     }, [fixture, fixtureLoaded, coralClash]);
@@ -432,7 +431,7 @@ const BaseCoralClashBoard = ({
 
     const handleResign = () => {
         closeMenu();
-        Alert.alert('Resign Game', 'Are you sure you want to resign? You will lose the game.', [
+        showAlert('Resign Game', 'Are you sure you want to resign? You will lose the game.', [
             {
                 text: 'Cancel',
                 style: 'cancel',
@@ -640,7 +639,7 @@ const BaseCoralClashBoard = ({
                         };
                     });
 
-                    Alert.alert(
+                    showAlert(
                         'Hunter Effect (Whale)',
                         'Choose coral removal option:',
                         alertButtons,
@@ -677,7 +676,7 @@ const BaseCoralClashBoard = ({
             const hasCoralRemoved = movesToThisSquare.some((m) => m.coralRemoved === true);
 
             if (hasCoralPlaced) {
-                Alert.alert('Gatherer Effect', 'Place coral on this square?', [
+                showAlert('Gatherer Effect', 'Place coral on this square?', [
                     {
                         text: 'No',
                         onPress: async () => {
@@ -721,7 +720,7 @@ const BaseCoralClashBoard = ({
                 ]);
                 return;
             } else if (hasCoralRemoved) {
-                Alert.alert('Hunter Effect', 'Remove coral from this square?', [
+                showAlert('Hunter Effect', 'Remove coral from this square?', [
                     {
                         text: 'No',
                         onPress: async () => {
@@ -809,7 +808,7 @@ const BaseCoralClashBoard = ({
                 title: `coral-clash-state-${timestamp}.json`,
             });
         } catch (error) {
-            Alert.alert('Export Failed', error.message);
+            showAlert('Export Failed', error.message);
         }
     };
 

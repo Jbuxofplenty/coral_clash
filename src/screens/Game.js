@@ -5,7 +5,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Block } from 'galio-framework';
 import ComputerCoralClashBoard from '../components/ComputerCoralClashBoard';
 import PvPCoralClashBoard from '../components/PvPCoralClashBoard';
-import { useTheme } from '../contexts/ThemeContext';
+import { useTheme } from '../contexts';
 
 const { width, height } = Dimensions.get('screen');
 

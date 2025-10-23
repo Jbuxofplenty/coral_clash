@@ -18,10 +18,15 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Image, Platform, StatusBar } from 'react-native';
 import { Images, materialTheme } from './src/constants/';
 import Screens from './src/navigation/Screens';
-import { AuthProvider } from './src/contexts/AuthContext';
-import { ThemeProvider, useTheme } from './src/contexts/ThemeContext';
-import { NotificationProvider, useNotifications } from './src/contexts/NotificationContext';
-import { GamePreferencesProvider } from './src/contexts/GamePreferencesContext';
+import {
+    AuthProvider,
+    ThemeProvider,
+    useTheme,
+    NotificationProvider,
+    useNotifications,
+    GamePreferencesProvider,
+    AlertProvider,
+} from './src/contexts';
 import { NotificationDropdown } from './src/components';
 import { httpsCallable } from 'firebase/functions';
 import { functions } from './src/config/firebase';
@@ -149,8 +154,12 @@ function AppContent({ navigationRef }) {
                 case 'game_accepted':
                 case 'reset_approved':
                 case 'reset_rejected':
+                case 'reset_cancelled':
                 case 'undo_approved':
                 case 'undo_rejected':
+                case 'undo_cancelled':
+                case 'undo_requested':
+                case 'reset_requested':
                     // Navigate to the game
                     if (notificationData.data.gameId) {
                         navigationRef.current.navigate('Game', {
@@ -252,15 +261,17 @@ export default function App() {
         <SafeAreaProvider>
             <AuthProvider>
                 <ThemeProvider>
-                    <GamePreferencesProvider>
-                        <NotificationProvider>
-                            <NavigationContainer ref={navigationRef} onReady={onLayoutRootView}>
-                                <GalioProvider theme={materialTheme}>
-                                    <AppContent navigationRef={navigationRef} />
-                                </GalioProvider>
-                            </NavigationContainer>
-                        </NotificationProvider>
-                    </GamePreferencesProvider>
+                    <AlertProvider>
+                        <GamePreferencesProvider>
+                            <NotificationProvider>
+                                <NavigationContainer ref={navigationRef} onReady={onLayoutRootView}>
+                                    <GalioProvider theme={materialTheme}>
+                                        <AppContent navigationRef={navigationRef} />
+                                    </GalioProvider>
+                                </NavigationContainer>
+                            </NotificationProvider>
+                        </GamePreferencesProvider>
+                    </AlertProvider>
                 </ThemeProvider>
             </AuthProvider>
         </SafeAreaProvider>
