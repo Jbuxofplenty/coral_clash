@@ -823,6 +823,7 @@ const BaseCoralClashBoard = ({
                         isComputer={topPlayerData.isComputer}
                         isActive={isTopPlayerActive}
                         color={topPlayerColor}
+                        coralRemaining={coralClash.getCoralRemaining(topPlayerColor)}
                     />
                 </View>
 
@@ -869,6 +870,7 @@ const BaseCoralClashBoard = ({
                         isComputer={bottomPlayerData.isComputer}
                         isActive={isBottomPlayerActive}
                         color={bottomPlayerColor}
+                        coralRemaining={coralClash.getCoralRemaining(bottomPlayerColor)}
                     />
                 </View>
 

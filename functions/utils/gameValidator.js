@@ -16,13 +16,12 @@ function validateMove(gameState, move) {
         // Create game instance and restore full state (including coral)
         const game = new CoralClash();
 
-        // If we have a full game state, restore it (includes coral)
-        if (gameState && typeof gameState === 'object' && gameState.fen) {
-            restoreGameFromSnapshot(game, gameState);
-        } else {
-            // Fallback: if just a FEN string was passed (backward compatibility)
-            game.load(gameState);
+        // Restore full game state (includes coral, piece roles, etc.)
+        if (!gameState || typeof gameState !== 'object' || !gameState.fen) {
+            throw new Error('Invalid game state: must be an object with a fen property');
         }
+
+        restoreGameFromSnapshot(game, gameState);
 
         // Try to make the move
         const result = game.move(move);

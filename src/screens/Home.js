@@ -26,16 +26,6 @@ export default function Home({ navigation }) {
     // Wrap callbacks in useCallback to prevent infinite re-renders
     const handleGameAccepted = useCallback(
         (gameId, gameData) => {
-            const deviceInfo = `${Platform.OS} ${width.toFixed(0)}x${height.toFixed(0)}`;
-            console.log(`[Home ${deviceInfo}] handleGameAccepted called`, {
-                gameId,
-                hasGameState: !!gameData.gameState,
-                gameStateKeys: gameData.gameState ? Object.keys(gameData.gameState) : [],
-                opponentType: gameData.opponentType || 'pvp',
-                opponentId: gameData.opponentId,
-                opponentDisplayName: gameData.opponentDisplayName,
-            });
-
             navigation.navigate('Game', {
                 gameId: gameId,
                 gameState: gameData.gameState,
@@ -46,8 +36,6 @@ export default function Home({ navigation }) {
                     avatarKey: gameData.opponentAvatarKey,
                 },
             });
-
-            console.log(`[Home ${deviceInfo}] Navigation to Game screen triggered`);
         },
         [navigation],
     );

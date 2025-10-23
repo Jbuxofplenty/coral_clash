@@ -2746,6 +2746,15 @@ export class CoralClash {
             output += '=' + move.promotion.toUpperCase();
         }
 
+        // Coral Clash: Add coral notation
+        // * = coral placed (gatherer)
+        // ~ = coral removed (hunter)
+        if (move.coralPlaced === true) {
+            output += '*';
+        } else if (move.coralRemoved === true) {
+            output += '~';
+        }
+
         // Don't call _makeMove/_undoMove here - causes recursion bug!
         // Check symbols should be added by the caller if needed
         // this._makeMove(move);
@@ -2763,15 +2772,45 @@ export class CoralClash {
 
     // convert a move from Standard Algebraic Notation (SAN) to 0x88 coordinates
     private _moveFromSan(move: string, strict = false): InternalMove | null {
+        // Coral Clash: Check for coral notation before stripping
+        // * = coral placed, ~ = coral removed
+        const hasCoralPlaced = move.includes('*');
+        const hasCoralRemoved = move.includes('~');
+
         // strip off any move decorations: e.g Nf3+?! becomes Nf3
-        const cleanMove = strippedSan(move);
+        // Also strip our custom coral symbols for the base move matching
+        const cleanMove = strippedSan(move).replace(/[*~]/g, '');
 
         let pieceType = inferPieceType(cleanMove);
         let moves = this._moves({ legal: true, piece: pieceType });
 
         // strict parser
         for (let i = 0, len = moves.length; i < len; i++) {
-            if (cleanMove === strippedSan(this._moveToSan(moves[i], moves))) {
+            const moveNotation = strippedSan(this._moveToSan(moves[i], moves)).replace(/[*~]/g, '');
+            if (cleanMove === moveNotation) {
+                // Coral Clash: If move has coral notation, match it to the right variant
+                if (hasCoralPlaced && moves[i].coralPlaced !== true) {
+                    continue; // Skip this move, doesn't match coral placement
+                }
+                if (hasCoralRemoved && moves[i].coralRemoved !== true) {
+                    continue; // Skip this move, doesn't match coral removal
+                }
+                // If no coral notation in PGN, prefer moves without coral action (backward compat)
+                if (!hasCoralPlaced && !hasCoralRemoved) {
+                    if (moves[i].coralPlaced === true || moves[i].coralRemoved === true) {
+                        // Check if there's a variant without coral action
+                        const variantWithoutCoral = moves.find(
+                            (m) =>
+                                algebraic(m.from) === algebraic(moves[i].from) &&
+                                algebraic(m.to) === algebraic(moves[i].to) &&
+                                m.coralPlaced !== true &&
+                                m.coralRemoved !== true,
+                        );
+                        if (variantWithoutCoral) {
+                            continue; // Skip this variant, use the one without coral
+                        }
+                    }
+                }
                 return moves[i];
             }
         }

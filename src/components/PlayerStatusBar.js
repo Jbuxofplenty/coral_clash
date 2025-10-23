@@ -12,6 +12,7 @@ import { useTheme } from '../contexts/ThemeContext';
  * @param {number} props.timeRemaining - Time remaining in seconds (optional)
  * @param {boolean} props.isActive - Whether it's this player's turn
  * @param {string} props.color - Player's color ('w' or 'b')
+ * @param {number} props.coralRemaining - Number of coral pieces remaining for this player
  */
 export default function PlayerStatusBar({
     playerName = 'Player',
@@ -20,6 +21,7 @@ export default function PlayerStatusBar({
     timeRemaining,
     isActive = false,
     color = 'w',
+    coralRemaining,
 }) {
     const { colors } = useTheme();
 
@@ -46,11 +48,18 @@ export default function PlayerStatusBar({
                 <Text style={[styles.playerName, { color: 'white' }]} numberOfLines={1}>
                     {isComputer ? 'Computer' : playerName}
                 </Text>
-                {timeRemaining !== undefined && timeRemaining !== null && (
-                    <Text style={[styles.timer, { color: colors.TEXT_SECONDARY }]}>
-                        {formatTime(timeRemaining)}
-                    </Text>
-                )}
+                <View style={styles.statsRow}>
+                    {timeRemaining !== undefined && timeRemaining !== null && (
+                        <Text style={[styles.timer, { color: colors.TEXT_SECONDARY }]}>
+                            {formatTime(timeRemaining)}
+                        </Text>
+                    )}
+                    {coralRemaining !== undefined && coralRemaining !== null && (
+                        <Text style={[styles.coralCounter, { color: colors.TEXT_SECONDARY }]}>
+                            🪸 {coralRemaining}
+                        </Text>
+                    )}
+                </View>
             </View>
 
             {/* Color indicator */}
@@ -85,9 +94,17 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: '600',
     },
+    statsRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 2,
+        gap: 12,
+    },
     timer: {
         fontSize: 14,
-        marginTop: 2,
+    },
+    coralCounter: {
+        fontSize: 14,
     },
     colorIndicator: {
         width: 32,

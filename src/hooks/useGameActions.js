@@ -143,65 +143,11 @@ export const useGameActions = (coralClash, gameId, onStateUpdate) => {
                 return result;
             } catch (error) {
                 console.error('Error sending move to backend:', error);
-
-                // Check if this is a sync error (out of sync with server state)
-                const isSyncError =
-                    error.message?.includes('Invalid move') ||
-                    error.message?.includes('Not your turn') ||
-                    error.code === 'permission-denied' ||
-                    error.code === 'invalid-argument';
-
-                if (isSyncError) {
-                    // Force resync: Fetch latest game state from Firestore
-                    try {
-                        const gameRef = doc(db, 'games', gameId);
-                        const gameSnap = await getDoc(gameRef);
-
-                        if (gameSnap.exists()) {
-                            const latestData = gameSnap.data();
-
-                            // Update local state
-                            if (isMountedRef.current) {
-                                setGameData(latestData);
-                            }
-
-                            // Apply the latest game state to CoralClash instance
-                            if (latestData.gameState && coralClash) {
-                                restoreGameFromSnapshot(coralClash, latestData.gameState);
-
-                                // Trigger UI update
-                                if (isMountedRef.current) {
-                                    onStateUpdate?.();
-                                }
-                            }
-
-                            // Show user-friendly message
-                            if (error.message?.includes('Not your turn')) {
-                                Alert.alert(
-                                    'Not Your Turn',
-                                    'The game state has been updated. Please wait for your turn.',
-                                );
-                            } else {
-                                Alert.alert(
-                                    'Invalid Move',
-                                    'The game state has been updated. Please try a different move.',
-                                );
-                            }
-                        }
-                    } catch (resyncError) {
-                        console.error('[makeMove] Failed to resync:', resyncError);
-                        Alert.alert(
-                            'Sync Error',
-                            'Failed to sync with server. Please refresh the game.',
-                        );
-                    }
-                } else {
-                    // Show alert for connection errors
-                    Alert.alert(
-                        'Connection Error',
-                        'Failed to send move to server. Please check your connection and try again.',
-                    );
-                }
+                // Show alert for connection errors
+                Alert.alert(
+                    'Connection Error',
+                    'Failed to send move to server. Please check your connection and try again.',
+                );
                 return null;
             } finally {
                 setIsProcessing(false);

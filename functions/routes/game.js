@@ -515,6 +515,7 @@ exports.makeMove = functions.https.onCall(async (data, context) => {
             }
         }
 
+        console.log('[makeMove] Game state after move:', validation.gameState);
         return {
             success: true,
             message: 'Move made successfully',
@@ -1316,9 +1317,13 @@ exports.requestUndo = functions.https.onCall(async (data, context) => {
             // Create new game state
             const newGameState = createGameSnapshot(coralClash);
 
+            // Determine whose turn it is after undo
+            const nextTurn = newGameState.turn === 'w' ? gameData.creatorId : gameData.opponentId;
+
             // Update game document
             await db.collection('games').doc(gameId).update({
                 gameState: newGameState,
+                currentTurn: nextTurn,
                 updatedAt: serverTimestamp(),
             });
 
@@ -1437,9 +1442,13 @@ exports.respondToUndoRequest = functions.https.onCall(async (data, context) => {
             // Create new game state
             const newGameState = createGameSnapshot(coralClash);
 
+            // Determine whose turn it is after undo
+            const nextTurn = newGameState.turn === 'w' ? gameData.creatorId : gameData.opponentId;
+
             // Update game document - clear undo request and update state
             await db.collection('games').doc(gameId).update({
                 gameState: newGameState,
+                currentTurn: nextTurn,
                 undoRequestedBy: null,
                 undoRequestMoveCount: null,
                 undoRequestAtMoveNumber: null,

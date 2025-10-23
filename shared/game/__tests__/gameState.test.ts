@@ -422,6 +422,119 @@ describe('Game State Snapshot and Restore', () => {
         });
     });
 
+    describe('Coral Placement Choice Preservation', () => {
+        it('should NOT add coral when gatherer moves with coralPlaced: false', () => {
+            // Verifies that coral placement choices are preserved through PGN encoding
+            // Expected behavior: If a gatherer moves with coralPlaced: false, no coral should be added
+            // Fix: PGN now encodes coral choices using * (placed) and ~ (removed) notation
+
+            const game = new CoralClash();
+
+            // Find a gatherer piece that can move
+            const validMoves = game.moves({ verbose: true }) as any[];
+            const gathererMoves = validMoves.filter((m: any) => {
+                const piece = game.get(m.from);
+                return piece && piece.role === 'gatherer' && m.coralPlaced !== undefined;
+            });
+
+            expect(gathererMoves.length).toBeGreaterThan(0);
+
+            // Find a move where gatherer can place coral (has two variants)
+            const moveWithoutCoral = gathererMoves.find((m: any) => m.coralPlaced === false);
+            expect(moveWithoutCoral).toBeDefined();
+
+            // Get coral state before move
+            const coralBefore = game.getAllCoral();
+            const coralRemainingBefore = game.getCoralRemainingCounts();
+
+            // Make the move WITHOUT placing coral
+            const result = game.move(moveWithoutCoral);
+            expect(result).toBeTruthy();
+
+            // Verify coral was NOT placed at destination
+            const coralAfterMove = game.getAllCoral();
+            const coralAtDestination = coralAfterMove.find(
+                (c: any) => c.square === moveWithoutCoral.to,
+            );
+            expect(coralAtDestination).toBeUndefined(); // NO coral at destination
+
+            // Verify coral count did NOT decrease
+            const coralRemainingAfterMove = game.getCoralRemainingCounts();
+            expect(coralRemainingAfterMove.w).toBe(coralRemainingBefore.w); // Count unchanged
+
+            // Now create a snapshot (this is where the bug occurs)
+            const snapshot = createGameSnapshot(game);
+
+            // Verify: snapshot.coral should NOT include coral at destination
+            // PGN now encodes coral choices, so this is correctly preserved
+            const coralInSnapshot = snapshot.coral.find(
+                (c: any) => c.square === moveWithoutCoral.to,
+            );
+
+            // Coral should NOT be at destination
+            expect(coralInSnapshot).toBeUndefined();
+
+            // Additional verification: coral count should be unchanged
+            expect(snapshot.coralRemaining.w).toBe(coralRemainingBefore.w);
+        });
+
+        it('should preserve coral placement choice through snapshot/restore cycle', () => {
+            // Simulate the EXACT backend flow from game.js:
+            // 1. User makes Move A -> snapshot -> save to DB
+            // 2. Computer move: RESTORE from DB -> make Move B -> snapshot -> save to DB
+            // This is where the bug occurs!
+
+            // ===== MOVE A: User's turn =====
+            const game1 = new CoralClash();
+
+            // Move A: Gatherer moves WITHOUT placing coral
+            const validMoves = game1.moves({ verbose: true }) as any[];
+            const gathererMove = validMoves.find((m: any) => {
+                const piece = game1.get(m.from);
+                return piece && piece.role === 'gatherer' && m.coralPlaced === false;
+            });
+
+            expect(gathererMove).toBeDefined();
+            const destinationSquare = gathererMove.to;
+
+            game1.move(gathererMove);
+
+            // Verify no coral at destination after move A
+            let coral = game1.getAllCoral();
+            expect(coral.find((c: any) => c.square === destinationSquare)).toBeUndefined();
+
+            // Create snapshot (simulating what backend does after move A)
+            const snapshotAfterMoveA = createGameSnapshot(game1);
+
+            // Snapshot should NOT have coral at destination
+            expect(
+                snapshotAfterMoveA.coral.find((c: any) => c.square === destinationSquare),
+            ).toBeUndefined();
+
+            // ===== MOVE B: Computer's turn =====
+            // CRITICAL: Backend RESTORES game state from snapshot before validating computer move
+            // This is what happens in validateMove() in game.js
+            const game2 = new CoralClash();
+            restoreGameFromSnapshot(game2, snapshotAfterMoveA);
+
+            // Computer makes Move B
+            const opponentMove = game2.moves({ verbose: true })[0] as any;
+            game2.move(opponentMove);
+
+            // Create snapshot after Move B (this is where the bug manifests)
+            const snapshotAfterMoveB = createGameSnapshot(game2);
+
+            // Verify: PGN encoding preserves coral choice through snapshot/restore cycle
+            // When PGN is loaded and replayed, the correct coral choice is maintained
+            const coralInSnapshotB = snapshotAfterMoveB.coral.find(
+                (c: any) => c.square === destinationSquare,
+            );
+
+            // Coral should NOT appear (choice was coralPlaced: false)
+            expect(coralInSnapshotB).toBeUndefined();
+        });
+    });
+
     describe('Move History Preservation', () => {
         it('should save and restore move history for undo functionality', () => {
             const game1 = new CoralClash();
