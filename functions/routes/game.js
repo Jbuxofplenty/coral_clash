@@ -1,6 +1,11 @@
 const functions = require('firebase-functions/v1');
 const admin = require('firebase-admin');
-const { initializeGameState, serverTimestamp, increment } = require('../utils/helpers');
+const {
+    initializeGameState,
+    serverTimestamp,
+    increment,
+    formatDisplayName,
+} = require('../utils/helpers');
 const { validateMove, getGameResult } = require('../utils/gameValidator');
 const {
     sendGameRequestNotification,
@@ -10,22 +15,6 @@ const {
 const { GAME_VERSION } = require('../../shared/dist/game');
 
 const db = admin.firestore();
-
-/**
- * Helper function to format display name with discriminator
- * @param {string} displayName - The user's display name
- * @param {string} discriminator - The 4-digit discriminator
- * @returns {string} Formatted name like "Username #1234"
- */
-function formatDisplayName(displayName, discriminator) {
-    if (!displayName) {
-        return 'User';
-    }
-    if (!discriminator) {
-        return displayName;
-    }
-    return `${displayName} #${discriminator}`;
-}
 
 /**
  * Validate game engine version

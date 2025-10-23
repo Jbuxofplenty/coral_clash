@@ -9,6 +9,7 @@ import ActiveGamesCard from './ActiveGamesCard';
 import GameHistoryCard from './GameHistoryCard';
 import PlayerStatusBar from './PlayerStatusBar';
 import GameStatusBanner from './GameStatusBanner';
+import MatchmakingCard from './MatchmakingCard';
 
 export {
     Icon,
@@ -22,4 +23,5 @@ export {
     GameHistoryCard,
     PlayerStatusBar,
     GameStatusBanner,
+    MatchmakingCard,
 };

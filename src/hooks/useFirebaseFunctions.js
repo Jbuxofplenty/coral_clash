@@ -284,6 +284,41 @@ export const useFirebaseFunctions = () => {
         }
     };
 
+    // ==================== Matchmaking Functions ====================
+
+    const joinMatchmaking = async () => {
+        try {
+            const callable = httpsCallable(functions, 'joinMatchmaking');
+            const result = await callable();
+            return result.data;
+        } catch (error) {
+            console.error('Error joining matchmaking:', error);
+            throw error;
+        }
+    };
+
+    const leaveMatchmaking = async () => {
+        try {
+            const callable = httpsCallable(functions, 'leaveMatchmaking');
+            const result = await callable();
+            return result.data;
+        } catch (error) {
+            console.error('Error leaving matchmaking:', error);
+            throw error;
+        }
+    };
+
+    const getMatchmakingStatus = async () => {
+        try {
+            const callable = httpsCallable(functions, 'getMatchmakingStatus');
+            const result = await callable();
+            return result.data;
+        } catch (error) {
+            console.error('Error getting matchmaking status:', error);
+            throw error;
+        }
+    };
+
     return {
         // User Profile
         getUserProfile,
@@ -311,6 +346,10 @@ export const useFirebaseFunctions = () => {
         getFriends,
         removeFriend,
         searchUsers,
+        // Matchmaking
+        joinMatchmaking,
+        leaveMatchmaking,
+        getMatchmakingStatus,
     };
 };
 

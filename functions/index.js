@@ -14,6 +14,7 @@ const userProfile = require('./routes/userProfile');
 const userSettings = require('./routes/userSettings');
 const game = require('./routes/game');
 const friends = require('./routes/friends');
+const matchmaking = require('./routes/matchmaking');
 const { getDefaultSettings } = require('./utils/helpers');
 
 // ==================== User Profile APIs ====================
@@ -46,7 +47,14 @@ exports.getFriends = friends.getFriends;
 exports.removeFriend = friends.removeFriend;
 exports.searchUsers = friends.searchUsers;
 
+// ==================== Matchmaking APIs ====================
+exports.joinMatchmaking = matchmaking.joinMatchmaking;
+exports.leaveMatchmaking = matchmaking.leaveMatchmaking;
+exports.getMatchmakingStatus = matchmaking.getMatchmakingStatus;
+
 // ==================== Firestore Triggers ====================
+exports.onPlayerJoinQueue = matchmaking.onPlayerJoinQueue;
+exports.cleanupStaleMatchmakingEntries = matchmaking.cleanupStaleMatchmakingEntries;
 
 /**
  * Automatically assign a unique discriminator to new users

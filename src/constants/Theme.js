@@ -1,6 +1,7 @@
 const LIGHT_COLORS = {
     DEFAULT: '#DCDCDC',
     PRIMARY: '#1e88e5',
+    PRIMARY_DARKER: '#1565c0',
     SECONDARY: '#2a5298',
     LABEL: '#FE2472',
     INFO: '#00BCD4',
@@ -34,6 +35,7 @@ const LIGHT_COLORS = {
 const DARK_COLORS = {
     DEFAULT: '#2C2C2C',
     PRIMARY: '#64b5f6',
+    PRIMARY_DARKER: '#1976d2',
     SECONDARY: '#5a7db5',
     LABEL: '#FF6B9D',
     INFO: '#4DD0E1',

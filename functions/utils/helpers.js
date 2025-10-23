@@ -55,9 +55,26 @@ function increment(amount) {
     return FieldValue.increment(amount);
 }
 
+/**
+ * Format display name with discriminator
+ * @param {string} displayName - The user's display name
+ * @param {string} discriminator - The 4-digit discriminator
+ * @returns {string} Formatted name like "Username #1234"
+ */
+function formatDisplayName(displayName, discriminator) {
+    if (!displayName) {
+        return 'User';
+    }
+    if (!discriminator) {
+        return displayName;
+    }
+    return `${displayName} #${discriminator}`;
+}
+
 module.exports = {
     initializeGameState,
     getDefaultSettings,
     serverTimestamp,
     increment,
+    formatDisplayName,
 };

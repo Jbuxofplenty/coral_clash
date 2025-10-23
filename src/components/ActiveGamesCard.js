@@ -19,11 +19,13 @@ export default function ActiveGamesCard({
     loading,
     acceptGameInvite,
     declineGameInvite,
+    resignGame,
 }) {
     const { colors } = useTheme();
     const { user } = useAuth();
     const [acceptingGameId, setAcceptingGameId] = useState(null);
     const [decliningGameId, setDecliningGameId] = useState(null);
+    const [resigningGameId, setResigningGameId] = useState(null);
 
     const handleGamePress = (game) => {
         // Don't navigate if game is pending
@@ -63,6 +65,17 @@ export default function ActiveGamesCard({
             console.error('Error declining game:', error);
         } finally {
             setDecliningGameId(null);
+        }
+    };
+
+    const handleResignGame = async (gameId) => {
+        try {
+            setResigningGameId(gameId);
+            await resignGame(gameId);
+        } catch (error) {
+            console.error('Error resigning game:', error);
+        } finally {
+            setResigningGameId(null);
         }
     };
 
@@ -193,8 +206,11 @@ export default function ActiveGamesCard({
                         const status = getGameStatus(game);
                         const isPending = game.status === 'pending';
                         const isRecipient = game.opponentId === user?.uid;
+                        const isComputerGame = opponent.isComputer;
                         const isProcessing =
-                            acceptingGameId === game.id || decliningGameId === game.id;
+                            acceptingGameId === game.id ||
+                            decliningGameId === game.id ||
+                            resigningGameId === game.id;
 
                         return (
                             <TouchableOpacity
@@ -330,6 +346,49 @@ export default function ActiveGamesCard({
                                                     />
                                                 </TouchableOpacity>
                                             )}
+                                        </Block>
+                                    ) : isComputerGame ? (
+                                        <Block row middle>
+                                            {resigningGameId === game.id ? (
+                                                <View
+                                                    style={[
+                                                        styles.actionButton,
+                                                        {
+                                                            backgroundColor: colors.ERROR + '10',
+                                                            marginRight: 8,
+                                                        },
+                                                    ]}
+                                                >
+                                                    <ActivityIndicator
+                                                        size='small'
+                                                        color={colors.ERROR}
+                                                    />
+                                                </View>
+                                            ) : (
+                                                <TouchableOpacity
+                                                    onPress={() => handleResignGame(game.id)}
+                                                    style={[
+                                                        styles.actionButton,
+                                                        {
+                                                            backgroundColor: colors.ERROR + '10',
+                                                            marginRight: 8,
+                                                        },
+                                                    ]}
+                                                >
+                                                    <Icon
+                                                        name='times'
+                                                        family='font-awesome'
+                                                        size={18}
+                                                        color={colors.ERROR}
+                                                    />
+                                                </TouchableOpacity>
+                                            )}
+                                            <Icon
+                                                name='chevron-right'
+                                                family='font-awesome'
+                                                size={16}
+                                                color={colors.TEXT_SECONDARY}
+                                            />
                                         </Block>
                                     ) : (
                                         <Icon

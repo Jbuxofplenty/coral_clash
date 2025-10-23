@@ -67,6 +67,18 @@ service cloud.firestore {
             // Only Cloud Functions can create/delete notifications
             allow create, delete: if false;
         }
+
+        // Matchmaking queue
+        match /matchmakingQueue/{userId} {
+            // Users can read their own queue entry
+            allow read: if isOwner(userId);
+            
+            // Users can read queue count (list all entries)
+            allow list: if isAuthenticated();
+            
+            // Only Cloud Functions can write to matchmaking queue
+            allow write: if false;
+        }
     }
 }
 

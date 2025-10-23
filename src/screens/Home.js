@@ -1,14 +1,15 @@
 import { theme } from 'galio-framework';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Dimensions, ScrollView, StyleSheet, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
-import { GameModeCard, ActiveGamesCard, GameHistoryCard } from '../components/';
+import { GameModeCard, ActiveGamesCard, GameHistoryCard, MatchmakingCard } from '../components/';
 import FixtureLoaderModal from '../components/FixtureLoaderModal';
 import { useTheme } from '../contexts/ThemeContext';
 import { useGame } from '../hooks/useGame';
 import { useAuth } from '../contexts/AuthContext';
 import { useFirebaseFunctions } from '../hooks/useFirebaseFunctions';
+import { useMatchmaking } from '../hooks/useMatchmaking';
 import { db, collection, query, where, onSnapshot } from '../config/firebase';
 
 const { width, height } = Dimensions.get('screen');
@@ -40,6 +41,23 @@ export default function Home({ navigation }) {
         [navigation],
     );
 
+    // Handle matchmaking match found
+    const handleMatchFound = useCallback(
+        async (matchData) => {
+            // Navigate to the game immediately
+            navigation.navigate('Game', {
+                gameId: matchData.gameId,
+                opponentType: 'pvp',
+                opponentData: {
+                    id: matchData.opponentId,
+                    displayName: matchData.opponentName,
+                    avatarKey: matchData.opponentAvatarKey,
+                },
+            });
+        },
+        [navigation],
+    );
+
     // useGame hook with navigation callbacks for real-time game events
     const {
         startComputerGame,
@@ -51,7 +69,38 @@ export default function Home({ navigation }) {
         onGameAccepted: handleGameAccepted,
     });
 
-    const { getGameHistory } = useFirebaseFunctions();
+    // useMatchmaking hook for random matchmaking
+    const {
+        searching,
+        queueCount,
+        loading: matchmakingLoading,
+        startSearching,
+        stopSearching,
+    } = useMatchmaking({
+        onMatchFound: handleMatchFound,
+    });
+
+    const { getGameHistory, resignGame } = useFirebaseFunctions();
+
+    // Use ref to track searching state for cleanup without triggering re-renders
+    const searchingRef = useRef(searching);
+    useEffect(() => {
+        searchingRef.current = searching;
+    }, [searching]);
+
+    // Clean up matchmaking queue when component unmounts
+    useEffect(() => {
+        return () => {
+            // If user is searching when unmounting, leave the queue
+            if (searchingRef.current) {
+                stopSearching().catch((error) => {
+                    console.error('[Home] Error leaving matchmaking on unmount:', error);
+                });
+            }
+        };
+        // Empty dependency array - only run cleanup on unmount
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     // Initial load and set up game history listeners on mount
     useEffect(() => {
@@ -232,6 +281,15 @@ export default function Home({ navigation }) {
         });
     };
 
+    const handleResignGame = async (gameId) => {
+        try {
+            await resignGame({ gameId });
+            // The game will be automatically moved to history via Firestore listeners
+        } catch (error) {
+            console.error('Failed to resign game:', error);
+        }
+    };
+
     return (
         <LinearGradient
             colors={[colors.GRADIENT_START, colors.GRADIENT_MID, colors.GRADIENT_END]}
@@ -250,10 +308,19 @@ export default function Home({ navigation }) {
                         loading={activeGamesLoading}
                         acceptGameInvite={acceptGameInvite}
                         declineGameInvite={declineGameInvite}
+                        resignGame={handleResignGame}
                     />
                 )}
 
                 {/* Game Mode Cards */}
+                <MatchmakingCard
+                    searching={searching}
+                    queueCount={queueCount}
+                    loading={matchmakingLoading}
+                    onStartSearch={startSearching}
+                    onStopSearch={stopSearching}
+                />
+
                 <GameModeCard
                     title='Play vs Computer'
                     description='Start a new game against the AI'
@@ -280,6 +347,7 @@ export default function Home({ navigation }) {
                         loading={activeGamesLoading}
                         acceptGameInvite={acceptGameInvite}
                         declineGameInvite={declineGameInvite}
+                        resignGame={handleResignGame}
                     />
                 )}
 
