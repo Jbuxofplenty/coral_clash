@@ -20,12 +20,46 @@
         "preview": {
             "distribution": "internal",
             "channel": "preview",
-            "node": "22.11.0"
+            "node": "22.11.0",
+            "env": {
+                "EXPO_PUBLIC_FIREBASE_API_KEY": "AIzaSyBUsxVR7oBG53yOJ0pKgLs70uk6JVzUl8Y",
+                "EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN": "coral-clash.firebaseapp.com",
+                "EXPO_PUBLIC_FIREBASE_DATABASE_URL": "https://coral-clash-default-rtdb.firebaseio.com",
+                "EXPO_PUBLIC_FIREBASE_PROJECT_ID": "coral-clash",
+                "EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET": "coral-clash.firebasestorage.app",
+                "EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID": "796262519653",
+                "EXPO_PUBLIC_FIREBASE_APP_ID": "1:796262519653:web:9fa8310866f2138fd7878c",
+                "EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID": "G-0PMT54YPL5",
+                "EXPO_PUBLIC_FIREBASE_FUNCTIONS_URL": "https://us-central1-coral-clash.cloudfunctions.net",
+                "EXPO_PUBLIC_USE_FIREBASE_EMULATOR": "false",
+                "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "796262519653-kv6qr2gf8vnihe6bj851ngrbfu8drrr8.apps.googleusercontent.com",
+                "EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID": "796262519653-kv6qr2gf8vnihe6bj851ngrbfu8drrr8.apps.googleusercontent.com",
+                "EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID": "796262519653-kv6qr2gf8vnihe6bj851ngrbfu8drrr8.apps.googleusercontent.com",
+                "EXPO_PUBLIC_GOOGLE_EXPO_CLIENT_ID": "796262519653-kv6qr2gf8vnihe6bj851ngrbfu8drrr8.apps.googleusercontent.com",
+                "EXPO_PUBLIC_ENABLE_DEV_FEATURES": "false"
+            }
         },
         "production": {
             "autoIncrement": true,
             "channel": "production",
-            "node": "22.11.0"
+            "node": "22.11.0",
+            "env": {
+                "EXPO_PUBLIC_FIREBASE_API_KEY": "AIzaSyBUsxVR7oBG53yOJ0pKgLs70uk6JVzUl8Y",
+                "EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN": "coral-clash.firebaseapp.com",
+                "EXPO_PUBLIC_FIREBASE_DATABASE_URL": "https://coral-clash-default-rtdb.firebaseio.com",
+                "EXPO_PUBLIC_FIREBASE_PROJECT_ID": "coral-clash",
+                "EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET": "coral-clash.firebasestorage.app",
+                "EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID": "796262519653",
+                "EXPO_PUBLIC_FIREBASE_APP_ID": "1:796262519653:web:9fa8310866f2138fd7878c",
+                "EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID": "G-0PMT54YPL5",
+                "EXPO_PUBLIC_FIREBASE_FUNCTIONS_URL": "https://us-central1-coral-clash.cloudfunctions.net",
+                "EXPO_PUBLIC_USE_FIREBASE_EMULATOR": "false",
+                "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "796262519653-kv6qr2gf8vnihe6bj851ngrbfu8drrr8.apps.googleusercontent.com",
+                "EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID": "796262519653-kv6qr2gf8vnihe6bj851ngrbfu8drrr8.apps.googleusercontent.com",
+                "EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID": "796262519653-kv6qr2gf8vnihe6bj851ngrbfu8drrr8.apps.googleusercontent.com",
+                "EXPO_PUBLIC_GOOGLE_EXPO_CLIENT_ID": "796262519653-kv6qr2gf8vnihe6bj851ngrbfu8drrr8.apps.googleusercontent.com",
+                "EXPO_PUBLIC_ENABLE_DEV_FEATURES": "false"
+            }
         }
     },
     "submit": {
