@@ -19,12 +19,15 @@ const createMockQueryRef = () => ({
     get: mockGet,
 });
 
+const createMockDocRef = () => ({
+    get: mockGet,
+    update: mockUpdate,
+    set: mockSet,
+    collection: jest.fn(() => createMockCollectionRef()),
+});
+
 const createMockCollectionRef = () => ({
-    doc: jest.fn(() => ({
-        get: mockGet,
-        update: mockUpdate,
-        set: mockSet,
-    })),
+    doc: jest.fn(() => createMockDocRef()),
     add: mockAdd,
     where: mockWhere,
 });
@@ -106,7 +109,22 @@ describe('Game Creation Functions', () => {
                 data: () => ({
                     displayName: 'Creator',
                     discriminator: '5678',
-                    settings: { avatarKey: 'dolphin' },
+                }),
+            });
+
+            // Mock creator settings (subcollection)
+            mockGet.mockResolvedValueOnce({
+                exists: true,
+                data: () => ({
+                    avatarKey: 'dolphin',
+                }),
+            });
+
+            // Mock opponent settings (subcollection)
+            mockGet.mockResolvedValueOnce({
+                exists: true,
+                data: () => ({
+                    avatarKey: 'whale',
                 }),
             });
 
@@ -251,7 +269,22 @@ describe('Game Creation Functions', () => {
                 data: () => ({
                     displayName: 'Creator',
                     discriminator: '5678',
-                    settings: { avatarKey: 'dolphin' },
+                }),
+            });
+
+            // Mock creator settings (subcollection)
+            mockGet.mockResolvedValueOnce({
+                exists: true,
+                data: () => ({
+                    avatarKey: 'dolphin',
+                }),
+            });
+
+            // Mock opponent settings (subcollection)
+            mockGet.mockResolvedValueOnce({
+                exists: true,
+                data: () => ({
+                    avatarKey: 'whale',
                 }),
             });
 

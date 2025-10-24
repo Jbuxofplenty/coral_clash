@@ -118,7 +118,7 @@ describe('User Settings Functions', () => {
             expect(mockSet).toHaveBeenCalled();
         });
 
-        it('should also update main user document if avatarKey is provided', async () => {
+        it('should update settings with avatarKey', async () => {
             const wrapped = test.wrap(userSettings.updateUserSettings);
 
             const newSettings = {
@@ -126,11 +126,14 @@ describe('User Settings Functions', () => {
             };
 
             mockSet.mockResolvedValue();
-            mockUpdate.mockResolvedValue();
 
-            await wrapped({ settings: newSettings }, { auth: { uid: 'test-user-123' } });
+            const result = await wrapped(
+                { settings: newSettings },
+                { auth: { uid: 'test-user-123' } },
+            );
 
-            expect(mockUpdate).toHaveBeenCalled();
+            expect(result.success).toBe(true);
+            expect(mockSet).toHaveBeenCalled();
         });
 
         it('should throw error if settings data is missing', async () => {
@@ -166,15 +169,16 @@ describe('User Settings Functions', () => {
             expect(mockSet).toHaveBeenCalled();
         });
 
-        it('should update main user document avatarKey', async () => {
+        it('should reset avatarKey to default', async () => {
             const wrapped = test.wrap(userSettings.resetUserSettings);
 
             mockSet.mockResolvedValue();
-            mockUpdate.mockResolvedValue();
 
-            await wrapped({}, { auth: { uid: 'test-user-123' } });
+            const result = await wrapped({}, { auth: { uid: 'test-user-123' } });
 
-            expect(mockUpdate).toHaveBeenCalled();
+            expect(result.success).toBe(true);
+            expect(result.settings.avatarKey).toBe('dolphin');
+            expect(mockSet).toHaveBeenCalled();
         });
 
         it('should throw error if user not authenticated', async () => {
