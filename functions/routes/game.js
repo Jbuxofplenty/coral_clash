@@ -154,6 +154,15 @@ exports.createComputerGame = functions.https.onCall(async (data, context) => {
         const { timeControl, difficulty } = data;
         const userId = context.auth.uid;
 
+        // Initialize time control and time remaining
+        const finalTimeControl = timeControl || { type: 'unlimited' };
+        const timeRemaining = finalTimeControl.totalSeconds
+            ? {
+                  [userId]: finalTimeControl.totalSeconds,
+                  computer: finalTimeControl.totalSeconds,
+              }
+            : null;
+
         // Create game document with computer opponent
         const gameData = {
             creatorId: userId,
@@ -162,7 +171,9 @@ exports.createComputerGame = functions.https.onCall(async (data, context) => {
             difficulty: difficulty || 'random', // 'random', 'easy', 'medium', 'hard'
             status: 'active', // Computer games start immediately
             currentTurn: userId, // User goes first (white)
-            timeControl: timeControl || { type: 'unlimited' },
+            timeControl: finalTimeControl,
+            timeRemaining: timeRemaining,
+            lastMoveTime: serverTimestamp(),
             moves: [],
             gameState: initializeGameState(),
             version: GAME_VERSION, // Store game engine version
@@ -233,14 +244,23 @@ exports.respondToGameInvite = functions.https.onCall(async (data, context) => {
             );
         }
 
+        // Prepare update data
+        const updateData = {
+            status: accept ? 'active' : 'cancelled',
+            updatedAt: serverTimestamp(),
+        };
+
+        // If accepted, initialize time tracking
+        if (accept && gameData.timeControl && gameData.timeControl.totalSeconds) {
+            updateData.timeRemaining = {
+                [gameData.creatorId]: gameData.timeControl.totalSeconds,
+                [gameData.opponentId]: gameData.timeControl.totalSeconds,
+            };
+            updateData.lastMoveTime = serverTimestamp();
+        }
+
         // Update game status
-        await db
-            .collection('games')
-            .doc(gameId)
-            .update({
-                status: accept ? 'active' : 'cancelled',
-                updatedAt: serverTimestamp(),
-            });
+        await db.collection('games').doc(gameId).update(updateData);
 
         // If accepted, notify the creator and cancel other pending games
         if (accept) {
@@ -384,7 +404,38 @@ exports.makeMove = functions.https.onCall(async (data, context) => {
               : gameData.creatorId;
 
         // Check if game is over (use full game state, not just FEN)
-        const gameResult = getGameResult(validation.gameState);
+        let gameResult = getGameResult(validation.gameState);
+
+        // Handle time tracking if enabled
+        let updatedTimeRemaining = gameData.timeRemaining;
+        if (gameData.timeControl?.totalSeconds && gameData.timeRemaining && gameData.lastMoveTime) {
+            const now = Date.now();
+            const lastMoveTimestamp = gameData.lastMoveTime.toDate
+                ? gameData.lastMoveTime.toDate().getTime()
+                : gameData.lastMoveTime;
+            const elapsedSeconds = Math.floor((now - lastMoveTimestamp) / 1000);
+
+            // Decrement the current player's time
+            const currentPlayerTime =
+                gameData.timeRemaining[userId] || gameData.timeControl.totalSeconds;
+            const newTimeRemaining = Math.max(0, currentPlayerTime - elapsedSeconds);
+
+            updatedTimeRemaining = {
+                ...gameData.timeRemaining,
+                [userId]: newTimeRemaining,
+            };
+
+            // Check if player ran out of time
+            if (newTimeRemaining <= 0) {
+                gameResult = {
+                    isOver: true,
+                    result: userId === gameData.creatorId ? 'loss' : 'win',
+                    reason: 'timeout',
+                    winner:
+                        userId === gameData.creatorId ? gameData.opponentId : gameData.creatorId,
+                };
+            }
+        }
 
         // Update game with validated state
         const updateData = {
@@ -395,14 +446,26 @@ exports.makeMove = functions.https.onCall(async (data, context) => {
             updatedAt: serverTimestamp(),
         };
 
+        // Update time tracking if enabled
+        if (gameData.timeControl?.totalSeconds) {
+            updateData.timeRemaining = updatedTimeRemaining;
+            updateData.lastMoveTime = serverTimestamp();
+        }
+
         if (gameResult.isOver) {
             updateData.status = 'completed';
             updateData.result = gameResult.result;
             updateData.resultReason = gameResult.reason;
             updateData.winner = gameResult.winner || null;
+            updateData.pendingTimeoutTask = null; // Clear task reference
         }
 
         await db.collection('games').doc(gameId).update(updateData);
+
+        // Cancel pending timeout task if game is over
+        if (gameResult.isOver && gameData.pendingTimeoutTask) {
+            await cancelPendingTimeoutTask(gameId, gameData.pendingTimeoutTask);
+        }
 
         // Notify opponent (if game continues and not computer)
         if (!gameResult.isOver && nextTurn && nextTurn !== 'computer') {
@@ -661,6 +724,12 @@ async function makeComputerMoveHelper(gameId, gameData = null) {
         updateData.result = gameResult.result;
         updateData.resultReason = gameResult.reason;
         updateData.winner = gameResult.winner || null;
+        updateData.pendingTimeoutTask = null; // Clear task reference
+
+        // Cancel pending timeout task
+        if (gameData.pendingTimeoutTask) {
+            await cancelPendingTimeoutTask(gameId, gameData.pendingTimeoutTask);
+        }
 
         // Update player stats
         if (gameResult.winner) {
@@ -727,10 +796,149 @@ async function makeComputerMoveHelper(gameId, gameData = null) {
 }
 
 /**
- * Resign from a game
- * POST /api/game/resign
+ * Check if current player's time has expired and end game if so
+ * Called when loading a game to ensure time limits are enforced
  */
-exports.resignGame = functions.https.onCall(async (data, context) => {
+/**
+ * Cancel pending timeout task for a game
+ */
+async function cancelPendingTimeoutTask(gameId, taskName) {
+    // Skip in emulator
+    if (process.env.FUNCTIONS_EMULATOR === 'true' || !taskName) {
+        return;
+    }
+
+    try {
+        const { CloudTasksClient } = require('@google-cloud/tasks');
+        const client = new CloudTasksClient();
+
+        await client.deleteTask({ name: taskName });
+        console.log(`Cancelled timeout task for game ${gameId}`);
+
+        // Clear the task name from Firestore
+        await db.collection('games').doc(gameId).update({
+            pendingTimeoutTask: null,
+        });
+    } catch (error) {
+        // Task might already be executed or not exist, which is fine
+        console.log(`Could not cancel task for game ${gameId}:`, error.message);
+    }
+}
+
+async function checkAndHandleTimeExpiration(gameId, gameData) {
+    // Only check if game has time control and is active
+    if (
+        !gameData.timeControl?.totalSeconds ||
+        !gameData.timeRemaining ||
+        !gameData.lastMoveTime ||
+        gameData.status !== 'active' ||
+        !gameData.currentTurn
+    ) {
+        return { timeExpired: false };
+    }
+
+    const now = Date.now();
+    const lastMoveTimestamp = gameData.lastMoveTime.toDate
+        ? gameData.lastMoveTime.toDate().getTime()
+        : gameData.lastMoveTime;
+    const elapsedSeconds = Math.floor((now - lastMoveTimestamp) / 1000);
+
+    // Check current player's time
+    const currentPlayerTime =
+        gameData.timeRemaining[gameData.currentTurn] || gameData.timeControl.totalSeconds;
+    const newTimeRemaining = currentPlayerTime - elapsedSeconds;
+
+    if (newTimeRemaining <= 0) {
+        // Time has expired - end the game
+        const loser = gameData.currentTurn;
+        const winner = loser === gameData.creatorId ? gameData.opponentId : gameData.creatorId;
+
+        // Cancel pending timeout task (the current one that triggered this)
+        if (gameData.pendingTimeoutTask) {
+            await cancelPendingTimeoutTask(gameId, gameData.pendingTimeoutTask);
+        }
+
+        // Update game to completed
+        await db
+            .collection('games')
+            .doc(gameId)
+            .update({
+                status: 'completed',
+                result: loser === gameData.creatorId ? 'loss' : 'win',
+                resultReason: 'timeout',
+                winner: winner,
+                timeRemaining: {
+                    ...gameData.timeRemaining,
+                    [loser]: 0,
+                },
+                pendingTimeoutTask: null,
+                updatedAt: serverTimestamp(),
+            });
+
+        // Update stats if not a computer game
+        if (gameData.opponentId !== 'computer') {
+            // Winner gets a win
+            await db
+                .collection('users')
+                .doc(winner)
+                .update({
+                    'stats.gamesPlayed': increment(1),
+                    'stats.gamesWon': increment(1),
+                });
+
+            // Loser gets a loss
+            await db
+                .collection('users')
+                .doc(loser)
+                .update({
+                    'stats.gamesPlayed': increment(1),
+                    'stats.gamesLost': increment(1),
+                });
+
+            // Notify both players
+            await db.collection('notifications').add({
+                userId: winner,
+                type: 'game_over',
+                gameId: gameId,
+                result: 'win',
+                reason: 'timeout',
+                read: false,
+                createdAt: serverTimestamp(),
+            });
+
+            await db.collection('notifications').add({
+                userId: loser,
+                type: 'game_over',
+                gameId: gameId,
+                result: 'loss',
+                reason: 'timeout',
+                read: false,
+                createdAt: serverTimestamp(),
+            });
+        } else {
+            // Computer game - only update user stats
+            const isUserWinner = winner !== 'computer';
+            await db
+                .collection('users')
+                .doc(gameData.creatorId)
+                .update({
+                    'stats.gamesPlayed': increment(1),
+                    'stats.gamesWon': increment(isUserWinner ? 1 : 0),
+                    'stats.gamesLost': increment(isUserWinner ? 0 : 1),
+                });
+        }
+
+        return { timeExpired: true, winner, loser };
+    }
+
+    return { timeExpired: false };
+}
+
+/**
+ * Check game time status
+ * Called when loading a game to check if time has expired
+ */
+exports.checkGameTime = functions.https.onCall(async (data, context) => {
     try {
         if (!context.auth) {
             throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
@@ -752,8 +960,196 @@ exports.resignGame = functions.https.onCall(async (data, context) => {
             throw new functions.https.HttpsError('permission-denied', 'Not a player in this game');
         }
 
+        // Check for time expiration
+        const result = await checkAndHandleTimeExpiration(gameId, gameData);
+
+        return {
+            success: true,
+            timeExpired: result.timeExpired,
+            winner: result.winner || null,
+            loser: result.loser || null,
+        };
+    } catch (error) {
+        console.error('Error checking game time:', error);
+        throw new functions.https.HttpsError('internal', error.message);
+    }
+});
+
+/**
+ * HTTP endpoint for Cloud Tasks to check time expiration
+ * This is called at the exact time when a player's time should expire
+ */
+exports.handleTimeExpiration = functions.https.onRequest(async (req, res) => {
+    try {
+        // Verify this is a Cloud Tasks request (basic security)
+        const { gameId } = req.body;
+
+        if (!gameId) {
+            res.status(400).send('Missing gameId');
+            return;
+        }
+
+        const gameDoc = await db.collection('games').doc(gameId).get();
+
+        if (!gameDoc.exists) {
+            res.status(404).send('Game not found');
+            return;
+        }
+
+        const gameData = gameDoc.data();
+
+        // Check and handle time expiration
+        const result = await checkAndHandleTimeExpiration(gameId, gameData);
+
+        res.status(200).json({
+            success: true,
+            timeExpired: result.timeExpired,
+            winner: result.winner || null,
+            loser: result.loser || null,
+        });
+    } catch (error) {
+        console.error('Error in handleTimeExpiration:', error);
+        res.status(500).send('Internal error');
+    }
+});
+
+/**
+ * Firestore trigger: Schedule time expiration check when lastMoveTime is updated
+ * This ensures we check for timeout at the exact moment time runs out
+ */
+exports.onGameMoveUpdate = functions.firestore
+    .document('games/{gameId}')
+    .onUpdate(async (change, context) => {
+        try {
+            const gameId = context.params.gameId;
+            const beforeData = change.before.data();
+            const afterData = change.after.data();
+
+            // Only proceed if lastMoveTime was updated and game has time control
+            if (
+                !afterData.lastMoveTime ||
+                !afterData.timeControl?.totalSeconds ||
+                !afterData.timeRemaining ||
+                !afterData.currentTurn ||
+                afterData.status !== 'active'
+            ) {
+                return null;
+            }
+
+            // Check if lastMoveTime actually changed (a move was made)
+            const beforeTime = beforeData.lastMoveTime?.toDate?.()?.getTime() || 0;
+            const afterTime = afterData.lastMoveTime?.toDate?.()?.getTime() || 0;
+
+            if (beforeTime === afterTime) {
+                return null;
+            }
+
+            // Calculate when current player's time will expire
+            const currentPlayerTime = afterData.timeRemaining[afterData.currentTurn];
+
+            if (!currentPlayerTime || currentPlayerTime <= 0) {
+                // Time already expired, handle immediately
+                await checkAndHandleTimeExpiration(gameId, afterData);
+                return null;
+            }
+
+            // Skip Cloud Tasks scheduling in emulator (no local emulator available)
+            if (process.env.FUNCTIONS_EMULATOR === 'true') {
+                console.log(
+                    `[Emulator] Skipping Cloud Task scheduling for game ${gameId} - would expire in ${currentPlayerTime}s`,
+                );
+                return null;
+            }
+
+            // Schedule a task to check expiration at the exact time
+            const { CloudTasksClient } = require('@google-cloud/tasks');
+            const client = new CloudTasksClient();
+
+            const project = process.env.GCLOUD_PROJECT || process.env.GCP_PROJECT;
+            const location = process.env.FUNCTION_REGION || 'us-central1';
+            const queue = 'default';
+
+            const parent = client.queuePath(project, location, queue);
+
+            // Calculate schedule time (current time + remaining time)
+            const scheduleTime = new Date(afterTime + currentPlayerTime * 1000);
+
+            // Create the task
+            // Generate unique task name
+            const taskName = `${parent}/tasks/timeout-${gameId}-${afterTime}`;
+
+            const task = {
+                name: taskName,
+                httpRequest: {
+                    httpMethod: 'POST',
+                    url: `https://${location}-${project}.cloudfunctions.net/handleTimeExpiration`,
+                    body: Buffer.from(JSON.stringify({ gameId })).toString('base64'),
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                },
+                scheduleTime: {
+                    seconds: Math.floor(scheduleTime.getTime() / 1000),
+                },
+            };
+
+            const [response] = await client.createTask({ parent, task });
+
+            // Store task name in Firestore for cancellation
+            await db.collection('games').doc(gameId).update({
+                pendingTimeoutTask: response.name,
+            });
+
+            console.log(
+                `Scheduled time expiration check for game ${gameId} at ${scheduleTime.toISOString()}`,
+            );
+            return null;
+        } catch (error) {
+            console.error('Error in onGameMoveUpdate trigger:', error);
+            // Don't throw - we don't want to fail the move because of scheduling issues
+            return null;
+        }
+    });
+
+/**
+ * Resign from a game
+ * POST /api/game/resign
+ */
+exports.resignGame = functions.https.onCall(async (data, context) => {
+    try {
+        console.log('[resignGame] Starting resignation process');
+        if (!context.auth) {
+            console.error('[resignGame] Unauthenticated user');
+            throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
+        }
+
+        const { gameId } = data;
+        const userId = context.auth.uid;
+        console.log('[resignGame] User:', userId, 'Game:', gameId);
+
+        const gameDoc = await db.collection('games').doc(gameId).get();
+
+        if (!gameDoc.exists) {
+            console.error('[resignGame] Game not found:', gameId);
+            throw new functions.https.HttpsError('not-found', 'Game not found');
+        }
+
+        const gameData = gameDoc.data();
+        console.log('[resignGame] Game data retrieved:', {
+            creatorId: gameData.creatorId,
+            opponentId: gameData.opponentId,
+            status: gameData.status,
+        });
+
+        // Verify user is a player in this game
+        if (gameData.creatorId !== userId && gameData.opponentId !== userId) {
+            console.error('[resignGame] User is not a player in this game');
+            throw new functions.https.HttpsError('permission-denied', 'Not a player in this game');
+        }
+
         // Check if game is already over
         if (gameData.status === 'completed' || gameData.status === 'cancelled') {
+            console.error('[resignGame] Game is already finished:', gameData.status);
             throw new functions.https.HttpsError('failed-precondition', 'Game is already finished');
         }
 
@@ -762,6 +1158,7 @@ exports.resignGame = functions.https.onCall(async (data, context) => {
 
         // Determine which color resigned
         const resignedColor = gameData.whitePlayerId === userId ? 'w' : 'b';
+        console.log('[resignGame] Winner:', winner, 'Resigned color:', resignedColor);
 
         // Update the game state with resignation
         const currentGameState = gameData.gameState || { fen: gameData.fen };
@@ -769,6 +1166,13 @@ exports.resignGame = functions.https.onCall(async (data, context) => {
             ...currentGameState,
             resigned: resignedColor,
         };
+
+        console.log('[resignGame] Updating game document to completed status');
+
+        // Cancel pending timeout task
+        if (gameData.pendingTimeoutTask) {
+            await cancelPendingTimeoutTask(gameId, gameData.pendingTimeoutTask);
+        }
 
         // Update game status
         await db
@@ -780,28 +1184,43 @@ exports.resignGame = functions.https.onCall(async (data, context) => {
                 resultReason: 'resignation',
                 winner: winner,
                 gameState: updatedGameState,
+                pendingTimeoutTask: null,
                 updatedAt: serverTimestamp(),
             });
+        console.log('[resignGame] Game document updated successfully');
 
         // Update stats for both players (skip if opponent is computer)
         if (gameData.opponentId !== 'computer') {
-            // Winner gets a win
+            console.log('[resignGame] Updating stats for PvP game');
+            // Winner gets a win - use set with merge to ensure stats exist
             await db
                 .collection('users')
                 .doc(winner)
-                .update({
-                    'stats.gamesPlayed': increment(1),
-                    'stats.gamesWon': increment(1),
-                });
+                .set(
+                    {
+                        stats: {
+                            gamesPlayed: increment(1),
+                            gamesWon: increment(1),
+                        },
+                    },
+                    { merge: true },
+                );
+            console.log('[resignGame] Winner stats updated');
 
-            // Loser (user who resigned) gets a loss
+            // Loser (user who resigned) gets a loss - use set with merge to ensure stats exist
             await db
                 .collection('users')
                 .doc(userId)
-                .update({
-                    'stats.gamesPlayed': increment(1),
-                    'stats.gamesLost': increment(1),
-                });
+                .set(
+                    {
+                        stats: {
+                            gamesPlayed: increment(1),
+                            gamesLost: increment(1),
+                        },
+                    },
+                    { merge: true },
+                );
+            console.log('[resignGame] Loser stats updated');
 
             // Send notification to opponent that they won
             const resignerDoc = await db.collection('users').doc(userId).get();
@@ -822,24 +1241,34 @@ exports.resignGame = functions.https.onCall(async (data, context) => {
                 read: false,
                 createdAt: serverTimestamp(),
             });
+            console.log('[resignGame] Notification sent to winner');
         } else {
-            // Computer game - only update user stats
+            console.log('[resignGame] Updating stats for computer game');
+            // Computer game - only update user stats - use set with merge to ensure stats exist
             await db
                 .collection('users')
                 .doc(userId)
-                .update({
-                    'stats.gamesPlayed': increment(1),
-                    'stats.gamesLost': increment(1),
-                });
+                .set(
+                    {
+                        stats: {
+                            gamesPlayed: increment(1),
+                            gamesLost: increment(1),
+                        },
+                    },
+                    { merge: true },
+                );
+            console.log('[resignGame] User stats updated for computer game');
         }
 
+        console.log('[resignGame] Resignation completed successfully');
         return {
             success: true,
             message: 'Game resigned successfully',
             winner: winner,
         };
     } catch (error) {
-        console.error('Error resigning game:', error);
+        console.error('[resignGame] Error resigning game:', error);
+        console.error('[resignGame] Error stack:', error.stack);
         throw new functions.https.HttpsError('internal', error.message);
     }
 });
@@ -1085,12 +1514,13 @@ exports.getGameHistory = functions.https.onCall(async (data, context) => {
         const userId = context.auth.uid;
 
         // Get games where user is creator or opponent and status is completed or cancelled
+        // Fetch more games to ensure we have enough for stats (top 5 opponents could have multiple games each)
         const creatorGames = await db
             .collection('games')
             .where('creatorId', '==', userId)
             .where('status', 'in', ['completed', 'cancelled'])
             .orderBy('updatedAt', 'desc')
-            .limit(10)
+            .limit(50)
             .get();
 
         const opponentGames = await db
@@ -1098,7 +1528,7 @@ exports.getGameHistory = functions.https.onCall(async (data, context) => {
             .where('opponentId', '==', userId)
             .where('status', 'in', ['completed', 'cancelled'])
             .orderBy('updatedAt', 'desc')
-            .limit(10)
+            .limit(50)
             .get();
 
         const games = [];
@@ -1114,6 +1544,7 @@ exports.getGameHistory = functions.https.onCall(async (data, context) => {
                     ...gameData,
                     opponentDisplayName: 'Computer',
                     opponentAvatarKey: 'computer',
+                    opponentType: 'computer',
                 });
             } else {
                 // Get opponent info for human player
@@ -1150,7 +1581,7 @@ exports.getGameHistory = functions.https.onCall(async (data, context) => {
             });
         }
 
-        // Sort by most recently updated and take top 5
+        // Sort by most recently updated and return all
         games.sort((a, b) => {
             const aTime = a.updatedAt?.toMillis() || 0;
             const bTime = b.updatedAt?.toMillis() || 0;
@@ -1159,7 +1590,7 @@ exports.getGameHistory = functions.https.onCall(async (data, context) => {
 
         return {
             success: true,
-            games: games.slice(0, 5),
+            games: games,
         };
     } catch (error) {
         console.error('Error getting game history:', error);

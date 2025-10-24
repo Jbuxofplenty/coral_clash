@@ -256,7 +256,7 @@ exports.getFriends = functions.https.onCall(async (data, context) => {
                 friends.push({
                     id: friendId,
                     displayName: formatDisplayName(userData.displayName, userData.discriminator),
-                    avatarKey: userData.settings?.avatarKey || 'dolphin',
+                    avatarKey: userData.avatarKey || 'dolphin',
                 });
             }
         }
@@ -278,7 +278,7 @@ exports.getFriends = functions.https.onCall(async (data, context) => {
                     requestId: doc.id,
                     id: request.from,
                     displayName: formatDisplayName(userData.displayName, userData.discriminator),
-                    avatarKey: userData.settings?.avatarKey || 'dolphin',
+                    avatarKey: userData.avatarKey || 'dolphin',
                     createdAt: request.createdAt,
                 });
             }
@@ -297,12 +297,11 @@ exports.getFriends = functions.https.onCall(async (data, context) => {
             const toUserDoc = await db.collection('users').doc(request.to).get();
             if (toUserDoc.exists) {
                 const userData = toUserDoc.data();
-                const avatarKey = userData.settings?.avatarKey || 'dolphin';
                 outgoingRequests.push({
                     requestId: doc.id,
                     id: request.to,
                     displayName: formatDisplayName(userData.displayName, userData.discriminator),
-                    avatarKey: avatarKey,
+                    avatarKey: userData.avatarKey || 'dolphin',
                     createdAt: request.createdAt,
                 });
             }
@@ -425,7 +424,7 @@ exports.searchUsers = functions.https.onCall(async (data, context) => {
                 matchedUsers.push({
                     id: uid,
                     displayName: formatDisplayName(userData.displayName, userData.discriminator),
-                    avatarKey: userData.settings?.avatarKey || 'dolphin',
+                    avatarKey: userData.avatarKey || 'dolphin',
                     matchScore,
                     hasPendingRequest,
                 });

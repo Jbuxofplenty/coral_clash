@@ -23,7 +23,7 @@ import PlayerStatusBar from './PlayerStatusBar';
 import GameStatusBanner from './GameStatusBanner';
 import LoadingScreen from './LoadingScreen';
 import { useTheme, useGamePreferences, useAuth, useAlert } from '../contexts';
-import { useGameActions } from '../hooks';
+import { useGameActions, useFirebaseFunctions } from '../hooks';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -72,6 +72,7 @@ const BaseCoralClashBoard = ({
     const { isBoardFlipped: contextBoardFlipped, toggleBoardFlip } = useGamePreferences();
     const { user } = useAuth();
     const { showAlert } = useAlert();
+    const { checkGameTime } = useFirebaseFunctions();
 
     // Use effective board flip if provided, otherwise use context value
     const isBoardFlipped = effectiveBoardFlip !== null ? effectiveBoardFlip : contextBoardFlipped;
@@ -86,6 +87,7 @@ const BaseCoralClashBoard = ({
         isUserTurn,
         gameData,
         isLoading: gameActionsLoading,
+        isProcessing: isGameActionProcessing,
     } = useGameActions(coralClash, gameId, () => forceUpdate((n) => n + 1));
     const [visibleMoves, setVisibleMoves] = useState([]);
     const [selectedSquare, setSelectedSquare] = useState(null);
@@ -100,6 +102,10 @@ const BaseCoralClashBoard = ({
     const [historyIndex, setHistoryIndex] = useState(null); // null = current state, 0+ = viewing history
     const [historicalBoard, setHistoricalBoard] = useState(null);
     const boardSize = Math.min(width, 400);
+
+    // Time tracking state for local countdown
+    const [localTimeRemaining, setLocalTimeRemaining] = useState(null);
+    const [lastUpdateTime, setLastUpdateTime] = useState(null);
 
     // Safety check - show loading if coralClash is not initialized
     if (!coralClash) {
@@ -184,6 +190,103 @@ const BaseCoralClashBoard = ({
         setIsViewingEnemyMoves(false);
     }, [isBoardFlipped]);
 
+    // Check game time on mount for online games with time control
+    useEffect(() => {
+        const checkTimeOnMount = async () => {
+            if (!gameId || !gameData?.timeControl?.totalSeconds) {
+                return;
+            }
+
+            try {
+                await checkGameTime({ gameId });
+            } catch (error) {
+                console.error('Error checking game time on mount:', error);
+            }
+        };
+
+        checkTimeOnMount();
+        // Only run when gameId or timeControl changes
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [gameId, gameData?.timeControl?.totalSeconds]);
+
+    // Sync local time with server time when gameData updates
+    // Calculate actual remaining time based on elapsed time since lastMoveTime
+    useEffect(() => {
+        if (
+            gameData?.timeRemaining &&
+            gameData?.timeControl?.totalSeconds &&
+            gameData?.lastMoveTime &&
+            gameData?.currentTurn
+        ) {
+            // Calculate elapsed time since last move
+            const now = Date.now();
+            const lastMoveTimestamp = gameData.lastMoveTime.toMillis
+                ? gameData.lastMoveTime.toMillis()
+                : gameData.lastMoveTime;
+            const elapsedSeconds = Math.floor((now - lastMoveTimestamp) / 1000);
+
+            // Calculate actual remaining time for current player
+            const currentPlayerTime = gameData.timeRemaining[gameData.currentTurn];
+            const actualCurrentPlayerTime = Math.max(0, currentPlayerTime - elapsedSeconds);
+
+            // Set the corrected time
+            const correctedTimeRemaining = {
+                ...gameData.timeRemaining,
+                [gameData.currentTurn]: actualCurrentPlayerTime,
+            };
+
+            setLocalTimeRemaining(correctedTimeRemaining);
+            setLastUpdateTime(now);
+        } else if (gameData?.timeRemaining && gameData?.timeControl?.totalSeconds) {
+            // Fallback for unlimited or when game hasn't started
+            setLocalTimeRemaining(gameData.timeRemaining);
+            setLastUpdateTime(Date.now());
+        }
+    }, [
+        gameData?.timeRemaining,
+        gameData?.timeControl,
+        gameData?.lastMoveTime,
+        gameData?.currentTurn,
+    ]);
+
+    // Local countdown timer - decrement every second for active player
+    useEffect(() => {
+        // Stop timer if game is over or time control is not active
+        if (
+            !localTimeRemaining ||
+            !gameData?.timeControl?.totalSeconds ||
+            !gameData?.currentTurn ||
+            gameData?.status === 'completed' ||
+            coralClash?.isGameOver()
+        ) {
+            return;
+        }
+
+        const interval = setInterval(() => {
+            setLocalTimeRemaining((prevTime) => {
+                if (!prevTime || !gameData.currentTurn) return prevTime;
+
+                const currentPlayerTime = prevTime[gameData.currentTurn];
+                if (currentPlayerTime === undefined || currentPlayerTime <= 0) {
+                    return prevTime;
+                }
+
+                return {
+                    ...prevTime,
+                    [gameData.currentTurn]: Math.max(0, currentPlayerTime - 1),
+                };
+            });
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }, [
+        localTimeRemaining,
+        gameData?.timeControl,
+        gameData?.currentTurn,
+        gameData?.status,
+        coralClash,
+    ]);
+
     // Update historical board state when historyIndex changes
     useEffect(() => {
         if (historyIndex === null) {
@@ -265,6 +368,42 @@ const BaseCoralClashBoard = ({
 
     // Get game status message with type for unified banner styling
     const getGameStatus = () => {
+        // Priority 0: Check for timeout from server (for online games)
+        if (gameData?.resultReason === 'timeout' && gameData?.status === 'completed') {
+            const winner = gameData.winner;
+            if (userColor && user) {
+                const didUserWin = winner === user.uid;
+
+                if (didUserWin) {
+                    let opponentName = 'Opponent';
+                    if (opponentType === 'computer') {
+                        opponentName = 'Computer';
+                    } else if (userColor === 'w') {
+                        opponentName = topPlayerData?.name || 'Opponent';
+                    } else {
+                        opponentName = bottomPlayerData?.name || 'Opponent';
+                    }
+                    return {
+                        message: `You won! ${opponentName} ran out of time ⏱️`,
+                        type: 'timeout_win',
+                    };
+                } else {
+                    return {
+                        message: `You lost! Time expired ⏱️`,
+                        type: 'timeout_lose',
+                    };
+                }
+            } else {
+                // Offline or spectator mode
+                const loserColor = gameData.result === 'win' ? 'b' : 'w';
+                const loserName = loserColor === 'w' ? 'White' : 'Black';
+                return {
+                    message: `${loserName} ran out of time! ⏱️`,
+                    type: 'timeout_lose',
+                };
+            }
+        }
+
         // Priority 1: Check real-time resignation status from Firestore (for online games)
         // This ensures immediate display when opponent resigns
         if (opponentResigned) {
@@ -429,8 +568,16 @@ const BaseCoralClashBoard = ({
         setIsViewingEnemyMoves(false);
     };
 
-    const handleResign = () => {
+    const handleResign = async () => {
+        if (isGameActionProcessing) {
+            return;
+        }
+
         closeMenu();
+
+        // Wait for menu animation to complete before showing alert
+        await new Promise((resolve) => setTimeout(resolve, 300));
+
         showAlert('Resign Game', 'Are you sure you want to resign? You will lose the game.', [
             {
                 text: 'Cancel',
@@ -440,7 +587,6 @@ const BaseCoralClashBoard = ({
                 text: 'Resign',
                 style: 'destructive',
                 onPress: async () => {
-                    // Use the resign method from useGameActions hook
                     const success = await resignAPI();
                     if (success) {
                         setVisibleMoves([]);
@@ -833,6 +979,27 @@ const BaseCoralClashBoard = ({
     const isTopPlayerActive = currentTurn === topPlayerColor;
     const isBottomPlayerActive = currentTurn === bottomPlayerColor;
 
+    // Get player IDs for time tracking
+    const getPlayerIdForColor = (color) => {
+        if (!gameData) return null;
+        if (gameData.whitePlayerId && gameData.blackPlayerId) {
+            return color === 'w' ? gameData.whitePlayerId : gameData.blackPlayerId;
+        }
+        // For computer games or when color assignment isn't in game data
+        if (color === 'w') {
+            return gameData.creatorId;
+        }
+        return gameData.opponentId === 'computer' ? 'computer' : gameData.opponentId;
+    };
+
+    const topPlayerId = getPlayerIdForColor(topPlayerColor);
+    const bottomPlayerId = getPlayerIdForColor(bottomPlayerColor);
+
+    const topPlayerTime =
+        localTimeRemaining && topPlayerId ? localTimeRemaining[topPlayerId] : null;
+    const bottomPlayerTime =
+        localTimeRemaining && bottomPlayerId ? localTimeRemaining[bottomPlayerId] : null;
+
     return (
         <View style={styles.container}>
             <View style={{ width: '100%', alignItems: 'center' }}>
@@ -845,6 +1012,7 @@ const BaseCoralClashBoard = ({
                         isActive={isTopPlayerActive}
                         color={topPlayerColor}
                         coralRemaining={coralClash.getCoralRemaining(topPlayerColor)}
+                        timeRemaining={topPlayerTime}
                     />
                 </View>
 
@@ -892,6 +1060,7 @@ const BaseCoralClashBoard = ({
                         isActive={isBottomPlayerActive}
                         color={bottomPlayerColor}
                         coralRemaining={coralClash.getCoralRemaining(bottomPlayerColor)}
+                        timeRemaining={bottomPlayerTime}
                     />
                 </View>
 
@@ -1023,30 +1192,41 @@ const BaseCoralClashBoard = ({
                             <TouchableOpacity
                                 style={[
                                     styles.menuItem,
-                                    { opacity: coralClash.isGameOver() ? 0.5 : 1 },
+                                    {
+                                        opacity:
+                                            coralClash.isGameOver() || isGameActionProcessing
+                                                ? 0.5
+                                                : 1,
+                                    },
                                 ]}
                                 onPress={handleResign}
-                                disabled={coralClash.isGameOver()}
+                                disabled={coralClash.isGameOver() || isGameActionProcessing}
                                 activeOpacity={0.7}
                             >
                                 <Icon
                                     name='flag'
                                     family='MaterialIcons'
                                     size={28}
-                                    color={coralClash.isGameOver() ? colors.MUTED : '#d32f2f'}
+                                    color={
+                                        coralClash.isGameOver() || isGameActionProcessing
+                                            ? colors.MUTED
+                                            : '#d32f2f'
+                                    }
                                 />
                                 <View style={styles.menuItemText}>
                                     <Text
                                         style={[
                                             styles.menuItemTitle,
                                             {
-                                                color: coralClash.isGameOver()
-                                                    ? colors.MUTED
-                                                    : colors.TEXT,
+                                                color:
+                                                    coralClash.isGameOver() ||
+                                                    isGameActionProcessing
+                                                        ? colors.MUTED
+                                                        : colors.TEXT,
                                             },
                                         ]}
                                     >
-                                        Resign Game
+                                        {isGameActionProcessing ? 'Resigning...' : 'Resign Game'}
                                     </Text>
                                     <Text
                                         style={[
@@ -1054,9 +1234,11 @@ const BaseCoralClashBoard = ({
                                             { color: colors.TEXT_SECONDARY },
                                         ]}
                                     >
-                                        {coralClash.isGameOver()
-                                            ? 'Game already ended'
-                                            : 'Forfeit the current game'}
+                                        {isGameActionProcessing
+                                            ? 'Please wait...'
+                                            : coralClash.isGameOver()
+                                              ? 'Game already ended'
+                                              : 'Forfeit the current game'}
                                     </Text>
                                 </View>
                             </TouchableOpacity>

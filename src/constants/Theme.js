@@ -9,7 +9,7 @@ const LIGHT_COLORS = {
     SUCCESS: '#4CAF50',
     WARNING: '#FF9800',
     MUTED: '#979797',
-    INPUT: '#DCDCDC',
+    INPUT: '#D0D0D0',
     ACTIVE: '#1e88e5',
     BUTTON_COLOR: '#1e88e5',
     PLACEHOLDER: '#9FA5AA',

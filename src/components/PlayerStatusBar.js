@@ -50,12 +50,12 @@ export default function PlayerStatusBar({
                 </Text>
                 <View style={styles.statsRow}>
                     {timeRemaining !== undefined && timeRemaining !== null && (
-                        <Text style={[styles.timer, { color: colors.TEXT_SECONDARY }]}>
+                        <Text style={[styles.timer, { color: 'white' }]}>
                             {formatTime(timeRemaining)}
                         </Text>
                     )}
                     {coralRemaining !== undefined && coralRemaining !== null && (
-                        <Text style={[styles.coralCounter, { color: colors.TEXT_SECONDARY }]}>
+                        <Text style={[styles.coralCounter, { color: 'white' }]}>
                             🪸 {coralRemaining}
                         </Text>
                     )}

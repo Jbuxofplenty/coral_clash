@@ -1,15 +1,7 @@
 import { Block, Text, theme } from 'galio-framework';
-import React, { useEffect, useState } from 'react';
-import {
-    ScrollView,
-    StyleSheet,
-    View,
-    Dimensions,
-    ActivityIndicator,
-    TouchableOpacity,
-} from 'react-native';
+import React, { useState } from 'react';
+import { ScrollView, StyleSheet, View, Dimensions } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import { LinearGradient } from 'expo-linear-gradient';
 
 import { Icon, Avatar, LoadingScreen } from '../components';
 import { useAuth, useTheme } from '../contexts';
@@ -25,6 +17,12 @@ export default function Stats({ navigation }) {
     const [loading, setLoading] = useState(true);
     const [gameHistory, setGameHistory] = useState([]);
     const [opponentStats, setOpponentStats] = useState({});
+    const [overallStats, setOverallStats] = useState({
+        gamesPlayed: 0,
+        gamesWon: 0,
+        gamesLost: 0,
+        gamesDraw: 0,
+    });
 
     // Load stats when screen comes into focus
     useFocusEffect(
@@ -40,15 +38,23 @@ export default function Stats({ navigation }) {
 
         try {
             setLoading(true);
-            // Get game history to calculate opponent-specific stats
             const historyResult = await getGameHistory();
             const games = historyResult.games || [];
             setGameHistory(games);
 
-            // Calculate stats per opponent
+            // Calculate stats per opponent and overall stats
             const stats = {};
+            const overall = {
+                gamesPlayed: 0,
+                gamesWon: 0,
+                gamesLost: 0,
+                gamesDraw: 0,
+            };
+
             games.forEach((game) => {
-                if (game.status !== 'completed') return;
+                if (game.status !== 'completed') {
+                    return;
+                }
 
                 // Determine opponent based on game type
                 let opponentId,
@@ -56,15 +62,24 @@ export default function Stats({ navigation }) {
                     opponentAvatar,
                     isComputer = false;
 
-                if (game.gameType === 'computer' || game.isComputer) {
+                // First determine opponentId
+                const potentialOpponentId =
+                    game.creatorId === user.uid ? game.opponentId : game.creatorId;
+
+                if (
+                    game.gameType === 'computer' ||
+                    game.isComputer ||
+                    game.opponentType === 'computer' ||
+                    potentialOpponentId === 'computer'
+                ) {
                     // Computer opponent
-                    opponentId = `computer_${game.difficulty || 'easy'}`;
-                    opponentName = `Computer (${game.difficulty || 'Easy'})`;
+                    opponentId = 'computer';
+                    opponentName = 'Computer';
                     opponentAvatar = 'computer';
                     isComputer = true;
                 } else {
                     // PvP opponent
-                    opponentId = game.creatorId === user.uid ? game.opponentId : game.creatorId;
+                    opponentId = potentialOpponentId;
                     opponentName =
                         game.opponentDisplayName || game.opponentName || 'Unknown Player';
                     opponentAvatar = game.opponentAvatarKey || 'dolphin';
@@ -86,30 +101,46 @@ export default function Stats({ navigation }) {
                 let userWon = false;
                 let userLost = false;
 
-                if (game.gameType === 'computer' || game.isComputer) {
-                    // For computer games, check if user won directly
-                    userWon = game.result?.winner === 'player' || game.winner === user.uid;
-                    userLost =
-                        game.result?.winner === 'computer' ||
-                        (game.winner && game.winner !== user.uid);
+                if (
+                    game.gameType === 'computer' ||
+                    game.isComputer ||
+                    game.opponentType === 'computer'
+                ) {
+                    // For computer games, user is always white ('w')
+                    // Winner is stored as 'w' or 'b' (the color that won)
+                    const winner = game.winner || game.result?.winner;
+                    if (winner) {
+                        userWon = winner === 'w'; // User always plays white against computer
+                        userLost = winner === 'b' || winner === 'computer';
+                    }
                 } else {
-                    // For PvP games
+                    // For PvP games - check both winner field and result.winner for compatibility
                     const userColor = game.creatorId === user.uid ? 'w' : 'b';
-                    userWon = game.result?.winner === userColor;
-                    userLost = game.result?.winner && game.result?.winner !== userColor;
+                    const winner = game.winner || game.result?.winner;
+
+                    if (winner) {
+                        userWon = winner === userColor || winner === user.uid;
+                        userLost = winner !== userColor && winner !== user.uid;
+                    }
+                    // If no winner, it's a draw (handled by else clause below)
                 }
 
                 if (userWon) {
                     stats[opponentId].wins++;
+                    overall.gamesWon++;
                 } else if (userLost) {
                     stats[opponentId].losses++;
+                    overall.gamesLost++;
                 } else {
                     stats[opponentId].draws++;
+                    overall.gamesDraw++;
                 }
                 stats[opponentId].total++;
+                overall.gamesPlayed++;
             });
 
             setOpponentStats(stats);
+            setOverallStats(overall);
         } catch (error) {
             console.error('Error loading stats:', error);
         } finally {
@@ -240,14 +271,7 @@ export default function Stats({ navigation }) {
         return <LoadingScreen />;
     }
 
-    const stats = user?.stats || {
-        gamesPlayed: 0,
-        gamesWon: 0,
-        gamesLost: 0,
-        gamesDraw: 0,
-    };
-
-    const overallWinRate = calculateWinRate(stats.gamesWon, stats.gamesPlayed);
+    const overallWinRate = calculateWinRate(overallStats.gamesWon, overallStats.gamesPlayed);
     const sortedOpponents = Object.entries(opponentStats).sort((a, b) => b[1].total - a[1].total);
 
     return (
@@ -267,37 +291,70 @@ export default function Stats({ navigation }) {
                         Overall Statistics
                     </Text>
 
+                    {/* Large Games Played Card */}
+                    <Block
+                        style={[
+                            styles.largeStatCard,
+                            {
+                                backgroundColor: colors.CARD_BACKGROUND,
+                                borderColor: colors.BORDER_COLOR,
+                                shadowColor: colors.SHADOW,
+                            },
+                        ]}
+                    >
+                        <Block center>
+                            <Block
+                                center
+                                style={{
+                                    width: 80,
+                                    height: 80,
+                                    borderRadius: 40,
+                                    backgroundColor: colors.PRIMARY + '15',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    marginBottom: 16,
+                                }}
+                            >
+                                <Icon
+                                    name='gamepad'
+                                    family='font-awesome'
+                                    size={40}
+                                    color={colors.PRIMARY}
+                                />
+                            </Block>
+                            <Text size={48} bold color={colors.TEXT} style={{ marginBottom: 8 }}>
+                                {overallStats.gamesPlayed}
+                            </Text>
+                            <Text size={18} color={colors.TEXT_SECONDARY}>
+                                Games Played
+                            </Text>
+                        </Block>
+                    </Block>
+
                     {/* Stats Grid */}
                     <Block row style={styles.statsGrid}>
                         {renderStatCard(
-                            'Games Played',
-                            stats.gamesPlayed,
-                            'gamepad',
-                            colors.PRIMARY,
+                            'Wins',
+                            overallStats.gamesWon,
+                            'check-circle',
+                            colors.SUCCESS,
                         )}
                         {renderStatCard(
-                            'Win Rate',
-                            `${overallWinRate}%`,
-                            'trophy',
-                            colors.WARNING,
-                            `${stats.gamesWon} wins`,
+                            'Losses',
+                            overallStats.gamesLost,
+                            'times-circle',
+                            colors.ERROR,
                         )}
-                    </Block>
-
-                    <Block row style={styles.statsGrid}>
-                        {renderStatCard('Wins', stats.gamesWon, 'check-circle', colors.SUCCESS)}
-                        {renderStatCard('Losses', stats.gamesLost, 'times-circle', colors.ERROR)}
                     </Block>
 
                     <Block row style={[styles.statsGrid, { marginBottom: theme.SIZES.BASE * 2 }]}>
-                        {renderStatCard('Draws', stats.gamesDraw, 'minus-circle', colors.INFO)}
                         {renderStatCard(
-                            'Completed',
-                            gameHistory.length,
-                            'history',
-                            colors.TEXT_SECONDARY,
-                            'Recent games',
+                            'Draws',
+                            overallStats.gamesDraw,
+                            'minus-circle',
+                            colors.INFO,
                         )}
+                        {renderStatCard('Win Rate', `${overallWinRate}%`, 'trophy', colors.WARNING)}
                     </Block>
                 </Block>
 
@@ -322,15 +379,17 @@ export default function Stats({ navigation }) {
                             Win rates against each opponent (PvP & Computer)
                         </Text>
                         <Block>
-                            {sortedOpponents.map(([opponentId, opponentData]) =>
-                                renderOpponentRow(opponentId, opponentData),
-                            )}
+                            {sortedOpponents
+                                .slice(0, 5)
+                                .map(([opponentId, opponentData]) =>
+                                    renderOpponentRow(opponentId, opponentData),
+                                )}
                         </Block>
                     </Block>
                 )}
 
                 {/* Empty State */}
-                {stats.gamesPlayed === 0 && (
+                {overallStats.gamesPlayed === 0 && (
                     <Block
                         center
                         style={[
@@ -392,6 +451,17 @@ const styles = StyleSheet.create({
     statsGrid: {
         justifyContent: 'space-between',
         marginBottom: theme.SIZES.BASE * 1.5,
+    },
+    largeStatCard: {
+        width: '100%',
+        borderRadius: 20,
+        padding: theme.SIZES.BASE * 3,
+        marginBottom: theme.SIZES.BASE * 1.5,
+        borderWidth: 1,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.15,
+        shadowRadius: 8,
+        elevation: 5,
     },
     statCard: {
         width: (width - theme.SIZES.BASE * 4) / 2,

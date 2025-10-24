@@ -10,6 +10,7 @@ import GameHistoryCard from './GameHistoryCard';
 import PlayerStatusBar from './PlayerStatusBar';
 import GameStatusBanner from './GameStatusBanner';
 import MatchmakingCard from './MatchmakingCard';
+import TimeControlModal from './TimeControlModal';
 
 export {
     Icon,
@@ -24,4 +25,5 @@ export {
     PlayerStatusBar,
     GameStatusBanner,
     MatchmakingCard,
+    TimeControlModal,
 };

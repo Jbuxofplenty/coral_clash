@@ -1,357 +1,81 @@
 import { Block, Text, theme } from 'galio-framework';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
     ActivityIndicator,
-    Alert,
     ScrollView,
     StyleSheet,
     TouchableOpacity,
     TextInput,
     Dimensions,
     View,
+    RefreshControl,
 } from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
 
-import { Icon, Avatar, LoadingScreen } from '../components';
-import { useAuth, useTheme, useAlert } from '../contexts';
-import { useFirebaseFunctions, useGame } from '../hooks';
-import { db, collection, query, where, onSnapshot } from '../config/firebase';
+import { Icon, Avatar, LoadingScreen, TimeControlModal } from '../components';
+import { useAuth, useTheme } from '../contexts';
+import { useFriends, useUserSearch, useGame } from '../hooks';
 
 const { width } = Dimensions.get('screen');
 
 export default function Friends({ navigation }) {
     const { user } = useAuth();
     const { colors, isDarkMode } = useTheme();
-    const { showAlert } = useAlert();
-    const { getFriends, sendFriendRequest, respondToFriendRequest, removeFriend, searchUsers } =
-        useFirebaseFunctions();
     const { sendGameRequest } = useGame();
 
-    const [loading, setLoading] = useState(true);
-    const [friends, setFriends] = useState([]);
-    const [incomingRequests, setIncomingRequests] = useState([]);
-    const [outgoingRequests, setOutgoingRequests] = useState([]);
-    const [searchQuery, setSearchQuery] = useState('');
-    const [searchResults, setSearchResults] = useState([]);
-    const [searching, setSearching] = useState(false);
-    const [showDropdown, setShowDropdown] = useState(false);
-    const [sending, setSending] = useState(false);
-    const [removingFriendId, setRemovingFriendId] = useState(null);
-    const [acceptingRequestId, setAcceptingRequestId] = useState(null);
-    const [decliningRequestId, setDecliningRequestId] = useState(null);
-    const searchTimeoutRef = React.useRef(null);
+    // Friends management
+    const {
+        loading,
+        refreshing,
+        friends,
+        incomingRequests,
+        outgoingRequests,
+        removingFriendId,
+        acceptingRequestId,
+        decliningRequestId,
+        handleRefresh,
+        handleRemoveFriend,
+        handleAcceptRequest,
+        handleDeclineRequest,
+        handleCancelRequest,
+    } = useFriends();
 
-    // Set up real-time Firestore listeners when screen comes into focus
-    useFocusEffect(
-        React.useCallback(() => {
-            if (!user || !user.uid) return;
+    // User search
+    const {
+        searchQuery,
+        searchResults,
+        searching,
+        showDropdown,
+        sending,
+        handleSearch,
+        handleSearchFocus,
+        handleSearchBlur,
+        handleSelectUser,
+    } = useUserSearch();
 
-            let friendsUnsubscribe = null;
-            let incomingUnsubscribe = null;
-            let outgoingUnsubscribe = null;
-
-            const setupListeners = async () => {
-                try {
-                    setLoading(true);
-
-                    // Listen to user's friends subcollection
-                    const friendsRef = collection(db, 'users', user.uid, 'friends');
-                    friendsUnsubscribe = onSnapshot(
-                        friendsRef,
-                        async (snapshot) => {
-                            // Whenever the friends subcollection changes (add, delete, modify),
-                            // fetch the updated friends list
-                            try {
-                                const result = await getFriends();
-                                setFriends(result.friends || []);
-
-                                // Clear loading state if the friend being removed is no longer in the list
-                                setRemovingFriendId((currentId) => {
-                                    if (
-                                        currentId &&
-                                        !result.friends.some((f) => f.id === currentId)
-                                    ) {
-                                        return null;
-                                    }
-                                    return currentId;
-                                });
-                            } catch (error) {
-                                console.error('Error fetching friends:', error);
-                            }
-                        },
-                        (error) => {
-                            console.error('Error in friends listener:', error);
-                        },
-                    );
-
-                    // Listen to incoming friend requests
-                    const incomingQuery = query(
-                        collection(db, 'friendRequests'),
-                        where('to', '==', user.uid),
-                        where('status', '==', 'pending'),
-                    );
-                    incomingUnsubscribe = onSnapshot(
-                        incomingQuery,
-                        async () => {
-                            try {
-                                const result = await getFriends();
-                                setIncomingRequests(result.incomingRequests || []);
-
-                                // Clear loading states if requests no longer exist
-                                setAcceptingRequestId((currentId) => {
-                                    if (
-                                        currentId &&
-                                        !result.incomingRequests.some(
-                                            (r) => r.requestId === currentId,
-                                        )
-                                    ) {
-                                        return null;
-                                    }
-                                    return currentId;
-                                });
-                                setDecliningRequestId((currentId) => {
-                                    if (
-                                        currentId &&
-                                        !result.incomingRequests.some(
-                                            (r) => r.requestId === currentId,
-                                        )
-                                    ) {
-                                        return null;
-                                    }
-                                    return currentId;
-                                });
-                            } catch (error) {
-                                console.error('Error fetching incoming requests:', error);
-                            }
-                        },
-                        (error) => {
-                            console.error('Error in incoming requests listener:', error);
-                        },
-                    );
-
-                    // Listen to outgoing friend requests
-                    const outgoingQuery = query(
-                        collection(db, 'friendRequests'),
-                        where('from', '==', user.uid),
-                        where('status', '==', 'pending'),
-                    );
-                    outgoingUnsubscribe = onSnapshot(
-                        outgoingQuery,
-                        async () => {
-                            try {
-                                const result = await getFriends();
-                                setOutgoingRequests(result.outgoingRequests || []);
-
-                                // Clear declining state if request no longer exists (for cancellations)
-                                setDecliningRequestId((currentId) => {
-                                    if (
-                                        currentId &&
-                                        !result.outgoingRequests.some(
-                                            (r) => r.requestId === currentId,
-                                        )
-                                    ) {
-                                        return null;
-                                    }
-                                    return currentId;
-                                });
-                            } catch (error) {
-                                console.error('Error fetching outgoing requests:', error);
-                            }
-                        },
-                        (error) => {
-                            console.error('Error in outgoing requests listener:', error);
-                        },
-                    );
-
-                    // Initial load
-                    const result = await getFriends();
-                    setFriends(result.friends || []);
-                    setIncomingRequests(result.incomingRequests || []);
-                    setOutgoingRequests(result.outgoingRequests || []);
-                } catch (error) {
-                    console.error('Error setting up listeners:', error);
-                } finally {
-                    setLoading(false);
-                }
-            };
-
-            setupListeners();
-
-            // Cleanup listeners when screen loses focus or unmounts
-            return () => {
-                if (friendsUnsubscribe) friendsUnsubscribe();
-                if (incomingUnsubscribe) incomingUnsubscribe();
-                if (outgoingUnsubscribe) outgoingUnsubscribe();
-            };
-            // eslint-disable-next-line react-hooks/exhaustive-deps
-        }, [user]),
-    );
-
-    const loadFriends = async () => {
-        if (!user || !user.uid) return;
-
-        try {
-            setLoading(true);
-            const result = await getFriends();
-            setFriends(result.friends || []);
-            setIncomingRequests(result.incomingRequests || []);
-            setOutgoingRequests(result.outgoingRequests || []);
-        } catch (error) {
-            console.error('Error loading friends:', error);
-            setFriends([]);
-            setIncomingRequests([]);
-            setOutgoingRequests([]);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleSearch = async (query) => {
-        setSearchQuery(query);
-
-        // Clear previous timeout
-        if (searchTimeoutRef.current) {
-            clearTimeout(searchTimeoutRef.current);
-        }
-
-        // Hide dropdown if query is too short
-        if (query.trim().length < 2) {
-            setShowDropdown(false);
-            setSearchResults([]);
-            return;
-        }
-
-        // Debounce search
-        searchTimeoutRef.current = setTimeout(async () => {
-            try {
-                setSearching(true);
-                setShowDropdown(true);
-                const result = await searchUsers(query);
-                setSearchResults(result.users || []);
-            } catch (error) {
-                console.error('Error searching users:', error);
-                setSearchResults([]);
-            } finally {
-                setSearching(false);
-            }
-        }, 300);
-    };
-
-    const handleSearchFocus = () => {
-        // Show dropdown only if there's a valid search query and results exist
-        if (searchQuery.trim().length >= 2 && (searchResults.length > 0 || searching)) {
-            setShowDropdown(true);
-        }
-    };
-
-    const handleSearchBlur = () => {
-        // Hide dropdown when focus is lost
-        setTimeout(() => {
-            setShowDropdown(false);
-        }, 200);
-    };
-
-    const handleSelectUser = async (selectedUser) => {
-        if (selectedUser.hasPendingRequest) {
-            showAlert(
-                'Pending Request',
-                'You already have a pending friend request with this user.',
-            );
-            return;
-        }
-
-        try {
-            setSending(true);
-            await sendFriendRequest(selectedUser.id);
-            // Clear search state completely
-            setSearchQuery('');
-            setShowDropdown(false);
-            setSearchResults([]);
-            // Clear any pending search timeouts
-            if (searchTimeoutRef.current) {
-                clearTimeout(searchTimeoutRef.current);
-            }
-            // Note: Real-time listener will auto-update the UI
-        } catch (error) {
-            console.error('Error sending friend request:', error);
-            showAlert('Error', error.message || 'Failed to send friend request');
-        } finally {
-            setSending(false);
-        }
-    };
-
-    const handleRemoveFriend = (friendId, friendDisplayName) => {
-        showAlert(
-            'Remove Friend',
-            `Are you sure you want to remove ${friendDisplayName} from your friends?`,
-            [
-                { text: 'Cancel', style: 'cancel' },
-                {
-                    text: 'Remove',
-                    style: 'destructive',
-                    onPress: async () => {
-                        try {
-                            setRemovingFriendId(friendId);
-                            await removeFriend(friendId);
-                            // Note: Real-time listener will auto-update the UI
-                        } catch (error) {
-                            console.error('Error removing friend:', error);
-                            showAlert('Error', 'Failed to remove friend');
-                            setRemovingFriendId(null);
-                        }
-                    },
-                },
-            ],
-        );
-    };
-
-    const handleAcceptRequest = async (requestId, userId) => {
-        try {
-            setAcceptingRequestId(requestId);
-            await respondToFriendRequest(requestId, true);
-            // Note: Real-time listener will auto-update the UI
-        } catch (error) {
-            console.error('Error accepting friend request:', error);
-            showAlert('Error', 'Failed to accept friend request');
-            setAcceptingRequestId(null);
-        }
-    };
-
-    const handleDeclineRequest = async (requestId) => {
-        try {
-            setDecliningRequestId(requestId);
-            await respondToFriendRequest(requestId, false);
-            // Note: Real-time listener will auto-update the UI
-        } catch (error) {
-            console.error('Error declining friend request:', error);
-            showAlert('Error', 'Failed to decline friend request');
-            setDecliningRequestId(null);
-        }
-    };
-
-    const handleCancelRequest = async (requestId, displayName) => {
-        showAlert('Cancel Friend Request', `Cancel friend request to ${displayName}?`, [
-            { text: 'No', style: 'cancel' },
-            {
-                text: 'Yes, Cancel',
-                style: 'destructive',
-                onPress: async () => {
-                    try {
-                        setDecliningRequestId(requestId);
-                        await respondToFriendRequest(requestId, false);
-                        // Note: Real-time listener will auto-update the UI
-                    } catch (error) {
-                        console.error('Error canceling friend request:', error);
-                        showAlert('Error', 'Failed to cancel friend request');
-                        setDecliningRequestId(null);
-                    }
-                },
-            },
-        ]);
-    };
+    // Time control modal state
+    const [timeControlModalVisible, setTimeControlModalVisible] = useState(false);
+    const [pendingGameRequest, setPendingGameRequest] = useState(null);
 
     const handleStartGame = async (friendId, friendName) => {
-        await sendGameRequest(friendId, friendName);
+        setPendingGameRequest({ friendId, friendName });
+        setTimeControlModalVisible(true);
+    };
+
+    const handleTimeControlSelect = async (timeControl) => {
+        setTimeControlModalVisible(false);
+        if (pendingGameRequest) {
+            await sendGameRequest(
+                pendingGameRequest.friendId,
+                pendingGameRequest.friendName,
+                timeControl,
+            );
+            setPendingGameRequest(null);
+        }
+    };
+
+    const handleTimeControlCancel = () => {
+        setTimeControlModalVisible(false);
+        setPendingGameRequest(null);
     };
 
     const renderFriendItem = (friend) => {
@@ -456,6 +180,14 @@ export default function Friends({ navigation }) {
             <ScrollView
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={styles.scrollContainer}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={handleRefresh}
+                        tintColor={colors.PRIMARY}
+                        colors={[colors.PRIMARY]}
+                    />
+                }
             >
                 <Block>
                     {/* Add Friend Section */}
@@ -883,6 +615,13 @@ export default function Friends({ navigation }) {
                     </Block>
                 </Block>
             </ScrollView>
+
+            {/* Time Control Modal */}
+            <TimeControlModal
+                visible={timeControlModalVisible}
+                onSelect={handleTimeControlSelect}
+                onCancel={handleTimeControlCancel}
+            />
         </View>
     );
 }

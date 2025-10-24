@@ -134,6 +134,7 @@ describe('Matchmaking Functions', () => {
                 avatarKey: 'dolphin',
                 joinedAt: expect.any(Object),
                 status: 'searching',
+                timeControl: { type: 'unlimited' },
             });
         });
 

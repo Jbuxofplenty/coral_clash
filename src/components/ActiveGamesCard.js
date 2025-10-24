@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Block, Text, theme } from 'galio-framework';
 import { View, StyleSheet, TouchableOpacity, ActivityIndicator, Dimensions } from 'react-native';
-import { useTheme, useAuth } from '../contexts';
+import { useTheme, useAuth, useAlert } from '../contexts';
 import Icon from './Icon';
 import Avatar from './Avatar';
 
@@ -22,6 +22,7 @@ export default function ActiveGamesCard({
 }) {
     const { colors } = useTheme();
     const { user } = useAuth();
+    const { showAlert } = useAlert();
     const [acceptingGameId, setAcceptingGameId] = useState(null);
     const [decliningGameId, setDecliningGameId] = useState(null);
     const [resigningGameId, setResigningGameId] = useState(null);
@@ -68,14 +69,33 @@ export default function ActiveGamesCard({
     };
 
     const handleResignGame = async (gameId) => {
-        try {
-            setResigningGameId(gameId);
-            await resignGame(gameId);
-        } catch (error) {
-            console.error('Error resigning game:', error);
-        } finally {
-            setResigningGameId(null);
-        }
+        // Show confirmation dialog before resigning
+        showAlert('Resign Game', 'Are you sure you want to resign? You will lose this game.', [
+            {
+                text: 'Cancel',
+                style: 'cancel',
+                onPress: () => {
+                    console.log('[ActiveGamesCard] Resign cancelled');
+                },
+            },
+            {
+                text: 'Resign',
+                style: 'destructive',
+                onPress: async () => {
+                    try {
+                        console.log('[ActiveGamesCard] Starting resignation for game:', gameId);
+                        setResigningGameId(gameId);
+                        await resignGame(gameId);
+                        console.log('[ActiveGamesCard] Resignation completed');
+                    } catch (error) {
+                        console.error('[ActiveGamesCard] Error resigning game:', error);
+                        showAlert('Error', 'Failed to resign game. Please try again.');
+                    } finally {
+                        setResigningGameId(null);
+                    }
+                },
+            },
+        ]);
     };
 
     const getGameStatus = (game) => {
@@ -132,6 +152,37 @@ export default function ActiveGamesCard({
             displayName: game.opponentDisplayName || 'Opponent',
             isComputer: false,
         };
+    };
+
+    const getTimeControlInfo = (game) => {
+        const timeControl = game.timeControl || { type: 'unlimited' };
+
+        switch (timeControl.type) {
+            case 'blitz':
+                return {
+                    icon: 'bolt',
+                    iconFamily: 'font-awesome',
+                    label: 'Blitz',
+                };
+            case 'normal':
+                return {
+                    icon: 'clock-o',
+                    iconFamily: 'font-awesome',
+                    label: 'Normal',
+                };
+            case 'unlimited':
+                return {
+                    icon: 'infinite',
+                    iconFamily: 'ionicon',
+                    label: 'Unlimited',
+                };
+            default:
+                return {
+                    icon: 'clock-o',
+                    iconFamily: 'font-awesome',
+                    label: 'Timed',
+                };
+        }
     };
 
     // Don't show card if user is not authenticated
@@ -211,6 +262,8 @@ export default function ActiveGamesCard({
                             decliningGameId === game.id ||
                             resigningGameId === game.id;
 
+                        const timeControlInfo = getTimeControlInfo(game);
+
                         return (
                             <TouchableOpacity
                                 key={game.id || index}
@@ -236,32 +289,59 @@ export default function ActiveGamesCard({
                                             style={styles.avatar}
                                         />
                                         <Block flex style={styles.gameInfo}>
-                                            <Text
-                                                size={16}
-                                                bold
-                                                style={[
-                                                    styles.opponentName,
-                                                    { color: colors.TEXT },
-                                                ]}
-                                                numberOfLines={1}
-                                            >
-                                                vs {opponent.displayName}
-                                            </Text>
+                                            <Block row middle style={{ marginBottom: 3 }}>
+                                                <Text
+                                                    size={16}
+                                                    bold
+                                                    style={{ color: colors.TEXT }}
+                                                    numberOfLines={1}
+                                                >
+                                                    vs {opponent.displayName}
+                                                </Text>
+                                            </Block>
                                             <Block row middle>
+                                                {status.icon ? (
+                                                    <>
+                                                        <Icon
+                                                            name={status.icon}
+                                                            family='font-awesome'
+                                                            size={12}
+                                                            color={status.color}
+                                                        />
+                                                        <Text
+                                                            size={13}
+                                                            style={[
+                                                                styles.statusText,
+                                                                { color: status.color },
+                                                            ]}
+                                                        >
+                                                            {status.text}
+                                                        </Text>
+                                                        <Text
+                                                            size={13}
+                                                            style={{
+                                                                color: colors.TEXT_SECONDARY,
+                                                                marginHorizontal: 6,
+                                                            }}
+                                                        >
+                                                            •
+                                                        </Text>
+                                                    </>
+                                                ) : null}
                                                 <Icon
-                                                    name={status.icon}
-                                                    family='font-awesome'
-                                                    size={12}
-                                                    color={status.color}
+                                                    name={timeControlInfo.icon}
+                                                    family={timeControlInfo.iconFamily}
+                                                    size={11}
+                                                    color={colors.TEXT}
                                                 />
                                                 <Text
-                                                    size={13}
-                                                    style={[
-                                                        styles.statusText,
-                                                        { color: status.color },
-                                                    ]}
+                                                    size={12}
+                                                    style={{
+                                                        color: colors.TEXT,
+                                                        marginLeft: 5,
+                                                    }}
                                                 >
-                                                    {status.text}
+                                                    {timeControlInfo.label}
                                                 </Text>
                                             </Block>
                                         </Block>
@@ -457,9 +537,6 @@ const styles = StyleSheet.create({
     },
     gameInfo: {
         marginRight: theme.SIZES.BASE * 0.75,
-    },
-    opponentName: {
-        marginBottom: 3,
     },
     statusText: {
         marginLeft: 6,

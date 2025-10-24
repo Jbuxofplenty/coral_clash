@@ -16,6 +16,7 @@ exports.joinMatchmaking = functions.https.onCall(async (data, context) => {
         }
 
         const userId = context.auth.uid;
+        const { timeControl } = data;
 
         // Check if user is already in queue
         const existingEntry = await db.collection('matchmakingQueue').doc(userId).get();
@@ -65,8 +66,10 @@ exports.joinMatchmaking = functions.https.onCall(async (data, context) => {
                 userId,
                 displayName: userData.displayName || 'User',
                 discriminator: userData.discriminator || '',
-                avatarKey: userData.settings?.avatarKey || 'dolphin',
+                avatarKey: userData.avatarKey || 'dolphin',
+                timeControl: timeControl || { type: 'unlimited' },
                 joinedAt: serverTimestamp(),
+                lastHeartbeat: serverTimestamp(), // Track last activity
                 status: 'searching', // searching, matched
             });
 
@@ -112,6 +115,42 @@ exports.leaveMatchmaking = functions.https.onCall(async (data, context) => {
 });
 
 /**
+ * Update heartbeat for matchmaking queue entry
+ * POST /api/matchmaking/heartbeat
+ */
+exports.updateMatchmakingHeartbeat = functions.https.onCall(async (data, context) => {
+    try {
+        if (!context.auth) {
+            throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
+        }
+
+        const userId = context.auth.uid;
+
+        // Check if user is in queue
+        const queueDoc = await db.collection('matchmakingQueue').doc(userId).get();
+        if (!queueDoc.exists) {
+            return {
+                success: false,
+                message: 'Not in matchmaking queue',
+            };
+        }
+
+        // Update last heartbeat
+        await db.collection('matchmakingQueue').doc(userId).update({
+            lastHeartbeat: serverTimestamp(),
+        });
+
+        return {
+            success: true,
+        };
+    } catch (error) {
+        console.error('Error updating matchmaking heartbeat:', error);
+        // Don't throw error - heartbeat failures shouldn't interrupt the app
+        return { success: false, error: error.message };
+    }
+});
+
+/**
  * Get matchmaking status (queue count and user's status)
  * GET /api/matchmaking/status
  */
@@ -150,10 +189,20 @@ exports.getMatchmakingStatus = functions.https.onCall(async (data, context) => {
  */
 async function tryMatchPlayers(newUserId) {
     try {
-        // Get all players in queue (excluding the new user)
+        // Get the new user's time control preference
+        const newUserDoc = await db.collection('matchmakingQueue').doc(newUserId).get();
+        if (!newUserDoc.exists) {
+            return;
+        }
+
+        const newUserData = newUserDoc.data();
+        const newUserTimeControlType = newUserData.timeControl?.type || 'unlimited';
+
+        // Get all players in queue with SAME time control preference
         const queueSnapshot = await db
             .collection('matchmakingQueue')
             .where('status', '==', 'searching')
+            .where('timeControl.type', '==', newUserTimeControlType)
             .orderBy('joinedAt', 'asc')
             .limit(10) // Get up to 10 oldest waiting players
             .get();
@@ -215,7 +264,7 @@ async function createMatchedGame(player1Id, player2Id) {
         const whitePlayerId = randomizeColors ? player1Id : player2Id;
         const blackPlayerId = randomizeColors ? player2Id : player1Id;
 
-        // Get both players' data
+        // Get both players' data from users collection
         const player1Doc = await db.collection('users').doc(player1Id).get();
         const player2Doc = await db.collection('users').doc(player2Id).get();
 
@@ -226,6 +275,22 @@ async function createMatchedGame(player1Id, player2Id) {
         const player1Data = player1Doc.data();
         const player2Data = player2Doc.data();
 
+        // Get players' queue data to retrieve time controls
+        const player1QueueDoc = await db.collection('matchmakingQueue').doc(player1Id).get();
+        const player2QueueDoc = await db.collection('matchmakingQueue').doc(player2Id).get();
+
+        // Use player1's time control (they initiated the match), or default to unlimited
+        const timeControl = (player1QueueDoc.exists && player1QueueDoc.data().timeControl) ||
+            (player2QueueDoc.exists && player2QueueDoc.data().timeControl) || { type: 'unlimited' };
+
+        // Initialize time remaining if time control has a limit
+        const timeRemaining = timeControl.totalSeconds
+            ? {
+                  [player1Id]: timeControl.totalSeconds,
+                  [player2Id]: timeControl.totalSeconds,
+              }
+            : null;
+
         // Create game document (active immediately, no pending state for matchmaking)
         const gameData = {
             creatorId: player1Id,
@@ -234,7 +299,9 @@ async function createMatchedGame(player1Id, player2Id) {
             blackPlayerId,
             status: 'active', // Matchmaking games start immediately
             currentTurn: whitePlayerId, // White always starts
-            timeControl: { type: 'unlimited' },
+            timeControl,
+            timeRemaining,
+            lastMoveTime: serverTimestamp(),
             moves: [],
             gameState: initializeGameState(),
             version: GAME_VERSION,
@@ -307,24 +374,27 @@ exports.onPlayerJoinQueue = functions.firestore
 
 /**
  * Firestore trigger: Clean up stale matchmaking entries
- * Remove entries older than 10 minutes
+ * Remove entries older than 2 minutes (more aggressive cleanup for disconnected clients)
  */
 exports.cleanupStaleMatchmakingEntries = functions.pubsub
-    .schedule('every 5 minutes')
+    .schedule('every 2 minutes')
     .onRun(async (context) => {
         try {
-            const tenMinutesAgo = admin.firestore.Timestamp.fromDate(
-                new Date(Date.now() - 10 * 60 * 1000),
+            const twoMinutesAgo = admin.firestore.Timestamp.fromDate(
+                new Date(Date.now() - 2 * 60 * 1000),
             );
 
             const staleEntries = await db
                 .collection('matchmakingQueue')
-                .where('joinedAt', '<', tenMinutesAgo)
+                .where('lastHeartbeat', '<', twoMinutesAgo)
                 .get();
 
             if (staleEntries.empty) {
+                console.log('[Cleanup] No stale matchmaking entries found');
                 return null;
             }
+
+            console.log(`[Cleanup] Removing ${staleEntries.size} stale matchmaking entries`);
 
             const batch = db.batch();
             staleEntries.docs.forEach((doc) => {

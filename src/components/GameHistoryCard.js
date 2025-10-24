@@ -129,6 +129,37 @@ export default function GameHistoryCard({ navigation, gameHistory = [], loading 
         };
     };
 
+    const getTimeControlInfo = (game) => {
+        const timeControl = game.timeControl || { type: 'unlimited' };
+
+        switch (timeControl.type) {
+            case 'blitz':
+                return {
+                    icon: 'bolt',
+                    iconFamily: 'font-awesome',
+                    label: 'Blitz',
+                };
+            case 'normal':
+                return {
+                    icon: 'clock-o',
+                    iconFamily: 'font-awesome',
+                    label: 'Normal',
+                };
+            case 'unlimited':
+                return {
+                    icon: 'infinite',
+                    iconFamily: 'ionicon',
+                    label: 'Unlimited',
+                };
+            default:
+                return {
+                    icon: 'clock-o',
+                    iconFamily: 'font-awesome',
+                    label: 'Timed',
+                };
+        }
+    };
+
     // Don't show card if user is not authenticated
     if (!user) {
         return null;
@@ -198,6 +229,7 @@ export default function GameHistoryCard({ navigation, gameHistory = [], loading 
                         const opponent = getOpponentData(game);
                         const result = getGameResult(game);
                         const completedDate = formatGameDate(game.updatedAt);
+                        const timeControlInfo = getTimeControlInfo(game);
 
                         return (
                             <View
@@ -232,17 +264,45 @@ export default function GameHistoryCard({ navigation, gameHistory = [], loading 
                                             >
                                                 vs {opponent.displayName}
                                             </Text>
-                                            {completedDate && (
+                                            <Block row middle>
+                                                {completedDate && (
+                                                    <>
+                                                        <Text
+                                                            size={11}
+                                                            style={[
+                                                                styles.dateText,
+                                                                { color: colors.TEXT_SECONDARY },
+                                                            ]}
+                                                        >
+                                                            {completedDate}
+                                                        </Text>
+                                                        <Text
+                                                            size={11}
+                                                            style={{
+                                                                color: colors.TEXT_SECONDARY,
+                                                                marginHorizontal: 6,
+                                                            }}
+                                                        >
+                                                            •
+                                                        </Text>
+                                                    </>
+                                                )}
+                                                <Icon
+                                                    name={timeControlInfo.icon}
+                                                    family={timeControlInfo.iconFamily}
+                                                    size={10}
+                                                    color={colors.TEXT}
+                                                />
                                                 <Text
                                                     size={11}
-                                                    style={[
-                                                        styles.dateText,
-                                                        { color: colors.TEXT_SECONDARY },
-                                                    ]}
+                                                    style={{
+                                                        color: colors.TEXT,
+                                                        marginLeft: 5,
+                                                    }}
                                                 >
-                                                    {completedDate}
+                                                    {timeControlInfo.label}
                                                 </Text>
-                                            )}
+                                            </Block>
                                         </Block>
                                     </Block>
 
@@ -333,7 +393,6 @@ const styles = StyleSheet.create({
         marginLeft: 6,
     },
     dateText: {
-        marginTop: 4,
         opacity: 0.8,
     },
     loadingContainer: {

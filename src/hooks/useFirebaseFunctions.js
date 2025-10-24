@@ -140,6 +140,17 @@ export const useFirebaseFunctions = () => {
         }
     };
 
+    const checkGameTime = async ({ gameId }) => {
+        try {
+            const callable = httpsCallable(functions, 'checkGameTime');
+            const result = await callable({ gameId });
+            return result.data;
+        } catch (error) {
+            console.error('[useFirebaseFunctions] Error checking game time:', error);
+            throw error;
+        }
+    };
+
     const requestGameReset = async ({ gameId }) => {
         try {
             const callable = httpsCallable(functions, 'requestGameReset');
@@ -286,10 +297,10 @@ export const useFirebaseFunctions = () => {
 
     // ==================== Matchmaking Functions ====================
 
-    const joinMatchmaking = async () => {
+    const joinMatchmaking = async (timeControl = null) => {
         try {
             const callable = httpsCallable(functions, 'joinMatchmaking');
-            const result = await callable();
+            const result = await callable({ timeControl });
             return result.data;
         } catch (error) {
             console.error('Error joining matchmaking:', error);
@@ -305,6 +316,17 @@ export const useFirebaseFunctions = () => {
         } catch (error) {
             console.error('Error leaving matchmaking:', error);
             throw error;
+        }
+    };
+
+    const updateMatchmakingHeartbeat = async () => {
+        try {
+            const callable = httpsCallable(functions, 'updateMatchmakingHeartbeat');
+            const result = await callable();
+            return result.data;
+        } catch (error) {
+            // Don't log or throw - heartbeat failures are expected to be silent
+            return { success: false };
         }
     };
 
@@ -334,6 +356,7 @@ export const useFirebaseFunctions = () => {
         makeMove,
         makeComputerMove,
         resignGame,
+        checkGameTime,
         requestGameReset,
         respondToResetRequest,
         requestUndo,
@@ -349,6 +372,7 @@ export const useFirebaseFunctions = () => {
         // Matchmaking
         joinMatchmaking,
         leaveMatchmaking,
+        updateMatchmakingHeartbeat,
         getMatchmakingStatus,
     };
 };

@@ -3,9 +3,15 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Dimensions, ScrollView, StyleSheet, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
-import { GameModeCard, ActiveGamesCard, GameHistoryCard, MatchmakingCard } from '../components/';
+import {
+    GameModeCard,
+    ActiveGamesCard,
+    GameHistoryCard,
+    MatchmakingCard,
+    TimeControlModal,
+} from '../components/';
 import FixtureLoaderModal from '../components/FixtureLoaderModal';
-import { useTheme, useAuth } from '../contexts';
+import { useTheme, useAuth, useAlert } from '../contexts';
 import { useGame, useFirebaseFunctions, useMatchmaking } from '../hooks';
 import { db, collection, query, where, onSnapshot, doc, getDoc } from '../config/firebase';
 
@@ -17,9 +23,12 @@ const enableDevFeatures = process.env.EXPO_PUBLIC_ENABLE_DEV_FEATURES === 'true'
 export default function Home({ navigation }) {
     const { colors } = useTheme();
     const { user } = useAuth();
+    const { showAlert } = useAlert();
     const [fixtureModalVisible, setFixtureModalVisible] = useState(false);
     const [gameHistory, setGameHistory] = useState([]);
     const [historyLoading, setHistoryLoading] = useState(true);
+    const [timeControlModalVisible, setTimeControlModalVisible] = useState(false);
+    const [pendingGameAction, setPendingGameAction] = useState(null); // 'computer' or 'matchmaking'
 
     // Wrap callbacks in useCallback to prevent infinite re-renders
     const handleGameAccepted = useCallback(
@@ -310,20 +319,57 @@ export default function Home({ navigation }) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user]);
 
-    const handleStartComputerGame = async () => {
+    const handleStartComputerGame = () => {
+        setPendingGameAction('computer');
+        setTimeControlModalVisible(true);
+    };
+
+    const handleStartMatchmaking = () => {
+        // Check if user has any active games
+        const hasActiveGames = activeGames.some((game) => game.status === 'active');
+
+        if (hasActiveGames) {
+            showAlert(
+                'Cannot Join Matchmaking',
+                'You already have an active game. Finish it before joining matchmaking.',
+            );
+            return { success: false, error: 'Active game exists' };
+        }
+
+        setPendingGameAction('matchmaking');
+        setTimeControlModalVisible(true);
+        return { success: true };
+    };
+
+    const handleTimeControlSelect = async (timeControl) => {
+        setTimeControlModalVisible(false);
+
         try {
-            const result = await startComputerGame();
-            if (result.success) {
-                // Navigate to game screen
-                // If gameId is null, it's an offline game
-                navigation.navigate('Game', {
-                    gameId: result.gameId || null,
-                    opponentType: 'computer',
-                });
+            if (pendingGameAction === 'computer') {
+                const result = await startComputerGame(timeControl);
+                if (result.success) {
+                    navigation.navigate('Game', {
+                        gameId: result.gameId || null,
+                        opponentType: 'computer',
+                    });
+                }
+            } else if (pendingGameAction === 'matchmaking') {
+                const result = await startSearching(timeControl);
+                if (result && !result.success && result.error) {
+                    showAlert('Cannot Join Matchmaking', result.error);
+                }
             }
         } catch (error) {
-            console.error('Failed to start computer game:', error);
+            console.error(`Failed to start ${pendingGameAction}:`, error);
+            showAlert('Error', `Failed to start ${pendingGameAction}. Please try again.`);
+        } finally {
+            setPendingGameAction(null);
         }
+    };
+
+    const handleTimeControlCancel = () => {
+        setTimeControlModalVisible(false);
+        setPendingGameAction(null);
     };
 
     const handleOpenFixtureLoader = () => {
@@ -344,6 +390,7 @@ export default function Home({ navigation }) {
             // The game will be automatically moved to history via Firestore listeners
         } catch (error) {
             console.error('Failed to resign game:', error);
+            showAlert('Error', 'Failed to resign game. Please try again.');
         }
     };
 
@@ -370,13 +417,15 @@ export default function Home({ navigation }) {
                 )}
 
                 {/* Game Mode Cards */}
-                <MatchmakingCard
-                    searching={searching}
-                    queueCount={queueCount}
-                    loading={matchmakingLoading}
-                    onStartSearch={startSearching}
-                    onStopSearch={stopSearching}
-                />
+                {user && (
+                    <MatchmakingCard
+                        searching={searching}
+                        queueCount={queueCount}
+                        loading={matchmakingLoading}
+                        onStartSearch={handleStartMatchmaking}
+                        onStopSearch={stopSearching}
+                    />
+                )}
 
                 <GameModeCard
                     title='Play vs Computer'
@@ -420,6 +469,12 @@ export default function Home({ navigation }) {
                 visible={fixtureModalVisible}
                 onClose={() => setFixtureModalVisible(false)}
                 onSelectFixture={handleSelectFixture}
+            />
+
+            <TimeControlModal
+                visible={timeControlModalVisible}
+                onSelect={handleTimeControlSelect}
+                onCancel={handleTimeControlCancel}
             />
         </LinearGradient>
     );

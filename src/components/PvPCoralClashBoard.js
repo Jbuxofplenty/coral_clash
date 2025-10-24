@@ -221,7 +221,9 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData }) => {
     }) => {
         const historyLength = coralClash.history().length;
         const isGameOver = coralClash.isGameOver();
-        const canRequestUndo = historyLength >= 1 && !isGameOver && !isViewingHistory;
+        // Disable undo if game is over, viewing history, no moves, or if there's a pending reset request
+        const canRequestUndo =
+            historyLength >= 1 && !isGameOver && !isViewingHistory && !resetRequestData;
 
         return (
             <View style={baseStyles.controlBar}>
@@ -289,6 +291,9 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData }) => {
         const handleResetRequest = async () => {
             closeMenu();
 
+            // Wait for menu animation to complete before showing alert
+            await new Promise((resolve) => setTimeout(resolve, 300));
+
             showAlert(
                 'Request Reset',
                 `Request to reset this game? ${liveOpponentData?.displayName || 'Your opponent'} will need to approve.`,
@@ -320,12 +325,15 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData }) => {
             );
         };
 
-        const isResetDisabled = isGameOver || noMovesYet;
+        // Disable reset if game is over, no moves yet, or if there's a pending undo request
+        const isResetDisabled = isGameOver || noMovesYet || undoRequestData;
         let resetSubtitle = 'Ask opponent to reset the game';
         if (isGameOver) {
             resetSubtitle = 'Game already ended';
         } else if (noMovesYet) {
             resetSubtitle = 'No moves have been made yet';
+        } else if (undoRequestData) {
+            resetSubtitle = 'Pending undo request must be resolved first';
         }
 
         return (
@@ -350,7 +358,14 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData }) => {
                         color={isResetDisabled ? colors.MUTED : '#f57c00'}
                     />
                     <View style={styles.menuItemText}>
-                        <Text style={[styles.menuItemTitle, { color: colors.TEXT }]}>
+                        <Text
+                            style={[
+                                styles.menuItemTitle,
+                                {
+                                    color: isResetDisabled ? colors.MUTED : colors.TEXT,
+                                },
+                            ]}
+                        >
                             Request Reset
                         </Text>
                         <Text style={[styles.menuItemSubtitle, { color: colors.TEXT_SECONDARY }]}>

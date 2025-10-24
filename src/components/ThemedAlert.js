@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Modal,
     View,
@@ -7,6 +7,7 @@ import {
     StyleSheet,
     Dimensions,
     Platform,
+    ActivityIndicator,
 } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
 
@@ -22,14 +23,37 @@ const { width } = Dimensions.get('window');
  */
 export default function ThemedAlert({ visible, title, message, buttons = [], onDismiss }) {
     const { colors, isDarkMode } = useTheme();
+    const [isProcessing, setIsProcessing] = useState(false);
 
     // Use a lighter background in dark mode for better contrast
     const alertBackgroundColor = isDarkMode ? '#2A2A2A' : colors.CARD_BACKGROUND;
 
-    const handleButtonPress = (button) => {
-        if (button.onPress) {
-            button.onPress();
+    // Reset processing state when alert is dismissed
+    useEffect(() => {
+        if (!visible) {
+            setIsProcessing(false);
         }
+    }, [visible]);
+
+    const handleButtonPress = async (button) => {
+        // Prevent multiple clicks while processing
+        if (isProcessing) {
+            return;
+        }
+
+        setIsProcessing(true);
+
+        // If button has onPress handler, call it and wait if it's async
+        if (button.onPress) {
+            try {
+                await button.onPress();
+            } catch (error) {
+                console.error('Error in alert button handler:', error);
+            }
+        }
+
+        // Reset processing state and dismiss after the button handler completes
+        setIsProcessing(false);
         onDismiss();
     };
 
@@ -43,7 +67,9 @@ export default function ThemedAlert({ visible, title, message, buttons = [], onD
         }
     };
 
-    if (!visible) return null;
+    if (!visible) {
+        return null;
+    }
 
     return (
         <Modal
@@ -86,26 +112,36 @@ export default function ThemedAlert({ visible, title, message, buttons = [], onD
                                         !isLast && styles.buttonBorder,
                                         {
                                             borderColor: colors.BORDER,
+                                            opacity: isProcessing ? 0.6 : 1,
                                         },
                                     ]}
                                     onPress={() => handleButtonPress(button)}
+                                    disabled={isProcessing}
                                     activeOpacity={0.7}
                                 >
-                                    <Text
-                                        style={[
-                                            styles.buttonText,
-                                            {
-                                                color: isDestructive
-                                                    ? colors.ERROR
-                                                    : isCancel
-                                                      ? colors.TEXT_SECONDARY
-                                                      : colors.PRIMARY,
-                                            },
-                                            (isCancel || isDestructive) && styles.buttonTextBold,
-                                        ]}
-                                    >
-                                        {button.text || 'OK'}
-                                    </Text>
+                                    {isProcessing && !isCancel ? (
+                                        <ActivityIndicator
+                                            size='small'
+                                            color={isDestructive ? colors.ERROR : colors.PRIMARY}
+                                        />
+                                    ) : (
+                                        <Text
+                                            style={[
+                                                styles.buttonText,
+                                                {
+                                                    color: isDestructive
+                                                        ? colors.ERROR
+                                                        : isCancel
+                                                          ? colors.TEXT_SECONDARY
+                                                          : colors.PRIMARY,
+                                                },
+                                                (isCancel || isDestructive) &&
+                                                    styles.buttonTextBold,
+                                            ]}
+                                        >
+                                            {button.text || 'OK'}
+                                        </Text>
+                                    )}
                                 </TouchableOpacity>
                             );
                         })}

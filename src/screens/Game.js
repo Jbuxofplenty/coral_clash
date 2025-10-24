@@ -1,6 +1,7 @@
-import React, { useEffect } from 'react';
+import React, { useState } from 'react';
 import { Dimensions, StyleSheet, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useFocusEffect } from '@react-navigation/native';
 
 import { Block } from 'galio-framework';
 import ComputerCoralClashBoard from '../components/ComputerCoralClashBoard';
@@ -18,6 +19,16 @@ export default function Game({ route }) {
     const opponentType = route?.params?.opponentType; // 'computer' or undefined for PvP
     const opponentData = route?.params?.opponentData; // For PvP games
 
+    // Use a key that changes when the screen comes into focus to force timer re-sync
+    const [focusKey, setFocusKey] = useState(0);
+
+    useFocusEffect(
+        React.useCallback(() => {
+            // Increment the key to trigger a re-render of the board component
+            setFocusKey((prev) => prev + 1);
+        }, []),
+    );
+
     // Select the appropriate board component
     const BoardComponent =
         opponentType === 'computer' || !gameId ? ComputerCoralClashBoard : PvPCoralClashBoard;
@@ -31,6 +42,7 @@ export default function Game({ route }) {
         >
             <Block flex>
                 <BoardComponent
+                    key={focusKey}
                     fixture={fixture}
                     gameId={gameId}
                     gameState={gameState}

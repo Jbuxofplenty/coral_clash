@@ -33,6 +33,18 @@ const GameStatusBanner = ({ message, type = 'info', visible = true }) => {
                     iconColor: colors.ERROR,
                     iconBg: colors.ERROR + '15',
                 };
+            case 'timeout_win':
+                return {
+                    icon: 'clock-o',
+                    iconColor: colors.SUCCESS,
+                    iconBg: colors.SUCCESS + '15',
+                };
+            case 'timeout_lose':
+                return {
+                    icon: 'clock-o',
+                    iconColor: colors.ERROR,
+                    iconBg: colors.ERROR + '15',
+                };
             case 'resign':
                 return {
                     icon: 'flag',

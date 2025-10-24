@@ -39,6 +39,8 @@ exports.requestUndo = game.requestUndo;
 exports.respondToUndoRequest = game.respondToUndoRequest;
 exports.getActiveGames = game.getActiveGames;
 exports.getGameHistory = game.getGameHistory;
+exports.checkGameTime = game.checkGameTime;
+exports.handleTimeExpiration = game.handleTimeExpiration;
 
 // ==================== Friends APIs ====================
 exports.sendFriendRequest = friends.sendFriendRequest;
@@ -50,11 +52,13 @@ exports.searchUsers = friends.searchUsers;
 // ==================== Matchmaking APIs ====================
 exports.joinMatchmaking = matchmaking.joinMatchmaking;
 exports.leaveMatchmaking = matchmaking.leaveMatchmaking;
+exports.updateMatchmakingHeartbeat = matchmaking.updateMatchmakingHeartbeat;
 exports.getMatchmakingStatus = matchmaking.getMatchmakingStatus;
 
 // ==================== Firestore Triggers ====================
 exports.onPlayerJoinQueue = matchmaking.onPlayerJoinQueue;
 exports.cleanupStaleMatchmakingEntries = matchmaking.cleanupStaleMatchmakingEntries;
+exports.onGameMoveUpdate = game.onGameMoveUpdate;
 
 /**
  * Automatically assign a unique discriminator to new users

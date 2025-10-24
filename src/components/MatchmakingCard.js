@@ -37,7 +37,7 @@ function MatchmakingCard({ searching, queueCount, loading, onStartSearch, onStop
                 await onStopSearch();
             } else {
                 const result = await onStartSearch();
-                if (!result.success && result.error) {
+                if (result && !result.success && result.error) {
                     showAlert('Cannot Join Matchmaking', result.error);
                 }
             }
@@ -51,15 +51,17 @@ function MatchmakingCard({ searching, queueCount, loading, onStartSearch, onStop
 
     // Determine card appearance based on state
     const isActive = searching || loading || isProcessing;
-    const backgroundColor = isActive ? colors.PRIMARY_DARKER : colors.CARD_BACKGROUND;
-    const iconColor = isActive ? colors.TEXT : colors.PRIMARY;
+    const backgroundColor = isActive ? '#606060' : colors.CARD_BACKGROUND;
+    const textColor = isActive ? '#FFFFFF' : colors.TEXT;
+    const iconColor = isActive ? '#64b5f6' : colors.PRIMARY;
+    const spinnerColor = isActive ? '#64b5f6' : colors.PRIMARY;
 
     return (
         <TouchableWithoutFeedback onPress={handlePress} disabled={loading || isProcessing}>
             <Block card style={[styles.card, styles.shadow, { backgroundColor }, style]}>
                 <Block center middle style={styles.iconContainer}>
                     {loading || isProcessing ? (
-                        <ActivityIndicator size='large' color={colors.PRIMARY} />
+                        <ActivityIndicator size='large' color={spinnerColor} />
                     ) : (
                         <View style={styles.iconWrapper}>
                             <Icon
@@ -72,19 +74,14 @@ function MatchmakingCard({ searching, queueCount, loading, onStartSearch, onStop
                     )}
                 </Block>
                 <Block style={styles.contentContainer}>
-                    <Text
-                        size={20}
-                        bold
-                        style={[styles.title, { color: isActive ? colors.TEXT : colors.TEXT }]}
-                        center
-                    >
+                    <Text size={20} bold style={[styles.title, { color: textColor }]} center>
                         {searching ? 'Searching for Opponent...' : 'Find Random Match'}
                     </Text>
                     <Text
                         size={14}
                         style={[
                             styles.description,
-                            { color: isActive ? colors.TEXT_SECONDARY : colors.TEXT_SECONDARY },
+                            { color: isActive ? 'rgba(255,255,255,0.8)' : colors.TEXT_SECONDARY },
                         ]}
                         center
                     >

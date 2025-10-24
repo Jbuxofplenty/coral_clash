@@ -185,13 +185,13 @@ export const useGameActions = (coralClash, gameId, onStateUpdate) => {
             // This prevents inconsistencies and ensures backend state is the source of truth
             return true;
         } catch (error) {
-            console.error('Error sending resignation to backend:', error);
+            console.error('Error resigning game:', error);
             showAlert('Error', 'Failed to resign. Please check your connection and try again.');
             return false;
         } finally {
             setIsProcessing(false);
         }
-    }, [coralClash, gameId, resignGameAPI, onStateUpdate]);
+    }, [coralClash, gameId, resignGameAPI, onStateUpdate, showAlert]);
 
     /**
      * Undo the last move
