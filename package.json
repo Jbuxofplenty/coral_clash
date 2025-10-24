@@ -34,7 +34,9 @@
         "preset": "jest-expo",
         "testPathIgnorePatterns": [
             "/node_modules/",
-            "/functions/"
+            "/functions/",
+            "/shared/dist/",
+            "/shared/node_modules/"
         ]
     },
     "dependencies": {
