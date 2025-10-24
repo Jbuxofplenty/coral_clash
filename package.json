@@ -25,6 +25,7 @@
         "build:production:android": "eas build --profile production --platform android",
         "submit:staging": "eas submit --profile preview --platform all --latest",
         "submit:production": "eas submit --profile production --platform all --latest",
+        "postinstall": "cd shared && yarn install && yarn build",
         "eject": "expo eject",
         "test": "node ./node_modules/jest/bin/jest.js --watchAll",
         "test:ci": "node ./node_modules/jest/bin/jest.js --watchAll=false --ci"

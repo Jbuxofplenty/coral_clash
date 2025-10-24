@@ -21,7 +21,6 @@
             "distribution": "internal",
             "channel": "preview",
             "node": "22.11.0",
-            "prebuildCommand": "cd shared && yarn install && yarn build",
             "env": {
                 "EXPO_PUBLIC_FIREBASE_API_KEY": "AIzaSyBUsxVR7oBG53yOJ0pKgLs70uk6JVzUl8Y",
                 "EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN": "coral-clash.firebaseapp.com",
@@ -44,7 +43,6 @@
             "autoIncrement": true,
             "channel": "production",
             "node": "22.11.0",
-            "prebuildCommand": "cd shared && yarn install && yarn build",
             "env": {
                 "EXPO_PUBLIC_FIREBASE_API_KEY": "AIzaSyBUsxVR7oBG53yOJ0pKgLs70uk6JVzUl8Y",
                 "EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN": "coral-clash.firebaseapp.com",
