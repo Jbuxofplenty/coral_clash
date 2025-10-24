@@ -85,7 +85,37 @@ exports.createGame = functions.https.onCall(async (data, context) => {
         const whitePlayerId = randomizeColors ? creatorId : opponentId;
         const blackPlayerId = randomizeColors ? opponentId : creatorId;
 
-        // Create game document
+        // Get creator's info to snapshot
+        const creatorDoc = await db.collection('users').doc(creatorId).get();
+        const creatorData = creatorDoc.data();
+        const creatorName = formatDisplayName(creatorData.displayName, creatorData.discriminator);
+
+        // Get creator's avatar from settings
+        const creatorSettingsDoc = await db
+            .collection('users')
+            .doc(creatorId)
+            .collection('settings')
+            .doc('preferences')
+            .get();
+        const creatorSettings = creatorSettingsDoc.exists ? creatorSettingsDoc.data() : {};
+
+        // Get opponent's info to snapshot
+        const opponentData = opponentDoc.data();
+        const opponentName = formatDisplayName(
+            opponentData.displayName,
+            opponentData.discriminator,
+        );
+
+        // Get opponent's avatar from settings
+        const opponentSettingsDoc = await db
+            .collection('users')
+            .doc(opponentId)
+            .collection('settings')
+            .doc('preferences')
+            .get();
+        const opponentSettings = opponentSettingsDoc.exists ? opponentSettingsDoc.data() : {};
+
+        // Create game document with snapshot of player info
         const gameData = {
             creatorId,
             opponentId,
@@ -97,6 +127,12 @@ exports.createGame = functions.https.onCall(async (data, context) => {
             moves: [],
             gameState: initializeGameState(),
             version: GAME_VERSION, // Store game engine version
+            // Snapshot creator info at game creation
+            creatorDisplayName: creatorName,
+            creatorAvatarKey: creatorSettings.avatarKey || 'dolphin',
+            // Snapshot opponent info at game creation
+            opponentDisplayName: opponentName,
+            opponentAvatarKey: opponentSettings.avatarKey || 'dolphin',
             createdAt: serverTimestamp(),
             updatedAt: serverTimestamp(),
         };
@@ -112,14 +148,6 @@ exports.createGame = functions.https.onCall(async (data, context) => {
             read: false,
             createdAt: serverTimestamp(),
         });
-
-        // Get creator's info for push notification
-        const creatorDoc = await db.collection('users').doc(creatorId).get();
-        const creatorData = creatorDoc.data();
-        const creatorName = formatDisplayName(creatorData.displayName, creatorData.discriminator);
-
-        // Get opponent's info for response
-        const opponentData = opponentDoc.data();
 
         // Send push notification
         sendGameRequestNotification(
@@ -1547,18 +1575,25 @@ exports.getGameHistory = functions.https.onCall(async (data, context) => {
                     opponentType: 'computer',
                 });
             } else {
-                // Get opponent info for human player
-                const opponentDoc = await db.collection('users').doc(gameData.opponentId).get();
-                const opponentData = opponentDoc.exists ? opponentDoc.data() : {};
+                // Use snapshot data if available, otherwise fetch current data
+                let opponentDisplayName = gameData.opponentDisplayName;
+                let opponentAvatarKey = gameData.opponentAvatarKey;
+
+                if (!opponentDisplayName || !opponentAvatarKey) {
+                    // Fallback: fetch current data if snapshot doesn't exist (old games)
+                    const opponentDoc = await db.collection('users').doc(gameData.opponentId).get();
+                    const opponentData = opponentDoc.exists ? opponentDoc.data() : {};
+                    opponentDisplayName =
+                        formatDisplayName(opponentData.displayName, opponentData.discriminator) ||
+                        'Opponent';
+                    opponentAvatarKey = opponentData.settings?.avatarKey || 'dolphin';
+                }
 
                 games.push({
                     id: doc.id,
                     ...gameData,
-                    opponentDisplayName: formatDisplayName(
-                        opponentData.displayName,
-                        opponentData.discriminator,
-                    ),
-                    opponentAvatarKey: opponentData.settings?.avatarKey || 'dolphin',
+                    opponentDisplayName,
+                    opponentAvatarKey,
                 });
             }
         }
@@ -1566,18 +1601,26 @@ exports.getGameHistory = functions.https.onCall(async (data, context) => {
         // Process opponent games (computer games won't be here since opponentId is 'computer')
         for (const doc of opponentGames.docs) {
             const gameData = doc.data();
-            // Get creator info (they are the opponent from user's perspective)
-            const creatorDoc = await db.collection('users').doc(gameData.creatorId).get();
-            const creatorData = creatorDoc.exists ? creatorDoc.data() : {};
+
+            // Use snapshot data if available, otherwise fetch current data
+            let opponentDisplayName = gameData.creatorDisplayName;
+            let opponentAvatarKey = gameData.creatorAvatarKey;
+
+            if (!opponentDisplayName || !opponentAvatarKey) {
+                // Fallback: fetch current data if snapshot doesn't exist (old games)
+                const creatorDoc = await db.collection('users').doc(gameData.creatorId).get();
+                const creatorData = creatorDoc.exists ? creatorDoc.data() : {};
+                opponentDisplayName =
+                    formatDisplayName(creatorData.displayName, creatorData.discriminator) ||
+                    'Opponent';
+                opponentAvatarKey = creatorData.settings?.avatarKey || 'dolphin';
+            }
 
             games.push({
                 id: doc.id,
                 ...gameData,
-                opponentDisplayName: formatDisplayName(
-                    creatorData.displayName,
-                    creatorData.discriminator,
-                ),
-                opponentAvatarKey: creatorData.settings?.avatarKey || 'dolphin',
+                opponentDisplayName,
+                opponentAvatarKey,
             });
         }
 
@@ -1639,20 +1682,25 @@ exports.getActiveGames = functions.https.onCall(async (data, context) => {
                     opponentType: 'computer',
                 });
             } else {
-                // User is creator, so opponent is the opponentId
-                const opponentDoc = await db.collection('users').doc(gameData.opponentId).get();
-                const opponentData = opponentDoc.exists ? opponentDoc.data() : {};
+                // Use snapshot data if available, otherwise fetch current data
+                let opponentDisplayName = gameData.opponentDisplayName;
+                let opponentAvatarKey = gameData.opponentAvatarKey;
 
-                const opponentDisplayName = formatDisplayName(
-                    opponentData.displayName,
-                    opponentData.discriminator,
-                );
+                if (!opponentDisplayName || !opponentAvatarKey) {
+                    // Fallback: fetch current data if snapshot doesn't exist (old games)
+                    const opponentDoc = await db.collection('users').doc(gameData.opponentId).get();
+                    const opponentData = opponentDoc.exists ? opponentDoc.data() : {};
+                    opponentDisplayName =
+                        formatDisplayName(opponentData.displayName, opponentData.discriminator) ||
+                        'Opponent';
+                    opponentAvatarKey = opponentData.settings?.avatarKey || 'dolphin';
+                }
 
                 games.push({
                     id: doc.id,
                     ...gameData,
                     opponentDisplayName,
-                    opponentAvatarKey: opponentData.settings?.avatarKey || 'dolphin',
+                    opponentAvatarKey,
                     opponentType: 'pvp',
                 });
             }
@@ -1661,20 +1709,26 @@ exports.getActiveGames = functions.https.onCall(async (data, context) => {
         // Process opponent games (user is the opponent, so creator is their opponent)
         for (const doc of opponentGames.docs) {
             const gameData = doc.data();
-            // User is opponent, so the creator is their opponent
-            const creatorDoc = await db.collection('users').doc(gameData.creatorId).get();
-            const creatorData = creatorDoc.exists ? creatorDoc.data() : {};
 
-            const opponentDisplayName = formatDisplayName(
-                creatorData.displayName,
-                creatorData.discriminator,
-            );
+            // Use snapshot data if available, otherwise fetch current data
+            let opponentDisplayName = gameData.creatorDisplayName;
+            let opponentAvatarKey = gameData.creatorAvatarKey;
+
+            if (!opponentDisplayName || !opponentAvatarKey) {
+                // Fallback: fetch current data if snapshot doesn't exist (old games)
+                const creatorDoc = await db.collection('users').doc(gameData.creatorId).get();
+                const creatorData = creatorDoc.exists ? creatorDoc.data() : {};
+                opponentDisplayName =
+                    formatDisplayName(creatorData.displayName, creatorData.discriminator) ||
+                    'Opponent';
+                opponentAvatarKey = creatorData.settings?.avatarKey || 'dolphin';
+            }
 
             games.push({
                 id: doc.id,
                 ...gameData,
                 opponentDisplayName,
-                opponentAvatarKey: creatorData.settings?.avatarKey || 'dolphin',
+                opponentAvatarKey,
                 opponentType: 'pvp',
             });
         }

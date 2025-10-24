@@ -12,7 +12,7 @@ const { width } = Dimensions.get('screen');
 export default function Stats({ navigation }) {
     const { user } = useAuth();
     const { colors, isDarkMode } = useTheme();
-    const { getGameHistory } = useFirebaseFunctions();
+    const { getGameHistory, getPublicUserInfo } = useFirebaseFunctions();
 
     const [loading, setLoading] = useState(true);
     const [gameHistory, setGameHistory] = useState([]);
@@ -139,6 +139,26 @@ export default function Stats({ navigation }) {
                 overall.gamesPlayed++;
             });
 
+            // Fetch current user data for each opponent to get latest avatars and names
+            const opponentIds = Object.keys(stats).filter((id) => id !== 'computer');
+            for (const opponentId of opponentIds) {
+                try {
+                    const result = await getPublicUserInfo(opponentId);
+                    if (result.success && result.user) {
+                        const { displayName, discriminator, avatarKey } = result.user;
+                        // Update with current display name
+                        stats[opponentId].name = discriminator
+                            ? `${displayName} #${discriminator}`
+                            : displayName;
+                        // Update with current avatar
+                        stats[opponentId].avatarKey = avatarKey;
+                    }
+                } catch (error) {
+                    console.error(`Error fetching current data for opponent ${opponentId}:`, error);
+                    // Keep historical data if fetch fails
+                }
+            }
+
             setOpponentStats(stats);
             setOverallStats(overall);
         } catch (error) {
@@ -207,31 +227,12 @@ export default function Stats({ navigation }) {
                 ]}
             >
                 <Block row middle flex>
-                    {stats.isComputer ? (
-                        <Block
-                            center
-                            style={{
-                                width: 48,
-                                height: 48,
-                                borderRadius: 24,
-                                backgroundColor: colors.INFO + '20',
-                                marginRight: theme.SIZES.BASE * 1.25,
-                            }}
-                        >
-                            <Icon
-                                name='desktop'
-                                family='font-awesome'
-                                size={24}
-                                color={colors.INFO}
-                            />
-                        </Block>
-                    ) : (
-                        <Avatar
-                            avatarKey={stats.avatarKey}
-                            size='medium'
-                            style={styles.avatarContainer}
-                        />
-                    )}
+                    <Avatar
+                        avatarKey={stats.avatarKey}
+                        computer={stats.isComputer}
+                        size='medium'
+                        style={styles.avatarContainer}
+                    />
                     <Block flex style={{ marginRight: 8 }}>
                         <Text
                             size={16}

@@ -8,6 +8,17 @@ import { GAME_VERSION } from '../../shared/game';
 export const useFirebaseFunctions = () => {
     // ==================== User Profile Functions ====================
 
+    const getPublicUserInfo = async (userId) => {
+        try {
+            const callable = httpsCallable(functions, 'getPublicUserInfo');
+            const result = await callable({ userId });
+            return result.data;
+        } catch (error) {
+            console.error('Error getting public user info:', error);
+            throw error;
+        }
+    };
+
     const getUserProfile = async (userId) => {
         try {
             const callable = httpsCallable(functions, 'getUserProfile');
@@ -343,6 +354,7 @@ export const useFirebaseFunctions = () => {
 
     return {
         // User Profile
+        getPublicUserInfo,
         getUserProfile,
         updateUserProfile,
         // User Settings

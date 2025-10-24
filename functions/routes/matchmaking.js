@@ -66,7 +66,7 @@ exports.joinMatchmaking = functions.https.onCall(async (data, context) => {
                 userId,
                 displayName: userData.displayName || 'User',
                 discriminator: userData.discriminator || '',
-                avatarKey: userData.avatarKey || 'dolphin',
+                avatarKey: userData.settings?.avatarKey || 'dolphin',
                 timeControl: timeControl || { type: 'unlimited' },
                 joinedAt: serverTimestamp(),
                 lastHeartbeat: serverTimestamp(), // Track last activity
@@ -275,6 +275,28 @@ async function createMatchedGame(player1Id, player2Id) {
         const player1Data = player1Doc.data();
         const player2Data = player2Doc.data();
 
+        // Get player 1's avatar from settings
+        const player1SettingsDoc = await db
+            .collection('users')
+            .doc(player1Id)
+            .collection('settings')
+            .doc('preferences')
+            .get();
+        const player1Settings = player1SettingsDoc.exists ? player1SettingsDoc.data() : {};
+
+        // Get player 2's avatar from settings
+        const player2SettingsDoc = await db
+            .collection('users')
+            .doc(player2Id)
+            .collection('settings')
+            .doc('preferences')
+            .get();
+        const player2Settings = player2SettingsDoc.exists ? player2SettingsDoc.data() : {};
+
+        // Format display names
+        const player1Name = formatDisplayName(player1Data.displayName, player1Data.discriminator);
+        const player2Name = formatDisplayName(player2Data.displayName, player2Data.discriminator);
+
         // Get players' queue data to retrieve time controls
         const player1QueueDoc = await db.collection('matchmakingQueue').doc(player1Id).get();
         const player2QueueDoc = await db.collection('matchmakingQueue').doc(player2Id).get();
@@ -306,6 +328,11 @@ async function createMatchedGame(player1Id, player2Id) {
             gameState: initializeGameState(),
             version: GAME_VERSION,
             matchmakingGame: true, // Mark as matchmaking game
+            // Snapshot player info at game creation
+            creatorDisplayName: player1Name,
+            creatorAvatarKey: player1Settings.avatarKey || 'dolphin',
+            opponentDisplayName: player2Name,
+            opponentAvatarKey: player2Settings.avatarKey || 'dolphin',
             createdAt: serverTimestamp(),
             updatedAt: serverTimestamp(),
         };
@@ -313,16 +340,13 @@ async function createMatchedGame(player1Id, player2Id) {
         const gameRef = await db.collection('games').add(gameData);
 
         // Send notifications to both players
-        const player1Name = formatDisplayName(player1Data.displayName, player1Data.discriminator);
-        const player2Name = formatDisplayName(player2Data.displayName, player2Data.discriminator);
-
         await db.collection('notifications').add({
             userId: player1Id,
             type: 'match_found',
             gameId: gameRef.id,
             opponentId: player2Id,
             opponentName: player2Name,
-            opponentAvatarKey: player2Data.settings?.avatarKey || 'dolphin',
+            opponentAvatarKey: player2Settings.avatarKey || 'dolphin',
             read: false,
             createdAt: serverTimestamp(),
         });
@@ -333,7 +357,7 @@ async function createMatchedGame(player1Id, player2Id) {
             gameId: gameRef.id,
             opponentId: player1Id,
             opponentName: player1Name,
-            opponentAvatarKey: player1Data.settings?.avatarKey || 'dolphin',
+            opponentAvatarKey: player1Settings.avatarKey || 'dolphin',
             read: false,
             createdAt: serverTimestamp(),
         });

@@ -74,19 +74,14 @@ export default function ActiveGamesCard({
             {
                 text: 'Cancel',
                 style: 'cancel',
-                onPress: () => {
-                    console.log('[ActiveGamesCard] Resign cancelled');
-                },
             },
             {
                 text: 'Resign',
                 style: 'destructive',
                 onPress: async () => {
                     try {
-                        console.log('[ActiveGamesCard] Starting resignation for game:', gameId);
                         setResigningGameId(gameId);
                         await resignGame(gameId);
-                        console.log('[ActiveGamesCard] Resignation completed');
                     } catch (error) {
                         console.error('[ActiveGamesCard] Error resigning game:', error);
                         showAlert('Error', 'Failed to resign game. Please try again.');

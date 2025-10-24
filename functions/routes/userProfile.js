@@ -5,6 +5,58 @@ const { serverTimestamp } = require('../utils/helpers');
 const db = admin.firestore();
 
 /**
+ * Get public user info (displayName, discriminator, avatarKey)
+ * This is safe to call for any user and returns only public information
+ * GET /api/profile/public
+ */
+exports.getPublicUserInfo = functions.https.onCall(async (data, context) => {
+    try {
+        // Verify authentication
+        if (!context.auth) {
+            throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
+        }
+
+        const { userId } = data;
+
+        if (!userId) {
+            throw new functions.https.HttpsError('invalid-argument', 'userId is required');
+        }
+
+        // Get user document
+        const userDoc = await db.collection('users').doc(userId).get();
+
+        if (!userDoc.exists) {
+            throw new functions.https.HttpsError('not-found', 'User not found');
+        }
+
+        const userData = userDoc.data();
+
+        // Get user settings for avatar
+        const settingsDoc = await db
+            .collection('users')
+            .doc(userId)
+            .collection('settings')
+            .doc('preferences')
+            .get();
+
+        const settings = settingsDoc.exists ? settingsDoc.data() : {};
+
+        // Return only public information
+        return {
+            success: true,
+            user: {
+                displayName: userData.displayName || 'User',
+                discriminator: userData.discriminator || '',
+                avatarKey: settings.avatarKey || 'dolphin',
+            },
+        };
+    } catch (error) {
+        console.error('Error getting public user info:', error);
+        throw new functions.https.HttpsError('internal', error.message);
+    }
+});
+
+/**
  * Get user profile
  * GET /api/profile/:userId
  */

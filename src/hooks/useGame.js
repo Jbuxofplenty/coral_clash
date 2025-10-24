@@ -80,8 +80,19 @@ export const useGame = (options = {}) => {
                     if (change.type === 'added') {
                         // New game added (shouldn't happen often for creator query after initial load)
                         if (existingIndex === -1) {
-                            // Fetch opponent data if it's a PvP game
-                            if (gameData.opponentId && gameData.opponentId !== 'computer') {
+                            // Use snapshot data from game document if available
+                            const opponentDisplayName = gameData.opponentDisplayName || null;
+                            const opponentAvatarKey = gameData.opponentAvatarKey || null;
+
+                            if (opponentDisplayName && opponentAvatarKey) {
+                                // Snapshot data exists, use it
+                                updatedGames.push({
+                                    ...gameData,
+                                    opponentType:
+                                        gameData.opponentId === 'computer' ? 'computer' : 'pvp',
+                                });
+                            } else if (gameData.opponentId && gameData.opponentId !== 'computer') {
+                                // No snapshot, fetch current data (for old games)
                                 const opponentDoc = await getDoc(
                                     doc(db, 'users', gameData.opponentId),
                                 );
@@ -89,13 +100,13 @@ export const useGame = (options = {}) => {
                                     ? opponentDoc.data()
                                     : {};
 
-                                const opponentDisplayName = opponentUserData.displayName
+                                const fetchedDisplayName = opponentUserData.displayName
                                     ? `${opponentUserData.displayName}${opponentUserData.discriminator ? ` #${opponentUserData.discriminator}` : ''}`
                                     : 'Opponent';
 
                                 updatedGames.push({
                                     ...gameData,
-                                    opponentDisplayName,
+                                    opponentDisplayName: fetchedDisplayName,
                                     opponentAvatarKey:
                                         opponentUserData.settings?.avatarKey || 'dolphin',
                                     opponentType: 'pvp',
@@ -120,31 +131,17 @@ export const useGame = (options = {}) => {
                         if (existingIndex !== -1) {
                             const previousGame = updatedGames[existingIndex];
 
-                            // Fetch latest opponent data to get current avatar
-                            let opponentDisplayName =
-                                previousGame.opponentDisplayName || 'Opponent';
-                            let opponentAvatarKey = previousGame.opponentAvatarKey || 'dolphin';
+                            // Preserve snapshot data from game document if it exists
+                            const opponentDisplayName =
+                                gameData.opponentDisplayName ||
+                                previousGame.opponentDisplayName ||
+                                'Opponent';
+                            const opponentAvatarKey =
+                                gameData.opponentAvatarKey ||
+                                previousGame.opponentAvatarKey ||
+                                'dolphin';
 
-                            if (gameData.opponentId && gameData.opponentId !== 'computer') {
-                                try {
-                                    const opponentDoc = await getDoc(
-                                        doc(db, 'users', gameData.opponentId),
-                                    );
-                                    if (opponentDoc.exists()) {
-                                        const opponentUserData = opponentDoc.data();
-                                        opponentDisplayName = opponentUserData.displayName
-                                            ? `${opponentUserData.displayName}${opponentUserData.discriminator ? ` #${opponentUserData.discriminator}` : ''}`
-                                            : 'Opponent';
-                                        opponentAvatarKey =
-                                            opponentUserData.settings?.avatarKey || 'dolphin';
-                                    }
-                                } catch (error) {
-                                    console.error('Error fetching opponent data:', error);
-                                    // Keep previous values on error
-                                }
-                            }
-
-                            // Update game data with latest opponent info
+                            // Update game data with snapshot opponent info
                             updatedGames[existingIndex] = {
                                 ...gameData,
                                 opponentDisplayName,
@@ -202,23 +199,40 @@ export const useGame = (options = {}) => {
                     if (change.type === 'added') {
                         // New game invite received!
                         if (gameData.opponentId === user.uid) {
-                            // For new invites, we need opponent data (the creator in this case)
-                            // Fetch opponent (creator) data from Firestore
-                            const opponentUserId = gameData.creatorId;
-                            const opponentDoc = await getDoc(doc(db, 'users', opponentUserId));
-                            const opponentUserData = opponentDoc.exists() ? opponentDoc.data() : {};
+                            // Use snapshot data from game document if available
+                            // For opponent games, the creator is the opponent
+                            const opponentDisplayName = gameData.creatorDisplayName || null;
+                            const opponentAvatarKey = gameData.creatorAvatarKey || null;
 
-                            const opponentDisplayName = opponentUserData.displayName
-                                ? `${opponentUserData.displayName}${opponentUserData.discriminator ? ` #${opponentUserData.discriminator}` : ''}`
-                                : 'Opponent';
+                            let newGame;
+                            if (opponentDisplayName && opponentAvatarKey) {
+                                // Snapshot data exists, use it
+                                newGame = {
+                                    ...gameData,
+                                    opponentDisplayName,
+                                    opponentAvatarKey,
+                                    opponentType: 'pvp',
+                                };
+                            } else {
+                                // No snapshot, fetch current data (for old games)
+                                const opponentUserId = gameData.creatorId;
+                                const opponentDoc = await getDoc(doc(db, 'users', opponentUserId));
+                                const opponentUserData = opponentDoc.exists()
+                                    ? opponentDoc.data()
+                                    : {};
 
-                            const newGame = {
-                                ...gameData,
-                                opponentDisplayName,
-                                opponentAvatarKey:
-                                    opponentUserData.settings?.avatarKey || 'dolphin',
-                                opponentType: 'pvp',
-                            };
+                                const fetchedDisplayName = opponentUserData.displayName
+                                    ? `${opponentUserData.displayName}${opponentUserData.discriminator ? ` #${opponentUserData.discriminator}` : ''}`
+                                    : 'Opponent';
+
+                                newGame = {
+                                    ...gameData,
+                                    opponentDisplayName: fetchedDisplayName,
+                                    opponentAvatarKey:
+                                        opponentUserData.settings?.avatarKey || 'dolphin',
+                                    opponentType: 'pvp',
+                                };
+                            }
 
                             updatedGames.push(newGame);
                             hasChanges = true;
@@ -231,33 +245,18 @@ export const useGame = (options = {}) => {
                         if (existingIndex !== -1) {
                             const previousGame = updatedGames[existingIndex];
 
-                            // Fetch latest opponent data to get current avatar
-                            let opponentDisplayName =
-                                previousGame.opponentDisplayName || 'Opponent';
-                            let opponentAvatarKey = previousGame.opponentAvatarKey || 'dolphin';
+                            // Preserve snapshot data from game document if it exists
+                            // For opponent games, the creator is the opponent
+                            const opponentDisplayName =
+                                gameData.creatorDisplayName ||
+                                previousGame.opponentDisplayName ||
+                                'Opponent';
+                            const opponentAvatarKey =
+                                gameData.creatorAvatarKey ||
+                                previousGame.opponentAvatarKey ||
+                                'dolphin';
 
-                            // For opponent query, the creator is the opponent
-                            const opponentUserId = gameData.creatorId;
-                            if (opponentUserId && opponentUserId !== 'computer') {
-                                try {
-                                    const opponentDoc = await getDoc(
-                                        doc(db, 'users', opponentUserId),
-                                    );
-                                    if (opponentDoc.exists()) {
-                                        const opponentUserData = opponentDoc.data();
-                                        opponentDisplayName = opponentUserData.displayName
-                                            ? `${opponentUserData.displayName}${opponentUserData.discriminator ? ` #${opponentUserData.discriminator}` : ''}`
-                                            : 'Opponent';
-                                        opponentAvatarKey =
-                                            opponentUserData.settings?.avatarKey || 'dolphin';
-                                    }
-                                } catch (error) {
-                                    console.error('Error fetching opponent data:', error);
-                                    // Keep previous values on error
-                                }
-                            }
-
-                            // Update game data with latest opponent info
+                            // Update game data with snapshot opponent info
                             updatedGames[existingIndex] = {
                                 ...gameData,
                                 opponentDisplayName,

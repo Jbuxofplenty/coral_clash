@@ -86,7 +86,7 @@ export default function Home({ navigation }) {
         onMatchFound: handleMatchFound,
     });
 
-    const { getGameHistory, resignGame } = useFirebaseFunctions();
+    const { getGameHistory, resignGame, getPublicUserInfo } = useFirebaseFunctions();
 
     // Use ref to track searching state for cleanup without triggering re-renders
     const searchingRef = useRef(searching);
@@ -108,29 +108,44 @@ export default function Home({ navigation }) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    // Helper function to fetch opponent data from Firestore
+    // Helper function to extract opponent data from game data
+    // Uses snapshot data if available, otherwise fetches current data
     const fetchOpponentData = async (gameData, userId) => {
+        // Determine opponent ID based on user's role in the game
+        const opponentId = gameData.creatorId === userId ? gameData.opponentId : gameData.creatorId;
+
+        // Handle computer opponent
+        if (opponentId === 'computer' || gameData.opponentType === 'computer') {
+            return {
+                opponentDisplayName: 'Computer',
+                opponentAvatarKey: 'computer',
+            };
+        }
+
+        // Use snapshot data from game document (for new games)
+        // If user is creator, opponent data is in opponentDisplayName/opponentAvatarKey
+        // If user is opponent, opponent data is in creatorDisplayName/creatorAvatarKey
+        const isCreator = gameData.creatorId === userId;
+        const snapshotDisplayName = isCreator
+            ? gameData.opponentDisplayName
+            : gameData.creatorDisplayName;
+        const snapshotAvatarKey = isCreator
+            ? gameData.opponentAvatarKey
+            : gameData.creatorAvatarKey;
+
+        // If snapshot data exists, use it
+        if (snapshotDisplayName && snapshotAvatarKey) {
+            return {
+                opponentDisplayName: snapshotDisplayName,
+                opponentAvatarKey: snapshotAvatarKey,
+            };
+        }
+
+        // Fallback: fetch current data for old games without snapshots
         try {
-            // Determine opponent ID based on user's role in the game
-            const opponentId =
-                gameData.creatorId === userId ? gameData.opponentId : gameData.creatorId;
-
-            // Handle computer opponent
-            if (opponentId === 'computer' || gameData.opponentType === 'computer') {
-                return {
-                    opponentDisplayName: 'Computer',
-                    opponentAvatarKey: 'computer',
-                };
-            }
-
-            // Fetch opponent user data
-            const opponentDoc = await getDoc(doc(db, 'users', opponentId));
-            if (opponentDoc.exists()) {
-                const opponentData = opponentDoc.data();
-                const displayName = opponentData.displayName || 'Player';
-                const discriminator = opponentData.discriminator;
-                const avatarKey = opponentData.settings?.avatarKey || 'dolphin';
-
+            const result = await getPublicUserInfo(opponentId);
+            if (result.success && result.user) {
+                const { displayName, discriminator, avatarKey } = result.user;
                 return {
                     opponentDisplayName: discriminator
                         ? `${displayName} #${discriminator}`
@@ -138,19 +153,15 @@ export default function Home({ navigation }) {
                     opponentAvatarKey: avatarKey,
                 };
             }
-
-            // Fallback if opponent not found
-            return {
-                opponentDisplayName: 'Opponent',
-                opponentAvatarKey: 'dolphin',
-            };
         } catch (error) {
             console.error('Error fetching opponent data:', error);
-            return {
-                opponentDisplayName: 'Opponent',
-                opponentAvatarKey: 'dolphin',
-            };
         }
+
+        // Final fallback
+        return {
+            opponentDisplayName: 'Opponent',
+            opponentAvatarKey: 'dolphin',
+        };
     };
 
     // Initial load and set up game history listeners on mount

@@ -18,6 +18,7 @@ const matchmaking = require('./routes/matchmaking');
 const { getDefaultSettings } = require('./utils/helpers');
 
 // ==================== User Profile APIs ====================
+exports.getPublicUserInfo = userProfile.getPublicUserInfo;
 exports.getUserProfile = userProfile.getUserProfile;
 exports.updateUserProfile = userProfile.updateUserProfile;
 
@@ -110,18 +111,25 @@ exports.onUserCreate = functions.firestore
                 discriminator = Math.floor(1000 + Math.random() * 9000).toString();
             }
 
-            // Get default settings if not already set
-            const updates = {
+            // Update the user document with the discriminator
+            await snap.ref.update({
                 discriminator: discriminator,
-            };
+            });
 
-            // Only set default settings if settings don't exist
+            // Initialize default settings in subcollection if not already set
             if (!userData.settings) {
-                updates.settings = getDefaultSettings();
+                const defaultSettings = getDefaultSettings();
+                await db
+                    .collection('users')
+                    .doc(userId)
+                    .collection('settings')
+                    .doc('preferences')
+                    .set({
+                        ...defaultSettings,
+                        createdAt: new Date().toISOString(),
+                        updatedAt: new Date().toISOString(),
+                    });
             }
-
-            // Update the user document with the discriminator and default settings
-            await snap.ref.update(updates);
 
             console.log(
                 `Assigned unique discriminator ${discriminator} and default settings to user ${userId} (${displayName})`,

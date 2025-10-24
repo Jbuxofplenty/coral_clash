@@ -26,8 +26,12 @@ export default function Avatar({
     const { colors } = useTheme();
 
     // Get avatar key from props or user data (only if not computer)
+    // If avatarKey is explicitly undefined (not passed), use current user's avatar
+    // If avatarKey is explicitly passed (even if null/empty), use it or default
     const finalAvatarKey =
-        avatarKey || user?.avatarKey || user?.settings?.avatarKey || DEFAULT_AVATAR_NAME;
+        avatarKey !== undefined
+            ? avatarKey || DEFAULT_AVATAR_NAME
+            : user?.settings?.avatarKey || DEFAULT_AVATAR_NAME;
     const avatarSource = DEFAULT_AVATARS[finalAvatarKey] || DEFAULT_AVATARS[DEFAULT_AVATAR_NAME];
 
     // Size configurations

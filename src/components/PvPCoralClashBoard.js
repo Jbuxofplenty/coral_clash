@@ -46,7 +46,7 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData }) => {
     const [currentMoveCount, setCurrentMoveCount] = useState(0); // Track move count from Firestore
     const [liveOpponentData, setLiveOpponentData] = useState(opponentData); // Track live opponent data
 
-    // Determine user's color and track requests from game document
+    // Listen to game document for user color, requests, and opponent snapshot data
     useEffect(() => {
         if (!gameId || !user) return;
 
@@ -94,45 +94,33 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData }) => {
                     } else {
                         setResetRequestData(null);
                     }
+
+                    // Update opponent snapshot data from game document
+                    // We want to show the opponent's avatar as it was when the game was created
+                    const isCreator = gameData.creatorId === user.uid;
+                    const opponentDisplayName = isCreator
+                        ? gameData.opponentDisplayName
+                        : gameData.creatorDisplayName;
+                    const opponentAvatarKey = isCreator
+                        ? gameData.opponentAvatarKey
+                        : gameData.creatorAvatarKey;
+
+                    if (opponentDisplayName && opponentAvatarKey) {
+                        setLiveOpponentData({
+                            id: gameData.opponentId,
+                            displayName: opponentDisplayName,
+                            avatarKey: opponentAvatarKey,
+                        });
+                    }
                 }
             },
             (error) => {
-                console.error('Error listening to game for user color:', error);
+                console.error('Error listening to game document:', error);
             },
         );
 
         return () => unsubscribe();
     }, [gameId, user]);
-
-    // Listen to opponent's user profile for real-time avatar updates
-    useEffect(() => {
-        if (!opponentId || !gameId) return;
-
-        const unsubscribe = onSnapshot(
-            doc(db, 'users', opponentId),
-            (docSnap) => {
-                if (docSnap.exists()) {
-                    const userData = docSnap.data();
-                    const displayName = userData.displayName || 'Player';
-                    const discriminator = userData.discriminator;
-                    const avatarKey = userData.settings?.avatarKey || 'dolphin';
-
-                    setLiveOpponentData({
-                        id: opponentId,
-                        displayName: discriminator
-                            ? `${displayName} #${discriminator}`
-                            : displayName,
-                        avatarKey: avatarKey,
-                    });
-                }
-            },
-            (error) => {
-                console.error('Error listening to opponent profile:', error);
-            },
-        );
-
-        return () => unsubscribe();
-    }, [opponentId, gameId]);
 
     // Handler for undo request from control bar
     const handleUndoRequest = async () => {

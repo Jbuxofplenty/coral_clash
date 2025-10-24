@@ -256,7 +256,7 @@ exports.getFriends = functions.https.onCall(async (data, context) => {
                 friends.push({
                     id: friendId,
                     displayName: formatDisplayName(userData.displayName, userData.discriminator),
-                    avatarKey: userData.avatarKey || 'dolphin',
+                    avatarKey: userData.settings?.avatarKey || 'dolphin',
                 });
             }
         }
@@ -278,7 +278,7 @@ exports.getFriends = functions.https.onCall(async (data, context) => {
                     requestId: doc.id,
                     id: request.from,
                     displayName: formatDisplayName(userData.displayName, userData.discriminator),
-                    avatarKey: userData.avatarKey || 'dolphin',
+                    avatarKey: userData.settings?.avatarKey || 'dolphin',
                     createdAt: request.createdAt,
                 });
             }
@@ -301,7 +301,7 @@ exports.getFriends = functions.https.onCall(async (data, context) => {
                     requestId: doc.id,
                     id: request.to,
                     displayName: formatDisplayName(userData.displayName, userData.discriminator),
-                    avatarKey: userData.avatarKey || 'dolphin',
+                    avatarKey: userData.settings?.avatarKey || 'dolphin',
                     createdAt: request.createdAt,
                 });
             }
@@ -424,7 +424,7 @@ exports.searchUsers = functions.https.onCall(async (data, context) => {
                 matchedUsers.push({
                     id: uid,
                     displayName: formatDisplayName(userData.displayName, userData.discriminator),
-                    avatarKey: userData.avatarKey || 'dolphin',
+                    avatarKey: userData.settings?.avatarKey || 'dolphin',
                     matchScore,
                     hasPendingRequest,
                 });
