@@ -435,6 +435,16 @@ export default function Home({ navigation }) {
                     onPress={handleStartComputerGame}
                 />
 
+                {!user && (
+                    <GameModeCard
+                        title='How-To Play'
+                        description='Learn the rules and strategies of Coral Clash'
+                        icon='question-circle'
+                        iconFamily='font-awesome'
+                        onPress={() => navigation.navigate('How-To Play')}
+                    />
+                )}
+
                 {enableDevFeatures && (
                     <GameModeCard
                         title='Load Game State (Dev)'

@@ -10,6 +10,7 @@ import Login from '../screens/Login';
 import Settings from '../screens/Settings';
 import Friends from '../screens/Friends';
 import Stats from '../screens/Stats';
+import HowToPlay from '../screens/HowToPlay';
 import CustomDrawerContent from './Menu';
 import { useAuth, useTheme, useAlert } from '../contexts';
 
@@ -123,6 +124,28 @@ export default function AppStack(props) {
                         }}
                     />
                     <Drawer.Screen
+                        name='How-To Play'
+                        component={HowToPlay}
+                        options={{
+                            drawerIcon: ({ focused, color }) => (
+                                <Icon
+                                    size={24}
+                                    name='question-circle'
+                                    family='font-awesome'
+                                    color={color}
+                                />
+                            ),
+                            header: ({ navigation, scene }) => (
+                                <Header
+                                    title='How-To Play'
+                                    navigation={navigation}
+                                    scene={scene}
+                                    user={user}
+                                />
+                            ),
+                        }}
+                    />
+                    <Drawer.Screen
                         name='Settings'
                         component={Settings}
                         options={{
@@ -177,22 +200,46 @@ export default function AppStack(props) {
                     />
                 </>
             ) : (
-                <Drawer.Screen
-                    name='Log In'
-                    component={Login}
-                    options={{
-                        drawerIcon: ({ focused, color }) => (
-                            <Icon size={24} name='sign-in' family='font-awesome' color={color} />
-                        ),
-                        drawerItemStyle: {
-                            marginTop: 'auto',
-                            marginBottom: 20,
-                        },
-                        header: ({ navigation, scene }) => (
-                            <Header title='Log In' navigation={navigation} scene={scene} />
-                        ),
-                    }}
-                />
+                <>
+                    <Drawer.Screen
+                        name='How-To Play'
+                        component={HowToPlay}
+                        options={{
+                            drawerIcon: ({ focused, color }) => (
+                                <Icon
+                                    size={24}
+                                    name='question-circle'
+                                    family='font-awesome'
+                                    color={color}
+                                />
+                            ),
+                            header: ({ navigation, scene }) => (
+                                <Header title='How-To Play' navigation={navigation} scene={scene} />
+                            ),
+                        }}
+                    />
+                    <Drawer.Screen
+                        name='Log In'
+                        component={Login}
+                        options={{
+                            drawerIcon: ({ focused, color }) => (
+                                <Icon
+                                    size={24}
+                                    name='sign-in'
+                                    family='font-awesome'
+                                    color={color}
+                                />
+                            ),
+                            drawerItemStyle: {
+                                marginTop: 'auto',
+                                marginBottom: 20,
+                            },
+                            header: ({ navigation, scene }) => (
+                                <Header title='Log In' navigation={navigation} scene={scene} />
+                            ),
+                        }}
+                    />
+                </>
             )}
         </Drawer.Navigator>
     );
