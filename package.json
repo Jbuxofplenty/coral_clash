@@ -4,6 +4,9 @@
     "description": "Coral Clash Board Game",
     "main": "node_modules/expo/AppEntry.js",
     "private": true,
+    "resolutions": {
+        "expo-constants": "18.0.10"
+    },
     "scripts": {
         "start": "cross-env REACT_EDITOR=code expo start",
         "android": "cross-env REACT_EDITOR=code expo start --android",
