@@ -1,10 +1,27 @@
 import { Block, Text, theme } from 'galio-framework';
 import React from 'react';
-import { Dimensions, ScrollView, StyleSheet, View } from 'react-native';
+import { Dimensions, ScrollView, StyleSheet, View, TouchableOpacity } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../contexts';
+import { getScenario } from '../constants/tutorialScenarios';
 
 const { width, height } = Dimensions.get('screen');
+
+// Clickable text component for scenario links
+const ScenarioLink = ({ children, scenarioId, navigation, color }) => {
+    const handlePress = () => {
+        const scenario = getScenario(scenarioId);
+        if (scenario) {
+            navigation.navigate('ScenarioBoard', { scenario });
+        }
+    };
+
+    return (
+        <Text bold style={[styles.link, { color: color }]} onPress={handlePress}>
+            {children}
+        </Text>
+    );
+};
 
 export default function HowToPlay({ navigation }) {
     const { colors } = useTheme();
@@ -28,8 +45,23 @@ export default function HowToPlay({ navigation }) {
                     </Text>
                     <View style={styles.bulletSection}>
                         <Text style={[styles.bulletPoint, { color: colors.TEXT }]}>
-                            • <Text bold>Checkmate</Text> your opponent's Whale (when the Whale is
-                            in check and cannot escape)
+                            •{' '}
+                            <ScenarioLink
+                                scenarioId='checkmate'
+                                navigation={navigation}
+                                color={colors.LINK}
+                            >
+                                Checkmate
+                            </ScenarioLink>{' '}
+                            your opponent's Whale (when the Whale is in{' '}
+                            <ScenarioLink
+                                scenarioId='check'
+                                navigation={navigation}
+                                color={colors.LINK}
+                            >
+                                check
+                            </ScenarioLink>{' '}
+                            and cannot escape)
                         </Text>
                         <Text style={[styles.bulletPoint, { color: colors.TEXT }]}>
                             • Control the <Text bold>most area with Coral</Text> when:
@@ -69,12 +101,26 @@ export default function HowToPlay({ navigation }) {
                     </Text>
                     <View style={styles.bulletSection}>
                         <Text style={[styles.bulletPoint, { color: colors.TEXT }]}>
-                            • <Text bold>Hunter</Text> pieces (without four coral icons) can remove
-                            Coral
+                            •{' '}
+                            <ScenarioLink
+                                scenarioId='hunterEffect'
+                                navigation={navigation}
+                                color={colors.LINK}
+                            >
+                                Hunter
+                            </ScenarioLink>{' '}
+                            pieces (without four coral icons) can remove Coral
                         </Text>
                         <Text style={[styles.bulletPoint, { color: colors.TEXT }]}>
-                            • <Text bold>Gatherer</Text> pieces (with four coral icons) can place
-                            Coral
+                            •{' '}
+                            <ScenarioLink
+                                scenarioId='gathererEffect'
+                                navigation={navigation}
+                                color={colors.LINK}
+                            >
+                                Gatherer
+                            </ScenarioLink>{' '}
+                            pieces (with four coral icons) can place Coral
                         </Text>
                     </View>
                 </Block>
@@ -104,61 +150,145 @@ export default function HowToPlay({ navigation }) {
                         How Pieces Move
                     </Text>
 
-                    <View style={styles.pieceSection}>
-                        <Text bold style={[styles.pieceTitle, { color: colors.TEXT }]}>
-                            🐋 Whale
+                    <Text style={[styles.text, { color: colors.TEXT }]}>
+                        Each piece type comes in two variants that interact with Coral differently:
+                    </Text>
+                    <View style={styles.bulletSection}>
+                        <Text style={[styles.bulletPoint, { color: colors.TEXT }]}>
+                            • <Text bold>Hunter pieces</Text> (without coral icons) get{' '}
+                            <Text bold>STOPPED BY</Text> Coral - they cannot move through it
+                        </Text>
+                        <Text style={[styles.bulletPoint, { color: colors.TEXT }]}>
+                            • <Text bold>Gatherer pieces</Text> (with four coral icons) are more
+                            powerful - they can pass <Text bold>THROUGH</Text> Coral freely
+                        </Text>
+                    </View>
+
+                    <TouchableOpacity
+                        style={[styles.ruleSection, { marginTop: theme.SIZES.BASE }]}
+                        onPress={() => {
+                            const scenario = getScenario('coralMovementComparison');
+                            if (scenario) navigation.navigate('ScenarioBoard', { scenario });
+                        }}
+                        activeOpacity={0.7}
+                    >
+                        <Text style={[styles.ruleTitle, { color: colors.LINK }]}>
+                            <Text bold>🪸 See Coral Movement Demo</Text>
+                        </Text>
+                        <Text style={[styles.text, { color: colors.TEXT }]}>
+                            Tap to see how Hunter pieces are blocked by Coral while Gatherer pieces
+                            can pass through it.
+                        </Text>
+                    </TouchableOpacity>
+
+                    <Text
+                        h6
+                        bold
+                        style={[
+                            styles.subHeading,
+                            { color: colors.PRIMARY, marginTop: theme.SIZES.BASE * 2 },
+                        ]}
+                    >
+                        Individual Piece Movements
+                    </Text>
+
+                    <TouchableOpacity
+                        style={styles.pieceSection}
+                        onPress={() => {
+                            const scenario = getScenario('whaleMovement');
+                            if (scenario) navigation.navigate('ScenarioBoard', { scenario });
+                        }}
+                        activeOpacity={0.7}
+                    >
+                        <Text style={[styles.pieceTitle, { color: colors.LINK }]}>
+                            🐋 <Text bold>Whale (tap to see demo)</Text>
                         </Text>
                         <Text style={[styles.text, { color: colors.TEXT }]}>
                             Can move half the piece any number of squares in any direction, or
                             rotate half of the piece to an adjacent square. Cannot end movement in
                             check.
                         </Text>
-                    </View>
+                    </TouchableOpacity>
 
-                    <View style={styles.pieceSection}>
-                        <Text bold style={[styles.pieceTitle, { color: colors.TEXT }]}>
-                            🐬 Dolphin
+                    <TouchableOpacity
+                        style={styles.pieceSection}
+                        onPress={() => {
+                            const scenario = getScenario('dolphinMovement');
+                            if (scenario) navigation.navigate('ScenarioBoard', { scenario });
+                        }}
+                        activeOpacity={0.7}
+                    >
+                        <Text style={[styles.pieceTitle, { color: colors.LINK }]}>
+                            🐬 <Text bold>Dolphin (tap to see demo)</Text>
                         </Text>
                         <Text style={[styles.text, { color: colors.TEXT }]}>
                             Moves any number of squares vertically, horizontally, or diagonally.
                         </Text>
-                    </View>
+                    </TouchableOpacity>
 
-                    <View style={styles.pieceSection}>
-                        <Text bold style={[styles.pieceTitle, { color: colors.TEXT }]}>
-                            🐢 Turtle
+                    <TouchableOpacity
+                        style={styles.pieceSection}
+                        onPress={() => {
+                            const scenario = getScenario('turtleMovement');
+                            if (scenario) navigation.navigate('ScenarioBoard', { scenario });
+                        }}
+                        activeOpacity={0.7}
+                    >
+                        <Text style={[styles.pieceTitle, { color: colors.LINK }]}>
+                            🐢 <Text bold>Turtle (tap to see demo)</Text>
                         </Text>
                         <Text style={[styles.text, { color: colors.TEXT }]}>
                             Moves any number of squares vertically or horizontally.
                         </Text>
-                    </View>
+                    </TouchableOpacity>
 
-                    <View style={styles.pieceSection}>
-                        <Text bold style={[styles.pieceTitle, { color: colors.TEXT }]}>
-                            🐡 Pufferfish
+                    <TouchableOpacity
+                        style={styles.pieceSection}
+                        onPress={() => {
+                            const scenario = getScenario('pufferfishMovement');
+                            if (scenario) navigation.navigate('ScenarioBoard', { scenario });
+                        }}
+                        activeOpacity={0.7}
+                    >
+                        <Text style={[styles.pieceTitle, { color: colors.LINK }]}>
+                            🐡 <Text bold>Pufferfish (tap to see demo)</Text>
                         </Text>
                         <Text style={[styles.text, { color: colors.TEXT }]}>
                             Moves any number of squares diagonally.
                         </Text>
-                    </View>
+                    </TouchableOpacity>
 
-                    <View style={styles.pieceSection}>
-                        <Text bold style={[styles.pieceTitle, { color: colors.TEXT }]}>
-                            🐙 Octopus
+                    <TouchableOpacity
+                        style={styles.pieceSection}
+                        onPress={() => {
+                            const scenario = getScenario('octopusMovement');
+                            if (scenario) navigation.navigate('ScenarioBoard', { scenario });
+                        }}
+                        activeOpacity={0.7}
+                    >
+                        <Text style={[styles.pieceTitle, { color: colors.LINK }]}>
+                            🐙 <Text bold>Octopus (tap to see demo)</Text>
                         </Text>
                         <Text style={[styles.text, { color: colors.TEXT }]}>
                             Moves one square diagonally.
                         </Text>
-                    </View>
+                    </TouchableOpacity>
 
-                    <View style={styles.pieceSection}>
-                        <Text bold style={[styles.pieceTitle, { color: colors.TEXT }]}>
-                            🦀 Crab
+                    <TouchableOpacity
+                        style={styles.pieceSection}
+                        onPress={() => {
+                            const scenario = getScenario('crabMovement');
+                            if (scenario) navigation.navigate('ScenarioBoard', { scenario });
+                        }}
+                        activeOpacity={0.7}
+                    >
+                        <Text style={[styles.pieceTitle, { color: colors.LINK }]}>
+                            🦀 <Text bold>Crab (tap to see demo)</Text>
                         </Text>
                         <Text style={[styles.text, { color: colors.TEXT }]}>
                             Moves one square vertically or horizontally.
                         </Text>
-                    </View>
+                    </TouchableOpacity>
                 </Block>
 
                 <Block style={[styles.card, { backgroundColor: colors.CARD_BACKGROUND }]}>
@@ -166,35 +296,56 @@ export default function HowToPlay({ navigation }) {
                         Special Rules
                     </Text>
 
-                    <View style={styles.ruleSection}>
-                        <Text bold style={[styles.ruleTitle, { color: colors.TEXT }]}>
-                            Capture
+                    <TouchableOpacity
+                        style={styles.ruleSection}
+                        onPress={() => {
+                            const scenario = getScenario('capture');
+                            if (scenario) navigation.navigate('ScenarioBoard', { scenario });
+                        }}
+                        activeOpacity={0.7}
+                    >
+                        <Text style={[styles.ruleTitle, { color: colors.LINK }]}>
+                            <Text bold>Capture (tap to see demo)</Text>
                         </Text>
                         <Text style={[styles.text, { color: colors.TEXT }]}>
                             Move to a square occupied by an enemy piece. Whales can capture two
                             pieces in one move.
                         </Text>
-                    </View>
+                    </TouchableOpacity>
 
-                    <View style={styles.ruleSection}>
-                        <Text bold style={[styles.ruleTitle, { color: colors.TEXT }]}>
-                            Hunter Effect
+                    <TouchableOpacity
+                        style={styles.ruleSection}
+                        onPress={() => {
+                            const scenario = getScenario('hunterEffect');
+                            if (scenario) navigation.navigate('ScenarioBoard', { scenario });
+                        }}
+                        activeOpacity={0.7}
+                    >
+                        <Text style={[styles.ruleTitle, { color: colors.LINK }]}>
+                            <Text bold>Hunter Effect (tap to see demo)</Text>
                         </Text>
                         <Text style={[styles.text, { color: colors.TEXT }]}>
                             Hunter pieces (without coral icons) stop when moving onto Coral and can
                             remove it from the board.
                         </Text>
-                    </View>
+                    </TouchableOpacity>
 
-                    <View style={styles.ruleSection}>
-                        <Text bold style={[styles.ruleTitle, { color: colors.TEXT }]}>
-                            Gatherer Effect
+                    <TouchableOpacity
+                        style={styles.ruleSection}
+                        onPress={() => {
+                            const scenario = getScenario('gathererEffect');
+                            if (scenario) navigation.navigate('ScenarioBoard', { scenario });
+                        }}
+                        activeOpacity={0.7}
+                    >
+                        <Text style={[styles.ruleTitle, { color: colors.LINK }]}>
+                            <Text bold>Gatherer Effect (tap to see demo)</Text>
                         </Text>
                         <Text style={[styles.text, { color: colors.TEXT }]}>
                             Gatherer pieces (with four coral icons) can place Coral on empty squares
                             they move to.
                         </Text>
-                    </View>
+                    </TouchableOpacity>
                 </Block>
 
                 <Block style={[styles.card, { backgroundColor: colors.CARD_BACKGROUND }]}>
@@ -247,6 +398,10 @@ const styles = StyleSheet.create({
     heading: {
         marginBottom: theme.SIZES.BASE,
     },
+    subHeading: {
+        marginBottom: theme.SIZES.BASE,
+        fontSize: 18,
+    },
     text: {
         fontSize: 15,
         lineHeight: 22,
@@ -283,5 +438,8 @@ const styles = StyleSheet.create({
     ruleTitle: {
         fontSize: 16,
         marginBottom: theme.SIZES.BASE / 2,
+    },
+    link: {
+        textDecorationLine: 'underline',
     },
 });

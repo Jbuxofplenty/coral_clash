@@ -1,5 +1,5 @@
-import Images from './Images';
-import materialTheme from './Theme';
+import Images from './images';
+import materialTheme from './theme';
 import utils from './utils';
 
 export { Images, materialTheme, utils };

@@ -1228,6 +1228,111 @@ describe('CoralClash Whale Mechanics', () => {
             console.log('Coral remaining:', coralRemaining);
             expect(coralRemaining).toEqual({ w: 12, b: 8 });
         });
+
+        it('REGRESSION: whale should be blocked by coral (hunter piece)', () => {
+            // Bug: Whale (hunter piece) was not checking for coral blocking during movement
+            // This allowed whale to move through coral, which should not be possible
+            const game = new CoralClash();
+            game.clear();
+
+            // Setup: White whale at d3-e3, coral at d4 and d5
+            game.put({ type: 'h', color: 'w' }, 'd3'); // White whale at d3-e3 (horizontal)
+            game.placeCoral('d4', 'w');
+            game.placeCoral('d5', 'w');
+
+            // Black whale for game validity
+            game.put({ type: 'h', color: 'b' }, 'a8');
+
+            console.log('\n=== Whale Blocked by Coral Test ===');
+            console.log('White whale at:', game.whalePositions().w);
+            console.log('Coral at d4 and d5');
+
+            // Get all moves for white whale
+            const whaleMoves = game.moves({ verbose: true, piece: 'h' });
+            console.log('Total whale moves:', whaleMoves.length);
+
+            // TYPE 1: Single-half sliding - d3 half slides to d4 (lands on coral)
+            // Whale d3-e3, d3 slides to d4, result: whale at d4-e3
+            const d3ToD4 = whaleMoves.find((m) => m.from === 'd3' && m.to === 'd4');
+            console.log('Can d3->d4 (land on coral)?', !!d3ToD4);
+            // Should be able to land on coral (hunter pieces can)
+            expect(d3ToD4).toBeDefined();
+
+            // d3 should NOT be able to slide past d4 to d5 (blocked by coral after landing on d4)
+            const d3ToD5 = whaleMoves.find((m) => m.from === 'd3' && m.to === 'd5');
+            console.log('Can d3->d5 (through coral at d4)?', !!d3ToD5);
+            expect(d3ToD5).toBeUndefined();
+
+            // TYPE 3: Parallel sliding up
+            // Both halves sliding up together (d3-e3 -> d4-e4) should land on d4 but stop
+            const parallelUp = whaleMoves.find(
+                (m) =>
+                    (m.to === 'd4' && m.whaleSecondSquare === 'e4') ||
+                    (m.to === 'e4' && m.whaleSecondSquare === 'd4'),
+            );
+            console.log('Can parallel slide d3-e3 -> d4-e4 (lands on d4 coral)?', !!parallelUp);
+            // Should be able to land on coral
+            expect(parallelUp).toBeDefined();
+
+            // But should NOT be able to continue past coral to d5-e5
+            const parallelThroughCoral = whaleMoves.find(
+                (m) =>
+                    (m.to === 'd5' && m.whaleSecondSquare === 'e5') ||
+                    (m.to === 'e5' && m.whaleSecondSquare === 'd5'),
+            );
+            console.log(
+                'Can parallel slide d3-e3 -> d5-e5 (through coral)?',
+                !!parallelThroughCoral,
+            );
+            expect(parallelThroughCoral).toBeUndefined();
+        });
+
+        it('REGRESSION: whale diagonal movement should be blocked by coral', () => {
+            // Test whale parallel diagonal sliding being blocked by coral
+            const game = new CoralClash();
+            game.clear();
+
+            // Setup: White whale at d3-e3 horizontal, coral at e4
+            game.put({ type: 'h', color: 'w' }, 'd3'); // White whale at d3-e3
+            game.placeCoral('e4', 'w');
+            game.put({ type: 'h', color: 'b' }, 'a8'); // Black whale
+
+            console.log('\n=== Whale Diagonal Blocked by Coral Test ===');
+            console.log('White whale at:', game.whalePositions().w);
+            console.log('Coral at e4');
+
+            // Get whale moves
+            const whaleMoves = game.moves({ verbose: true, piece: 'h' });
+
+            // Parallel diagonal up-left: d3-e3 -> c4-d4 (should work, no coral)
+            const upLeft = whaleMoves.find(
+                (m) =>
+                    (m.to === 'c4' && m.whaleSecondSquare === 'd4') ||
+                    (m.to === 'd4' && m.whaleSecondSquare === 'c4'),
+            );
+            console.log('Can parallel slide d3-e3 -> c4-d4 (clear)?', !!upLeft);
+            expect(upLeft).toBeDefined();
+
+            // Parallel diagonal up-right: d3-e3 -> e4-f4
+            // Should be BLOCKED because e4 has coral (can land on it but stops there)
+            // Actually, whale should be able to LAND on e4-f4 (coral at e4), but not go THROUGH to f5-g5
+            const upRightLand = whaleMoves.find(
+                (m) =>
+                    (m.to === 'e4' && m.whaleSecondSquare === 'f4') ||
+                    (m.to === 'f4' && m.whaleSecondSquare === 'e4'),
+            );
+            console.log('Can parallel slide d3-e3 -> e4-f4 (lands on e4 coral)?', !!upRightLand);
+            expect(upRightLand).toBeDefined(); // Can land on coral
+
+            // But should NOT be able to go through to f5-g5
+            const upRightThrough = whaleMoves.find(
+                (m) =>
+                    (m.to === 'f5' && m.whaleSecondSquare === 'g5') ||
+                    (m.to === 'g5' && m.whaleSecondSquare === 'f5'),
+            );
+            console.log('Can parallel slide d3-e3 -> f5-g5 (through coral)?', !!upRightThrough);
+            expect(upRightThrough).toBeUndefined(); // Cannot go through coral
+        });
     });
 
     describe('Crab Movement Debug', () => {

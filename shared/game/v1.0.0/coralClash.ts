@@ -1520,9 +1520,18 @@ export class CoralClash {
                 // Check if blocked by second half along the path
                 // (whale cannot slide through its own other half)
 
+                // Check if destination has coral (whale is hunter, gets blocked by coral)
+                const hasCoralAtDestination =
+                    this._coral[to] !== null && this._coral[to] !== undefined;
+
                 if (!this._isSquareOccupied(to)) {
                     // Empty square - can move
                     addWhaleMove(firstSq, to, secondSq);
+
+                    // Hunter pieces (whale) stop at coral (can't move through)
+                    if (hasCoralAtDestination) {
+                        break;
+                    }
                 } else if (this._isSquareOccupied(to, them)) {
                     // Capture
                     const capturedType = this._board[to]?.type || WHALE;
@@ -1562,9 +1571,18 @@ export class CoralClash {
                 // CRITICAL: Whale must remain as 2 adjacent orthogonal squares
                 if (!areOrthogonallyAdjacent(to, firstSq)) break;
 
+                // Check if destination has coral (whale is hunter, gets blocked by coral)
+                const hasCoralAtDestination =
+                    this._coral[to] !== null && this._coral[to] !== undefined;
+
                 if (!this._isSquareOccupied(to)) {
                     // Empty square - can move
                     addWhaleMove(secondSq, to, firstSq);
+
+                    // Hunter pieces (whale) stop at coral (can't move through)
+                    if (hasCoralAtDestination) {
+                        break;
+                    }
                 } else if (this._isSquareOccupied(to, them)) {
                     // Capture
                     const capturedType = this._board[to]?.type || WHALE;
@@ -1623,11 +1641,23 @@ export class CoralClash {
                     newSecond !== firstSq &&
                     newSecond !== secondSq;
 
+                // Check for coral blocking (whale is hunter, cannot move through coral)
+                const firstHasCoral =
+                    this._coral[newFirst] !== null && this._coral[newFirst] !== undefined;
+                const secondHasCoral =
+                    this._coral[newSecond] !== null && this._coral[newSecond] !== undefined;
+
                 // Both must be empty to slide through
                 if (!firstBlocked && !secondBlocked) {
                     // Generate moves from BOTH starting squares for parallel sliding
                     addWhaleMove(firstSq, newFirst, newSecond);
                     addWhaleMove(secondSq, newSecond, newFirst);
+
+                    // Hunter pieces (whale) stop if either square has coral (can't move through)
+                    if (firstHasCoral || secondHasCoral) {
+                        break;
+                    }
+
                     dist++;
                 } else {
                     // Check for captures (can capture with one or both squares)

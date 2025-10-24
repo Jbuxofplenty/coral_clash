@@ -11,6 +11,7 @@ import Settings from '../screens/Settings';
 import Friends from '../screens/Friends';
 import Stats from '../screens/Stats';
 import HowToPlay from '../screens/HowToPlay';
+import ScenarioBoard from '../screens/ScenarioBoard';
 import CustomDrawerContent from './Menu';
 import { useAuth, useTheme, useAlert } from '../contexts';
 
@@ -37,6 +38,40 @@ function HomeStack(props) {
                 options={{
                     header: ({ navigation, scene }) => (
                         <Header title='Game' navigation={navigation} scene={scene} back />
+                    ),
+                }}
+            />
+            <Stack.Screen
+                name='ScenarioBoard'
+                component={ScenarioBoard}
+                options={{
+                    header: ({ navigation, scene }) => (
+                        <Header title='Tutorial' navigation={navigation} scene={scene} back />
+                    ),
+                }}
+            />
+        </Stack.Navigator>
+    );
+}
+
+function HowToPlayStack(props) {
+    return (
+        <Stack.Navigator initialRouteName='HowToPlayMain'>
+            <Stack.Screen
+                name='HowToPlayMain'
+                component={HowToPlay}
+                options={{
+                    header: ({ navigation, scene }) => (
+                        <Header title='How-To Play' navigation={navigation} scene={scene} />
+                    ),
+                }}
+            />
+            <Stack.Screen
+                name='ScenarioBoard'
+                component={ScenarioBoard}
+                options={{
+                    header: ({ navigation, scene }) => (
+                        <Header title='Tutorial' navigation={navigation} scene={scene} back />
                     ),
                 }}
             />
@@ -125,7 +160,7 @@ export default function AppStack(props) {
                     />
                     <Drawer.Screen
                         name='How-To Play'
-                        component={HowToPlay}
+                        component={HowToPlayStack}
                         options={{
                             drawerIcon: ({ focused, color }) => (
                                 <Icon
@@ -135,14 +170,7 @@ export default function AppStack(props) {
                                     color={color}
                                 />
                             ),
-                            header: ({ navigation, scene }) => (
-                                <Header
-                                    title='How-To Play'
-                                    navigation={navigation}
-                                    scene={scene}
-                                    user={user}
-                                />
-                            ),
+                            headerShown: false,
                         }}
                     />
                     <Drawer.Screen
@@ -203,7 +231,7 @@ export default function AppStack(props) {
                 <>
                     <Drawer.Screen
                         name='How-To Play'
-                        component={HowToPlay}
+                        component={HowToPlayStack}
                         options={{
                             drawerIcon: ({ focused, color }) => (
                                 <Icon
@@ -213,9 +241,7 @@ export default function AppStack(props) {
                                     color={color}
                                 />
                             ),
-                            header: ({ navigation, scene }) => (
-                                <Header title='How-To Play' navigation={navigation} scene={scene} />
-                            ),
+                            headerShown: false,
                         }}
                     />
                     <Drawer.Screen

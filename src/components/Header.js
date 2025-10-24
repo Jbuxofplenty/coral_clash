@@ -4,7 +4,7 @@ import { Block, NavBar, theme } from 'galio-framework';
 import React from 'react';
 import { Dimensions, Platform, StyleSheet } from 'react-native';
 
-import materialTheme from '../constants/Theme';
+import materialTheme from '../constants/theme';
 import { useAuth, useTheme } from '../contexts';
 import Avatar from './Avatar';
 
