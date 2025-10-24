@@ -133,6 +133,7 @@ describe('Matchmaking Functions', () => {
                 discriminator: '1234',
                 avatarKey: 'dolphin',
                 joinedAt: expect.any(Object),
+                lastHeartbeat: expect.any(Object),
                 status: 'searching',
                 timeControl: { type: 'unlimited' },
             });
