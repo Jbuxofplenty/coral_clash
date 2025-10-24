@@ -7,6 +7,9 @@ package-lock.json
 *.p12
 *.key
 *.mobileprovision
+*.p8
+google-service-account*.json
+service-account*.json
 
 # Environment variables
 .env

@@ -27,6 +27,21 @@
         }
     },
     "submit": {
-        "production": {}
+        "production": {
+            "ios": {
+                "appleTeamId": "FWV22U8U39"
+            },
+            "android": {
+                "track": "production"
+            }
+        },
+        "preview": {
+            "ios": {
+                "appleTeamId": "FWV22U8U39"
+            },
+            "android": {
+                "track": "internal"
+            }
+        }
     }
 }

@@ -1,16 +1,15 @@
 {
     "expo": {
-        "name": "coral-clash",
+        "name": "Coral Clash",
         "description": "Coral Clash Board Game",
         "slug": "coral-clash",
         "platforms": ["ios", "android"],
         "version": "1.8.0",
         "orientation": "portrait",
-        "icon": "./src/assets/images/icon.png",
+        "icon": "./src/assets/icons/app_icon.png",
         "splash": {
             "image": "./src/assets/images/splash.png",
-            "resizeMode": "cover",
-            "backgroundColor": "#1e3c72"
+            "resizeMode": "contain"
         },
         "backgroundColor": "#1e3c72",
         "updates": {

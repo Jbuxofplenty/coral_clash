@@ -1,0 +1,35 @@
+name: Deploy to Staging (TestFlight/Internal Testing)
+
+on:
+  # Trigger on staging tags (e.g., v1.8.0-beta.1) or push to develop branch
+  push:
+    tags:
+      - 'v*-beta.*'
+      - 'v*-rc.*'
+    branches:
+      - develop
+  
+  # Allow manual triggering from GitHub UI
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: 'Platform to deploy (ios, android, all)'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - ios
+          - android
+
+jobs:
+  deploy-staging:
+    name: Deploy to Staging
+    uses: ./.github/workflows/build-and-submit.yml
+    with:
+      profile: 'preview'
+      platform: ${{ github.event.inputs.platform || 'all' }}
+      environment: 'staging'
+    secrets:
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+

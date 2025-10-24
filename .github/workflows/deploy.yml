@@ -1,0 +1,32 @@
+name: Deploy to Production (App Store/Play Store)
+
+on:
+  # Trigger on production version tags (e.g., v1.8.0, v1.8.1)
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+  
+  # Allow manual triggering from GitHub UI
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: 'Platform to deploy (ios, android, all)'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - ios
+          - android
+
+jobs:
+  deploy-production:
+    name: Deploy to Production
+    uses: ./.github/workflows/build-and-submit.yml
+    with:
+      profile: 'production'
+      platform: ${{ github.event.inputs.platform || 'all' }}
+      environment: 'production'
+    secrets:
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+

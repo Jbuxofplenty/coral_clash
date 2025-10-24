@@ -1,0 +1,80 @@
+name: Build and Submit (Reusable)
+
+on:
+  workflow_call:
+    inputs:
+      profile:
+        description: 'EAS build profile to use (preview, production)'
+        required: true
+        type: string
+      platform:
+        description: 'Platform to deploy (ios, android, all)'
+        required: false
+        default: 'all'
+        type: string
+      environment:
+        description: 'GitHub environment name for deployment protection'
+        required: false
+        type: string
+    secrets:
+      EXPO_TOKEN:
+        required: true
+
+jobs:
+  build-and-submit:
+    name: Build and Submit to Stores
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Setup Expo and EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build iOS app
+        if: inputs.platform == 'ios' || inputs.platform == 'all'
+        run: eas build --platform ios --profile ${{ inputs.profile }} --non-interactive --no-wait
+
+      - name: Build Android app
+        if: inputs.platform == 'android' || inputs.platform == 'all'
+        run: eas build --platform android --profile ${{ inputs.profile }} --non-interactive --no-wait
+
+      - name: Wait for builds to complete
+        run: |
+          echo "Waiting for builds to complete..."
+          sleep 60
+          echo "Builds are processing. Check EAS dashboard for progress."
+
+      - name: Submit to App Store
+        if: inputs.platform == 'ios' || inputs.platform == 'all'
+        run: eas submit --platform ios --profile ${{ inputs.profile }} --latest --non-interactive
+
+      - name: Submit to Play Store
+        if: inputs.platform == 'android' || inputs.platform == 'all'
+        run: eas submit --platform android --profile ${{ inputs.profile }} --latest --non-interactive
+
+      - name: Build summary
+        if: always()
+        run: |
+          echo "### 🚀 Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Profile**: ${{ inputs.profile }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Platform**: ${{ inputs.platform }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status**: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "📊 Check build status: [EAS Dashboard](https://expo.dev/accounts/[your-account]/projects/coral-clash/builds)" >> $GITHUB_STEP_SUMMARY
+

@@ -40,7 +40,7 @@ import { enableScreens } from 'react-native-screens';
 enableScreens();
 
 // cache app images
-const assetImages = [Images.Home];
+const assetImages = [];
 
 function cacheImages(images) {
     return images.map((image) => {
