@@ -39,6 +39,11 @@ function Login({ navigation }) {
     const [error, setError] = React.useState('');
     const [successMessage, setSuccessMessage] = React.useState('');
 
+    // Refs for input fields
+    const displayNameRef = React.useRef(null);
+    const emailRef = React.useRef(null);
+    const passwordRef = React.useRef(null);
+
     // Redirect to Home if user is already logged in
     React.useEffect(() => {
         if (user) {
@@ -255,6 +260,7 @@ function Login({ navigation }) {
 
                                 {!showForgotPassword && isSignUp && (
                                     <Input
+                                        ref={displayNameRef}
                                         placeholder='Username (required)'
                                         value={displayName}
                                         onChangeText={setDisplayName}
@@ -268,9 +274,14 @@ function Login({ navigation }) {
                                         color={colors.TEXT}
                                         placeholderTextColor={colors.PLACEHOLDER}
                                         autoCapitalize='words'
+                                        textContentType='nickname'
+                                        autoComplete='name'
+                                        returnKeyType='next'
+                                        onSubmitEditing={() => emailRef.current?.focus()}
                                     />
                                 )}
                                 <Input
+                                    ref={emailRef}
                                     placeholder='Email'
                                     value={email}
                                     onChangeText={setEmail}
@@ -285,9 +296,20 @@ function Login({ navigation }) {
                                     placeholderTextColor={colors.PLACEHOLDER}
                                     keyboardType='email-address'
                                     autoCapitalize='none'
+                                    textContentType={isSignUp ? 'username' : 'username'}
+                                    autoComplete={isSignUp ? 'email' : 'username'}
+                                    returnKeyType={showForgotPassword ? 'done' : 'next'}
+                                    onSubmitEditing={() => {
+                                        if (showForgotPassword) {
+                                            handleForgotPassword();
+                                        } else {
+                                            passwordRef.current?.focus();
+                                        }
+                                    }}
                                 />
                                 {!showForgotPassword && (
                                     <Input
+                                        ref={passwordRef}
                                         placeholder='Password'
                                         value={password}
                                         onChangeText={setPassword}
@@ -303,6 +325,10 @@ function Login({ navigation }) {
                                         password
                                         viewPass
                                         autoCapitalize='none'
+                                        textContentType={isSignUp ? 'newPassword' : 'password'}
+                                        autoComplete={isSignUp ? 'password-new' : 'password'}
+                                        returnKeyType='done'
+                                        onSubmitEditing={handleSubmit}
                                     />
                                 )}
 
@@ -370,18 +396,20 @@ const styles = StyleSheet.create({
     },
     scrollContainer: {
         flexGrow: 1,
+        justifyContent: 'center',
     },
     container: {
         width: width,
         paddingHorizontal: theme.SIZES.BASE,
-        paddingVertical: theme.SIZES.BASE * 4,
+        paddingVertical: theme.SIZES.BASE * 2,
     },
     card: {
         borderRadius: 12,
         padding: theme.SIZES.BASE * 1.5,
-        paddingVertical: theme.SIZES.BASE * 2,
+        paddingVertical: theme.SIZES.BASE * 3,
         width: '100%',
         maxWidth: 400,
+        minHeight: height * 0.75,
         shadowColor: theme.COLORS.BLACK,
         shadowOffset: { width: 0, height: 4 },
         shadowRadius: 12,

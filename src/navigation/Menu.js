@@ -1,7 +1,7 @@
 import { DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer';
 import { Block, Text } from 'galio-framework';
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, useWindowDimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth, useTheme } from '../contexts';
@@ -19,6 +19,10 @@ function CustomDrawerContent(props) {
     const insets = useSafeAreaInsets();
     const { user } = useAuth();
     const { colors } = useTheme();
+    const { height } = useWindowDimensions();
+
+    // Use compact mode on smaller screens (iPhone SE, etc.)
+    const isCompact = height < 700;
 
     // Format display name with discriminator
     const getDisplayName = () => {
@@ -40,20 +44,41 @@ function CustomDrawerContent(props) {
                 style={styles.container}
                 contentContainerStyle={styles.contentContainer}
             >
-                <Block style={[styles.header, { paddingTop: insets.top + 20 }]}>
+                <Block
+                    style={[
+                        styles.header,
+                        {
+                            paddingTop: insets.top + (isCompact ? 10 : 20),
+                        },
+                        isCompact && styles.headerCompact,
+                    ]}
+                >
                     {user && (
-                        <View style={styles.profileContainer}>
-                            <Avatar size='xlarge' style={styles.avatar} showBorder={true} />
-                            <Text size={16} color='white' style={styles.userName}>
+                        <View
+                            style={[
+                                styles.profileContainer,
+                                isCompact && styles.profileContainerCompact,
+                            ]}
+                        >
+                            <Avatar
+                                size={isCompact ? 'large' : 'xlarge'}
+                                style={styles.avatar}
+                                showBorder={true}
+                            />
+                            <Text size={isCompact ? 13 : 16} color='white' style={styles.userName}>
                                 {getDisplayName()}
                             </Text>
                         </View>
                     )}
 
-                    <Text h4 color='white' style={styles.title}>
+                    <Text
+                        size={isCompact ? 18 : 24}
+                        color='white'
+                        style={[styles.title, isCompact && styles.titleCompact]}
+                    >
                         Coral Clash
                     </Text>
-                    <Text size={14} color='white' style={styles.subtitle}>
+                    <Text size={isCompact ? 11 : 14} color='white' style={styles.subtitle}>
                         Ocean Strategy Game
                     </Text>
                 </Block>
@@ -75,16 +100,25 @@ const styles = StyleSheet.create({
         backgroundColor: 'transparent',
     },
     contentContainer: {
-        flex: 1,
+        flexGrow: 1,
+        paddingBottom: 20,
     },
     header: {
         paddingHorizontal: 24,
         paddingBottom: 24,
         marginBottom: 16,
     },
+    headerCompact: {
+        paddingHorizontal: 16,
+        paddingBottom: 12,
+        marginBottom: 8,
+    },
     profileContainer: {
         alignItems: 'center',
         marginBottom: 20,
+    },
+    profileContainerCompact: {
+        marginBottom: 12,
     },
     avatar: {
         marginBottom: 12,
@@ -97,6 +131,9 @@ const styles = StyleSheet.create({
     title: {
         fontWeight: 'bold',
         marginBottom: 4,
+    },
+    titleCompact: {
+        marginBottom: 2,
     },
     subtitle: {
         opacity: 0.8,

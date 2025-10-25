@@ -1,4 +1,4 @@
-const functions = require('firebase-functions/v1');
+const { onCall, onRequest, HttpsError } = require('firebase-functions/v2/https');
 const admin = require('firebase-admin');
 const { serverTimestamp, formatDisplayName } = require('../utils/helpers');
 const {
@@ -13,17 +13,18 @@ const db = admin.firestore();
  * POST /api/friends/request
  * Accepts either friendId (UID) or email
  */
-exports.sendFriendRequest = functions.https.onCall(async (data, context) => {
+exports.sendFriendRequest = onCall(async (request) => {
+    const { data, auth } = request;
     try {
-        if (!context.auth) {
-            throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
+        if (!auth) {
+            throw new HttpsError('unauthenticated', 'User must be authenticated');
         }
 
         const { friendId, email } = data;
-        const userId = context.auth.uid;
+        const userId = auth.uid;
 
         if (!friendId && !email) {
-            throw new functions.https.HttpsError(
+            throw new HttpsError(
                 'invalid-argument',
                 'Either friendId or email is required',
             );
@@ -35,13 +36,13 @@ exports.sendFriendRequest = functions.https.onCall(async (data, context) => {
         if (email && !friendId) {
             const userByEmail = await admin.auth().getUserByEmail(email);
             if (!userByEmail) {
-                throw new functions.https.HttpsError('not-found', 'User with that email not found');
+                throw new HttpsError('not-found', 'User with that email not found');
             }
             targetUserId = userByEmail.uid;
         }
 
         if (userId === targetUserId) {
-            throw new functions.https.HttpsError(
+            throw new HttpsError(
                 'invalid-argument',
                 'Cannot add yourself as friend',
             );
@@ -50,7 +51,7 @@ exports.sendFriendRequest = functions.https.onCall(async (data, context) => {
         // Check if friend exists in Firestore
         const friendDoc = await db.collection('users').doc(targetUserId).get();
         if (!friendDoc.exists) {
-            throw new functions.https.HttpsError('not-found', 'User not found');
+            throw new HttpsError('not-found', 'User not found');
         }
 
         // Check if already friends
@@ -62,7 +63,7 @@ exports.sendFriendRequest = functions.https.onCall(async (data, context) => {
             .get();
 
         if (existingFriend.exists) {
-            throw new functions.https.HttpsError('already-exists', 'Already friends');
+            throw new HttpsError('already-exists', 'Already friends');
         }
 
         // Check for existing pending request
@@ -74,7 +75,7 @@ exports.sendFriendRequest = functions.https.onCall(async (data, context) => {
             .get();
 
         if (!existingRequest.empty) {
-            throw new functions.https.HttpsError('already-exists', 'Friend request already sent');
+            throw new HttpsError('already-exists', 'Friend request already sent');
         }
 
         // Check for reverse pending request (they sent you a request)
@@ -86,7 +87,7 @@ exports.sendFriendRequest = functions.https.onCall(async (data, context) => {
             .get();
 
         if (!reverseRequest.empty) {
-            throw new functions.https.HttpsError(
+            throw new HttpsError(
                 'already-exists',
                 'This user has already sent you a friend request. Accept their request instead.',
             );
@@ -126,7 +127,7 @@ exports.sendFriendRequest = functions.https.onCall(async (data, context) => {
         };
     } catch (error) {
         console.error('Error sending friend request:', error);
-        throw new functions.https.HttpsError('internal', error.message);
+        throw new HttpsError('internal', error.message);
     }
 });
 
@@ -134,19 +135,20 @@ exports.sendFriendRequest = functions.https.onCall(async (data, context) => {
  * Accept or decline friend request
  * POST /api/friends/respond
  */
-exports.respondToFriendRequest = functions.https.onCall(async (data, context) => {
+exports.respondToFriendRequest = onCall(async (request) => {
+    const { data, auth } = request;
     try {
-        if (!context.auth) {
-            throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
+        if (!auth) {
+            throw new HttpsError('unauthenticated', 'User must be authenticated');
         }
 
         const { requestId, accept } = data;
-        const userId = context.auth.uid;
+        const userId = auth.uid;
 
         const requestDoc = await db.collection('friendRequests').doc(requestId).get();
 
         if (!requestDoc.exists) {
-            throw new functions.https.HttpsError('not-found', 'Friend request not found');
+            throw new HttpsError('not-found', 'Friend request not found');
         }
 
         const requestData = requestDoc.data();
@@ -159,12 +161,12 @@ exports.respondToFriendRequest = functions.https.onCall(async (data, context) =>
         const isSender = requestData.from === userId;
 
         if (!isRecipient && !isSender) {
-            throw new functions.https.HttpsError('permission-denied', 'Not authorized');
+            throw new HttpsError('permission-denied', 'Not authorized');
         }
 
         // Only recipient can accept (sender cannot accept their own request)
         if (accept && !isRecipient) {
-            throw new functions.https.HttpsError(
+            throw new HttpsError(
                 'permission-denied',
                 'Only the recipient can accept a friend request',
             );
@@ -222,7 +224,7 @@ exports.respondToFriendRequest = functions.https.onCall(async (data, context) =>
         };
     } catch (error) {
         console.error('Error responding to friend request:', error);
-        throw new functions.https.HttpsError('internal', error.message);
+        throw new HttpsError('internal', error.message);
     }
 });
 
@@ -230,13 +232,14 @@ exports.respondToFriendRequest = functions.https.onCall(async (data, context) =>
  * Get user's friends list and pending requests
  * GET /api/friends
  */
-exports.getFriends = functions.https.onCall(async (data, context) => {
+exports.getFriends = onCall(async (request) => {
+    const { data, auth } = request;
     try {
-        if (!context.auth) {
-            throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
+        if (!auth) {
+            throw new HttpsError('unauthenticated', 'User must be authenticated');
         }
 
-        const userId = context.auth.uid;
+        const userId = auth.uid;
 
         // Get friends
         const friendsSnapshot = await db
@@ -315,7 +318,7 @@ exports.getFriends = functions.https.onCall(async (data, context) => {
         };
     } catch (error) {
         console.error('Error getting friends:', error);
-        throw new functions.https.HttpsError('internal', error.message);
+        throw new HttpsError('internal', error.message);
     }
 });
 
@@ -323,14 +326,15 @@ exports.getFriends = functions.https.onCall(async (data, context) => {
  * Remove friend
  * POST /api/friends/remove
  */
-exports.removeFriend = functions.https.onCall(async (data, context) => {
+exports.removeFriend = onCall(async (request) => {
+    const { data, auth } = request;
     try {
-        if (!context.auth) {
-            throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
+        if (!auth) {
+            throw new HttpsError('unauthenticated', 'User must be authenticated');
         }
 
         const { friendId } = data;
-        const userId = context.auth.uid;
+        const userId = auth.uid;
 
         // Remove from both users' friends subcollections
         const batch = db.batch();
@@ -346,7 +350,7 @@ exports.removeFriend = functions.https.onCall(async (data, context) => {
         };
     } catch (error) {
         console.error('Error removing friend:', error);
-        throw new functions.https.HttpsError('internal', error.message);
+        throw new HttpsError('internal', error.message);
     }
 });
 
@@ -354,14 +358,15 @@ exports.removeFriend = functions.https.onCall(async (data, context) => {
  * Search users by username or email (fuzzy match)
  * GET /api/friends/search
  */
-exports.searchUsers = functions.https.onCall(async (data, context) => {
+exports.searchUsers = onCall(async (request) => {
+    const { data, auth } = request;
     try {
-        if (!context.auth) {
-            throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
+        if (!auth) {
+            throw new HttpsError('unauthenticated', 'User must be authenticated');
         }
 
         const { query } = data;
-        const userId = context.auth.uid;
+        const userId = auth.uid;
 
         if (!query || query.trim().length < 2) {
             return {
@@ -441,7 +446,7 @@ exports.searchUsers = functions.https.onCall(async (data, context) => {
         };
     } catch (error) {
         console.error('Error searching users:', error);
-        throw new functions.https.HttpsError('internal', error.message);
+        throw new HttpsError('internal', error.message);
     }
 });
 

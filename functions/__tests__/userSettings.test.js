@@ -46,18 +46,14 @@ describe('User Settings Functions', () => {
 
     describe('getUserSettings', () => {
         it('should return default settings if none exist', async () => {
-            const wrapped = test.wrap(userSettings.getUserSettings);
-
             mockGet.mockResolvedValue({
                 exists: false,
             });
 
-            const result = await wrapped(
-                {},
-                {
-                    auth: { uid: 'test-user-123' },
-                },
-            );
+            const result = await userSettings.getUserSettingsHandler({
+                data: {},
+                auth: { uid: 'test-user-123' },
+            });
 
             expect(result.success).toBe(true);
             expect(result.settings.theme).toBe('auto');
@@ -65,8 +61,6 @@ describe('User Settings Functions', () => {
         });
 
         it('should return existing settings', async () => {
-            const wrapped = test.wrap(userSettings.getUserSettings);
-
             const existingSettings = {
                 theme: 'dark',
                 avatarKey: 'whale',
@@ -78,28 +72,27 @@ describe('User Settings Functions', () => {
                 data: () => existingSettings,
             });
 
-            const result = await wrapped(
-                {},
-                {
-                    auth: { uid: 'test-user-123' },
-                },
-            );
+            const result = await userSettings.getUserSettingsHandler({
+                data: {},
+                auth: { uid: 'test-user-123' },
+            });
 
             expect(result.success).toBe(true);
             expect(result.settings).toEqual(existingSettings);
         });
 
         it('should throw error if user not authenticated', async () => {
-            const wrapped = test.wrap(userSettings.getUserSettings);
-
-            await expect(wrapped({}, {})).rejects.toThrow('User must be authenticated');
+            await expect(
+                userSettings.getUserSettingsHandler({
+                    data: {},
+                    auth: null,
+                }),
+            ).rejects.toThrow('User must be authenticated');
         });
     });
 
     describe('updateUserSettings', () => {
         it('should update settings successfully', async () => {
-            const wrapped = test.wrap(userSettings.updateUserSettings);
-
             const newSettings = {
                 theme: 'light',
                 avatarKey: 'octopus',
@@ -108,10 +101,10 @@ describe('User Settings Functions', () => {
             mockSet.mockResolvedValue();
             mockUpdate.mockResolvedValue();
 
-            const result = await wrapped(
-                { settings: newSettings },
-                { auth: { uid: 'test-user-123' } },
-            );
+            const result = await userSettings.updateUserSettingsHandler({
+                data: { settings: newSettings },
+                auth: { uid: 'test-user-123' },
+            });
 
             expect(result.success).toBe(true);
             expect(result.message).toBe('Settings updated successfully');
@@ -119,48 +112,49 @@ describe('User Settings Functions', () => {
         });
 
         it('should update settings with avatarKey', async () => {
-            const wrapped = test.wrap(userSettings.updateUserSettings);
-
             const newSettings = {
                 avatarKey: 'crab',
             };
 
             mockSet.mockResolvedValue();
 
-            const result = await wrapped(
-                { settings: newSettings },
-                { auth: { uid: 'test-user-123' } },
-            );
+            const result = await userSettings.updateUserSettingsHandler({
+                data: { settings: newSettings },
+                auth: { uid: 'test-user-123' },
+            });
 
             expect(result.success).toBe(true);
             expect(mockSet).toHaveBeenCalled();
         });
 
         it('should throw error if settings data is missing', async () => {
-            const wrapped = test.wrap(userSettings.updateUserSettings);
-
-            await expect(wrapped({}, { auth: { uid: 'test-user-123' } })).rejects.toThrow(
-                'Settings data is required',
-            );
+            await expect(
+                userSettings.updateUserSettingsHandler({
+                    data: {},
+                    auth: { uid: 'test-user-123' },
+                }),
+            ).rejects.toThrow('Settings data is required');
         });
 
         it('should throw error if user not authenticated', async () => {
-            const wrapped = test.wrap(userSettings.updateUserSettings);
-
-            await expect(wrapped({ settings: { theme: 'dark' } }, {})).rejects.toThrow(
-                'User must be authenticated',
-            );
+            await expect(
+                userSettings.updateUserSettingsHandler({
+                    data: { settings: { theme: 'dark' } },
+                    auth: null,
+                }),
+            ).rejects.toThrow('User must be authenticated');
         });
     });
 
     describe('resetUserSettings', () => {
         it('should reset settings to defaults', async () => {
-            const wrapped = test.wrap(userSettings.resetUserSettings);
-
             mockSet.mockResolvedValue();
             mockUpdate.mockResolvedValue();
 
-            const result = await wrapped({}, { auth: { uid: 'test-user-123' } });
+            const result = await userSettings.resetUserSettingsHandler({
+                data: {},
+                auth: { uid: 'test-user-123' },
+            });
 
             expect(result.success).toBe(true);
             expect(result.message).toBe('Settings reset to defaults');
@@ -170,11 +164,12 @@ describe('User Settings Functions', () => {
         });
 
         it('should reset avatarKey to default', async () => {
-            const wrapped = test.wrap(userSettings.resetUserSettings);
-
             mockSet.mockResolvedValue();
 
-            const result = await wrapped({}, { auth: { uid: 'test-user-123' } });
+            const result = await userSettings.resetUserSettingsHandler({
+                data: {},
+                auth: { uid: 'test-user-123' },
+            });
 
             expect(result.success).toBe(true);
             expect(result.settings.avatarKey).toBe('dolphin');
@@ -182,9 +177,12 @@ describe('User Settings Functions', () => {
         });
 
         it('should throw error if user not authenticated', async () => {
-            const wrapped = test.wrap(userSettings.resetUserSettings);
-
-            await expect(wrapped({}, {})).rejects.toThrow('User must be authenticated');
+            await expect(
+                userSettings.resetUserSettingsHandler({
+                    data: {},
+                    auth: null,
+                }),
+            ).rejects.toThrow('User must be authenticated');
         });
     });
 });

@@ -198,7 +198,15 @@ export default function Stats({ navigation }) {
             >
                 <Icon name={icon} family='font-awesome' size={24} color={iconColor} />
             </Block>
-            <Text size={32} bold color={colors.TEXT} style={{ marginBottom: 4 }}>
+            <Text
+                size={32}
+                bold
+                color={colors.TEXT}
+                style={{ marginBottom: 4 }}
+                numberOfLines={1}
+                adjustsFontSizeToFit
+                minimumFontScale={0.6}
+            >
                 {value}
             </Text>
             <Text size={14} color={colors.TEXT_SECONDARY} style={{ marginBottom: 2 }}>
@@ -239,24 +247,53 @@ export default function Stats({ navigation }) {
                             bold
                             color={colors.TEXT}
                             numberOfLines={1}
+                            adjustsFontSizeToFit
+                            minimumFontScale={0.7}
                             style={{ marginBottom: 4 }}
                         >
                             {stats.name}
                         </Text>
                         <Block row>
-                            <Text size={13} color={colors.SUCCESS} style={{ marginRight: 12 }}>
+                            <Text
+                                size={13}
+                                color={colors.SUCCESS}
+                                style={{ marginRight: 12 }}
+                                numberOfLines={1}
+                                adjustsFontSizeToFit
+                                minimumFontScale={0.7}
+                            >
                                 {stats.wins}W
                             </Text>
-                            <Text size={13} color={colors.ERROR} style={{ marginRight: 12 }}>
+                            <Text
+                                size={13}
+                                color={colors.ERROR}
+                                style={{ marginRight: 12 }}
+                                numberOfLines={1}
+                                adjustsFontSizeToFit
+                                minimumFontScale={0.7}
+                            >
                                 {stats.losses}L
                             </Text>
-                            <Text size={13} color={colors.TEXT_SECONDARY}>
+                            <Text
+                                size={13}
+                                color={colors.TEXT_SECONDARY}
+                                numberOfLines={1}
+                                adjustsFontSizeToFit
+                                minimumFontScale={0.7}
+                            >
                                 {stats.draws}D
                             </Text>
                         </Block>
                     </Block>
-                    <Block center>
-                        <Text size={20} bold color={colors.PRIMARY}>
+                    <Block center style={{ minWidth: 60 }}>
+                        <Text
+                            size={20}
+                            bold
+                            color={colors.PRIMARY}
+                            numberOfLines={1}
+                            adjustsFontSizeToFit
+                            minimumFontScale={0.7}
+                        >
                             {winRate}%
                         </Text>
                         <Text size={11} color={colors.TEXT_SECONDARY}>
@@ -323,7 +360,15 @@ export default function Stats({ navigation }) {
                                     color={colors.PRIMARY}
                                 />
                             </Block>
-                            <Text size={48} bold color={colors.TEXT} style={{ marginBottom: 8 }}>
+                            <Text
+                                size={48}
+                                bold
+                                color={colors.TEXT}
+                                style={{ marginBottom: 8 }}
+                                numberOfLines={1}
+                                adjustsFontSizeToFit
+                                minimumFontScale={0.6}
+                            >
                                 {overallStats.gamesPlayed}
                             </Text>
                             <Text size={18} color={colors.TEXT_SECONDARY}>

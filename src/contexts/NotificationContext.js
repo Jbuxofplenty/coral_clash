@@ -6,13 +6,32 @@ import { useAuth } from './AuthContext';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../config/firebase';
 
+// Ref to track active game ID for notification filtering
+// This needs to be outside the component so the handler can access it
+const activeGameIdRef = { current: null };
+
 // Configure how notifications are handled when app is in foreground
 Notifications.setNotificationHandler({
-    handleNotification: async () => ({
-        shouldShowAlert: true,
-        shouldPlaySound: true,
-        shouldSetBadge: true,
-    }),
+    handleNotification: async (notification) => {
+        const notificationData = notification.request.content.data;
+        const notificationType = notificationData?.type;
+        const notificationGameId = notificationData?.gameId;
+
+        // Check if this notification should be suppressed for the currently active game
+        // Suppress move, undo request, and reset request notifications if user is viewing that game
+        const suppressibleTypes = ['move_made', 'undo_requested', 'reset_requested'];
+        const shouldSuppress =
+            suppressibleTypes.includes(notificationType) &&
+            notificationGameId &&
+            notificationGameId === activeGameIdRef.current;
+
+        return {
+            shouldShowAlert: false, // Deprecated but keeping for backwards compatibility
+            shouldShowBanner: !shouldSuppress, // Don't show banner if suppressed
+            shouldPlaySound: !shouldSuppress, // Don't play sound if suppressed
+            shouldSetBadge: !shouldSuppress, // Don't update badge if suppressed
+        };
+    },
 });
 
 const NotificationContext = createContext({});
@@ -30,54 +49,74 @@ export function NotificationProvider({ children }) {
     const [expoPushToken, setExpoPushToken] = useState('');
     const [notification, setNotification] = useState(null);
     const [badgeCount, setBadgeCount] = useState(0);
+    const [activeGameId, setActiveGameId] = useState(null);
     const notificationListener = useRef();
     const responseListener = useRef();
     const appState = useRef(AppState.currentState);
 
+    // Keep shared ref in sync with state for notification handler
+    useEffect(() => {
+        activeGameIdRef.current = activeGameId;
+    }, [activeGameId]);
+
     // Register for push notifications
     useEffect(() => {
-        registerForPushNotificationsAsync().then((token) => {
-            if (token) {
-                setExpoPushToken(token);
-                // Save token to user's Firestore document if logged in
-                if (user?.uid) {
-                    updateDoc(doc(db, 'users', user.uid), {
-                        pushToken: token,
-                        pushTokenUpdatedAt: new Date().toISOString(),
-                    }).catch((error) => console.error('Error saving push token:', error));
+        registerForPushNotificationsAsync()
+            .then((token) => {
+                if (token) {
+                    setExpoPushToken(token);
+                    // Save token to user's Firestore document if logged in
+                    if (user?.uid) {
+                        updateDoc(doc(db, 'users', user.uid), {
+                            pushToken: token,
+                            pushTokenUpdatedAt: new Date().toISOString(),
+                        }).catch((error) => console.error('Error saving push token:', error));
+                    }
                 }
-            }
-        });
+            })
+            .catch(() => {
+                // Silently handle registration errors (common in simulators/Expo Go)
+            });
 
         // Listener for when notifications are received while app is in foreground
         notificationListener.current = Notifications.addNotificationReceivedListener(
-            (notification) => {
-                console.log('📱 Notification received:', notification);
-                setNotification(notification);
+            (receivedNotification) => {
+                const notificationData = receivedNotification.request.content.data;
+                const notificationType = notificationData?.type;
+                const notificationGameId = notificationData?.gameId;
 
-                // Update badge count
-                const newCount = badgeCount + 1;
-                setBadgeCount(newCount);
-                Notifications.setBadgeCountAsync(newCount);
+                // Filter out move, undo, and reset request notifications if user is viewing that game
+                // (The notification handler already suppressed the banner/sound/badge)
+                const suppressibleTypes = ['move_made', 'undo_requested', 'reset_requested'];
+                const shouldSuppress =
+                    suppressibleTypes.includes(notificationType) &&
+                    notificationGameId === activeGameIdRef.current;
+
+                if (shouldSuppress) {
+                    return; // Don't store in state or show dropdown
+                }
+
+                setNotification(receivedNotification);
+
+                // Update badge count - use functional update to avoid stale closure
+                setBadgeCount((prevCount) => {
+                    const newCount = prevCount + 1;
+                    Notifications.setBadgeCountAsync(newCount);
+                    return newCount;
+                });
             },
         );
 
         // Listener for when user taps on a notification
         responseListener.current = Notifications.addNotificationResponseReceivedListener(
             (response) => {
-                console.log('📱 Notification tapped:', response);
                 const data = response.notification.request.content.data;
 
                 // Handle navigation based on notification type
-                if (data?.type === 'friend_request') {
-                    // Navigate to Friends screen
-                    // This will be handled by the navigation prop passed down
-                } else if (data?.type === 'game_request') {
-                    // Navigate to Game screen or show notification
-                    // This will be handled by the notification dropdown
-                } else if (data?.type === 'game_accepted') {
-                    // Navigate to the game
-                    // This will be handled by the navigation prop passed down
+                // Navigation is handled by the useNotificationHandlers hook
+                if (data?.type) {
+                    // Notification types: friend_request, game_request, game_accepted, etc.
+                    // The actual navigation logic is in useNotificationHandlers
                 }
             },
         );
@@ -100,7 +139,22 @@ export function NotificationProvider({ children }) {
             }
             subscription?.remove();
         };
-    }, [user]);
+    }, [user?.uid]); // Only re-run when user ID changes, not when entire user object changes
+
+    // Auto-dismiss move, undo, and reset request notifications when user navigates to that game
+    useEffect(() => {
+        if (!notification || !activeGameId) return;
+
+        const notificationData = notification.request.content.data;
+        const notificationType = notificationData?.type;
+        const notificationGameId = notificationData?.gameId;
+
+        // Dismiss if it's a move, undo, or reset request notification and user is now viewing that game
+        const suppressibleTypes = ['move_made', 'undo_requested', 'reset_requested'];
+        if (suppressibleTypes.includes(notificationType) && notificationGameId === activeGameId) {
+            setNotification(null);
+        }
+    }, [notification, activeGameId]);
 
     const refreshBadgeCount = async () => {
         // In a real app, fetch unread notifications count from Firebase
@@ -134,6 +188,7 @@ export function NotificationProvider({ children }) {
                 clearBadge,
                 decrementBadge,
                 refreshBadgeCount,
+                setActiveGameId,
             }}
         >
             {children}
@@ -144,37 +199,41 @@ export function NotificationProvider({ children }) {
 async function registerForPushNotificationsAsync() {
     let token;
 
-    if (Platform.OS === 'android') {
-        await Notifications.setNotificationChannelAsync('default', {
-            name: 'default',
-            importance: Notifications.AndroidImportance.MAX,
-            vibrationPattern: [0, 250, 250, 250],
-            lightColor: '#FF231F7C',
-        });
-    }
-
-    if (Device.isDevice) {
-        const { status: existingStatus } = await Notifications.getPermissionsAsync();
-        let finalStatus = existingStatus;
-
-        if (existingStatus !== 'granted') {
-            const { status } = await Notifications.requestPermissionsAsync();
-            finalStatus = status;
+    try {
+        if (Platform.OS === 'android') {
+            await Notifications.setNotificationChannelAsync('default', {
+                name: 'default',
+                importance: Notifications.AndroidImportance.MAX,
+                vibrationPattern: [0, 250, 250, 250],
+                lightColor: '#FF231F7C',
+            });
         }
 
-        if (finalStatus !== 'granted') {
-            console.warn('Failed to get push token for push notification!');
-            return;
-        }
+        if (Device.isDevice) {
+            const { status: existingStatus } = await Notifications.getPermissionsAsync();
+            let finalStatus = existingStatus;
 
-        try {
-            token = (await Notifications.getExpoPushTokenAsync()).data;
-            console.log('📱 Push token:', token);
-        } catch (error) {
-            console.error('Error getting push token:', error);
+            if (existingStatus !== 'granted') {
+                const { status } = await Notifications.requestPermissionsAsync();
+                finalStatus = status;
+            }
+
+            if (finalStatus !== 'granted') {
+                console.warn('Failed to get push token for push notification!');
+                return;
+            }
+
+            try {
+                // Get push token - may fail in Expo Go due to keychain access
+                token = (await Notifications.getExpoPushTokenAsync()).data;
+            } catch (error) {
+                // Silently handle - common in simulators and Expo Go
+            }
+        } else {
+            console.warn('Must use physical device for Push Notifications');
         }
-    } else {
-        console.warn('Must use physical device for Push Notifications');
+    } catch (error) {
+        console.warn('Push notification setup failed:', error.message);
     }
 
     return token;

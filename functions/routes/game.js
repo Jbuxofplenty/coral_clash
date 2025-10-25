@@ -1,4 +1,4 @@
-const functions = require('firebase-functions/v1');
+const { onCall, onRequest, HttpsError } = require('firebase-functions/v2/https');
 const admin = require('firebase-admin');
 const {
     initializeGameState,
@@ -27,7 +27,7 @@ function validateGameVersion(clientVersion) {
 
     // Check if version is supported
     if (version !== GAME_VERSION) {
-        throw new functions.https.HttpsError(
+        throw new HttpsError(
             'failed-precondition',
             `Game version mismatch. Client: ${version}, Server: ${GAME_VERSION}. Please update your app.`,
         );
@@ -37,150 +37,158 @@ function validateGameVersion(clientVersion) {
 }
 
 /**
+ * Handler for creating a new PvP game
+ * Separated for testing purposes
+ */
+async function createGameHandler(request) {
+    const { data, auth } = request;
+    if (!auth) {
+        throw new HttpsError('unauthenticated', 'User must be authenticated');
+    }
+
+    const { opponentId, timeControl } = data;
+    const creatorId = auth.uid;
+
+    // Validate opponent exists
+    const opponentDoc = await db.collection('users').doc(opponentId).get();
+    if (!opponentDoc.exists) {
+        throw new HttpsError('not-found', 'Opponent not found');
+    }
+
+    // Check for existing pending games between these players
+    // Check both directions: creator->opponent and opponent->creator
+    const existingGamesQuery1 = await db
+        .collection('games')
+        .where('creatorId', '==', creatorId)
+        .where('opponentId', '==', opponentId)
+        .where('status', '==', 'pending')
+        .limit(1)
+        .get();
+
+    const existingGamesQuery2 = await db
+        .collection('games')
+        .where('creatorId', '==', opponentId)
+        .where('opponentId', '==', creatorId)
+        .where('status', '==', 'pending')
+        .limit(1)
+        .get();
+
+    if (!existingGamesQuery1.empty || !existingGamesQuery2.empty) {
+        throw new HttpsError(
+            'already-exists',
+            'A pending game request already exists between these players',
+        );
+    }
+
+    // Randomly assign white/black to players
+    const randomizeColors = Math.random() < 0.5;
+    const whitePlayerId = randomizeColors ? creatorId : opponentId;
+    const blackPlayerId = randomizeColors ? opponentId : creatorId;
+
+    // Get creator's info to snapshot
+    const creatorDoc = await db.collection('users').doc(creatorId).get();
+    const creatorData = creatorDoc.data();
+    const creatorName = formatDisplayName(creatorData.displayName, creatorData.discriminator);
+
+    // Get creator's avatar from settings
+    const creatorSettingsDoc = await db
+        .collection('users')
+        .doc(creatorId)
+        .collection('settings')
+        .doc('preferences')
+        .get();
+    const creatorSettings = creatorSettingsDoc.exists ? creatorSettingsDoc.data() : {};
+
+    // Get opponent's info to snapshot
+    const opponentData = opponentDoc.data();
+    const opponentName = formatDisplayName(opponentData.displayName, opponentData.discriminator);
+
+    // Get opponent's avatar from settings
+    const opponentSettingsDoc = await db
+        .collection('users')
+        .doc(opponentId)
+        .collection('settings')
+        .doc('preferences')
+        .get();
+    const opponentSettings = opponentSettingsDoc.exists ? opponentSettingsDoc.data() : {};
+
+    // Create game document with snapshot of player info
+    const gameData = {
+        creatorId,
+        opponentId,
+        whitePlayerId, // Randomly assigned
+        blackPlayerId, // Randomly assigned
+        status: 'pending', // pending, active, completed, cancelled
+        currentTurn: whitePlayerId, // White always starts
+        timeControl: timeControl || { type: 'unlimited' },
+        moves: [],
+        gameState: initializeGameState(),
+        version: GAME_VERSION, // Store game engine version
+        // Snapshot creator info at game creation
+        creatorDisplayName: creatorName,
+        creatorAvatarKey: creatorSettings.avatarKey || 'dolphin',
+        // Snapshot opponent info at game creation
+        opponentDisplayName: opponentName,
+        opponentAvatarKey: opponentSettings.avatarKey || 'dolphin',
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+    };
+
+    const gameRef = await db.collection('games').add(gameData);
+
+    // Send notification to opponent
+    await db.collection('notifications').add({
+        userId: opponentId,
+        type: 'game_invite',
+        gameId: gameRef.id,
+        from: creatorId,
+        read: false,
+        createdAt: serverTimestamp(),
+    });
+
+    // Send push notification
+    sendGameRequestNotification(
+        opponentId,
+        creatorId,
+        creatorName,
+        gameRef.id,
+        creatorData.settings?.avatarKey || 'dolphin',
+    ).catch((error) => console.error('Error sending push notification:', error));
+
+    return {
+        success: true,
+        gameId: gameRef.id,
+        message: 'Game created successfully',
+    };
+}
+
+/**
  * Create a new PvP game
  * POST /api/game/create
  */
-exports.createGame = functions.https.onCall(async (data, context) => {
+exports.createGame = onCall(async (request) => {
     try {
-        if (!context.auth) {
-            throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
-        }
-
-        const { opponentId, timeControl } = data;
-        const creatorId = context.auth.uid;
-
-        // Validate opponent exists
-        const opponentDoc = await db.collection('users').doc(opponentId).get();
-        if (!opponentDoc.exists) {
-            throw new functions.https.HttpsError('not-found', 'Opponent not found');
-        }
-
-        // Check for existing pending games between these players
-        // Check both directions: creator->opponent and opponent->creator
-        const existingGamesQuery1 = await db
-            .collection('games')
-            .where('creatorId', '==', creatorId)
-            .where('opponentId', '==', opponentId)
-            .where('status', '==', 'pending')
-            .limit(1)
-            .get();
-
-        const existingGamesQuery2 = await db
-            .collection('games')
-            .where('creatorId', '==', opponentId)
-            .where('opponentId', '==', creatorId)
-            .where('status', '==', 'pending')
-            .limit(1)
-            .get();
-
-        if (!existingGamesQuery1.empty || !existingGamesQuery2.empty) {
-            throw new functions.https.HttpsError(
-                'already-exists',
-                'A pending game request already exists between these players',
-            );
-        }
-
-        // Randomly assign white/black to players
-        const randomizeColors = Math.random() < 0.5;
-        const whitePlayerId = randomizeColors ? creatorId : opponentId;
-        const blackPlayerId = randomizeColors ? opponentId : creatorId;
-
-        // Get creator's info to snapshot
-        const creatorDoc = await db.collection('users').doc(creatorId).get();
-        const creatorData = creatorDoc.data();
-        const creatorName = formatDisplayName(creatorData.displayName, creatorData.discriminator);
-
-        // Get creator's avatar from settings
-        const creatorSettingsDoc = await db
-            .collection('users')
-            .doc(creatorId)
-            .collection('settings')
-            .doc('preferences')
-            .get();
-        const creatorSettings = creatorSettingsDoc.exists ? creatorSettingsDoc.data() : {};
-
-        // Get opponent's info to snapshot
-        const opponentData = opponentDoc.data();
-        const opponentName = formatDisplayName(
-            opponentData.displayName,
-            opponentData.discriminator,
-        );
-
-        // Get opponent's avatar from settings
-        const opponentSettingsDoc = await db
-            .collection('users')
-            .doc(opponentId)
-            .collection('settings')
-            .doc('preferences')
-            .get();
-        const opponentSettings = opponentSettingsDoc.exists ? opponentSettingsDoc.data() : {};
-
-        // Create game document with snapshot of player info
-        const gameData = {
-            creatorId,
-            opponentId,
-            whitePlayerId, // Randomly assigned
-            blackPlayerId, // Randomly assigned
-            status: 'pending', // pending, active, completed, cancelled
-            currentTurn: whitePlayerId, // White always starts
-            timeControl: timeControl || { type: 'unlimited' },
-            moves: [],
-            gameState: initializeGameState(),
-            version: GAME_VERSION, // Store game engine version
-            // Snapshot creator info at game creation
-            creatorDisplayName: creatorName,
-            creatorAvatarKey: creatorSettings.avatarKey || 'dolphin',
-            // Snapshot opponent info at game creation
-            opponentDisplayName: opponentName,
-            opponentAvatarKey: opponentSettings.avatarKey || 'dolphin',
-            createdAt: serverTimestamp(),
-            updatedAt: serverTimestamp(),
-        };
-
-        const gameRef = await db.collection('games').add(gameData);
-
-        // Send notification to opponent
-        await db.collection('notifications').add({
-            userId: opponentId,
-            type: 'game_invite',
-            gameId: gameRef.id,
-            from: creatorId,
-            read: false,
-            createdAt: serverTimestamp(),
-        });
-
-        // Send push notification
-        sendGameRequestNotification(
-            opponentId,
-            creatorId,
-            creatorName,
-            gameRef.id,
-            creatorData.settings?.avatarKey || 'dolphin',
-        ).catch((error) => console.error('Error sending push notification:', error));
-
-        return {
-            success: true,
-            gameId: gameRef.id,
-            message: 'Game created successfully',
-        };
+        return await createGameHandler(request);
     } catch (error) {
         console.error('Error creating PvP game:', error);
-        throw new functions.https.HttpsError('internal', error.message);
+        throw new HttpsError('internal', error.message);
     }
 });
+exports.createGameHandler = createGameHandler;
 
 /**
  * Create a new game against the computer
  * POST /api/game/createComputer
  */
-exports.createComputerGame = functions.https.onCall(async (data, context) => {
+exports.createComputerGame = onCall(async (request) => {
+    const { data, auth } = request;
     try {
-        if (!context.auth) {
-            throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
+        if (!auth) {
+            throw new HttpsError('unauthenticated', 'User must be authenticated');
         }
 
         const { timeControl, difficulty } = data;
-        const userId = context.auth.uid;
+        const userId = auth.uid;
 
         // Initialize time control and time remaining
         const finalTimeControl = timeControl || { type: 'unlimited' };
@@ -218,7 +226,7 @@ exports.createComputerGame = functions.https.onCall(async (data, context) => {
         };
     } catch (error) {
         console.error('Error creating computer game:', error);
-        throw new functions.https.HttpsError('internal', error.message);
+        throw new HttpsError('internal', error.message);
     }
 });
 
@@ -231,29 +239,27 @@ exports.createComputerGame = functions.https.onCall(async (data, context) => {
  * - Sender (creatorId) can cancel (decline)
  * - Both can decline/cancel only if game status is 'pending'
  */
-exports.respondToGameInvite = functions.https.onCall(async (data, context) => {
+exports.respondToGameInvite = onCall(async (request) => {
+    const { data, auth } = request;
     try {
-        if (!context.auth) {
-            throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
+        if (!auth) {
+            throw new HttpsError('unauthenticated', 'User must be authenticated');
         }
 
         const { gameId, accept } = data;
-        const userId = context.auth.uid;
+        const userId = auth.uid;
 
         const gameDoc = await db.collection('games').doc(gameId).get();
 
         if (!gameDoc.exists) {
-            throw new functions.https.HttpsError('not-found', 'Game not found');
+            throw new HttpsError('not-found', 'Game not found');
         }
 
         const gameData = gameDoc.data();
 
         // Verify game is in pending status
         if (gameData.status !== 'pending') {
-            throw new functions.https.HttpsError(
-                'failed-precondition',
-                'Game is not in pending status',
-            );
+            throw new HttpsError('failed-precondition', 'Game is not in pending status');
         }
 
         // Authorization: Check if user is the recipient or sender
@@ -261,12 +267,12 @@ exports.respondToGameInvite = functions.https.onCall(async (data, context) => {
         const isSender = gameData.creatorId === userId;
 
         if (!isRecipient && !isSender) {
-            throw new functions.https.HttpsError('permission-denied', 'Not authorized');
+            throw new HttpsError('permission-denied', 'Not authorized');
         }
 
         // Only recipient can accept (sender cannot accept their own request)
         if (accept && !isRecipient) {
-            throw new functions.https.HttpsError(
+            throw new HttpsError(
                 'permission-denied',
                 'Only the recipient can accept a game invitation',
             );
@@ -358,7 +364,7 @@ exports.respondToGameInvite = functions.https.onCall(async (data, context) => {
         };
     } catch (error) {
         console.error('Error responding to game invite:', error);
-        throw new functions.https.HttpsError('internal', error.message);
+        throw new HttpsError('internal', error.message);
     }
 });
 
@@ -367,14 +373,15 @@ exports.respondToGameInvite = functions.https.onCall(async (data, context) => {
  * POST /api/game/move
  * Server-side move validation prevents cheating
  */
-exports.makeMove = functions.https.onCall(async (data, context) => {
+exports.makeMove = onCall(async (request) => {
+    const { data, auth } = request;
     try {
-        if (!context.auth) {
-            throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
+        if (!auth) {
+            throw new HttpsError('unauthenticated', 'User must be authenticated');
         }
 
         const { gameId, move, version } = data;
-        const userId = context.auth.uid;
+        const userId = auth.uid;
 
         // Validate game version
         validateGameVersion(version);
@@ -382,19 +389,19 @@ exports.makeMove = functions.https.onCall(async (data, context) => {
         const gameDoc = await db.collection('games').doc(gameId).get();
 
         if (!gameDoc.exists) {
-            throw new functions.https.HttpsError('not-found', 'Game not found');
+            throw new HttpsError('not-found', 'Game not found');
         }
 
         const gameData = gameDoc.data();
 
         // Verify it's the user's turn
         if (gameData.currentTurn !== userId) {
-            throw new functions.https.HttpsError('permission-denied', 'Not your turn');
+            throw new HttpsError('permission-denied', 'Not your turn');
         }
 
         // Verify user is a player in this game
         if (gameData.creatorId !== userId && gameData.opponentId !== userId) {
-            throw new functions.https.HttpsError('permission-denied', 'Not a player in this game');
+            throw new HttpsError('permission-denied', 'Not a player in this game');
         }
 
         // CRITICAL: Validate move using game engine to prevent cheating
@@ -410,10 +417,7 @@ exports.makeMove = functions.https.onCall(async (data, context) => {
                 fen: currentGameState.fen,
                 turn: currentGameState.turn,
             });
-            throw new functions.https.HttpsError(
-                'invalid-argument',
-                `Invalid move: ${validation.error}`,
-            );
+            throw new HttpsError('invalid-argument', `Invalid move: ${validation.error}`);
         }
 
         // Add validated move to moves array
@@ -606,7 +610,7 @@ exports.makeMove = functions.https.onCall(async (data, context) => {
         };
     } catch (error) {
         console.error('Error making move:', error);
-        throw new functions.https.HttpsError('internal', error.message);
+        throw new HttpsError('internal', error.message);
     }
 });
 
@@ -615,12 +619,13 @@ exports.makeMove = functions.https.onCall(async (data, context) => {
  * POST /api/game/makeComputerMove
  * @param {string} gameId - The game ID
  */
-exports.makeComputerMove = functions.https.onCall(async (data, context) => {
+exports.makeComputerMove = onCall(async (request) => {
+    const { data, auth } = request;
     try {
         const { gameId, version } = data;
 
         if (!gameId) {
-            throw new functions.https.HttpsError('invalid-argument', 'Game ID is required');
+            throw new HttpsError('invalid-argument', 'Game ID is required');
         }
 
         // Validate game version
@@ -628,24 +633,24 @@ exports.makeComputerMove = functions.https.onCall(async (data, context) => {
 
         const gameDoc = await db.collection('games').doc(gameId).get();
         if (!gameDoc.exists) {
-            throw new functions.https.HttpsError('not-found', 'Game not found');
+            throw new HttpsError('not-found', 'Game not found');
         }
 
         const gameData = gameDoc.data();
 
         // Verify this is a computer game
         if (gameData.opponentType !== 'computer') {
-            throw new functions.https.HttpsError('failed-precondition', 'Not a computer game');
+            throw new HttpsError('failed-precondition', 'Not a computer game');
         }
 
         // Verify it's the computer's turn
         if (gameData.currentTurn !== 'computer') {
-            throw new functions.https.HttpsError('failed-precondition', "Not the computer's turn");
+            throw new HttpsError('failed-precondition', "Not the computer's turn");
         }
 
         // Verify game is not over
         if (gameData.status !== 'active') {
-            throw new functions.https.HttpsError('failed-precondition', 'Game is not active');
+            throw new HttpsError('failed-precondition', 'Game is not active');
         }
 
         const result = await makeComputerMoveHelper(gameId, gameData);
@@ -657,10 +662,10 @@ exports.makeComputerMove = functions.https.onCall(async (data, context) => {
         };
     } catch (error) {
         console.error('Error making computer move:', error);
-        if (error instanceof functions.https.HttpsError) {
+        if (error instanceof HttpsError) {
             throw error;
         }
-        throw new functions.https.HttpsError('internal', error.message);
+        throw new HttpsError('internal', error.message);
     }
 });
 
@@ -886,6 +891,16 @@ async function checkAndHandleTimeExpiration(gameId, gameData) {
             await cancelPendingTimeoutTask(gameId, gameData.pendingTimeoutTask);
         }
 
+        // Determine which color lost on time
+        const loserColor = gameData.whitePlayerId === loser ? 'w' : 'b';
+
+        // Update gameState to mark as resigned (same effect as resignation)
+        const currentGameState = gameData.gameState || { fen: gameData.fen };
+        const updatedGameState = {
+            ...currentGameState,
+            resigned: loserColor,
+        };
+
         // Update game to completed
         await db
             .collection('games')
@@ -895,6 +910,7 @@ async function checkAndHandleTimeExpiration(gameId, gameData) {
                 result: loser === gameData.creatorId ? 'loss' : 'win',
                 resultReason: 'timeout',
                 winner: winner,
+                gameState: updatedGameState,
                 timeRemaining: {
                     ...gameData.timeRemaining,
                     [loser]: 0,
@@ -966,26 +982,27 @@ async function checkAndHandleTimeExpiration(gameId, gameData) {
  * Check game time status
  * Called when loading a game to check if time has expired
  */
-exports.checkGameTime = functions.https.onCall(async (data, context) => {
+exports.checkGameTime = onCall(async (request) => {
+    const { data, auth } = request;
     try {
-        if (!context.auth) {
-            throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
+        if (!auth) {
+            throw new HttpsError('unauthenticated', 'User must be authenticated');
         }
 
         const { gameId } = data;
-        const userId = context.auth.uid;
+        const userId = auth.uid;
 
         const gameDoc = await db.collection('games').doc(gameId).get();
 
         if (!gameDoc.exists) {
-            throw new functions.https.HttpsError('not-found', 'Game not found');
+            throw new HttpsError('not-found', 'Game not found');
         }
 
         const gameData = gameDoc.data();
 
         // Verify user is a player in this game
         if (gameData.creatorId !== userId && gameData.opponentId !== userId) {
-            throw new functions.https.HttpsError('permission-denied', 'Not a player in this game');
+            throw new HttpsError('permission-denied', 'Not a player in this game');
         }
 
         // Check for time expiration
@@ -999,7 +1016,7 @@ exports.checkGameTime = functions.https.onCall(async (data, context) => {
         };
     } catch (error) {
         console.error('Error checking game time:', error);
-        throw new functions.https.HttpsError('internal', error.message);
+        throw new HttpsError('internal', error.message);
     }
 });
 
@@ -1007,7 +1024,7 @@ exports.checkGameTime = functions.https.onCall(async (data, context) => {
  * HTTP endpoint for Cloud Tasks to check time expiration
  * This is called at the exact time when a player's time should expire
  */
-exports.handleTimeExpiration = functions.https.onRequest(async (req, res) => {
+exports.handleTimeExpiration = onRequest(async (req, res) => {
     try {
         // Verify this is a Cloud Tasks request (basic security)
         const { gameId } = req.body;
@@ -1042,124 +1059,27 @@ exports.handleTimeExpiration = functions.https.onRequest(async (req, res) => {
 });
 
 /**
- * Firestore trigger: Schedule time expiration check when lastMoveTime is updated
- * This ensures we check for timeout at the exact moment time runs out
- */
-exports.onGameMoveUpdate = functions.firestore
-    .document('games/{gameId}')
-    .onUpdate(async (change, context) => {
-        try {
-            const gameId = context.params.gameId;
-            const beforeData = change.before.data();
-            const afterData = change.after.data();
-
-            // Only proceed if lastMoveTime was updated and game has time control
-            if (
-                !afterData.lastMoveTime ||
-                !afterData.timeControl?.totalSeconds ||
-                !afterData.timeRemaining ||
-                !afterData.currentTurn ||
-                afterData.status !== 'active'
-            ) {
-                return null;
-            }
-
-            // Check if lastMoveTime actually changed (a move was made)
-            const beforeTime = beforeData.lastMoveTime?.toDate?.()?.getTime() || 0;
-            const afterTime = afterData.lastMoveTime?.toDate?.()?.getTime() || 0;
-
-            if (beforeTime === afterTime) {
-                return null;
-            }
-
-            // Calculate when current player's time will expire
-            const currentPlayerTime = afterData.timeRemaining[afterData.currentTurn];
-
-            if (!currentPlayerTime || currentPlayerTime <= 0) {
-                // Time already expired, handle immediately
-                await checkAndHandleTimeExpiration(gameId, afterData);
-                return null;
-            }
-
-            // Skip Cloud Tasks scheduling in emulator (no local emulator available)
-            if (process.env.FUNCTIONS_EMULATOR === 'true') {
-                console.log(
-                    `[Emulator] Skipping Cloud Task scheduling for game ${gameId} - would expire in ${currentPlayerTime}s`,
-                );
-                return null;
-            }
-
-            // Schedule a task to check expiration at the exact time
-            const { CloudTasksClient } = require('@google-cloud/tasks');
-            const client = new CloudTasksClient();
-
-            const project = process.env.GCLOUD_PROJECT || process.env.GCP_PROJECT;
-            const location = process.env.FUNCTION_REGION || 'us-central1';
-            const queue = 'default';
-
-            const parent = client.queuePath(project, location, queue);
-
-            // Calculate schedule time (current time + remaining time)
-            const scheduleTime = new Date(afterTime + currentPlayerTime * 1000);
-
-            // Create the task
-            // Generate unique task name
-            const taskName = `${parent}/tasks/timeout-${gameId}-${afterTime}`;
-
-            const task = {
-                name: taskName,
-                httpRequest: {
-                    httpMethod: 'POST',
-                    url: `https://${location}-${project}.cloudfunctions.net/handleTimeExpiration`,
-                    body: Buffer.from(JSON.stringify({ gameId })).toString('base64'),
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                },
-                scheduleTime: {
-                    seconds: Math.floor(scheduleTime.getTime() / 1000),
-                },
-            };
-
-            const [response] = await client.createTask({ parent, task });
-
-            // Store task name in Firestore for cancellation
-            await db.collection('games').doc(gameId).update({
-                pendingTimeoutTask: response.name,
-            });
-
-            console.log(
-                `Scheduled time expiration check for game ${gameId} at ${scheduleTime.toISOString()}`,
-            );
-            return null;
-        } catch (error) {
-            console.error('Error in onGameMoveUpdate trigger:', error);
-            // Don't throw - we don't want to fail the move because of scheduling issues
-            return null;
-        }
-    });
-
-/**
  * Resign from a game
  * POST /api/game/resign
  */
-exports.resignGame = functions.https.onCall(async (data, context) => {
+exports.resignGame = onCall(async (request) => {
+    const { data, auth } = request;
     try {
         console.log('[resignGame] Starting resignation process');
-        if (!context.auth) {
+        if (!auth) {
             console.error('[resignGame] Unauthenticated user');
-            throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
+            throw new HttpsError('unauthenticated', 'User must be authenticated');
         }
 
         const { gameId } = data;
-        const userId = context.auth.uid;
+        const userId = auth.uid;
         console.log('[resignGame] User:', userId, 'Game:', gameId);
 
         const gameDoc = await db.collection('games').doc(gameId).get();
 
         if (!gameDoc.exists) {
             console.error('[resignGame] Game not found:', gameId);
-            throw new functions.https.HttpsError('not-found', 'Game not found');
+            throw new HttpsError('not-found', 'Game not found');
         }
 
         const gameData = gameDoc.data();
@@ -1172,13 +1092,13 @@ exports.resignGame = functions.https.onCall(async (data, context) => {
         // Verify user is a player in this game
         if (gameData.creatorId !== userId && gameData.opponentId !== userId) {
             console.error('[resignGame] User is not a player in this game');
-            throw new functions.https.HttpsError('permission-denied', 'Not a player in this game');
+            throw new HttpsError('permission-denied', 'Not a player in this game');
         }
 
         // Check if game is already over
         if (gameData.status === 'completed' || gameData.status === 'cancelled') {
             console.error('[resignGame] Game is already finished:', gameData.status);
-            throw new functions.https.HttpsError('failed-precondition', 'Game is already finished');
+            throw new HttpsError('failed-precondition', 'Game is already finished');
         }
 
         // Determine winner (opponent wins when user resigns)
@@ -1297,7 +1217,7 @@ exports.resignGame = functions.https.onCall(async (data, context) => {
     } catch (error) {
         console.error('[resignGame] Error resigning game:', error);
         console.error('[resignGame] Error stack:', error.stack);
-        throw new functions.https.HttpsError('internal', error.message);
+        throw new HttpsError('internal', error.message);
     }
 });
 
@@ -1306,36 +1226,37 @@ exports.resignGame = functions.https.onCall(async (data, context) => {
  * For computer games: Auto-approves and resets immediately
  * For PvP games: Sends request to opponent for approval
  */
-exports.requestGameReset = functions.https.onCall(async (data, context) => {
+exports.requestGameReset = onCall(async (request) => {
+    const { data, auth } = request;
     try {
-        if (!context.auth) {
-            throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
+        if (!auth) {
+            throw new HttpsError('unauthenticated', 'User must be authenticated');
         }
 
         const { gameId } = data;
-        const userId = context.auth.uid;
+        const userId = auth.uid;
 
         const gameDoc = await db.collection('games').doc(gameId).get();
 
         if (!gameDoc.exists) {
-            throw new functions.https.HttpsError('not-found', 'Game not found');
+            throw new HttpsError('not-found', 'Game not found');
         }
 
         const gameData = gameDoc.data();
 
         // Verify user is a player in this game
         if (gameData.creatorId !== userId && gameData.opponentId !== userId) {
-            throw new functions.https.HttpsError('permission-denied', 'Not a player in this game');
+            throw new HttpsError('permission-denied', 'Not a player in this game');
         }
 
         // Check if game is already over
         if (gameData.status === 'completed' || gameData.status === 'cancelled') {
-            throw new functions.https.HttpsError('failed-precondition', 'Game is already finished');
+            throw new HttpsError('failed-precondition', 'Game is already finished');
         }
 
         // Check if any moves have been made
         if (!gameData.moves || gameData.moves.length === 0) {
-            throw new functions.https.HttpsError(
+            throw new HttpsError(
                 'failed-precondition',
                 'Cannot reset game - no moves have been made yet',
             );
@@ -1343,10 +1264,7 @@ exports.requestGameReset = functions.https.onCall(async (data, context) => {
 
         // Check if there's already a pending reset request
         if (gameData.resetRequestedBy) {
-            throw new functions.https.HttpsError(
-                'failed-precondition',
-                'A reset request is already pending',
-            );
+            throw new HttpsError('failed-precondition', 'A reset request is already pending');
         }
 
         const isComputerGame = gameData.opponentType === 'computer';
@@ -1403,7 +1321,7 @@ exports.requestGameReset = functions.https.onCall(async (data, context) => {
         }
     } catch (error) {
         console.error('Error requesting game reset:', error);
-        throw new functions.https.HttpsError('internal', error.message);
+        throw new HttpsError('internal', error.message);
     }
 });
 
@@ -1411,44 +1329,42 @@ exports.requestGameReset = functions.https.onCall(async (data, context) => {
  * Respond to a game reset request (approve or reject)
  * Only for PvP games
  */
-exports.respondToResetRequest = functions.https.onCall(async (data, context) => {
+exports.respondToResetRequest = onCall(async (request) => {
+    const { data, auth } = request;
     try {
-        if (!context.auth) {
-            throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
+        if (!auth) {
+            throw new HttpsError('unauthenticated', 'User must be authenticated');
         }
 
         const { gameId, approve } = data;
-        const userId = context.auth.uid;
+        const userId = auth.uid;
 
         if (typeof approve !== 'boolean') {
-            throw new functions.https.HttpsError('invalid-argument', 'approve must be a boolean');
+            throw new HttpsError('invalid-argument', 'approve must be a boolean');
         }
 
         const gameDoc = await db.collection('games').doc(gameId).get();
 
         if (!gameDoc.exists) {
-            throw new functions.https.HttpsError('not-found', 'Game not found');
+            throw new HttpsError('not-found', 'Game not found');
         }
 
         const gameData = gameDoc.data();
 
         // Verify there's a pending reset request
         if (!gameData.resetRequestedBy || gameData.resetRequestStatus !== 'pending') {
-            throw new functions.https.HttpsError('failed-precondition', 'No reset request pending');
+            throw new HttpsError('failed-precondition', 'No reset request pending');
         }
 
         // Verify user is the opponent (not the requester), unless they're canceling
         // Allow requester to reject (cancel) their own request, but not approve it
         if (gameData.resetRequestedBy === userId && approve) {
-            throw new functions.https.HttpsError(
-                'permission-denied',
-                'Cannot approve your own reset request',
-            );
+            throw new HttpsError('permission-denied', 'Cannot approve your own reset request');
         }
 
         // Verify user is a player in this game
         if (gameData.creatorId !== userId && gameData.opponentId !== userId) {
-            throw new functions.https.HttpsError('permission-denied', 'Not a player in this game');
+            throw new HttpsError('permission-denied', 'Not a player in this game');
         }
 
         const requesterId = gameData.resetRequestedBy;
@@ -1525,7 +1441,7 @@ exports.respondToResetRequest = functions.https.onCall(async (data, context) => 
         }
     } catch (error) {
         console.error('Error responding to reset request:', error);
-        throw new functions.https.HttpsError('internal', error.message);
+        throw new HttpsError('internal', error.message);
     }
 });
 
@@ -1533,13 +1449,14 @@ exports.respondToResetRequest = functions.https.onCall(async (data, context) => 
  * Get user's game history (completed and cancelled games)
  * GET /api/games/history
  */
-exports.getGameHistory = functions.https.onCall(async (data, context) => {
+exports.getGameHistory = onCall(async (request) => {
+    const { data, auth } = request;
     try {
-        if (!context.auth) {
-            throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
+        if (!auth) {
+            throw new HttpsError('unauthenticated', 'User must be authenticated');
         }
 
-        const userId = context.auth.uid;
+        const userId = auth.uid;
 
         // Get games where user is creator or opponent and status is completed or cancelled
         // Fetch more games to ensure we have enough for stats (top 5 opponents could have multiple games each)
@@ -1637,7 +1554,7 @@ exports.getGameHistory = functions.https.onCall(async (data, context) => {
         };
     } catch (error) {
         console.error('Error getting game history:', error);
-        throw new functions.https.HttpsError('internal', error.message);
+        throw new HttpsError('internal', error.message);
     }
 });
 
@@ -1645,13 +1562,14 @@ exports.getGameHistory = functions.https.onCall(async (data, context) => {
  * Get user's active games
  * GET /api/games/active
  */
-exports.getActiveGames = functions.https.onCall(async (data, context) => {
+exports.getActiveGames = onCall(async (request) => {
+    const { data, auth } = request;
     try {
-        if (!context.auth) {
-            throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
+        if (!auth) {
+            throw new HttpsError('unauthenticated', 'User must be authenticated');
         }
 
-        const userId = context.auth.uid;
+        const userId = auth.uid;
 
         // Get games where user is creator or opponent and status is active or pending
         const creatorGames = await db
@@ -1746,7 +1664,7 @@ exports.getActiveGames = functions.https.onCall(async (data, context) => {
         };
     } catch (error) {
         console.error('Error getting active games:', error);
-        throw new functions.https.HttpsError('internal', error.message);
+        throw new HttpsError('internal', error.message);
     }
 });
 
@@ -1754,37 +1672,38 @@ exports.getActiveGames = functions.https.onCall(async (data, context) => {
  * Request to undo a move
  * POST /api/game/requestUndo
  */
-exports.requestUndo = functions.https.onCall(async (data, context) => {
+exports.requestUndo = onCall(async (request) => {
+    const { data, auth } = request;
     try {
-        if (!context.auth) {
-            throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
+        if (!auth) {
+            throw new HttpsError('unauthenticated', 'User must be authenticated');
         }
 
         const { gameId, moveCount = 2 } = data; // moveCount = how many moves to undo (default 2 for computer games)
-        const userId = context.auth.uid;
+        const userId = auth.uid;
 
         const gameDoc = await db.collection('games').doc(gameId).get();
 
         if (!gameDoc.exists) {
-            throw new functions.https.HttpsError('not-found', 'Game not found');
+            throw new HttpsError('not-found', 'Game not found');
         }
 
         const gameData = gameDoc.data();
 
         // Verify user is a player in this game
         if (gameData.creatorId !== userId && gameData.opponentId !== userId) {
-            throw new functions.https.HttpsError('permission-denied', 'Not a player in this game');
+            throw new HttpsError('permission-denied', 'Not a player in this game');
         }
 
         // Check if game is over
         if (gameData.status !== 'active') {
-            throw new functions.https.HttpsError('failed-precondition', 'Game is not active');
+            throw new HttpsError('failed-precondition', 'Game is not active');
         }
 
         // Check if there are enough moves to undo
         const moveHistory = gameData.moves || [];
         if (moveHistory.length < moveCount) {
-            throw new functions.https.HttpsError(
+            throw new HttpsError(
                 'failed-precondition',
                 `Not enough moves to undo (have ${moveHistory.length}, need ${moveCount})`,
             );
@@ -1810,7 +1729,9 @@ exports.requestUndo = functions.https.onCall(async (data, context) => {
             const newGameState = createGameSnapshot(coralClash);
 
             // Determine whose turn it is after undo
-            const nextTurn = newGameState.turn === 'w' ? gameData.creatorId : gameData.opponentId;
+            // Use whitePlayerId/blackPlayerId since colors are randomly assigned
+            const nextTurn =
+                newGameState.turn === 'w' ? gameData.whitePlayerId : gameData.blackPlayerId;
 
             // Update game document
             await db.collection('games').doc(gameId).update({
@@ -1855,7 +1776,7 @@ exports.requestUndo = functions.https.onCall(async (data, context) => {
         };
     } catch (error) {
         console.error('Error requesting undo:', error);
-        throw new functions.https.HttpsError('internal', error.message);
+        throw new HttpsError('internal', error.message);
     }
 });
 
@@ -1863,40 +1784,38 @@ exports.requestUndo = functions.https.onCall(async (data, context) => {
  * Respond to an undo request
  * POST /api/game/respondToUndoRequest
  */
-exports.respondToUndoRequest = functions.https.onCall(async (data, context) => {
+exports.respondToUndoRequest = onCall(async (request) => {
+    const { data, auth } = request;
     try {
-        if (!context.auth) {
-            throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
+        if (!auth) {
+            throw new HttpsError('unauthenticated', 'User must be authenticated');
         }
 
         const { gameId, approve } = data;
-        const userId = context.auth.uid;
+        const userId = auth.uid;
 
         const gameDoc = await db.collection('games').doc(gameId).get();
 
         if (!gameDoc.exists) {
-            throw new functions.https.HttpsError('not-found', 'Game not found');
+            throw new HttpsError('not-found', 'Game not found');
         }
 
         const gameData = gameDoc.data();
 
         // Verify there's a pending undo request
         if (!gameData.undoRequestedBy || gameData.undoRequestStatus !== 'pending') {
-            throw new functions.https.HttpsError('failed-precondition', 'No pending undo request');
+            throw new HttpsError('failed-precondition', 'No pending undo request');
         }
 
         // Verify user is the opponent (not the requester), unless they're canceling
         // Allow requester to reject (cancel) their own request, but not approve it
         if (gameData.undoRequestedBy === userId && approve) {
-            throw new functions.https.HttpsError(
-                'permission-denied',
-                'Cannot approve your own undo request',
-            );
+            throw new HttpsError('permission-denied', 'Cannot approve your own undo request');
         }
 
         // Verify user is a player in this game
         if (gameData.creatorId !== userId && gameData.opponentId !== userId) {
-            throw new functions.https.HttpsError('permission-denied', 'Not a player in this game');
+            throw new HttpsError('permission-denied', 'Not a player in this game');
         }
 
         const requesterId = gameData.undoRequestedBy;
@@ -1935,7 +1854,9 @@ exports.respondToUndoRequest = functions.https.onCall(async (data, context) => {
             const newGameState = createGameSnapshot(coralClash);
 
             // Determine whose turn it is after undo
-            const nextTurn = newGameState.turn === 'w' ? gameData.creatorId : gameData.opponentId;
+            // Use whitePlayerId/blackPlayerId since colors are randomly assigned
+            const nextTurn =
+                newGameState.turn === 'w' ? gameData.whitePlayerId : gameData.blackPlayerId;
 
             // Update game document - clear undo request and update state
             await db.collection('games').doc(gameId).update({
@@ -2011,6 +1932,6 @@ exports.respondToUndoRequest = functions.https.onCall(async (data, context) => {
         }
     } catch (error) {
         console.error('Error responding to undo request:', error);
-        throw new functions.https.HttpsError('internal', error.message);
+        throw new HttpsError('internal', error.message);
     }
 });

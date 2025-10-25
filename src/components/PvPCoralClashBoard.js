@@ -206,9 +206,11 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData }) => {
         handleHistoryForward,
         coralClash,
         isViewingHistory,
+        gameData,
     }) => {
         const historyLength = coralClash.history().length;
-        const isGameOver = coralClash.isGameOver();
+        // Check both local game engine state AND server-side completion status (e.g., timeout)
+        const isGameOver = coralClash.isGameOver() || gameData?.status === 'completed';
         // Disable undo if game is over, viewing history, no moves, or if there's a pending reset request
         const canRequestUndo =
             historyLength >= 1 && !isGameOver && !isViewingHistory && !resetRequestData;
@@ -271,8 +273,9 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData }) => {
     };
 
     // PvP-specific: Render menu items (reset request and resign)
-    const renderMenuItems = ({ closeMenu, coralClash, colors, styles }) => {
-        const isGameOver = coralClash.isGameOver();
+    const renderMenuItems = ({ closeMenu, coralClash, colors, styles, gameData }) => {
+        // Check both local game engine state AND server-side completion status (e.g., timeout)
+        const isGameOver = coralClash.isGameOver() || gameData?.status === 'completed';
         const moveHistory = coralClash.history();
         const noMovesYet = moveHistory.length === 0;
 

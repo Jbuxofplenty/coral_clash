@@ -43,18 +43,20 @@ export default function ThemedAlert({ visible, title, message, buttons = [], onD
 
         setIsProcessing(true);
 
-        // If button has onPress handler, call it and wait if it's async
+        // Dismiss the modal immediately for better UX
+        onDismiss();
+
+        // If button has onPress handler, call it (don't wait for completion)
         if (button.onPress) {
             try {
-                await button.onPress();
+                // Execute in background after modal is dismissed
+                button.onPress().catch((error) => {
+                    console.error('Error in alert button handler:', error);
+                });
             } catch (error) {
                 console.error('Error in alert button handler:', error);
             }
         }
-
-        // Reset processing state and dismiss after the button handler completes
-        setIsProcessing(false);
-        onDismiss();
     };
 
     const handleBackdropPress = () => {

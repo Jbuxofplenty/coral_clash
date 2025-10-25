@@ -2,12 +2,9 @@
 require('./register');
 
 const admin = require('firebase-admin');
-const functions = require('firebase-functions/v1');
 
 // Initialize Firebase Admin
 admin.initializeApp();
-
-const db = admin.firestore();
 
 // Import route modules
 const userProfile = require('./routes/userProfile');
@@ -15,7 +12,14 @@ const userSettings = require('./routes/userSettings');
 const game = require('./routes/game');
 const friends = require('./routes/friends');
 const matchmaking = require('./routes/matchmaking');
-const { getDefaultSettings } = require('./utils/helpers');
+
+// Import trigger modules
+const { onUserCreate } = require('./triggers/onUserCreate');
+const { onPlayerJoinQueue } = require('./triggers/onPlayerJoinQueue');
+const { onGameMoveUpdate } = require('./triggers/onGameMoveUpdate');
+
+// Import scheduled function modules
+const { cleanupStaleMatchmakingEntries } = require('./scheduled/cleanupStaleMatchmakingEntries');
 
 // ==================== User Profile APIs ====================
 exports.getPublicUserInfo = userProfile.getPublicUserInfo;
@@ -57,86 +61,9 @@ exports.updateMatchmakingHeartbeat = matchmaking.updateMatchmakingHeartbeat;
 exports.getMatchmakingStatus = matchmaking.getMatchmakingStatus;
 
 // ==================== Firestore Triggers ====================
-exports.onPlayerJoinQueue = matchmaking.onPlayerJoinQueue;
-exports.cleanupStaleMatchmakingEntries = matchmaking.cleanupStaleMatchmakingEntries;
-exports.onGameMoveUpdate = game.onGameMoveUpdate;
+exports.onPlayerJoinQueue = onPlayerJoinQueue;
+exports.onGameMoveUpdate = onGameMoveUpdate;
+exports.onUserCreate = onUserCreate;
 
-/**
- * Automatically assign a unique discriminator to new users
- * Trigger on user document creation
- */
-exports.onUserCreate = functions.firestore
-    .document('users/{userId}')
-    .onCreate(async (snap, context) => {
-        try {
-            const userData = snap.data();
-
-            // Check if discriminator already exists
-            if (userData.discriminator) {
-                return null;
-            }
-
-            const displayName = userData.displayName || 'User';
-            const userId = context.params.userId;
-            let discriminator = null;
-            let attempts = 0;
-            const maxAttempts = 100; // Prevent infinite loops
-
-            // Keep trying until we find a unique discriminator
-            while (!discriminator && attempts < maxAttempts) {
-                attempts++;
-
-                // Generate random 4-digit discriminator
-                const candidate = Math.floor(1000 + Math.random() * 9000).toString();
-
-                // Check if this username + discriminator combo already exists
-                const existingUsers = await db
-                    .collection('users')
-                    .where('displayName', '==', displayName)
-                    .where('discriminator', '==', candidate)
-                    .limit(1)
-                    .get();
-
-                // If no match found, this discriminator is unique for this username
-                if (existingUsers.empty) {
-                    discriminator = candidate;
-                }
-            }
-
-            if (!discriminator) {
-                console.error(
-                    `Failed to generate unique discriminator for user ${userId} after ${maxAttempts} attempts`,
-                );
-                // Fall back to a random one anyway
-                discriminator = Math.floor(1000 + Math.random() * 9000).toString();
-            }
-
-            // Update the user document with the discriminator
-            await snap.ref.update({
-                discriminator: discriminator,
-            });
-
-            // Initialize default settings in subcollection if not already set
-            if (!userData.settings) {
-                const defaultSettings = getDefaultSettings();
-                await db
-                    .collection('users')
-                    .doc(userId)
-                    .collection('settings')
-                    .doc('preferences')
-                    .set({
-                        ...defaultSettings,
-                        createdAt: new Date().toISOString(),
-                        updatedAt: new Date().toISOString(),
-                    });
-            }
-
-            console.log(
-                `Assigned unique discriminator ${discriminator} and default settings to user ${userId} (${displayName})`,
-            );
-            return null;
-        } catch (error) {
-            console.error('Error assigning discriminator:', error);
-            return null;
-        }
-    });
+// ==================== Scheduled Functions ====================
+exports.cleanupStaleMatchmakingEntries = cleanupStaleMatchmakingEntries;

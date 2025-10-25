@@ -1,4 +1,4 @@
-import { Dimensions, Alert } from 'react-native';
+import { Dimensions, Alert, useWindowDimensions } from 'react-native';
 import { Icon, Header } from '../components';
 
 import { createDrawerNavigator } from '@react-navigation/drawer';
@@ -83,6 +83,10 @@ export default function AppStack(props) {
     const { user, logOut } = useAuth();
     const { colors } = useTheme();
     const { showAlert } = useAlert();
+    const { height } = useWindowDimensions();
+
+    // Use compact mode on smaller screens (iPhone SE, etc.)
+    const isCompact = height < 700;
 
     return (
         <Drawer.Navigator
@@ -95,11 +99,11 @@ export default function AppStack(props) {
                 drawerActiveTintColor: '#fff',
                 drawerInactiveTintColor: '#b0c4de',
                 drawerLabelStyle: {
-                    fontSize: 18,
+                    fontSize: isCompact ? 15 : 18,
                     fontWeight: '500',
                 },
                 drawerItemStyle: {
-                    marginVertical: 5,
+                    marginVertical: isCompact ? 2 : 5,
                     borderRadius: 8,
                 },
                 drawerActiveBackgroundColor: 'rgba(255, 255, 255, 0.15)',
@@ -111,7 +115,12 @@ export default function AppStack(props) {
                 component={HomeStack}
                 options={{
                     drawerIcon: ({ focused, color }) => (
-                        <Icon size={24} name='home' family='font-awesome' color={color} />
+                        <Icon
+                            size={isCompact ? 20 : 24}
+                            name='home'
+                            family='font-awesome'
+                            color={color}
+                        />
                     ),
                     headerShown: false,
                 }}
@@ -124,7 +133,12 @@ export default function AppStack(props) {
                         component={Friends}
                         options={{
                             drawerIcon: ({ focused, color }) => (
-                                <Icon size={24} name='users' family='font-awesome' color={color} />
+                                <Icon
+                                    size={isCompact ? 20 : 24}
+                                    name='users'
+                                    family='font-awesome'
+                                    color={color}
+                                />
                             ),
                             header: ({ navigation, scene }) => (
                                 <Header
@@ -142,7 +156,7 @@ export default function AppStack(props) {
                         options={{
                             drawerIcon: ({ focused, color }) => (
                                 <Icon
-                                    size={24}
+                                    size={isCompact ? 20 : 24}
                                     name='line-chart'
                                     family='font-awesome'
                                     color={color}
@@ -164,7 +178,7 @@ export default function AppStack(props) {
                         options={{
                             drawerIcon: ({ focused, color }) => (
                                 <Icon
-                                    size={24}
+                                    size={isCompact ? 20 : 24}
                                     name='question-circle'
                                     family='font-awesome'
                                     color={color}
@@ -178,7 +192,12 @@ export default function AppStack(props) {
                         component={Settings}
                         options={{
                             drawerIcon: ({ focused, color }) => (
-                                <Icon size={24} name='cog' family='font-awesome' color={color} />
+                                <Icon
+                                    size={isCompact ? 20 : 24}
+                                    name='cog'
+                                    family='font-awesome'
+                                    color={color}
+                                />
                             ),
                             drawerItemStyle: {
                                 marginTop: 'auto',
@@ -199,14 +218,15 @@ export default function AppStack(props) {
                         options={{
                             drawerIcon: ({ focused, color }) => (
                                 <Icon
-                                    size={24}
+                                    size={isCompact ? 20 : 24}
                                     name='sign-out'
                                     family='font-awesome'
                                     color={color}
                                 />
                             ),
                             drawerItemStyle: {
-                                marginBottom: 20,
+                                marginTop: isCompact ? 12 : 16,
+                                marginBottom: isCompact ? 10 : 20,
                             },
                         }}
                         listeners={{
@@ -235,7 +255,7 @@ export default function AppStack(props) {
                         options={{
                             drawerIcon: ({ focused, color }) => (
                                 <Icon
-                                    size={24}
+                                    size={isCompact ? 20 : 24}
                                     name='question-circle'
                                     family='font-awesome'
                                     color={color}
@@ -250,7 +270,7 @@ export default function AppStack(props) {
                         options={{
                             drawerIcon: ({ focused, color }) => (
                                 <Icon
-                                    size={24}
+                                    size={isCompact ? 20 : 24}
                                     name='sign-in'
                                     family='font-awesome'
                                     color={color}
@@ -258,7 +278,7 @@ export default function AppStack(props) {
                             ),
                             drawerItemStyle: {
                                 marginTop: 'auto',
-                                marginBottom: 20,
+                                marginBottom: isCompact ? 10 : 20,
                             },
                             header: ({ navigation, scene }) => (
                                 <Header title='Log In' navigation={navigation} scene={scene} />

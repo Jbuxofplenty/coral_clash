@@ -1,6 +1,6 @@
 # Coral Clash
 
-![Coral Clash](src/assets/images/board_game.png)
+![Coral Clash](public/board_game.png)
 
 An ocean-themed strategy board game built with React Native, Expo, and Firebase.
 

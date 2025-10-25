@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, useWindowDimensions } from 'react-native';
 import { useTheme } from '../contexts';
 import Icon from './Icon';
 
@@ -13,6 +13,10 @@ import Icon from './Icon';
  */
 const GameStatusBanner = ({ message, type = 'info', visible = true }) => {
     const { colors } = useTheme();
+    const { height } = useWindowDimensions();
+
+    // Use compact mode on smaller screens (iPhone SE, etc.)
+    const isCompact = height < 700;
 
     if (!visible || !message) {
         return null;
@@ -75,11 +79,36 @@ const GameStatusBanner = ({ message, type = 'info', visible = true }) => {
     const config = getStatusConfig();
 
     return (
-        <View style={[styles.statusBanner, { backgroundColor: colors.INPUT }]}>
-            <View style={[styles.iconContainer, { backgroundColor: config.iconBg }]}>
-                <Icon name={config.icon} family='font-awesome' size={20} color={config.iconColor} />
+        <View
+            style={[
+                styles.statusBanner,
+                { backgroundColor: colors.INPUT },
+                isCompact && styles.statusBannerCompact,
+            ]}
+        >
+            <View
+                style={[
+                    styles.iconContainer,
+                    { backgroundColor: config.iconBg },
+                    isCompact && styles.iconContainerCompact,
+                ]}
+            >
+                <Icon
+                    name={config.icon}
+                    family='font-awesome'
+                    size={isCompact ? 16 : 20}
+                    color={config.iconColor}
+                />
             </View>
-            <Text style={[styles.statusText, { color: colors.TEXT }]}>{message}</Text>
+            <Text
+                style={[
+                    styles.statusText,
+                    { color: colors.TEXT },
+                    isCompact && styles.statusTextCompact,
+                ]}
+            >
+                {message}
+            </Text>
         </View>
     );
 };
@@ -92,6 +121,11 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
     },
+    statusBannerCompact: {
+        marginTop: 4,
+        paddingVertical: 8,
+        paddingHorizontal: 12,
+    },
     iconContainer: {
         width: 40,
         height: 40,
@@ -100,10 +134,19 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginRight: 12,
     },
+    iconContainerCompact: {
+        width: 32,
+        height: 32,
+        borderRadius: 16,
+        marginRight: 8,
+    },
     statusText: {
         fontSize: 15,
         fontWeight: '600',
         flex: 1,
+    },
+    statusTextCompact: {
+        fontSize: 13,
     },
 });
 

@@ -67,6 +67,7 @@ const ComputerCoralClashBoard = ({ fixture, gameId, gameState }) => {
         handleHistoryBack,
         handleHistoryForward,
         isViewingHistory,
+        gameData, // Added for consistency with PvP board
     }) => (
         <View style={baseStyles.controlBar}>
             <TouchableOpacity
@@ -122,20 +123,47 @@ const ComputerCoralClashBoard = ({ fixture, gameId, gameState }) => {
     );
 
     // Computer-specific: Render menu items
-    const renderMenuItems = ({ closeMenu, coralClash, colors, styles }) => {
-        const isGameOver = coralClash.isGameOver();
+    const renderMenuItems = ({ closeMenu, coralClash, colors, styles, gameData }) => {
+        // Check both local game engine state AND server-side completion status (e.g., timeout)
+        const isGameOver = coralClash.isGameOver() || gameData?.status === 'completed';
         const moveHistory = coralClash.history();
         const noMovesYet = moveHistory.length === 0;
 
         const handleReset = async () => {
             closeMenu();
 
-            if (gameId) {
-                // Online game - request reset from server
-                showAlert(
-                    'Reset Game',
-                    'Request to reset this game? The computer will automatically approve.',
-                    [
+            // Wait for menu animation to complete before showing alert
+            setTimeout(() => {
+                if (gameId) {
+                    // Online game - request reset from server
+                    showAlert(
+                        'Reset Game',
+                        'Request to reset this game? The computer will automatically approve.',
+                        [
+                            {
+                                text: 'Cancel',
+                                style: 'cancel',
+                            },
+                            {
+                                text: 'Reset',
+                                style: 'destructive',
+                                onPress: async () => {
+                                    try {
+                                        await requestGameReset({ gameId });
+                                    } catch (error) {
+                                        console.error('Error requesting reset:', error);
+                                        showAlert(
+                                            'Error',
+                                            'Failed to reset game. Please try again.',
+                                        );
+                                    }
+                                },
+                            },
+                        ],
+                    );
+                } else {
+                    // Offline game - local reset
+                    showAlert('Reset Game', 'Are you sure you want to start a new game?', [
                         {
                             text: 'Cancel',
                             style: 'cancel',
@@ -143,34 +171,13 @@ const ComputerCoralClashBoard = ({ fixture, gameId, gameState }) => {
                         {
                             text: 'Reset',
                             style: 'destructive',
-                            onPress: async () => {
-                                try {
-                                    await requestGameReset({ gameId });
-                                    showAlert('Success', 'Game has been reset!');
-                                } catch (error) {
-                                    console.error('Error requesting reset:', error);
-                                    showAlert('Error', 'Failed to reset game. Please try again.');
-                                }
+                            onPress: () => {
+                                coralClash.reset();
                             },
                         },
-                    ],
-                );
-            } else {
-                // Offline game - local reset
-                showAlert('Reset Game', 'Are you sure you want to start a new game?', [
-                    {
-                        text: 'Cancel',
-                        style: 'cancel',
-                    },
-                    {
-                        text: 'Reset',
-                        style: 'destructive',
-                        onPress: () => {
-                            coralClash.reset();
-                        },
-                    },
-                ]);
-            }
+                    ]);
+                }
+            }, 300); // 300ms delay for menu close animation
         };
 
         const isResetDisabled = isGameOver || noMovesYet;

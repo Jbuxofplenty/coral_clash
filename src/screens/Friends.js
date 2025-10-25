@@ -5,6 +5,7 @@ import {
     ScrollView,
     StyleSheet,
     TouchableOpacity,
+    Pressable,
     TextInput,
     Dimensions,
     View,
@@ -180,6 +181,7 @@ export default function Friends({ navigation }) {
             <ScrollView
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={styles.scrollContainer}
+                keyboardShouldPersistTaps='handled'
                 refreshControl={
                     <RefreshControl
                         refreshing={refreshing}
@@ -256,12 +258,17 @@ export default function Friends({ navigation }) {
                                         </Block>
                                     ) : (
                                         searchResults.map((searchUser) => (
-                                            <TouchableOpacity
+                                            <Pressable
                                                 key={searchUser.id}
                                                 onPress={() => handleSelectUser(searchUser)}
                                                 disabled={searchUser.hasPendingRequest}
-                                                style={[
+                                                style={({ pressed }) => [
                                                     styles.dropdownItem,
+                                                    {
+                                                        backgroundColor: pressed
+                                                            ? colors.PRIMARY + '10'
+                                                            : 'transparent',
+                                                    },
                                                     searchUser.hasPendingRequest && {
                                                         opacity: 0.5,
                                                     },
@@ -302,7 +309,7 @@ export default function Friends({ navigation }) {
                                                         />
                                                     )}
                                                 </Block>
-                                            </TouchableOpacity>
+                                            </Pressable>
                                         ))
                                     )}
                                 </Block>

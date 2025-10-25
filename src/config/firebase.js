@@ -62,10 +62,25 @@ const functions = getFunctions(app);
 
 // Connect to emulators in development
 // Set EXPO_PUBLIC_USE_FIREBASE_EMULATOR=true in .env to enable
+// Set EXPO_PUBLIC_EMULATOR_HOST to your computer's local IP (e.g., 192.168.x.x) for physical devices
 const USE_EMULATOR = process.env.EXPO_PUBLIC_USE_FIREBASE_EMULATOR === 'true';
 
 if (USE_EMULATOR) {
-    const EMULATOR_HOST = Platform.OS === 'android' ? '10.0.2.2' : '127.0.0.1';
+    // Determine the emulator host dynamically:
+    // - Android emulator always uses 10.0.2.2 (special alias for host machine)
+    // - iOS (simulator and physical devices) can use your Mac's local IP
+    //   The Mac's local IP works for BOTH iOS Simulator and physical iPhone on same WiFi
+    // - Set EXPO_PUBLIC_EMULATOR_HOST to override (useful if IP changes or for localhost)
+    let EMULATOR_HOST;
+
+    if (Platform.OS === 'android') {
+        // Android emulator uses special IP that maps to host's localhost
+        EMULATOR_HOST = process.env.EXPO_PUBLIC_EMULATOR_HOST || '10.0.2.2';
+    } else {
+        // iOS: Use Mac's local IP (works for both simulator and physical devices)
+        // Fallback to localhost if not set
+        EMULATOR_HOST = process.env.EXPO_PUBLIC_EMULATOR_HOST || '127.0.0.1';
+    }
 
     // Connect to Auth Emulator (OAuth providers like Google won't work, use email/password)
     connectAuthEmulator(auth, `http://${EMULATOR_HOST}:9099`, {
@@ -77,6 +92,8 @@ if (USE_EMULATOR) {
 
     // Connect to Functions Emulator
     connectFunctionsEmulator(functions, EMULATOR_HOST, 5001);
+
+    console.log(`🔧 Connected to Firebase Emulators at ${EMULATOR_HOST}`);
 }
 
 export { app, auth, db, functions, doc, onSnapshot, getDoc, collection, query, where };

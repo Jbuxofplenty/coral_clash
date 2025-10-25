@@ -230,8 +230,8 @@ function AvatarOption({ avatarKey, selected, onSelect, colors }) {
             style={[
                 styles.avatarOption,
                 {
-                    backgroundColor: selected ? colors.PRIMARY + '20' : colors.BACKGROUND,
-                    borderColor: selected ? colors.PRIMARY : 'transparent',
+                    backgroundColor: selected ? colors.PRIMARY + '20' : 'rgba(255, 255, 255, 0.1)',
+                    borderColor: selected ? colors.PRIMARY : 'rgba(255, 255, 255, 0.15)',
                 },
             ]}
         >
@@ -240,15 +240,6 @@ function AvatarOption({ avatarKey, selected, onSelect, colors }) {
                 style={styles.avatarImage}
                 resizeMode='contain'
             />
-            <Text
-                size={12}
-                center
-                bold={selected}
-                color={colors.TEXT}
-                style={{ marginTop: 4, textTransform: 'capitalize' }}
-            >
-                {avatarKey}
-            </Text>
         </TouchableOpacity>
     );
 }
@@ -335,7 +326,7 @@ const styles = StyleSheet.create({
     avatarOption: {
         width: '30%',
         aspectRatio: 1,
-        padding: theme.SIZES.BASE,
+        padding: theme.SIZES.BASE * 0.5,
         borderRadius: 12,
         marginBottom: theme.SIZES.BASE,
         alignItems: 'center',
@@ -343,7 +334,7 @@ const styles = StyleSheet.create({
         borderWidth: 2,
     },
     avatarImage: {
-        width: '60%',
-        height: '60%',
+        width: '100%',
+        height: '100%',
     },
 });

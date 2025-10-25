@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, useWindowDimensions } from 'react-native';
 import Avatar from './Avatar';
 import { useTheme } from '../contexts';
 
@@ -24,6 +24,10 @@ export default function PlayerStatusBar({
     coralRemaining,
 }) {
     const { colors } = useTheme();
+    const { height } = useWindowDimensions();
+
+    // Use compact mode on smaller screens (iPhone SE, etc.)
+    const isCompact = height < 700;
 
     const formatTime = (seconds) => {
         if (!seconds && seconds !== 0) return null;
@@ -40,22 +44,47 @@ export default function PlayerStatusBar({
                     backgroundColor: 'transparent',
                     borderColor: isActive ? colors.PRIMARY : 'transparent',
                 },
+                isCompact && styles.containerCompact,
             ]}
         >
-            <Avatar avatarKey={avatarKey} computer={isComputer} size='medium' showBorder={true} />
+            <Avatar
+                avatarKey={avatarKey}
+                computer={isComputer}
+                size={isCompact ? 'small' : 'medium'}
+                showBorder={true}
+            />
 
             <View style={styles.info}>
-                <Text style={[styles.playerName, { color: 'white' }]} numberOfLines={1}>
+                <Text
+                    style={[
+                        styles.playerName,
+                        { color: 'white' },
+                        isCompact && styles.playerNameCompact,
+                    ]}
+                    numberOfLines={1}
+                >
                     {isComputer ? 'Computer' : playerName}
                 </Text>
                 <View style={styles.statsRow}>
                     {timeRemaining !== undefined && timeRemaining !== null && (
-                        <Text style={[styles.timer, { color: 'white' }]}>
+                        <Text
+                            style={[
+                                styles.timer,
+                                { color: 'white' },
+                                isCompact && styles.timerCompact,
+                            ]}
+                        >
                             {formatTime(timeRemaining)}
                         </Text>
                     )}
                     {coralRemaining !== undefined && coralRemaining !== null && (
-                        <Text style={[styles.coralCounter, { color: 'white' }]}>
+                        <Text
+                            style={[
+                                styles.coralCounter,
+                                { color: 'white' },
+                                isCompact && styles.coralCounterCompact,
+                            ]}
+                        >
                             🪸 {coralRemaining}
                         </Text>
                     )}
@@ -70,6 +99,7 @@ export default function PlayerStatusBar({
                         backgroundColor: color === 'w' ? '#FFFFFF' : '#000000',
                         borderColor: color === 'w' ? '#666666' : '#CCCCCC',
                     },
+                    isCompact && styles.colorIndicatorCompact,
                 ]}
             />
         </View>
@@ -85,6 +115,10 @@ const styles = StyleSheet.create({
         borderWidth: 2,
         borderRadius: 0,
     },
+    containerCompact: {
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+    },
     info: {
         flex: 1,
         marginLeft: 12,
@@ -93,6 +127,9 @@ const styles = StyleSheet.create({
     playerName: {
         fontSize: 16,
         fontWeight: '600',
+    },
+    playerNameCompact: {
+        fontSize: 14,
     },
     statsRow: {
         flexDirection: 'row',
@@ -103,8 +140,14 @@ const styles = StyleSheet.create({
     timer: {
         fontSize: 14,
     },
+    timerCompact: {
+        fontSize: 12,
+    },
     coralCounter: {
         fontSize: 14,
+    },
+    coralCounterCompact: {
+        fontSize: 12,
     },
     colorIndicator: {
         width: 32,
@@ -112,5 +155,10 @@ const styles = StyleSheet.create({
         borderRadius: 4,
         borderWidth: 1,
         marginLeft: 12,
+    },
+    colorIndicatorCompact: {
+        width: 24,
+        height: 24,
+        marginLeft: 8,
     },
 });

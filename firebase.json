@@ -1,27 +1,71 @@
 {
-    "functions": {
-        "source": "functions",
-        "predeploy": [],
-        "runtime": "nodejs22"
-    },
+    "functions": [
+        {
+            "source": "functions",
+            "codebase": "default",
+            "runtime": "nodejs22"
+        }
+    ],
     "firestore": {
         "rules": "firestore.rules",
         "indexes": "firestore.indexes.json"
     },
+    "hosting": {
+        "public": "public",
+        "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+        "headers": [
+            {
+                "source": "/.well-known/apple-app-site-association",
+                "headers": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Cache-Control",
+                        "value": "max-age=3600"
+                    }
+                ]
+            },
+            {
+                "source": "/.well-known/assetlinks.json",
+                "headers": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Cache-Control",
+                        "value": "max-age=3600"
+                    }
+                ]
+            }
+        ]
+    },
     "emulators": {
         "auth": {
-            "port": 9099
+            "port": 9099,
+            "host": "0.0.0.0"
         },
         "functions": {
-            "port": 5001
+            "port": 5001,
+            "host": "0.0.0.0"
         },
         "firestore": {
-            "port": 8080
+            "port": 8080,
+            "host": "0.0.0.0"
+        },
+        "hosting": {
+            "port": 5000,
+            "host": "0.0.0.0"
         },
         "ui": {
             "enabled": true,
             "port": 4000
         },
-        "singleProjectMode": true
+        "singleProjectMode": true,
+        "hub": {
+            "host": "0.0.0.0"
+        }
     }
 }

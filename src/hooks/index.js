@@ -6,4 +6,5 @@ export { default as useGame } from './useGame';
 export { default as useGameActions } from './useGameActions';
 export { default as useIsMounted } from './useIsMounted';
 export { default as useMatchmaking } from './useMatchmaking';
+export { useNotificationHandlers } from './useNotificationHandlers';
 export { useUserSearch } from './useUserSearch';

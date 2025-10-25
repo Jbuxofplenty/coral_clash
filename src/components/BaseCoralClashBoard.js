@@ -67,12 +67,15 @@ const BaseCoralClashBoard = ({
     userColor = null,
     effectiveBoardFlip = null,
 }) => {
-    const { width } = useWindowDimensions();
+    const { width, height } = useWindowDimensions();
     const { colors } = useTheme();
     const { isBoardFlipped: contextBoardFlipped, toggleBoardFlip } = useGamePreferences();
     const { user } = useAuth();
     const { showAlert } = useAlert();
     const { checkGameTime } = useFirebaseFunctions();
+
+    // Use compact mode on smaller screens (iPhone SE, etc.)
+    const isCompact = height < 700;
 
     // Use effective board flip if provided, otherwise use context value
     const isBoardFlipped = effectiveBoardFlip !== null ? effectiveBoardFlip : contextBoardFlipped;
@@ -285,6 +288,44 @@ const BaseCoralClashBoard = ({
         gameData?.currentTurn,
         gameData?.status,
         coralClash,
+    ]);
+
+    // Check for time expiration and notify server
+    useEffect(() => {
+        // Only check for online games with time control
+        if (
+            !gameId ||
+            !localTimeRemaining ||
+            !gameData?.timeControl?.totalSeconds ||
+            !gameData?.currentTurn ||
+            gameData?.status === 'completed'
+        ) {
+            return;
+        }
+
+        const currentPlayerTime = localTimeRemaining[gameData.currentTurn];
+
+        // If current player's time has expired, notify server
+        if (currentPlayerTime !== undefined && currentPlayerTime <= 0) {
+            const reportTimeout = async () => {
+                try {
+                    await checkGameTime({ gameId });
+                    // Server will update game status if time truly expired
+                    // Firestore listener will update local state automatically
+                } catch (error) {
+                    console.error('Error reporting time expiration:', error);
+                }
+            };
+
+            reportTimeout();
+        }
+    }, [
+        localTimeRemaining,
+        gameData?.currentTurn,
+        gameData?.timeControl,
+        gameData?.status,
+        gameId,
+        checkGameTime,
     ]);
 
     // Update historical board state when historyIndex changes
@@ -547,11 +588,14 @@ const BaseCoralClashBoard = ({
 
     // Compute if undo is actually available based on enableUndo prop and game state
     const historyLength = coralClash.history().length;
-    const isGameOver = coralClash.isGameOver();
+    // Check both local game engine state AND server-side completion status (e.g., timeout)
+    const isGameOver = coralClash.isGameOver() || gameData?.status === 'completed';
     const canUndo = enableUndo && historyLength >= 2 && !isGameOver;
 
     // Calculate if it's the player's turn (stable calculation, not inline in JSX)
-    const isPlayerTurn = userColor ? coralClash.turn() === userColor : true;
+    // For online games, use server's turn state (isUserTurn from gameData)
+    // For offline games, use local game engine's turn state
+    const isPlayerTurn = gameId ? isUserTurn : userColor ? coralClash.turn() === userColor : true;
 
     const handleUndo = () => {
         if (onUndo) {
@@ -632,7 +676,7 @@ const BaseCoralClashBoard = ({
 
     const handleSelectPiece = (square) => {
         // Disable interaction when viewing history or game is over
-        if (coralClash.isGameOver() || isViewingHistory) {
+        if (isGameOver || isViewingHistory) {
             return;
         }
 
@@ -976,8 +1020,18 @@ const BaseCoralClashBoard = ({
     const topPlayerColor = bottomPlayerColor === 'w' ? 'b' : 'w';
 
     // Determine which player is active based on current turn
-    const isTopPlayerActive = currentTurn === topPlayerColor;
-    const isBottomPlayerActive = currentTurn === bottomPlayerColor;
+    // For online games, use server's turn state (isUserTurn) to avoid sync issues after undo
+    let isTopPlayerActive, isBottomPlayerActive;
+    if (gameId && gameData) {
+        // Online game: use server state
+        // isUserTurn tells us if it's the user's turn (bottom player)
+        isBottomPlayerActive = isUserTurn;
+        isTopPlayerActive = !isUserTurn;
+    } else {
+        // Offline game: use local engine state
+        isTopPlayerActive = currentTurn === topPlayerColor;
+        isBottomPlayerActive = currentTurn === bottomPlayerColor;
+    }
 
     // Get player IDs for time tracking
     const getPlayerIdForColor = (color) => {
@@ -1002,7 +1056,7 @@ const BaseCoralClashBoard = ({
 
     return (
         <View style={styles.container}>
-            <View style={{ width: '100%', alignItems: 'center' }}>
+            <View style={styles.contentWrapper}>
                 {/* Top Player Status Bar */}
                 <View style={[styles.topPlayerBar, { width: boardSize }]}>
                     <PlayerStatusBar
@@ -1016,7 +1070,7 @@ const BaseCoralClashBoard = ({
                     />
                 </View>
 
-                <View style={styles.spacer} />
+                <View style={[styles.spacer, isCompact && styles.spacerCompact]} />
 
                 {/* Game Board */}
                 <View style={{ position: 'relative', alignSelf: 'center' }}>
@@ -1049,7 +1103,7 @@ const BaseCoralClashBoard = ({
                     />
                 </View>
 
-                <View style={styles.spacer} />
+                <View style={[styles.spacer, isCompact && styles.spacerCompact]} />
 
                 {/* Bottom Player Status Bar */}
                 <View style={[styles.bottomPlayerBar, { width: boardSize }]}>
@@ -1090,6 +1144,8 @@ const BaseCoralClashBoard = ({
                     isViewingHistory,
                     // Game instance for conditional rendering
                     coralClash,
+                    // Game data for server-side status checks
+                    gameData,
                 })}
 
             {/* Bottom Drawer Menu */}
@@ -1186,6 +1242,7 @@ const BaseCoralClashBoard = ({
                                     coralClash,
                                     colors,
                                     styles,
+                                    gameData,
                                 })}
 
                             {/* Resign */}
@@ -1268,6 +1325,11 @@ const styles = StyleSheet.create({
         flex: 1,
         width: '100%',
     },
+    contentWrapper: {
+        width: '100%',
+        alignItems: 'center',
+        paddingBottom: 100, // Ensure content stays above the absolutely positioned control bar
+    },
     topPlayerBar: {
         paddingTop: 8,
         alignSelf: 'center',
@@ -1277,6 +1339,9 @@ const styles = StyleSheet.create({
     },
     spacer: {
         height: 12,
+    },
+    spacerCompact: {
+        height: 6,
     },
     controlBar: {
         position: 'absolute',

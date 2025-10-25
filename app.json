@@ -21,14 +21,28 @@
             "supportsTablet": true,
             "bundleIdentifier": "com.jbuxofplenty.coralclash",
             "runtimeVersion": "1.0.0",
-            "appleTeamId": "FWV22U8U39"
+            "appleTeamId": "FWV22U8U39",
+            "associatedDomains": ["webcredentials:coral-clash.firebaseapp.com"]
         },
         "plugins": ["expo-font"],
         "android": {
             "package": "com.jbuxofplenty.coralclash",
             "runtimeVersion": {
                 "policy": "appVersion"
-            }
+            },
+            "intentFilters": [
+                {
+                    "action": "VIEW",
+                    "autoVerify": true,
+                    "data": [
+                        {
+                            "scheme": "https",
+                            "host": "coral-clash.firebaseapp.com"
+                        }
+                    ],
+                    "category": ["BROWSABLE", "DEFAULT"]
+                }
+            ]
         },
         "extra": {
             "eas": {

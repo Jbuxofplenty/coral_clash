@@ -28,7 +28,8 @@
         "postinstall": "cd shared && yarn install && yarn build",
         "eject": "expo eject",
         "test": "node ./node_modules/jest/bin/jest.js --watchAll",
-        "test:ci": "node ./node_modules/jest/bin/jest.js --watchAll=false --ci"
+        "test:ci": "node ./node_modules/jest/bin/jest.js --watchAll=false --ci",
+        "web": "npx http-server public -p 8080 -o"
     },
     "jest": {
         "preset": "jest-expo",

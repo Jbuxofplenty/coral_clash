@@ -40,8 +40,6 @@ describe('User Profile Functions', () => {
 
     describe('getUserProfile', () => {
         it('should return own profile successfully', async () => {
-            const wrapped = test.wrap(userProfile.getUserProfile);
-
             const userId = 'test-user-123';
             const profileData = {
                 displayName: 'TestUser',
@@ -54,15 +52,16 @@ describe('User Profile Functions', () => {
                 data: () => profileData,
             });
 
-            const result = await wrapped({ userId }, { auth: { uid: userId } });
+            const result = await userProfile.getUserProfileHandler({
+                data: { userId },
+                auth: { uid: userId },
+            });
 
             expect(result.success).toBe(true);
             expect(result.profile).toEqual(profileData);
         });
 
         it('should return friend profile if users are friends', async () => {
-            const wrapped = test.wrap(userProfile.getUserProfile);
-
             const friendUserId = 'friend-456';
 
             // Mock friend check - they are friends
@@ -78,15 +77,16 @@ describe('User Profile Functions', () => {
                     }),
                 });
 
-            const result = await wrapped({ userId: friendUserId }, { auth: { uid: 'user-123' } });
+            const result = await userProfile.getUserProfileHandler({
+                data: { userId: friendUserId },
+                auth: { uid: 'user-123' },
+            });
 
             expect(result.success).toBe(true);
             expect(result.profile.displayName).toBe('FriendUser');
         });
 
         it('should throw permission error if trying to view non-friend profile', async () => {
-            const wrapped = test.wrap(userProfile.getUserProfile);
-
             const strangerUserId = 'stranger-789';
 
             // Mock friend check - they are NOT friends
@@ -95,43 +95,49 @@ describe('User Profile Functions', () => {
             });
 
             await expect(
-                wrapped({ userId: strangerUserId }, { auth: { uid: 'user-123' } }),
+                userProfile.getUserProfileHandler({
+                    data: { userId: strangerUserId },
+                    auth: { uid: 'user-123' },
+                }),
             ).rejects.toThrow('Can only view friends profiles');
         });
 
         it('should throw not-found error if user does not exist', async () => {
-            const wrapped = test.wrap(userProfile.getUserProfile);
-
             mockGet.mockResolvedValue({
                 exists: false,
                 data: () => null,
             });
 
             await expect(
-                wrapped({ userId: 'user-123' }, { auth: { uid: 'user-123' } }),
+                userProfile.getUserProfileHandler({
+                    data: { userId: 'user-123' },
+                    auth: { uid: 'user-123' },
+                }),
             ).rejects.toThrow('User not found');
         });
 
         it('should throw error if user not authenticated', async () => {
-            const wrapped = test.wrap(userProfile.getUserProfile);
-
-            await expect(wrapped({ userId: 'user-123' }, {})).rejects.toThrow(
-                'User must be authenticated',
-            );
+            await expect(
+                userProfile.getUserProfileHandler({
+                    data: { userId: 'user-123' },
+                    auth: null,
+                }),
+            ).rejects.toThrow('User must be authenticated');
         });
     });
 
     describe('updateUserProfile', () => {
         it('should update profile with displayName', async () => {
-            const wrapped = test.wrap(userProfile.updateUserProfile);
-
             const updateData = {
                 displayName: 'NewDisplayName',
             };
 
             mockUpdate.mockResolvedValue();
 
-            const result = await wrapped(updateData, { auth: { uid: 'test-user-123' } });
+            const result = await userProfile.updateUserProfileHandler({
+                data: updateData,
+                auth: { uid: 'test-user-123' },
+            });
 
             expect(result.success).toBe(true);
             expect(result.message).toBe('Profile updated successfully');
@@ -143,15 +149,16 @@ describe('User Profile Functions', () => {
         });
 
         it('should update profile with photoURL', async () => {
-            const wrapped = test.wrap(userProfile.updateUserProfile);
-
             const updateData = {
                 photoURL: 'https://example.com/new-photo.jpg',
             };
 
             mockUpdate.mockResolvedValue();
 
-            const result = await wrapped(updateData, { auth: { uid: 'test-user-123' } });
+            const result = await userProfile.updateUserProfileHandler({
+                data: updateData,
+                auth: { uid: 'test-user-123' },
+            });
 
             expect(result.success).toBe(true);
             expect(mockUpdate).toHaveBeenCalledWith(
@@ -162,8 +169,6 @@ describe('User Profile Functions', () => {
         });
 
         it('should update profile with multiple fields', async () => {
-            const wrapped = test.wrap(userProfile.updateUserProfile);
-
             const updateData = {
                 displayName: 'UpdatedName',
                 photoURL: 'https://example.com/updated.jpg',
@@ -172,7 +177,10 @@ describe('User Profile Functions', () => {
 
             mockUpdate.mockResolvedValue();
 
-            const result = await wrapped(updateData, { auth: { uid: 'test-user-123' } });
+            const result = await userProfile.updateUserProfileHandler({
+                data: updateData,
+                auth: { uid: 'test-user-123' },
+            });
 
             expect(result.success).toBe(true);
             expect(mockUpdate).toHaveBeenCalledWith(
@@ -185,11 +193,12 @@ describe('User Profile Functions', () => {
         });
 
         it('should include updatedAt timestamp', async () => {
-            const wrapped = test.wrap(userProfile.updateUserProfile);
-
             mockUpdate.mockResolvedValue();
 
-            await wrapped({ displayName: 'Test' }, { auth: { uid: 'test-user-123' } });
+            await userProfile.updateUserProfileHandler({
+                data: { displayName: 'Test' },
+                auth: { uid: 'test-user-123' },
+            });
 
             expect(mockUpdate).toHaveBeenCalledWith(
                 expect.objectContaining({
@@ -199,11 +208,12 @@ describe('User Profile Functions', () => {
         });
 
         it('should throw error if user not authenticated', async () => {
-            const wrapped = test.wrap(userProfile.updateUserProfile);
-
-            await expect(wrapped({ displayName: 'Test' }, {})).rejects.toThrow(
-                'User must be authenticated',
-            );
+            await expect(
+                userProfile.updateUserProfileHandler({
+                    data: { displayName: 'Test' },
+                    auth: null,
+                }),
+            ).rejects.toThrow('User must be authenticated');
         });
     });
 });
