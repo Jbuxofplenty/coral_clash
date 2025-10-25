@@ -53,6 +53,12 @@ jobs:
         if: inputs.platform == 'android' || inputs.platform == 'all'
         run: eas build --platform android --profile ${{ inputs.profile }} --non-interactive
 
+      - name: Wait for EAS to sync builds
+        if: (inputs.platform == 'ios' || inputs.platform == 'android' || inputs.platform == 'all')
+        run: |
+          echo "Waiting 30 seconds for EAS to sync build metadata..."
+          sleep 30
+
       - name: Submit to App Store
         if: inputs.platform == 'ios' || inputs.platform == 'all'
         run: eas submit --platform ios --profile ${{ inputs.profile }} --latest --non-interactive
