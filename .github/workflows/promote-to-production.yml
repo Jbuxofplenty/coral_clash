@@ -1,0 +1,151 @@
+name: Promote to Production
+
+on:
+  # Manual trigger to promote a staging release to production
+  workflow_dispatch:
+    inputs:
+      staging_tag:
+        description: 'Staging tag to promote (e.g., v1.8.0-beta.1)'
+        required: true
+        type: string
+      platform:
+        description: 'Platform to deploy (ios, android, all)'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - ios
+          - android
+
+jobs:
+  promote:
+    name: Promote Staging to Production
+    runs-on: ubuntu-latest
+    outputs:
+      production_tag: ${{ steps.validate.outputs.production_tag }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Validate staging tag
+        id: validate
+        run: |
+          STAGING_TAG="${{ github.event.inputs.staging_tag }}"
+          
+          # Check if tag exists
+          if ! git rev-parse "$STAGING_TAG" >/dev/null 2>&1; then
+            echo "❌ Error: Tag $STAGING_TAG does not exist"
+            exit 1
+          fi
+          
+          # Check if it's a staging tag (contains -beta or -rc)
+          if [[ ! "$STAGING_TAG" =~ -beta\. ]] && [[ ! "$STAGING_TAG" =~ -rc\. ]]; then
+            echo "❌ Error: $STAGING_TAG is not a staging tag (must contain -beta. or -rc.)"
+            exit 1
+          fi
+          
+          # Extract production version (remove -beta.X or -rc.X suffix)
+          PROD_TAG=$(echo "$STAGING_TAG" | sed -E 's/-beta\.[0-9]+$//' | sed -E 's/-rc\.[0-9]+$//')
+          
+          echo "✅ Staging tag: $STAGING_TAG"
+          echo "✅ Production tag: $PROD_TAG"
+          echo "production_tag=$PROD_TAG" >> $GITHUB_OUTPUT
+      
+      - name: Check if production tag already exists
+        id: check_tag
+        run: |
+          PROD_TAG="${{ steps.validate.outputs.production_tag }}"
+          
+          if git rev-parse "$PROD_TAG" >/dev/null 2>&1; then
+            echo "⚠️  Warning: Production tag $PROD_TAG already exists"
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "✅ Production tag $PROD_TAG does not exist - will create"
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Create production tag
+        if: steps.check_tag.outputs.exists == 'false'
+        run: |
+          STAGING_TAG="${{ github.event.inputs.staging_tag }}"
+          PROD_TAG="${{ steps.validate.outputs.production_tag }}"
+          
+          # Configure git
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          
+          # Get the commit SHA of the staging tag
+          COMMIT_SHA=$(git rev-parse "$STAGING_TAG")
+          
+          # Create and push production tag
+          git tag -a "$PROD_TAG" "$COMMIT_SHA" -m "Promote $STAGING_TAG to production"
+          git push origin "$PROD_TAG"
+          
+          echo "✅ Created and pushed production tag: $PROD_TAG"
+          echo "📝 Commit SHA: $COMMIT_SHA"
+      
+      - name: Summary
+        run: |
+          echo "### 🚀 Promotion Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Staging Tag**: ${{ github.event.inputs.staging_tag }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Production Tag**: ${{ steps.validate.outputs.production_tag }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Platform**: ${{ github.event.inputs.platform }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ steps.check_tag.outputs.exists }}" = "true" ]; then
+            echo "⚠️  Production tag already exists - deployment will use existing build" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ Production tag created - deployment triggered automatically" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "📊 Monitor deployment: [GitHub Actions](https://github.com/${{ github.repository }}/actions/workflows/deploy.yml)" >> $GITHUB_STEP_SUMMARY
+
+  # Wait for the production deployment to be triggered by the tag push
+  wait-and-monitor:
+    name: Monitor Production Deployment
+    needs: promote
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Wait for production workflow to start
+        run: |
+          echo "⏳ Waiting 10 seconds for production workflow to be triggered..."
+          sleep 10
+      
+      - name: Find and link to production workflow
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prodTag = '${{ needs.promote.outputs.production_tag }}';
+            
+            // Wait a bit more and check for the workflow run
+            await new Promise(resolve => setTimeout(resolve, 5000));
+            
+            const { data: runs } = await github.rest.actions.listWorkflowRuns({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'deploy.yml',
+              event: 'push',
+              per_page: 5
+            });
+            
+            const prodRun = runs.workflow_runs.find(run => 
+              run.head_branch === prodTag || run.name.includes('Production')
+            );
+            
+            if (prodRun) {
+              console.log(`✅ Production deployment started: ${prodRun.html_url}`);
+              core.summary.addHeading('Production Deployment Started', 2);
+              core.summary.addLink('View Production Deployment', prodRun.html_url);
+              await core.summary.write();
+            } else {
+              console.log('⏳ Production deployment not started yet - check Actions tab');
+            }
+
