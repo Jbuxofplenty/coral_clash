@@ -16,6 +16,8 @@ Coral Clash is a mobile board game application featuring online multiplayer game
 - 📊 **Statistics** - Track wins, losses, and win rates against each opponent
 - 🎨 **Beautiful UI** - Ocean-themed design with dark/light mode support
 - 🔔 **Real-time Notifications** - Get notified of game invites and moves
+- 🚀 **CI/CD Pipeline** - Automated testing and deployment via GitHub Actions
+- 📱 **Cross-Platform** - Native iOS and Android apps via Expo
 
 ## Prerequisites
 
@@ -66,72 +68,123 @@ yarn android
 ### Frontend
 
 - **Expo SDK 54** - Development framework
-- **React Native 0.76** - Mobile app framework
+- **React Native 0.81.5** - Mobile app framework
+- **React 19.1** - UI library
 - **React Navigation v7** - Navigation and routing
-- **TypeScript** - Type safety for game logic
+- **TypeScript 5.9** - Type safety for game logic
 - **Galio Framework** - UI component library
 
 ### Backend
 
-- **Firebase Cloud Functions** - Serverless backend
+- **Firebase Cloud Functions** - Serverless backend (Node.js 22)
 - **Firestore** - NoSQL database
 - **Firebase Authentication** - User authentication with Google Sign-In
 - **Firebase Cloud Messaging** - Push notifications
 
+### DevOps & Tooling
+
+- **Expo Application Services (EAS)** - Build and submit automation
+- **GitHub Actions** - CI/CD pipeline for testing and deployment
+- **Firebase CLI** - Backend deployment and emulators
+- **Jest** - Testing framework for all layers
+- **Yarn Workspaces** - Monorepo dependency management
+
 ## Project Structure
 
-```
+```text
 coral_clash/
-├── src/                        # Main source code
-│   ├── components/            # Reusable UI components
-│   │   ├── CoralClashBoard.js # Game board component
-│   │   ├── Avatar.js          # User avatar component
+├── .github/                   # GitHub Actions workflows
+│   └── workflows/            # CI/CD pipeline definitions
+│       ├── test.yml          # Automated testing
+│       ├── deploy-staging.yml # Staging deployment
+│       ├── deploy.yml        # Production deployment
+│       └── firebase-deploy.yml # Firebase backend deployment
+├── src/                       # Main source code
+│   ├── components/           # Reusable UI components
+│   │   ├── BaseCoralClashBoard.js    # Base board component
+│   │   ├── PvPCoralClashBoard.js     # Multiplayer board
+│   │   ├── ComputerCoralClashBoard.js # AI opponent board
 │   │   ├── ActiveGamesCard.js # Active games display
-│   │   └── ...
-│   ├── screens/               # Screen components
-│   │   ├── Home.js            # Home screen with game modes
-│   │   ├── Game.js            # Game screen
-│   │   ├── Friends.js         # Friends management
-│   │   ├── Stats.js           # Statistics and analytics
-│   │   ├── Settings.js        # User settings
-│   │   └── Login.js           # Authentication
-│   ├── hooks/                 # Custom React hooks
-│   │   ├── useCoralClash.ts   # Core game logic hook
-│   │   ├── usePvPGame.js      # Multiplayer game hook
-│   │   └── useFirebaseFunctions.js
-│   ├── navigation/            # Navigation configuration
-│   │   ├── Screens.js         # Main drawer navigator
-│   │   └── Menu.js            # Custom drawer content
-│   ├── contexts/              # React contexts
-│   │   ├── AuthContext.js     # Authentication state
-│   │   ├── ThemeContext.js    # Theme (dark/light mode)
-│   │   └── NotificationContext.js
-│   ├── config/                # Configuration files
-│   │   └── firebase.js        # Firebase initialization
-│   ├── constants/             # App constants
-│   │   ├── Theme.js           # Theme colors and styles
-│   │   ├── avatars.js         # Avatar configurations
-│   │   └── products.js        # Game mode definitions
-│   └── assets/                # Static assets
-│       ├── images/            # Image assets
-│       └── fonts/             # Custom fonts
-├── functions/                 # Firebase Cloud Functions
-│   ├── routes/               # API route handlers
-│   │   ├── game.js           # PvP/Computer game logic
-│   │   ├── friends.js        # Friends management
-│   │   ├── userProfile.js    # User profiles
-│   │   └── userSettings.js   # User settings
-│   ├── utils/                # Utility functions
-│   │   ├── gameValidator.js  # Server-side move validation
-│   │   ├── helpers.js        # Helper functions
-│   │   └── notifications.js  # Push notification logic
-│   └── __tests__/            # Function tests
-├── shared/                   # Shared code between frontend and backend
-│   └── game/                 # Core game engine
-│       ├── coralClash.ts     # Game state logic
-│       └── gameState.ts      # Game state types
-├── docs/                     # Documentation
-└── ios/                      # iOS native code
+│   │   ├── Avatar.js         # User avatar component
+│   │   ├── GameModeCard.js   # Game mode selection
+│   │   ├── MatchmakingCard.js # Matchmaking UI
+│   │   └── ...               # 22 components total
+│   ├── screens/              # Screen components
+│   │   ├── Home.js           # Home screen with game modes
+│   │   ├── Game.js           # Game screen
+│   │   ├── Friends.js        # Friends management
+│   │   ├── Stats.js          # Statistics and analytics
+│   │   ├── Settings.js       # User settings
+│   │   ├── Login.js          # Authentication
+│   │   ├── HowToPlay.js      # Game rules/tutorial
+│   │   └── ScenarioBoard.js  # Tutorial scenarios
+│   ├── hooks/                # Custom React hooks
+│   │   ├── useCoralClash.ts  # Core game logic hook
+│   │   ├── useGame.js        # Game state management
+│   │   ├── useGameActions.js # Game action handlers
+│   │   ├── useMatchmaking.js # Matchmaking logic
+│   │   ├── useFriends.js     # Friends management
+│   │   ├── useFirebaseFunctions.js # Firebase API calls
+│   │   └── ...               # 10 hooks total
+│   ├── navigation/           # Navigation configuration
+│   │   ├── Screens.js        # Main drawer navigator
+│   │   └── Menu.js           # Custom drawer content
+│   ├── contexts/             # React contexts
+│   │   ├── AuthContext.js    # Authentication state
+│   │   ├── ThemeContext.js   # Theme (dark/light mode)
+│   │   └── NotificationContext.js # Notification handling
+│   ├── config/               # Configuration files
+│   │   └── firebase.js       # Firebase initialization
+│   ├── constants/            # App constants
+│   │   ├── theme.js          # Theme colors and styles
+│   │   ├── avatars.js        # Avatar configurations
+│   │   ├── images.js         # Image imports
+│   │   └── tutorialScenarios.js # Tutorial game states
+│   └── assets/               # Static assets
+│       ├── images/           # PNG image assets
+│       ├── icons/            # App icons
+│       └── fonts/            # Custom fonts
+├── functions/                # Firebase Cloud Functions
+│   ├── routes/              # API route handlers
+│   │   ├── game.js          # PvP/Computer game API
+│   │   ├── matchmaking.js   # Matchmaking API
+│   │   ├── friends.js       # Friends management API
+│   │   ├── userProfile.js   # User profiles API
+│   │   └── userSettings.js  # User settings API
+│   ├── triggers/            # Firestore triggers
+│   │   ├── onGameMoveUpdate.js # Game move notifications
+│   │   ├── onPlayerJoinQueue.js # Matchmaking triggers
+│   │   └── onUserCreate.js  # New user initialization
+│   ├── scheduled/           # Scheduled functions
+│   │   └── cleanupStaleMatchmakingEntries.js
+│   ├── utils/               # Utility functions
+│   │   ├── gameValidator.js # Server-side move validation
+│   │   ├── helpers.js       # Helper functions
+│   │   └── notifications.js # Push notification logic
+│   └── __tests__/           # Function tests
+├── shared/                  # Shared code between frontend and backend
+│   └── game/                # Core game engine (TypeScript)
+│       ├── v1.0.0/          # Versioned game logic
+│       │   ├── coralClash.ts # Game state logic
+│       │   ├── gameState.ts  # Game state types
+│       │   └── index.ts
+│       ├── __tests__/       # Game engine tests
+│       ├── __fixtures__/    # Test fixtures
+│       └── index.ts         # Public exports
+├── docs/                    # Comprehensive documentation
+│   ├── architecture.md      # System architecture
+│   ├── coral_clash_rules.md # Game rules
+│   ├── github_actions_setup.md # CI/CD setup
+│   ├── firebase_setup.md    # Firebase configuration
+│   └── ...                  # 17 docs total
+├── android/                 # Android native code
+├── ios/                     # iOS native code
+├── App.js                   # App entry point
+├── eas.json                 # EAS Build configuration
+├── firebase.json            # Firebase configuration
+├── firestore.rules          # Firestore security rules
+├── firestore.indexes.json   # Firestore indexes
+└── package.json             # Dependencies and scripts
 ```
 
 ## Development
@@ -176,6 +229,152 @@ firebase emulators:start
 - **Cross-platform** - Single codebase for iOS and Android
 - **Server-side validation** - Prevents cheating in multiplayer games
 
+## CI/CD & Deployment
+
+The project uses GitHub Actions for automated testing and deployment.
+
+### Automated Workflows
+
+#### 1. **Continuous Testing** (`test.yml`)
+
+Runs on every push to `main` and on all pull requests:
+
+- ✅ Tests frontend, shared module, and backend functions
+- ✅ Validates build integrity
+- ✅ Uses Node.js 22 (Firebase Cloud Functions requirement)
+
+#### 2. **Staging Deployment** (`deploy-staging.yml`)
+
+Deploys to TestFlight (iOS) and Internal Testing (Android):
+
+**Triggers:**
+
+- Push to `develop` branch
+- Tags matching `v*-beta.*` or `v*-rc.*` (e.g., `v1.8.0-beta.1`)
+- Manual trigger via GitHub Actions UI
+
+**Process:**
+
+- Builds using EAS Build with `preview` profile
+- Submits to TestFlight (iOS) and Internal Testing track (Android)
+- Uses `internal` distribution for pre-release testing
+
+#### 3. **Production Deployment** (`deploy.yml`)
+
+Deploys to App Store (iOS) and Play Store (Android):
+
+**Triggers:**
+
+- Tags matching semantic versioning: `v[major].[minor].[patch]` (e.g., `v1.8.0`)
+- Manual trigger via GitHub Actions UI
+
+**Process:**
+
+- Builds using EAS Build with `production` profile
+- Submits to App Store and Play Store for public release
+- Requires approval in GitHub environment `production`
+
+#### 4. **Firebase Backend Deployment** (`firebase-deploy.yml`)
+
+Deploys backend services (Cloud Functions, Firestore rules, indexes):
+
+**Triggers:**
+
+- Automatically after successful staging deployment
+- Manual trigger with selective deployment options
+
+**Process:**
+
+- Builds and tests shared game module
+- Runs functions tests before deployment
+- Deploys to Firebase project `coral-clash`
+- Supports selective deployment: `functions`, `firestore`, `hosting`, or `all`
+
+### Manual Deployments
+
+**Deploy to Staging:**
+
+```bash
+# Via GitHub Actions UI: Actions → Deploy to Staging → Run workflow
+
+# Or via CLI:
+yarn build:staging        # Build both platforms
+yarn build:staging:ios    # iOS only
+yarn build:staging:android # Android only
+yarn submit:staging       # Submit latest builds
+```
+
+**Deploy to Production:**
+
+```bash
+# Via GitHub Actions UI: Actions → Deploy to Production → Run workflow
+
+# Or via CLI:
+yarn build:production        # Build both platforms
+yarn build:production:ios    # iOS only
+yarn build:production:android # Android only
+yarn submit:production       # Submit latest builds
+```
+
+**Deploy Firebase:**
+
+```bash
+# Via GitHub Actions UI: Actions → Deploy to Firebase → Run workflow
+
+# Or via CLI:
+firebase deploy --project coral-clash
+firebase deploy --only functions --project coral-clash
+firebase deploy --only firestore --project coral-clash
+```
+
+### Release Process
+
+**Staging Release:**
+
+```bash
+# 1. Merge changes to develop branch
+git checkout develop
+git merge feature/my-feature
+
+# 2. Tag with beta version
+git tag v1.8.0-beta.1
+git push origin v1.8.0-beta.1
+
+# 3. GitHub Actions automatically builds and submits to TestFlight/Internal Testing
+# 4. Firebase backend deploys automatically after successful app deployment
+```
+
+**Production Release:**
+
+```bash
+# 1. Merge develop to main
+git checkout main
+git merge develop
+
+# 2. Tag with production version
+git tag v1.8.0
+git push origin v1.8.0
+
+# 3. GitHub Actions automatically builds and submits to App Store/Play Store
+```
+
+### Required GitHub Secrets
+
+Configure these secrets in **Settings → Secrets and variables → Actions**:
+
+- `EXPO_TOKEN` - Expo authentication token (get via `npx eas login` then `npx eas token:create`)
+- `FIREBASE_TOKEN` - Firebase CI token (get via `firebase login:ci`)
+
+### EAS Build Configuration
+
+The project uses Expo Application Services (EAS) for building and submitting apps:
+
+- **Development**: Local development builds with dev client
+- **Preview**: Internal testing builds (TestFlight/Internal Testing track)
+- **Production**: Public release builds (App Store/Play Store)
+
+See `eas.json` for detailed build configuration.
+
 ## Troubleshooting
 
 **Clear cache and restart:**
@@ -207,9 +406,37 @@ rm -rf .emulator-data/
 firebase emulators:start --clean
 ```
 
-## Game Rules
+## Documentation
 
-For detailed game rules and mechanics, see [docs/coral_clash_rules.md](docs/coral_clash_rules.md)
+Comprehensive documentation is available in the `docs/` directory:
+
+### Game & Architecture
+
+- [Coral Clash Rules](docs/coral_clash_rules.md) - Complete game rules and mechanics
+- [Architecture Overview](docs/architecture.md) - System architecture and design patterns
+- [Game Actions Architecture](docs/game_actions_architecture.md) - Action handling and validation
+- [Game Versioning](docs/game_versioning.md) - Version management strategy
+
+### Feature Documentation
+
+- [Active Games Feature](docs/active_games_feature.md) - Active games display and management
+- [Matchmaking System](docs/matchmaking_system.md) - Matchmaking logic and cleanup
+- [Notification System](docs/notification_system.md) - Push notification implementation
+- [Computer Game API](docs/computer_game_api.md) - AI opponent integration
+- [Tutorial Autoplay](docs/tutorial_autoplay_feature.md) - Tutorial and autoplay features
+
+### Setup & Deployment Guides
+
+- [Firebase Setup](docs/firebase_setup.md) - Firebase project configuration
+- [Google Sign-In Setup](docs/google_signin_setup.md) - OAuth configuration
+- [GitHub Actions Setup](docs/github_actions_setup.md) - CI/CD configuration
+- [Deployment Quick Reference](docs/deployment_quick_reference.md) - Quick deployment commands
+- [Deployment Setup](docs/deployment_setup.md) - Detailed deployment guide
+
+### Debugging & Maintenance
+
+- [Game State Debug](docs/game_state_debug.md) - Debugging game state issues
+- [Matchmaking Cleanup](docs/matchmaking_cleanup.md) - Matchmaking maintenance
 
 ## License
 
