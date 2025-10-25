@@ -12,12 +12,12 @@ on:
       platform:
         description: 'Platform to deploy (ios, android, all)'
         required: true
-        default: 'all'
+        default: 'ios'
         type: choice
         options:
-          - all
           - ios
           - android
+          - all
 
 jobs:
   deploy-production:
@@ -25,7 +25,7 @@ jobs:
     uses: ./.github/workflows/build-and-submit.yml
     with:
       profile: 'production'
-      platform: ${{ github.event.inputs.platform || 'all' }}
+      platform: ${{ github.event.inputs.platform || 'ios' }}
       environment: 'production'
     secrets:
       EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}

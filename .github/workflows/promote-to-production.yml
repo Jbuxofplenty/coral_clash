@@ -11,7 +11,7 @@ on:
       platform:
         description: 'Platform to deploy (ios, android, all)'
         required: false
-        default: 'all'
+        default: 'ios'
         type: string
   
   # Manual trigger to promote a staging release to production
@@ -24,12 +24,12 @@ on:
       platform:
         description: 'Platform to deploy (ios, android, all)'
         required: true
-        default: 'all'
+        default: 'ios'
         type: choice
         options:
-          - all
           - ios
           - android
+          - all
 
 jobs:
   promote:

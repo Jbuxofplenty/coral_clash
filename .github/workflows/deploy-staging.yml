@@ -15,12 +15,13 @@ on:
       platform:
         description: 'Platform to deploy (ios, android, all)'
         required: true
-        default: 'all'
+        # temporary until we get google play account setup
+        default: 'ios'
         type: choice
         options:
-          - all
           - ios
           - android
+          - all
 
 jobs:
   deploy-staging:
@@ -28,7 +29,7 @@ jobs:
     uses: ./.github/workflows/build-and-submit.yml
     with:
       profile: 'preview'
-      platform: ${{ github.event.inputs.platform || 'all' }}
+      platform: ${{ github.event.inputs.platform || 'ios' }}
       environment: 'staging'
     secrets:
       EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
@@ -55,8 +56,8 @@ jobs:
       - name: Extract platform selection
         id: platform
         run: |
-          # Get platform from manual trigger or default to 'all'
-          PLATFORM="${{ github.event.inputs.platform || 'all' }}"
+          # Get platform from manual trigger or default to 'ios'
+          PLATFORM="${{ github.event.inputs.platform || 'ios' }}"
           echo "platform=$PLATFORM" >> $GITHUB_OUTPUT
           echo "📱 Platform: $PLATFORM"
       
