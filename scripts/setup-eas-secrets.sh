@@ -23,6 +23,25 @@ set +a
 # List of environments to configure
 ENVIRONMENTS=("preview" "production")
 
+# List of all environment variable names
+ENV_VARS=(
+    "EXPO_PUBLIC_FIREBASE_API_KEY"
+    "EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN"
+    "EXPO_PUBLIC_FIREBASE_DATABASE_URL"
+    "EXPO_PUBLIC_FIREBASE_PROJECT_ID"
+    "EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET"
+    "EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID"
+    "EXPO_PUBLIC_FIREBASE_APP_ID"
+    "EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID"
+    "EXPO_PUBLIC_FIREBASE_FUNCTIONS_URL"
+    "EXPO_PUBLIC_USE_FIREBASE_EMULATOR"
+    "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID"
+    "EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID"
+    "EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID"
+    "EXPO_PUBLIC_GOOGLE_EXPO_CLIENT_ID"
+    "EXPO_PUBLIC_ENABLE_DEV_FEATURES"
+)
+
 # Loop through each environment
 for ENV in "${ENVIRONMENTS[@]}"; do
     echo ""
@@ -30,6 +49,16 @@ for ENV in "${ENVIRONMENTS[@]}"; do
     echo "Setting up environment: $ENV"
     echo "========================================"
     echo ""
+
+    # Delete existing variables first (delete removes from all environments, so we do this once)
+    if [ "$ENV" == "preview" ]; then
+        echo "Deleting existing environment variables (if any)..."
+        for VAR_NAME in "${ENV_VARS[@]}"; do
+            eas env:delete --variable-name "$VAR_NAME" --non-interactive 2>/dev/null || true
+        done
+        echo "Cleanup complete."
+        echo ""
+    fi
 
     echo "Creating Firebase environment variables..."
     eas env:create --name EXPO_PUBLIC_FIREBASE_API_KEY --value "$EXPO_PUBLIC_FIREBASE_API_KEY" --environment "$ENV" --visibility sensitive --non-interactive --force || true
