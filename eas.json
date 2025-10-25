@@ -18,6 +18,7 @@
             "channel": "development"
         },
         "preview": {
+            "autoIncrement": true,
             "distribution": "store",
             "channel": "preview",
             "node": "22.11.0"
