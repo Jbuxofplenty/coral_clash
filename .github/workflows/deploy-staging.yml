@@ -27,8 +27,66 @@ on:
           - all
 
 jobs:
+  prepare-version:
+    name: Prepare Version
+    runs-on: ubuntu-latest
+    # Only run for branch pushes, not tags
+    if: github.ref_type == 'branch'
+    outputs:
+      version_updated: ${{ steps.update.outputs.updated }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Calculate and update version
+        id: update
+        run: |
+          # Get the latest production tag (vX.Y.Z format, no beta/rc)
+          LATEST_TAG=$(git tag -l 'v*' | grep -v -E '(beta|rc)' | sort -V | tail -n1)
+          
+          if [ -z "$LATEST_TAG" ]; then
+            NEW_VERSION="1.0.0"
+          else
+            # Extract version numbers and bump minor
+            VERSION_NUM="${LATEST_TAG#v}"
+            MAJOR=$(echo $VERSION_NUM | cut -d. -f1)
+            MINOR=$(echo $VERSION_NUM | cut -d. -f2)
+            PATCH=$(echo $VERSION_NUM | cut -d. -f3)
+            MINOR=$((MINOR + 1))
+            NEW_VERSION="${MAJOR}.${MINOR}.0"
+          fi
+          
+          echo "📊 Latest tag: ${LATEST_TAG:-none}"
+          echo "🆕 New version: $NEW_VERSION"
+          
+          # Update version in app.json
+          sed -i.bak "s/\"version\": \".*\"/\"version\": \"$NEW_VERSION\"/" app.json
+          rm app.json.bak
+          
+          # Configure git
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          
+          # Commit and push if changed
+          if git diff --quiet app.json; then
+            echo "No version change needed"
+            echo "updated=false" >> $GITHUB_OUTPUT
+          else
+            git add app.json
+            git commit -m "Bump version to $NEW_VERSION [skip ci]"
+            git push origin HEAD:${{ github.ref_name }}
+            echo "✅ Updated app.json to version: $NEW_VERSION"
+            echo "updated=true" >> $GITHUB_OUTPUT
+          fi
+  
   deploy-staging:
     name: Deploy to Staging
+    needs: [prepare-version]
+    if: always()  # Run even if prepare-version was skipped
     uses: ./.github/workflows/build-and-submit.yml
     with:
       profile: 'preview'
