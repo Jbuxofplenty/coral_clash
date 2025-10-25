@@ -47,17 +47,11 @@ jobs:
 
       - name: Build iOS app
         if: inputs.platform == 'ios' || inputs.platform == 'all'
-        run: eas build --platform ios --profile ${{ inputs.profile }} --non-interactive --no-wait
+        run: eas build --platform ios --profile ${{ inputs.profile }} --non-interactive
 
       - name: Build Android app
         if: inputs.platform == 'android' || inputs.platform == 'all'
-        run: eas build --platform android --profile ${{ inputs.profile }} --non-interactive --no-wait
-
-      - name: Wait for builds to complete
-        run: |
-          echo "Waiting for builds to complete..."
-          sleep 60
-          echo "Builds are processing. Check EAS dashboard for progress."
+        run: eas build --platform android --profile ${{ inputs.profile }} --non-interactive
 
       - name: Submit to App Store
         if: inputs.platform == 'ios' || inputs.platform == 'all'
