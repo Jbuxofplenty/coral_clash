@@ -191,6 +191,68 @@ function Login({ navigation }) {
                             ) : null}
 
                             <Block style={styles.form}>
+                                {!showForgotPassword && (
+                                    <>
+                                        <TouchableOpacity
+                                            style={[
+                                                styles.googleButton,
+                                                {
+                                                    backgroundColor: colors.CARD_BACKGROUND,
+                                                    borderColor: colors.BORDER_COLOR,
+                                                },
+                                                !googleSignInAvailable &&
+                                                    styles.googleButtonDisabled,
+                                            ]}
+                                            onPress={handleGoogleSignIn}
+                                            disabled={
+                                                !googleSignInAvailable || loading || authLoading
+                                            }
+                                        >
+                                            <Ionicons
+                                                name='logo-google'
+                                                size={24}
+                                                color={googleSignInAvailable ? '#DB4437' : '#ccc'}
+                                            />
+                                            <Text
+                                                size={16}
+                                                color={colors.TEXT}
+                                                style={[
+                                                    styles.googleButtonText,
+                                                    !googleSignInAvailable &&
+                                                        styles.googleButtonTextDisabled,
+                                                ]}
+                                            >
+                                                {isSignUp
+                                                    ? 'Sign up with Google'
+                                                    : 'Sign in with Google'}
+                                                {!googleSignInAvailable && ' (Production only)'}
+                                            </Text>
+                                        </TouchableOpacity>
+
+                                        <View style={styles.dividerContainer}>
+                                            <View
+                                                style={[
+                                                    styles.divider,
+                                                    { backgroundColor: colors.BORDER_COLOR },
+                                                ]}
+                                            />
+                                            <Text
+                                                size={14}
+                                                color={colors.TEXT_SECONDARY}
+                                                style={styles.dividerText}
+                                            >
+                                                OR
+                                            </Text>
+                                            <View
+                                                style={[
+                                                    styles.divider,
+                                                    { backgroundColor: colors.BORDER_COLOR },
+                                                ]}
+                                            />
+                                        </View>
+                                    </>
+                                )}
+
                                 {!showForgotPassword && isSignUp && (
                                     <Input
                                         placeholder='Username (required)'
@@ -276,68 +338,6 @@ function Login({ navigation }) {
                                     </TouchableOpacity>
                                 )}
 
-                                {!showForgotPassword && (
-                                    <>
-                                        <View style={styles.dividerContainer}>
-                                            <View
-                                                style={[
-                                                    styles.divider,
-                                                    { backgroundColor: colors.BORDER_COLOR },
-                                                ]}
-                                            />
-                                            <Text
-                                                size={14}
-                                                color={colors.TEXT_SECONDARY}
-                                                style={styles.dividerText}
-                                            >
-                                                OR
-                                            </Text>
-                                            <View
-                                                style={[
-                                                    styles.divider,
-                                                    { backgroundColor: colors.BORDER_COLOR },
-                                                ]}
-                                            />
-                                        </View>
-
-                                        <TouchableOpacity
-                                            style={[
-                                                styles.googleButton,
-                                                {
-                                                    backgroundColor: colors.CARD_BACKGROUND,
-                                                    borderColor: colors.BORDER_COLOR,
-                                                },
-                                                !googleSignInAvailable &&
-                                                    styles.googleButtonDisabled,
-                                            ]}
-                                            onPress={handleGoogleSignIn}
-                                            disabled={
-                                                !googleSignInAvailable || loading || authLoading
-                                            }
-                                        >
-                                            <Ionicons
-                                                name='logo-google'
-                                                size={24}
-                                                color={googleSignInAvailable ? '#DB4437' : '#ccc'}
-                                            />
-                                            <Text
-                                                size={16}
-                                                color={colors.TEXT}
-                                                style={[
-                                                    styles.googleButtonText,
-                                                    !googleSignInAvailable &&
-                                                        styles.googleButtonTextDisabled,
-                                                ]}
-                                            >
-                                                {isSignUp
-                                                    ? 'Sign up with Google'
-                                                    : 'Sign in with Google'}
-                                                {!googleSignInAvailable && ' (Production only)'}
-                                            </Text>
-                                        </TouchableOpacity>
-                                    </>
-                                )}
-
                                 <TouchableOpacity
                                     onPress={showForgotPassword ? toggleForgotPassword : toggleMode}
                                     style={styles.toggleButton}
@@ -373,12 +373,13 @@ const styles = StyleSheet.create({
     },
     container: {
         width: width,
-        paddingHorizontal: theme.SIZES.BASE * 2,
+        paddingHorizontal: theme.SIZES.BASE,
         paddingVertical: theme.SIZES.BASE * 4,
     },
     card: {
         borderRadius: 12,
-        padding: theme.SIZES.BASE * 3,
+        padding: theme.SIZES.BASE * 1.5,
+        paddingVertical: theme.SIZES.BASE * 2,
         width: '100%',
         maxWidth: 400,
         shadowColor: theme.COLORS.BLACK,
