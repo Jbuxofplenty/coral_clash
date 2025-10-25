@@ -43,6 +43,13 @@ jobs:
       - name: Build Shared module
         run: cd shared && yarn build
         
+      - name: Copy Shared module to Functions
+        run: |
+          cd functions
+          rm -rf shared
+          mkdir -p shared
+          cp -r ../shared/dist shared/
+        
       - name: Install Functions dependencies
         run: cd functions && yarn install --frozen-lockfile
         

@@ -2,7 +2,7 @@
 // This file runs before all tests
 
 // Mock the shared game library
-jest.mock('../../shared/game', () => ({
+jest.mock('../shared/dist/game', () => ({
     CoralClash: jest.fn().mockImplementation(() => ({
         fen: jest.fn().mockReturnValue('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'),
         turn: jest.fn().mockReturnValue('w'),

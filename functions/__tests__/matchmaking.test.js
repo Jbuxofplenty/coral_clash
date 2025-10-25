@@ -1,5 +1,5 @@
 // Mock the shared game library before requiring anything
-jest.mock('../../shared/game');
+jest.mock('../shared/dist/game');
 
 const test = require('firebase-functions-test')();
 

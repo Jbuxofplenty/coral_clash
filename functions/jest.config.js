@@ -12,6 +12,6 @@ module.exports = {
     // Transform shared TypeScript files
     transformIgnorePatterns: ['node_modules/(?!(firebase-admin|firebase-functions|@firebase)/)'],
     moduleNameMapper: {
-        '^../../shared/game$': '<rootDir>/../shared/game/index.ts',
+        '^../shared/dist/game$': '<rootDir>/../shared/dist/game/index.js',
     },
 };
