@@ -6,8 +6,6 @@ on:
     workflows: ["Deploy to Staging (TestFlight/Internal Testing)"]
     types:
       - completed
-    branches:
-      - develop
   
   # Allow manual triggering from GitHub UI
   workflow_dispatch:
