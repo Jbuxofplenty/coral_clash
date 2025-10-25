@@ -1,5 +1,8 @@
 name: Promote to Production
 
+permissions:
+  contents: write  # Allow pushing tags
+
 on:
   # Called by staging workflow after approval
   workflow_call:
