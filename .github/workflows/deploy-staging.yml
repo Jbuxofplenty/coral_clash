@@ -37,30 +37,89 @@ jobs:
     name: Approve for Production
     needs: deploy-staging
     runs-on: ubuntu-latest
-    # Only run for tag-based deployments, not branch pushes
-    if: startsWith(github.ref, 'refs/tags/') && (contains(github.ref, '-beta.') || contains(github.ref, '-rc.'))
     environment:
       name: production-approval
       url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
     outputs:
       staging_tag: ${{ steps.extract.outputs.staging_tag }}
       should_promote: ${{ steps.extract.outputs.should_promote }}
+      is_branch: ${{ steps.extract.outputs.is_branch }}
     
     steps:
-      - name: Extract staging tag
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Determine staging tag
         id: extract
         run: |
-          # Extract tag name from ref (refs/tags/v1.8.0-beta.1 -> v1.8.0-beta.1)
-          STAGING_TAG="${GITHUB_REF#refs/tags/}"
+          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            # Tag-based deployment
+            STAGING_TAG="${GITHUB_REF#refs/tags/}"
+            echo "is_branch=false" >> $GITHUB_OUTPUT
+            echo "🏷️  Using existing staging tag: $STAGING_TAG"
+          else
+            # Branch-based deployment - auto-bump version
+            echo "is_branch=true" >> $GITHUB_OUTPUT
+            
+            # Get the latest production tag (vX.Y.Z format, no beta/rc)
+            LATEST_TAG=$(git tag -l 'v*' | grep -v -E '(beta|rc)' | sort -V | tail -n1)
+            
+            if [ -z "$LATEST_TAG" ]; then
+              # No existing tags, start at v1.0.0
+              NEW_VERSION="v1.0.0"
+            else
+              # Extract version numbers (v1.9.0 -> 1 9 0)
+              VERSION_NUM="${LATEST_TAG#v}"
+              MAJOR=$(echo $VERSION_NUM | cut -d. -f1)
+              MINOR=$(echo $VERSION_NUM | cut -d. -f2)
+              PATCH=$(echo $VERSION_NUM | cut -d. -f3)
+              
+              # Bump minor version, reset patch to 0
+              MINOR=$((MINOR + 1))
+              NEW_VERSION="v${MAJOR}.${MINOR}.0"
+            fi
+            
+            # Create staging tag with -beta.1 suffix
+            STAGING_TAG="${NEW_VERSION}-beta.1"
+            
+            echo "📊 Latest production tag: ${LATEST_TAG:-none}"
+            echo "🆕 New version: $NEW_VERSION"
+            echo "🏷️  Staging tag: $STAGING_TAG"
+          fi
+          
           echo "staging_tag=$STAGING_TAG" >> $GITHUB_OUTPUT
           echo "should_promote=true" >> $GITHUB_OUTPUT
-          echo "🏷️  Staging tag: $STAGING_TAG"
+      
+      - name: Create staging tag for branch deployment
+        if: steps.extract.outputs.is_branch == 'true'
+        run: |
+          STAGING_TAG="${{ steps.extract.outputs.staging_tag }}"
+          
+          # Configure git
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          
+          # Create and push staging tag
+          git tag -a "$STAGING_TAG" -m "Auto-generated staging tag from ${{ github.ref_name }}"
+          git push origin "$STAGING_TAG"
+          
+          echo "✅ Created staging tag: $STAGING_TAG"
       
       - name: Ready to promote
         run: |
           echo "### ✅ Staging Deployment Successful!" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Staging tag **${{ steps.extract.outputs.staging_tag }}** has been deployed to TestFlight." >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ steps.extract.outputs.is_branch }}" = "true" ]; then
+            echo "Branch **${{ github.ref_name }}** has been deployed to TestFlight." >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Auto-generated staging tag: **${{ steps.extract.outputs.staging_tag }}**" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "Staging tag **${{ steps.extract.outputs.staging_tag }}** has been deployed to TestFlight." >> $GITHUB_STEP_SUMMARY
+          fi
+          
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "🧪 **Test the staging build**, then approve this step to promote to production." >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
