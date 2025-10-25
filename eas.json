@@ -65,7 +65,8 @@
     "submit": {
         "production": {
             "ios": {
-                "appleTeamId": "FWV22U8U39"
+                "appleTeamId": "FWV22U8U39",
+                "ascAppId": "6754509672"
             },
             "android": {
                 "track": "production"
@@ -73,7 +74,8 @@
         },
         "preview": {
             "ios": {
-                "appleTeamId": "FWV22U8U39"
+                "appleTeamId": "FWV22U8U39",
+                "ascAppId": "6754509672"
             },
             "android": {
                 "track": "internal"
