@@ -1,0 +1,56 @@
+# Cursor AI Rules for Coral Clash
+
+## Git Commit Guidelines
+
+- ALWAYS use conventional commit format: `<type>(<scope>): <subject>`
+- Valid types: feat, fix, docs, refactor, test, ci, chore, build, perf, style
+- Examples:
+    - `feat(ci): add test gate before staging deployment`
+    - `fix(ios): add encryption exemption to Info.plist`
+    - `docs(deployment): add approval setup guide`
+    - `refactor(workflows): simplify platform selection logic`
+
+## Git Operations
+
+- NEVER run `git push` unless explicitly requested by the user
+- ALWAYS commit changes locally first before pushing
+- Ask for confirmation before force pushing or destructive git operations
+- Feel free to commit changes when we fix a bug or add a feature
+
+## Firebase Development
+
+- NEVER restart Firebase emulators unless explicitly requested
+- NEVER stop running Firebase emulators automatically
+- Keep emulators running in the background
+- Always add tests to functions (i.e. routes, triggers, scheduled funcs)
+
+## Development Workflow
+
+- Run tests before suggesting deployment
+- Use iOS as default platform (until Android setup is complete)
+- Prefer `yarn` over `npm` for package management
+
+## Code Quality
+
+- Follow existing code style and patterns in the repository
+- Use TypeScript types when working with shared module
+- Keep functions focused and single-purpose
+- Always add tests for BE related code (not react components atm)
+
+## Documentation
+
+- Update relevant documentation when making significant changes
+- Include examples in documentation
+- Keep docs concise and actionable
+
+## EAS & Expo
+
+- Use `eas build` for remote builds, not local builds
+- Version bumping is handled by CI/CD workflows
+
+## Communication
+
+- Be concise but thorough in explanations
+- Show what changed and why it matters
+- Provide examples when introducing new patterns
+- Add documentation markdown file to docs folder for complex features/architecture

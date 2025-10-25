@@ -3,5 +3,13 @@
     "useTabs": false,
     "singleQuote": true,
     "jsxSingleQuote": true,
-    "printWidth": 100
+    "printWidth": 100,
+    "overrides": [
+        {
+            "files": "*.md",
+            "options": {
+                "tabWidth": 2
+            }
+        }
+    ]
 }
