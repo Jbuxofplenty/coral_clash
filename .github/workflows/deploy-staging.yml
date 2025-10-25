@@ -27,9 +27,30 @@ on:
           - all
 
 jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'yarn'
+      
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+      
+      - name: Run tests
+        run: yarn test:ci
+  
   prepare-version:
     name: Prepare Version
     runs-on: ubuntu-latest
+    needs: [test]  # Wait for tests to pass
     # Only run for branch pushes, not tags
     if: github.ref_type == 'branch'
     outputs:
@@ -86,8 +107,9 @@ jobs:
   
   deploy-staging:
     name: Deploy to Staging
-    needs: [prepare-version]
-    if: always()  # Run even if prepare-version was skipped
+    needs: [test, prepare-version]
+    # Run if tests pass, even if prepare-version was skipped (for tags)
+    if: ${{ !cancelled() && needs.test.result == 'success' }}
     uses: ./.github/workflows/build-and-submit.yml
     with:
       profile: 'preview'
