@@ -9,17 +9,6 @@ on:
     branches:
       - develop
   
-  # Deploy on push to main branch
-  push:
-    branches:
-      - main
-    paths:
-      - 'functions/**'
-      - 'shared/**'
-      - 'firestore.rules'
-      - 'firestore.indexes.json'
-      - 'firebase.json'
-  
   # Allow manual triggering from GitHub UI
   workflow_dispatch:
     inputs:
