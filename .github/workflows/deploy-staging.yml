@@ -80,6 +80,7 @@ jobs:
             git commit -m "Bump version to $NEW_VERSION [skip ci]"
             git push origin HEAD:${{ github.ref_name }}
             echo "✅ Updated app.json to version: $NEW_VERSION"
+            echo "✅ Build job will use updated version from branch"
             echo "updated=true" >> $GITHUB_OUTPUT
           fi
   
