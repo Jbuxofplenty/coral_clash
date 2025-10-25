@@ -214,12 +214,12 @@ export const TUTORIAL_SCENARIOS = {
         id: 'hunterEffect',
         title: 'Hunter Effect',
         description:
-            'Hunter pieces (those without four coral icons) stop when they move onto Coral. They can then remove that Coral from the board. Here, the White Hunter Crab is on coral and can remove it.',
+            'Hunter pieces (those without four coral icons) stop when they move onto Coral. They can then remove that Coral from the board. Watch the White Hunter Crab move onto coral and remove it.',
         fixture: {
             schemaVersion: '1.1.0',
             exportedAt: new Date().toISOString(),
             state: {
-                fen: '8/8/8/8/3C4/8/8/8 w - - 0 1',
+                fen: '8/8/8/8/2C5/8/8/8 w - - 0 1',
                 board: [
                     [null, null, null, null, null, null, null, null],
                     [null, null, null, null, null, null, null, null],
@@ -228,8 +228,8 @@ export const TUTORIAL_SCENARIOS = {
                     [
                         null,
                         null,
+                        { square: 'c4', type: 'c', color: 'w', role: 'hunter' },
                         null,
-                        { square: 'd4', type: 'c', color: 'w', role: 'hunter' },
                         null,
                         null,
                         null,
@@ -254,13 +254,22 @@ export const TUTORIAL_SCENARIOS = {
                 isCoralVictory: null,
             },
         },
+        // Auto-play sequence: crab moves onto coral (stops), then removes it
+        autoPlaySequence: {
+            moves: [
+                { from: 'c4', to: 'd4' }, // Crab moves onto coral and stops
+            ],
+            delayBetweenMoves: 1500, // 1.5 seconds between moves
+            pauseAtEnd: 2500, // 2.5 seconds before reset
+            showPath: true, // Highlight the path before moving
+        },
     },
 
     gathererEffect: {
         id: 'gathererEffect',
         title: 'Gatherer Effect',
         description:
-            'Gatherer pieces (those with four coral icons) can place Coral on empty squares they move to. This White Gatherer Octopus can place coral after moving.',
+            'Gatherer pieces (those with four coral icons) can place Coral on empty squares they move to. Watch the White Gatherer Octopus move and place coral.',
         fixture: {
             schemaVersion: '1.1.0',
             exportedAt: new Date().toISOString(),
@@ -298,6 +307,15 @@ export const TUTORIAL_SCENARIOS = {
                 isDraw: false,
                 isCoralVictory: null,
             },
+        },
+        // Auto-play sequence: octopus moves and places coral
+        autoPlaySequence: {
+            moves: [
+                { from: 'e4', to: 'f5', flags: 'p' }, // Octopus moves diagonally and places coral
+            ],
+            delayBetweenMoves: 1500, // 1.5 seconds between moves
+            pauseAtEnd: 2500, // 2.5 seconds before reset
+            showPath: true, // Highlight the path before moving
         },
     },
 
@@ -577,6 +595,15 @@ export const TUTORIAL_SCENARIOS = {
                 isDraw: false,
                 isCoralVictory: null,
             },
+        },
+        // Auto-play sequence: dolphin captures crab
+        autoPlaySequence: {
+            moves: [
+                { from: 'd4', to: 'g7' }, // Dolphin captures crab
+            ],
+            delayBetweenMoves: 3000, // 3 seconds to see the path and move
+            pauseAtEnd: 5000, // 5 seconds before reset
+            showPath: true, // Highlight the path before moving
         },
     },
 };

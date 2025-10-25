@@ -31,10 +31,14 @@ export default function ScenarioBoard({ route, navigation }) {
     const [visibleMoves, setVisibleMoves] = useState([]);
     const [selectedSquare, setSelectedSquare] = useState(null);
     const [selectedPieceColor, setSelectedPieceColor] = useState(null);
+    const [isAutoPlaying, setIsAutoPlaying] = useState(false);
+    const [autoPlayEnabled, setAutoPlayEnabled] = useState(true);
+    const [autoPlayPathMoves, setAutoPlayPathMoves] = useState([]);
 
     // Calculate board size
     const boardSize = Math.min(width * 0.95, SCREEN_HEIGHT * 0.5);
 
+    // Load initial fixture
     useEffect(() => {
         if (scenario && scenario.fixture) {
             try {
@@ -47,7 +51,192 @@ export default function ScenarioBoard({ route, navigation }) {
         }
     }, [scenario]);
 
+    // Clear selection when auto-play starts
+    useEffect(() => {
+        if (isAutoPlaying) {
+            setSelectedSquare(null);
+            setVisibleMoves([]);
+            setShowingMoves(false);
+            setSelectedPieceColor(null);
+        }
+    }, [isAutoPlaying]);
+
+    // Auto-play sequence effect
+    useEffect(() => {
+        if (!scenario?.autoPlaySequence || !autoPlayEnabled) {
+            return;
+        }
+
+        let timeoutIds = [];
+        let isActive = true;
+
+        const playSequence = async () => {
+            if (!isActive) return;
+
+            // Clear any manual selections and path highlighting before resetting
+            setSelectedSquare(null);
+            setVisibleMoves([]);
+            setShowingMoves(false);
+            setSelectedPieceColor(null);
+            setAutoPlayPathMoves([]);
+
+            // Reset to initial state at the start of each sequence
+            try {
+                applyFixture(coralClash, scenario.fixture, { skipValidation: true });
+                setUpdateCounter((prev) => prev + 1);
+            } catch (error) {
+                console.error('Error resetting scenario at start:', error);
+                return;
+            }
+
+            setIsAutoPlaying(true);
+            const {
+                moves,
+                delayBetweenMoves = 1000,
+                pauseAtEnd = 2000,
+            } = scenario.autoPlaySequence;
+
+            // Longer delay to show the reset state before any moves
+            await new Promise((resolve) => {
+                const timeoutId = setTimeout(resolve, 1500);
+                timeoutIds.push(timeoutId);
+            });
+
+            // Play each move in the sequence
+            for (let i = 0; i < moves.length; i++) {
+                if (!isActive) break;
+
+                const move = moves[i];
+
+                // Show the path for this move after a brief delay
+                if (scenario.autoPlaySequence.showPath !== false) {
+                    // Wait a bit before showing the path
+                    await new Promise((resolve) => {
+                        const timeoutId = setTimeout(resolve, 500);
+                        timeoutIds.push(timeoutId);
+                    });
+
+                    if (isActive) {
+                        try {
+                            let pathMoves;
+
+                            // Check if we should show all possible moves or just the trajectory
+                            if (scenario.autoPlaySequence.showAllMoves) {
+                                // Show all possible moves for this piece
+                                pathMoves = coralClash.moves({
+                                    square: move.from,
+                                    verbose: true,
+                                });
+                            } else {
+                                // Calculate the specific path from source to destination
+                                const pathSquares = calculatePath(move.from, move.to);
+
+                                // Create move objects for each square in the path
+                                pathMoves = pathSquares.map((square) => ({
+                                    to: square,
+                                    from: move.from,
+                                    san: square,
+                                }));
+                            }
+
+                            setAutoPlayPathMoves(pathMoves);
+                        } catch (error) {
+                            console.error('Error getting path moves:', error);
+                        }
+                    }
+                }
+
+                // Wait before executing the move
+                await new Promise((resolve) => {
+                    const timeoutId = setTimeout(() => {
+                        if (isActive) {
+                            try {
+                                coralClash.move(move);
+                                setUpdateCounter((prev) => prev + 1);
+                                // Clear the path after the move
+                                setAutoPlayPathMoves([]);
+                            } catch (error) {
+                                console.error('Error playing move:', error);
+                            }
+                        }
+                        resolve();
+                    }, delayBetweenMoves);
+                    timeoutIds.push(timeoutId);
+                });
+            }
+
+            // Pause at the end
+            await new Promise((resolve) => {
+                const timeoutId = setTimeout(resolve, pauseAtEnd);
+                timeoutIds.push(timeoutId);
+            });
+
+            // Reset to initial state
+            if (isActive) {
+                try {
+                    applyFixture(coralClash, scenario.fixture, { skipValidation: true });
+                    setUpdateCounter((prev) => prev + 1);
+                    setIsAutoPlaying(false);
+                } catch (error) {
+                    console.error('Error resetting scenario:', error);
+                }
+
+                // Schedule next loop
+                const nextLoopTimeout = setTimeout(() => {
+                    if (isActive) {
+                        playSequence();
+                    }
+                }, delayBetweenMoves);
+                timeoutIds.push(nextLoopTimeout);
+            }
+        };
+
+        // Start the sequence immediately
+        playSequence();
+
+        // Cleanup function
+        return () => {
+            isActive = false;
+            timeoutIds.forEach((id) => clearTimeout(id));
+            setIsAutoPlaying(false);
+            setAutoPlayPathMoves([]);
+        };
+    }, [scenario, autoPlayEnabled]);
+
+    // Calculate the path squares between two squares
+    const calculatePath = (from, to) => {
+        const files = 'abcdefgh';
+        const fromFile = files.indexOf(from[0]);
+        const fromRank = parseInt(from[1]);
+        const toFile = files.indexOf(to[0]);
+        const toRank = parseInt(to[1]);
+
+        const path = [];
+        const fileStep = Math.sign(toFile - fromFile);
+        const rankStep = Math.sign(toRank - fromRank);
+
+        let currentFile = fromFile;
+        let currentRank = fromRank;
+
+        // Include the starting square and all intermediate squares
+        while (currentFile !== toFile || currentRank !== toRank) {
+            path.push(files[currentFile] + currentRank);
+            if (currentFile !== toFile) currentFile += fileStep;
+            if (currentRank !== toRank) currentRank += rankStep;
+        }
+        // Add the destination square
+        path.push(to);
+
+        return path;
+    };
+
     const handleSelectPiece = (square) => {
+        // Disable manual selection only when auto-play is enabled and running
+        // Allow selection when user has paused auto-play
+        if (scenario?.autoPlaySequence && autoPlayEnabled) {
+            return;
+        }
+
         if (selectedSquare === square) {
             // Deselect
             setSelectedSquare(null);
@@ -117,6 +306,29 @@ export default function ScenarioBoard({ route, navigation }) {
                 {/* Title */}
                 <View style={[styles.titleCard, { backgroundColor: colors.CARD_BACKGROUND }]}>
                     <Text style={[styles.title, { color: colors.PRIMARY }]}>{scenario.title}</Text>
+                    {scenario.autoPlaySequence && (
+                        <TouchableOpacity
+                            style={[
+                                styles.autoPlayToggle,
+                                {
+                                    backgroundColor: autoPlayEnabled
+                                        ? colors.PRIMARY
+                                        : colors.MUTED,
+                                },
+                            ]}
+                            onPress={() => setAutoPlayEnabled(!autoPlayEnabled)}
+                        >
+                            <Icon
+                                name={autoPlayEnabled ? 'pause' : 'play'}
+                                family='font-awesome'
+                                size={16}
+                                color='white'
+                            />
+                            <Text style={styles.autoPlayText}>
+                                {autoPlayEnabled ? 'Pause Auto-Play' : 'Play Demo'}
+                            </Text>
+                        </TouchableOpacity>
+                    )}
                 </View>
 
                 {/* Board */}
@@ -137,7 +349,8 @@ export default function ScenarioBoard({ route, navigation }) {
                             userColor={null}
                             boardFlipped={false}
                         />
-                        {showingMoves && (
+                        {/* Show manual selection moves when: no auto-play OR auto-play is paused */}
+                        {showingMoves && (!scenario?.autoPlaySequence || !autoPlayEnabled) && (
                             <Moves
                                 visibleMoves={visibleMoves}
                                 onSelectMove={() => {}}
@@ -147,6 +360,19 @@ export default function ScenarioBoard({ route, navigation }) {
                                 isPlayerTurn={true}
                             />
                         )}
+                        {/* Show auto-play path moves only when auto-play is active */}
+                        {scenario?.autoPlaySequence &&
+                            autoPlayEnabled &&
+                            autoPlayPathMoves.length > 0 && (
+                                <Moves
+                                    visibleMoves={autoPlayPathMoves}
+                                    onSelectMove={() => {}}
+                                    size={boardSize}
+                                    isEnemyMoves={false}
+                                    boardFlipped={false}
+                                    isPlayerTurn={true}
+                                />
+                            )}
                     </View>
                 </View>
 
@@ -206,6 +432,22 @@ const styles = StyleSheet.create({
         fontSize: 24,
         fontWeight: 'bold',
         textAlign: 'center',
+        marginBottom: 8,
+    },
+    autoPlayToggle: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 8,
+        paddingHorizontal: 16,
+        borderRadius: 8,
+        marginTop: 12,
+        gap: 8,
+    },
+    autoPlayText: {
+        color: 'white',
+        fontSize: 14,
+        fontWeight: '600',
     },
     boardContainer: {
         marginBottom: 16,
