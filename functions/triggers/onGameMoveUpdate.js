@@ -2,8 +2,6 @@ const { onDocumentUpdated } = require('firebase-functions/v2/firestore');
 const admin = require('firebase-admin');
 const { serverTimestamp, increment } = require('../utils/helpers');
 
-const db = admin.firestore();
-
 /**
  * Cancel pending timeout task for a game
  */
@@ -14,6 +12,7 @@ async function cancelPendingTimeoutTask(gameId, taskName) {
     }
 
     try {
+        const db = admin.firestore();
         const { CloudTasksClient } = require('@google-cloud/tasks');
         const client = new CloudTasksClient();
 
@@ -34,6 +33,8 @@ async function cancelPendingTimeoutTask(gameId, taskName) {
  * Check if current player's time has expired and end game if so
  */
 async function checkAndHandleTimeExpiration(gameId, gameData) {
+    const db = admin.firestore();
+
     // Only check if game has time control and is active
     if (
         !gameData.timeControl?.totalSeconds ||
@@ -148,6 +149,7 @@ async function checkAndHandleTimeExpiration(gameId, gameData) {
  */
 exports.onGameMoveUpdate = onDocumentUpdated('games/{gameId}', async (event) => {
     try {
+        const db = admin.firestore();
         const change = event.data;
         if (!change) return;
 

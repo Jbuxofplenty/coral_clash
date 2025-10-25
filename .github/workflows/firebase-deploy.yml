@@ -1,0 +1,111 @@
+name: Deploy to Firebase
+
+on:
+  # Deploy after staging deployment succeeds
+  workflow_run:
+    workflows: ["Deploy to Staging (TestFlight/Internal Testing)"]
+    types:
+      - completed
+    branches:
+      - develop
+  
+  # Deploy on push to main branch
+  push:
+    branches:
+      - main
+    paths:
+      - 'functions/**'
+      - 'shared/**'
+      - 'firestore.rules'
+      - 'firestore.indexes.json'
+      - 'firebase.json'
+  
+  # Allow manual triggering from GitHub UI
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 'Firebase target (functions, firestore, hosting, all)'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - functions
+          - firestore
+          - hosting
+
+jobs:
+  deploy:
+    name: Deploy to Firebase
+    runs-on: ubuntu-latest
+    # Only run if staging deployment was successful, or if manually triggered/pushed to main
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' || github.event_name == 'push' }}
+    
+    steps:
+      - name: Check trigger source
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_run" ]; then
+            echo "🚀 Triggered by successful staging deployment"
+            echo "📦 Staging workflow: ${{ github.event.workflow_run.name }}"
+          elif [ "${{ github.event_name }}" = "push" ]; then
+            echo "🚀 Triggered by push to main branch"
+          else
+            echo "🚀 Manually triggered deployment"
+          fi
+      
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'yarn'
+      
+      - name: Install root dependencies
+        run: yarn install --frozen-lockfile
+      
+      - name: Build shared module
+        run: |
+          cd shared
+          yarn install --frozen-lockfile
+          yarn build
+      
+      - name: Install functions dependencies
+        run: |
+          cd functions
+          yarn install --frozen-lockfile
+      
+      - name: Copy shared module to functions
+        run: |
+          cd functions
+          yarn copy:shared
+      
+      - name: Run functions tests
+        run: |
+          cd functions
+          yarn test:ci
+        continue-on-error: false
+      
+      - name: Install Firebase CLI
+        run: npm install -g firebase-tools
+      
+      - name: Deploy to Firebase
+        run: |
+          TARGET="${{ github.event.inputs.target || 'all' }}"
+          if [ "$TARGET" = "all" ]; then
+            firebase deploy --project coral-clash --non-interactive
+          else
+            firebase deploy --only $TARGET --project coral-clash --non-interactive
+          fi
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+      
+      - name: Deploy Summary
+        run: |
+          echo "✅ Firebase deployment completed successfully!"
+          echo "🔗 Project: coral-clash"
+          echo "📦 Deployed: ${{ github.event.inputs.target || 'all' }}"
+          echo "🌿 Branch: ${{ github.ref_name }}"
+          echo "📝 Commit: ${{ github.sha }}"
+

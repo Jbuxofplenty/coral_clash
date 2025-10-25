@@ -1,9 +1,7 @@
 const { onDocumentCreated } = require('firebase-functions/v2/firestore');
 const admin = require('firebase-admin');
 const { initializeGameState, serverTimestamp, formatDisplayName } = require('../utils/helpers');
-const { GAME_VERSION } = require('../../shared/dist/game');
-
-const db = admin.firestore();
+const { GAME_VERSION } = require('../shared/dist/game');
 
 /**
  * Helper function to try matching players
@@ -11,6 +9,7 @@ const db = admin.firestore();
  */
 async function tryMatchPlayers(newUserId) {
     try {
+        const db = admin.firestore();
         // Get the new user's time control preference
         const newUserDoc = await db.collection('matchmakingQueue').doc(newUserId).get();
         if (!newUserDoc.exists) {
@@ -81,6 +80,7 @@ async function tryMatchPlayers(newUserId) {
  */
 async function createMatchedGame(player1Id, player2Id) {
     try {
+        const db = admin.firestore();
         // Randomly assign white/black to players
         const randomizeColors = Math.random() < 0.5;
         const whitePlayerId = randomizeColors ? player1Id : player2Id;

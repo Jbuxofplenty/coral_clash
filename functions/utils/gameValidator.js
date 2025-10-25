@@ -1,9 +1,5 @@
 // Import from shared library (source of truth)
-const {
-    CoralClash,
-    createGameSnapshot,
-    restoreGameFromSnapshot,
-} = require('../../shared/dist/game');
+const { CoralClash, createGameSnapshot, restoreGameFromSnapshot } = require('../shared/dist/game');
 
 /**
  * Validate a move on the server side to prevent cheating

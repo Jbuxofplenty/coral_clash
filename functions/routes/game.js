@@ -12,7 +12,7 @@ const {
     sendGameAcceptedNotification,
     sendOpponentMoveNotification,
 } = require('../utils/notifications');
-const { GAME_VERSION } = require('../../shared/dist/game');
+const { GAME_VERSION } = require('../shared/dist/game');
 
 const db = admin.firestore();
 
@@ -689,7 +689,7 @@ async function makeComputerMoveHelper(gameId, gameData = null) {
 
     // For now, we'll use simple random move selection
     // In the future, this could be enhanced with difficulty levels
-    const { CoralClash, restoreGameFromSnapshot } = require('../../shared/dist/game');
+    const { CoralClash, restoreGameFromSnapshot } = require('../shared/dist/game');
     const game = new CoralClash();
 
     // Restore full game state including coral
@@ -1271,8 +1271,8 @@ exports.requestGameReset = onCall(async (request) => {
 
         if (isComputerGame) {
             // Computer game: Auto-approve and reset immediately
-            const { CoralClash } = require('../../shared/dist/game');
-            const { createGameSnapshot } = require('../../shared/dist/game');
+            const { CoralClash } = require('../shared/dist/game');
+            const { createGameSnapshot } = require('../shared/dist/game');
 
             const newGame = new CoralClash();
             const initialGameState = createGameSnapshot(newGame);
@@ -1371,8 +1371,8 @@ exports.respondToResetRequest = onCall(async (request) => {
 
         if (approve) {
             // Approved: Reset the game
-            const { CoralClash } = require('../../shared/dist/game');
-            const { createGameSnapshot } = require('../../shared/dist/game');
+            const { CoralClash } = require('../shared/dist/game');
+            const { createGameSnapshot } = require('../shared/dist/game');
 
             const newGame = new CoralClash();
             const initialGameState = createGameSnapshot(newGame);
@@ -1716,7 +1716,7 @@ exports.requestUndo = onCall(async (request) => {
                 CoralClash,
                 restoreGameFromSnapshot,
                 createGameSnapshot,
-            } = require('../../shared/dist/game');
+            } = require('../shared/dist/game');
             const coralClash = new CoralClash();
             restoreGameFromSnapshot(coralClash, gameData.gameState);
 
@@ -1829,7 +1829,7 @@ exports.respondToUndoRequest = onCall(async (request) => {
                 restoreGameFromSnapshot,
                 createGameSnapshot,
                 calculateUndoMoveCount,
-            } = require('../../shared/dist/game');
+            } = require('../shared/dist/game');
             const coralClash = new CoralClash();
             restoreGameFromSnapshot(coralClash, gameData.gameState);
 

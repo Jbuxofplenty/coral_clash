@@ -2,15 +2,16 @@
     "name": "functions",
     "description": "Cloud Functions for Coral Clash",
     "scripts": {
-        "serve": "npm run build:shared && firebase emulators:start --only functions",
+        "serve": "npm run build:shared && npm run copy:shared && firebase emulators:start --only functions",
         "shell": "firebase functions:shell",
         "start": "npm run shell",
-        "deploy": "npm run build:shared && firebase deploy --only functions",
+        "deploy": "npm run build:shared && npm run copy:shared && firebase deploy --only functions",
         "logs": "firebase functions:log",
         "build:shared": "cd ../shared && npm run build",
+        "copy:shared": "rm -rf shared && mkdir -p shared && cp -r ../shared/dist shared/",
         "test": "jest --coverage",
         "test:ci": "jest --coverage --watchAll=false --ci",
-        "pretest": "npm run build:shared"
+        "pretest": "npm run build:shared && npm run copy:shared"
     },
     "engines": {
         "node": "22"

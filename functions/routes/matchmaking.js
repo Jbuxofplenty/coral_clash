@@ -1,7 +1,7 @@
 const { onCall, HttpsError } = require('firebase-functions/v2/https');
 const admin = require('firebase-admin');
 const { initializeGameState, serverTimestamp, formatDisplayName } = require('../utils/helpers');
-const { GAME_VERSION } = require('../../shared/dist/game');
+const { GAME_VERSION } = require('../shared/dist/game');
 
 const db = admin.firestore();
 
