@@ -79,8 +79,9 @@ export default function GameHistoryCard({ navigation, gameHistory = [], loading 
         }
 
         if (status === 'completed') {
-            const didWin = game.winner === user.uid;
-            const isDraw = !game.winner;
+            let didWin = false;
+            const winner = game.winner || game.result?.winner;
+            const isDraw = !winner;
 
             if (isDraw) {
                 return {
@@ -88,6 +89,21 @@ export default function GameHistoryCard({ navigation, gameHistory = [], loading 
                     icon: 'minus-circle',
                     color: colors.WARNING,
                 };
+            }
+
+            // Determine win/loss based on game type
+            if (
+                game.gameType === 'computer' ||
+                game.isComputer ||
+                game.opponentType === 'computer'
+            ) {
+                // For computer games, user is always white ('w')
+                // Winner is stored as 'w' or 'b' (the color that won)
+                didWin = winner === 'w';
+            } else {
+                // For PvP games - check both winner field for compatibility
+                const userColor = game.creatorId === user.uid ? 'w' : 'b';
+                didWin = winner === userColor || winner === user.uid;
             }
 
             if (didWin) {
