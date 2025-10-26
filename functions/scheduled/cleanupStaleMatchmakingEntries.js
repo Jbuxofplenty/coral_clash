@@ -5,9 +5,9 @@ const db = admin.firestore();
 
 /**
  * Scheduled function: Clean up stale matchmaking entries
- * Remove entries older than 2 minutes (more aggressive cleanup for disconnected clients)
+ * Remove entries older than 5 minutes
  */
-exports.cleanupStaleMatchmakingEntries = onSchedule('every 5 minutes', async (event) => {
+exports.cleanupStaleMatchmakingEntries = onSchedule('every 10 minutes', async (event) => {
     try {
         const twoMinutesAgo = admin.firestore.Timestamp.fromDate(
             new Date(Date.now() - 2 * 60 * 1000),

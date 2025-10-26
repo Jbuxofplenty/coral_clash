@@ -29,19 +29,16 @@ Automatically removes users from the queue when the app goes to background or be
 ```javascript
 // Monitor app state changes - leave queue when app goes to background
 useEffect(() => {
-    const handleAppStateChange = (nextAppState) => {
-        if (
-            (nextAppState === 'background' || nextAppState === 'inactive') &&
-            searchingRef.current
-        ) {
-            leaveMatchmaking().catch((error) => {
-                console.error('[useMatchmaking] Error leaving queue on app background:', error);
-            });
-        }
-    };
+  const handleAppStateChange = (nextAppState) => {
+    if ((nextAppState === 'background' || nextAppState === 'inactive') && searchingRef.current) {
+      leaveMatchmaking().catch((error) => {
+        console.error('[useMatchmaking] Error leaving queue on app background:', error);
+      });
+    }
+  };
 
-    const subscription = AppState.addEventListener('change', handleAppStateChange);
-    return () => subscription?.remove();
+  const subscription = AppState.addEventListener('change', handleAppStateChange);
+  return () => subscription?.remove();
 }, [leaveMatchmaking]);
 ```
 
@@ -64,13 +61,13 @@ Removes users from queue when they navigate away from the Home screen.
 
 ```javascript
 useEffect(() => {
-    return () => {
-        if (searchingRef.current) {
-            stopSearching().catch((error) => {
-                console.error('[Home] Error leaving matchmaking on unmount:', error);
-            });
-        }
-    };
+  return () => {
+    if (searchingRef.current) {
+      stopSearching().catch((error) => {
+        console.error('[Home] Error leaving matchmaking on unmount:', error);
+      });
+    }
+  };
 }, []);
 ```
 
@@ -98,17 +95,17 @@ A heartbeat is sent every 30 seconds while searching to prove the client is stil
 ```javascript
 // Send periodic heartbeat while searching (every 30 seconds)
 useEffect(() => {
-    if (!searching || !user || !user.uid) return;
+  if (!searching || !user || !user.uid) return;
 
-    updateMatchmakingHeartbeat(); // Initial heartbeat
+  updateMatchmakingHeartbeat(); // Initial heartbeat
 
-    const heartbeatInterval = setInterval(() => {
-        if (searchingRef.current) {
-            updateMatchmakingHeartbeat();
-        }
-    }, 30000); // 30 seconds
+  const heartbeatInterval = setInterval(() => {
+    if (searchingRef.current) {
+      updateMatchmakingHeartbeat();
+    }
+  }, 30000); // 30 seconds
 
-    return () => clearInterval(heartbeatInterval);
+  return () => clearInterval(heartbeatInterval);
 }, [searching, user, updateMatchmakingHeartbeat]);
 ```
 
@@ -116,11 +113,11 @@ useEffect(() => {
 
 ```javascript
 exports.updateMatchmakingHeartbeat = functions.https.onCall(async (data, context) => {
-    const userId = context.auth.uid;
-    await db.collection('matchmakingQueue').doc(userId).update({
-        lastHeartbeat: serverTimestamp(),
-    });
-    return { success: true };
+  const userId = context.auth.uid;
+  await db.collection('matchmakingQueue').doc(userId).update({
+    lastHeartbeat: serverTimestamp(),
+  });
+  return { success: true };
 });
 ```
 
@@ -149,29 +146,27 @@ Each matchmaking queue entry now includes:
 
 **Location:** `functions/routes/matchmaking.js`
 
-A scheduled Cloud Function runs every 2 minutes to remove entries with stale heartbeats.
+A scheduled Cloud Function runs every 5 minutes to remove entries with stale heartbeats.
 
 ```javascript
 exports.cleanupStaleMatchmakingEntries = functions.pubsub
-    .schedule('every 2 minutes')
-    .onRun(async (context) => {
-        const twoMinutesAgo = admin.firestore.Timestamp.fromDate(
-            new Date(Date.now() - 2 * 60 * 1000),
-        );
+  .schedule('every 5 minutes')
+  .onRun(async (context) => {
+    const twoMinutesAgo = admin.firestore.Timestamp.fromDate(new Date(Date.now() - 2 * 60 * 1000));
 
-        const staleEntries = await db
-            .collection('matchmakingQueue')
-            .where('lastHeartbeat', '<', twoMinutesAgo)
-            .get();
+    const staleEntries = await db
+      .collection('matchmakingQueue')
+      .where('lastHeartbeat', '<', twoMinutesAgo)
+      .get();
 
-        if (!staleEntries.empty) {
-            const batch = db.batch();
-            staleEntries.docs.forEach((doc) => batch.delete(doc.ref));
-            await batch.commit();
-        }
+    if (!staleEntries.empty) {
+      const batch = db.batch();
+      staleEntries.docs.forEach((doc) => batch.delete(doc.ref));
+      await batch.commit();
+    }
 
-        return null;
-    });
+    return null;
+  });
 ```
 
 **When it works:**
@@ -180,10 +175,10 @@ exports.cleanupStaleMatchmakingEntries = functions.pubsub
 - Handles force-closed apps, crashed apps, network failures
 - Runs independently of client state
 
-**Schedule:** Every 2 minutes
-**Cleanup threshold:** Entries with lastHeartbeat older than 2 minutes
+**Schedule:** Every 5 minutes
+**Cleanup threshold:** Entries with lastHeartbeat older than 5 minutes
 
-**Worst-case scenario:** A dead client will remain in queue for at most 2 minutes before being cleaned up.
+**Worst-case scenario:** A dead client will remain in queue for at most 5 minutes before being cleaned up.
 
 ## Timeline Example
 
@@ -207,15 +202,15 @@ Here's what happens when a user force-closes the app while searching:
         - Checks for entries with lastHeartbeat < 00:00
         - User's entry still has lastHeartbeat of 01:00 (not old enough)
 
-03:15 - User entry reaches 2 minutes old (01:00 + 2 min = 03:00)
+03:15 - User entry reaches 5 minutes old (01:00 + 5 min = 03:00)
 
 04:00 - Cleanup function runs again
         - Finds user's entry with lastHeartbeat of 01:00
-        - 01:00 < 02:00 (current time - 2 minutes)
+        - 01:00 < 02:00 (current time - 5 minutes)
         - Entry is deleted
 ```
 
-**Total time in queue after force-close:** ~2 minutes 45 seconds maximum
+**Total time in queue after force-close:** ~5 minutes 45 seconds maximum
 
 ## Testing the Implementation
 
@@ -237,7 +232,7 @@ Here's what happens when a user force-closes the app while searching:
 2. Force-close app from app switcher
 3. Wait 2-3 minutes
 4. Check Firestore `matchmakingQueue` collection
-5. **Expected:** Entry removed by cleanup function within ~2 minutes
+5. **Expected:** Entry removed by cleanup function within ~5 minutes
 
 ### Test Case 4: Network Failure
 
@@ -261,18 +256,18 @@ To change the frequency:
 
 ### Cleanup Schedule
 
-**Current:** Every 2 minutes
+**Current:** Every 5 minutes
 **Location:** `functions/routes/matchmaking.js` line 344
 
 To change the schedule:
 
 ```javascript
-.schedule('every 2 minutes') // Change this value
+.schedule('every 5 minutes') // Change this value
 ```
 
 ### Cleanup Threshold
 
-**Current:** 2 minutes
+**Current:** 5 minutes
 **Location:** `functions/routes/matchmaking.js` line 347
 
 To change the threshold:
@@ -304,7 +299,7 @@ This ensures at least one missed heartbeat before cleanup occurs.
 
 ### Cleanup Function
 
-- Runs every 2 minutes regardless of queue size
+- Runs every 5 minutes regardless of queue size
 - 720 invocations per day
 - 21,600 invocations per month
 - Well within free tier limits
@@ -355,22 +350,22 @@ The frontend changes will be deployed with your next app build.
 ### Optional Enhancements
 
 1. **Presence Detection with Firebase Realtime Database**
-    - More robust than heartbeats
-    - Automatic disconnect detection
-    - Requires additional setup
+   - More robust than heartbeats
+   - Automatic disconnect detection
+   - Requires additional setup
 
 2. **Client-Side Heartbeat Monitoring**
-    - Track failed heartbeats on client
-    - Auto-leave queue after X failures
-    - Better UX for network issues
+   - Track failed heartbeats on client
+   - Auto-leave queue after X failures
+   - Better UX for network issues
 
 3. **Exponential Backoff for Heartbeats**
-    - Reduce frequency after initial period
-    - Save on API calls for long searches
+   - Reduce frequency after initial period
+   - Save on API calls for long searches
 
 4. **Queue Position Indicator**
-    - Show user their position in queue
-    - Estimated wait time
+   - Show user their position in queue
+   - Estimated wait time
 
 ## Troubleshooting
 
