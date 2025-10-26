@@ -9,10 +9,7 @@
             "distribution": "internal",
             "channel": "development",
             "ios": {
-                "simulator": true,
-                "config": {
-                    "usesNonExemptEncryption": false
-                }
+                "simulator": true
             },
             "android": {
                 "buildType": "apk"
@@ -21,33 +18,18 @@
         "development-device": {
             "developmentClient": true,
             "distribution": "internal",
-            "channel": "development",
-            "ios": {
-                "config": {
-                    "usesNonExemptEncryption": false
-                }
-            }
+            "channel": "development"
         },
         "preview": {
             "autoIncrement": true,
             "distribution": "store",
             "channel": "preview",
-            "node": "22.11.0",
-            "ios": {
-                "config": {
-                    "usesNonExemptEncryption": false
-                }
-            }
+            "node": "22.11.0"
         },
         "production": {
             "autoIncrement": true,
             "channel": "production",
-            "node": "22.11.0",
-            "ios": {
-                "config": {
-                    "usesNonExemptEncryption": false
-                }
-            }
+            "node": "22.11.0"
         }
     },
     "submit": {
