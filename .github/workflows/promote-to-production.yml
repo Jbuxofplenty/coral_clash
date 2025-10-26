@@ -105,8 +105,75 @@ jobs:
           echo "✅ Created and pushed production tag: $PROD_TAG"
           echo "📝 Commit SHA: $COMMIT_SHA"
       
+      - name: Update app.json with production version
+        if: steps.check_tag.outputs.exists == 'false'
+        run: |
+          PROD_TAG="${{ steps.validate.outputs.production_tag }}"
+          # Remove 'v' prefix for app.json version
+          PROD_VERSION="${PROD_TAG#v}"
+          
+          # Configure git
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          
+          # Checkout develop branch
+          git fetch origin develop
+          git checkout develop
+          
+          # Update version in app.json
+          sed -i.bak "s/\"version\": \".*\"/\"version\": \"$PROD_VERSION\"/" app.json
+          rm app.json.bak
+          
+          # Commit and push
+          if git diff --quiet app.json; then
+            echo "⚠️  app.json already has version $PROD_VERSION"
+          else
+            git add app.json
+            git commit -m "chore(release): bump version to $PROD_VERSION [skip ci]"
+            git push origin develop
+            echo "✅ Updated app.json to version: $PROD_VERSION"
+          fi
+      
+      - name: Create next staging version
+        if: steps.check_tag.outputs.exists == 'false'
+        run: |
+          PROD_TAG="${{ steps.validate.outputs.production_tag }}"
+          
+          # Configure git
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          
+          # Extract version numbers and bump minor
+          VERSION_NUM="${PROD_TAG#v}"
+          MAJOR=$(echo $VERSION_NUM | cut -d. -f1)
+          MINOR=$(echo $VERSION_NUM | cut -d. -f2)
+          PATCH=$(echo $VERSION_NUM | cut -d. -f3)
+          
+          # Bump minor version, reset patch to 0
+          MINOR=$((MINOR + 1))
+          NEXT_VERSION="v${MAJOR}.${MINOR}.0"
+          NEXT_STAGING_TAG="${NEXT_VERSION}-beta.1"
+          
+          echo "📊 Production version: $PROD_TAG"
+          echo "🆕 Next staging version: $NEXT_STAGING_TAG"
+          
+          # Create next staging tag (pointing to latest develop)
+          git fetch origin develop
+          git checkout develop
+          
+          # Check if tag already exists
+          if git rev-parse "$NEXT_STAGING_TAG" >/dev/null 2>&1; then
+            echo "⚠️  Tag $NEXT_STAGING_TAG already exists - skipping"
+          else
+            git tag -a "$NEXT_STAGING_TAG" -m "Prepare next staging version after $PROD_TAG release"
+            git push origin "$NEXT_STAGING_TAG"
+            echo "✅ Created next staging tag: $NEXT_STAGING_TAG"
+          fi
+      
       - name: Summary
         run: |
+          PROD_TAG="${{ steps.validate.outputs.production_tag }}"
+          
           echo "### 🚀 Promotion Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "- **Staging Tag**: ${{ github.event.inputs.staging_tag }}" >> $GITHUB_STEP_SUMMARY
@@ -118,6 +185,18 @@ jobs:
             echo "⚠️  Production tag already exists - deployment will use existing build" >> $GITHUB_STEP_SUMMARY
           else
             echo "✅ Production tag created - deployment triggered automatically" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            
+            # Calculate next staging tag for summary
+            VERSION_NUM="${PROD_TAG#v}"
+            MAJOR=$(echo $VERSION_NUM | cut -d. -f1)
+            MINOR=$(echo $VERSION_NUM | cut -d. -f2)
+            PATCH=$(echo $VERSION_NUM | cut -d. -f3)
+            MINOR=$((MINOR + 1))
+            NEXT_STAGING_TAG="v${MAJOR}.${MINOR}.0-beta.1"
+            
+            echo "📦 **app.json** updated on develop branch" >> $GITHUB_STEP_SUMMARY
+            echo "🏷️  **Next staging tag created**: $NEXT_STAGING_TAG" >> $GITHUB_STEP_SUMMARY
           fi
           
           echo "" >> $GITHUB_STEP_SUMMARY

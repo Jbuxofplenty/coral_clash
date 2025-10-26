@@ -47,68 +47,9 @@ jobs:
       - name: Run tests
         run: yarn test:ci
   
-  prepare-version:
-    name: Prepare Version
-    runs-on: ubuntu-latest
-    needs: [test]  # Wait for tests to pass
-    # Only run for branch pushes, not tags
-    if: github.ref_type == 'branch'
-    outputs:
-      version_updated: ${{ steps.update.outputs.updated }}
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
-      
-      - name: Calculate and update version
-        id: update
-        run: |
-          # Get the latest production tag (vX.Y.Z format, no beta/rc)
-          LATEST_TAG=$(git tag -l 'v*' | grep -v -E '(beta|rc)' | sort -V | tail -n1)
-          
-          if [ -z "$LATEST_TAG" ]; then
-            NEW_VERSION="1.0.0"
-          else
-            # Extract version numbers and bump minor
-            VERSION_NUM="${LATEST_TAG#v}"
-            MAJOR=$(echo $VERSION_NUM | cut -d. -f1)
-            MINOR=$(echo $VERSION_NUM | cut -d. -f2)
-            PATCH=$(echo $VERSION_NUM | cut -d. -f3)
-            MINOR=$((MINOR + 1))
-            NEW_VERSION="${MAJOR}.${MINOR}.0"
-          fi
-          
-          echo "📊 Latest tag: ${LATEST_TAG:-none}"
-          echo "🆕 New version: $NEW_VERSION"
-          
-          # Update version in app.json
-          sed -i.bak "s/\"version\": \".*\"/\"version\": \"$NEW_VERSION\"/" app.json
-          rm app.json.bak
-          
-          # Configure git
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
-          
-          # Commit and push if changed
-          if git diff --quiet app.json; then
-            echo "No version change needed"
-            echo "updated=false" >> $GITHUB_OUTPUT
-          else
-            git add app.json
-            git commit -m "Bump version to $NEW_VERSION [skip ci]"
-            git push origin HEAD:${{ github.ref_name }}
-            echo "✅ Updated app.json to version: $NEW_VERSION"
-            echo "✅ Build job will use updated version from branch"
-            echo "updated=true" >> $GITHUB_OUTPUT
-          fi
-  
   deploy-staging:
     name: Deploy to Staging
-    needs: [test, prepare-version]
-    # Run if tests pass, even if prepare-version was skipped (for tags)
+    needs: [test]
     if: ${{ !cancelled() && needs.test.result == 'success' }}
     uses: ./.github/workflows/build-and-submit.yml
     with:
@@ -155,33 +96,21 @@ jobs:
             echo "is_branch=false" >> $GITHUB_OUTPUT
             echo "🏷️  Using existing staging tag: $STAGING_TAG"
           else
-            # Branch-based deployment - auto-bump version
+            # Branch-based deployment - use latest beta/rc tag
             echo "is_branch=true" >> $GITHUB_OUTPUT
             
-            # Get the latest production tag (vX.Y.Z format, no beta/rc)
-            LATEST_TAG=$(git tag -l 'v*' | grep -v -E '(beta|rc)' | sort -V | tail -n1)
+            # Get the latest beta/rc tag
+            LATEST_STAGING_TAG=$(git tag -l 'v*' | grep -E '(beta|rc)' | sort -V | tail -n1)
             
-            if [ -z "$LATEST_TAG" ]; then
-              # No existing tags, start at v1.0.0
-              NEW_VERSION="v1.0.0"
+            if [ -z "$LATEST_STAGING_TAG" ]; then
+              # No existing staging tags, start at v1.0.0-beta.1
+              STAGING_TAG="v1.0.0-beta.1"
+              echo "🆕 No existing staging tags found - creating initial tag: $STAGING_TAG"
             else
-              # Extract version numbers (v1.9.0 -> 1 9 0)
-              VERSION_NUM="${LATEST_TAG#v}"
-              MAJOR=$(echo $VERSION_NUM | cut -d. -f1)
-              MINOR=$(echo $VERSION_NUM | cut -d. -f2)
-              PATCH=$(echo $VERSION_NUM | cut -d. -f3)
-              
-              # Bump minor version, reset patch to 0
-              MINOR=$((MINOR + 1))
-              NEW_VERSION="v${MAJOR}.${MINOR}.0"
+              # Use the latest staging tag
+              STAGING_TAG="$LATEST_STAGING_TAG"
+              echo "📊 Using latest staging tag: $STAGING_TAG"
             fi
-            
-            # Create staging tag with -beta.1 suffix
-            STAGING_TAG="${NEW_VERSION}-beta.1"
-            
-            echo "📊 Latest production tag: ${LATEST_TAG:-none}"
-            echo "🆕 New version: $NEW_VERSION"
-            echo "🏷️  Staging tag: $STAGING_TAG"
           fi
           
           echo "staging_tag=$STAGING_TAG" >> $GITHUB_OUTPUT
