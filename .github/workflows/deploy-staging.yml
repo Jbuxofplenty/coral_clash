@@ -196,11 +196,16 @@ jobs:
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
           
-          # Create and push staging tag
-          git tag -a "$STAGING_TAG" -m "Auto-generated staging tag from ${{ github.ref_name }}"
-          git push origin "$STAGING_TAG"
-          
-          echo "✅ Created staging tag: $STAGING_TAG"
+          # Check if tag already exists
+          if git rev-parse "$STAGING_TAG" >/dev/null 2>&1; then
+            echo "⚠️  Tag $STAGING_TAG already exists - skipping creation"
+            echo "ℹ️  Will use existing tag for deployment"
+          else
+            # Create and push staging tag
+            git tag -a "$STAGING_TAG" -m "Auto-generated staging tag from ${{ github.ref_name }}"
+            git push origin "$STAGING_TAG"
+            echo "✅ Created staging tag: $STAGING_TAG"
+          fi
       
       - name: Ready to promote
         run: |
