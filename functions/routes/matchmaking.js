@@ -2,6 +2,7 @@ const { onCall, HttpsError } = require('firebase-functions/v2/https');
 const admin = require('firebase-admin');
 const { initializeGameState, serverTimestamp, formatDisplayName } = require('../utils/helpers');
 const { GAME_VERSION } = require('../shared/dist/game');
+const { getAppCheckConfig } = require('../utils/appCheckConfig');
 
 const db = admin.firestore();
 
@@ -84,7 +85,7 @@ async function joinMatchmakingHandler(request) {
  * Join the matchmaking queue
  * POST /api/matchmaking/join
  */
-exports.joinMatchmaking = onCall(async (request) => {
+exports.joinMatchmaking = onCall(getAppCheckConfig(), async (request) => {
     try {
         return await joinMatchmakingHandler(request);
     } catch (error) {
@@ -122,7 +123,7 @@ async function leaveMatchmakingHandler(request) {
  * Leave the matchmaking queue
  * POST /api/matchmaking/leave
  */
-exports.leaveMatchmaking = onCall(async (request) => {
+exports.leaveMatchmaking = onCall(getAppCheckConfig(), async (request) => {
     try {
         return await leaveMatchmakingHandler(request);
     } catch (error) {
@@ -167,7 +168,7 @@ async function updateMatchmakingHeartbeatHandler(request) {
  * Update heartbeat for matchmaking queue entry
  * POST /api/matchmaking/heartbeat
  */
-exports.updateMatchmakingHeartbeat = onCall(async (request) => {
+exports.updateMatchmakingHeartbeat = onCall(getAppCheckConfig(), async (request) => {
     try {
         return await updateMatchmakingHeartbeatHandler(request);
     } catch (error) {
@@ -211,7 +212,7 @@ async function getMatchmakingStatusHandler(request) {
  * Get matchmaking status (queue count and user's status)
  * GET /api/matchmaking/status
  */
-exports.getMatchmakingStatus = onCall(async (request) => {
+exports.getMatchmakingStatus = onCall(getAppCheckConfig(), async (request) => {
     try {
         return await getMatchmakingStatusHandler(request);
     } catch (error) {
