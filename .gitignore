@@ -41,3 +41,4 @@ build-*.tar.gz
 *.apk
 *.aab
 *.ipa
+*.app
