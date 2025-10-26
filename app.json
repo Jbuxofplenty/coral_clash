@@ -27,7 +27,9 @@
         "plugins": ["expo-font"],
         "android": {
             "package": "com.jbuxofplenty.coralclash",
-            "runtimeVersion": "1.0.0",
+            "runtimeVersion": {
+                "policy": "appVersion"
+            },
             "intentFilters": [
                 {
                     "action": "VIEW",

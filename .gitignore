@@ -11,6 +11,10 @@ package-lock.json
 google-service-account*.json
 service-account*.json
 
+# Native folders (managed by Expo Prebuild)
+/android
+/ios
+
 # Environment variables
 .env
 .env.local
