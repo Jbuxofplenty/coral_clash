@@ -5,48 +5,23 @@
         "slug": "coral-clash",
         "platforms": ["ios", "android"],
         "version": "1.0.0",
-        "orientation": "portrait",
-        "icon": "./src/assets/icons/app_icon.png",
-        "splash": {
-            "image": "./src/assets/images/splash.png",
-            "resizeMode": "contain"
-        },
-        "backgroundColor": "#1e3c72",
         "updates": {
             "fallbackToCacheTimeout": 0,
             "url": "https://u.expo.dev/416801e2-5620-4693-8729-161decbd0b5b"
         },
         "assetBundlePatterns": ["**/*"],
         "ios": {
-            "supportsTablet": true,
             "bundleIdentifier": "com.jbuxofplenty.coralclash",
-            "runtimeVersion": "1.0.0",
-            "appleTeamId": "FWV22U8U39",
-            "associatedDomains": ["webcredentials:coral-clash.firebaseapp.com"]
+            "runtimeVersion": "1.0.0"
         },
-        "plugins": ["expo-font"],
         "android": {
             "package": "com.jbuxofplenty.coralclash",
-            "runtimeVersion": "1.0.0",
-            "intentFilters": [
-                {
-                    "action": "VIEW",
-                    "autoVerify": true,
-                    "data": [
-                        {
-                            "scheme": "https",
-                            "host": "coral-clash.firebaseapp.com"
-                        }
-                    ],
-                    "category": ["BROWSABLE", "DEFAULT"]
-                }
-            ]
+            "runtimeVersion": "1.0.0"
         },
         "extra": {
             "eas": {
                 "projectId": "416801e2-5620-4693-8729-161decbd0b5b"
             }
-        },
-        "scheme": "coralclash"
+        }
     }
 }
