@@ -51,7 +51,13 @@ jobs:
       - name: Validate staging tag
         id: validate
         run: |
-          STAGING_TAG="${{ github.event.inputs.staging_tag }}"
+          # Support both workflow_call (from staging) and workflow_dispatch (manual)
+          STAGING_TAG="${{ inputs.staging_tag || github.event.inputs.staging_tag }}"
+          
+          if [ -z "$STAGING_TAG" ]; then
+            echo "❌ Error: staging_tag input is required"
+            exit 1
+          fi
           
           # Check if tag exists
           if ! git rev-parse "$STAGING_TAG" >/dev/null 2>&1; then
@@ -70,6 +76,7 @@ jobs:
           
           echo "✅ Staging tag: $STAGING_TAG"
           echo "✅ Production tag: $PROD_TAG"
+          echo "staging_tag=$STAGING_TAG" >> $GITHUB_OUTPUT
           echo "production_tag=$PROD_TAG" >> $GITHUB_OUTPUT
       
       - name: Check if production tag already exists
@@ -88,7 +95,7 @@ jobs:
       - name: Create production tag
         if: steps.check_tag.outputs.exists == 'false'
         run: |
-          STAGING_TAG="${{ github.event.inputs.staging_tag }}"
+          STAGING_TAG="${{ steps.validate.outputs.staging_tag }}"
           PROD_TAG="${{ steps.validate.outputs.production_tag }}"
           
           # Configure git
@@ -176,9 +183,9 @@ jobs:
           
           echo "### 🚀 Promotion Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- **Staging Tag**: ${{ github.event.inputs.staging_tag }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Staging Tag**: ${{ steps.validate.outputs.staging_tag }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Production Tag**: ${{ steps.validate.outputs.production_tag }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Platform**: ${{ github.event.inputs.platform }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Platform**: ${{ inputs.platform || github.event.inputs.platform }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           
           if [ "${{ steps.check_tag.outputs.exists }}" = "true" ]; then
