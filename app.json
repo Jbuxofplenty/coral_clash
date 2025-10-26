@@ -22,7 +22,10 @@
             "bundleIdentifier": "com.jbuxofplenty.coralclash",
             "runtimeVersion": "1.0.0",
             "appleTeamId": "FWV22U8U39",
-            "associatedDomains": ["webcredentials:coral-clash.firebaseapp.com"]
+            "associatedDomains": ["webcredentials:coral-clash.firebaseapp.com"],
+            "infoPlist": {
+                "ITSAppUsesNonExemptEncryption": false
+            }
         },
         "plugins": ["expo-font"],
         "android": {
