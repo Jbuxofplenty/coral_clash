@@ -1,6 +1,7 @@
 const { onCall, HttpsError } = require('firebase-functions/v2/https');
 const admin = require('firebase-admin');
 const { serverTimestamp } = require('../utils/helpers');
+const { getAppCheckConfig } = require('../utils/appCheckConfig');
 
 const db = admin.firestore();
 
@@ -56,7 +57,7 @@ async function getPublicUserInfoHandler(request) {
  * This is safe to call for any user and returns only public information
  * GET /api/profile/public
  */
-exports.getPublicUserInfo = onCall(getPublicUserInfoHandler);
+exports.getPublicUserInfo = onCall(getAppCheckConfig(), getPublicUserInfoHandler);
 exports.getPublicUserInfoHandler = getPublicUserInfoHandler;
 
 /**
@@ -103,7 +104,7 @@ async function getUserProfileHandler(request) {
  * Get user profile
  * GET /api/profile/:userId
  */
-exports.getUserProfile = onCall(getUserProfileHandler);
+exports.getUserProfile = onCall(getAppCheckConfig(), getUserProfileHandler);
 exports.getUserProfileHandler = getUserProfileHandler;
 
 /**
@@ -139,5 +140,5 @@ async function updateUserProfileHandler(request) {
  * Update user profile
  * POST /api/profile/update
  */
-exports.updateUserProfile = onCall(updateUserProfileHandler);
+exports.updateUserProfile = onCall(getAppCheckConfig(), updateUserProfileHandler);
 exports.updateUserProfileHandler = updateUserProfileHandler;

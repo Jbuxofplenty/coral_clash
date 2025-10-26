@@ -1,6 +1,7 @@
 const { onCall, onRequest, HttpsError } = require('firebase-functions/v2/https');
 const admin = require('firebase-admin');
 const { getDefaultSettings } = require('../utils/helpers');
+const { getAppCheckConfig } = require('../utils/appCheckConfig');
 
 const db = admin.firestore();
 
@@ -40,7 +41,7 @@ async function getUserSettingsHandler(request) {
  * Get user settings
  * GET /api/settings
  */
-exports.getUserSettings = onCall(getUserSettingsHandler);
+exports.getUserSettings = onCall(getAppCheckConfig(), getUserSettingsHandler);
 exports.getUserSettingsHandler = getUserSettingsHandler;
 
 /**
@@ -85,7 +86,7 @@ async function updateUserSettingsHandler(request) {
  * Update user settings
  * POST /api/settings/update
  */
-exports.updateUserSettings = onCall(updateUserSettingsHandler);
+exports.updateUserSettings = onCall(getAppCheckConfig(), updateUserSettingsHandler);
 exports.updateUserSettingsHandler = updateUserSettingsHandler;
 
 /**
@@ -122,5 +123,5 @@ async function resetUserSettingsHandler(request) {
  * Reset user settings to defaults
  * POST /api/settings/reset
  */
-exports.resetUserSettings = onCall(resetUserSettingsHandler);
+exports.resetUserSettings = onCall(getAppCheckConfig(), resetUserSettingsHandler);
 exports.resetUserSettingsHandler = resetUserSettingsHandler;

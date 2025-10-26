@@ -5,6 +5,7 @@ const {
     sendFriendRequestNotification,
     sendFriendAcceptedNotification,
 } = require('../utils/notifications');
+const { getAppCheckConfig } = require('../utils/appCheckConfig');
 
 const db = admin.firestore();
 
@@ -13,7 +14,7 @@ const db = admin.firestore();
  * POST /api/friends/request
  * Accepts either friendId (UID) or email
  */
-exports.sendFriendRequest = onCall(async (request) => {
+exports.sendFriendRequest = onCall(getAppCheckConfig(), async (request) => {
     const { data, auth } = request;
     try {
         if (!auth) {
@@ -135,7 +136,7 @@ exports.sendFriendRequest = onCall(async (request) => {
  * Accept or decline friend request
  * POST /api/friends/respond
  */
-exports.respondToFriendRequest = onCall(async (request) => {
+exports.respondToFriendRequest = onCall(getAppCheckConfig(), async (request) => {
     const { data, auth } = request;
     try {
         if (!auth) {
@@ -232,7 +233,7 @@ exports.respondToFriendRequest = onCall(async (request) => {
  * Get user's friends list and pending requests
  * GET /api/friends
  */
-exports.getFriends = onCall(async (request) => {
+exports.getFriends = onCall(getAppCheckConfig(), async (request) => {
     const { data, auth } = request;
     try {
         if (!auth) {
@@ -326,7 +327,7 @@ exports.getFriends = onCall(async (request) => {
  * Remove friend
  * POST /api/friends/remove
  */
-exports.removeFriend = onCall(async (request) => {
+exports.removeFriend = onCall(getAppCheckConfig(), async (request) => {
     const { data, auth } = request;
     try {
         if (!auth) {
@@ -358,7 +359,7 @@ exports.removeFriend = onCall(async (request) => {
  * Search users by username or email (fuzzy match)
  * GET /api/friends/search
  */
-exports.searchUsers = onCall(async (request) => {
+exports.searchUsers = onCall(getAppCheckConfig(), async (request) => {
     const { data, auth } = request;
     try {
         if (!auth) {

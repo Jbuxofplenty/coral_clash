@@ -13,6 +13,7 @@ const {
     sendOpponentMoveNotification,
 } = require('../utils/notifications');
 const { GAME_VERSION } = require('../shared/dist/game');
+const { getAppCheckConfig } = require('../utils/appCheckConfig');
 
 const db = admin.firestore();
 
@@ -166,7 +167,7 @@ async function createGameHandler(request) {
  * Create a new PvP game
  * POST /api/game/create
  */
-exports.createGame = onCall(async (request) => {
+exports.createGame = onCall(getAppCheckConfig(), async (request) => {
     try {
         return await createGameHandler(request);
     } catch (error) {
@@ -180,7 +181,7 @@ exports.createGameHandler = createGameHandler;
  * Create a new game against the computer
  * POST /api/game/createComputer
  */
-exports.createComputerGame = onCall(async (request) => {
+exports.createComputerGame = onCall(getAppCheckConfig(), async (request) => {
     const { data, auth } = request;
     try {
         if (!auth) {
@@ -239,7 +240,7 @@ exports.createComputerGame = onCall(async (request) => {
  * - Sender (creatorId) can cancel (decline)
  * - Both can decline/cancel only if game status is 'pending'
  */
-exports.respondToGameInvite = onCall(async (request) => {
+exports.respondToGameInvite = onCall(getAppCheckConfig(), async (request) => {
     const { data, auth } = request;
     try {
         if (!auth) {
@@ -373,7 +374,7 @@ exports.respondToGameInvite = onCall(async (request) => {
  * POST /api/game/move
  * Server-side move validation prevents cheating
  */
-exports.makeMove = onCall(async (request) => {
+exports.makeMove = onCall(getAppCheckConfig(), async (request) => {
     const { data, auth } = request;
     try {
         if (!auth) {
@@ -619,7 +620,7 @@ exports.makeMove = onCall(async (request) => {
  * POST /api/game/makeComputerMove
  * @param {string} gameId - The game ID
  */
-exports.makeComputerMove = onCall(async (request) => {
+exports.makeComputerMove = onCall(getAppCheckConfig(), async (request) => {
     const { data, auth } = request;
     try {
         const { gameId, version } = data;
@@ -982,7 +983,7 @@ async function checkAndHandleTimeExpiration(gameId, gameData) {
  * Check game time status
  * Called when loading a game to check if time has expired
  */
-exports.checkGameTime = onCall(async (request) => {
+exports.checkGameTime = onCall(getAppCheckConfig(), async (request) => {
     const { data, auth } = request;
     try {
         if (!auth) {
@@ -1062,7 +1063,7 @@ exports.handleTimeExpiration = onRequest(async (req, res) => {
  * Resign from a game
  * POST /api/game/resign
  */
-exports.resignGame = onCall(async (request) => {
+exports.resignGame = onCall(getAppCheckConfig(), async (request) => {
     const { data, auth } = request;
     try {
         console.log('[resignGame] Starting resignation process');
@@ -1226,7 +1227,7 @@ exports.resignGame = onCall(async (request) => {
  * For computer games: Auto-approves and resets immediately
  * For PvP games: Sends request to opponent for approval
  */
-exports.requestGameReset = onCall(async (request) => {
+exports.requestGameReset = onCall(getAppCheckConfig(), async (request) => {
     const { data, auth } = request;
     try {
         if (!auth) {
@@ -1329,7 +1330,7 @@ exports.requestGameReset = onCall(async (request) => {
  * Respond to a game reset request (approve or reject)
  * Only for PvP games
  */
-exports.respondToResetRequest = onCall(async (request) => {
+exports.respondToResetRequest = onCall(getAppCheckConfig(), async (request) => {
     const { data, auth } = request;
     try {
         if (!auth) {
@@ -1449,7 +1450,7 @@ exports.respondToResetRequest = onCall(async (request) => {
  * Get user's game history (completed and cancelled games)
  * GET /api/games/history
  */
-exports.getGameHistory = onCall(async (request) => {
+exports.getGameHistory = onCall(getAppCheckConfig(), async (request) => {
     const { data, auth } = request;
     try {
         if (!auth) {
@@ -1562,7 +1563,7 @@ exports.getGameHistory = onCall(async (request) => {
  * Get user's active games
  * GET /api/games/active
  */
-exports.getActiveGames = onCall(async (request) => {
+exports.getActiveGames = onCall(getAppCheckConfig(), async (request) => {
     const { data, auth } = request;
     try {
         if (!auth) {
@@ -1672,7 +1673,7 @@ exports.getActiveGames = onCall(async (request) => {
  * Request to undo a move
  * POST /api/game/requestUndo
  */
-exports.requestUndo = onCall(async (request) => {
+exports.requestUndo = onCall(getAppCheckConfig(), async (request) => {
     const { data, auth } = request;
     try {
         if (!auth) {
@@ -1784,7 +1785,7 @@ exports.requestUndo = onCall(async (request) => {
  * Respond to an undo request
  * POST /api/game/respondToUndoRequest
  */
-exports.respondToUndoRequest = onCall(async (request) => {
+exports.respondToUndoRequest = onCall(getAppCheckConfig(), async (request) => {
     const { data, auth } = request;
     try {
         if (!auth) {

@@ -16,6 +16,11 @@ import {
     where,
 } from 'firebase/firestore';
 import { getFunctions, connectFunctionsEmulator } from 'firebase/functions';
+import {
+    initializeAppCheck,
+    ReCaptchaEnterpriseProvider,
+    CustomProvider,
+} from 'firebase/app-check';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
 
@@ -34,6 +39,34 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
+
+// Initialize App Check
+// For React Native, we use a custom provider with debug tokens in development
+// In production, this will use device attestation (DeviceCheck for iOS, Play Integrity for Android)
+let appCheck;
+if (__DEV__) {
+    // Development: Use debug token
+    // Set this in your browser: https://console.firebase.google.com/project/coral-clash/appcheck
+    self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+    try {
+        appCheck = initializeAppCheck(app, {
+            provider: new CustomProvider({
+                getToken: () =>
+                    Promise.resolve({
+                        token: 'debug-token',
+                        expireTimeMillis: Date.now() + 60 * 60 * 1000,
+                    }),
+            }),
+            isTokenAutoRefreshEnabled: true,
+        });
+    } catch (error) {
+        console.warn('App Check initialization failed in development:', error);
+    }
+} else {
+    // Production: Will use device attestation when properly configured
+    // For now, we'll skip App Check enforcement in production until setup is complete
+    console.log('App Check: Skipping in production until attestation is configured');
+}
 
 // Initialize Auth with persistence for React Native
 // Handle hot reload to avoid "already-initialized" error
