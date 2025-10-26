@@ -10,6 +10,9 @@
             "channel": "development",
             "ios": {
                 "simulator": true
+            },
+            "android": {
+                "buildType": "apk"
             }
         },
         "development-device": {
