@@ -205,13 +205,13 @@ jobs:
           fi
           
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Platform**: ${{ steps.platform.outputs.platform }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Staging Platform**: ${{ steps.platform.outputs.platform }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "🧪 **Test the staging build**, then approve this step to promote to production." >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "Production tag will be: **$(echo ${{ steps.extract.outputs.staging_tag }} | sed -E 's/-beta\.[0-9]+$//' | sed -E 's/-rc\.[0-9]+$//')**" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "⚠️ _Production will deploy to the same platform(s) as staging: **${{ steps.platform.outputs.platform }}**_" >> $GITHUB_STEP_SUMMARY
+          echo "📱 _Production will deploy to **all platforms** (iOS + Android)_" >> $GITHUB_STEP_SUMMARY
   
   promote-to-production:
     name: Promote to Production
@@ -222,4 +222,3 @@ jobs:
       staging_tag: ${{ needs.promote-gate.outputs.staging_tag }}
       platform: ${{ needs.promote-gate.outputs.platform }}
     secrets: inherit
-
