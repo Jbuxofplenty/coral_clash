@@ -25,10 +25,7 @@ exports.sendFriendRequest = onCall(getAppCheckConfig(), async (request) => {
         const userId = auth.uid;
 
         if (!friendId && !email) {
-            throw new HttpsError(
-                'invalid-argument',
-                'Either friendId or email is required',
-            );
+            throw new HttpsError('invalid-argument', 'Either friendId or email is required');
         }
 
         let targetUserId = friendId;
@@ -43,10 +40,7 @@ exports.sendFriendRequest = onCall(getAppCheckConfig(), async (request) => {
         }
 
         if (userId === targetUserId) {
-            throw new HttpsError(
-                'invalid-argument',
-                'Cannot add yourself as friend',
-            );
+            throw new HttpsError('invalid-argument', 'Cannot add yourself as friend');
         }
 
         // Check if friend exists in Firestore
