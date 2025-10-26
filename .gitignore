@@ -38,3 +38,6 @@ __pycache__/
 
 # EAS Build artifacts
 build-*.tar.gz
+*.apk
+*.aab
+*.ipa
