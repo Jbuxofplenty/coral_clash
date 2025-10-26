@@ -1,8 +1,8 @@
 name: Update Dependencies Daily
 
 on:
-#   schedule:
-#     - cron: '0 0 * * *'  # Run daily at midnight UTC
+  schedule:
+    - cron: '0 0 * * *'  # Run daily at midnight UTC
   workflow_dispatch:
 
 jobs:
@@ -32,7 +32,7 @@ jobs:
         body: |
           ## Automated Dependency Updates
           
-          This PR updates dependencies to their latest versions using `npm-check-updates`.
+          This PR updates dependencies to Expo SDK-compatible versions using `expo install --fix`.
           
           Please review the changes and run tests before merging.
           
