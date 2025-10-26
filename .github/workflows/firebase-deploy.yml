@@ -1,11 +1,17 @@
 name: Deploy to Firebase
 
 on:
-  # Deploy after staging deployment succeeds
-  workflow_run:
-    workflows: ["Deploy to Staging (TestFlight/Internal Testing)"]
-    types:
-      - completed
+  # Called by other workflows
+  workflow_call:
+    inputs:
+      target:
+        description: 'Firebase target (functions, firestore, hosting, all)'
+        required: false
+        default: 'all'
+        type: string
+    secrets:
+      FIREBASE_TOKEN:
+        required: true
   
   # Allow manual triggering from GitHub UI
   workflow_dispatch:
@@ -25,17 +31,12 @@ jobs:
   deploy:
     name: Deploy to Firebase
     runs-on: ubuntu-latest
-    # Only run if staging deployment was successful, or if manually triggered/pushed to main
-    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' || github.event_name == 'push' }}
     
     steps:
       - name: Check trigger source
         run: |
-          if [ "${{ github.event_name }}" = "workflow_run" ]; then
-            echo "🚀 Triggered by successful staging deployment"
-            echo "📦 Staging workflow: ${{ github.event.workflow_run.name }}"
-          elif [ "${{ github.event_name }}" = "push" ]; then
-            echo "🚀 Triggered by push to main branch"
+          if [ "${{ github.event_name }}" = "workflow_call" ]; then
+            echo "🚀 Triggered by another workflow"
           else
             echo "🚀 Manually triggered deployment"
           fi
@@ -95,4 +96,3 @@ jobs:
           echo "📦 Deployed: ${{ github.event.inputs.target || 'all' }}"
           echo "🌿 Branch: ${{ github.ref_name }}"
           echo "📝 Commit: ${{ github.sha }}"
-

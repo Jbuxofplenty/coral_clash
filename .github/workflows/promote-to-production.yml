@@ -11,11 +11,6 @@ on:
         description: 'Staging tag to promote (e.g., v1.8.0-beta.1)'
         required: true
         type: string
-      platform:
-        description: 'Platform to deploy (ios, android, all)'
-        required: false
-        default: 'ios'
-        type: string
   
   # Manual trigger to promote a staging release to production
   workflow_dispatch:
@@ -24,15 +19,6 @@ on:
         description: 'Staging tag to promote (e.g., v1.8.0-beta.1)'
         required: true
         type: string
-      platform:
-        description: 'Platform to deploy (ios, android, all)'
-        required: true
-        default: 'ios'
-        type: choice
-        options:
-          - ios
-          - android
-          - all
 
 jobs:
   promote:
@@ -185,7 +171,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "- **Staging Tag**: ${{ steps.validate.outputs.staging_tag }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Production Tag**: ${{ steps.validate.outputs.production_tag }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Platform**: ${{ inputs.platform || github.event.inputs.platform }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Platform**: All (iOS + Android)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           
           if [ "${{ steps.check_tag.outputs.exists }}" = "true" ]; then

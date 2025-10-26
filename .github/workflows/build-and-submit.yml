@@ -79,4 +79,3 @@ jobs:
           echo "- **Status**: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "📊 Check build status: [EAS Dashboard](https://expo.dev/accounts/[your-account]/projects/coral-clash/builds)" >> $GITHUB_STEP_SUMMARY
-
