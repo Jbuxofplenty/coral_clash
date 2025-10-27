@@ -29,10 +29,13 @@ import {
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 // Ignore expo-notifications warnings in development (keychain access issues in Expo Go)
+// Also ignore Galio Input deprecation warnings (third-party library issue)
 LogBox.ignoreLogs([
     '[expo-notifications]',
     'Keychain access failed',
     'Could not enable automatically registering',
+    '[Input] iconColor is deprecated',
+    '[Input] iconSize is deprecated',
 ]);
 
 // Keep the splash screen visible while we fetch resources

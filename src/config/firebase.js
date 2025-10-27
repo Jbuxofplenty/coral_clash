@@ -40,13 +40,19 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
+// Set EXPO_PUBLIC_USE_FIREBASE_EMULATOR=true in .env to enable
+// Set EXPO_PUBLIC_EMULATOR_HOST to your computer's local IP (e.g., 192.168.x.x) for physical devices
+const USE_EMULATOR = process.env.EXPO_PUBLIC_USE_FIREBASE_EMULATOR === 'true';
+
 // Initialize App Check
 // For React Native, we use a custom provider with debug tokens in development
 // In production, this will use device attestation (DeviceCheck for iOS, Play Integrity for Android)
 let appCheck;
-if (__DEV__) {
-    // Development: Use debug token
-    // Set this in your browser: https://console.firebase.google.com/project/coral-clash/appcheck
+
+// Only enable App Check when using emulators (where it works without crypto issues)
+// When connecting to real Firebase, skip App Check due to React Native crypto limitations
+if (USE_EMULATOR && __DEV__) {
+    // Development with emulators: Use debug token
     self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
     try {
         appCheck = initializeAppCheck(app, {
@@ -60,12 +66,12 @@ if (__DEV__) {
             isTokenAutoRefreshEnabled: true,
         });
     } catch (error) {
-        console.warn('App Check initialization failed in development:', error);
+        console.warn('App Check initialization failed:', error);
     }
 } else {
-    // Production: Will use device attestation when properly configured
-    // For now, we'll skip App Check enforcement in production until setup is complete
-    console.log('App Check: Skipping in production until attestation is configured');
+    // Real Firebase or production: Skip App Check to avoid crypto errors in React Native
+    // Re-enable when proper device attestation is configured
+    console.log('App Check: Disabled (connecting to real Firebase)');
 }
 
 // Initialize Auth with persistence for React Native
@@ -94,10 +100,6 @@ const db = getFirestore(app);
 const functions = getFunctions(app);
 
 // Connect to emulators in development
-// Set EXPO_PUBLIC_USE_FIREBASE_EMULATOR=true in .env to enable
-// Set EXPO_PUBLIC_EMULATOR_HOST to your computer's local IP (e.g., 192.168.x.x) for physical devices
-const USE_EMULATOR = process.env.EXPO_PUBLIC_USE_FIREBASE_EMULATOR === 'true';
-
 if (USE_EMULATOR) {
     // Determine the emulator host dynamically:
     // - Android emulator always uses 10.0.2.2 (special alias for host machine)

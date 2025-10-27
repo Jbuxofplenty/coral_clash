@@ -363,6 +363,17 @@ export default function Home({ navigation }) {
                         gameId: result.gameId || null,
                         opponentType: 'computer',
                     });
+                } else {
+                    // Fallback to offline mode if online game creation fails
+                    console.log('Online computer game failed, starting offline mode');
+                    showAlert(
+                        'Offline Mode',
+                        'Unable to connect to server. Starting offline computer game.',
+                    );
+                    navigation.navigate('Game', {
+                        gameId: null, // null gameId = offline mode
+                        opponentType: 'computer',
+                    });
                 }
             } else if (pendingGameAction === 'matchmaking') {
                 const result = await startSearching(timeControl);
@@ -372,7 +383,21 @@ export default function Home({ navigation }) {
             }
         } catch (error) {
             console.error(`Failed to start ${pendingGameAction}:`, error);
-            showAlert('Error', `Failed to start ${pendingGameAction}. Please try again.`);
+
+            // For computer games, fall back to offline mode on any error
+            if (pendingGameAction === 'computer') {
+                console.log('Error starting online computer game, falling back to offline mode');
+                showAlert(
+                    'Offline Mode',
+                    'Unable to connect to server. Starting offline computer game.',
+                );
+                navigation.navigate('Game', {
+                    gameId: null, // null gameId = offline mode
+                    opponentType: 'computer',
+                });
+            } else {
+                showAlert('Error', `Failed to start ${pendingGameAction}. Please try again.`);
+            }
         } finally {
             setPendingGameAction(null);
         }
