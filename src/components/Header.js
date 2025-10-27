@@ -31,7 +31,7 @@ function Header({ back, title, transparent }) {
 
     const headerStyles = {
         backgroundColor: transparent ? 'rgba(0,0,0,0)' : colors.CARD_BACKGROUND,
-        paddingTop: 10,
+        paddingVertical: 10,
         shadowColor: colors.SHADOW,
         shadowOffset: { width: 0, height: 2 },
         shadowRadius: 6,
@@ -41,7 +41,8 @@ function Header({ back, title, transparent }) {
 
     const navbarStyles = {
         ...styles.navbar,
-        backgroundColor: colors.CARD_BACKGROUND,
+        backgroundColor: 'transparent',
+        borderBottomWidth: 0,
     };
 
     return (
