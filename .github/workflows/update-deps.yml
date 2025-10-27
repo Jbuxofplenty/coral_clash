@@ -18,10 +18,14 @@ jobs:
       with:
         node-version: 22
     
+    - name: Install dependencies
+      run: yarn install
+    
     - name: Update dependencies
-      run: |
-        npx expo install --fix
-        yarn install
+      run: npx expo install --fix
+    
+    - name: Install updated dependencies
+      run: yarn install
     
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v6
