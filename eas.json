@@ -22,7 +22,7 @@
         },
         "preview": {
             "autoIncrement": true,
-            "distribution": "internal",
+            "distribution": "store",
             "channel": "preview",
             "node": "22.11.0"
         },
