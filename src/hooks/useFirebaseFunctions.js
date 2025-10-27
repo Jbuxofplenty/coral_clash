@@ -114,9 +114,6 @@ export const useFirebaseFunctions = () => {
             return result.data;
         } catch (error) {
             console.error('Error creating computer game:', error);
-            console.error('Error code:', error.code);
-            console.error('Error message:', error.message);
-            console.error('Error details:', error.details);
             throw error;
         }
     };
@@ -227,9 +224,6 @@ export const useFirebaseFunctions = () => {
             return result.data;
         } catch (error) {
             console.error('Error getting active games:', error);
-            console.error('Error code:', error.code);
-            console.error('Error message:', error.message);
-            console.error('Error details:', error.details);
             throw error;
         }
     };
@@ -241,9 +235,6 @@ export const useFirebaseFunctions = () => {
             return result.data;
         } catch (error) {
             console.error('Error getting game history:', error);
-            console.error('Error code:', error.code);
-            console.error('Error message:', error.message);
-            console.error('Error details:', error.details);
             throw error;
         }
     };

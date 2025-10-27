@@ -31,7 +31,7 @@ const formatDisplayName = (displayName, discriminator) => {
  * - Reset requires opponent approval
  * - Real-time sync via Firestore
  */
-const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData }) => {
+const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notificationStatus }) => {
     const { user } = useAuth();
     const { isBoardFlipped } = useGamePreferences();
     const { colors } = useTheme();
@@ -664,6 +664,7 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData }) => {
             onUndo={undefined}
             userColor={userColor}
             effectiveBoardFlip={shouldFlipBoard}
+            notificationStatus={notificationStatus}
         />
     );
 };

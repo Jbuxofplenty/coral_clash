@@ -34,8 +34,8 @@ LogBox.ignoreLogs([
     '[expo-notifications]',
     'Keychain access failed',
     'Could not enable automatically registering',
-    '[Input] iconColor is deprecated',
-    '[Input] iconSize is deprecated',
+    'iconColor is deprecated',
+    'iconSize is deprecated',
 ]);
 
 // Keep the splash screen visible while we fetch resources

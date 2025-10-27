@@ -37,7 +37,13 @@ function HomeStack(props) {
                 component={GameScreen}
                 options={{
                     header: ({ navigation, scene }) => (
-                        <Header title='Game' navigation={navigation} scene={scene} back />
+                        <Header
+                            title='Game'
+                            navigation={navigation}
+                            scene={scene}
+                            back
+                            transparent
+                        />
                     ),
                 }}
             />

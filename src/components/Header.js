@@ -31,7 +31,7 @@ function Header({ back, title, transparent }) {
 
     const headerStyles = {
         backgroundColor: transparent ? 'rgba(0,0,0,0)' : colors.CARD_BACKGROUND,
-        paddingVertical: 10,
+        paddingTop: 10,
         shadowColor: colors.SHADOW,
         shadowOffset: { width: 0, height: 2 },
         shadowRadius: 6,

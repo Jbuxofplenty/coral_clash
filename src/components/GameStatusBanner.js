@@ -1,22 +1,34 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, useWindowDimensions } from 'react-native';
 import { useTheme } from '../contexts';
 import Icon from './Icon';
 
 /**
  * GameStatusBanner - Unified banner component for displaying game status messages
- * Now uses consistent styling with undo/reset banners
  * @param {Object} props
  * @param {string} props.message - The message to display
- * @param {string} props.type - Type of status: 'win', 'lose', 'draw', 'resign', 'check', 'info'
+ * @param {string} props.type - Type of status: 'win', 'lose', 'draw', 'resign', 'check', 'info', 'success', 'error'
  * @param {boolean} props.visible - Whether the banner should be visible (default: true)
+ * @param {number} props.timeout - Auto-dismiss after this many ms (0 = no auto-dismiss)
+ * @param {function} props.onDismiss - Callback when banner is dismissed
  */
-const GameStatusBanner = ({ message, type = 'info', visible = true }) => {
+const GameStatusBanner = ({ message, type = 'info', visible = true, timeout = 0, onDismiss }) => {
     const { colors } = useTheme();
     const { height } = useWindowDimensions();
 
     // Use compact mode on smaller screens (iPhone SE, etc.)
     const isCompact = height < 700;
+
+    // Auto-dismiss after timeout
+    useEffect(() => {
+        if (visible && timeout > 0 && onDismiss) {
+            const timer = setTimeout(() => {
+                onDismiss();
+            }, timeout);
+
+            return () => clearTimeout(timer);
+        }
+    }, [visible, timeout, onDismiss]);
 
     if (!visible || !message) {
         return null;
@@ -66,6 +78,18 @@ const GameStatusBanner = ({ message, type = 'info', visible = true }) => {
                     icon: 'exclamation-triangle',
                     iconColor: colors.WARNING,
                     iconBg: colors.WARNING + '15',
+                };
+            case 'success':
+                return {
+                    icon: 'check-circle',
+                    iconColor: colors.SUCCESS,
+                    iconBg: colors.SUCCESS + '15',
+                };
+            case 'error':
+                return {
+                    icon: 'times-circle',
+                    iconColor: colors.ERROR,
+                    iconBg: colors.ERROR + '15',
                 };
             default:
                 return {

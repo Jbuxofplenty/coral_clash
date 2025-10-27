@@ -66,6 +66,7 @@ const BaseCoralClashBoard = ({
     onUndo,
     userColor = null,
     effectiveBoardFlip = null,
+    notificationStatus = null,
 }) => {
     const { width, height } = useWindowDimensions();
     const { colors } = useTheme();
@@ -1127,6 +1128,17 @@ const BaseCoralClashBoard = ({
                     type={gameStatus?.type}
                     visible={!!gameStatus}
                 />
+
+                {/* Notification Status Banner (for undo/reset notifications) */}
+                {notificationStatus && (
+                    <GameStatusBanner
+                        message={notificationStatus.message}
+                        type={notificationStatus.type}
+                        visible={true}
+                        timeout={notificationStatus.timeout}
+                        onDismiss={notificationStatus.onDismiss}
+                    />
+                )}
             </View>
 
             {/* Control Bar */}

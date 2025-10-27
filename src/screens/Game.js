@@ -1,17 +1,18 @@
-import React, { useState } from 'react';
-import { Dimensions, StyleSheet, Platform } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { Dimensions, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useFocusEffect } from '@react-navigation/native';
 
-import { Block } from 'galio-framework';
 import ComputerCoralClashBoard from '../components/ComputerCoralClashBoard';
 import PvPCoralClashBoard from '../components/PvPCoralClashBoard';
-import { useTheme } from '../contexts';
+import { useTheme, useNotifications } from '../contexts';
 
 const { width, height } = Dimensions.get('screen');
 
 export default function Game({ route }) {
     const { colors } = useTheme();
+    const { gameStatusUpdate, setActiveGameId } = useNotifications();
+
     // Get game params from route
     const fixture = route?.params?.fixture;
     const gameId = route?.params?.gameId;
@@ -21,6 +22,37 @@ export default function Game({ route }) {
 
     // Use a key that changes when the screen comes into focus to force timer re-sync
     const [focusKey, setFocusKey] = useState(0);
+    const [statusMessage, setStatusMessage] = useState(null);
+    const [statusType, setStatusType] = useState('info');
+    const [showStatus, setShowStatus] = useState(false);
+
+    // Set active game ID for notification filtering
+    useEffect(() => {
+        if (gameId) {
+            setActiveGameId(gameId);
+        }
+        return () => setActiveGameId(null);
+    }, [gameId, setActiveGameId]);
+
+    // Handle game status updates
+    useEffect(() => {
+        if (!gameStatusUpdate || gameStatusUpdate.gameId !== gameId) return;
+
+        const messageConfig = {
+            reset_approved: { message: 'Game has been reset', type: 'success' },
+            reset_rejected: { message: 'Reset request declined', type: 'error' },
+            undo_approved: { message: 'Move undone', type: 'success' },
+            undo_rejected: { message: 'Undo request declined', type: 'error' },
+        };
+
+        const config = messageConfig[gameStatusUpdate.type];
+
+        if (config) {
+            setStatusMessage(config.message);
+            setStatusType(config.type);
+            setShowStatus(true);
+        }
+    }, [gameStatusUpdate?.timestamp, gameId]);
 
     useFocusEffect(
         React.useCallback(() => {
@@ -40,15 +72,23 @@ export default function Game({ route }) {
             start={{ x: 0, y: 0 }}
             end={{ x: 0, y: 1 }}
         >
-            <Block flex>
-                <BoardComponent
-                    key={focusKey}
-                    fixture={fixture}
-                    gameId={gameId}
-                    gameState={gameState}
-                    opponentData={opponentData}
-                />
-            </Block>
+            <BoardComponent
+                key={focusKey}
+                fixture={fixture}
+                gameId={gameId}
+                gameState={gameState}
+                opponentData={opponentData}
+                notificationStatus={
+                    showStatus && statusMessage
+                        ? {
+                              message: statusMessage,
+                              type: statusType,
+                              timeout: 3000,
+                              onDismiss: () => setShowStatus(false),
+                          }
+                        : null
+                }
+            />
         </LinearGradient>
     );
 }

@@ -10,6 +10,21 @@ import { db } from '../config/firebase';
 // This needs to be outside the component so the handler can access it
 const activeGameIdRef = { current: null };
 
+// Notification types that should be suppressed when user is viewing that game
+export const SUPPRESSIBLE_NOTIFICATION_TYPES = [
+    'move_made',
+    'game_accepted',
+    'reset_approved',
+    'reset_rejected',
+    'reset_cancelled',
+    'undo_approved',
+    'undo_rejected',
+    'undo_cancelled',
+    'undo_requested',
+    'reset_requested',
+    'game_over',
+];
+
 // Configure how notifications are handled when app is in foreground
 Notifications.setNotificationHandler({
     handleNotification: async (notification) => {
@@ -18,10 +33,9 @@ Notifications.setNotificationHandler({
         const notificationGameId = notificationData?.gameId;
 
         // Check if this notification should be suppressed for the currently active game
-        // Suppress move, undo request, and reset request notifications if user is viewing that game
-        const suppressibleTypes = ['move_made', 'undo_requested', 'reset_requested'];
+        // Suppress game-related notifications if user is viewing that game
         const shouldSuppress =
-            suppressibleTypes.includes(notificationType) &&
+            SUPPRESSIBLE_NOTIFICATION_TYPES.includes(notificationType) &&
             notificationGameId &&
             notificationGameId === activeGameIdRef.current;
 
@@ -50,6 +64,7 @@ export function NotificationProvider({ children }) {
     const [notification, setNotification] = useState(null);
     const [badgeCount, setBadgeCount] = useState(0);
     const [activeGameId, setActiveGameId] = useState(null);
+    const [gameStatusUpdate, setGameStatusUpdate] = useState(null); // For showing status even when suppressed
     const notificationListener = useRef();
     const responseListener = useRef();
     const appState = useRef(AppState.currentState);
@@ -85,12 +100,33 @@ export function NotificationProvider({ children }) {
                 const notificationType = notificationData?.type;
                 const notificationGameId = notificationData?.gameId;
 
-                // Filter out move, undo, and reset request notifications if user is viewing that game
+                // Filter out game-related notifications if user is viewing that game
                 // (The notification handler already suppressed the banner/sound/badge)
-                const suppressibleTypes = ['move_made', 'undo_requested', 'reset_requested'];
                 const shouldSuppress =
-                    suppressibleTypes.includes(notificationType) &&
+                    SUPPRESSIBLE_NOTIFICATION_TYPES.includes(notificationType) &&
                     notificationGameId === activeGameIdRef.current;
+
+                // Special handling: Show status updates even when suppressed for certain types
+                const statusUpdateTypes = [
+                    'reset_approved',
+                    'reset_rejected',
+                    'undo_approved',
+                    'undo_rejected',
+                ];
+
+                if (
+                    shouldSuppress &&
+                    statusUpdateTypes.includes(notificationType) &&
+                    notificationGameId === activeGameIdRef.current
+                ) {
+                    // Set game status update that Game screen can display
+                    setGameStatusUpdate({
+                        type: notificationType,
+                        gameId: notificationGameId,
+                        timestamp: Date.now(),
+                    });
+                    return; // Still suppress the notification itself
+                }
 
                 if (shouldSuppress) {
                     return; // Don't store in state or show dropdown
@@ -149,9 +185,11 @@ export function NotificationProvider({ children }) {
         const notificationType = notificationData?.type;
         const notificationGameId = notificationData?.gameId;
 
-        // Dismiss if it's a move, undo, or reset request notification and user is now viewing that game
-        const suppressibleTypes = ['move_made', 'undo_requested', 'reset_requested'];
-        if (suppressibleTypes.includes(notificationType) && notificationGameId === activeGameId) {
+        // Dismiss if it's a game-related notification and user is now viewing that game
+        if (
+            SUPPRESSIBLE_NOTIFICATION_TYPES.includes(notificationType) &&
+            notificationGameId === activeGameId
+        ) {
             setNotification(null);
         }
     }, [notification, activeGameId]);
@@ -189,6 +227,7 @@ export function NotificationProvider({ children }) {
                 decrementBadge,
                 refreshBadgeCount,
                 setActiveGameId,
+                gameStatusUpdate,
             }}
         >
             {children}
