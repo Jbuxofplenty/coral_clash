@@ -18,6 +18,9 @@ service-account*.json
 # Environment variables
 .env
 .env.local
+.env.preview
+.env.production
+.env.*
 
 # Firebase Emulator logs and data
 firestore-debug.log

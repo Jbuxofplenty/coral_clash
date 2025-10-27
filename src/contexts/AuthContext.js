@@ -216,18 +216,13 @@ export const AuthProvider = ({ children }) => {
         }
 
         try {
-            console.log('🚀 Starting Google Sign-In...');
-            console.log('Request object ready:', !!request);
             setError(null);
 
             if (!request) {
                 console.error('❌ OAuth request not ready');
                 throw new Error('OAuth request not initialized');
             }
-
-            console.log('📱 Opening Google Sign-In prompt...');
-            const result = await promptAsync();
-            console.log('📱 Prompt result:', result);
+            await promptAsync();
         } catch (error) {
             console.error('❌ signInWithGoogle error:', error);
             setError(error.message);

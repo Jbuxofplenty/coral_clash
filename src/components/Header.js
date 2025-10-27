@@ -54,7 +54,7 @@ function Header({ back, title, transparent }) {
                 right={renderRight()}
                 rightStyle={{ alignItems: 'center' }}
                 leftStyle={{ flex: 0.3, paddingTop: 2 }}
-                leftIconName={back ? 'chevron-left' : 'navicon'}
+                leftIconName={back ? 'chevron-left' : 'menu'}
                 leftIconSize={back ? 50 : 30}
                 leftIconColor={colors.ICON}
                 titleStyle={[styles.title, { color: colors.TEXT }]}

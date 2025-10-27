@@ -73,11 +73,21 @@ export const LIGHT_THEME = {
     SIZES: {
         BLOCK_SHADOW_RADIUS: 2,
     },
+    // New API format
+    colors: LIGHT_COLORS,
+    sizes: {
+        BLOCK_SHADOW_RADIUS: 2,
+    },
 };
 
 export const DARK_THEME = {
     COLORS: DARK_COLORS,
     SIZES: {
+        BLOCK_SHADOW_RADIUS: 2,
+    },
+    // New API format
+    colors: DARK_COLORS,
+    sizes: {
         BLOCK_SHADOW_RADIUS: 2,
     },
 };
