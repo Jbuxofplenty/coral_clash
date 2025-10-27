@@ -32,16 +32,13 @@ const shouldEnforceAppCheck = () => {
  * Get App Check configuration for onCall functions
  *
  * Returns an object with:
- * - consumeAppCheckToken: only when enforcing (to avoid errors when client doesn't send token)
+ * - consumeAppCheckToken: true (always consume to log usage)
  * - enforceAppCheck: based on ENFORCE_APP_CHECK env var
  */
-const getAppCheckConfig = () => {
-    const enforce = shouldEnforceAppCheck();
-    return {
-        consumeAppCheckToken: enforce, // Only consume when enforcing to avoid errors
-        enforceAppCheck: enforce, // Only block if env var is true
-    };
-};
+const getAppCheckConfig = () => ({
+    consumeAppCheckToken: true, // Always consume to track usage
+    enforceAppCheck: shouldEnforceAppCheck(), // Only block if env var is true
+});
 
 module.exports = {
     getAppCheckConfig,
