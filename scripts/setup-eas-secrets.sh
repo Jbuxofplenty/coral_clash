@@ -9,25 +9,25 @@ echo "🔐 Setting up EAS Secrets for Coral Clash..."
 echo ""
 
 # List of environments to configure
-ENVIRONMENTS=("preview" "production")
+ENVIRONMENTS=("development" "preview" "production")
 
 # List of all environment variable names
 ENV_VARS=(
-    "EXPO_PUBLIC_FIREBASE_API_KEY"
-    "EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN"
-    "EXPO_PUBLIC_FIREBASE_DATABASE_URL"
-    "EXPO_PUBLIC_FIREBASE_PROJECT_ID"
-    "EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET"
-    "EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID"
-    "EXPO_PUBLIC_FIREBASE_APP_ID"
-    "EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID"
-    "EXPO_PUBLIC_FIREBASE_FUNCTIONS_URL"
-    "EXPO_PUBLIC_USE_FIREBASE_EMULATOR"
-    "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID"
-    "EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID"
-    "EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID"
-    "EXPO_PUBLIC_GOOGLE_EXPO_CLIENT_ID"
-    "EXPO_PUBLIC_ENABLE_DEV_FEATURES"
+    "EXPO_FIREBASE_API_KEY"
+    "EXPO_FIREBASE_AUTH_DOMAIN"
+    "EXPO_FIREBASE_DATABASE_URL"
+    "EXPO_FIREBASE_PROJECT_ID"
+    "EXPO_FIREBASE_STORAGE_BUCKET"
+    "EXPO_FIREBASE_MESSAGING_SENDER_ID"
+    "EXPO_FIREBASE_APP_ID"
+    "EXPO_FIREBASE_MEASUREMENT_ID"
+    "EXPO_FIREBASE_FUNCTIONS_URL"
+    "EXPO_USE_FIREBASE_EMULATOR"
+    "EXPO_GOOGLE_WEB_CLIENT_ID"
+    "EXPO_GOOGLE_IOS_CLIENT_ID"
+    "EXPO_GOOGLE_ANDROID_CLIENT_ID"
+    "EXPO_GOOGLE_EXPO_CLIENT_ID"
+    "EXPO_ENABLE_DEV_FEATURES"
 )
 
 # Loop through each environment
@@ -61,33 +61,33 @@ for ENV in "${ENVIRONMENTS[@]}"; do
     echo ""
 
     echo "Creating Firebase environment variables..."
-    eas env:create --name EXPO_PUBLIC_FIREBASE_API_KEY --value "$EXPO_PUBLIC_FIREBASE_API_KEY" --environment "$ENV" --visibility secret --non-interactive --force || true
-    eas env:create --name EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN --value "$EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN" --environment "$ENV" --visibility sensitive --non-interactive --force || true
-    eas env:create --name EXPO_PUBLIC_FIREBASE_DATABASE_URL --value "$EXPO_PUBLIC_FIREBASE_DATABASE_URL" --environment "$ENV" --visibility sensitive --non-interactive --force || true
-    eas env:create --name EXPO_PUBLIC_FIREBASE_PROJECT_ID --value "$EXPO_PUBLIC_FIREBASE_PROJECT_ID" --environment "$ENV" --visibility sensitive --non-interactive --force || true
-    eas env:create --name EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET --value "$EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET" --environment "$ENV" --visibility sensitive --non-interactive --force || true
-    eas env:create --name EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID --value "$EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID" --environment "$ENV" --visibility sensitive --non-interactive --force || true
-    eas env:create --name EXPO_PUBLIC_FIREBASE_APP_ID --value "$EXPO_PUBLIC_FIREBASE_APP_ID" --environment "$ENV" --visibility sensitive --non-interactive --force || true
-    eas env:create --name EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID --value "$EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID" --environment "$ENV" --visibility sensitive --non-interactive --force || true
+    eas env:create --name EXPO_FIREBASE_API_KEY --value "$EXPO_FIREBASE_API_KEY" --environment "$ENV" --visibility secret --non-interactive --force || true
+    eas env:create --name EXPO_FIREBASE_AUTH_DOMAIN --value "$EXPO_FIREBASE_AUTH_DOMAIN" --environment "$ENV" --visibility sensitive --non-interactive --force || true
+    eas env:create --name EXPO_FIREBASE_DATABASE_URL --value "$EXPO_FIREBASE_DATABASE_URL" --environment "$ENV" --visibility sensitive --non-interactive --force || true
+    eas env:create --name EXPO_FIREBASE_PROJECT_ID --value "$EXPO_FIREBASE_PROJECT_ID" --environment "$ENV" --visibility sensitive --non-interactive --force || true
+    eas env:create --name EXPO_FIREBASE_STORAGE_BUCKET --value "$EXPO_FIREBASE_STORAGE_BUCKET" --environment "$ENV" --visibility sensitive --non-interactive --force || true
+    eas env:create --name EXPO_FIREBASE_MESSAGING_SENDER_ID --value "$EXPO_FIREBASE_MESSAGING_SENDER_ID" --environment "$ENV" --visibility sensitive --non-interactive --force || true
+    eas env:create --name EXPO_FIREBASE_APP_ID --value "$EXPO_FIREBASE_APP_ID" --environment "$ENV" --visibility sensitive --non-interactive --force || true
+    eas env:create --name EXPO_FIREBASE_MEASUREMENT_ID --value "$EXPO_FIREBASE_MEASUREMENT_ID" --environment "$ENV" --visibility sensitive --non-interactive --force || true
 
     echo ""
     echo "Creating Firebase Functions URL..."
-    eas env:create --name EXPO_PUBLIC_FIREBASE_FUNCTIONS_URL --value "$EXPO_PUBLIC_FIREBASE_FUNCTIONS_URL" --environment "$ENV" --visibility sensitive --non-interactive --force || true
+    eas env:create --name EXPO_FIREBASE_FUNCTIONS_URL --value "$EXPO_FIREBASE_FUNCTIONS_URL" --environment "$ENV" --visibility sensitive --non-interactive --force || true
 
     echo ""
     echo "Creating Firebase Emulator setting..."
-    eas env:create --name EXPO_PUBLIC_USE_FIREBASE_EMULATOR --value "false" --environment "$ENV" --visibility sensitive --non-interactive --force || true
+    eas env:create --name EXPO_USE_FIREBASE_EMULATOR --value "false" --environment "$ENV" --visibility sensitive --non-interactive --force || true
 
     echo ""
     echo "Creating Google OAuth environment variables..."
-    eas env:create --name EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID --value "$EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID" --environment "$ENV" --visibility sensitive --non-interactive --force || true
-    eas env:create --name EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID --value "$EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID" --environment "$ENV" --visibility sensitive --non-interactive --force || true
-    eas env:create --name EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID --value "$EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID" --environment "$ENV" --visibility sensitive --non-interactive --force || true
-    eas env:create --name EXPO_PUBLIC_GOOGLE_EXPO_CLIENT_ID --value "$EXPO_PUBLIC_GOOGLE_EXPO_CLIENT_ID" --environment "$ENV" --visibility sensitive --non-interactive --force || true
+    eas env:create --name EXPO_GOOGLE_WEB_CLIENT_ID --value "$EXPO_GOOGLE_WEB_CLIENT_ID" --environment "$ENV" --visibility sensitive --non-interactive --force || true
+    eas env:create --name EXPO_GOOGLE_IOS_CLIENT_ID --value "$EXPO_GOOGLE_IOS_CLIENT_ID" --environment "$ENV" --visibility sensitive --non-interactive --force || true
+    eas env:create --name EXPO_GOOGLE_ANDROID_CLIENT_ID --value "$EXPO_GOOGLE_ANDROID_CLIENT_ID" --environment "$ENV" --visibility sensitive --non-interactive --force || true
+    eas env:create --name EXPO_GOOGLE_EXPO_CLIENT_ID --value "$EXPO_GOOGLE_EXPO_CLIENT_ID" --environment "$ENV" --visibility sensitive --non-interactive --force || true
 
     echo ""
     echo "Creating dev features setting..."
-    eas env:create --name EXPO_PUBLIC_ENABLE_DEV_FEATURES --value "false" --environment "$ENV" --visibility sensitive --non-interactive --force || true
+    eas env:create --name EXPO_ENABLE_DEV_FEATURES --value "false" --environment "$ENV" --visibility sensitive --non-interactive --force || true
     
     echo "✅ Completed setup for $ENV environment!"
 done
@@ -109,18 +109,13 @@ if [ -f "google-service-account.json" ]; then
     echo "Found google-service-account.json file"
     echo ""
     
-    # Delete existing GOOGLE_SERVICE_ACCOUNT from all environments
-    echo "Deleting existing GOOGLE_SERVICE_ACCOUNT (if any)..."
-    eas env:delete --variable-name GOOGLE_SERVICE_ACCOUNT --variable-environment development --non-interactive 2>/dev/null || true
-    eas env:delete --variable-name GOOGLE_SERVICE_ACCOUNT --variable-environment preview --non-interactive 2>/dev/null || true
-    eas env:delete --variable-name GOOGLE_SERVICE_ACCOUNT --variable-environment production --non-interactive 2>/dev/null || true
-    
     echo "Creating Google Service Account secret for all environments..."
     # Read the JSON file content
     GOOGLE_SERVICE_ACCOUNT_JSON=$(cat google-service-account.json)
     
     # Create for each environment
-    for BUILD_ENV in "${ENVS[@]}"; do
+    for BUILD_ENV in "${ENVIRONMENTS[@]}"; do
+        eas env:delete --variable-name GOOGLE_SERVICE_ACCOUNT --variable-environment "$BUILD_ENV" --non-interactive 2>/dev/null || true
         eas env:create --name GOOGLE_SERVICE_ACCOUNT --value "$GOOGLE_SERVICE_ACCOUNT_JSON" --environment "$BUILD_ENV" --visibility secret --type string --non-interactive --force || true
     done
     
@@ -153,10 +148,10 @@ echo "To view your secrets:"
 echo "  eas secret:list"
 echo ""
 echo "To update an environment variable:"
-echo "  eas env:update EXPO_PUBLIC_FIREBASE_API_KEY --value \"new-value\""
+echo "  eas env:update EXPO_FIREBASE_API_KEY --value \"new-value\""
 echo ""
 echo "To delete an environment variable:"
-echo "  eas env:delete EXPO_PUBLIC_FIREBASE_API_KEY"
+echo "  eas env:delete EXPO_FIREBASE_API_KEY"
 echo ""
 echo "To update Google Service Account:"
 echo "  Just run this script again - it will automatically update the credentials"

@@ -18,7 +18,7 @@ import { db, collection, query, where, onSnapshot, doc, getDoc } from '../config
 const { width, height } = Dimensions.get('screen');
 
 // Check if dev features are enabled
-const enableDevFeatures = process.env.EXPO_PUBLIC_ENABLE_DEV_FEATURES === 'true';
+const enableDevFeatures = process.env.EXPO_ENABLE_DEV_FEATURES === 'true';
 
 export default function Home({ navigation }) {
     const { colors } = useTheme();
