@@ -61,7 +61,7 @@ for ENV in "${ENVIRONMENTS[@]}"; do
     echo ""
 
     echo "Creating Firebase environment variables..."
-    eas env:create --name EXPO_PUBLIC_FIREBASE_API_KEY --value "$EXPO_PUBLIC_FIREBASE_API_KEY" --environment "$ENV" --visibility sensitive --non-interactive --force || true
+    eas env:create --name EXPO_PUBLIC_FIREBASE_API_KEY --value "$EXPO_PUBLIC_FIREBASE_API_KEY" --environment "$ENV" --visibility secret --non-interactive --force || true
     eas env:create --name EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN --value "$EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN" --environment "$ENV" --visibility sensitive --non-interactive --force || true
     eas env:create --name EXPO_PUBLIC_FIREBASE_DATABASE_URL --value "$EXPO_PUBLIC_FIREBASE_DATABASE_URL" --environment "$ENV" --visibility sensitive --non-interactive --force || true
     eas env:create --name EXPO_PUBLIC_FIREBASE_PROJECT_ID --value "$EXPO_PUBLIC_FIREBASE_PROJECT_ID" --environment "$ENV" --visibility sensitive --non-interactive --force || true
