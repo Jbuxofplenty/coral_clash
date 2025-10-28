@@ -109,7 +109,6 @@ Your `eas.json` is already configured with the correct submission settings:
         "ascAppId": "6754509672"
       },
       "android": {
-        "serviceAccountKeyPath": "${EAS_SECRET:GOOGLE_SERVICE_ACCOUNT}",
         "track": "production"
       }
     },
@@ -119,7 +118,6 @@ Your `eas.json` is already configured with the correct submission settings:
         "ascAppId": "6754509672"
       },
       "android": {
-        "serviceAccountKeyPath": "${EAS_SECRET:GOOGLE_SERVICE_ACCOUNT}",
         "track": "internal"
       }
     }
