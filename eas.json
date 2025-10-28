@@ -24,12 +24,30 @@
             "autoIncrement": true,
             "distribution": "store",
             "channel": "preview",
-            "node": "22.11.0"
+            "node": "22.11.0",
+            "android": {
+                "gradleProperties": {
+                    "org.gradle.jvmargs": "-Xmx4096m -XX:MaxMetaspaceSize=1024m -XX:+HeapDumpOnOutOfMemoryError",
+                    "org.gradle.parallel": "true",
+                    "org.gradle.configureondemand": "true",
+                    "android.enableMinifyInReleaseBuilds": false,
+                    "android.enableShrinkResourcesInReleaseBuilds": false
+                }
+            }
         },
         "production": {
             "autoIncrement": true,
             "channel": "production",
-            "node": "22.11.0"
+            "node": "22.11.0",
+            "android": {
+                "gradleProperties": {
+                    "org.gradle.jvmargs": "-Xmx4096m -XX:MaxMetaspaceSize=1024m -XX:+HeapDumpOnOutOfMemoryError",
+                    "org.gradle.parallel": "true",
+                    "org.gradle.configureondemand": "true",
+                    "android.enableMinifyInReleaseBuilds": true,
+                    "android.enableShrinkResourcesInReleaseBuilds": true
+                }
+            }
         }
     },
     "submit": {
