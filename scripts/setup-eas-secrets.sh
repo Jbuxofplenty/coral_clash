@@ -109,25 +109,22 @@ if [ -f "google-service-account.json" ]; then
     echo "Found google-service-account.json file"
     echo ""
     
-    # Check if secret already exists
-    if eas secret:list 2>/dev/null | grep -q "GOOGLE_SERVICE_ACCOUNT"; then
-        echo "⚠️  GOOGLE_SERVICE_ACCOUNT secret already exists"
-        read -p "Do you want to update it? (y/N): " -n 1 -r
-        echo
-        if [[ $REPLY =~ ^[Yy]$ ]]; then
-            echo "Deleting existing secret..."
-            eas secret:delete --name GOOGLE_SERVICE_ACCOUNT --non-interactive || true
-            echo "Creating new Google Service Account secret..."
-            eas secret:create --scope project --name GOOGLE_SERVICE_ACCOUNT --type file --value ./google-service-account.json
-            echo "✅ Google Service Account secret updated!"
-        else
-            echo "⏭️  Skipping Google Service Account update"
-        fi
-    else
-        echo "Creating Google Service Account secret..."
-        eas secret:create --scope project --name GOOGLE_SERVICE_ACCOUNT --type file --value ./google-service-account.json
-        echo "✅ Google Service Account secret created!"
-    fi
+    # Delete existing GOOGLE_SERVICE_ACCOUNT from all environments
+    echo "Deleting existing GOOGLE_SERVICE_ACCOUNT (if any)..."
+    eas env:delete --variable-name GOOGLE_SERVICE_ACCOUNT --variable-environment development --non-interactive 2>/dev/null || true
+    eas env:delete --variable-name GOOGLE_SERVICE_ACCOUNT --variable-environment preview --non-interactive 2>/dev/null || true
+    eas env:delete --variable-name GOOGLE_SERVICE_ACCOUNT --variable-environment production --non-interactive 2>/dev/null || true
+    
+    echo "Creating Google Service Account secret for all environments..."
+    # Read the JSON file content
+    GOOGLE_SERVICE_ACCOUNT_JSON=$(cat google-service-account.json)
+    
+    # Create for each environment
+    for BUILD_ENV in "${ENVS[@]}"; do
+        eas env:create --name GOOGLE_SERVICE_ACCOUNT --value "$GOOGLE_SERVICE_ACCOUNT_JSON" --environment "$BUILD_ENV" --visibility secret --type string --non-interactive --force || true
+    done
+    
+    echo "✅ Google Service Account secret created for all environments!"
 else
     echo "⚠️  google-service-account.json not found"
     echo ""
@@ -162,6 +159,5 @@ echo "To delete an environment variable:"
 echo "  eas env:delete EXPO_PUBLIC_FIREBASE_API_KEY"
 echo ""
 echo "To update Google Service Account:"
-echo "  eas secret:delete --name GOOGLE_SERVICE_ACCOUNT"
-echo "  eas secret:create --scope project --name GOOGLE_SERVICE_ACCOUNT --type file --value ./google-service-account.json"
+echo "  Just run this script again - it will automatically update the credentials"
 
