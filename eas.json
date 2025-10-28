@@ -39,7 +39,6 @@
                 "ascAppId": "6754509672"
             },
             "android": {
-                "serviceAccountKeyPath": "${EAS_SECRET:GOOGLE_SERVICE_ACCOUNT}",
                 "track": "production"
             }
         },
@@ -49,7 +48,6 @@
                 "ascAppId": "6754509672"
             },
             "android": {
-                "serviceAccountKeyPath": "${EAS_SECRET:GOOGLE_SERVICE_ACCOUNT}",
                 "track": "internal"
             }
         }
