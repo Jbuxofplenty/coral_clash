@@ -31,7 +31,7 @@ const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 const GAME_STATE_VERSION = '1.2.0';
 
 // Check if dev features are enabled
-const DEV_FEATURES_ENABLED = process.env.EXPO_ENABLE_DEV_FEATURES === 'true';
+const DEV_FEATURES_ENABLED = process.env.EXPO_PUBLIC_ENABLE_DEV_FEATURES === 'true';
 
 /**
  * BaseCoralClashBoard - Core game board component with all shared logic

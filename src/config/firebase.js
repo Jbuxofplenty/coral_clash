@@ -25,24 +25,24 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
 
 // Your web app's Firebase configuration
-// Note: In Expo, use EXPO_ prefix for environment variables accessible in client code
+// Note: In Expo, use EXPO_PUBLIC_ prefix for environment variables accessible in client code
 const firebaseConfig = {
-    apiKey: process.env.EXPO_FIREBASE_API_KEY,
-    authDomain: process.env.EXPO_FIREBASE_AUTH_DOMAIN,
-    databaseURL: process.env.EXPO_FIREBASE_DATABASE_URL,
-    projectId: process.env.EXPO_FIREBASE_PROJECT_ID,
-    storageBucket: process.env.EXPO_FIREBASE_STORAGE_BUCKET,
-    messagingSenderId: process.env.EXPO_FIREBASE_MESSAGING_SENDER_ID,
-    appId: process.env.EXPO_FIREBASE_APP_ID,
-    measurementId: process.env.EXPO_FIREBASE_MEASUREMENT_ID,
+    apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
+    authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN,
+    databaseURL: process.env.EXPO_PUBLIC_FIREBASE_DATABASE_URL,
+    projectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID,
+    storageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID,
+    measurementId: process.env.EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-// Set EXPO_USE_FIREBASE_EMULATOR=true in .env to enable
-// Set EXPO_EMULATOR_HOST to your computer's local IP (e.g., 192.168.x.x) for physical devices
-const USE_EMULATOR = process.env.EXPO_USE_FIREBASE_EMULATOR === 'true';
+// Set EXPO_PUBLIC_USE_FIREBASE_EMULATOR=true in .env to enable
+// Set EXPO_PUBLIC_EMULATOR_HOST to your computer's local IP (e.g., 192.168.x.x) for physical devices
+const USE_EMULATOR = process.env.EXPO_PUBLIC_USE_FIREBASE_EMULATOR === 'true';
 
 // Initialize App Check
 // For React Native, we use a custom provider with debug tokens in development
@@ -105,7 +105,7 @@ if (USE_EMULATOR) {
     // - Android emulator always uses 10.0.2.2 (special alias for host machine)
     // - iOS (simulator and physical devices) can use your Mac's local IP
     //   The Mac's local IP works for BOTH iOS Simulator and physical iPhone on same WiFi
-    // - Set EXPO_EMULATOR_HOST to override (useful if IP changes or for localhost)
+    // - Set EXPO_PUBLIC_EMULATOR_HOST to override (useful if IP changes or for localhost)
     let EMULATOR_HOST;
 
     if (Platform.OS === 'android') {

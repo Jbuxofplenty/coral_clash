@@ -26,7 +26,7 @@ This guide will help you set up Google Sign-In for Coral Clash.
 2. Select your Firebase project (`coral-clash`)
 3. Navigate to **APIs & Services** > **Credentials**
 4. Find the **Web client** OAuth 2.0 Client ID (auto-created by Firebase)
-5. Copy the **Client ID** - this is your `EXPO_GOOGLE_WEB_CLIENT_ID`
+5. Copy the **Client ID** - this is your `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID`
 
 ### For iOS
 
@@ -35,7 +35,7 @@ This guide will help you set up Google Sign-In for Coral Clash.
 3. Select **iOS** as application type
 4. Enter your iOS Bundle ID: `com.jbuxofplenty.coralclash`
 5. Click **Create**
-6. Copy the **Client ID** - this is your `EXPO_GOOGLE_IOS_CLIENT_ID`
+6. Copy the **Client ID** - this is your `EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID`
 
 ### For Android
 
@@ -45,17 +45,17 @@ This guide will help you set up Google Sign-In for Coral Clash.
 4. Enter your Android Package name: `com.jbuxofplenty.coralclash`
 5. Get your SHA-1 certificate fingerprint:
 
-   ```bash
-   # For debug builds
-   keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android -keypass android
+    ```bash
+    # For debug builds
+    keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android -keypass android
 
-   # For release builds (use your keystore)
-   keytool -list -v -keystore path/to/your/keystore -alias your-alias
-   ```
+    # For release builds (use your keystore)
+    keytool -list -v -keystore path/to/your/keystore -alias your-alias
+    ```
 
 6. Enter the SHA-1 fingerprint
 7. Click **Create**
-8. Copy the **Client ID** - this is your `EXPO_GOOGLE_ANDROID_CLIENT_ID`
+8. Copy the **Client ID** - this is your `EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID`
 
 ### For Expo Go (Development)
 
@@ -65,10 +65,10 @@ For testing in Expo Go during development:
 2. Find the **Web client** (created by Firebase)
 3. Edit it
 4. Under **Authorized redirect URIs**, add:
-   ```
-   https://auth.expo.io/@your-expo-username/coral-clash
-   ```
-5. The Web client ID can also be used as `EXPO_GOOGLE_EXPO_CLIENT_ID`
+    ```
+    https://auth.expo.io/@your-expo-username/coral-clash
+    ```
+5. The Web client ID can also be used as `EXPO_PUBLIC_GOOGLE_EXPO_CLIENT_ID`
 
 ## Step 3: Update Environment Variables
 
@@ -76,10 +76,10 @@ Edit your `.env` file and add the Client IDs:
 
 ```bash
 # Google OAuth Client IDs
-EXPO_GOOGLE_WEB_CLIENT_ID=123456789-abcdefg.apps.googleusercontent.com
-EXPO_GOOGLE_IOS_CLIENT_ID=123456789-hijklmn.apps.googleusercontent.com
-EXPO_GOOGLE_ANDROID_CLIENT_ID=123456789-opqrstu.apps.googleusercontent.com
-EXPO_GOOGLE_EXPO_CLIENT_ID=123456789-abcdefg.apps.googleusercontent.com
+EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID=123456789-abcdefg.apps.googleusercontent.com
+EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID=123456789-hijklmn.apps.googleusercontent.com
+EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID=123456789-opqrstu.apps.googleusercontent.com
+EXPO_PUBLIC_GOOGLE_EXPO_CLIENT_ID=123456789-abcdefg.apps.googleusercontent.com
 ```
 
 ## Step 4: Configure iOS (for production builds)
@@ -110,7 +110,7 @@ Replace `YOUR-IOS-CLIENT-ID-REVERSED` with your iOS Client ID in reverse order (
 
 ## Testing with Emulators
 
-Google Sign-In works with Firebase Emulators! When `EXPO_USE_FIREBASE_EMULATOR=true`:
+Google Sign-In works with Firebase Emulators! When `EXPO_PUBLIC_USE_FIREBASE_EMULATOR=true`:
 
 - Authentication will be handled by the Auth Emulator
 - User profiles will be stored in the local Firestore Emulator
@@ -138,7 +138,7 @@ Google Sign-In works with Firebase Emulators! When `EXPO_USE_FIREBASE_EMULATOR=t
 
 ### Expo Go Sign-In Issues
 
-- Make sure you're using the Web Client ID for `EXPO_GOOGLE_EXPO_CLIENT_ID`
+- Make sure you're using the Web Client ID for `EXPO_PUBLIC_GOOGLE_EXPO_CLIENT_ID`
 - Verify the redirect URI is added to the Web client in Google Cloud Console
 - The redirect URI format: `https://auth.expo.io/@your-expo-username/coral-clash`
 
