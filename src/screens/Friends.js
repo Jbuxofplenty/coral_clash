@@ -1,5 +1,5 @@
 import { Block, Text, theme } from 'galio-framework';
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
     ActivityIndicator,
     ScrollView,
@@ -10,6 +10,7 @@ import {
     Dimensions,
     View,
     RefreshControl,
+    useWindowDimensions,
 } from 'react-native';
 
 import { Icon, Avatar, LoadingScreen, TimeControlModal } from '../components';
@@ -22,6 +23,10 @@ export default function Friends({ navigation }) {
     const { user } = useAuth();
     const { colors, isDarkMode } = useTheme();
     const { sendGameRequest } = useGame();
+    const { height } = useWindowDimensions();
+
+    // Use compact mode on smaller screens (iPhone SE, etc.)
+    const isCompact = height < 700;
 
     // Friends management
     const {
@@ -52,6 +57,15 @@ export default function Friends({ navigation }) {
         handleSearchBlur,
         handleSelectUser,
     } = useUserSearch();
+
+    // Sort friends alphabetically by display name
+    const sortedFriends = useMemo(() => {
+        return [...friends].sort((a, b) => {
+            const nameA = (a.displayName || '').toLowerCase();
+            const nameB = (b.displayName || '').toLowerCase();
+            return nameA.localeCompare(nameB);
+        });
+    }, [friends]);
 
     // Time control modal state
     const [timeControlModalVisible, setTimeControlModalVisible] = useState(false);
@@ -100,7 +114,7 @@ export default function Friends({ navigation }) {
                     <Block row middle flex>
                         <Avatar
                             avatarKey={friend.avatarKey}
-                            size='medium'
+                            size={isCompact ? 'small' : 'medium'}
                             style={styles.avatarContainer}
                         />
                         <Block flex style={{ marginRight: 8 }}>
@@ -217,6 +231,8 @@ export default function Friends({ navigation }) {
                                         onFocus={handleSearchFocus}
                                         onBlur={handleSearchBlur}
                                         autoCapitalize='none'
+                                        autoCorrect={false}
+                                        autoComplete='off'
                                         style={[
                                             styles.input,
                                             {
@@ -351,7 +367,7 @@ export default function Friends({ navigation }) {
                                                 <Block row middle flex>
                                                     <Avatar
                                                         avatarKey={request.avatarKey}
-                                                        size='medium'
+                                                        size={isCompact ? 'small' : 'medium'}
                                                         style={styles.avatarContainer}
                                                     />
                                                     <Block flex style={{ marginRight: 8 }}>
@@ -495,7 +511,7 @@ export default function Friends({ navigation }) {
                                                 <Block row middle flex>
                                                     <Avatar
                                                         avatarKey={request.avatarKey}
-                                                        size='medium'
+                                                        size={isCompact ? 'small' : 'medium'}
                                                         style={styles.avatarContainer}
                                                     />
                                                     <Block flex style={{ marginRight: 8 }}>
@@ -565,9 +581,9 @@ export default function Friends({ navigation }) {
                             color={colors.TEXT}
                             style={{ marginBottom: 12, paddingHorizontal: 4 }}
                         >
-                            My Friends ({friends.length})
+                            My Friends ({sortedFriends.length})
                         </Text>
-                        {friends.length === 0 ? (
+                        {sortedFriends.length === 0 ? (
                             <Block
                                 center
                                 style={[
@@ -616,7 +632,7 @@ export default function Friends({ navigation }) {
                             </Block>
                         ) : (
                             <Block style={styles.friendsList}>
-                                {friends.map((friend) => renderFriendItem(friend))}
+                                {sortedFriends.map((friend) => renderFriendItem(friend))}
                             </Block>
                         )}
                     </Block>

@@ -224,98 +224,133 @@ exports.respondToFriendRequest = onCall(getAppCheckConfig(), async (request) => 
 });
 
 /**
+ * Handler for getting friends list
+ * Separated for testing purposes
+ */
+async function getFriendsHandler(request) {
+    const { data, auth } = request;
+    if (!auth) {
+        throw new HttpsError('unauthenticated', 'User must be authenticated');
+    }
+
+    const userId = auth.uid;
+
+    // Get friends
+    const friendsSnapshot = await db.collection('users').doc(userId).collection('friends').get();
+
+    const friendIds = friendsSnapshot.docs.map((doc) => doc.id);
+
+    // Get friend profiles
+    const friends = [];
+    for (const friendId of friendIds) {
+        const friendDoc = await db.collection('users').doc(friendId).get();
+        if (friendDoc.exists) {
+            const userData = friendDoc.data();
+
+            // Get avatarKey from settings subcollection
+            const settingsDoc = await db
+                .collection('users')
+                .doc(friendId)
+                .collection('settings')
+                .doc('preferences')
+                .get();
+            const settings = settingsDoc.exists ? settingsDoc.data() : {};
+
+            friends.push({
+                id: friendId,
+                displayName: formatDisplayName(userData.displayName, userData.discriminator),
+                avatarKey: settings.avatarKey || 'dolphin',
+            });
+        }
+    }
+
+    // Get incoming pending requests
+    const incomingRequestsSnapshot = await db
+        .collection('friendRequests')
+        .where('to', '==', userId)
+        .where('status', '==', 'pending')
+        .get();
+
+    const incomingRequests = [];
+    for (const doc of incomingRequestsSnapshot.docs) {
+        const request = doc.data();
+        const fromUserDoc = await db.collection('users').doc(request.from).get();
+        if (fromUserDoc.exists) {
+            const userData = fromUserDoc.data();
+
+            // Get avatarKey from settings subcollection
+            const settingsDoc = await db
+                .collection('users')
+                .doc(request.from)
+                .collection('settings')
+                .doc('preferences')
+                .get();
+            const settings = settingsDoc.exists ? settingsDoc.data() : {};
+
+            incomingRequests.push({
+                requestId: doc.id,
+                id: request.from,
+                displayName: formatDisplayName(userData.displayName, userData.discriminator),
+                avatarKey: settings.avatarKey || 'dolphin',
+                createdAt: request.createdAt,
+            });
+        }
+    }
+
+    // Get outgoing pending requests
+    const outgoingRequestsSnapshot = await db
+        .collection('friendRequests')
+        .where('from', '==', userId)
+        .where('status', '==', 'pending')
+        .get();
+
+    const outgoingRequests = [];
+    for (const doc of outgoingRequestsSnapshot.docs) {
+        const request = doc.data();
+        const toUserDoc = await db.collection('users').doc(request.to).get();
+        if (toUserDoc.exists) {
+            const userData = toUserDoc.data();
+
+            // Get avatarKey from settings subcollection
+            const settingsDoc = await db
+                .collection('users')
+                .doc(request.to)
+                .collection('settings')
+                .doc('preferences')
+                .get();
+            const settings = settingsDoc.exists ? settingsDoc.data() : {};
+
+            outgoingRequests.push({
+                requestId: doc.id,
+                id: request.to,
+                displayName: formatDisplayName(userData.displayName, userData.discriminator),
+                avatarKey: settings.avatarKey || 'dolphin',
+                createdAt: request.createdAt,
+            });
+        }
+    }
+
+    return {
+        success: true,
+        friends,
+        incomingRequests,
+        outgoingRequests,
+    };
+}
+
+/**
  * Get user's friends list and pending requests
  * GET /api/friends
  */
 exports.getFriends = onCall(getAppCheckConfig(), async (request) => {
-    const { data, auth } = request;
     try {
-        if (!auth) {
-            throw new HttpsError('unauthenticated', 'User must be authenticated');
-        }
-
-        const userId = auth.uid;
-
-        // Get friends
-        const friendsSnapshot = await db
-            .collection('users')
-            .doc(userId)
-            .collection('friends')
-            .get();
-
-        const friendIds = friendsSnapshot.docs.map((doc) => doc.id);
-
-        // Get friend profiles
-        const friends = [];
-        for (const friendId of friendIds) {
-            const friendDoc = await db.collection('users').doc(friendId).get();
-            if (friendDoc.exists) {
-                const userData = friendDoc.data();
-                friends.push({
-                    id: friendId,
-                    displayName: formatDisplayName(userData.displayName, userData.discriminator),
-                    avatarKey: userData.settings?.avatarKey || 'dolphin',
-                });
-            }
-        }
-
-        // Get incoming pending requests
-        const incomingRequestsSnapshot = await db
-            .collection('friendRequests')
-            .where('to', '==', userId)
-            .where('status', '==', 'pending')
-            .get();
-
-        const incomingRequests = [];
-        for (const doc of incomingRequestsSnapshot.docs) {
-            const request = doc.data();
-            const fromUserDoc = await db.collection('users').doc(request.from).get();
-            if (fromUserDoc.exists) {
-                const userData = fromUserDoc.data();
-                incomingRequests.push({
-                    requestId: doc.id,
-                    id: request.from,
-                    displayName: formatDisplayName(userData.displayName, userData.discriminator),
-                    avatarKey: userData.settings?.avatarKey || 'dolphin',
-                    createdAt: request.createdAt,
-                });
-            }
-        }
-
-        // Get outgoing pending requests
-        const outgoingRequestsSnapshot = await db
-            .collection('friendRequests')
-            .where('from', '==', userId)
-            .where('status', '==', 'pending')
-            .get();
-
-        const outgoingRequests = [];
-        for (const doc of outgoingRequestsSnapshot.docs) {
-            const request = doc.data();
-            const toUserDoc = await db.collection('users').doc(request.to).get();
-            if (toUserDoc.exists) {
-                const userData = toUserDoc.data();
-                outgoingRequests.push({
-                    requestId: doc.id,
-                    id: request.to,
-                    displayName: formatDisplayName(userData.displayName, userData.discriminator),
-                    avatarKey: userData.settings?.avatarKey || 'dolphin',
-                    createdAt: request.createdAt,
-                });
-            }
-        }
-
-        return {
-            success: true,
-            friends,
-            incomingRequests,
-            outgoingRequests,
-        };
+        return await getFriendsHandler(request);
     } catch (error) {
         console.error('Error getting friends:', error);
         throw new HttpsError('internal', error.message);
     }
 });
+exports.getFriendsHandler = getFriendsHandler;
 
 /**
  * Remove friend
@@ -350,100 +385,115 @@ exports.removeFriend = onCall(getAppCheckConfig(), async (request) => {
 });
 
 /**
- * Search users by username or email (fuzzy match)
- * GET /api/friends/search
+ * Handler for searching users
+ * Separated for testing purposes
+ */
+async function searchUsersHandler(request) {
+    const { data, auth } = request;
+    if (!auth) {
+        throw new HttpsError('unauthenticated', 'User must be authenticated');
+    }
+
+    const { query } = data;
+    const userId = auth.uid;
+
+    if (!query || query.trim().length < 2) {
+        throw new HttpsError('invalid-argument', 'Search query must be at least 2 characters');
+    }
+
+    const searchQuery = query.toLowerCase().trim();
+
+    // Get all users and filter in memory for fuzzy matching
+    // Note: For better performance with large user bases, consider using Algolia or similar
+    const usersSnapshot = await db.collection('users').limit(500).get();
+
+    const matchedUsers = [];
+
+    for (const doc of usersSnapshot.docs) {
+        const userData = doc.data();
+        const uid = doc.id;
+
+        // Skip current user
+        if (uid === userId) continue;
+
+        // Check if already friends
+        const friendDoc = await db
+            .collection('users')
+            .doc(userId)
+            .collection('friends')
+            .doc(uid)
+            .get();
+
+        if (friendDoc.exists) continue;
+
+        // Check for pending friend requests (both directions)
+        const sentRequest = await db
+            .collection('friendRequests')
+            .where('from', '==', userId)
+            .where('to', '==', uid)
+            .where('status', '==', 'pending')
+            .limit(1)
+            .get();
+
+        const receivedRequest = await db
+            .collection('friendRequests')
+            .where('from', '==', uid)
+            .where('to', '==', userId)
+            .where('status', '==', 'pending')
+            .limit(1)
+            .get();
+
+        const hasPendingRequest = !sentRequest.empty || !receivedRequest.empty;
+
+        // Fuzzy match on displayName and email
+        const displayName = (userData.displayName || '').toLowerCase();
+        const email = (userData.email || '').toLowerCase();
+
+        const matchScore = calculateMatchScore(searchQuery, displayName, email);
+
+        if (matchScore > 0) {
+            // Get avatarKey from settings subcollection
+            const settingsDoc = await db
+                .collection('users')
+                .doc(uid)
+                .collection('settings')
+                .doc('preferences')
+                .get();
+            const settings = settingsDoc.exists ? settingsDoc.data() : {};
+
+            matchedUsers.push({
+                id: uid,
+                displayName: formatDisplayName(userData.displayName, userData.discriminator),
+                avatarKey: settings.avatarKey || 'dolphin',
+                matchScore,
+                hasPendingRequest,
+            });
+        }
+    }
+
+    // Sort by match score and return top 5
+    matchedUsers.sort((a, b) => b.matchScore - a.matchScore);
+    const topMatches = matchedUsers.slice(0, 5);
+
+    return {
+        success: true,
+        users: topMatches,
+    };
+}
+
+/**
+ * Search for users by username
+ * POST /api/friends/search
  */
 exports.searchUsers = onCall(getAppCheckConfig(), async (request) => {
-    const { data, auth } = request;
     try {
-        if (!auth) {
-            throw new HttpsError('unauthenticated', 'User must be authenticated');
-        }
-
-        const { query } = data;
-        const userId = auth.uid;
-
-        if (!query || query.trim().length < 2) {
-            return {
-                success: true,
-                users: [],
-            };
-        }
-
-        const searchQuery = query.toLowerCase().trim();
-
-        // Get all users and filter in memory for fuzzy matching
-        // Note: For better performance with large user bases, consider using Algolia or similar
-        const usersSnapshot = await db.collection('users').limit(500).get();
-
-        const matchedUsers = [];
-
-        for (const doc of usersSnapshot.docs) {
-            const userData = doc.data();
-            const uid = doc.id;
-
-            // Skip current user
-            if (uid === userId) continue;
-
-            // Check if already friends
-            const friendDoc = await db
-                .collection('users')
-                .doc(userId)
-                .collection('friends')
-                .doc(uid)
-                .get();
-
-            if (friendDoc.exists) continue;
-
-            // Check for pending friend requests (both directions)
-            const sentRequest = await db
-                .collection('friendRequests')
-                .where('from', '==', userId)
-                .where('to', '==', uid)
-                .where('status', '==', 'pending')
-                .limit(1)
-                .get();
-
-            const receivedRequest = await db
-                .collection('friendRequests')
-                .where('from', '==', uid)
-                .where('to', '==', userId)
-                .where('status', '==', 'pending')
-                .limit(1)
-                .get();
-
-            const hasPendingRequest = !sentRequest.empty || !receivedRequest.empty;
-
-            // Fuzzy match on displayName and email
-            const displayName = (userData.displayName || '').toLowerCase();
-            const email = (userData.email || '').toLowerCase();
-
-            const matchScore = calculateMatchScore(searchQuery, displayName, email);
-
-            if (matchScore > 0) {
-                matchedUsers.push({
-                    id: uid,
-                    displayName: formatDisplayName(userData.displayName, userData.discriminator),
-                    avatarKey: userData.settings?.avatarKey || 'dolphin',
-                    matchScore,
-                    hasPendingRequest,
-                });
-            }
-        }
-
-        // Sort by match score and return top 5
-        matchedUsers.sort((a, b) => b.matchScore - a.matchScore);
-        const topMatches = matchedUsers.slice(0, 5);
-
-        return {
-            success: true,
-            users: topMatches,
-        };
+        return await searchUsersHandler(request);
     } catch (error) {
         console.error('Error searching users:', error);
         throw new HttpsError('internal', error.message);
     }
 });
+exports.searchUsersHandler = searchUsersHandler;
 
 /**
  * Calculate fuzzy match score

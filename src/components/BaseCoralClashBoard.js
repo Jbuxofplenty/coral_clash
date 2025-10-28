@@ -105,6 +105,7 @@ const BaseCoralClashBoard = ({
     const [slideAnim] = useState(new Animated.Value(0));
     const [historyIndex, setHistoryIndex] = useState(null); // null = current state, 0+ = viewing history
     const [historicalBoard, setHistoricalBoard] = useState(null);
+    const [historicalCoralClash, setHistoricalCoralClash] = useState(null); // Store historical game instance for coral
     const boardSize = Math.min(width, 400);
 
     // Time tracking state for local countdown
@@ -333,6 +334,7 @@ const BaseCoralClashBoard = ({
     useEffect(() => {
         if (historyIndex === null) {
             setHistoricalBoard(null);
+            setHistoricalCoralClash(null);
             return;
         }
 
@@ -349,12 +351,14 @@ const BaseCoralClashBoard = ({
                 tempGame.move(move);
             }
 
-            // Store the board state
+            // Store both the board state and the game instance (for coral state)
             setHistoricalBoard(tempGame.board());
+            setHistoricalCoralClash(tempGame);
         } catch (error) {
             console.error('Error creating historical board state:', error);
             setHistoryIndex(null);
             setHistoricalBoard(null);
+            setHistoricalCoralClash(null);
         }
     }, [historyIndex, coralClash]);
 
@@ -1077,7 +1081,11 @@ const BaseCoralClashBoard = ({
                 <View style={{ position: 'relative', alignSelf: 'center' }}>
                     <EmptyBoard size={boardSize} boardFlipped={isBoardFlipped} />
                     <Coral
-                        coralClash={coralClash}
+                        coralClash={
+                            isViewingHistory && historicalCoralClash
+                                ? historicalCoralClash
+                                : coralClash
+                        }
                         size={boardSize}
                         boardFlipped={isBoardFlipped}
                         userColor={userColor}
@@ -1357,6 +1365,7 @@ const styles = StyleSheet.create({
     },
     controlBar: {
         position: 'absolute',
+        marginBottom: 20,
         bottom: 100,
         left: 0,
         right: 0,

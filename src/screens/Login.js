@@ -274,6 +274,7 @@ function Login({ navigation }) {
                                         color={colors.TEXT}
                                         placeholderTextColor={colors.PLACEHOLDER}
                                         autoCapitalize='words'
+                                        autoCorrect={false}
                                         textContentType='nickname'
                                         autoComplete='name'
                                         returnKeyType='next'
@@ -296,6 +297,7 @@ function Login({ navigation }) {
                                     placeholderTextColor={colors.PLACEHOLDER}
                                     keyboardType='email-address'
                                     autoCapitalize='none'
+                                    autoCorrect={false}
                                     textContentType={isSignUp ? 'username' : 'username'}
                                     autoComplete={isSignUp ? 'email' : 'username'}
                                     returnKeyType={showForgotPassword ? 'done' : 'next'}
@@ -325,6 +327,7 @@ function Login({ navigation }) {
                                         password
                                         viewPass
                                         autoCapitalize='none'
+                                        autoCorrect={false}
                                         textContentType={isSignUp ? 'newPassword' : 'password'}
                                         autoComplete={isSignUp ? 'password-new' : 'password'}
                                         returnKeyType='done'
