@@ -1670,6 +1670,27 @@ exports.getActiveGames = onCall(getAppCheckConfig(), async (request) => {
 });
 
 /**
+ * Helper function to determine whose turn it is based on game type
+ * Handles both PvP games (with whitePlayerId/blackPlayerId) and computer games
+ */
+function determineCurrentTurn(gameData, turn) {
+    // For computer games, user is always white (creatorId)
+    if (gameData.opponentId === 'computer') {
+        return turn === 'w' ? gameData.creatorId : 'computer';
+    }
+
+    // For PvP games, use whitePlayerId/blackPlayerId if available
+    if (gameData.whitePlayerId && gameData.blackPlayerId) {
+        return turn === 'w' ? gameData.whitePlayerId : gameData.blackPlayerId;
+    }
+
+    // Fallback: shouldn't happen, but use current logic
+    console.warn('Unable to determine currentTurn, missing player ID fields');
+    return turn === 'w' ? gameData.creatorId : gameData.opponentId;
+}
+exports.determineCurrentTurn = determineCurrentTurn; // Export for testing
+
+/**
  * Request to undo a move
  * POST /api/game/requestUndo
  */
@@ -1730,9 +1751,7 @@ exports.requestUndo = onCall(getAppCheckConfig(), async (request) => {
             const newGameState = createGameSnapshot(coralClash);
 
             // Determine whose turn it is after undo
-            // Use whitePlayerId/blackPlayerId since colors are randomly assigned
-            const nextTurn =
-                newGameState.turn === 'w' ? gameData.whitePlayerId : gameData.blackPlayerId;
+            const nextTurn = determineCurrentTurn(gameData, newGameState.turn);
 
             // Update game document
             await db.collection('games').doc(gameId).update({
@@ -1855,9 +1874,7 @@ exports.respondToUndoRequest = onCall(getAppCheckConfig(), async (request) => {
             const newGameState = createGameSnapshot(coralClash);
 
             // Determine whose turn it is after undo
-            // Use whitePlayerId/blackPlayerId since colors are randomly assigned
-            const nextTurn =
-                newGameState.turn === 'w' ? gameData.whitePlayerId : gameData.blackPlayerId;
+            const nextTurn = determineCurrentTurn(gameData, newGameState.turn);
 
             // Update game document - clear undo request and update state
             await db.collection('games').doc(gameId).update({

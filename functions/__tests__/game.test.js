@@ -301,4 +301,98 @@ describe('Game Creation Functions', () => {
             expect(mockAdd).toHaveBeenCalledTimes(2); // Game + notification
         });
     });
+
+    describe('determineCurrentTurn', () => {
+        const { determineCurrentTurn } = gameRoutes;
+
+        describe('Computer games', () => {
+            it('should return creatorId when turn is white', () => {
+                const gameData = {
+                    creatorId: 'user-123',
+                    opponentId: 'computer',
+                };
+
+                const result = determineCurrentTurn(gameData, 'w');
+
+                expect(result).toBe('user-123');
+            });
+
+            it('should return "computer" when turn is black', () => {
+                const gameData = {
+                    creatorId: 'user-123',
+                    opponentId: 'computer',
+                };
+
+                const result = determineCurrentTurn(gameData, 'b');
+
+                expect(result).toBe('computer');
+            });
+        });
+
+        describe('PvP games', () => {
+            it('should return whitePlayerId when turn is white', () => {
+                const gameData = {
+                    creatorId: 'user-123',
+                    opponentId: 'user-456',
+                    whitePlayerId: 'user-456',
+                    blackPlayerId: 'user-123',
+                };
+
+                const result = determineCurrentTurn(gameData, 'w');
+
+                expect(result).toBe('user-456');
+            });
+
+            it('should return blackPlayerId when turn is black', () => {
+                const gameData = {
+                    creatorId: 'user-123',
+                    opponentId: 'user-456',
+                    whitePlayerId: 'user-456',
+                    blackPlayerId: 'user-123',
+                };
+
+                const result = determineCurrentTurn(gameData, 'b');
+
+                expect(result).toBe('user-123');
+            });
+        });
+
+        describe('Fallback (missing player IDs)', () => {
+            it('should return creatorId when turn is white and player IDs are missing', () => {
+                const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
+
+                const gameData = {
+                    creatorId: 'user-123',
+                    opponentId: 'user-456',
+                };
+
+                const result = determineCurrentTurn(gameData, 'w');
+
+                expect(result).toBe('user-123');
+                expect(consoleWarnSpy).toHaveBeenCalledWith(
+                    'Unable to determine currentTurn, missing player ID fields',
+                );
+
+                consoleWarnSpy.mockRestore();
+            });
+
+            it('should return opponentId when turn is black and player IDs are missing', () => {
+                const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
+
+                const gameData = {
+                    creatorId: 'user-123',
+                    opponentId: 'user-456',
+                };
+
+                const result = determineCurrentTurn(gameData, 'b');
+
+                expect(result).toBe('user-456');
+                expect(consoleWarnSpy).toHaveBeenCalledWith(
+                    'Unable to determine currentTurn, missing player ID fields',
+                );
+
+                consoleWarnSpy.mockRestore();
+            });
+        });
+    });
 });
