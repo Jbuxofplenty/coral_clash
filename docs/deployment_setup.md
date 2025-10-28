@@ -15,43 +15,70 @@ This guide will help you set up automated deployment to the Apple App Store and 
 
 1. **Generate credentials** (if not already done):
 
-    ```bash
-    eas credentials
-    ```
+   ```bash
+   eas credentials
+   ```
 
-    Choose "iOS" → "App Store" → Follow the prompts to set up your certificates and provisioning profiles
+   Choose "iOS" → "App Store" → Follow the prompts to set up your certificates and provisioning profiles
 
 2. **Configure App Store Connect API Key**:
 
-    ```bash
-    eas submit --platform ios
-    ```
+   ```bash
+   eas submit --platform ios
+   ```
 
-    On first run, you'll be prompted to provide your App Store Connect API credentials:
-    - Key ID
-    - Issuer ID
-    - API Key (.p8 file)
+   On first run, you'll be prompted to provide your App Store Connect API credentials:
+   - Key ID
+   - Issuer ID
+   - API Key (.p8 file)
 
-    To generate these:
-    - Go to [App Store Connect](https://appstoreconnect.apple.com/)
-    - Navigate to Users and Access → Keys
-    - Create a new key with "App Manager" role
-    - Download the .p8 file and save the Key ID and Issuer ID
+   To generate these:
+   - Go to [App Store Connect](https://appstoreconnect.apple.com/)
+   - Navigate to Users and Access → Keys
+   - Create a new key with "App Manager" role
+   - Download the .p8 file and save the Key ID and Issuer ID
 
 ### Android (Play Store)
 
 1. **Create a Google Service Account**:
-    - Go to [Google Play Console](https://play.google.com/console)
-    - Navigate to Setup → API access
-    - Create a new service account or use existing
-    - Create credentials (JSON key file)
-    - Grant the service account "Release Manager" permissions
+   - Go to [Google Play Console](https://play.google.com/console)
+   - Navigate to Setup → API access
+   - Link or create a Google Cloud Project (if not already linked)
+   - Click "Create new service account"
+     - This redirects to Google Cloud Console
+     - Click "Create Service Account"
+     - Name it "EAS Build Deploy"
+     - Click "Create and Continue"
+     - Grant role: "Service Account User"
+     - Click "Done"
+   - **Create and download JSON key**:
+     - Find the service account you created
+     - Click on it → Keys tab
+     - Click "Add Key" → "Create new key"
+     - Choose **JSON** format
+     - Click "Create"
+     - Save the downloaded JSON file
+   - **Grant Play Console access**:
+     - Go back to Play Console → Setup → API Access
+     - Find your service account
+     - Click "Grant access"
+     - Add your app under "App permissions"
+     - Grant "Release to production, exclude devices, and use Play App Signing" permission
+     - Click "Invite user" / "Apply"
 
 2. **Configure EAS with Play Store credentials**:
-    ```bash
-    eas submit --platform android
-    ```
-    When prompted, provide the path to your service account JSON file
+
+   ```bash
+   # Save the downloaded JSON as google-service-account.json in project root
+   # Then run the setup script which will create the EAS secret
+   ./scripts/setup-eas-secrets.sh
+   ```
+
+   Or manually:
+
+   ```bash
+   eas secret:create --scope project --name GOOGLE_SERVICE_ACCOUNT --type file --value ./google-service-account.json
+   ```
 
 ## Step 2: Generate Expo Access Token
 
@@ -66,46 +93,43 @@ This guide will help you set up automated deployment to the Apple App Store and 
 2. Navigate to Settings → Secrets and variables → Actions
 3. Click "New repository secret"
 4. Add the following secret:
-    - Name: `EXPO_TOKEN`
-    - Value: [paste the token from Step 2]
+   - Name: `EXPO_TOKEN`
+   - Value: [paste the token from Step 2]
 
-## Step 4: Configure App Store Submission
+## Step 4: Verify EAS Configuration
 
-Update your `eas.json` submit configuration to include all necessary details:
+Your `eas.json` is already configured with the correct submission settings:
 
 ```json
 {
-    "submit": {
-        "production": {
-            "ios": {
-                "appleId": "your-apple-id@example.com",
-                "ascAppId": "your-app-store-app-id",
-                "appleTeamId": "FWV22U8U39"
-            },
-            "android": {
-                "serviceAccountKeyPath": "path/to/google-service-account.json",
-                "track": "production"
-            }
-        }
+  "submit": {
+    "production": {
+      "ios": {
+        "appleTeamId": "FWV22U8U39",
+        "ascAppId": "6754509672"
+      },
+      "android": {
+        "serviceAccountKeyPath": "${EAS_SECRET:GOOGLE_SERVICE_ACCOUNT}",
+        "track": "production"
+      }
+    },
+    "preview": {
+      "ios": {
+        "appleTeamId": "FWV22U8U39",
+        "ascAppId": "6754509672"
+      },
+      "android": {
+        "serviceAccountKeyPath": "${EAS_SECRET:GOOGLE_SERVICE_ACCOUNT}",
+        "track": "internal"
+      }
     }
+  }
 }
 ```
 
-**Note**: For security, don't commit the `serviceAccountKeyPath` directly. Instead, use EAS Secrets:
+The `${EAS_SECRET:GOOGLE_SERVICE_ACCOUNT}` references the EAS secret you created in Step 1.
 
-```bash
-# Store service account JSON as EAS secret
-eas secret:create --scope project --name GOOGLE_SERVICE_ACCOUNT --type file --value ./google-service-account.json
-```
-
-Then update `eas.json`:
-
-```json
-"android": {
-  "serviceAccountKeyPath": "${EAS_SECRET:GOOGLE_SERVICE_ACCOUNT}",
-  "track": "production"
-}
-```
+**Note**: The Google Service Account JSON is stored as an EAS secret (not committed to git) for security.
 
 ## Step 5: Deploy!
 
@@ -187,14 +211,14 @@ The production workflow will:
 
 1. Check EAS build logs:
 
-    ```bash
-    eas build:list
-    ```
+   ```bash
+   eas build:list
+   ```
 
 2. View specific build details:
-    ```bash
-    eas build:view [build-id]
-    ```
+   ```bash
+   eas build:view [build-id]
+   ```
 
 ### Submission Failures
 
@@ -253,15 +277,15 @@ Add Slack/Discord notifications to your workflow:
 - name: Notify on Success
   if: success()
   run: |
-      curl -X POST ${{ secrets.SLACK_WEBHOOK_URL }} \
-      -H 'Content-Type: application/json' \
-      -d '{"text":"✅ Coral Clash deployment successful!"}'
+    curl -X POST ${{ secrets.SLACK_WEBHOOK_URL }} \
+    -H 'Content-Type: application/json' \
+    -d '{"text":"✅ Coral Clash deployment successful!"}'
 ```
 
 ## Security Best Practices
 
 1. **Never commit sensitive files**:
-    - Add to `.gitignore`: `*.p8`, `*.p12`, `google-service-account.json`
+   - Add to `.gitignore`: `*.p8`, `*.p12`, `google-service-account.json`
 2. **Use EAS Secrets** for sensitive data instead of committing files
 
 3. **Rotate tokens regularly**: Generate new Expo tokens every 6-12 months

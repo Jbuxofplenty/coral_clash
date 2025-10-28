@@ -45,3 +45,7 @@ build-*.tar.gz
 *.aab
 *.ipa
 *.app
+
+# Google Cloud
+coral-clash-*.json
+google-service-account.json
