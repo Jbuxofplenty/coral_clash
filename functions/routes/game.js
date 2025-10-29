@@ -1,6 +1,13 @@
+import { CloudTasksClient } from '@google-cloud/tasks';
 import { HttpsError, onCall, onRequest } from 'firebase-functions/v2/https';
 import { admin } from '../init.js';
-import { GAME_VERSION } from '../shared/dist/game/index.js';
+import {
+    CoralClash,
+    GAME_VERSION,
+    calculateUndoMoveCount,
+    createGameSnapshot,
+    restoreGameFromSnapshot,
+} from '../shared/dist/game/index.js';
 import { getAppCheckConfig } from '../utils/appCheckConfig.js';
 import { getGameResult, validateMove } from '../utils/gameValidator.js';
 import {
@@ -13,6 +20,13 @@ import {
     sendGameAcceptedNotification,
     sendGameRequestNotification,
     sendOpponentMoveNotification,
+    sendResetApprovedNotification,
+    sendResetCancelledNotification,
+    sendResetRejectedNotification,
+    sendUndoApprovedNotification,
+    sendUndoCancelledNotification,
+    sendUndoRejectedNotification,
+    sendUndoRequestNotification,
 } from '../utils/notifications.js';
 
 const db = admin.firestore();
@@ -600,7 +614,6 @@ export const makeMove = onCall(getAppCheckConfig(), async (request) => {
             }
         }
 
-        console.log('[makeMove] Game state after move:', validation.gameState);
         return {
             success: true,
             message: 'Move made successfully',
@@ -690,7 +703,6 @@ async function makeComputerMoveHelper(gameId, gameData = null) {
 
     // For now, we'll use simple random move selection
     // In the future, this could be enhanced with difficulty levels
-    const { CoralClash, restoreGameFromSnapshot } = require('../shared/dist/game');
     const game = new CoralClash();
 
     // Restore full game state including coral
@@ -843,7 +855,6 @@ async function cancelPendingTimeoutTask(gameId, taskName) {
     }
 
     try {
-        const { CloudTasksClient } = require('@google-cloud/tasks');
         const client = new CloudTasksClient();
 
         await client.deleteTask({ name: taskName });
@@ -1272,9 +1283,6 @@ export const requestGameReset = onCall(getAppCheckConfig(), async (request) => {
 
         if (isComputerGame) {
             // Computer game: Auto-approve and reset immediately
-            const { CoralClash } = require('../shared/dist/game');
-            const { createGameSnapshot } = require('../shared/dist/game');
-
             const newGame = new CoralClash();
             const initialGameState = createGameSnapshot(newGame);
 
@@ -1372,9 +1380,6 @@ export const respondToResetRequest = onCall(getAppCheckConfig(), async (request)
 
         if (approve) {
             // Approved: Reset the game
-            const { CoralClash } = require('../shared/dist/game');
-            const { createGameSnapshot } = require('../shared/dist/game');
-
             const newGame = new CoralClash();
             const initialGameState = createGameSnapshot(newGame);
 
@@ -1389,7 +1394,6 @@ export const respondToResetRequest = onCall(getAppCheckConfig(), async (request)
             });
 
             // Send push notification to requester
-            const { sendResetApprovedNotification } = require('../utils/notifications');
             const userDoc = await db.collection('users').doc(userId).get();
             const userData = userDoc.exists ? userDoc.data() : {};
             const userName = formatDisplayName(userData.displayName, userData.discriminator);
@@ -1419,15 +1423,12 @@ export const respondToResetRequest = onCall(getAppCheckConfig(), async (request)
                 // User is cancelling their own request - notify the opponent
                 const opponentId =
                     gameData.creatorId === userId ? gameData.opponentId : gameData.creatorId;
-                const { sendResetCancelledNotification } = require('../utils/notifications');
 
                 await sendResetCancelledNotification(opponentId, userId, userName, gameId).catch(
                     (error) => console.error('Error sending reset cancelled notification:', error),
                 );
             } else {
                 // Opponent is rejecting the request - notify the requester
-                const { sendResetRejectedNotification } = require('../utils/notifications');
-
                 await sendResetRejectedNotification(requesterId, userId, userName, gameId).catch(
                     (error) => console.error('Error sending reset rejected notification:', error),
                 );
@@ -1734,11 +1735,6 @@ export const requestUndo = onCall(getAppCheckConfig(), async (request) => {
         // Handle computer game - auto-approve and undo immediately
         if (gameData.opponentId === 'computer') {
             // Load game state and undo moves
-            const {
-                CoralClash,
-                restoreGameFromSnapshot,
-                createGameSnapshot,
-            } = require('../shared/dist/game');
             const coralClash = new CoralClash();
             restoreGameFromSnapshot(coralClash, gameData.gameState);
 
@@ -1781,7 +1777,6 @@ export const requestUndo = onCall(getAppCheckConfig(), async (request) => {
         });
 
         // Send notification to opponent
-        const { sendUndoRequestNotification } = require('../utils/notifications');
         const userDoc = await db.collection('users').doc(userId).get();
         const userData = userDoc.exists ? userDoc.data() : {};
         const userName = formatDisplayName(userData.displayName, userData.discriminator);
@@ -1844,12 +1839,6 @@ export const respondToUndoRequest = onCall(getAppCheckConfig(), async (request) 
 
         if (approve) {
             // Undo approved - perform the undo
-            const {
-                CoralClash,
-                restoreGameFromSnapshot,
-                createGameSnapshot,
-                calculateUndoMoveCount,
-            } = require('../shared/dist/game');
             const coralClash = new CoralClash();
             restoreGameFromSnapshot(coralClash, gameData.gameState);
 
@@ -1888,7 +1877,6 @@ export const respondToUndoRequest = onCall(getAppCheckConfig(), async (request) 
             });
 
             // Send notification to requester
-            const { sendUndoApprovedNotification } = require('../utils/notifications');
             const userDoc = await db.collection('users').doc(userId).get();
             const userData = userDoc.exists ? userDoc.data() : {};
             const userName = formatDisplayName(userData.displayName, userData.discriminator);
@@ -1923,15 +1911,11 @@ export const respondToUndoRequest = onCall(getAppCheckConfig(), async (request) 
                 // User is cancelling their own request - notify the opponent
                 const opponentId =
                     gameData.creatorId === userId ? gameData.opponentId : gameData.creatorId;
-                const { sendUndoCancelledNotification } = require('../utils/notifications');
-
                 await sendUndoCancelledNotification(opponentId, userId, userName, gameId).catch(
                     (error) => console.error('Error sending undo cancelled notification:', error),
                 );
             } else {
                 // Opponent is rejecting the request - notify the requester
-                const { sendUndoRejectedNotification } = require('../utils/notifications');
-
                 await sendUndoRejectedNotification(
                     requesterId,
                     userId,

@@ -1,28 +1,52 @@
+// Black pieces - greyscale (Ocean themed)
+import BCC from './greyscale/grey-crab-coral.png'; // Crab with Coral
+import BC from './greyscale/grey-crab.png'; // Crab (c)
+import BDC from './greyscale/grey-dolphin-coral.png'; // Dolphin with Coral
+import BD from './greyscale/grey-dolphin.png'; // Dolphin (d)
+import BOC from './greyscale/grey-octopus-coral.png'; // Octopus with Coral
+import BO from './greyscale/grey-octopus.png'; // Octopus (o)
+import BFC from './greyscale/grey-puffer-coral.png'; // Pufferfish with Coral
+import BF from './greyscale/grey-puffer.png'; // Pufferfish (f)
+import BTC from './greyscale/grey-turtle-coral.png'; // Turtle with Coral
+import BT from './greyscale/grey-turtle.png'; // Turtle (t)
+import BH from './greyscale/grey-whale.png'; // Whale (h)
+
+// White pieces - colored (Ocean themed)
+import WCC from './transparent/crab-coral.png'; // Crab with Coral
+import WC from './transparent/crab.png'; // Crab (c)
+import WDC from './transparent/dolphin-coral.png'; // Dolphin with Coral
+import WD from './transparent/dolphin.png'; // Dolphin (d)
+import WOC from './transparent/octopus-coral.png'; // Octopus with Coral
+import WO from './transparent/octopus.png'; // Octopus (o)
+import WFC from './transparent/puffer-coral.png'; // Pufferfish with Coral
+import WF from './transparent/puffer.png'; // Pufferfish (f)
+import WTC from './transparent/turtle-coral.png'; // Turtle with Coral
+import WT from './transparent/turtle.png'; // Turtle (t)
+import WH from './transparent/whale.png'; // Whale (h)
+
 const PieceImages = {
-    // Black pieces - greyscale (Ocean themed)
-    BF: require('./greyscale/grey-puffer.png'), // Pufferfish (f)
-    BFC: require('./greyscale/grey-puffer-coral.png'), // Pufferfish with Coral
-    BD: require('./greyscale/grey-dolphin.png'), // Dolphin (d)
-    BDC: require('./greyscale/grey-dolphin-coral.png'), // Dolphin with Coral
-    BC: require('./greyscale/grey-crab.png'), // Crab (c)
-    BCC: require('./greyscale/grey-crab-coral.png'), // Crab with Coral
-    BH: require('./greyscale/grey-whale.png'), // Whale (h)
-    BT: require('./greyscale/grey-turtle.png'), // Turtle (t)
-    BTC: require('./greyscale/grey-turtle-coral.png'), // Turtle with Coral
-    BO: require('./greyscale/grey-octopus.png'), // Octopus (o)
-    BOC: require('./greyscale/grey-octopus-coral.png'), // Octopus with Coral
-    // White pieces - colored (Ocean themed)
-    WF: require('./transparent/puffer.png'), // Pufferfish (f)
-    WFC: require('./transparent/puffer-coral.png'), // Pufferfish with Coral
-    WD: require('./transparent/dolphin.png'), // Dolphin (d)
-    WDC: require('./transparent/dolphin-coral.png'), // Dolphin with Coral
-    WC: require('./transparent/crab.png'), // Crab (c)
-    WCC: require('./transparent/crab-coral.png'), // Crab with Coral
-    WH: require('./transparent/whale.png'), // Whale (h)
-    WT: require('./transparent/turtle.png'), // Turtle (t)
-    WTC: require('./transparent/turtle-coral.png'), // Turtle with Coral
-    WO: require('./transparent/octopus.png'), // Octopus (o)
-    WOC: require('./transparent/octopus-coral.png'), // Octopus with Coral
+    BF,
+    BFC,
+    BD,
+    BDC,
+    BC,
+    BCC,
+    BH,
+    BT,
+    BTC,
+    BO,
+    BOC,
+    WF,
+    WFC,
+    WD,
+    WDC,
+    WC,
+    WCC,
+    WH,
+    WT,
+    WTC,
+    WO,
+    WOC,
 };
 
 export default PieceImages;

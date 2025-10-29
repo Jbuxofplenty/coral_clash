@@ -40,16 +40,16 @@ All game APIs validate the client version:
 ```javascript
 // functions/routes/game.js
 function validateGameVersion(clientVersion) {
-    const version = clientVersion || GAME_VERSION;
+  const version = clientVersion || GAME_VERSION;
 
-    if (version !== GAME_VERSION) {
-        throw new HttpsError(
-            'failed-precondition',
-            `Game version mismatch. Client: ${version}, Server: ${GAME_VERSION}`,
-        );
-    }
+  if (version !== GAME_VERSION) {
+    throw new HttpsError(
+      'failed-precondition',
+      `Game version mismatch. Client: ${version}, Server: ${GAME_VERSION}`,
+    );
+  }
 
-    return version;
+  return version;
 }
 ```
 
@@ -62,13 +62,13 @@ The frontend automatically sends the current version with each API call:
 import { GAME_VERSION } from '../../shared/game';
 
 const makeMove = async ({ gameId, move }) => {
-    const callable = httpsCallable(functions, 'makeMove');
-    const result = await callable({
-        gameId,
-        move,
-        version: GAME_VERSION, // ✅ Version sent automatically
-    });
-    return result.data;
+  const callable = httpsCallable(functions, 'makeMove');
+  const result = await callable({
+    gameId,
+    move,
+    version: GAME_VERSION, // ✅ Version sent automatically
+  });
+  return result.data;
 };
 ```
 
@@ -78,11 +78,11 @@ Each game stores its engine version:
 
 ```javascript
 const gameData = {
-    creatorId,
-    opponentId,
-    status: 'pending',
-    version: GAME_VERSION, // ✅ Stored in Firestore
-    // ... other fields
+  creatorId,
+  opponentId,
+  status: 'pending',
+  version: GAME_VERSION, // ✅ Stored in Firestore
+  // ... other fields
 };
 ```
 
@@ -98,44 +98,44 @@ const gameData = {
 
 1. **Create new version folder:**
 
-    ```bash
-    mkdir shared/game/v1.1.0
-    cp shared/game/v1.0.0/* shared/game/v1.1.0/
-    ```
+   ```bash
+   mkdir shared/game/v1.1.0
+   cp shared/game/v1.0.0/* shared/game/v1.1.0/
+   ```
 
 2. **Update version constant:**
 
-    ```typescript
-    // shared/game/index.ts
-    export const GAME_VERSION = '1.1.0';
-    ```
+   ```typescript
+   // shared/game/index.ts
+   export const GAME_VERSION = '1.1.0';
+   ```
 
 3. **Update getGameEngine:**
 
-    ```typescript
-    export function getGameEngine(version: string = GAME_VERSION) {
-        switch (version) {
-            case '1.0.0':
-                return require('./v1.0.0');
-            case '1.1.0':
-                return require('./v1.1.0');
-            default:
-                throw new Error(`Unsupported game version: ${version}`);
-        }
-    }
-    ```
+   ```typescript
+   export async function getGameEngine(version: string = GAME_VERSION) {
+     switch (version) {
+       case '1.0.0':
+         return await import('./v1.0.0/index.js');
+       case '1.1.0':
+         return await import('./v1.1.0/index.js');
+       default:
+         throw new Error(`Unsupported game version: ${version}`);
+     }
+   }
+   ```
 
 4. **Update exports:**
 
-    ```typescript
-    // Export new version as default
-    export * from './v1.1.0';
-    ```
+   ```typescript
+   // Export new version as default
+   export * from './v1.1.0';
+   ```
 
 5. **Deploy backend first, then frontend:**
-    - Backend supports both versions during transition
-    - Frontend users gradually update to new version
-    - Old version can be deprecated after transition period
+   - Backend supports both versions during transition
+   - Frontend users gradually update to new version
+   - Old version can be deprecated after transition period
 
 ## Benefits
 

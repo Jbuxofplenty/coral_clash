@@ -1,3 +1,4 @@
+import { CloudTasksClient } from '@google-cloud/tasks';
 import { onDocumentUpdated } from 'firebase-functions/v2/firestore';
 import { admin } from '../init.js';
 import { increment, serverTimestamp } from '../utils/helpers.js';
@@ -13,7 +14,6 @@ async function cancelPendingTimeoutTask(gameId, taskName) {
 
     try {
         const db = admin.firestore();
-        const { CloudTasksClient } = require('@google-cloud/tasks');
         const client = new CloudTasksClient();
 
         await client.deleteTask({ name: taskName });
@@ -194,7 +194,6 @@ export const onGameMoveUpdate = onDocumentUpdated('games/{gameId}', async (event
         }
 
         // Schedule a task to check expiration at the exact time
-        const { CloudTasksClient } = require('@google-cloud/tasks');
         const client = new CloudTasksClient();
 
         const project = process.env.GCLOUD_PROJECT || process.env.GCP_PROJECT;

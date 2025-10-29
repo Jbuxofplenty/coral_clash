@@ -13,27 +13,26 @@ This directory contains exported game states for testing purposes.
 ## Using Fixtures in Tests
 
 ```typescript
-import { CoralClash } from './coralClash';
-import { applyFixture, validateFixtureVersion } from './__fixtures__/fixtureLoader';
-
-// Import fixtures directly (Jest only - doesn't work in React Native)
-const exampleState = require('./__fixtures__/example-state.json');
+import { CoralClash } from './coralClash.js';
+import { applyFixture, validateFixtureVersion } from './gameState.js';
+// Import fixtures directly (works in both Jest and React Native with proper bundler config)
+import exampleState from './__fixtures__/example-state.json';
 
 describe('My Test', () => {
-    it('should handle a specific game state', () => {
-        const fixture = exampleState;
-        validateFixtureVersion(fixture); // Optional: check schema version
+  it('should handle a specific game state', () => {
+    const fixture = exampleState;
+    validateFixtureVersion(fixture); // Optional: check schema version
 
-        const game = new CoralClash();
-        applyFixture(game, fixture);
+    const game = new CoralClash();
+    applyFixture(game, fixture);
 
-        // Now test with the loaded state
-        expect(game.fen()).toBe(fixture.state.fen);
-    });
+    // Now test with the loaded state
+    expect(game.fen()).toBe(fixture.state.fen);
+  });
 });
 ```
 
-**Note:** Import fixtures statically at the top of your file. Dynamic `require()` with template literals doesn't work with React Native's Metro bundler.
+**Note:** Import fixtures statically at the top of your file. Dynamic imports don't work reliably with React Native's Metro bundler.
 
 ## Fixture Schema
 

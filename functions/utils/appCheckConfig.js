@@ -15,17 +15,30 @@
  * 5. Redeploy functions
  */
 
-export const shouldEnforceAppCheck = () => {
-    // Check if enforcement is enabled via environment variable
-    const enforce = process.env.ENFORCE_APP_CHECK === 'true';
+// Cache the enforcement setting to avoid repeated checks and logs
+let _enforceAppCheck = null;
+let _hasLogged = false;
 
-    if (enforce) {
-        console.log('🔒 App Check enforcement is ENABLED - blocking invalid tokens');
-    } else {
-        console.log('⚠️  App Check enforcement is DISABLED - logging only');
+export const shouldEnforceAppCheck = () => {
+    // Return cached value if already determined
+    if (_enforceAppCheck !== null) {
+        return _enforceAppCheck;
     }
 
-    return enforce;
+    // Check if enforcement is enabled via environment variable
+    _enforceAppCheck = process.env.ENFORCE_APP_CHECK === 'true';
+
+    // Only log once on first call
+    if (!_hasLogged) {
+        if (_enforceAppCheck) {
+            console.log('🔒 App Check enforcement is ENABLED - blocking invalid tokens');
+        } else {
+            console.log('⚠️  App Check enforcement is DISABLED - logging only');
+        }
+        _hasLogged = true;
+    }
+
+    return _enforceAppCheck;
 };
 
 /**

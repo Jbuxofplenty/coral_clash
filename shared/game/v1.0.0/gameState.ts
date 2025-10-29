@@ -24,14 +24,14 @@ export interface GameStateFixture {
 }
 
 /**
- * NOTE: The loadFixture() function has been removed because dynamic require()
- * doesn't work with React Native's Metro bundler.
+ * NOTE: The loadFixture() function has been removed because dynamic imports
+ * don't work reliably with React Native's Metro bundler.
  *
- * For Jest tests: Import fixtures directly using require()
+ * For Jest tests: Import fixtures directly using ES module imports
  * For React Native: Import fixtures statically at the top of your file
  *
  * Example:
- *   const fixture = require('./__fixtures__/whale-move-diagonally.json');
+ *   import fixture from './__fixtures__/whale-move-diagonally.json';
  *   applyFixture(game, fixture);
  */
 

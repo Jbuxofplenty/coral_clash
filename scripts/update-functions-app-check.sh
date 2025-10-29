@@ -25,10 +25,10 @@ for FILE in "${FILES[@]}"; do
         continue
     fi
     
-    # Add import after other requires (look for the last require statement)
+    # Add import after other imports
     # This is a placeholder - manual updates recommended for safety
     echo "   ⚠️  Manual update needed - add this import:"
-    echo "   const { getAppCheckConfig } = require('../utils/appCheckConfig');"
+    echo "   import { getAppCheckConfig } from '../utils/appCheckConfig';"
     echo ""
     echo "   Then replace all onCall( with onCall(getAppCheckConfig(), "
     echo ""

@@ -44,8 +44,12 @@ importGameState(game, gameState);
 ### In Firebase Functions
 
 ```javascript
-const { CoralClash } = require('../shared/game/coralClash');
-const { createGameSnapshot, restoreGameFromSnapshot } = require('../shared/game/gameState');
+import {
+  CoralClash,
+  DEFAULT_POSITION,
+  createGameSnapshot,
+  restoreGameFromSnapshot,
+} from '../shared/dist/game/index.js';
 
 // Create a lightweight snapshot for Firestore
 const game = new CoralClash(DEFAULT_POSITION);
@@ -108,5 +112,6 @@ When making changes to game rules:
 ## Notes
 
 - The game engine is written in TypeScript
-- Firebase Functions use JavaScript but can import the TypeScript directly
-- Node.js will handle TypeScript compilation when importing
+- Firebase Functions use ES modules and import from the compiled `dist/` directory
+- Both frontend (React Native) and backend (Firebase Functions) use the same ES module exports
+- The shared library is compiled to ES modules for maximum compatibility
