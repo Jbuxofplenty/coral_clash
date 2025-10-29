@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
+    ActivityIndicator,
+    Dimensions,
     Modal,
-    View,
+    Platform,
+    StyleSheet,
     Text,
     TouchableOpacity,
-    StyleSheet,
-    Dimensions,
-    Platform,
-    ActivityIndicator,
+    View,
 } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
 

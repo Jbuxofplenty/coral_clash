@@ -18,12 +18,11 @@ import { useCoralClash, useFirebaseFunctions, useGameActions } from '../hooks';
 import Coral from './Coral';
 import EmptyBoard from './EmptyBoard';
 import GameStatusBanner from './GameStatusBanner';
-import LoadingScreen from './LoadingScreen';
 import Moves from './Moves';
 import Pieces from './Pieces';
 import PlayerStatusBar from './PlayerStatusBar';
 
-const { height: SCREEN_HEIGHT } = Dimensions.get('window');
+const { height: _SCREEN_HEIGHT } = Dimensions.get('window');
 
 // Game state schema version for fixtures
 const GAME_STATE_VERSION = '1.2.0';
@@ -88,7 +87,7 @@ const BaseCoralClashBoard = ({
         userResigned,
         isUserTurn,
         gameData,
-        isLoading: gameActionsLoading,
+        isLoading: _gameActionsLoading,
         isProcessing: isGameActionProcessing,
     } = useGameActions(coralClash, gameId, () => forceUpdate((n) => n + 1));
     const [visibleMoves, setVisibleMoves] = useState([]);
@@ -108,12 +107,7 @@ const BaseCoralClashBoard = ({
 
     // Time tracking state for local countdown
     const [localTimeRemaining, setLocalTimeRemaining] = useState(null);
-    const [lastUpdateTime, setLastUpdateTime] = useState(null);
-
-    // Safety check - show loading if coralClash is not initialized
-    if (!coralClash) {
-        return <LoadingScreen iconName='gamepad' message='Loading game...' />;
-    }
+    const [_lastUpdateTime, setLastUpdateTime] = useState(null);
 
     const openMenu = () => {
         setMenuVisible(true);
@@ -145,7 +139,7 @@ const BaseCoralClashBoard = ({
                 showAlert('Error', 'Failed to load game state');
             }
         }
-    }, [gameState, gameStateLoaded, fixture, coralClash, width]);
+    }, [gameState, gameStateLoaded, fixture, coralClash, width, showAlert]);
 
     // Load fixture if provided (for dev mode scenarios)
     useEffect(() => {
@@ -158,7 +152,7 @@ const BaseCoralClashBoard = ({
                 showAlert('Error', 'Failed to load game state');
             }
         }
-    }, [fixture, fixtureLoaded, coralClash]);
+    }, [fixture, fixtureLoaded, coralClash, showAlert]);
 
     // Firestore listener is now managed in useGameActions hook
     // No need for duplicate listener here
@@ -182,6 +176,7 @@ const BaseCoralClashBoard = ({
             // Force re-render to show the updated board
             forceUpdate((n) => n + 1);
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [coralClash.history().length, fixture, fixtureLoaded, gameId, opponentType, coralClash]);
 
     // Clear selection state when board is flipped
@@ -1363,6 +1358,7 @@ const styles = StyleSheet.create({
     spacerCompact: {
         height: 6,
     },
+    // eslint-disable-next-line react-native/no-unused-styles -- Used by child components
     controlBar: {
         position: 'absolute',
         marginBottom: 20,
@@ -1377,6 +1373,7 @@ const styles = StyleSheet.create({
         paddingVertical: 12,
         backgroundColor: 'transparent',
     },
+    // eslint-disable-next-line react-native/no-unused-styles -- Used by child components
     controlButton: {
         padding: 12,
         backgroundColor: 'transparent',

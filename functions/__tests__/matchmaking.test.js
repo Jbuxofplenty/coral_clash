@@ -1,51 +1,18 @@
-// Mock the shared game library before requiring anything
-jest.mock('../shared/dist/game');
+import { cleanup, setupStandardMocks } from './testHelpers.js';
 
-const test = require('firebase-functions-test')();
+const mocks = setupStandardMocks();
 
-// Mock Firestore
-const mockGet = jest.fn();
-const mockAdd = jest.fn();
-const mockSet = jest.fn();
-const mockUpdate = jest.fn();
-const mockDelete = jest.fn();
-const mockWhere = jest.fn();
-const mockOrderBy = jest.fn();
-const mockLimit = jest.fn();
-const mockServerTimestamp = jest.fn(() => ({ _methodName: 'serverTimestamp' }));
-
-const createMockBatch = () => ({
-    update: jest.fn(),
-    delete: jest.fn(),
-    commit: jest.fn().mockResolvedValue(undefined),
-});
-
-const mockBatch = jest.fn(() => createMockBatch());
-
-const createMockDocRef = () => ({
-    get: mockGet,
-    update: mockUpdate,
-    set: mockSet,
-    delete: mockDelete,
-});
-
-const createMockCollectionRef = () => ({
-    doc: jest.fn(() => createMockDocRef()),
-    add: mockAdd,
-    where: mockWhere,
-    orderBy: mockOrderBy,
-    limit: mockLimit,
-    get: mockGet,
-});
-
-const mockCollection = jest.fn(() => createMockCollectionRef());
+jest.mock('../shared/dist/game/index.js');
 
 jest.mock('firebase-admin', () => {
     const mockFirestoreFunc = jest.fn(() => ({
-        collection: mockCollection,
-        batch: mockBatch,
+        collection: (...args) => mocks.mockCollection(...args),
+        batch: (...args) => mocks.mockBatch(...args),
         FieldValue: {
-            serverTimestamp: mockServerTimestamp,
+            serverTimestamp: (...args) => mocks.mockServerTimestamp(...args),
+            increment: (...args) => mocks.mockIncrement(...args),
+            arrayUnion: (...args) => mocks.mockArrayUnion(...args),
+            arrayRemove: (...args) => mocks.mockArrayRemove(...args),
         },
     }));
 
@@ -60,35 +27,33 @@ jest.mock('firebase-admin', () => {
     };
 });
 
-const matchmakingRoutes = require('../routes/matchmaking');
-const { onPlayerJoinQueue } = require('../triggers/onPlayerJoinQueue');
-const { cleanupStaleMatchmakingEntries } = require('../scheduled/cleanupStaleMatchmakingEntries');
+import * as matchmakingRoutes from '../routes/matchmaking.js';
 
 describe('Matchmaking Functions', () => {
     beforeEach(() => {
         jest.clearAllMocks();
 
         // Setup default mock chains
-        mockWhere.mockReturnValue({
-            where: mockWhere,
-            orderBy: mockOrderBy,
-            limit: mockLimit,
-            get: mockGet,
+        mocks.mockWhere.mockReturnValue({
+            where: mocks.mockWhere,
+            orderBy: mocks.mockOrderBy,
+            limit: mocks.mockLimit,
+            get: mocks.mockGet,
         });
 
-        mockOrderBy.mockReturnValue({
-            orderBy: mockOrderBy,
-            limit: mockLimit,
-            get: mockGet,
+        mocks.mockOrderBy.mockReturnValue({
+            orderBy: mocks.mockOrderBy,
+            limit: mocks.mockLimit,
+            get: mocks.mockGet,
         });
 
-        mockLimit.mockReturnValue({
-            get: mockGet,
+        mocks.mockLimit.mockReturnValue({
+            get: mocks.mockGet,
         });
     });
 
     afterAll(() => {
-        test.cleanup();
+        cleanup();
     });
 
     describe('joinMatchmaking', () => {
@@ -98,17 +63,17 @@ describe('Matchmaking Functions', () => {
             // Call handler directly (v2 compatible)
 
             // Mock user not already in queue
-            mockGet.mockResolvedValueOnce({
+            mocks.mockGet.mockResolvedValueOnce({
                 exists: false,
             });
 
             // Mock no active games (2 queries)
-            mockGet
+            mocks.mockGet
                 .mockResolvedValueOnce({ empty: true }) // creatorId query
                 .mockResolvedValueOnce({ empty: true }); // opponentId query
 
             // Mock user profile exists
-            mockGet.mockResolvedValueOnce({
+            mocks.mockGet.mockResolvedValueOnce({
                 exists: true,
                 data: () => ({
                     displayName: 'TestUser',
@@ -118,12 +83,12 @@ describe('Matchmaking Functions', () => {
             });
 
             // Mock queue is empty (no matches)
-            mockGet.mockResolvedValueOnce({
+            mocks.mockGet.mockResolvedValueOnce({
                 empty: true,
                 docs: [],
             });
 
-            mockSet.mockResolvedValue(undefined);
+            mocks.mockSet.mockResolvedValue(undefined);
 
             const result = await matchmakingRoutes.joinMatchmakingHandler({
                 data: { timeControl: null },
@@ -132,7 +97,7 @@ describe('Matchmaking Functions', () => {
 
             expect(result.success).toBe(true);
             expect(result.message).toBe('Joined matchmaking queue');
-            expect(mockSet).toHaveBeenCalledWith({
+            expect(mocks.mockSet).toHaveBeenCalledWith({
                 userId,
                 displayName: 'TestUser',
                 discriminator: '1234',
@@ -148,12 +113,12 @@ describe('Matchmaking Functions', () => {
             // Call handler directly (v2 compatible)
 
             // Mock user not in queue
-            mockGet.mockResolvedValueOnce({
+            mocks.mockGet.mockResolvedValueOnce({
                 exists: false,
             });
 
             // Mock active game exists
-            mockGet
+            mocks.mockGet
                 .mockResolvedValueOnce({ empty: false }) // Has active game as creator
                 .mockResolvedValueOnce({ empty: true });
 
@@ -179,7 +144,7 @@ describe('Matchmaking Functions', () => {
         const userId = 'user-123';
 
         it('should successfully leave matchmaking queue', async () => {
-            mockDelete.mockResolvedValue(undefined);
+            mocks.mockDelete.mockResolvedValue(undefined);
 
             const result = await matchmakingRoutes.leaveMatchmakingHandler({
                 data: {},
@@ -188,7 +153,7 @@ describe('Matchmaking Functions', () => {
 
             expect(result.success).toBe(true);
             expect(result.message).toBe('Left matchmaking queue');
-            expect(mockDelete).toHaveBeenCalled();
+            expect(mocks.mockDelete).toHaveBeenCalled();
         });
 
         it('should reject if user not authenticated', async () => {
@@ -202,8 +167,6 @@ describe('Matchmaking Functions', () => {
     });
 
     describe('getMatchmakingStatus', () => {
-        const userId = 'user-123';
-
         it('should reject if user not authenticated', async () => {
             await expect(
                 matchmakingRoutes.getMatchmakingStatusHandler({
@@ -216,7 +179,7 @@ describe('Matchmaking Functions', () => {
 
     describe('Edge Cases', () => {
         it('should handle database errors gracefully', async () => {
-            mockGet.mockRejectedValueOnce(new Error('Database connection failed'));
+            mocks.mockGet.mockRejectedValueOnce(new Error('Database connection failed'));
 
             await expect(
                 matchmakingRoutes.joinMatchmakingHandler({

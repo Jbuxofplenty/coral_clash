@@ -1,12 +1,12 @@
-const { onDocumentCreated } = require('firebase-functions/v2/firestore');
-const admin = require('firebase-admin');
-const { getDefaultSettings } = require('../utils/helpers');
+import { onDocumentCreated } from 'firebase-functions/v2/firestore';
+import { admin } from '../init.js';
+import { getDefaultSettings } from '../utils/helpers.js';
 
 /**
  * Automatically assign a unique discriminator to new users
  * Trigger on user document creation
  */
-exports.onUserCreate = onDocumentCreated('users/{userId}', async (event) => {
+export const onUserCreate = onDocumentCreated('users/{userId}', async (event) => {
     try {
         const db = admin.firestore();
         const snap = event.data;

@@ -1,39 +1,24 @@
-// Mock the shared game library before requiring anything
-jest.mock('../shared/dist/game');
+import { cleanup, setupStandardMocks } from './testHelpers.js';
 
-const test = require('firebase-functions-test')();
+const mocks = setupStandardMocks();
 
-// Mock Firestore with support for subcollections
-const mockGet = jest.fn();
-const mockSet = jest.fn();
-const mockUpdate = jest.fn();
+jest.mock('../shared/dist/game/index.js');
 
-const createMockDocRef = () => ({
-    get: mockGet,
-    set: mockSet,
-    update: mockUpdate,
-    collection: jest.fn((collectionName) => ({
-        doc: createMockDocRef,
+jest.mock('firebase-admin', () => ({
+    initializeApp: jest.fn(),
+    firestore: jest.fn(() => ({
+        collection: (...args) => mocks.mockCollection(...args),
+        batch: (...args) => mocks.mockBatch(...args),
+        FieldValue: {
+            serverTimestamp: (...args) => mocks.mockServerTimestamp(...args),
+            increment: (...args) => mocks.mockIncrement(...args),
+            arrayUnion: (...args) => mocks.mockArrayUnion(...args),
+            arrayRemove: (...args) => mocks.mockArrayRemove(...args),
+        },
     })),
-});
-
-const mockDoc = jest.fn(createMockDocRef);
-const mockCollection = jest.fn(() => ({
-    doc: mockDoc,
 }));
 
-// Mock admin before requiring routes
-jest.mock('firebase-admin', () => {
-    return {
-        initializeApp: jest.fn(),
-        firestore: jest.fn(() => ({
-            collection: mockCollection,
-        })),
-    };
-});
-
-// Now require the module
-const userSettings = require('../routes/userSettings');
+import * as userSettings from '../routes/userSettings.js';
 
 describe('User Settings Functions', () => {
     beforeEach(() => {
@@ -41,12 +26,12 @@ describe('User Settings Functions', () => {
     });
 
     afterAll(() => {
-        test.cleanup();
+        cleanup();
     });
 
     describe('getUserSettings', () => {
         it('should return default settings if none exist', async () => {
-            mockGet.mockResolvedValue({
+            mocks.mockGet.mockResolvedValue({
                 exists: false,
             });
 
@@ -67,7 +52,7 @@ describe('User Settings Functions', () => {
                 updatedAt: '2024-01-01T00:00:00.000Z',
             };
 
-            mockGet.mockResolvedValue({
+            mocks.mockGet.mockResolvedValue({
                 exists: true,
                 data: () => existingSettings,
             });
@@ -98,8 +83,8 @@ describe('User Settings Functions', () => {
                 avatarKey: 'octopus',
             };
 
-            mockSet.mockResolvedValue();
-            mockUpdate.mockResolvedValue();
+            mocks.mockSet.mockResolvedValue();
+            mocks.mockUpdate.mockResolvedValue();
 
             const result = await userSettings.updateUserSettingsHandler({
                 data: { settings: newSettings },
@@ -108,7 +93,7 @@ describe('User Settings Functions', () => {
 
             expect(result.success).toBe(true);
             expect(result.message).toBe('Settings updated successfully');
-            expect(mockSet).toHaveBeenCalled();
+            expect(mocks.mockSet).toHaveBeenCalled();
         });
 
         it('should update settings with avatarKey', async () => {
@@ -116,7 +101,7 @@ describe('User Settings Functions', () => {
                 avatarKey: 'crab',
             };
 
-            mockSet.mockResolvedValue();
+            mocks.mockSet.mockResolvedValue();
 
             const result = await userSettings.updateUserSettingsHandler({
                 data: { settings: newSettings },
@@ -124,7 +109,7 @@ describe('User Settings Functions', () => {
             });
 
             expect(result.success).toBe(true);
-            expect(mockSet).toHaveBeenCalled();
+            expect(mocks.mockSet).toHaveBeenCalled();
         });
 
         it('should throw error if settings data is missing', async () => {
@@ -148,8 +133,8 @@ describe('User Settings Functions', () => {
 
     describe('resetUserSettings', () => {
         it('should reset settings to defaults', async () => {
-            mockSet.mockResolvedValue();
-            mockUpdate.mockResolvedValue();
+            mocks.mockSet.mockResolvedValue();
+            mocks.mockUpdate.mockResolvedValue();
 
             const result = await userSettings.resetUserSettingsHandler({
                 data: {},
@@ -160,11 +145,11 @@ describe('User Settings Functions', () => {
             expect(result.message).toBe('Settings reset to defaults');
             expect(result.settings.theme).toBe('auto');
             expect(result.settings.avatarKey).toBe('dolphin');
-            expect(mockSet).toHaveBeenCalled();
+            expect(mocks.mockSet).toHaveBeenCalled();
         });
 
         it('should reset avatarKey to default', async () => {
-            mockSet.mockResolvedValue();
+            mocks.mockSet.mockResolvedValue();
 
             const result = await userSettings.resetUserSettingsHandler({
                 data: {},
@@ -173,7 +158,7 @@ describe('User Settings Functions', () => {
 
             expect(result.success).toBe(true);
             expect(result.settings.avatarKey).toBe('dolphin');
-            expect(mockSet).toHaveBeenCalled();
+            expect(mocks.mockSet).toHaveBeenCalled();
         });
 
         it('should throw error if user not authenticated', async () => {

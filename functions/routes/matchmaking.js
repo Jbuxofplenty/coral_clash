@@ -1,8 +1,7 @@
-const { onCall, HttpsError } = require('firebase-functions/v2/https');
-const admin = require('firebase-admin');
-const { initializeGameState, serverTimestamp, formatDisplayName } = require('../utils/helpers');
-const { GAME_VERSION } = require('../shared/dist/game');
-const { getAppCheckConfig } = require('../utils/appCheckConfig');
+import { HttpsError, onCall } from 'firebase-functions/v2/https';
+import { admin } from '../init.js';
+import { getAppCheckConfig } from '../utils/appCheckConfig.js';
+import { serverTimestamp } from '../utils/helpers.js';
 
 const db = admin.firestore();
 
@@ -85,7 +84,7 @@ async function joinMatchmakingHandler(request) {
  * Join the matchmaking queue
  * POST /api/matchmaking/join
  */
-exports.joinMatchmaking = onCall(getAppCheckConfig(), async (request) => {
+export const joinMatchmaking = onCall(getAppCheckConfig(), async (request) => {
     try {
         return await joinMatchmakingHandler(request);
     } catch (error) {
@@ -96,14 +95,14 @@ exports.joinMatchmaking = onCall(getAppCheckConfig(), async (request) => {
         throw new HttpsError('internal', error.message);
     }
 });
-exports.joinMatchmakingHandler = joinMatchmakingHandler;
+export { joinMatchmakingHandler };
 
 /**
  * Handler for leaving matchmaking queue
  * Separated for testing purposes
  */
 async function leaveMatchmakingHandler(request) {
-    const { data, auth } = request;
+    const { data: _data, auth } = request;
     if (!auth) {
         throw new HttpsError('unauthenticated', 'User must be authenticated');
     }
@@ -123,7 +122,7 @@ async function leaveMatchmakingHandler(request) {
  * Leave the matchmaking queue
  * POST /api/matchmaking/leave
  */
-exports.leaveMatchmaking = onCall(getAppCheckConfig(), async (request) => {
+export const leaveMatchmaking = onCall(getAppCheckConfig(), async (request) => {
     try {
         return await leaveMatchmakingHandler(request);
     } catch (error) {
@@ -131,14 +130,14 @@ exports.leaveMatchmaking = onCall(getAppCheckConfig(), async (request) => {
         throw new HttpsError('internal', error.message);
     }
 });
-exports.leaveMatchmakingHandler = leaveMatchmakingHandler;
+export { leaveMatchmakingHandler };
 
 /**
  * Handler for updating matchmaking heartbeat
  * Separated for testing purposes
  */
 async function updateMatchmakingHeartbeatHandler(request) {
-    const { data, auth } = request;
+    const { data: _data, auth } = request;
     if (!auth) {
         throw new HttpsError('unauthenticated', 'User must be authenticated');
     }
@@ -168,7 +167,7 @@ async function updateMatchmakingHeartbeatHandler(request) {
  * Update heartbeat for matchmaking queue entry
  * POST /api/matchmaking/heartbeat
  */
-exports.updateMatchmakingHeartbeat = onCall(getAppCheckConfig(), async (request) => {
+export const updateMatchmakingHeartbeat = onCall(getAppCheckConfig(), async (request) => {
     try {
         return await updateMatchmakingHeartbeatHandler(request);
     } catch (error) {
@@ -177,14 +176,14 @@ exports.updateMatchmakingHeartbeat = onCall(getAppCheckConfig(), async (request)
         return { success: false, error: error.message };
     }
 });
-exports.updateMatchmakingHeartbeatHandler = updateMatchmakingHeartbeatHandler;
+export { updateMatchmakingHeartbeatHandler };
 
 /**
  * Handler for getting matchmaking status
  * Separated for testing purposes
  */
 async function getMatchmakingStatusHandler(request) {
-    const { data, auth } = request;
+    const { data: _data, auth } = request;
     if (!auth) {
         throw new HttpsError('unauthenticated', 'User must be authenticated');
     }
@@ -212,7 +211,7 @@ async function getMatchmakingStatusHandler(request) {
  * Get matchmaking status (queue count and user's status)
  * GET /api/matchmaking/status
  */
-exports.getMatchmakingStatus = onCall(getAppCheckConfig(), async (request) => {
+export const getMatchmakingStatus = onCall(getAppCheckConfig(), async (request) => {
     try {
         return await getMatchmakingStatusHandler(request);
     } catch (error) {
@@ -220,4 +219,4 @@ exports.getMatchmakingStatus = onCall(getAppCheckConfig(), async (request) => {
         throw new HttpsError('internal', error.message);
     }
 });
-exports.getMatchmakingStatusHandler = getMatchmakingStatusHandler;
+export { getMatchmakingStatusHandler };

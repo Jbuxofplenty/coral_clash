@@ -1,5 +1,5 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 
 const GamePreferencesContext = createContext({});
 const GAME_PREFS_STORAGE_KEY = '@coral_clash_game_preferences';

@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { Dimensions, StyleSheet } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useFocusEffect } from '@react-navigation/native';
+import { LinearGradient } from 'expo-linear-gradient';
+import React, { useCallback, useEffect, useState } from 'react';
+import { Dimensions, StyleSheet } from 'react-native';
 
 import ComputerCoralClashBoard from '../components/ComputerCoralClashBoard';
 import PvPCoralClashBoard from '../components/PvPCoralClashBoard';
-import { useTheme, useNotifications } from '../contexts';
+import { useNotifications, useTheme } from '../contexts';
 
 const { width, height } = Dimensions.get('screen');
 
@@ -52,10 +52,17 @@ export default function Game({ route }) {
             setStatusType(config.type);
             setShowStatus(true);
         }
-    }, [gameStatusUpdate?.timestamp, gameId]);
+    }, [
+        gameStatusUpdate?.timestamp,
+        gameId,
+        setStatusMessage,
+        setStatusType,
+        setShowStatus,
+        gameStatusUpdate,
+    ]);
 
     useFocusEffect(
-        React.useCallback(() => {
+        useCallback(() => {
             // Increment the key to trigger a re-render of the board component
             setFocusKey((prev) => prev + 1);
         }, []),

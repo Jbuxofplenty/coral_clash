@@ -15,27 +15,27 @@ import { Asset } from 'expo-asset';
 import * as SplashScreen from 'expo-splash-screen';
 import { Block, GalioProvider } from 'galio-framework';
 import React, { useCallback, useEffect, useState } from 'react';
-import { Image, Platform, StatusBar, LogBox } from 'react-native';
-import { Images, materialTheme } from './src/constants/';
-import Screens from './src/navigation/Screens';
+import { Image, LogBox, StatusBar } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { materialTheme } from './src/constants/';
 import {
+    AlertProvider,
     AuthProvider,
+    GamePreferencesProvider,
+    NotificationProvider,
     ThemeProvider,
     useTheme,
-    NotificationProvider,
-    GamePreferencesProvider,
-    AlertProvider,
 } from './src/contexts';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import Screens from './src/navigation/Screens';
 
 // Ignore expo-notifications warnings in development (keychain access issues in Expo Go)
 // Also ignore Galio Input deprecation warnings (third-party library issue)
 LogBox.ignoreLogs([
-    '[expo-notifications]',
-    'Keychain access failed',
-    'Could not enable automatically registering',
-    'iconColor is deprecated',
-    'iconSize is deprecated',
+    /\[expo-notifications\]/,
+    /Keychain access failed/,
+    /Could not enable automatically registering/,
+    /\[Input\] iconColor is deprecated/,
+    /\[Input\] iconSize is deprecated/,
 ]);
 
 // Keep the splash screen visible while we fetch resources
@@ -58,7 +58,7 @@ function cacheImages(images) {
     });
 }
 
-function AppContent({ navigationRef }) {
+function AppContent({ navigationRef: _navigationRef }) {
     const { isDarkMode } = useTheme();
 
     return (

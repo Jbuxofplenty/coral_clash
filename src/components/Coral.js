@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { SQUARES } from '../../shared';
 
 const Coral = ({ coralClash, size, boardFlipped = false, userColor = null, updateTrigger = 0 }) => {
@@ -16,7 +16,8 @@ const Coral = ({ coralClash, size, boardFlipped = false, userColor = null, updat
         });
 
         return squares;
-    }, [coralClash, updateTrigger]); // Re-compute when updateTrigger changes
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [coralClash, updateTrigger]); // Re-compute when updateTrigger changes (intentional)
 
     return (
         <>

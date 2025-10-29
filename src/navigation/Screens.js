@@ -1,26 +1,26 @@
-import { Dimensions, Alert, useWindowDimensions } from 'react-native';
-import { Icon, Header } from '../components';
+import { Dimensions, useWindowDimensions } from 'react-native';
+import { Header, Icon } from '../components';
 
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { createStackNavigator } from '@react-navigation/stack';
 import React from 'react';
+import { useAlert, useAuth } from '../contexts';
+import Friends from '../screens/Friends';
 import GameScreen from '../screens/Game';
 import HomeScreen from '../screens/Home';
-import Login from '../screens/Login';
-import Settings from '../screens/Settings';
-import Friends from '../screens/Friends';
-import Stats from '../screens/Stats';
 import HowToPlay from '../screens/HowToPlay';
+import Login from '../screens/Login';
 import ScenarioBoard from '../screens/ScenarioBoard';
+import Settings from '../screens/Settings';
+import Stats from '../screens/Stats';
 import CustomDrawerContent from './Menu';
-import { useAuth, useTheme, useAlert } from '../contexts';
 
 const { width } = Dimensions.get('screen');
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
 
-function HomeStack(props) {
+function HomeStack(_props) {
     return (
         <Stack.Navigator initialRouteName='Dashboard'>
             <Stack.Screen
@@ -54,7 +54,7 @@ function HomeStack(props) {
     );
 }
 
-function HowToPlayStack(props) {
+function HowToPlayStack(_props) {
     return (
         <Stack.Navigator initialRouteName='HowToPlayMain'>
             <Stack.Screen
@@ -79,9 +79,8 @@ function HowToPlayStack(props) {
     );
 }
 
-export default function AppStack(props) {
+export default function AppStack(_props) {
     const { user, logOut } = useAuth();
-    const { colors } = useTheme();
     const { showAlert } = useAlert();
     const { height } = useWindowDimensions();
 
@@ -114,7 +113,7 @@ export default function AppStack(props) {
                 name='Home'
                 component={HomeStack}
                 options={{
-                    drawerIcon: ({ focused, color }) => (
+                    drawerIcon: ({ _focused, color }) => (
                         <Icon
                             size={isCompact ? 20 : 24}
                             name='home'
@@ -132,7 +131,7 @@ export default function AppStack(props) {
                         name='Friends'
                         component={Friends}
                         options={{
-                            drawerIcon: ({ focused, color }) => (
+                            drawerIcon: ({ _focused: _focused, color }) => (
                                 <Icon
                                     size={isCompact ? 20 : 24}
                                     name='users'
@@ -154,7 +153,7 @@ export default function AppStack(props) {
                         name='Stats'
                         component={Stats}
                         options={{
-                            drawerIcon: ({ focused, color }) => (
+                            drawerIcon: ({ _focused, color }) => (
                                 <Icon
                                     size={isCompact ? 20 : 24}
                                     name='line-chart'
@@ -176,7 +175,7 @@ export default function AppStack(props) {
                         name='How-To Play'
                         component={HowToPlayStack}
                         options={{
-                            drawerIcon: ({ focused, color }) => (
+                            drawerIcon: ({ _focused, color }) => (
                                 <Icon
                                     size={isCompact ? 20 : 24}
                                     name='question-circle'
@@ -191,7 +190,7 @@ export default function AppStack(props) {
                         name='Settings'
                         component={Settings}
                         options={{
-                            drawerIcon: ({ focused, color }) => (
+                            drawerIcon: ({ _focused, color }) => (
                                 <Icon
                                     size={isCompact ? 20 : 24}
                                     name='cog'
@@ -216,7 +215,7 @@ export default function AppStack(props) {
                         name='Log Out'
                         component={Login}
                         options={{
-                            drawerIcon: ({ focused, color }) => (
+                            drawerIcon: ({ _focused, color }) => (
                                 <Icon
                                     size={isCompact ? 20 : 24}
                                     name='sign-out'
@@ -253,7 +252,7 @@ export default function AppStack(props) {
                         name='How-To Play'
                         component={HowToPlayStack}
                         options={{
-                            drawerIcon: ({ focused, color }) => (
+                            drawerIcon: ({ _focused, color }) => (
                                 <Icon
                                     size={isCompact ? 20 : 24}
                                     name='question-circle'
@@ -268,7 +267,7 @@ export default function AppStack(props) {
                         name='Log In'
                         component={Login}
                         options={{
-                            drawerIcon: ({ focused, color }) => (
+                            drawerIcon: ({ _focused: _focused, color }) => (
                                 <Icon
                                     size={isCompact ? 20 : 24}
                                     name='sign-in'

@@ -1,7 +1,7 @@
 import React from 'react';
-import { View, Image, StyleSheet } from 'react-native';
-import { useAuth, useTheme } from '../contexts';
+import { Image, View } from 'react-native';
 import { DEFAULT_AVATARS, DEFAULT_AVATAR_NAME } from '../constants/avatars';
+import { useAuth, useTheme } from '../contexts';
 import Icon from './Icon';
 
 /**
@@ -80,7 +80,3 @@ export default function Avatar({
         </View>
     );
 }
-
-const styles = StyleSheet.create({
-    // No styles needed as everything is dynamic
-});

@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, useWindowDimensions } from 'react-native';
+import { StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { useTheme } from '../contexts';
 import Icon from './Icon';
 
@@ -170,7 +170,7 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     statusTextCompact: {
-        fontSize: 13,
+        fontSize: 12,
     },
 });
 

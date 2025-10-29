@@ -1,21 +1,21 @@
-import { Block, Text, theme } from 'galio-framework';
-import React, { useState } from 'react';
-import { ScrollView, StyleSheet, View, Dimensions } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
+import { Block, Text, theme } from 'galio-framework';
+import React, { useCallback, useState } from 'react';
+import { Dimensions, ScrollView, StyleSheet, View } from 'react-native';
 
-import { Icon, Avatar, LoadingScreen } from '../components';
+import { Avatar, Icon, LoadingScreen } from '../components';
 import { useAuth, useTheme } from '../contexts';
 import { useFirebaseFunctions } from '../hooks';
 
 const { width } = Dimensions.get('screen');
 
-export default function Stats({ navigation }) {
+export default function Stats({ navigation: _navigation }) {
     const { user } = useAuth();
-    const { colors, isDarkMode } = useTheme();
+    const { colors, isDarkMode: _isDarkMode } = useTheme();
     const { getGameHistory, getPublicUserInfo } = useFirebaseFunctions();
 
     const [loading, setLoading] = useState(true);
-    const [gameHistory, setGameHistory] = useState([]);
+    const [_gameHistory, setGameHistory] = useState([]);
     const [opponentStats, setOpponentStats] = useState({});
     const [overallStats, setOverallStats] = useState({
         gamesPlayed: 0,
@@ -24,16 +24,7 @@ export default function Stats({ navigation }) {
         gamesDraw: 0,
     });
 
-    // Load stats when screen comes into focus
-    useFocusEffect(
-        React.useCallback(() => {
-            if (user && user.uid) {
-                loadStats();
-            }
-        }, [user]),
-    );
-
-    const loadStats = async () => {
+    const loadStats = useCallback(async () => {
         if (!user || !user.uid) return;
 
         try {
@@ -166,7 +157,17 @@ export default function Stats({ navigation }) {
         } finally {
             setLoading(false);
         }
-    };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [user]);
+
+    // Load stats when screen comes into focus
+    useFocusEffect(
+        useCallback(() => {
+            if (user && user.uid) {
+                loadStats();
+            }
+        }, [loadStats, user]),
+    );
 
     const calculateWinRate = (wins, total) => {
         if (total === 0) return 0;

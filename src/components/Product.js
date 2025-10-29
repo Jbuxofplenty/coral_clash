@@ -1,9 +1,8 @@
-import { useNavigation } from '@react-navigation/native';
 import { Block, Text, theme } from 'galio-framework';
 import React from 'react';
 import { Dimensions, StyleSheet, TouchableWithoutFeedback, View } from 'react-native';
-import Icon from './Icon';
 import { useTheme } from '../contexts';
+import Icon from './Icon';
 
 const { width } = Dimensions.get('screen');
 

@@ -1,5 +1,5 @@
-import { useEffect, useCallback } from 'react';
 import { httpsCallable } from 'firebase/functions';
+import { useCallback, useEffect } from 'react';
 import { functions } from '../config/firebase';
 import { useNotifications } from '../contexts';
 

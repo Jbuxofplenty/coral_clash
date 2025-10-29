@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import { View, TouchableOpacity, Alert, Text, Dimensions, Platform } from 'react-native';
 import { Icon } from 'galio-framework';
-import BaseCoralClashBoard, { baseStyles } from './BaseCoralClashBoard';
-import { useAuth, useGamePreferences, useTheme, useAlert } from '../contexts';
-import { useFirebaseFunctions } from '../hooks';
-import { db, doc, onSnapshot } from '../config/firebase';
-import IconComponent from './Icon';
+import React, { useEffect, useState } from 'react';
+import { Text, TouchableOpacity, View } from 'react-native';
 import { calculateUndoMoveCount } from '../../shared';
+import { db, doc, onSnapshot } from '../config/firebase';
+import { useAlert, useAuth, useGamePreferences, useTheme } from '../contexts';
+import { useFirebaseFunctions } from '../hooks';
+import BaseCoralClashBoard, { baseStyles } from './BaseCoralClashBoard';
+import IconComponent from './Icon';
 
 /**
  * Format display name with discriminator
@@ -39,8 +39,8 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
     const { requestGameReset, requestUndo, respondToUndoRequest, respondToResetRequest } =
         useFirebaseFunctions();
     const [userColor, setUserColor] = useState(null);
-    const [creatorId, setCreatorId] = useState(null);
-    const [opponentId, setOpponentId] = useState(null);
+    const [_creatorId, setCreatorId] = useState(null);
+    const [_opponentId, setOpponentId] = useState(null);
     const [undoRequestData, setUndoRequestData] = useState(null);
     const [resetRequestData, setResetRequestData] = useState(null);
     const [currentMoveCount, setCurrentMoveCount] = useState(0); // Track move count from Firestore
@@ -405,7 +405,7 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
     };
 
     // Render game request banner (undo or reset) - placed below bottom player status bar
-    const renderGameRequestBanner = ({ coralClash }) => {
+    const renderGameRequestBanner = ({ coralClash: _coralClash }) => {
         // Priority: Show undo request first, then reset request
         if (undoRequestData) {
             // Calculate dynamic move count based on current game state using shared logic

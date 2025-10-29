@@ -1,10 +1,10 @@
-import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
-import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
-import { Platform, AppState } from 'react-native';
-import { useAuth } from './AuthContext';
+import * as Notifications from 'expo-notifications';
 import { doc, updateDoc } from 'firebase/firestore';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
+import { AppState, Platform } from 'react-native';
 import { db } from '../config/firebase';
+import { useAuth } from './AuthContext';
 
 // Ref to track active game ID for notification filtering
 // This needs to be outside the component so the handler can access it
@@ -265,7 +265,7 @@ async function registerForPushNotificationsAsync() {
             try {
                 // Get push token - may fail in Expo Go due to keychain access
                 token = (await Notifications.getExpoPushTokenAsync()).data;
-            } catch (error) {
+            } catch (_error) {
                 // Silently handle - common in simulators and Expo Go
             }
         } else {

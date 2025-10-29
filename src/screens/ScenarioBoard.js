@@ -1,23 +1,23 @@
-import React, { useState, useEffect } from 'react';
-import {
-    View,
-    Text,
-    StyleSheet,
-    Dimensions,
-    TouchableOpacity,
-    useWindowDimensions,
-    ScrollView,
-} from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Icon as GalioIcon } from 'galio-framework';
+import React, { useEffect, useState } from 'react';
+import {
+    Dimensions,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+    useWindowDimensions,
+} from 'react-native';
+import { applyFixture } from '../../shared';
+import { Icon } from '../components';
+import Coral from '../components/Coral';
+import EmptyBoard from '../components/EmptyBoard';
+import Moves from '../components/Moves';
+import Pieces from '../components/Pieces';
 import { useTheme } from '../contexts';
 import { useCoralClash } from '../hooks';
-import { applyFixture } from '../../shared';
-import EmptyBoard from '../components/EmptyBoard';
-import Pieces from '../components/Pieces';
-import Coral from '../components/Coral';
-import Moves from '../components/Moves';
-import { Icon } from '../components';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -49,7 +49,7 @@ export default function ScenarioBoard({ route, navigation }) {
                 console.error('Error loading scenario fixture:', error);
             }
         }
-    }, [scenario]);
+    }, [coralClash, scenario]);
 
     // Clear selection when auto-play starts
     useEffect(() => {
@@ -201,7 +201,7 @@ export default function ScenarioBoard({ route, navigation }) {
             setIsAutoPlaying(false);
             setAutoPlayPathMoves([]);
         };
-    }, [scenario, autoPlayEnabled]);
+    }, [scenario, autoPlayEnabled, coralClash]);
 
     // Calculate the path squares between two squares
     const calculatePath = (from, to) => {

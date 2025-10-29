@@ -1,27 +1,23 @@
 import { Block, Text, theme } from 'galio-framework';
-import React, { useState, useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
     ActivityIndicator,
+    Pressable,
+    RefreshControl,
     ScrollView,
     StyleSheet,
-    TouchableOpacity,
-    Pressable,
     TextInput,
-    Dimensions,
+    TouchableOpacity,
     View,
-    RefreshControl,
     useWindowDimensions,
 } from 'react-native';
 
-import { Icon, Avatar, LoadingScreen, TimeControlModal } from '../components';
-import { useAuth, useTheme } from '../contexts';
-import { useFriends, useUserSearch, useGame } from '../hooks';
+import { Avatar, Icon, LoadingScreen, TimeControlModal } from '../components';
+import { useTheme } from '../contexts';
+import { useFriends, useGame, useUserSearch } from '../hooks';
 
-const { width } = Dimensions.get('screen');
-
-export default function Friends({ navigation }) {
-    const { user } = useAuth();
-    const { colors, isDarkMode } = useTheme();
+export default function Friends({ navigation: _navigation }) {
+    const { colors, isDarkMode: _isDarkMode } = useTheme();
     const { sendGameRequest, sendingGameRequest } = useGame();
     const { height } = useWindowDimensions();
 
@@ -728,17 +724,6 @@ const styles = StyleSheet.create({
     dropdownAvatar: {
         marginRight: theme.SIZES.BASE,
     },
-    sendButton: {
-        width: 48,
-        height: 48,
-        borderRadius: 10,
-        justifyContent: 'center',
-        alignItems: 'center',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 3,
-        elevation: 3,
-    },
     friendsList: {
         marginTop: 4,
     },
@@ -771,11 +756,6 @@ const styles = StyleSheet.create({
         borderRadius: 18,
         justifyContent: 'center',
         alignItems: 'center',
-    },
-    pendingBadge: {
-        paddingHorizontal: theme.SIZES.BASE,
-        paddingVertical: theme.SIZES.BASE * 0.5,
-        borderRadius: 12,
     },
     emptyContainer: {
         paddingVertical: theme.SIZES.BASE * 4,

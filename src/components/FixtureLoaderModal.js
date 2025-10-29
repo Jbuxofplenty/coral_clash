@@ -1,20 +1,8 @@
 import React, { useState } from 'react';
-import {
-    Modal,
-    View,
-    Text,
-    TouchableOpacity,
-    ScrollView,
-    StyleSheet,
-    Dimensions,
-    Alert,
-} from 'react-native';
-import { Block, theme } from 'galio-framework';
-import Icon from './Icon';
-import { useAlert } from '../contexts';
+import { Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { FIXTURES as FIXTURE_FILES } from '../../shared/game/__fixtures__';
-
-const { width } = Dimensions.get('screen');
+import { useAlert } from '../contexts';
+import Icon from './Icon';
 
 // Available fixtures - keep this list updated when adding new fixtures
 const FIXTURES = [

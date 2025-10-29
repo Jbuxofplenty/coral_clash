@@ -1,12 +1,12 @@
 import React from 'react';
 import {
+    Dimensions,
     Modal,
-    View,
+    Platform,
+    StyleSheet,
     Text,
     TouchableOpacity,
-    StyleSheet,
-    Dimensions,
-    Platform,
+    View,
 } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
 import Icon from './Icon';

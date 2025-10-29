@@ -1,18 +1,18 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
-import {
-    createUserWithEmailAndPassword,
-    signInWithEmailAndPassword,
-    signInWithCredential,
-    GoogleAuthProvider,
-    sendPasswordResetEmail,
-    signOut,
-    onAuthStateChanged,
-    updateProfile,
-} from 'firebase/auth';
-import { doc, setDoc, getDoc, onSnapshot } from 'firebase/firestore';
-import * as WebBrowser from 'expo-web-browser';
 import * as Google from 'expo-auth-session/providers/google';
 import Constants from 'expo-constants';
+import * as WebBrowser from 'expo-web-browser';
+import {
+    GoogleAuthProvider,
+    createUserWithEmailAndPassword,
+    onAuthStateChanged,
+    sendPasswordResetEmail,
+    signInWithCredential,
+    signInWithEmailAndPassword,
+    signOut,
+    updateProfile,
+} from 'firebase/auth';
+import { doc, getDoc, onSnapshot, setDoc } from 'firebase/firestore';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { auth, db } from '../config/firebase';
 
 // Required for Google Sign-In on web

@@ -1,27 +1,27 @@
-import Icon from './Icon';
-import Product from './Product';
-import GameModeCard from './GameModeCard';
-import Header from './Header';
-import Avatar from './Avatar';
-import LoadingScreen from './LoadingScreen';
 import ActiveGamesCard from './ActiveGamesCard';
+import Avatar from './Avatar';
 import GameHistoryCard from './GameHistoryCard';
-import PlayerStatusBar from './PlayerStatusBar';
+import GameModeCard from './GameModeCard';
 import GameStatusBanner from './GameStatusBanner';
+import Header from './Header';
+import Icon from './Icon';
+import LoadingScreen from './LoadingScreen';
 import MatchmakingCard from './MatchmakingCard';
+import PlayerStatusBar from './PlayerStatusBar';
+import Product from './Product';
 import TimeControlModal from './TimeControlModal';
 
 export {
-    Icon,
-    Product,
-    GameModeCard,
-    Header,
-    Avatar,
-    LoadingScreen,
     ActiveGamesCard,
+    Avatar,
     GameHistoryCard,
-    PlayerStatusBar,
+    GameModeCard,
     GameStatusBanner,
+    Header,
+    Icon,
+    LoadingScreen,
     MatchmakingCard,
+    PlayerStatusBar,
+    Product,
     TimeControlModal,
 };

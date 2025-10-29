@@ -1,23 +1,15 @@
-import { Block, Button, Switch, Text, theme } from 'galio-framework';
-import React, { useEffect, useState, useRef } from 'react';
-import {
-    ActivityIndicator,
-    Alert,
-    ScrollView,
-    StyleSheet,
-    TouchableOpacity,
-    Image,
-} from 'react-native';
+import { Block, Text, theme } from 'galio-framework';
+import React, { useEffect, useState } from 'react';
+import { Image, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
 
-import { materialTheme } from '../constants';
 import { LoadingScreen } from '../components';
-import { useAuth, useTheme, useAlert } from '../contexts';
-import { useFirebaseFunctions } from '../hooks';
 import { DEFAULT_AVATARS, getRandomAvatarKey } from '../constants/avatars';
+import { useAlert, useAuth, useTheme } from '../contexts';
+import { useFirebaseFunctions } from '../hooks';
 
-export default function Settings({ navigation }) {
+export default function Settings({ _navigation }) {
     const { user, refreshUserData } = useAuth();
-    const { colors, isDarkMode, setThemePreference } = useTheme();
+    const { colors, setThemePreference } = useTheme();
     const { showAlert } = useAlert();
     const { getUserSettings, updateUserSettings, resetUserSettings } = useFirebaseFunctions();
     const [loading, setLoading] = useState(true);
@@ -25,25 +17,26 @@ export default function Settings({ navigation }) {
     const [settings, setSettings] = useState(null);
 
     useEffect(() => {
+        const loadSettings = async () => {
+            if (!user || !user.uid) return;
+
+            try {
+                setLoading(true);
+                const result = await getUserSettings();
+                setSettings(result.settings);
+            } catch (_error) {
+                // Silently fail for new users - just use default settirngs with random avatar
+                setSettings({ theme: 'auto', avatarKey: getRandomAvatarKey() });
+            } finally {
+                setLoading(false);
+            }
+        };
+
         if (user && user.uid) {
             loadSettings();
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user]);
-
-    const loadSettings = async () => {
-        if (!user || !user.uid) return;
-
-        try {
-            setLoading(true);
-            const result = await getUserSettings();
-            setSettings(result.settings);
-        } catch (error) {
-            // Silently fail for new users - just use default settirngs with random avatar
-            setSettings({ theme: 'auto', avatarKey: getRandomAvatarKey() });
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const updateAvatar = async (avatarKey) => {
         const newSettings = {
@@ -308,12 +301,6 @@ const styles = StyleSheet.create({
     },
     themeOptionLast: {
         borderBottomWidth: 0,
-    },
-    button: {
-        marginTop: theme.SIZES.BASE * 2,
-        width: '100%',
-        height: 48,
-        borderRadius: 8,
     },
     textButton: {
         marginTop: theme.SIZES.BASE * 2,

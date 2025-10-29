@@ -3,5 +3,5 @@
  * Versioned export for backward compatibility
  */
 
-export * from './coralClash';
-export * from './gameState';
+export * from './coralClash.js';
+export * from './gameState.js';

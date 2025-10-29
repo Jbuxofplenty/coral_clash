@@ -4,6 +4,10 @@ module.exports = {
     roots: ['<rootDir>/game'],
     testMatch: ['**/__tests__/**/*.test.ts'],
     moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
+    extensionsToTreatAsEsm: ['.ts'],
+    moduleNameMapper: {
+        '^(\\.{1,2}/.*)\\.js$': '$1',
+    },
     collectCoverageFrom: [
         'game/**/*.ts',
         '!game/**/*.test.ts',

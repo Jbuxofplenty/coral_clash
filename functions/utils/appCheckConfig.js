@@ -15,7 +15,7 @@
  * 5. Redeploy functions
  */
 
-const shouldEnforceAppCheck = () => {
+export const shouldEnforceAppCheck = () => {
     // Check if enforcement is enabled via environment variable
     const enforce = process.env.ENFORCE_APP_CHECK === 'true';
 
@@ -35,12 +35,7 @@ const shouldEnforceAppCheck = () => {
  * - consumeAppCheckToken: true (always consume to log usage)
  * - enforceAppCheck: based on ENFORCE_APP_CHECK env var
  */
-const getAppCheckConfig = () => ({
+export const getAppCheckConfig = () => ({
     consumeAppCheckToken: true, // Always consume to track usage
     enforceAppCheck: shouldEnforceAppCheck(), // Only block if env var is true
 });
-
-module.exports = {
-    getAppCheckConfig,
-    shouldEnforceAppCheck,
-};

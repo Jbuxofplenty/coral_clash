@@ -16,7 +16,7 @@ export const GAME_VERSION = '1.0.0';
 
 // Export current version (v1.0.0) as default for easy imports
 // All game logic imports should come from versioned folders
-export * from './v1.0.0';
+export * from './v1.0.0/index.js';
 
 /**
  * Get game engine for a specific version
@@ -24,10 +24,10 @@ export * from './v1.0.0';
  * @param version - Semantic version string (e.g., '1.0.0')
  * @returns Game engine modules for the specified version
  */
-export function getGameEngine(version: string = GAME_VERSION) {
+export async function getGameEngine(version: string = GAME_VERSION) {
     switch (version) {
         case '1.0.0':
-            return require('./v1.0.0');
+            return await import('./v1.0.0/index.js');
         default:
             throw new Error(
                 `Unsupported game version: ${version}. Current version: ${GAME_VERSION}`,

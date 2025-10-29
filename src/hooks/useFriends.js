@@ -1,7 +1,7 @@
-import { useState, useCallback } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
-import { db, collection, query, where, onSnapshot } from '../config/firebase';
-import { useAuth, useAlert } from '../contexts';
+import { useCallback, useState } from 'react';
+import { collection, db, onSnapshot, query, where } from '../config/firebase';
+import { useAlert, useAuth } from '../contexts';
 import { useFirebaseFunctions } from './useFirebaseFunctions';
 
 export const useFriends = () => {
@@ -42,7 +42,7 @@ export const useFriends = () => {
                     const friendsRef = collection(db, 'users', user.uid, 'friends');
                     friendsUnsubscribe = onSnapshot(
                         friendsRef,
-                        async (snapshot) => {
+                        async (_snapshot) => {
                             // Whenever the friends subcollection changes (add, delete, modify),
                             // fetch the updated friends list
                             try {
@@ -205,7 +205,7 @@ export const useFriends = () => {
         );
     };
 
-    const handleAcceptRequest = async (requestId, userId) => {
+    const handleAcceptRequest = async (requestId, _userId) => {
         try {
             setAcceptingRequestId(requestId);
             await respondToFriendRequest(requestId, true);

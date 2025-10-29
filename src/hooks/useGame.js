@@ -1,8 +1,7 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
-import { Alert } from 'react-native';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { collection, db, doc, getDoc, onSnapshot, query, where } from '../config/firebase';
+import { useAlert, useAuth } from '../contexts';
 import { useFirebaseFunctions } from './useFirebaseFunctions';
-import { useAuth, useAlert } from '../contexts';
-import { db, collection, query, where, onSnapshot, doc, getDoc } from '../config/firebase';
 
 /**
  * Custom hook for managing game operations (PvP and Computer)
@@ -387,7 +386,7 @@ export const useGame = (options = {}) => {
                 setLoading(false);
             }
         },
-        [createComputerGame, user],
+        [createComputerGame, user, showAlert],
     );
 
     /**
@@ -417,7 +416,7 @@ export const useGame = (options = {}) => {
                 setLoading(false);
             }
         },
-        [respondToGameInvite],
+        [respondToGameInvite, showAlert],
     );
 
     /**
@@ -441,7 +440,7 @@ export const useGame = (options = {}) => {
                 setLoading(false);
             }
         },
-        [respondToGameInvite],
+        [respondToGameInvite, showAlert],
     );
 
     /**

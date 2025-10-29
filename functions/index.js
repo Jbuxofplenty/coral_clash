@@ -1,69 +1,65 @@
 // Register ts-node to handle TypeScript imports
-require('./register');
+import './register.js';
 
-const admin = require('firebase-admin');
-
-// Initialize Firebase Admin
-admin.initializeApp();
+// Initialize Firebase Admin before importing routes
+import './init.js';
 
 // Import route modules
-const userProfile = require('./routes/userProfile');
-const userSettings = require('./routes/userSettings');
-const game = require('./routes/game');
-const friends = require('./routes/friends');
-const matchmaking = require('./routes/matchmaking');
+import * as friends from './routes/friends.js';
+import * as game from './routes/game.js';
+import * as matchmaking from './routes/matchmaking.js';
+import * as userProfile from './routes/userProfile.js';
+import * as userSettings from './routes/userSettings.js';
 
 // Import trigger modules
-const { onUserCreate } = require('./triggers/onUserCreate');
-const { onPlayerJoinQueue } = require('./triggers/onPlayerJoinQueue');
-const { onGameMoveUpdate } = require('./triggers/onGameMoveUpdate');
+import { onGameMoveUpdate } from './triggers/onGameMoveUpdate.js';
+import { onPlayerJoinQueue } from './triggers/onPlayerJoinQueue.js';
+import { onUserCreate } from './triggers/onUserCreate.js';
 
 // Import scheduled function modules
-const { cleanupStaleMatchmakingEntries } = require('./scheduled/cleanupStaleMatchmakingEntries');
+import { cleanupStaleMatchmakingEntries } from './scheduled/cleanupStaleMatchmakingEntries.js';
 
 // ==================== User Profile APIs ====================
-exports.getPublicUserInfo = userProfile.getPublicUserInfo;
-exports.getUserProfile = userProfile.getUserProfile;
-exports.updateUserProfile = userProfile.updateUserProfile;
+export const getPublicUserInfo = userProfile.getPublicUserInfo;
+export const getUserProfile = userProfile.getUserProfile;
+export const updateUserProfile = userProfile.updateUserProfile;
 
 // ==================== User Settings APIs ====================
-exports.getUserSettings = userSettings.getUserSettings;
-exports.updateUserSettings = userSettings.updateUserSettings;
-exports.resetUserSettings = userSettings.resetUserSettings;
+export const getUserSettings = userSettings.getUserSettings;
+export const updateUserSettings = userSettings.updateUserSettings;
+export const resetUserSettings = userSettings.resetUserSettings;
 
 // ==================== Game APIs ====================
-exports.createGame = game.createGame;
-exports.createComputerGame = game.createComputerGame;
-exports.respondToGameInvite = game.respondToGameInvite;
-exports.makeMove = game.makeMove;
-exports.makeComputerMove = game.makeComputerMove;
-exports.resignGame = game.resignGame;
-exports.requestGameReset = game.requestGameReset;
-exports.respondToResetRequest = game.respondToResetRequest;
-exports.requestUndo = game.requestUndo;
-exports.respondToUndoRequest = game.respondToUndoRequest;
-exports.getActiveGames = game.getActiveGames;
-exports.getGameHistory = game.getGameHistory;
-exports.checkGameTime = game.checkGameTime;
-exports.handleTimeExpiration = game.handleTimeExpiration;
+export const createGame = game.createGame;
+export const createComputerGame = game.createComputerGame;
+export const respondToGameInvite = game.respondToGameInvite;
+export const makeMove = game.makeMove;
+export const makeComputerMove = game.makeComputerMove;
+export const resignGame = game.resignGame;
+export const requestGameReset = game.requestGameReset;
+export const respondToResetRequest = game.respondToResetRequest;
+export const requestUndo = game.requestUndo;
+export const respondToUndoRequest = game.respondToUndoRequest;
+export const getActiveGames = game.getActiveGames;
+export const getGameHistory = game.getGameHistory;
+export const checkGameTime = game.checkGameTime;
+export const handleTimeExpiration = game.handleTimeExpiration;
 
 // ==================== Friends APIs ====================
-exports.sendFriendRequest = friends.sendFriendRequest;
-exports.respondToFriendRequest = friends.respondToFriendRequest;
-exports.getFriends = friends.getFriends;
-exports.removeFriend = friends.removeFriend;
-exports.searchUsers = friends.searchUsers;
+export const sendFriendRequest = friends.sendFriendRequest;
+export const respondToFriendRequest = friends.respondToFriendRequest;
+export const getFriends = friends.getFriends;
+export const removeFriend = friends.removeFriend;
+export const searchUsers = friends.searchUsers;
 
 // ==================== Matchmaking APIs ====================
-exports.joinMatchmaking = matchmaking.joinMatchmaking;
-exports.leaveMatchmaking = matchmaking.leaveMatchmaking;
-exports.updateMatchmakingHeartbeat = matchmaking.updateMatchmakingHeartbeat;
-exports.getMatchmakingStatus = matchmaking.getMatchmakingStatus;
+export const joinMatchmaking = matchmaking.joinMatchmaking;
+export const leaveMatchmaking = matchmaking.leaveMatchmaking;
+export const updateMatchmakingHeartbeat = matchmaking.updateMatchmakingHeartbeat;
+export const getMatchmakingStatus = matchmaking.getMatchmakingStatus;
 
 // ==================== Firestore Triggers ====================
-exports.onPlayerJoinQueue = onPlayerJoinQueue;
-exports.onGameMoveUpdate = onGameMoveUpdate;
-exports.onUserCreate = onUserCreate;
+export { onGameMoveUpdate, onPlayerJoinQueue, onUserCreate };
 
 // ==================== Scheduled Functions ====================
-exports.cleanupStaleMatchmakingEntries = cleanupStaleMatchmakingEntries;
+export { cleanupStaleMatchmakingEntries };

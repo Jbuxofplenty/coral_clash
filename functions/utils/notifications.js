@@ -1,4 +1,4 @@
-const admin = require('firebase-admin');
+import { admin } from '../init.js';
 
 /**
  * Send push notification to a user using Firebase Cloud Messaging
@@ -385,18 +385,18 @@ async function sendResetCancelledNotification(recipientId, cancellerId, cancelle
     });
 }
 
-module.exports = {
-    sendPushNotification,
-    sendFriendRequestNotification,
+export {
     sendFriendAcceptedNotification,
-    sendGameRequestNotification,
+    sendFriendRequestNotification,
     sendGameAcceptedNotification,
+    sendGameRequestNotification,
     sendOpponentMoveNotification,
-    sendUndoRequestNotification,
-    sendUndoApprovedNotification,
-    sendUndoRejectedNotification,
-    sendUndoCancelledNotification,
+    sendPushNotification,
     sendResetApprovedNotification,
-    sendResetRejectedNotification,
     sendResetCancelledNotification,
+    sendResetRejectedNotification,
+    sendUndoApprovedNotification,
+    sendUndoCancelledNotification,
+    sendUndoRejectedNotification,
+    sendUndoRequestNotification,
 };

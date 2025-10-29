@@ -1,10 +1,9 @@
-import { useState, useCallback, useEffect } from 'react';
-import { Alert } from 'react-native';
+import { useCallback, useEffect, useState } from 'react';
+import { restoreGameFromSnapshot } from '../../shared';
+import { db, doc, onSnapshot } from '../config/firebase';
+import { useAlert, useAuth } from '../contexts';
 import useFirebaseFunctions from './useFirebaseFunctions';
 import useIsMounted from './useIsMounted';
-import { db, doc, onSnapshot, getDoc } from '../config/firebase';
-import { restoreGameFromSnapshot } from '../../shared';
-import { useAuth, useAlert } from '../contexts';
 
 /**
  * Hook to handle game actions with backend-first approach
@@ -154,7 +153,7 @@ export const useGameActions = (coralClash, gameId, onStateUpdate) => {
                 setIsProcessing(false);
             }
         },
-        [coralClash, gameId, makeMoveAPI, onStateUpdate, isUserTurn, gameData, user, isMountedRef],
+        [coralClash, gameId, isUserTurn, onStateUpdate, showAlert, makeMoveAPI],
     );
 
     /**
@@ -248,7 +247,7 @@ export const useGameActions = (coralClash, gameId, onStateUpdate) => {
                 setIsProcessing(false);
             }
         },
-        [coralClash, gameId, gameData, requestUndoAPI, onStateUpdate],
+        [coralClash, gameId, gameData?.opponentId, onStateUpdate, requestUndoAPI, showAlert],
     );
 
     // Derived state from game data

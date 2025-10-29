@@ -1,13 +1,13 @@
-import { CoralClash, applyFixture, validateFixtureVersion, Piece } from '../index';
+import { CoralClash, applyFixture } from '../index';
 
 // Import fixtures directly (works in Jest, not in React Native)
-import whaleMoveDigonally from '../__fixtures__/whale-move-diagonally.json';
-import octopusCheck from '../__fixtures__/octopus-check.json';
-import multipleChecks from '../__fixtures__/multiple-checks.json';
-import coralBlocksAttack from '../__fixtures__/coral-blocks-attack.json';
-import whaleRemovesCoral from '../__fixtures__/whale-removes-coral.json';
 import checkPinned from '../__fixtures__/check-pinned.json';
+import coralBlocksAttack from '../__fixtures__/coral-blocks-attack.json';
 import crabMovement from '../__fixtures__/crab-movement.json';
+import multipleChecks from '../__fixtures__/multiple-checks.json';
+import octopusCheck from '../__fixtures__/octopus-check.json';
+import whaleMoveDigonally from '../__fixtures__/whale-move-diagonally.json';
+import whaleRemovesCoral from '../__fixtures__/whale-removes-coral.json';
 
 describe('CoralClash Whale Mechanics', () => {
     let game: CoralClash;
@@ -1365,8 +1365,8 @@ describe('CoralClash Whale Mechanics', () => {
             // Check all white crab positions
             console.log('\nAll white pieces:');
             const board = game.board();
-            board.forEach((row, rankIdx) => {
-                row.forEach((square, fileIdx) => {
+            board.forEach((row, _rankIdx) => {
+                row.forEach((square, _fileIdx) => {
                     if (square && square.color === 'w' && square.type === 'c') {
                         console.log(`  White crab at ${square.square}: ${square.role}`);
                         const crabMoves = game.moves({ verbose: true, square: square.square });

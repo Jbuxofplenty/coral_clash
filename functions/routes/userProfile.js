@@ -1,7 +1,7 @@
-const { onCall, HttpsError } = require('firebase-functions/v2/https');
-const admin = require('firebase-admin');
-const { serverTimestamp } = require('../utils/helpers');
-const { getAppCheckConfig } = require('../utils/appCheckConfig');
+import { HttpsError, onCall } from 'firebase-functions/v2/https';
+import { admin } from '../init.js';
+import { getAppCheckConfig } from '../utils/appCheckConfig.js';
+import { serverTimestamp } from '../utils/helpers.js';
 
 const db = admin.firestore();
 
@@ -57,8 +57,8 @@ async function getPublicUserInfoHandler(request) {
  * This is safe to call for any user and returns only public information
  * GET /api/profile/public
  */
-exports.getPublicUserInfo = onCall(getAppCheckConfig(), getPublicUserInfoHandler);
-exports.getPublicUserInfoHandler = getPublicUserInfoHandler;
+export const getPublicUserInfo = onCall(getAppCheckConfig(), getPublicUserInfoHandler);
+export { getPublicUserInfoHandler };
 
 /**
  * Handler for getting user profile
@@ -104,8 +104,8 @@ async function getUserProfileHandler(request) {
  * Get user profile
  * GET /api/profile/:userId
  */
-exports.getUserProfile = onCall(getAppCheckConfig(), getUserProfileHandler);
-exports.getUserProfileHandler = getUserProfileHandler;
+export const getUserProfile = onCall(getAppCheckConfig(), getUserProfileHandler);
+export { getUserProfileHandler };
 
 /**
  * Handler for updating user profile
@@ -140,5 +140,5 @@ async function updateUserProfileHandler(request) {
  * Update user profile
  * POST /api/profile/update
  */
-exports.updateUserProfile = onCall(getAppCheckConfig(), updateUserProfileHandler);
-exports.updateUserProfileHandler = updateUserProfileHandler;
+export const updateUserProfile = onCall(getAppCheckConfig(), updateUserProfileHandler);
+export { updateUserProfileHandler };

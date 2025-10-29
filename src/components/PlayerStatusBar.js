@@ -1,7 +1,7 @@
 import React from 'react';
-import { View, Text, StyleSheet, useWindowDimensions } from 'react-native';
-import Avatar from './Avatar';
+import { StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { useTheme } from '../contexts';
+import Avatar from './Avatar';
 
 /**
  * PlayerStatusBar component displays player info, avatar, and optional timer
@@ -129,7 +129,7 @@ const styles = StyleSheet.create({
         fontWeight: '600',
     },
     playerNameCompact: {
-        fontSize: 14,
+        fontSize: 13,
     },
     statsRow: {
         flexDirection: 'row',
@@ -141,13 +141,13 @@ const styles = StyleSheet.create({
         fontSize: 14,
     },
     timerCompact: {
-        fontSize: 12,
+        fontSize: 11,
     },
     coralCounter: {
         fontSize: 14,
     },
     coralCounterCompact: {
-        fontSize: 12,
+        fontSize: 11,
     },
     colorIndicator: {
         width: 32,

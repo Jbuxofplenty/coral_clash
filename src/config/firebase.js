@@ -1,27 +1,23 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { initializeApp } from 'firebase/app';
+import { CustomProvider, initializeAppCheck } from 'firebase/app-check';
 import {
-    getAuth,
-    initializeAuth,
-    getReactNativePersistence,
     connectAuthEmulator,
+    getAuth,
+    getReactNativePersistence,
+    initializeAuth,
 } from 'firebase/auth';
 import {
-    getFirestore,
+    collection,
     connectFirestoreEmulator,
     doc,
-    onSnapshot,
     getDoc,
-    collection,
+    getFirestore,
+    onSnapshot,
     query,
     where,
 } from 'firebase/firestore';
-import { getFunctions, connectFunctionsEmulator } from 'firebase/functions';
-import {
-    initializeAppCheck,
-    ReCaptchaEnterpriseProvider,
-    CustomProvider,
-} from 'firebase/app-check';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { connectFunctionsEmulator, getFunctions } from 'firebase/functions';
 import { Platform } from 'react-native';
 
 // Your web app's Firebase configuration
@@ -47,7 +43,6 @@ const USE_EMULATOR = process.env.EXPO_PUBLIC_USE_FIREBASE_EMULATOR === 'true';
 // Initialize App Check
 // For React Native, we use a custom provider with debug tokens in development
 // In production, this will use device attestation (DeviceCheck for iOS, Play Integrity for Android)
-let appCheck;
 
 // Only enable App Check when using emulators (where it works without crypto issues)
 // When connecting to real Firebase, skip App Check due to React Native crypto limitations
@@ -55,7 +50,7 @@ if (USE_EMULATOR && __DEV__) {
     // Development with emulators: Use debug token
     self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
     try {
-        appCheck = initializeAppCheck(app, {
+        initializeAppCheck(app, {
             provider: new CustomProvider({
                 getToken: () =>
                     Promise.resolve({
@@ -131,4 +126,4 @@ if (USE_EMULATOR) {
     console.log(`🔧 Connected to Firebase Emulators at ${EMULATOR_HOST}`);
 }
 
-export { app, auth, db, functions, doc, onSnapshot, getDoc, collection, query, where };
+export { app, auth, collection, db, doc, functions, getDoc, onSnapshot, query, where };

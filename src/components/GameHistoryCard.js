@@ -1,9 +1,9 @@
-import React from 'react';
 import { Block, Text, theme } from 'galio-framework';
-import { View, StyleSheet, TouchableOpacity, ActivityIndicator, Dimensions } from 'react-native';
-import { useTheme, useAuth } from '../contexts';
-import Icon from './Icon';
+import React from 'react';
+import { ActivityIndicator, Dimensions, StyleSheet, View } from 'react-native';
+import { useAuth, useTheme } from '../contexts';
 import Avatar from './Avatar';
+import Icon from './Icon';
 
 const { width } = Dimensions.get('screen');
 
@@ -12,7 +12,11 @@ const { width } = Dimensions.get('screen');
  * Shows the 5 most recent completed or cancelled games
  * Note: Data loading and real-time updates are handled by the parent screen
  */
-export default function GameHistoryCard({ navigation, gameHistory = [], loading = false }) {
+export default function GameHistoryCard({
+    navigation: _navigation,
+    gameHistory = [],
+    loading = false,
+}) {
     const { colors } = useTheme();
     const { user } = useAuth();
 

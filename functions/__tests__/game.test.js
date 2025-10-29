@@ -1,85 +1,51 @@
-// Mock the shared game library before requiring anything
-jest.mock('../shared/dist/game');
+import { cleanup, setupStandardMocks } from './testHelpers.js';
 
-const test = require('firebase-functions-test')();
+const mocks = setupStandardMocks();
 
-// Mock Firestore
-const mockGet = jest.fn();
-const mockAdd = jest.fn();
-const mockUpdate = jest.fn();
-const mockSet = jest.fn();
-const mockWhere = jest.fn();
-const mockLimit = jest.fn();
-const mockServerTimestamp = jest.fn(() => ({ _methodName: 'serverTimestamp' }));
-const mockIncrement = jest.fn((value) => ({ _methodName: 'increment', value }));
-
-const createMockQueryRef = () => ({
-    where: mockWhere,
-    limit: mockLimit,
-    get: mockGet,
-});
-
-const createMockDocRef = () => ({
-    get: mockGet,
-    update: mockUpdate,
-    set: mockSet,
-    collection: jest.fn(() => createMockCollectionRef()),
-});
-
-const createMockCollectionRef = () => ({
-    doc: jest.fn(() => createMockDocRef()),
-    add: mockAdd,
-    where: mockWhere,
-});
-
-const mockCollection = jest.fn((collectionName) => createMockCollectionRef());
+jest.mock('../shared/dist/game/index.js');
 
 jest.mock('firebase-admin', () => ({
     initializeApp: jest.fn(),
     firestore: jest.fn(() => ({
-        collection: mockCollection,
+        collection: (...args) => mocks.mockCollection(...args),
+        batch: (...args) => mocks.mockBatch(...args),
         FieldValue: {
-            serverTimestamp: mockServerTimestamp,
-            increment: mockIncrement,
+            serverTimestamp: (...args) => mocks.mockServerTimestamp(...args),
+            increment: (...args) => mocks.mockIncrement(...args),
+            arrayUnion: (...args) => mocks.mockArrayUnion(...args),
+            arrayRemove: (...args) => mocks.mockArrayRemove(...args),
         },
     })),
 }));
 
-// Mock the notifications utility
-jest.mock('../utils/notifications', () => ({
-    sendGameRequestNotification: jest.fn().mockResolvedValue(undefined),
+jest.mock('../utils/notifications.js', () => ({
+    sendGameRequestNotification: jest.fn(() => Promise.resolve()),
+    sendGameAcceptedNotification: jest.fn(() => Promise.resolve()),
+    sendOpponentMoveNotification: jest.fn(() => Promise.resolve()),
 }));
 
-// Mock Cloud Tasks
-const mockDeleteTask = jest.fn();
-const mockCloudTasksClient = jest.fn(() => ({
-    deleteTask: mockDeleteTask,
-}));
+jest.mock('@google-cloud/tasks');
 
-jest.mock('@google-cloud/tasks', () => ({
-    CloudTasksClient: mockCloudTasksClient,
-}));
-
-const gameRoutes = require('../routes/game');
+import * as gameRoutes from '../routes/game.js';
 
 describe('Game Creation Functions', () => {
     beforeEach(() => {
         jest.clearAllMocks();
 
         // Setup default mock chain for where().limit().get()
-        mockWhere.mockReturnValue({
-            where: mockWhere,
-            limit: mockLimit,
-            get: mockGet,
+        mocks.mockWhere.mockReturnValue({
+            where: mocks.mockWhere,
+            limit: mocks.mockLimit,
+            get: mocks.mockGet,
         });
 
-        mockLimit.mockReturnValue({
-            get: mockGet,
+        mocks.mockLimit.mockReturnValue({
+            get: mocks.mockGet,
         });
     });
 
     afterAll(() => {
-        test.cleanup();
+        cleanup();
     });
 
     describe('createGame', () => {
@@ -90,7 +56,7 @@ describe('Game Creation Functions', () => {
             // Call handler directly (v2 compatible)
 
             // Mock opponent exists
-            mockGet.mockResolvedValueOnce({
+            mocks.mockGet.mockResolvedValueOnce({
                 exists: true,
                 data: () => ({
                     displayName: 'Opponent',
@@ -99,12 +65,12 @@ describe('Game Creation Functions', () => {
             });
 
             // Mock no existing pending games (both queries return empty)
-            mockGet
+            mocks.mockGet
                 .mockResolvedValueOnce({ empty: true }) // Query 1: creator->opponent
                 .mockResolvedValueOnce({ empty: true }); // Query 2: opponent->creator
 
             // Mock creator data
-            mockGet.mockResolvedValueOnce({
+            mocks.mockGet.mockResolvedValueOnce({
                 exists: true,
                 data: () => ({
                     displayName: 'Creator',
@@ -113,7 +79,7 @@ describe('Game Creation Functions', () => {
             });
 
             // Mock creator settings (subcollection)
-            mockGet.mockResolvedValueOnce({
+            mocks.mockGet.mockResolvedValueOnce({
                 exists: true,
                 data: () => ({
                     avatarKey: 'dolphin',
@@ -121,14 +87,14 @@ describe('Game Creation Functions', () => {
             });
 
             // Mock opponent settings (subcollection)
-            mockGet.mockResolvedValueOnce({
+            mocks.mockGet.mockResolvedValueOnce({
                 exists: true,
                 data: () => ({
                     avatarKey: 'whale',
                 }),
             });
 
-            mockAdd.mockResolvedValue({ id: 'new-game-id-123' });
+            mocks.mockAdd.mockResolvedValue({ id: 'new-game-id-123' });
 
             const result = await gameRoutes.createGameHandler({
                 data: {
@@ -140,14 +106,14 @@ describe('Game Creation Functions', () => {
 
             expect(result.success).toBe(true);
             expect(result.gameId).toBe('new-game-id-123');
-            expect(mockAdd).toHaveBeenCalledTimes(2); // Game + notification
+            expect(mocks.mockAdd).toHaveBeenCalledTimes(2); // Game + notification
         });
 
         it('should prevent duplicate game creation when pending request exists (creator->opponent)', async () => {
             // Call handler directly (v2 compatible)
 
             // Mock opponent exists
-            mockGet.mockResolvedValueOnce({
+            mocks.mockGet.mockResolvedValueOnce({
                 exists: true,
                 data: () => ({
                     displayName: 'Opponent',
@@ -156,7 +122,7 @@ describe('Game Creation Functions', () => {
             });
 
             // Mock existing pending game (creator->opponent direction)
-            mockGet
+            mocks.mockGet
                 .mockResolvedValueOnce({
                     empty: false, // Query 1: Found pending game
                     docs: [{ id: 'existing-game-id' }],
@@ -173,14 +139,14 @@ describe('Game Creation Functions', () => {
                 }),
             ).rejects.toThrow('A pending game request already exists between these players');
 
-            expect(mockAdd).not.toHaveBeenCalled();
+            expect(mocks.mockAdd).not.toHaveBeenCalled();
         });
 
         it('should prevent duplicate game creation when pending request exists (opponent->creator)', async () => {
             // Call handler directly (v2 compatible)
 
             // Mock opponent exists
-            mockGet.mockResolvedValueOnce({
+            mocks.mockGet.mockResolvedValueOnce({
                 exists: true,
                 data: () => ({
                     displayName: 'Opponent',
@@ -189,7 +155,7 @@ describe('Game Creation Functions', () => {
             });
 
             // Mock existing pending game (opponent->creator direction)
-            mockGet
+            mocks.mockGet
                 .mockResolvedValueOnce({ empty: true }) // Query 1: creator->opponent
                 .mockResolvedValueOnce({
                     empty: false, // Query 2: Found pending game in reverse direction
@@ -206,14 +172,14 @@ describe('Game Creation Functions', () => {
                 }),
             ).rejects.toThrow('A pending game request already exists between these players');
 
-            expect(mockAdd).not.toHaveBeenCalled();
+            expect(mocks.mockAdd).not.toHaveBeenCalled();
         });
 
         it('should throw error if opponent does not exist', async () => {
             // Call handler directly (v2 compatible)
 
             // Mock opponent doesn't exist
-            mockGet.mockResolvedValueOnce({
+            mocks.mockGet.mockResolvedValueOnce({
                 exists: false,
             });
 
@@ -227,7 +193,7 @@ describe('Game Creation Functions', () => {
                 }),
             ).rejects.toThrow('Opponent not found');
 
-            expect(mockAdd).not.toHaveBeenCalled();
+            expect(mocks.mockAdd).not.toHaveBeenCalled();
         });
 
         it('should throw error if user is not authenticated', async () => {
@@ -241,14 +207,14 @@ describe('Game Creation Functions', () => {
                 }),
             ).rejects.toThrow('User must be authenticated');
 
-            expect(mockAdd).not.toHaveBeenCalled();
+            expect(mocks.mockAdd).not.toHaveBeenCalled();
         });
 
         it('should allow new game creation if previous game between players is active (not pending)', async () => {
             // Call handler directly (v2 compatible)
 
             // Mock opponent exists
-            mockGet.mockResolvedValueOnce({
+            mocks.mockGet.mockResolvedValueOnce({
                 exists: true,
                 data: () => ({
                     displayName: 'Opponent',
@@ -257,12 +223,12 @@ describe('Game Creation Functions', () => {
             });
 
             // Mock no PENDING games (even though there may be active/completed games)
-            mockGet
+            mocks.mockGet
                 .mockResolvedValueOnce({ empty: true }) // Query 1: No pending creator->opponent
                 .mockResolvedValueOnce({ empty: true }); // Query 2: No pending opponent->creator
 
             // Mock creator data
-            mockGet.mockResolvedValueOnce({
+            mocks.mockGet.mockResolvedValueOnce({
                 exists: true,
                 data: () => ({
                     displayName: 'Creator',
@@ -271,7 +237,7 @@ describe('Game Creation Functions', () => {
             });
 
             // Mock creator settings (subcollection)
-            mockGet.mockResolvedValueOnce({
+            mocks.mockGet.mockResolvedValueOnce({
                 exists: true,
                 data: () => ({
                     avatarKey: 'dolphin',
@@ -279,14 +245,14 @@ describe('Game Creation Functions', () => {
             });
 
             // Mock opponent settings (subcollection)
-            mockGet.mockResolvedValueOnce({
+            mocks.mockGet.mockResolvedValueOnce({
                 exists: true,
                 data: () => ({
                     avatarKey: 'whale',
                 }),
             });
 
-            mockAdd.mockResolvedValue({ id: 'new-game-id-789' });
+            mocks.mockAdd.mockResolvedValue({ id: 'new-game-id-789' });
 
             const result = await gameRoutes.createGameHandler({
                 data: {
@@ -298,7 +264,7 @@ describe('Game Creation Functions', () => {
 
             expect(result.success).toBe(true);
             expect(result.gameId).toBe('new-game-id-789');
-            expect(mockAdd).toHaveBeenCalledTimes(2); // Game + notification
+            expect(mocks.mockAdd).toHaveBeenCalledTimes(2); // Game + notification
         });
     });
 

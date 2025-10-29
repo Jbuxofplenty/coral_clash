@@ -1,33 +1,28 @@
-// Mock the shared game library before requiring anything
-jest.mock('../shared/dist/game');
+import { cleanup, setupStandardMocks } from './testHelpers.js';
 
-const test = require('firebase-functions-test')();
+// Setup mocks
+const mocks = setupStandardMocks();
 
-// Mock Firestore with support for subcollections
-const mockGet = jest.fn();
-const mockUpdate = jest.fn();
+// Mock the shared game library before importing anything
+jest.mock('../shared/dist/game/index.js');
 
-const createMockDocRef = () => ({
-    get: mockGet,
-    update: mockUpdate,
-    collection: jest.fn((collectionName) => ({
-        doc: createMockDocRef,
-    })),
-});
-
-const mockDoc = jest.fn(createMockDocRef);
-const mockCollection = jest.fn(() => ({
-    doc: mockDoc,
-}));
-
+// Mock firebase-admin with standard setup
+// Note: Must inline the factory due to Jest hoisting restrictions
 jest.mock('firebase-admin', () => ({
     initializeApp: jest.fn(),
     firestore: jest.fn(() => ({
-        collection: mockCollection,
+        collection: (...args) => mocks.mockCollection(...args),
+        batch: (...args) => mocks.mockBatch(...args),
+        FieldValue: {
+            serverTimestamp: (...args) => mocks.mockServerTimestamp(...args),
+            increment: (...args) => mocks.mockIncrement(...args),
+            arrayUnion: (...args) => mocks.mockArrayUnion(...args),
+            arrayRemove: (...args) => mocks.mockArrayRemove(...args),
+        },
     })),
 }));
 
-const userProfile = require('../routes/userProfile');
+import * as userProfile from '../routes/userProfile.js';
 
 describe('User Profile Functions', () => {
     beforeEach(() => {
@@ -35,7 +30,7 @@ describe('User Profile Functions', () => {
     });
 
     afterAll(() => {
-        test.cleanup();
+        cleanup();
     });
 
     describe('getUserProfile', () => {
@@ -47,7 +42,7 @@ describe('User Profile Functions', () => {
                 discriminator: '1234',
             };
 
-            mockGet.mockResolvedValue({
+            mocks.mockGet.mockResolvedValue({
                 exists: true,
                 data: () => profileData,
             });
@@ -65,7 +60,7 @@ describe('User Profile Functions', () => {
             const friendUserId = 'friend-456';
 
             // Mock friend check - they are friends
-            mockGet
+            mocks.mockGet
                 .mockResolvedValueOnce({
                     exists: true, // Friend document exists
                 })
@@ -90,7 +85,7 @@ describe('User Profile Functions', () => {
             const strangerUserId = 'stranger-789';
 
             // Mock friend check - they are NOT friends
-            mockGet.mockResolvedValueOnce({
+            mocks.mockGet.mockResolvedValueOnce({
                 exists: false, // Friend document doesn't exist
             });
 
@@ -103,7 +98,7 @@ describe('User Profile Functions', () => {
         });
 
         it('should throw not-found error if user does not exist', async () => {
-            mockGet.mockResolvedValue({
+            mocks.mockGet.mockResolvedValue({
                 exists: false,
                 data: () => null,
             });
@@ -132,7 +127,7 @@ describe('User Profile Functions', () => {
                 displayName: 'NewDisplayName',
             };
 
-            mockUpdate.mockResolvedValue();
+            mocks.mockUpdate.mockResolvedValue();
 
             const result = await userProfile.updateUserProfileHandler({
                 data: updateData,
@@ -141,7 +136,7 @@ describe('User Profile Functions', () => {
 
             expect(result.success).toBe(true);
             expect(result.message).toBe('Profile updated successfully');
-            expect(mockUpdate).toHaveBeenCalledWith(
+            expect(mocks.mockUpdate).toHaveBeenCalledWith(
                 expect.objectContaining({
                     displayName: 'NewDisplayName',
                 }),
@@ -153,7 +148,7 @@ describe('User Profile Functions', () => {
                 photoURL: 'https://example.com/new-photo.jpg',
             };
 
-            mockUpdate.mockResolvedValue();
+            mocks.mockUpdate.mockResolvedValue();
 
             const result = await userProfile.updateUserProfileHandler({
                 data: updateData,
@@ -161,7 +156,7 @@ describe('User Profile Functions', () => {
             });
 
             expect(result.success).toBe(true);
-            expect(mockUpdate).toHaveBeenCalledWith(
+            expect(mocks.mockUpdate).toHaveBeenCalledWith(
                 expect.objectContaining({
                     photoURL: 'https://example.com/new-photo.jpg',
                 }),
@@ -175,7 +170,7 @@ describe('User Profile Functions', () => {
                 preferences: { theme: 'dark' },
             };
 
-            mockUpdate.mockResolvedValue();
+            mocks.mockUpdate.mockResolvedValue();
 
             const result = await userProfile.updateUserProfileHandler({
                 data: updateData,
@@ -183,7 +178,7 @@ describe('User Profile Functions', () => {
             });
 
             expect(result.success).toBe(true);
-            expect(mockUpdate).toHaveBeenCalledWith(
+            expect(mocks.mockUpdate).toHaveBeenCalledWith(
                 expect.objectContaining({
                     displayName: 'UpdatedName',
                     photoURL: 'https://example.com/updated.jpg',
@@ -193,14 +188,14 @@ describe('User Profile Functions', () => {
         });
 
         it('should include updatedAt timestamp', async () => {
-            mockUpdate.mockResolvedValue();
+            mocks.mockUpdate.mockResolvedValue();
 
             await userProfile.updateUserProfileHandler({
                 data: { displayName: 'Test' },
                 auth: { uid: 'test-user-123' },
             });
 
-            expect(mockUpdate).toHaveBeenCalledWith(
+            expect(mocks.mockUpdate).toHaveBeenCalledWith(
                 expect.objectContaining({
                     updatedAt: expect.anything(),
                 }),

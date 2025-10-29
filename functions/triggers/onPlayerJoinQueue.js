@@ -1,7 +1,7 @@
-const { onDocumentCreated } = require('firebase-functions/v2/firestore');
-const admin = require('firebase-admin');
-const { initializeGameState, serverTimestamp, formatDisplayName } = require('../utils/helpers');
-const { GAME_VERSION } = require('../shared/dist/game');
+import { onDocumentCreated } from 'firebase-functions/v2/firestore';
+import { admin } from '../init.js';
+import { GAME_VERSION } from '../shared/dist/game/index.js';
+import { formatDisplayName, initializeGameState, serverTimestamp } from '../utils/helpers.js';
 
 /**
  * Helper function to try matching players
@@ -195,7 +195,7 @@ async function createMatchedGame(player1Id, player2Id) {
  * Firestore trigger: When a player joins the queue, try to match them
  * This provides real-time matching without polling
  */
-exports.onPlayerJoinQueue = onDocumentCreated('matchmakingQueue/{userId}', async (event) => {
+export const onPlayerJoinQueue = onDocumentCreated('matchmakingQueue/{userId}', async (event) => {
     try {
         const snap = event.data;
         if (!snap) return;

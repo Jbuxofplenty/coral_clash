@@ -1,19 +1,19 @@
-import { theme } from 'galio-framework';
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Dimensions, ScrollView, StyleSheet, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { theme } from 'galio-framework';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Dimensions, ScrollView, StyleSheet } from 'react-native';
 
 import {
-    GameModeCard,
     ActiveGamesCard,
     GameHistoryCard,
+    GameModeCard,
     MatchmakingCard,
     TimeControlModal,
 } from '../components/';
 import FixtureLoaderModal from '../components/FixtureLoaderModal';
-import { useTheme, useAuth, useAlert } from '../contexts';
-import { useGame, useFirebaseFunctions, useMatchmaking } from '../hooks';
-import { db, collection, query, where, onSnapshot, doc, getDoc } from '../config/firebase';
+import { collection, db, onSnapshot, query, where } from '../config/firebase';
+import { useAlert, useAuth, useTheme } from '../contexts';
+import { useFirebaseFunctions, useGame, useMatchmaking } from '../hooks';
 
 const { width, height } = Dimensions.get('screen');
 

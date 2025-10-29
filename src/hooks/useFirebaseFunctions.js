@@ -1,6 +1,6 @@
 import { httpsCallable } from 'firebase/functions';
-import { functions, auth } from '../config/firebase';
 import { GAME_VERSION } from '../../shared/game';
+import { auth, functions } from '../config/firebase';
 
 /**
  * Custom hook for calling Firebase Cloud Functions
@@ -55,7 +55,7 @@ export const useFirebaseFunctions = () => {
             const result = await callable();
             return result.data;
         } catch (error) {
-            // Silently fail - caller will handle with default settings
+            console.error('Error getting user settings:', error);
             throw error;
         }
     };
@@ -335,7 +335,7 @@ export const useFirebaseFunctions = () => {
             const callable = httpsCallable(functions, 'updateMatchmakingHeartbeat');
             const result = await callable();
             return result.data;
-        } catch (error) {
+        } catch (_error) {
             // Don't log or throw - heartbeat failures are expected to be silent
             return { success: false };
         }

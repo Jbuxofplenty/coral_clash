@@ -2,14 +2,11 @@ import { useNavigation } from '@react-navigation/native';
 import { Block, NavBar, theme } from 'galio-framework';
 
 import React from 'react';
-import { Dimensions, Platform, StyleSheet } from 'react-native';
+import { Platform, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import materialTheme from '../constants/theme';
 import { useAuth, useTheme } from '../contexts';
 import Avatar from './Avatar';
-
-const { height, width } = Dimensions.get('window');
 
 function Header({ back, title, transparent }) {
     const navigation = useNavigation();
@@ -67,10 +64,6 @@ function Header({ back, title, transparent }) {
 export default Header;
 
 const styles = StyleSheet.create({
-    button: {
-        padding: 12,
-        position: 'relative',
-    },
     title: {
         fontSize: 18,
         fontWeight: 600,
@@ -85,25 +78,5 @@ const styles = StyleSheet.create({
         borderWidth: 0,
         elevation: 0,
         shadowOpacity: 0,
-    },
-    notify: {
-        backgroundColor: materialTheme.COLORS.LABEL,
-        borderRadius: 4,
-        height: theme.SIZES.BASE / 2,
-        width: theme.SIZES.BASE / 2,
-        position: 'absolute',
-        top: 8,
-        right: 8,
-    },
-    divider: {
-        borderRightWidth: 0.3,
-        borderRightColor: theme.COLORS.MUTED,
-    },
-    search: {
-        height: 48,
-        width: width - 32,
-        marginHorizontal: 16,
-        borderWidth: 1,
-        borderRadius: 3,
     },
 });

@@ -1,16 +1,19 @@
-module.exports = {
+export default {
     testEnvironment: 'node',
-    testMatch: ['**/__tests__/**/*.test.js'],
-    testPathIgnorePatterns: ['/node_modules/'],
+    testMatch: ['**/__tests__/**/*.test.js', '!shared/**'],
+    testPathIgnorePatterns: ['/node_modules/', '/shared/'],
     collectCoverageFrom: [
         'routes/**/*.js',
         'utils/**/*.js',
         '!utils/notifications.js', // Skip notifications for now
     ],
-    coveragePathIgnorePatterns: ['/node_modules/'],
-    // Transform shared TypeScript files
-    transformIgnorePatterns: ['node_modules/(?!(firebase-admin|firebase-functions|@firebase)/)'],
+    coveragePathIgnorePatterns: ['/node_modules/', '/shared/'],
+    transform: {
+        '^.+\\.js$': 'babel-jest',
+    },
+    transformIgnorePatterns: ['/node_modules/(?!(firebase-functions|firebase-admin)/)'],
     moduleNameMapper: {
-        '^../shared/dist/game$': '<rootDir>/../shared/dist/game/index.js',
+        '^../shared/dist/game$': '<rootDir>/__mocks__/shared-game.js',
+        '^../shared/dist/game/index.js$': '<rootDir>/__mocks__/shared-game.js',
     },
 };

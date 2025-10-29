@@ -1,5 +1,9 @@
 // Import from shared library (source of truth)
-const { CoralClash, createGameSnapshot, restoreGameFromSnapshot } = require('../shared/dist/game');
+import {
+    CoralClash,
+    createGameSnapshot,
+    restoreGameFromSnapshot,
+} from '../shared/dist/game/index.js';
 
 /**
  * Validate a move on the server side to prevent cheating
@@ -127,8 +131,4 @@ function getGameResult(gameState) {
     }
 }
 
-module.exports = {
-    validateMove,
-    getLegalMoves,
-    getGameResult,
-};
+export { getGameResult, getLegalMoves, validateMove };

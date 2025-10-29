@@ -257,7 +257,7 @@ const BITS: Record<string, number> = {
  */
 
 // prettier-ignore
-// eslint-disable-next-line
+
 const Ox88: Record<Square, number> = {
   a8:   0, b8:   1, c8:   2, d8:   3, e8:   4, f8:   5, g8:   6, h8:   7,
   a7:  16, b7:  17, c7:  18, d7:  19, e7:  20, f7:  21, g7:  22, h7:  23,
@@ -329,20 +329,8 @@ const PIECE_MASKS = { c: 0x1, t: 0x2, o: 0x4, f: 0x8, d: 0x10, h: 0x20 };
 
 const SYMBOLS = 'ctofdhCTOFDH';
 
-const PROMOTIONS: PieceSymbol[] = [TURTLE, OCTOPUS, PUFFERFISH, DOLPHIN];
-
 const RANK_1 = 7;
-const RANK_2 = 6;
-/*
- * const RANK_3 = 5
- * const RANK_4 = 4
- * const RANK_5 = 3
- * const RANK_6 = 2
- */
-const RANK_7 = 1;
 const RANK_8 = 0;
-
-const SECOND_RANK = { b: RANK_7, w: RANK_2 };
 
 const TERMINATION_MARKERS = ['1-0', '0-1', '1/2-1/2', '*'];
 
@@ -2310,7 +2298,7 @@ export class CoralClash {
         if (move.piece === WHALE && whaleCurrentPositions) {
             // This is a whale move - restore whale to both old positions
             // old.kings[us] tells us where the whale WAS before the move (both squares)
-            const [oldFirst, oldSecond] = old.kings[us];
+            const [oldFirst, _oldSecond] = old.kings[us];
 
             // Get the piece object from the CURRENT positions (saved before history restore)
             const [currentFirst, currentSecond] = whaleCurrentPositions;
@@ -3069,9 +3057,7 @@ export class CoralClash {
             move.whaleSecondSquare = toAlgebraic === firstSquare ? secondSquare : firstSquare;
 
             // Determine orientation based on squares
-            const toFile = toAlgebraic.charCodeAt(0);
             const toRank = parseInt(toAlgebraic[1]);
-            const secondFile = move.whaleSecondSquare.charCodeAt(0);
             const secondRank = parseInt(move.whaleSecondSquare[1]);
 
             move.whaleOrientation = toRank === secondRank ? 'horizontal' : 'vertical';

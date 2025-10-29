@@ -5,9 +5,9 @@
 import {
     CoralClash,
     createGameSnapshot,
-    restoreGameFromSnapshot,
     exportGameState,
     importGameState,
+    restoreGameFromSnapshot,
 } from '../index';
 
 describe('Game State Snapshot and Restore', () => {
@@ -444,7 +444,6 @@ describe('Game State Snapshot and Restore', () => {
             expect(moveWithoutCoral).toBeDefined();
 
             // Get coral state before move
-            const coralBefore = game.getAllCoral();
             const coralRemainingBefore = game.getCoralRemainingCounts();
 
             // Make the move WITHOUT placing coral

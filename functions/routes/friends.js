@@ -1,11 +1,8 @@
-const { onCall, onRequest, HttpsError } = require('firebase-functions/v2/https');
-const admin = require('firebase-admin');
-const { serverTimestamp, formatDisplayName } = require('../utils/helpers');
-const {
-    sendFriendRequestNotification,
-    sendFriendAcceptedNotification,
-} = require('../utils/notifications');
-const { getAppCheckConfig } = require('../utils/appCheckConfig');
+import { HttpsError, onCall } from 'firebase-functions/v2/https';
+import { admin } from '../init.js';
+import { getAppCheckConfig } from '../utils/appCheckConfig.js';
+import { formatDisplayName, serverTimestamp } from '../utils/helpers.js';
+import { sendFriendRequestNotification } from '../utils/notifications.js';
 
 const db = admin.firestore();
 
@@ -14,7 +11,7 @@ const db = admin.firestore();
  * POST /api/friends/request
  * Accepts either friendId (UID) or email
  */
-exports.sendFriendRequest = onCall(getAppCheckConfig(), async (request) => {
+export const sendFriendRequest = onCall(getAppCheckConfig(), async (request) => {
     const { data, auth } = request;
     try {
         if (!auth) {
@@ -130,7 +127,7 @@ exports.sendFriendRequest = onCall(getAppCheckConfig(), async (request) => {
  * Accept or decline friend request
  * POST /api/friends/respond
  */
-exports.respondToFriendRequest = onCall(getAppCheckConfig(), async (request) => {
+export const respondToFriendRequest = onCall(getAppCheckConfig(), async (request) => {
     const { data, auth } = request;
     try {
         if (!auth) {
@@ -227,8 +224,8 @@ exports.respondToFriendRequest = onCall(getAppCheckConfig(), async (request) => 
  * Handler for getting friends list
  * Separated for testing purposes
  */
-async function getFriendsHandler(request) {
-    const { data, auth } = request;
+export async function getFriendsHandler(request) {
+    const { data: _data, auth } = request;
     if (!auth) {
         throw new HttpsError('unauthenticated', 'User must be authenticated');
     }
@@ -342,7 +339,7 @@ async function getFriendsHandler(request) {
  * Get user's friends list and pending requests
  * GET /api/friends
  */
-exports.getFriends = onCall(getAppCheckConfig(), async (request) => {
+export const getFriends = onCall(getAppCheckConfig(), async (request) => {
     try {
         return await getFriendsHandler(request);
     } catch (error) {
@@ -350,13 +347,12 @@ exports.getFriends = onCall(getAppCheckConfig(), async (request) => {
         throw new HttpsError('internal', error.message);
     }
 });
-exports.getFriendsHandler = getFriendsHandler;
 
 /**
  * Remove friend
  * POST /api/friends/remove
  */
-exports.removeFriend = onCall(getAppCheckConfig(), async (request) => {
+export const removeFriend = onCall(getAppCheckConfig(), async (request) => {
     const { data, auth } = request;
     try {
         if (!auth) {
@@ -485,7 +481,7 @@ async function searchUsersHandler(request) {
  * Search for users by username
  * POST /api/friends/search
  */
-exports.searchUsers = onCall(getAppCheckConfig(), async (request) => {
+export const searchUsers = onCall(getAppCheckConfig(), async (request) => {
     try {
         return await searchUsersHandler(request);
     } catch (error) {
@@ -493,7 +489,7 @@ exports.searchUsers = onCall(getAppCheckConfig(), async (request) => {
         throw new HttpsError('internal', error.message);
     }
 });
-exports.searchUsersHandler = searchUsersHandler;
+export { searchUsersHandler };
 
 /**
  * Calculate fuzzy match score

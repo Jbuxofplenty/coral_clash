@@ -1,9 +1,9 @@
-const {
-    initializeGameState,
+import {
     getDefaultSettings,
-    serverTimestamp,
     increment,
-} = require('../utils/helpers');
+    initializeGameState,
+    serverTimestamp,
+} from '../utils/helpers.js';
 
 describe('Helpers', () => {
     describe('initializeGameState', () => {
@@ -17,9 +17,9 @@ describe('Helpers', () => {
             // Snapshot doesn't include moveHistory (it's in FEN)
         });
 
-        it('should create a game state that matches DEFAULT_POSITION', () => {
+        it('should create a game state that matches DEFAULT_POSITION', async () => {
             const gameState = initializeGameState();
-            const { CoralClash, DEFAULT_POSITION } = require('../shared/dist/game');
+            const { CoralClash, DEFAULT_POSITION } = await import('../__mocks__/shared-game.js');
             const game = new CoralClash(DEFAULT_POSITION);
 
             expect(gameState.fen).toBe(game.fen());

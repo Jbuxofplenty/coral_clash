@@ -1,9 +1,9 @@
-import React from 'react';
-import { View, TouchableOpacity, Alert, Text } from 'react-native';
 import { Icon } from 'galio-framework';
-import BaseCoralClashBoard, { baseStyles } from './BaseCoralClashBoard';
-import { useAuth, useGamePreferences, useAlert } from '../contexts';
+import React from 'react';
+import { Text, TouchableOpacity, View } from 'react-native';
+import { useAlert, useAuth, useGamePreferences } from '../contexts';
 import { useFirebaseFunctions } from '../hooks';
+import BaseCoralClashBoard, { baseStyles } from './BaseCoralClashBoard';
 
 /**
  * Format display name with discriminator
@@ -40,7 +40,7 @@ const ComputerCoralClashBoard = ({ fixture, gameId, gameState, notificationStatu
     } = useFirebaseFunctions();
 
     // Computer-specific: Handle move completion
-    const handleMoveComplete = async (result, move) => {
+    const handleMoveComplete = async (result, _move) => {
         // If it's a computer game and computer's turn, trigger computer move
         if (
             result.opponentType === 'computer' &&
@@ -67,7 +67,7 @@ const ComputerCoralClashBoard = ({ fixture, gameId, gameState, notificationStatu
         handleHistoryBack,
         handleHistoryForward,
         isViewingHistory,
-        gameData, // Added for consistency with PvP board
+        gameData: _gameData, // Added for consistency with PvP board
     }) => (
         <View style={baseStyles.controlBar}>
             <TouchableOpacity

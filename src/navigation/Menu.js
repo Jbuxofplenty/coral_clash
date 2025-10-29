@@ -1,16 +1,16 @@
 import { DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Block, Text } from 'galio-framework';
 import React from 'react';
 import { StyleSheet, View, useWindowDimensions } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useAuth, useTheme } from '../contexts';
 import { Avatar } from '../components';
+import { useAuth, useTheme } from '../contexts';
 
 // Re-export for backward compatibility
 export {
-    DEFAULT_AVATARS,
     AVATAR_KEYS,
+    DEFAULT_AVATARS,
     DEFAULT_AVATAR_NAME,
     getRandomAvatarKey,
 } from '../constants/avatars';

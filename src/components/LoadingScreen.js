@@ -1,6 +1,6 @@
-import React from 'react';
-import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { Block, Text } from 'galio-framework';
+import React from 'react';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { useTheme } from '../contexts';
 import Icon from './Icon';
 
@@ -58,7 +58,7 @@ export default function LoadingScreen({
     transparent = false,
     showSpinnerBackground = true,
 }) {
-    const { colors, isDarkMode } = useTheme();
+    const { colors, isDarkMode: _isDarkMode } = useTheme();
 
     const finalSpinnerColor = spinnerColor || colors.PRIMARY;
     const finalIconColor = iconColor || colors.PRIMARY;

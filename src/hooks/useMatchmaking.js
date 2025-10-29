@@ -1,9 +1,9 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { AppState } from 'react-native';
-import { useFirebaseFunctions } from './useFirebaseFunctions';
-import { useAuth } from '../contexts';
-import { db, collection, query, where, onSnapshot, doc } from '../config/firebase';
 import { updateDoc } from 'firebase/firestore';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { AppState } from 'react-native';
+import { collection, db, doc, onSnapshot, query, where } from '../config/firebase';
+import { useAuth } from '../contexts';
+import { useFirebaseFunctions } from './useFirebaseFunctions';
 
 /**
  * Custom hook for managing matchmaking state and real-time updates

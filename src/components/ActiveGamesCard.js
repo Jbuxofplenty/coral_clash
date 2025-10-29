@@ -1,11 +1,9 @@
-import React, { useState } from 'react';
 import { Block, Text, theme } from 'galio-framework';
-import { View, StyleSheet, TouchableOpacity, ActivityIndicator, Dimensions } from 'react-native';
-import { useTheme, useAuth, useAlert } from '../contexts';
-import Icon from './Icon';
+import React, { useState } from 'react';
+import { ActivityIndicator, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { useAlert, useAuth, useTheme } from '../contexts';
 import Avatar from './Avatar';
-
-const { width } = Dimensions.get('screen');
+import Icon from './Icon';
 
 /**
  * Card component that displays active games (PvP and Computer) on the home screen

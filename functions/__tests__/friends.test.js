@@ -1,46 +1,19 @@
-// Mock the shared game library before requiring anything
-jest.mock('../shared/dist/game');
+import { cleanup, setupStandardMocks } from './testHelpers.js';
 
-const test = require('firebase-functions-test')();
+const mocks = setupStandardMocks();
 
-// Mock Firestore
-const mockGet = jest.fn();
-const mockAdd = jest.fn();
-const mockUpdate = jest.fn();
-const mockSet = jest.fn();
-const mockWhere = jest.fn();
-const mockLimit = jest.fn();
-const mockServerTimestamp = jest.fn(() => ({ _methodName: 'serverTimestamp' }));
-
-const createMockQueryRef = () => ({
-    where: mockWhere,
-    limit: mockLimit,
-    get: mockGet,
-});
-
-const createMockDocRef = () => ({
-    get: mockGet,
-    update: mockUpdate,
-    set: mockSet,
-    collection: jest.fn(() => createMockCollectionRef()),
-});
-
-const createMockCollectionRef = () => ({
-    doc: jest.fn(() => createMockDocRef()),
-    add: mockAdd,
-    where: mockWhere,
-    limit: mockLimit,
-    get: mockGet,
-});
-
-const mockCollection = jest.fn((collectionName) => createMockCollectionRef());
+jest.mock('../shared/dist/game/index.js');
 
 jest.mock('firebase-admin', () => ({
     initializeApp: jest.fn(),
     firestore: jest.fn(() => ({
-        collection: mockCollection,
+        collection: (...args) => mocks.mockCollection(...args),
+        batch: (...args) => mocks.mockBatch(...args),
         FieldValue: {
-            serverTimestamp: mockServerTimestamp,
+            serverTimestamp: (...args) => mocks.mockServerTimestamp(...args),
+            increment: (...args) => mocks.mockIncrement(...args),
+            arrayUnion: (...args) => mocks.mockArrayUnion(...args),
+            arrayRemove: (...args) => mocks.mockArrayRemove(...args),
         },
     })),
     auth: jest.fn(() => ({
@@ -48,32 +21,32 @@ jest.mock('firebase-admin', () => ({
     })),
 }));
 
-// Mock the notifications utility
-jest.mock('../utils/notifications', () => ({
-    sendFriendRequestNotification: jest.fn().mockResolvedValue(undefined),
-    sendFriendAcceptedNotification: jest.fn().mockResolvedValue(undefined),
+jest.mock('../utils/notifications.js', () => ({
+    sendGameRequestNotification: jest.fn(() => Promise.resolve()),
+    sendGameAcceptedNotification: jest.fn(() => Promise.resolve()),
+    sendOpponentMoveNotification: jest.fn(() => Promise.resolve()),
 }));
 
-const friendsRoutes = require('../routes/friends');
+import * as friendsRoutes from '../routes/friends.js';
 
 describe('Friends Functions', () => {
     beforeEach(() => {
         jest.clearAllMocks();
 
         // Setup default mock chain for where().limit().get()
-        mockWhere.mockReturnValue({
-            where: mockWhere,
-            limit: mockLimit,
-            get: mockGet,
+        mocks.mockWhere.mockReturnValue({
+            where: mocks.mockWhere,
+            limit: mocks.mockLimit,
+            get: mocks.mockGet,
         });
 
-        mockLimit.mockReturnValue({
-            get: mockGet,
+        mocks.mockLimit.mockReturnValue({
+            get: mocks.mockGet,
         });
     });
 
     afterAll(() => {
-        test.cleanup();
+        cleanup();
     });
 
     describe('getFriends', () => {
@@ -83,12 +56,12 @@ describe('Friends Functions', () => {
 
         it('should return friends list with avatarKeys from settings subcollection', async () => {
             // Mock friends subcollection query
-            mockGet.mockResolvedValueOnce({
+            mocks.mockGet.mockResolvedValueOnce({
                 docs: [{ id: friendId1 }, { id: friendId2 }],
             });
 
             // Mock friend 1 user data
-            mockGet.mockResolvedValueOnce({
+            mocks.mockGet.mockResolvedValueOnce({
                 exists: true,
                 data: () => ({
                     displayName: 'Friend One',
@@ -97,7 +70,7 @@ describe('Friends Functions', () => {
             });
 
             // Mock friend 1 settings subcollection
-            mockGet.mockResolvedValueOnce({
+            mocks.mockGet.mockResolvedValueOnce({
                 exists: true,
                 data: () => ({
                     avatarKey: 'whale',
@@ -105,7 +78,7 @@ describe('Friends Functions', () => {
             });
 
             // Mock friend 2 user data
-            mockGet.mockResolvedValueOnce({
+            mocks.mockGet.mockResolvedValueOnce({
                 exists: true,
                 data: () => ({
                     displayName: 'Friend Two',
@@ -114,17 +87,17 @@ describe('Friends Functions', () => {
             });
 
             // Mock friend 2 settings subcollection (doesn't exist, should default to dolphin)
-            mockGet.mockResolvedValueOnce({
+            mocks.mockGet.mockResolvedValueOnce({
                 exists: false,
             });
 
             // Mock incoming requests (empty)
-            mockGet.mockResolvedValueOnce({
+            mocks.mockGet.mockResolvedValueOnce({
                 docs: [],
             });
 
             // Mock outgoing requests (empty)
-            mockGet.mockResolvedValueOnce({
+            mocks.mockGet.mockResolvedValueOnce({
                 docs: [],
             });
 
@@ -151,12 +124,12 @@ describe('Friends Functions', () => {
             const requesterId = 'requester-111';
 
             // Mock friends subcollection query (empty)
-            mockGet.mockResolvedValueOnce({
+            mocks.mockGet.mockResolvedValueOnce({
                 docs: [],
             });
 
             // Mock incoming requests
-            mockGet.mockResolvedValueOnce({
+            mocks.mockGet.mockResolvedValueOnce({
                 docs: [
                     {
                         id: 'request-1',
@@ -171,7 +144,7 @@ describe('Friends Functions', () => {
             });
 
             // Mock requester user data
-            mockGet.mockResolvedValueOnce({
+            mocks.mockGet.mockResolvedValueOnce({
                 exists: true,
                 data: () => ({
                     displayName: 'Requester',
@@ -180,7 +153,7 @@ describe('Friends Functions', () => {
             });
 
             // Mock requester settings
-            mockGet.mockResolvedValueOnce({
+            mocks.mockGet.mockResolvedValueOnce({
                 exists: true,
                 data: () => ({
                     avatarKey: 'octopus',
@@ -188,7 +161,7 @@ describe('Friends Functions', () => {
             });
 
             // Mock outgoing requests (empty)
-            mockGet.mockResolvedValueOnce({
+            mocks.mockGet.mockResolvedValueOnce({
                 docs: [],
             });
 
@@ -207,17 +180,17 @@ describe('Friends Functions', () => {
             const targetId = 'target-222';
 
             // Mock friends subcollection query (empty)
-            mockGet.mockResolvedValueOnce({
+            mocks.mockGet.mockResolvedValueOnce({
                 docs: [],
             });
 
             // Mock incoming requests (empty)
-            mockGet.mockResolvedValueOnce({
+            mocks.mockGet.mockResolvedValueOnce({
                 docs: [],
             });
 
             // Mock outgoing requests
-            mockGet.mockResolvedValueOnce({
+            mocks.mockGet.mockResolvedValueOnce({
                 docs: [
                     {
                         id: 'request-2',
@@ -232,7 +205,7 @@ describe('Friends Functions', () => {
             });
 
             // Mock target user data
-            mockGet.mockResolvedValueOnce({
+            mocks.mockGet.mockResolvedValueOnce({
                 exists: true,
                 data: () => ({
                     displayName: 'Target',
@@ -241,7 +214,7 @@ describe('Friends Functions', () => {
             });
 
             // Mock target settings
-            mockGet.mockResolvedValueOnce({
+            mocks.mockGet.mockResolvedValueOnce({
                 exists: true,
                 data: () => ({
                     avatarKey: 'turtle',
@@ -277,7 +250,7 @@ describe('Friends Functions', () => {
             const foundUserId = 'found-456';
 
             // Mock user search query
-            mockGet.mockResolvedValueOnce({
+            mocks.mockGet.mockResolvedValueOnce({
                 docs: [
                     {
                         id: foundUserId,
@@ -291,22 +264,22 @@ describe('Friends Functions', () => {
             });
 
             // Mock friend check (not friends)
-            mockGet.mockResolvedValueOnce({
+            mocks.mockGet.mockResolvedValueOnce({
                 exists: false,
             });
 
             // Mock sent request check (no sent request)
-            mockGet.mockResolvedValueOnce({
+            mocks.mockGet.mockResolvedValueOnce({
                 empty: true,
             });
 
             // Mock received request check (no received request)
-            mockGet.mockResolvedValueOnce({
+            mocks.mockGet.mockResolvedValueOnce({
                 empty: true,
             });
 
             // Mock found user settings
-            mockGet.mockResolvedValueOnce({
+            mocks.mockGet.mockResolvedValueOnce({
                 exists: true,
                 data: () => ({
                     avatarKey: 'crab',
@@ -328,7 +301,7 @@ describe('Friends Functions', () => {
             const foundUserId = 'found-789';
 
             // Mock user search query
-            mockGet.mockResolvedValueOnce({
+            mocks.mockGet.mockResolvedValueOnce({
                 docs: [
                     {
                         id: foundUserId,
@@ -342,22 +315,22 @@ describe('Friends Functions', () => {
             });
 
             // Mock friend check (not friends)
-            mockGet.mockResolvedValueOnce({
+            mocks.mockGet.mockResolvedValueOnce({
                 exists: false,
             });
 
             // Mock sent request check
-            mockGet.mockResolvedValueOnce({
+            mocks.mockGet.mockResolvedValueOnce({
                 empty: true,
             });
 
             // Mock received request check
-            mockGet.mockResolvedValueOnce({
+            mocks.mockGet.mockResolvedValueOnce({
                 empty: true,
             });
 
             // Mock settings don't exist
-            mockGet.mockResolvedValueOnce({
+            mocks.mockGet.mockResolvedValueOnce({
                 exists: false,
             });
 

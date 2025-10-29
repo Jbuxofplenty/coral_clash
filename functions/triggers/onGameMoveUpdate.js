@@ -1,6 +1,6 @@
-const { onDocumentUpdated } = require('firebase-functions/v2/firestore');
-const admin = require('firebase-admin');
-const { serverTimestamp, increment } = require('../utils/helpers');
+import { onDocumentUpdated } from 'firebase-functions/v2/firestore';
+import { admin } from '../init.js';
+import { increment, serverTimestamp } from '../utils/helpers.js';
 
 /**
  * Cancel pending timeout task for a game
@@ -147,7 +147,7 @@ async function checkAndHandleTimeExpiration(gameId, gameData) {
  * Firestore trigger: Schedule time expiration check when lastMoveTime is updated
  * This ensures we check for timeout at the exact moment time runs out
  */
-exports.onGameMoveUpdate = onDocumentUpdated('games/{gameId}', async (event) => {
+export const onGameMoveUpdate = onDocumentUpdated('games/{gameId}', async (event) => {
     try {
         const db = admin.firestore();
         const change = event.data;

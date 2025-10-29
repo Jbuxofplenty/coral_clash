@@ -1,6 +1,6 @@
 // Import from shared library (source of truth)
-const { CoralClash, DEFAULT_POSITION, createGameSnapshot } = require('../shared/dist/game');
-const { FieldValue } = require('firebase-admin/firestore');
+import { FieldValue } from 'firebase-admin/firestore';
+import { CoralClash, DEFAULT_POSITION, createGameSnapshot } from '../shared/dist/game/index.js';
 
 /**
  * Initialize game state for a new Coral Clash game
@@ -13,16 +13,6 @@ function initializeGameState() {
 
     // Return game state in format suitable for Firestore
     return createGameSnapshot(game);
-}
-
-/**
- * Get a random avatar key from available options
- * @returns {string} Random avatar key
- */
-function getRandomAvatarKey() {
-    const avatarKeys = ['dolphin', 'octopus', 'whale', 'turtle', 'crab', 'puffer'];
-    const randomIndex = Math.floor(Math.random() * avatarKeys.length);
-    return avatarKeys[randomIndex];
 }
 
 /**
@@ -71,10 +61,4 @@ function formatDisplayName(displayName, discriminator) {
     return `${displayName} #${discriminator}`;
 }
 
-module.exports = {
-    initializeGameState,
-    getDefaultSettings,
-    serverTimestamp,
-    increment,
-    formatDisplayName,
-};
+export { formatDisplayName, getDefaultSettings, increment, initializeGameState, serverTimestamp };

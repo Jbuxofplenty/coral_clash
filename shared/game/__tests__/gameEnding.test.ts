@@ -47,7 +47,7 @@ describe('Game Ending Conditions', () => {
             for (const move of moves) {
                 try {
                     game.move(move);
-                } catch (e) {
+                } catch (_error) {
                     // Some moves might not be legal in default position
                 }
             }

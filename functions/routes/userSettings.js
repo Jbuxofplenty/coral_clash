@@ -1,7 +1,7 @@
-const { onCall, onRequest, HttpsError } = require('firebase-functions/v2/https');
-const admin = require('firebase-admin');
-const { getDefaultSettings } = require('../utils/helpers');
-const { getAppCheckConfig } = require('../utils/appCheckConfig');
+import { HttpsError, onCall } from 'firebase-functions/v2/https';
+import { admin } from '../init.js';
+import { getAppCheckConfig } from '../utils/appCheckConfig.js';
+import { getDefaultSettings } from '../utils/helpers.js';
 
 const db = admin.firestore();
 
@@ -10,7 +10,7 @@ const db = admin.firestore();
  * Separated for testing purposes
  */
 async function getUserSettingsHandler(request) {
-    const { data, auth } = request;
+    const { data: _data, auth } = request;
     if (!auth) {
         throw new HttpsError('unauthenticated', 'User must be authenticated');
     }
@@ -41,8 +41,8 @@ async function getUserSettingsHandler(request) {
  * Get user settings
  * GET /api/settings
  */
-exports.getUserSettings = onCall(getAppCheckConfig(), getUserSettingsHandler);
-exports.getUserSettingsHandler = getUserSettingsHandler;
+export const getUserSettings = onCall(getAppCheckConfig(), getUserSettingsHandler);
+export { getUserSettingsHandler };
 
 /**
  * Handler for updating user settings
@@ -86,15 +86,15 @@ async function updateUserSettingsHandler(request) {
  * Update user settings
  * POST /api/settings/update
  */
-exports.updateUserSettings = onCall(getAppCheckConfig(), updateUserSettingsHandler);
-exports.updateUserSettingsHandler = updateUserSettingsHandler;
+export const updateUserSettings = onCall(getAppCheckConfig(), updateUserSettingsHandler);
+export { updateUserSettingsHandler };
 
 /**
  * Handler for resetting user settings
  * Separated for testing purposes
  */
 async function resetUserSettingsHandler(request) {
-    const { data, auth } = request;
+    const { data: _data, auth } = request;
     if (!auth) {
         throw new HttpsError('unauthenticated', 'User must be authenticated');
     }
@@ -123,5 +123,5 @@ async function resetUserSettingsHandler(request) {
  * Reset user settings to defaults
  * POST /api/settings/reset
  */
-exports.resetUserSettings = onCall(getAppCheckConfig(), resetUserSettingsHandler);
-exports.resetUserSettingsHandler = resetUserSettingsHandler;
+export const resetUserSettings = onCall(getAppCheckConfig(), resetUserSettingsHandler);
+export { resetUserSettingsHandler };

@@ -1,19 +1,19 @@
-const { onCall, onRequest, HttpsError } = require('firebase-functions/v2/https');
-const admin = require('firebase-admin');
-const {
+import { HttpsError, onCall, onRequest } from 'firebase-functions/v2/https';
+import { admin } from '../init.js';
+import { GAME_VERSION } from '../shared/dist/game/index.js';
+import { getAppCheckConfig } from '../utils/appCheckConfig.js';
+import { getGameResult, validateMove } from '../utils/gameValidator.js';
+import {
+    formatDisplayName,
+    increment,
     initializeGameState,
     serverTimestamp,
-    increment,
-    formatDisplayName,
-} = require('../utils/helpers');
-const { validateMove, getGameResult } = require('../utils/gameValidator');
-const {
-    sendGameRequestNotification,
+} from '../utils/helpers.js';
+import {
     sendGameAcceptedNotification,
+    sendGameRequestNotification,
     sendOpponentMoveNotification,
-} = require('../utils/notifications');
-const { GAME_VERSION } = require('../shared/dist/game');
-const { getAppCheckConfig } = require('../utils/appCheckConfig');
+} from '../utils/notifications.js';
 
 const db = admin.firestore();
 
@@ -167,7 +167,7 @@ async function createGameHandler(request) {
  * Create a new PvP game
  * POST /api/game/create
  */
-exports.createGame = onCall(getAppCheckConfig(), async (request) => {
+export const createGame = onCall(getAppCheckConfig(), async (request) => {
     try {
         return await createGameHandler(request);
     } catch (error) {
@@ -175,13 +175,13 @@ exports.createGame = onCall(getAppCheckConfig(), async (request) => {
         throw new HttpsError('internal', error.message);
     }
 });
-exports.createGameHandler = createGameHandler;
+export { createGameHandler };
 
 /**
  * Create a new game against the computer
  * POST /api/game/createComputer
  */
-exports.createComputerGame = onCall(getAppCheckConfig(), async (request) => {
+export const createComputerGame = onCall(getAppCheckConfig(), async (request) => {
     const { data, auth } = request;
     try {
         if (!auth) {
@@ -240,7 +240,7 @@ exports.createComputerGame = onCall(getAppCheckConfig(), async (request) => {
  * - Sender (creatorId) can cancel (decline)
  * - Both can decline/cancel only if game status is 'pending'
  */
-exports.respondToGameInvite = onCall(getAppCheckConfig(), async (request) => {
+export const respondToGameInvite = onCall(getAppCheckConfig(), async (request) => {
     const { data, auth } = request;
     try {
         if (!auth) {
@@ -374,7 +374,7 @@ exports.respondToGameInvite = onCall(getAppCheckConfig(), async (request) => {
  * POST /api/game/move
  * Server-side move validation prevents cheating
  */
-exports.makeMove = onCall(getAppCheckConfig(), async (request) => {
+export const makeMove = onCall(getAppCheckConfig(), async (request) => {
     const { data, auth } = request;
     try {
         if (!auth) {
@@ -620,8 +620,8 @@ exports.makeMove = onCall(getAppCheckConfig(), async (request) => {
  * POST /api/game/makeComputerMove
  * @param {string} gameId - The game ID
  */
-exports.makeComputerMove = onCall(getAppCheckConfig(), async (request) => {
-    const { data, auth } = request;
+export const makeComputerMove = onCall(getAppCheckConfig(), async (request) => {
+    const { data, auth: _auth } = request;
     try {
         const { gameId, version } = data;
 
@@ -983,7 +983,7 @@ async function checkAndHandleTimeExpiration(gameId, gameData) {
  * Check game time status
  * Called when loading a game to check if time has expired
  */
-exports.checkGameTime = onCall(getAppCheckConfig(), async (request) => {
+export const checkGameTime = onCall(getAppCheckConfig(), async (request) => {
     const { data, auth } = request;
     try {
         if (!auth) {
@@ -1025,7 +1025,7 @@ exports.checkGameTime = onCall(getAppCheckConfig(), async (request) => {
  * HTTP endpoint for Cloud Tasks to check time expiration
  * This is called at the exact time when a player's time should expire
  */
-exports.handleTimeExpiration = onRequest(async (req, res) => {
+export const handleTimeExpiration = onRequest(async (req, res) => {
     try {
         // Verify this is a Cloud Tasks request (basic security)
         const { gameId } = req.body;
@@ -1063,7 +1063,7 @@ exports.handleTimeExpiration = onRequest(async (req, res) => {
  * Resign from a game
  * POST /api/game/resign
  */
-exports.resignGame = onCall(getAppCheckConfig(), async (request) => {
+export const resignGame = onCall(getAppCheckConfig(), async (request) => {
     const { data, auth } = request;
     try {
         console.log('[resignGame] Starting resignation process');
@@ -1227,7 +1227,7 @@ exports.resignGame = onCall(getAppCheckConfig(), async (request) => {
  * For computer games: Auto-approves and resets immediately
  * For PvP games: Sends request to opponent for approval
  */
-exports.requestGameReset = onCall(getAppCheckConfig(), async (request) => {
+export const requestGameReset = onCall(getAppCheckConfig(), async (request) => {
     const { data, auth } = request;
     try {
         if (!auth) {
@@ -1330,7 +1330,7 @@ exports.requestGameReset = onCall(getAppCheckConfig(), async (request) => {
  * Respond to a game reset request (approve or reject)
  * Only for PvP games
  */
-exports.respondToResetRequest = onCall(getAppCheckConfig(), async (request) => {
+export const respondToResetRequest = onCall(getAppCheckConfig(), async (request) => {
     const { data, auth } = request;
     try {
         if (!auth) {
@@ -1450,8 +1450,8 @@ exports.respondToResetRequest = onCall(getAppCheckConfig(), async (request) => {
  * Get user's game history (completed and cancelled games)
  * GET /api/games/history
  */
-exports.getGameHistory = onCall(getAppCheckConfig(), async (request) => {
-    const { data, auth } = request;
+export const getGameHistory = onCall(getAppCheckConfig(), async (request) => {
+    const { data: _data, auth } = request;
     try {
         if (!auth) {
             throw new HttpsError('unauthenticated', 'User must be authenticated');
@@ -1563,8 +1563,8 @@ exports.getGameHistory = onCall(getAppCheckConfig(), async (request) => {
  * Get user's active games
  * GET /api/games/active
  */
-exports.getActiveGames = onCall(getAppCheckConfig(), async (request) => {
-    const { data, auth } = request;
+export const getActiveGames = onCall(getAppCheckConfig(), async (request) => {
+    const { data: _data, auth } = request;
     try {
         if (!auth) {
             throw new HttpsError('unauthenticated', 'User must be authenticated');
@@ -1688,13 +1688,13 @@ function determineCurrentTurn(gameData, turn) {
     console.warn('Unable to determine currentTurn, missing player ID fields');
     return turn === 'w' ? gameData.creatorId : gameData.opponentId;
 }
-exports.determineCurrentTurn = determineCurrentTurn; // Export for testing
+export { determineCurrentTurn }; // Export for testing
 
 /**
  * Request to undo a move
  * POST /api/game/requestUndo
  */
-exports.requestUndo = onCall(getAppCheckConfig(), async (request) => {
+export const requestUndo = onCall(getAppCheckConfig(), async (request) => {
     const { data, auth } = request;
     try {
         if (!auth) {
@@ -1804,7 +1804,7 @@ exports.requestUndo = onCall(getAppCheckConfig(), async (request) => {
  * Respond to an undo request
  * POST /api/game/respondToUndoRequest
  */
-exports.respondToUndoRequest = onCall(getAppCheckConfig(), async (request) => {
+export const respondToUndoRequest = onCall(getAppCheckConfig(), async (request) => {
     const { data, auth } = request;
     try {
         if (!auth) {

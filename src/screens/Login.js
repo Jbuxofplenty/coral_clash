@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Block, Button, Input, Text, theme } from 'galio-framework';
 import React from 'react';
@@ -11,9 +12,7 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 
-import { materialTheme } from '../constants';
 import { useAuth, useTheme } from '../contexts';
 
 const { width, height } = Dimensions.get('screen');

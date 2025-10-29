@@ -1,8 +1,8 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
-import { Appearance } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useAuth } from './AuthContext';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { Appearance } from 'react-native';
 import { getThemeColors } from '../constants/theme';
+import { useAuth } from './AuthContext';
 
 const ThemeContext = createContext({});
 const THEME_STORAGE_KEY = '@coral_clash_theme';
