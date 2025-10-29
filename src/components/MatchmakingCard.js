@@ -1,15 +1,14 @@
 import { Block, Text, theme } from 'galio-framework';
 import React, { useState } from 'react';
 import {
+    ActivityIndicator,
     Dimensions,
     StyleSheet,
     TouchableWithoutFeedback,
     View,
-    ActivityIndicator,
-    Alert,
 } from 'react-native';
+import { useAlert, useTheme } from '../contexts';
 import Icon from './Icon';
-import { useTheme, useAlert } from '../contexts';
 
 const { width } = Dimensions.get('screen');
 
@@ -60,16 +59,11 @@ function MatchmakingCard({ searching, queueCount, loading, onStartSearch, onStop
         <TouchableWithoutFeedback onPress={handlePress} disabled={loading || isProcessing}>
             <Block card style={[styles.card, styles.shadow, { backgroundColor }, style]}>
                 <Block center middle style={styles.iconContainer}>
-                    {loading || isProcessing ? (
+                    {loading || isProcessing || searching ? (
                         <ActivityIndicator size='large' color={spinnerColor} />
                     ) : (
                         <View style={styles.iconWrapper}>
-                            <Icon
-                                name={searching ? 'refresh' : 'users'}
-                                family='font-awesome'
-                                size={100}
-                                color={iconColor}
-                            />
+                            <Icon name='users' family='font-awesome' size={100} color={iconColor} />
                         </View>
                     )}
                 </Block>
