@@ -1,29 +1,27 @@
-import { useState, useEffect } from 'react';
+import { Icon } from 'galio-framework';
+import { useEffect, useState } from 'react';
 import {
-    useWindowDimensions,
-    View,
-    Text,
-    StyleSheet,
-    TouchableOpacity,
-    Share,
-    Alert,
-    Modal,
     Animated,
     Dimensions,
+    Modal,
     Platform,
+    Share,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+    useWindowDimensions,
 } from 'react-native';
-import { Icon } from 'galio-framework';
-import { useCoralClash } from '../hooks';
-import { WHALE, applyFixture, restoreGameFromSnapshot, CoralClash } from '../../shared';
-import EmptyBoard from './EmptyBoard';
-import Moves from './Moves';
-import Pieces from './Pieces';
+import { CoralClash, WHALE, applyFixture, restoreGameFromSnapshot } from '../../shared';
+import { useAlert, useAuth, useGamePreferences, useTheme } from '../contexts';
+import { useCoralClash, useFirebaseFunctions, useGameActions } from '../hooks';
 import Coral from './Coral';
-import PlayerStatusBar from './PlayerStatusBar';
+import EmptyBoard from './EmptyBoard';
 import GameStatusBanner from './GameStatusBanner';
 import LoadingScreen from './LoadingScreen';
-import { useTheme, useGamePreferences, useAuth, useAlert } from '../contexts';
-import { useGameActions, useFirebaseFunctions } from '../hooks';
+import Moves from './Moves';
+import Pieces from './Pieces';
+import PlayerStatusBar from './PlayerStatusBar';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 

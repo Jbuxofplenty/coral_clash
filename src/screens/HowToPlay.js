@@ -1,30 +1,29 @@
-import { Block, Text, theme } from 'galio-framework';
-import React from 'react';
-import { Dimensions, ScrollView, StyleSheet, View, TouchableOpacity } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Block, Text, theme } from 'galio-framework';
+import React, { useEffect, useState } from 'react';
+import { Dimensions, ScrollView, StyleSheet, View } from 'react-native';
+import ExampleLink, { loadViewedExamples, markExampleViewed } from '../components/ExampleLink';
 import { useTheme } from '../contexts';
-import { getScenario } from '../constants/tutorialScenarios';
 
 const { width, height } = Dimensions.get('screen');
 
-// Clickable text component for scenario links
-const ScenarioLink = ({ children, scenarioId, navigation, color }) => {
-    const handlePress = () => {
-        const scenario = getScenario(scenarioId);
-        if (scenario) {
-            navigation.navigate('ScenarioBoard', { scenario });
-        }
-    };
-
-    return (
-        <Text bold style={[styles.link, { color: color }]} onPress={handlePress}>
-            {children}
-        </Text>
-    );
-};
-
 export default function HowToPlay({ navigation }) {
     const { colors } = useTheme();
+    const [viewedExamples, setViewedExamples] = useState([]);
+
+    useEffect(() => {
+        loadExamples();
+    }, []);
+
+    const loadExamples = async () => {
+        const examples = await loadViewedExamples();
+        setViewedExamples(examples);
+    };
+
+    const handleMarkViewed = async (scenarioId) => {
+        const updated = await markExampleViewed(scenarioId, viewedExamples);
+        setViewedExamples(updated);
+    };
 
     return (
         <LinearGradient
@@ -45,23 +44,8 @@ export default function HowToPlay({ navigation }) {
                     </Text>
                     <View style={styles.bulletSection}>
                         <Text style={[styles.bulletPoint, { color: colors.TEXT }]}>
-                            •{' '}
-                            <ScenarioLink
-                                scenarioId='checkmate'
-                                navigation={navigation}
-                                color={colors.LINK}
-                            >
-                                Checkmate
-                            </ScenarioLink>{' '}
-                            your opponent's Whale (when the Whale is in{' '}
-                            <ScenarioLink
-                                scenarioId='check'
-                                navigation={navigation}
-                                color={colors.LINK}
-                            >
-                                check
-                            </ScenarioLink>{' '}
-                            and cannot escape)
+                            • <Text bold>Checkmate</Text> your opponent's Whale (when the Whale is
+                            in <Text bold>check</Text> and cannot escape)
                         </Text>
                         <Text style={[styles.bulletPoint, { color: colors.TEXT }]}>
                             • Control the <Text bold>most area with Coral</Text> when:
@@ -77,6 +61,22 @@ export default function HowToPlay({ navigation }) {
                                 - A Crab or Octopus reaches the opponent's back row
                             </Text>
                         </View>
+                    </View>
+                    <View style={styles.examplesContainer}>
+                        <ExampleLink
+                            scenarioId='checkmate'
+                            label='Checkmate Example'
+                            navigation={navigation}
+                            viewedExamples={viewedExamples}
+                            onViewed={handleMarkViewed}
+                        />
+                        <ExampleLink
+                            scenarioId='check'
+                            label='Check Example'
+                            navigation={navigation}
+                            viewedExamples={viewedExamples}
+                            onViewed={handleMarkViewed}
+                        />
                     </View>
                 </Block>
 
@@ -101,27 +101,29 @@ export default function HowToPlay({ navigation }) {
                     </Text>
                     <View style={styles.bulletSection}>
                         <Text style={[styles.bulletPoint, { color: colors.TEXT }]}>
-                            •{' '}
-                            <ScenarioLink
-                                scenarioId='hunterEffect'
-                                navigation={navigation}
-                                color={colors.LINK}
-                            >
-                                Hunter
-                            </ScenarioLink>{' '}
-                            pieces (without four coral icons) can remove Coral
+                            • <Text bold>Hunter</Text> pieces (without four coral icons) can remove
+                            Coral
                         </Text>
                         <Text style={[styles.bulletPoint, { color: colors.TEXT }]}>
-                            •{' '}
-                            <ScenarioLink
-                                scenarioId='gathererEffect'
-                                navigation={navigation}
-                                color={colors.LINK}
-                            >
-                                Gatherer
-                            </ScenarioLink>{' '}
-                            pieces (with four coral icons) can place Coral
+                            • <Text bold>Gatherer</Text> pieces (with four coral icons) can place
+                            Coral
                         </Text>
+                    </View>
+                    <View style={styles.examplesContainer}>
+                        <ExampleLink
+                            scenarioId='hunterEffect'
+                            label='Hunter Effect Example'
+                            navigation={navigation}
+                            viewedExamples={viewedExamples}
+                            onViewed={handleMarkViewed}
+                        />
+                        <ExampleLink
+                            scenarioId='gathererEffect'
+                            label='Gatherer Effect Example'
+                            navigation={navigation}
+                            viewedExamples={viewedExamples}
+                            onViewed={handleMarkViewed}
+                        />
                     </View>
                 </Block>
 
@@ -164,22 +166,13 @@ export default function HowToPlay({ navigation }) {
                         </Text>
                     </View>
 
-                    <TouchableOpacity
-                        style={[styles.ruleSection, { marginTop: theme.SIZES.BASE }]}
-                        onPress={() => {
-                            const scenario = getScenario('coralMovementComparison');
-                            if (scenario) navigation.navigate('ScenarioBoard', { scenario });
-                        }}
-                        activeOpacity={0.7}
-                    >
-                        <Text style={[styles.ruleTitle, { color: colors.LINK }]}>
-                            <Text bold>🪸 See Coral Movement Demo</Text>
-                        </Text>
-                        <Text style={[styles.text, { color: colors.TEXT }]}>
-                            Tap to see how Hunter pieces are blocked by Coral while Gatherer pieces
-                            can pass through it.
-                        </Text>
-                    </TouchableOpacity>
+                    <ExampleLink
+                        scenarioId='coralMovementComparison'
+                        label='Coral Movement Example'
+                        navigation={navigation}
+                        viewedExamples={viewedExamples}
+                        onViewed={handleMarkViewed}
+                    />
 
                     <Text
                         h6
@@ -192,103 +185,103 @@ export default function HowToPlay({ navigation }) {
                         Individual Piece Movements
                     </Text>
 
-                    <TouchableOpacity
-                        style={styles.pieceSection}
-                        onPress={() => {
-                            const scenario = getScenario('whaleMovement');
-                            if (scenario) navigation.navigate('ScenarioBoard', { scenario });
-                        }}
-                        activeOpacity={0.7}
-                    >
-                        <Text style={[styles.pieceTitle, { color: colors.LINK }]}>
-                            🐋 <Text bold>Whale (tap to see demo)</Text>
+                    <View style={styles.pieceSection}>
+                        <Text style={[styles.pieceTitle, { color: colors.TEXT }]}>
+                            🐋 <Text bold>Whale</Text>
                         </Text>
                         <Text style={[styles.text, { color: colors.TEXT }]}>
                             Can move half the piece any number of squares in any direction, or
                             rotate half of the piece to an adjacent square. Cannot end movement in
                             check.
                         </Text>
-                    </TouchableOpacity>
+                        <ExampleLink
+                            scenarioId='whaleMovement'
+                            label='Whale Movement Example'
+                            navigation={navigation}
+                            viewedExamples={viewedExamples}
+                            onViewed={handleMarkViewed}
+                        />
+                    </View>
 
-                    <TouchableOpacity
-                        style={styles.pieceSection}
-                        onPress={() => {
-                            const scenario = getScenario('dolphinMovement');
-                            if (scenario) navigation.navigate('ScenarioBoard', { scenario });
-                        }}
-                        activeOpacity={0.7}
-                    >
-                        <Text style={[styles.pieceTitle, { color: colors.LINK }]}>
-                            🐬 <Text bold>Dolphin (tap to see demo)</Text>
+                    <View style={styles.pieceSection}>
+                        <Text style={[styles.pieceTitle, { color: colors.TEXT }]}>
+                            🐬 <Text bold>Dolphin</Text>
                         </Text>
                         <Text style={[styles.text, { color: colors.TEXT }]}>
                             Moves any number of squares vertically, horizontally, or diagonally.
                         </Text>
-                    </TouchableOpacity>
+                        <ExampleLink
+                            scenarioId='dolphinMovement'
+                            label='Dolphin Movement Example'
+                            navigation={navigation}
+                            viewedExamples={viewedExamples}
+                            onViewed={handleMarkViewed}
+                        />
+                    </View>
 
-                    <TouchableOpacity
-                        style={styles.pieceSection}
-                        onPress={() => {
-                            const scenario = getScenario('turtleMovement');
-                            if (scenario) navigation.navigate('ScenarioBoard', { scenario });
-                        }}
-                        activeOpacity={0.7}
-                    >
-                        <Text style={[styles.pieceTitle, { color: colors.LINK }]}>
-                            🐢 <Text bold>Turtle (tap to see demo)</Text>
+                    <View style={styles.pieceSection}>
+                        <Text style={[styles.pieceTitle, { color: colors.TEXT }]}>
+                            🐢 <Text bold>Turtle</Text>
                         </Text>
                         <Text style={[styles.text, { color: colors.TEXT }]}>
                             Moves any number of squares vertically or horizontally.
                         </Text>
-                    </TouchableOpacity>
+                        <ExampleLink
+                            scenarioId='turtleMovement'
+                            label='Turtle Movement Example'
+                            navigation={navigation}
+                            viewedExamples={viewedExamples}
+                            onViewed={handleMarkViewed}
+                        />
+                    </View>
 
-                    <TouchableOpacity
-                        style={styles.pieceSection}
-                        onPress={() => {
-                            const scenario = getScenario('pufferfishMovement');
-                            if (scenario) navigation.navigate('ScenarioBoard', { scenario });
-                        }}
-                        activeOpacity={0.7}
-                    >
-                        <Text style={[styles.pieceTitle, { color: colors.LINK }]}>
-                            🐡 <Text bold>Pufferfish (tap to see demo)</Text>
+                    <View style={styles.pieceSection}>
+                        <Text style={[styles.pieceTitle, { color: colors.TEXT }]}>
+                            🐡 <Text bold>Pufferfish</Text>
                         </Text>
                         <Text style={[styles.text, { color: colors.TEXT }]}>
                             Moves any number of squares diagonally.
                         </Text>
-                    </TouchableOpacity>
+                        <ExampleLink
+                            scenarioId='pufferfishMovement'
+                            label='Pufferfish Movement Example'
+                            navigation={navigation}
+                            viewedExamples={viewedExamples}
+                            onViewed={handleMarkViewed}
+                        />
+                    </View>
 
-                    <TouchableOpacity
-                        style={styles.pieceSection}
-                        onPress={() => {
-                            const scenario = getScenario('octopusMovement');
-                            if (scenario) navigation.navigate('ScenarioBoard', { scenario });
-                        }}
-                        activeOpacity={0.7}
-                    >
-                        <Text style={[styles.pieceTitle, { color: colors.LINK }]}>
-                            🐙 <Text bold>Octopus (tap to see demo)</Text>
+                    <View style={styles.pieceSection}>
+                        <Text style={[styles.pieceTitle, { color: colors.TEXT }]}>
+                            🐙 <Text bold>Octopus</Text>
                         </Text>
                         <Text style={[styles.text, { color: colors.TEXT }]}>
                             Moves one square diagonally.
                         </Text>
-                    </TouchableOpacity>
+                        <ExampleLink
+                            scenarioId='octopusMovement'
+                            label='Octopus Movement Example'
+                            navigation={navigation}
+                            viewedExamples={viewedExamples}
+                            onViewed={handleMarkViewed}
+                        />
+                    </View>
 
-                    <TouchableOpacity
-                        style={styles.pieceSection}
-                        onPress={() => {
-                            const scenario = getScenario('crabMovement');
-                            if (scenario) navigation.navigate('ScenarioBoard', { scenario });
-                        }}
-                        activeOpacity={0.7}
-                    >
-                        <Text style={[styles.pieceTitle, { color: colors.LINK }]}>
-                            🦀 <Text bold>Crab (tap to see demo)</Text>
+                    <View style={styles.pieceSection}>
+                        <Text style={[styles.pieceTitle, { color: colors.TEXT }]}>
+                            🦀 <Text bold>Crab</Text>
                         </Text>
                         <Text style={[styles.text, { color: colors.TEXT }]}>
                             Moves one square vertically or horizontally.
                         </Text>
-                    </TouchableOpacity>
+                        <ExampleLink
+                            scenarioId='crabMovement'
+                            label='Crab Movement Example'
+                            navigation={navigation}
+                            viewedExamples={viewedExamples}
+                            onViewed={handleMarkViewed}
+                        />
+                    </View>
                 </Block>
 
                 <Block style={[styles.card, { backgroundColor: colors.CARD_BACKGROUND }]}>
@@ -296,56 +289,56 @@ export default function HowToPlay({ navigation }) {
                         Special Rules
                     </Text>
 
-                    <TouchableOpacity
-                        style={styles.ruleSection}
-                        onPress={() => {
-                            const scenario = getScenario('capture');
-                            if (scenario) navigation.navigate('ScenarioBoard', { scenario });
-                        }}
-                        activeOpacity={0.7}
-                    >
-                        <Text style={[styles.ruleTitle, { color: colors.LINK }]}>
-                            <Text bold>Capture (tap to see demo)</Text>
+                    <View style={styles.ruleSection}>
+                        <Text style={[styles.ruleTitle, { color: colors.TEXT }]}>
+                            <Text bold>Capture</Text>
                         </Text>
                         <Text style={[styles.text, { color: colors.TEXT }]}>
                             Move to a square occupied by an enemy piece. Whales can capture two
                             pieces in one move.
                         </Text>
-                    </TouchableOpacity>
+                        <ExampleLink
+                            scenarioId='capture'
+                            label='Capture Example'
+                            navigation={navigation}
+                            viewedExamples={viewedExamples}
+                            onViewed={handleMarkViewed}
+                        />
+                    </View>
 
-                    <TouchableOpacity
-                        style={styles.ruleSection}
-                        onPress={() => {
-                            const scenario = getScenario('hunterEffect');
-                            if (scenario) navigation.navigate('ScenarioBoard', { scenario });
-                        }}
-                        activeOpacity={0.7}
-                    >
-                        <Text style={[styles.ruleTitle, { color: colors.LINK }]}>
-                            <Text bold>Hunter Effect (tap to see demo)</Text>
+                    <View style={styles.ruleSection}>
+                        <Text style={[styles.ruleTitle, { color: colors.TEXT }]}>
+                            <Text bold>Hunter Effect</Text>
                         </Text>
                         <Text style={[styles.text, { color: colors.TEXT }]}>
                             Hunter pieces (without coral icons) stop when moving onto Coral and can
                             remove it from the board.
                         </Text>
-                    </TouchableOpacity>
+                        <ExampleLink
+                            scenarioId='hunterEffect'
+                            label='Hunter Effect Example'
+                            navigation={navigation}
+                            viewedExamples={viewedExamples}
+                            onViewed={handleMarkViewed}
+                        />
+                    </View>
 
-                    <TouchableOpacity
-                        style={styles.ruleSection}
-                        onPress={() => {
-                            const scenario = getScenario('gathererEffect');
-                            if (scenario) navigation.navigate('ScenarioBoard', { scenario });
-                        }}
-                        activeOpacity={0.7}
-                    >
-                        <Text style={[styles.ruleTitle, { color: colors.LINK }]}>
-                            <Text bold>Gatherer Effect (tap to see demo)</Text>
+                    <View style={styles.ruleSection}>
+                        <Text style={[styles.ruleTitle, { color: colors.TEXT }]}>
+                            <Text bold>Gatherer Effect</Text>
                         </Text>
                         <Text style={[styles.text, { color: colors.TEXT }]}>
                             Gatherer pieces (with four coral icons) can place Coral on empty squares
                             they move to.
                         </Text>
-                    </TouchableOpacity>
+                        <ExampleLink
+                            scenarioId='gathererEffect'
+                            label='Gatherer Effect Example'
+                            navigation={navigation}
+                            viewedExamples={viewedExamples}
+                            onViewed={handleMarkViewed}
+                        />
+                    </View>
                 </Block>
 
                 <Block style={[styles.card, { backgroundColor: colors.CARD_BACKGROUND }]}>
@@ -439,7 +432,8 @@ const styles = StyleSheet.create({
         fontSize: 16,
         marginBottom: theme.SIZES.BASE / 2,
     },
-    link: {
-        textDecorationLine: 'underline',
+    examplesContainer: {
+        marginTop: theme.SIZES.BASE,
+        gap: theme.SIZES.BASE / 2,
     },
 });
