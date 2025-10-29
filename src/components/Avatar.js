@@ -1,5 +1,6 @@
 import React from 'react';
 import { Image, View } from 'react-native';
+import { moderateScale, scale } from 'react-native-size-matters';
 import { DEFAULT_AVATARS, DEFAULT_AVATAR_NAME } from '../constants/avatars';
 import { useAuth, useTheme } from '../contexts';
 import Icon from './Icon';
@@ -36,10 +37,10 @@ export default function Avatar({
 
     // Size configurations
     const sizeConfig = {
-        small: { container: 36, image: 28, border: 2 },
-        medium: { container: 44, image: 36, border: 2 },
-        large: { container: 60, image: 48, border: 2 },
-        xlarge: { container: 80, image: 64, border: 3 },
+        small: { container: moderateScale(36), image: moderateScale(28), border: scale(2) },
+        medium: { container: moderateScale(44), image: moderateScale(36), border: scale(2) },
+        large: { container: moderateScale(60), image: moderateScale(48), border: scale(2) },
+        xlarge: { container: moderateScale(80), image: moderateScale(64), border: scale(3) },
     };
 
     const config = sizeConfig[size] || sizeConfig.medium;

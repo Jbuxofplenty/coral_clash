@@ -1,4 +1,5 @@
 import { Block, Text } from 'galio-framework';
+import { moderateScale } from 'react-native-size-matters';
 import { FlatGrid } from 'react-native-super-grid';
 
 const BOARD_SIZE = 8;
@@ -9,6 +10,9 @@ const EmptyBoard = ({ size, boardFlipped = false }) => {
     const squareSize = size / BOARD_SIZE;
     const displayFiles = boardFlipped ? [...FILES].reverse() : FILES;
     const displayRanks = boardFlipped ? [...RANKS].reverse() : RANKS;
+
+    // Calculate responsive font size for coordinate labels using moderateScale
+    const coordinateFontSize = moderateScale(squareSize * 0.2);
 
     return (
         <Block
@@ -46,7 +50,7 @@ const EmptyBoard = ({ size, boardFlipped = false }) => {
                         >
                             {showRank && (
                                 <Text
-                                    size={squareSize * 0.2}
+                                    size={coordinateFontSize}
                                     color={textColor}
                                     style={{
                                         position: 'absolute',
@@ -61,7 +65,7 @@ const EmptyBoard = ({ size, boardFlipped = false }) => {
                             )}
                             {showFile && (
                                 <Text
-                                    size={squareSize * 0.2}
+                                    size={coordinateFontSize}
                                     color={textColor}
                                     style={{
                                         position: 'absolute',

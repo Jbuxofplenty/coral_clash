@@ -2,6 +2,7 @@ import { Block, Text, theme } from 'galio-framework';
 import React, { useMemo, useState } from 'react';
 import {
     ActivityIndicator,
+    Dimensions,
     Pressable,
     RefreshControl,
     ScrollView,
@@ -11,10 +12,13 @@ import {
     View,
     useWindowDimensions,
 } from 'react-native';
+import { moderateScale } from 'react-native-size-matters';
 
 import { Avatar, Icon, LoadingScreen, TimeControlModal } from '../components';
 import { useTheme } from '../contexts';
 import { useFriends, useGame, useUserSearch } from '../hooks';
+
+const { width: screenWidth } = Dimensions.get('window');
 
 export default function Friends({ navigation: _navigation }) {
     const { colors, isDarkMode: _isDarkMode } = useTheme();
@@ -124,7 +128,7 @@ export default function Friends({ navigation: _navigation }) {
                         />
                         <Block flex style={{ marginRight: 8 }}>
                             <Text
-                                size={16}
+                                size={moderateScale(16)}
                                 bold
                                 color={colors.TEXT}
                                 numberOfLines={1}
@@ -134,7 +138,7 @@ export default function Friends({ navigation: _navigation }) {
                             </Text>
                             {friend.email && (
                                 <Text
-                                    size={13}
+                                    size={moderateScale(13)}
                                     color={colors.TEXT_SECONDARY}
                                     numberOfLines={1}
                                     style={{ marginTop: 2 }}
@@ -234,7 +238,12 @@ export default function Friends({ navigation: _navigation }) {
                             },
                         ]}
                     >
-                        <Text size={18} bold color={colors.TEXT} style={{ marginBottom: 16 }}>
+                        <Text
+                            size={moderateScale(18)}
+                            bold
+                            color={colors.TEXT}
+                            style={{ marginBottom: 16 }}
+                        >
                             Add Friend
                         </Text>
                         <Block>
@@ -285,7 +294,11 @@ export default function Friends({ navigation: _navigation }) {
                                 >
                                     {searchResults.length === 0 && !searching ? (
                                         <Block style={styles.dropdownItem}>
-                                            <Text size={14} color={colors.TEXT_SECONDARY} center>
+                                            <Text
+                                                size={moderateScale(14)}
+                                                color={colors.TEXT_SECONDARY}
+                                                center
+                                            >
                                                 No users found
                                             </Text>
                                         </Block>
@@ -321,7 +334,7 @@ export default function Friends({ navigation: _navigation }) {
                                                             />
                                                             <Block flex>
                                                                 <Text
-                                                                    size={15}
+                                                                    size={moderateScale(15)}
                                                                     bold
                                                                     color={colors.TEXT}
                                                                     numberOfLines={1}
@@ -332,7 +345,7 @@ export default function Friends({ navigation: _navigation }) {
                                                         </Block>
                                                         {searchUser.hasPendingRequest ? (
                                                             <Text
-                                                                size={12}
+                                                                size={moderateScale(13)}
                                                                 color={colors.WARNING}
                                                                 style={{ marginLeft: 8 }}
                                                             >
@@ -366,7 +379,7 @@ export default function Friends({ navigation: _navigation }) {
                     {incomingRequests.length > 0 && (
                         <Block style={styles.section}>
                             <Text
-                                size={20}
+                                size={moderateScale(20)}
                                 bold
                                 color={colors.TEXT}
                                 style={{ marginBottom: 12, paddingHorizontal: 4 }}
@@ -401,7 +414,7 @@ export default function Friends({ navigation: _navigation }) {
                                                     />
                                                     <Block flex style={{ marginRight: 8 }}>
                                                         <Text
-                                                            size={16}
+                                                            size={moderateScale(16)}
                                                             bold
                                                             color={colors.TEXT}
                                                             numberOfLines={1}
@@ -512,7 +525,7 @@ export default function Friends({ navigation: _navigation }) {
                     {outgoingRequests.length > 0 && (
                         <Block style={styles.section}>
                             <Text
-                                size={20}
+                                size={moderateScale(20)}
                                 bold
                                 color={colors.TEXT}
                                 style={{ marginBottom: 12, paddingHorizontal: 4 }}
@@ -545,7 +558,7 @@ export default function Friends({ navigation: _navigation }) {
                                                     />
                                                     <Block flex style={{ marginRight: 8 }}>
                                                         <Text
-                                                            size={16}
+                                                            size={moderateScale(16)}
                                                             bold
                                                             color={colors.TEXT}
                                                             numberOfLines={1}
@@ -605,7 +618,7 @@ export default function Friends({ navigation: _navigation }) {
                     {/* Friends List Section */}
                     <Block style={styles.section}>
                         <Text
-                            size={20}
+                            size={moderateScale(20)}
                             bold
                             color={colors.TEXT}
                             style={{ marginBottom: 12, paddingHorizontal: 4 }}
@@ -643,7 +656,7 @@ export default function Friends({ navigation: _navigation }) {
                                     />
                                 </Block>
                                 <Text
-                                    size={16}
+                                    size={moderateScale(16)}
                                     bold
                                     color={colors.TEXT}
                                     style={{ marginBottom: 8 }}
@@ -651,7 +664,7 @@ export default function Friends({ navigation: _navigation }) {
                                     No Friends Yet
                                 </Text>
                                 <Text
-                                    size={14}
+                                    size={moderateScale(14)}
                                     color={colors.TEXT_SECONDARY}
                                     center
                                     style={{ maxWidth: 240 }}
@@ -685,6 +698,9 @@ const styles = StyleSheet.create({
     scrollContainer: {
         paddingBottom: 30,
         padding: theme.SIZES.BASE * 1.5,
+        maxWidth: screenWidth > 600 ? Math.min(800, screenWidth * 0.8) : undefined,
+        width: screenWidth > 600 ? '100%' : 'auto',
+        alignSelf: screenWidth > 600 ? 'center' : 'auto',
     },
     card: {
         borderRadius: 12,
@@ -700,11 +716,11 @@ const styles = StyleSheet.create({
         marginBottom: theme.SIZES.BASE,
     },
     input: {
-        height: 48,
+        height: screenWidth > 600 ? 44 : 48,
         borderRadius: 10,
         borderWidth: 1,
         paddingHorizontal: theme.SIZES.BASE * 1.5,
-        fontSize: 15,
+        fontSize: screenWidth > 600 ? 14 : 15,
     },
     dropdown: {
         marginTop: 8,

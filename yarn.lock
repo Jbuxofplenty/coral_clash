@@ -7855,6 +7855,11 @@ react-native-screens@~4.16.0:
     react-native-is-edge-to-edge "^1.2.1"
     warn-once "^0.1.0"
 
+react-native-size-matters@^0.4.2:
+  version "0.4.2"
+  resolved "https://registry.yarnpkg.com/react-native-size-matters/-/react-native-size-matters-0.4.2.tgz#4348bdd6fc47383f60326d58ad69870c998a5f9a"
+  integrity sha512-DKE3f/sdcozd24oASgkP1iGg+YU3HoajRa5k3a4wkRzpiqREq8SGX12Y5zBgAt/8IivLQoTMYkyQu1/Giuy+zQ==
+
 react-native-super-grid@^6.0.2:
   version "6.0.2"
   resolved "https://registry.yarnpkg.com/react-native-super-grid/-/react-native-super-grid-6.0.2.tgz#05a176fce5dbb1d9d016b090d785bb559281a03a"

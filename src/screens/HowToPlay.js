@@ -2,6 +2,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Block, Text, theme } from 'galio-framework';
 import React, { useEffect, useState } from 'react';
 import { Dimensions, ScrollView, StyleSheet, View } from 'react-native';
+import { moderateScale } from 'react-native-size-matters';
 import ExampleLink, { loadViewedExamples, markExampleViewed } from '../components/ExampleLink';
 import { useTheme } from '../contexts';
 
@@ -442,6 +443,7 @@ const styles = StyleSheet.create({
         paddingVertical: theme.SIZES.BASE * 2,
         paddingHorizontal: theme.SIZES.BASE,
         paddingBottom: theme.SIZES.BASE * 3,
+        alignItems: width > 600 ? 'center' : 'stretch',
     },
     card: {
         borderRadius: 12,
@@ -452,17 +454,19 @@ const styles = StyleSheet.create({
         shadowRadius: 8,
         shadowOpacity: 0.2,
         elevation: 4,
+        width: width > 600 ? '100%' : 'auto',
+        maxWidth: width > 600 ? 800 : undefined,
     },
     heading: {
         marginBottom: theme.SIZES.BASE,
     },
     subHeading: {
         marginBottom: theme.SIZES.BASE,
-        fontSize: 18,
+        fontSize: moderateScale(18),
     },
     text: {
-        fontSize: 15,
-        lineHeight: 22,
+        fontSize: moderateScale(15),
+        lineHeight: moderateScale(22),
         marginBottom: theme.SIZES.BASE,
     },
     bulletSection: {
@@ -470,8 +474,8 @@ const styles = StyleSheet.create({
         marginTop: theme.SIZES.BASE / 2,
     },
     bulletPoint: {
-        fontSize: 15,
-        lineHeight: 22,
+        fontSize: moderateScale(15),
+        lineHeight: moderateScale(22),
         marginBottom: theme.SIZES.BASE / 2,
     },
     subBulletSection: {
@@ -479,22 +483,22 @@ const styles = StyleSheet.create({
         marginTop: theme.SIZES.BASE / 2,
     },
     subBullet: {
-        fontSize: 14,
-        lineHeight: 20,
+        fontSize: moderateScale(14),
+        lineHeight: moderateScale(20),
         marginBottom: theme.SIZES.BASE / 2,
     },
     pieceSection: {
         marginBottom: theme.SIZES.BASE * 1.5,
     },
     pieceTitle: {
-        fontSize: 16,
+        fontSize: moderateScale(16),
         marginBottom: theme.SIZES.BASE / 2,
     },
     ruleSection: {
         marginBottom: theme.SIZES.BASE * 1.5,
     },
     ruleTitle: {
-        fontSize: 16,
+        fontSize: moderateScale(16),
         marginBottom: theme.SIZES.BASE / 2,
     },
     examplesContainer: {

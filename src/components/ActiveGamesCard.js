@@ -1,9 +1,12 @@
 import { Block, Text, theme } from 'galio-framework';
 import React, { useState } from 'react';
-import { ActivityIndicator, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Dimensions, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { moderateScale, verticalScale } from 'react-native-size-matters';
 import { useAlert, useAuth, useTheme } from '../contexts';
 import Avatar from './Avatar';
 import Icon from './Icon';
+
+const { width } = Dimensions.get('screen');
 
 /**
  * Card component that displays active games (PvP and Computer) on the home screen
@@ -194,15 +197,22 @@ export default function ActiveGamesCard({
                         <Icon
                             name='gamepad'
                             family='font-awesome'
-                            size={20}
+                            size={moderateScale(20)}
                             color={colors.SUCCESS}
                         />
                     </View>
                     <Block flex>
-                        <Text size={18} bold style={[styles.title, { color: colors.TEXT }]}>
+                        <Text
+                            size={moderateScale(18)}
+                            bold
+                            style={[styles.title, { color: colors.TEXT }]}
+                        >
                             Active Games
                         </Text>
-                        <Text size={12} style={[styles.subtitle, { color: colors.TEXT_SECONDARY }]}>
+                        <Text
+                            size={moderateScale(12)}
+                            style={[styles.subtitle, { color: colors.TEXT_SECONDARY }]}
+                        >
                             {activeGames.length} {activeGames.length === 1 ? 'game' : 'games'} in
                             progress
                         </Text>
@@ -215,7 +225,7 @@ export default function ActiveGamesCard({
                     <Block center middle style={styles.loadingContainer}>
                         <ActivityIndicator size='large' color={colors.PRIMARY} />
                         <Text
-                            size={14}
+                            size={moderateScale(14)}
                             style={[styles.loadingText, { color: colors.TEXT_SECONDARY }]}
                         >
                             Loading games...
@@ -226,18 +236,18 @@ export default function ActiveGamesCard({
                         <Icon
                             name='inbox'
                             family='font-awesome'
-                            size={40}
+                            size={moderateScale(40)}
                             color={colors.TEXT_SECONDARY}
                             style={styles.emptyIcon}
                         />
                         <Text
-                            size={14}
+                            size={moderateScale(14)}
                             style={[styles.emptyText, { color: colors.TEXT_SECONDARY }]}
                         >
                             No active games
                         </Text>
                         <Text
-                            size={12}
+                            size={moderateScale(12)}
                             style={[styles.emptySubtext, { color: colors.TEXT_SECONDARY }]}
                         >
                             Start a game with a friend!
@@ -284,7 +294,7 @@ export default function ActiveGamesCard({
                                         <Block flex style={styles.gameInfo}>
                                             <Block row middle style={{ marginBottom: 3 }}>
                                                 <Text
-                                                    size={16}
+                                                    size={moderateScale(16)}
                                                     bold
                                                     style={{ color: colors.TEXT }}
                                                     numberOfLines={1}
@@ -298,11 +308,11 @@ export default function ActiveGamesCard({
                                                         <Icon
                                                             name={status.icon}
                                                             family='font-awesome'
-                                                            size={12}
+                                                            size={moderateScale(12)}
                                                             color={status.color}
                                                         />
                                                         <Text
-                                                            size={13}
+                                                            size={moderateScale(13)}
                                                             style={[
                                                                 styles.statusText,
                                                                 { color: status.color },
@@ -311,7 +321,7 @@ export default function ActiveGamesCard({
                                                             {status.text}
                                                         </Text>
                                                         <Text
-                                                            size={13}
+                                                            size={moderateScale(13)}
                                                             style={{
                                                                 color: colors.TEXT_SECONDARY,
                                                                 marginHorizontal: 6,
@@ -324,11 +334,11 @@ export default function ActiveGamesCard({
                                                 <Icon
                                                     name={timeControlInfo.icon}
                                                     family={timeControlInfo.iconFamily}
-                                                    size={11}
+                                                    size={moderateScale(11)}
                                                     color={colors.TEXT}
                                                 />
                                                 <Text
-                                                    size={12}
+                                                    size={moderateScale(12)}
                                                     style={{
                                                         color: colors.TEXT,
                                                         marginLeft: 5,
@@ -483,11 +493,16 @@ export default function ActiveGamesCard({
 const styles = StyleSheet.create({
     card: {
         marginVertical: theme.SIZES.BASE,
+        marginHorizontal: width > 600 ? 'auto' : 0,
         borderWidth: 0,
         borderRadius: 12,
         overflow: 'hidden',
         paddingTop: theme.SIZES.BASE * 1.25,
         paddingBottom: theme.SIZES.BASE * 0.75,
+        minHeight: width > 600 ? verticalScale(200) : width / 2,
+        maxWidth: width > 600 ? Math.min(800, width * 0.8) : undefined,
+        width: width > 600 ? '100%' : 'auto',
+        alignSelf: width > 600 ? 'center' : 'auto',
     },
     shadow: {
         shadowColor: '#000',

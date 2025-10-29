@@ -1,6 +1,7 @@
 import { Block, Text, theme } from 'galio-framework';
 import React from 'react';
 import { ActivityIndicator, Dimensions, StyleSheet, View } from 'react-native';
+import { verticalScale } from 'react-native-size-matters';
 import { useAuth, useTheme } from '../contexts';
 import Avatar from './Avatar';
 import Icon from './Icon';
@@ -353,12 +354,16 @@ export default function GameHistoryCard({
 const styles = StyleSheet.create({
     card: {
         marginVertical: theme.SIZES.BASE,
+        marginHorizontal: width > 600 ? 'auto' : 0,
         borderWidth: 0,
         borderRadius: 12,
         overflow: 'hidden',
         paddingTop: theme.SIZES.BASE * 1.25,
         paddingBottom: theme.SIZES.BASE * 0.75,
-        minHeight: width / 2,
+        minHeight: width > 600 ? verticalScale(200) : width / 2,
+        maxWidth: width > 600 ? Math.min(800, width * 0.8) : undefined,
+        width: width > 600 ? '100%' : 'auto',
+        alignSelf: width > 600 ? 'center' : 'auto',
     },
     shadow: {
         shadowColor: '#000',

@@ -7,6 +7,7 @@ import {
     TouchableWithoutFeedback,
     View,
 } from 'react-native';
+import { moderateScale, verticalScale } from 'react-native-size-matters';
 import { useAlert, useTheme } from '../contexts';
 import Icon from './Icon';
 
@@ -63,16 +64,26 @@ function MatchmakingCard({ searching, queueCount, loading, onStartSearch, onStop
                         <ActivityIndicator size='large' color={spinnerColor} />
                     ) : (
                         <View style={styles.iconWrapper}>
-                            <Icon name='users' family='font-awesome' size={100} color={iconColor} />
+                            <Icon
+                                name='users'
+                                family='font-awesome'
+                                size={moderateScale(80)}
+                                color={iconColor}
+                            />
                         </View>
                     )}
                 </Block>
                 <Block style={styles.contentContainer}>
-                    <Text size={20} bold style={[styles.title, { color: textColor }]} center>
+                    <Text
+                        size={moderateScale(20)}
+                        bold
+                        style={[styles.title, { color: textColor }]}
+                        center
+                    >
                         {searching ? 'Searching for Opponent...' : 'Find Random Match'}
                     </Text>
                     <Text
-                        size={14}
+                        size={moderateScale(14)}
                         style={[
                             styles.description,
                             { color: isActive ? 'rgba(255,255,255,0.8)' : colors.TEXT_SECONDARY },
@@ -94,8 +105,12 @@ export default MatchmakingCard;
 const styles = StyleSheet.create({
     card: {
         marginVertical: theme.SIZES.BASE * 1.5,
+        marginHorizontal: width > 600 ? 'auto' : 0,
         borderWidth: 0,
-        minHeight: width / 2,
+        minHeight: width > 600 ? verticalScale(200) : width / 2,
+        maxWidth: width > 600 ? Math.min(800, width * 0.8) : width - theme.SIZES.BASE * 2,
+        width: width > 600 ? '100%' : 'auto',
+        alignSelf: width > 600 ? 'center' : 'auto',
         borderRadius: 12,
         overflow: 'hidden',
     },

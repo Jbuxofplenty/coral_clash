@@ -12,6 +12,7 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
+import { moderateScale } from 'react-native-size-matters';
 
 import { useAuth, useTheme } from '../contexts';
 
@@ -163,24 +164,35 @@ function Login({ navigation }) {
                 >
                     <Block flex center middle style={styles.container}>
                         <Block style={[styles.card, { backgroundColor: colors.CARD_BACKGROUND }]}>
-                            <Text h3 bold color={colors.PRIMARY} style={styles.title}>
+                            <Text
+                                size={moderateScale(32)}
+                                bold
+                                color={colors.PRIMARY}
+                                style={styles.title}
+                            >
                                 {showForgotPassword
                                     ? 'Reset Password'
                                     : isSignUp
                                       ? 'Create Account'
                                       : 'Welcome Back'}
                             </Text>
-                            <Text size={16} color={colors.TEXT_SECONDARY} style={styles.subtitle}>
-                                {showForgotPassword
-                                    ? 'Enter your email to receive a password reset link'
-                                    : isSignUp
-                                      ? 'Create an account to play online. Choose a unique username!'
-                                      : 'Sign in to play against the computer or challenge other players online'}
-                            </Text>
+                            <Block style={styles.subtitleContainer}>
+                                <Text
+                                    size={moderateScale(16)}
+                                    color={colors.TEXT_SECONDARY}
+                                    style={styles.subtitle}
+                                >
+                                    {showForgotPassword
+                                        ? 'Enter your email to receive a password reset link'
+                                        : isSignUp
+                                          ? 'Create an account to play online. Choose a unique username!'
+                                          : 'Sign in to play against the computer or challenge other players online'}
+                                </Text>
+                            </Block>
 
                             {error || authError ? (
                                 <Block style={styles.errorContainer}>
-                                    <Text size={14} color={colors.ERROR} center>
+                                    <Text size={moderateScale(14)} color={colors.ERROR} center>
                                         {error || authError}
                                     </Text>
                                 </Block>
@@ -188,7 +200,7 @@ function Login({ navigation }) {
 
                             {successMessage ? (
                                 <Block style={styles.successContainer}>
-                                    <Text size={14} color={colors.SUCCESS} center>
+                                    <Text size={moderateScale(14)} color={colors.SUCCESS} center>
                                         {successMessage}
                                     </Text>
                                 </Block>
@@ -218,7 +230,7 @@ function Login({ navigation }) {
                                                 color={googleSignInAvailable ? '#DB4437' : '#ccc'}
                                             />
                                             <Text
-                                                size={16}
+                                                size={moderateScale(16)}
                                                 color={colors.TEXT}
                                                 style={[
                                                     styles.googleButtonText,
@@ -241,7 +253,7 @@ function Login({ navigation }) {
                                                 ]}
                                             />
                                             <Text
-                                                size={14}
+                                                size={moderateScale(14)}
                                                 color={colors.TEXT_SECONDARY}
                                                 style={styles.dividerText}
                                             >
@@ -345,7 +357,7 @@ function Login({ navigation }) {
                                     {loading || authLoading ? (
                                         <ActivityIndicator color='#fff' />
                                     ) : (
-                                        <Text bold size={16} color='#fff'>
+                                        <Text bold size={moderateScale(16)} color='#fff'>
                                             {showForgotPassword
                                                 ? 'Send Reset Link'
                                                 : isSignUp
@@ -360,7 +372,11 @@ function Login({ navigation }) {
                                         onPress={toggleForgotPassword}
                                         style={styles.forgotPasswordButton}
                                     >
-                                        <Text size={14} color={colors.PRIMARY} center>
+                                        <Text
+                                            size={moderateScale(14)}
+                                            color={colors.PRIMARY}
+                                            center
+                                        >
                                             Forgot Password?
                                         </Text>
                                     </TouchableOpacity>
@@ -370,7 +386,7 @@ function Login({ navigation }) {
                                     onPress={showForgotPassword ? toggleForgotPassword : toggleMode}
                                     style={styles.toggleButton}
                                 >
-                                    <Text size={14} color={colors.PRIMARY} center>
+                                    <Text size={moderateScale(14)} color={colors.PRIMARY} center>
                                         {showForgotPassword
                                             ? 'Back to Sign In'
                                             : isSignUp
@@ -407,11 +423,10 @@ const styles = StyleSheet.create({
     },
     card: {
         borderRadius: 12,
-        padding: theme.SIZES.BASE * 1.5,
-        paddingVertical: theme.SIZES.BASE * 3,
+        padding: width > 600 ? theme.SIZES.BASE * 2.5 : theme.SIZES.BASE * 1.5,
+        paddingVertical: width > 600 ? theme.SIZES.BASE * 3 : theme.SIZES.BASE * 3,
         width: '100%',
-        maxWidth: 400,
-        minHeight: height * 0.75,
+        maxWidth: width > 600 ? Math.min(600, width * 0.6) : 400,
         shadowColor: theme.COLORS.BLACK,
         shadowOffset: { width: 0, height: 4 },
         shadowRadius: 12,
@@ -419,13 +434,18 @@ const styles = StyleSheet.create({
         elevation: 8,
     },
     title: {
-        marginBottom: theme.SIZES.BASE,
+        marginBottom: width > 600 ? theme.SIZES.BASE * 1.5 : theme.SIZES.BASE,
         textAlign: 'center',
+    },
+    subtitleContainer: {
+        marginBottom: width > 600 ? theme.SIZES.BASE * 2.5 : theme.SIZES.BASE * 2,
+        paddingHorizontal: width > 600 ? theme.SIZES.BASE : 0,
+        minHeight: 'auto',
+        flexShrink: 0,
     },
     subtitle: {
         textAlign: 'center',
-        marginBottom: theme.SIZES.BASE * 2,
-        lineHeight: 22,
+        flexWrap: 'wrap',
     },
     form: {
         marginTop: theme.SIZES.BASE,
@@ -439,7 +459,7 @@ const styles = StyleSheet.create({
     button: {
         marginTop: theme.SIZES.BASE,
         width: '100%',
-        height: 48,
+        height: width > 600 ? 100 : 48,
         borderRadius: 8,
     },
     toggleButton: {
@@ -465,7 +485,7 @@ const styles = StyleSheet.create({
     dividerContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginVertical: theme.SIZES.BASE * 2,
+        marginVertical: width > 600 ? theme.SIZES.BASE * 1.5 : theme.SIZES.BASE * 2,
     },
     divider: {
         flex: 1,
@@ -480,7 +500,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         borderWidth: 1,
         borderRadius: 8,
-        paddingVertical: 12,
+        paddingVertical: width > 600 ? 10 : 12,
         paddingHorizontal: theme.SIZES.BASE,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },

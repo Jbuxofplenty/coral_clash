@@ -2,6 +2,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { Block, Text, theme } from 'galio-framework';
 import React, { useCallback, useState } from 'react';
 import { Dimensions, ScrollView, StyleSheet, View } from 'react-native';
+import { moderateScale, scale } from 'react-native-size-matters';
 
 import { Avatar, Icon, LoadingScreen } from '../components';
 import { useAuth, useTheme } from '../contexts';
@@ -188,19 +189,24 @@ export default function Stats({ navigation: _navigation }) {
             <Block
                 center
                 style={{
-                    width: 50,
-                    height: 50,
-                    borderRadius: 25,
+                    width: scale(50),
+                    height: scale(50),
+                    borderRadius: scale(25),
                     backgroundColor: iconColor + '15',
                     justifyContent: 'center',
                     alignItems: 'center',
                     marginBottom: 12,
                 }}
             >
-                <Icon name={icon} family='font-awesome' size={24} color={iconColor} />
+                <Icon
+                    name={icon}
+                    family='font-awesome'
+                    size={moderateScale(24)}
+                    color={iconColor}
+                />
             </Block>
             <Text
-                size={32}
+                size={moderateScale(32)}
                 bold
                 color={colors.TEXT}
                 style={{ marginBottom: 4 }}
@@ -210,11 +216,15 @@ export default function Stats({ navigation: _navigation }) {
             >
                 {value}
             </Text>
-            <Text size={14} color={colors.TEXT_SECONDARY} style={{ marginBottom: 2 }}>
+            <Text
+                size={moderateScale(14)}
+                color={colors.TEXT_SECONDARY}
+                style={{ marginBottom: 2 }}
+            >
                 {label}
             </Text>
             {subtext && (
-                <Text size={12} color={colors.TEXT_SECONDARY}>
+                <Text size={moderateScale(12)} color={colors.TEXT_SECONDARY}>
                     {subtext}
                 </Text>
             )}
@@ -244,7 +254,7 @@ export default function Stats({ navigation: _navigation }) {
                     />
                     <Block flex style={{ marginRight: 8 }}>
                         <Text
-                            size={16}
+                            size={moderateScale(16)}
                             bold
                             color={colors.TEXT}
                             numberOfLines={1}
@@ -256,7 +266,7 @@ export default function Stats({ navigation: _navigation }) {
                         </Text>
                         <Block row>
                             <Text
-                                size={13}
+                                size={moderateScale(13)}
                                 color={colors.SUCCESS}
                                 style={{ marginRight: 12 }}
                                 numberOfLines={1}
@@ -266,7 +276,7 @@ export default function Stats({ navigation: _navigation }) {
                                 {stats.wins}W
                             </Text>
                             <Text
-                                size={13}
+                                size={moderateScale(13)}
                                 color={colors.ERROR}
                                 style={{ marginRight: 12 }}
                                 numberOfLines={1}
@@ -276,7 +286,7 @@ export default function Stats({ navigation: _navigation }) {
                                 {stats.losses}L
                             </Text>
                             <Text
-                                size={13}
+                                size={moderateScale(13)}
                                 color={colors.TEXT_SECONDARY}
                                 numberOfLines={1}
                                 adjustsFontSizeToFit
@@ -288,7 +298,7 @@ export default function Stats({ navigation: _navigation }) {
                     </Block>
                     <Block center style={{ minWidth: 60 }}>
                         <Text
-                            size={20}
+                            size={moderateScale(20)}
                             bold
                             color={colors.PRIMARY}
                             numberOfLines={1}
@@ -297,7 +307,7 @@ export default function Stats({ navigation: _navigation }) {
                         >
                             {winRate}%
                         </Text>
-                        <Text size={11} color={colors.TEXT_SECONDARY}>
+                        <Text size={moderateScale(11)} color={colors.TEXT_SECONDARY}>
                             Win Rate
                         </Text>
                     </Block>
@@ -322,7 +332,7 @@ export default function Stats({ navigation: _navigation }) {
                 {/* Overall Stats Section */}
                 <Block>
                     <Text
-                        size={22}
+                        size={moderateScale(22)}
                         bold
                         color={colors.TEXT}
                         style={{ marginBottom: 16, paddingHorizontal: 4 }}
@@ -345,9 +355,9 @@ export default function Stats({ navigation: _navigation }) {
                             <Block
                                 center
                                 style={{
-                                    width: 80,
-                                    height: 80,
-                                    borderRadius: 40,
+                                    width: scale(80),
+                                    height: scale(80),
+                                    borderRadius: scale(40),
                                     backgroundColor: colors.PRIMARY + '15',
                                     justifyContent: 'center',
                                     alignItems: 'center',
@@ -357,12 +367,12 @@ export default function Stats({ navigation: _navigation }) {
                                 <Icon
                                     name='gamepad'
                                     family='font-awesome'
-                                    size={40}
+                                    size={moderateScale(40)}
                                     color={colors.PRIMARY}
                                 />
                             </Block>
                             <Text
-                                size={48}
+                                size={moderateScale(48)}
                                 bold
                                 color={colors.TEXT}
                                 style={{ marginBottom: 8 }}
@@ -372,7 +382,7 @@ export default function Stats({ navigation: _navigation }) {
                             >
                                 {overallStats.gamesPlayed}
                             </Text>
-                            <Text size={18} color={colors.TEXT_SECONDARY}>
+                            <Text size={moderateScale(18)} color={colors.TEXT_SECONDARY}>
                                 Games Played
                             </Text>
                         </Block>
@@ -414,12 +424,12 @@ export default function Stats({ navigation: _navigation }) {
                             space='between'
                             style={{ marginBottom: 16, paddingHorizontal: 4 }}
                         >
-                            <Text size={22} bold color={colors.TEXT}>
+                            <Text size={moderateScale(22)} bold color={colors.TEXT}>
                                 Matchup Statistics
                             </Text>
                         </Block>
                         <Text
-                            size={14}
+                            size={moderateScale(14)}
                             color={colors.TEXT_SECONDARY}
                             style={{ marginBottom: 12, paddingHorizontal: 4 }}
                         >
@@ -450,9 +460,9 @@ export default function Stats({ navigation: _navigation }) {
                     >
                         <Block
                             style={{
-                                width: 80,
-                                height: 80,
-                                borderRadius: 40,
+                                width: scale(80),
+                                height: scale(80),
+                                borderRadius: scale(40),
                                 backgroundColor: colors.PRIMARY + '15',
                                 justifyContent: 'center',
                                 alignItems: 'center',
@@ -462,15 +472,20 @@ export default function Stats({ navigation: _navigation }) {
                             <Icon
                                 name='line-chart'
                                 family='font-awesome'
-                                size={36}
+                                size={moderateScale(36)}
                                 color={colors.PRIMARY}
                             />
                         </Block>
-                        <Text size={16} bold color={colors.TEXT} style={{ marginBottom: 8 }}>
+                        <Text
+                            size={moderateScale(16)}
+                            bold
+                            color={colors.TEXT}
+                            style={{ marginBottom: 8 }}
+                        >
                             No Games Yet
                         </Text>
                         <Text
-                            size={14}
+                            size={moderateScale(14)}
                             color={colors.TEXT_SECONDARY}
                             center
                             style={{ maxWidth: 240 }}
