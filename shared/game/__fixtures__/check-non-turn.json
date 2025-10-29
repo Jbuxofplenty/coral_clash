@@ -1,0 +1,306 @@
+{
+    "schemaVersion": "1.2.0",
+    "exportedAt": "2025-10-29T07:52:17.788Z",
+    "state": {
+        "fen": "ftth1ttf/cocddcoc/4oO2/8/1o6/3O4/COCDDCOC/FTTH1TTF b - - 5 3",
+        "board": [
+            [
+                {
+                    "square": "a8",
+                    "type": "f",
+                    "color": "b",
+                    "role": "hunter"
+                },
+                {
+                    "square": "b8",
+                    "type": "t",
+                    "color": "b",
+                    "role": "hunter"
+                },
+                {
+                    "square": "c8",
+                    "type": "t",
+                    "color": "b",
+                    "role": "gatherer"
+                },
+                {
+                    "square": "d8",
+                    "type": "h",
+                    "color": "b"
+                },
+                {
+                    "square": "e8",
+                    "type": "h",
+                    "color": "b"
+                },
+                {
+                    "square": "f8",
+                    "type": "t",
+                    "color": "b",
+                    "role": "gatherer"
+                },
+                {
+                    "square": "g8",
+                    "type": "t",
+                    "color": "b",
+                    "role": "hunter"
+                },
+                {
+                    "square": "h8",
+                    "type": "f",
+                    "color": "b",
+                    "role": "gatherer"
+                }
+            ],
+            [
+                {
+                    "square": "a7",
+                    "type": "c",
+                    "color": "b",
+                    "role": "hunter"
+                },
+                {
+                    "square": "b7",
+                    "type": "o",
+                    "color": "b",
+                    "role": "gatherer"
+                },
+                {
+                    "square": "c7",
+                    "type": "c",
+                    "color": "b",
+                    "role": "gatherer"
+                },
+                {
+                    "square": "d7",
+                    "type": "d",
+                    "color": "b",
+                    "role": "hunter"
+                },
+                {
+                    "square": "e7",
+                    "type": "d",
+                    "color": "b",
+                    "role": "gatherer"
+                },
+                {
+                    "square": "f7",
+                    "type": "c",
+                    "color": "b",
+                    "role": "hunter"
+                },
+                {
+                    "square": "g7",
+                    "type": "o",
+                    "color": "b",
+                    "role": "hunter"
+                },
+                {
+                    "square": "h7",
+                    "type": "c",
+                    "color": "b",
+                    "role": "gatherer"
+                }
+            ],
+            [
+                null,
+                null,
+                null,
+                null,
+                {
+                    "square": "e6",
+                    "type": "o",
+                    "color": "b",
+                    "role": "gatherer"
+                },
+                {
+                    "square": "f6",
+                    "type": "o",
+                    "color": "w",
+                    "role": "gatherer"
+                },
+                null,
+                null
+            ],
+            [null, null, null, null, null, null, null, null],
+            [
+                null,
+                {
+                    "square": "b4",
+                    "type": "o",
+                    "color": "b",
+                    "role": "gatherer"
+                },
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+            ],
+            [
+                null,
+                null,
+                null,
+                {
+                    "square": "d3",
+                    "type": "o",
+                    "color": "w",
+                    "role": "gatherer"
+                },
+                null,
+                null,
+                null,
+                null
+            ],
+            [
+                {
+                    "square": "a2",
+                    "type": "c",
+                    "color": "w",
+                    "role": "hunter"
+                },
+                {
+                    "square": "b2",
+                    "type": "o",
+                    "color": "w",
+                    "role": "gatherer"
+                },
+                {
+                    "square": "c2",
+                    "type": "c",
+                    "color": "w",
+                    "role": "gatherer"
+                },
+                {
+                    "square": "d2",
+                    "type": "d",
+                    "color": "w",
+                    "role": "hunter"
+                },
+                {
+                    "square": "e2",
+                    "type": "d",
+                    "color": "w",
+                    "role": "gatherer"
+                },
+                {
+                    "square": "f2",
+                    "type": "c",
+                    "color": "w",
+                    "role": "hunter"
+                },
+                {
+                    "square": "g2",
+                    "type": "o",
+                    "color": "w",
+                    "role": "hunter"
+                },
+                {
+                    "square": "h2",
+                    "type": "c",
+                    "color": "w",
+                    "role": "gatherer"
+                }
+            ],
+            [
+                {
+                    "square": "a1",
+                    "type": "f",
+                    "color": "w",
+                    "role": "hunter"
+                },
+                {
+                    "square": "b1",
+                    "type": "t",
+                    "color": "w",
+                    "role": "hunter"
+                },
+                {
+                    "square": "c1",
+                    "type": "t",
+                    "color": "w",
+                    "role": "gatherer"
+                },
+                {
+                    "square": "d1",
+                    "type": "h",
+                    "color": "w"
+                },
+                {
+                    "square": "e1",
+                    "type": "h",
+                    "color": "w"
+                },
+                {
+                    "square": "f1",
+                    "type": "t",
+                    "color": "w",
+                    "role": "gatherer"
+                },
+                {
+                    "square": "g1",
+                    "type": "t",
+                    "color": "w",
+                    "role": "hunter"
+                },
+                {
+                    "square": "h1",
+                    "type": "f",
+                    "color": "w",
+                    "role": "gatherer"
+                }
+            ]
+        ],
+        "history": ["Of4*", "Oc5", "Og5*", "Ob4", "Of6*"],
+        "turn": "b",
+        "whalePositions": {
+            "w": ["d1", "e1"],
+            "b": ["d8", "e8"]
+        },
+        "coral": [
+            {
+                "square": "a6",
+                "color": "b"
+            },
+            {
+                "square": "d6",
+                "color": "b"
+            },
+            {
+                "square": "e6",
+                "color": "b"
+            },
+            {
+                "square": "f6",
+                "color": "w"
+            },
+            {
+                "square": "g5",
+                "color": "w"
+            },
+            {
+                "square": "f4",
+                "color": "w"
+            },
+            {
+                "square": "d3",
+                "color": "w"
+            },
+            {
+                "square": "e3",
+                "color": "w"
+            }
+        ],
+        "coralRemaining": {
+            "w": 12,
+            "b": 14
+        },
+        "isGameOver": false,
+        "inCheck": false,
+        "isCheckmate": false,
+        "isStalemate": false,
+        "isDraw": false,
+        "isCoralVictory": null
+    }
+}

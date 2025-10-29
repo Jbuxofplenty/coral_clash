@@ -2,10 +2,10 @@ import { Icon } from 'galio-framework';
 import { useEffect, useState } from 'react';
 import {
     Animated,
+    Clipboard,
     Dimensions,
     Modal,
     Platform,
-    Share,
     StyleSheet,
     Text,
     TouchableOpacity,
@@ -966,7 +966,10 @@ const BaseCoralClashBoard = ({
     };
 
     const handleExportState = async () => {
+        // Close menu first and wait for animation to complete
         closeMenu();
+        await new Promise((resolve) => setTimeout(resolve, 300));
+
         try {
             const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
             const gameStateData = {
@@ -990,11 +993,14 @@ const BaseCoralClashBoard = ({
             };
 
             const jsonString = JSON.stringify(gameStateData, null, 2);
+            const filename = `coral-clash-state-${timestamp}.json`;
 
-            await Share.share({
-                message: jsonString,
-                title: `coral-clash-state-${timestamp}.json`,
-            });
+            // Copy to clipboard (more reliable than Share for large JSON)
+            Clipboard.setString(jsonString);
+            showAlert(
+                'Game State Exported',
+                `Copied to clipboard!\n\nFilename: ${filename}\n\nPaste into a text editor to save.`,
+            );
         } catch (error) {
             showAlert('Export Failed', error.message);
         }

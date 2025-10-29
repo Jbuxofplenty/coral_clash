@@ -2104,7 +2104,7 @@ export class CoralClash {
     }
 
     private _makeMove(move: InternalMove) {
-        const us = this._turn;
+        const us = move.color;
         const them = swapColor(us);
         this._push(move);
 
@@ -2272,7 +2272,7 @@ export class CoralClash {
 
         const move = old.move;
 
-        const us = old.turn; // Use old.turn, not this._turn (which hasn't been restored yet)
+        const us = move.color; // Use move.color to undo the move correctly
         const them = swapColor(us);
 
         // Special handling for whale moves - save current position BEFORE restoring history
