@@ -22,7 +22,7 @@ const { width } = Dimensions.get('screen');
 export default function Friends({ navigation }) {
     const { user } = useAuth();
     const { colors, isDarkMode } = useTheme();
-    const { sendGameRequest } = useGame();
+    const { sendGameRequest, sendingGameRequest } = useGame();
     const { height } = useWindowDimensions();
 
     // Use compact mode on smaller screens (iPhone SE, etc.)
@@ -52,6 +52,7 @@ export default function Friends({ navigation }) {
         searching,
         showDropdown,
         sending,
+        sendingUserId,
         handleSearch,
         handleSearchFocus,
         handleSearchBlur,
@@ -70,6 +71,7 @@ export default function Friends({ navigation }) {
     // Time control modal state
     const [timeControlModalVisible, setTimeControlModalVisible] = useState(false);
     const [pendingGameRequest, setPendingGameRequest] = useState(null);
+    const [sendingGameToFriendId, setSendingGameToFriendId] = useState(null);
 
     const handleStartGame = async (friendId, friendName) => {
         setPendingGameRequest({ friendId, friendName });
@@ -79,12 +81,17 @@ export default function Friends({ navigation }) {
     const handleTimeControlSelect = async (timeControl) => {
         setTimeControlModalVisible(false);
         if (pendingGameRequest) {
-            await sendGameRequest(
-                pendingGameRequest.friendId,
-                pendingGameRequest.friendName,
-                timeControl,
-            );
-            setPendingGameRequest(null);
+            setSendingGameToFriendId(pendingGameRequest.friendId);
+            try {
+                await sendGameRequest(
+                    pendingGameRequest.friendId,
+                    pendingGameRequest.friendName,
+                    timeControl,
+                );
+            } finally {
+                setSendingGameToFriendId(null);
+                setPendingGameRequest(null);
+            }
         }
     };
 
@@ -96,6 +103,8 @@ export default function Friends({ navigation }) {
     const renderFriendItem = (friend) => {
         const displayName = friend.displayName || 'User';
         const isRemoving = removingFriendId === friend.id;
+        const isSendingGame = sendingGameToFriendId === friend.id;
+        const isDisabled = isRemoving || sendingGameRequest;
 
         return (
             <Block
@@ -106,7 +115,7 @@ export default function Friends({ navigation }) {
                         backgroundColor: colors.CARD_BACKGROUND,
                         borderColor: colors.BORDER_COLOR,
                         shadowColor: colors.SHADOW,
-                        opacity: isRemoving ? 0.6 : 1,
+                        opacity: isDisabled ? 0.6 : 1,
                     },
                 ]}
             >
@@ -140,21 +149,32 @@ export default function Friends({ navigation }) {
                         </Block>
                     </Block>
                     <Block row>
-                        <TouchableOpacity
-                            onPress={() => handleStartGame(friend.id, displayName)}
-                            disabled={isRemoving}
-                            style={[
-                                styles.actionButton,
-                                { backgroundColor: colors.SUCCESS + '10', marginRight: 8 },
-                            ]}
-                        >
-                            <Icon
-                                name='gamepad'
-                                family='font-awesome'
-                                size={18}
-                                color={colors.SUCCESS}
-                            />
-                        </TouchableOpacity>
+                        {isSendingGame ? (
+                            <View
+                                style={[
+                                    styles.actionButton,
+                                    { backgroundColor: colors.SUCCESS + '10', marginRight: 8 },
+                                ]}
+                            >
+                                <ActivityIndicator size='small' color={colors.SUCCESS} />
+                            </View>
+                        ) : (
+                            <TouchableOpacity
+                                onPress={() => handleStartGame(friend.id, displayName)}
+                                disabled={isDisabled}
+                                style={[
+                                    styles.actionButton,
+                                    { backgroundColor: colors.SUCCESS + '10', marginRight: 8 },
+                                ]}
+                            >
+                                <Icon
+                                    name='gamepad'
+                                    family='font-awesome'
+                                    size={18}
+                                    color={colors.SUCCESS}
+                                />
+                            </TouchableOpacity>
+                        )}
                         {isRemoving ? (
                             <View
                                 style={[
@@ -167,6 +187,7 @@ export default function Friends({ navigation }) {
                         ) : (
                             <TouchableOpacity
                                 onPress={() => handleRemoveFriend(friend.id, displayName)}
+                                disabled={sendingGameRequest}
                                 style={[
                                     styles.removeButton,
                                     { backgroundColor: colors.ERROR + '10' },
@@ -273,60 +294,72 @@ export default function Friends({ navigation }) {
                                             </Text>
                                         </Block>
                                     ) : (
-                                        searchResults.map((searchUser) => (
-                                            <Pressable
-                                                key={searchUser.id}
-                                                onPress={() => handleSelectUser(searchUser)}
-                                                disabled={searchUser.hasPendingRequest}
-                                                style={({ pressed }) => [
-                                                    styles.dropdownItem,
-                                                    {
-                                                        backgroundColor: pressed
-                                                            ? colors.PRIMARY + '10'
-                                                            : 'transparent',
-                                                    },
-                                                    searchUser.hasPendingRequest && {
-                                                        opacity: 0.5,
-                                                    },
-                                                ]}
-                                            >
-                                                <Block row middle space='between'>
-                                                    <Block row middle flex>
-                                                        <Avatar
-                                                            avatarKey={searchUser.avatarKey}
-                                                            size='small'
-                                                            style={styles.dropdownAvatar}
-                                                        />
-                                                        <Block flex>
-                                                            <Text
-                                                                size={15}
-                                                                bold
-                                                                color={colors.TEXT}
-                                                                numberOfLines={1}
-                                                            >
-                                                                {searchUser.displayName}
-                                                            </Text>
+                                        searchResults.map((searchUser) => {
+                                            const isThisUserSending =
+                                                sendingUserId === searchUser.id;
+                                            const isDisabled =
+                                                searchUser.hasPendingRequest || sending;
+                                            return (
+                                                <Pressable
+                                                    key={searchUser.id}
+                                                    onPress={() => handleSelectUser(searchUser)}
+                                                    disabled={isDisabled}
+                                                    style={({ pressed }) => [
+                                                        styles.dropdownItem,
+                                                        {
+                                                            backgroundColor: pressed
+                                                                ? colors.PRIMARY + '10'
+                                                                : 'transparent',
+                                                        },
+                                                        isDisabled && {
+                                                            opacity: 0.5,
+                                                        },
+                                                    ]}
+                                                >
+                                                    <Block row middle space='between'>
+                                                        <Block row middle flex>
+                                                            <Avatar
+                                                                avatarKey={searchUser.avatarKey}
+                                                                size='small'
+                                                                style={styles.dropdownAvatar}
+                                                            />
+                                                            <Block flex>
+                                                                <Text
+                                                                    size={15}
+                                                                    bold
+                                                                    color={colors.TEXT}
+                                                                    numberOfLines={1}
+                                                                >
+                                                                    {searchUser.displayName}
+                                                                </Text>
+                                                            </Block>
                                                         </Block>
+                                                        {searchUser.hasPendingRequest ? (
+                                                            <Text
+                                                                size={12}
+                                                                color={colors.WARNING}
+                                                                style={{ marginLeft: 8 }}
+                                                            >
+                                                                Pending
+                                                            </Text>
+                                                        ) : isThisUserSending ? (
+                                                            <ActivityIndicator
+                                                                size='small'
+                                                                color={colors.PRIMARY}
+                                                                style={{ marginLeft: 8 }}
+                                                            />
+                                                        ) : (
+                                                            <Icon
+                                                                name='user-plus'
+                                                                family='font-awesome'
+                                                                size={16}
+                                                                color={colors.PRIMARY}
+                                                            />
+                                                        )}
                                                     </Block>
-                                                    {searchUser.hasPendingRequest ? (
-                                                        <Text
-                                                            size={12}
-                                                            color={colors.WARNING}
-                                                            style={{ marginLeft: 8 }}
-                                                        >
-                                                            Pending
-                                                        </Text>
-                                                    ) : (
-                                                        <Icon
-                                                            name='user-plus'
-                                                            family='font-awesome'
-                                                            size={16}
-                                                            color={colors.PRIMARY}
-                                                        />
-                                                    )}
-                                                </Block>
-                                            </Pressable>
-                                        ))
+                                                </Pressable>
+                                            );
+                                        })
                                     )}
                                 </Block>
                             )}

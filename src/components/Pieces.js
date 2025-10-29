@@ -4,7 +4,14 @@ import { useGamePreferences } from '../contexts';
 
 import { Image, TouchableWithoutFeedback, View } from 'react-native';
 
-const Pieces = ({ board, size, onSelectPiece, userColor = null, boardFlipped = null }) => {
+const Pieces = ({
+    board,
+    size,
+    onSelectPiece,
+    userColor = null,
+    boardFlipped = null,
+    isProcessing = false,
+}) => {
     const { isBoardFlipped: contextBoardFlipped } = useGamePreferences();
     // Use provided boardFlipped if available, otherwise use context value
     const isBoardFlipped = boardFlipped !== null ? boardFlipped : contextBoardFlipped;
@@ -131,6 +138,7 @@ const Pieces = ({ board, size, onSelectPiece, userColor = null, boardFlipped = n
                     height: cellSize,
                     left: renderLeft,
                     bottom: renderBottom,
+                    opacity: isProcessing ? 0.5 : 1,
                 };
 
                 // Apply rotation for vertical whales only
@@ -181,6 +189,7 @@ const Pieces = ({ board, size, onSelectPiece, userColor = null, boardFlipped = n
                             height: cellSize,
                             left,
                             bottom,
+                            opacity: isProcessing ? 0.5 : 1,
                         }}
                         source={PieceImages[pieceKey]}
                         resizeMode='contain'

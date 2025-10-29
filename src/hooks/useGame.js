@@ -20,6 +20,7 @@ export const useGame = (options = {}) => {
     const { createGame, createComputerGame, respondToGameInvite, getActiveGames } =
         useFirebaseFunctions();
     const [loading, setLoading] = useState(true);
+    const [sendingGameRequest, setSendingGameRequest] = useState(false);
     const [activeGames, setActiveGames] = useState([]);
     const previousGamesRef = useRef([]); // Use ref to avoid triggering re-renders
 
@@ -318,7 +319,7 @@ export const useGame = (options = {}) => {
     const sendGameRequest = useCallback(
         async (opponentId, opponentName, timeControl = null) => {
             try {
-                setLoading(true);
+                setSendingGameRequest(true);
 
                 const result = await createGame(opponentId, timeControl);
 
@@ -350,10 +351,10 @@ export const useGame = (options = {}) => {
                     throw error;
                 }
             } finally {
-                setLoading(false);
+                setSendingGameRequest(false);
             }
         },
-        [createGame],
+        [createGame, showAlert],
     );
 
     /**
@@ -485,6 +486,7 @@ export const useGame = (options = {}) => {
     return {
         // State
         loading,
+        sendingGameRequest,
         activeGames,
 
         // Actions

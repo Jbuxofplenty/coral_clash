@@ -1,6 +1,12 @@
 import { Block, Text, theme } from 'galio-framework';
 import React from 'react';
-import { Dimensions, StyleSheet, TouchableWithoutFeedback, View } from 'react-native';
+import {
+    Dimensions,
+    StyleSheet,
+    TouchableWithoutFeedback,
+    View,
+    ActivityIndicator,
+} from 'react-native';
 import Icon from './Icon';
 import { useTheme } from '../contexts';
 
@@ -14,25 +20,37 @@ const { width } = Dimensions.get('screen');
  * @param {string} props.icon - Icon name
  * @param {string} props.iconFamily - Icon family (font-awesome, etc)
  * @param {Function} props.onPress - Handler for when card is pressed
+ * @param {boolean} props.disabled - Whether the card is disabled
+ * @param {boolean} props.loading - Whether the card is in loading state
  * @param {Object} props.style - Additional styles
  */
-function GameModeCard({ title, description, icon, iconFamily, onPress, style }) {
+function GameModeCard({ title, description, icon, iconFamily, onPress, disabled, loading, style }) {
     const { colors } = useTheme();
 
     return (
-        <TouchableWithoutFeedback onPress={onPress}>
+        <TouchableWithoutFeedback onPress={disabled ? null : onPress}>
             <Block
                 card
                 style={[
                     styles.card,
                     styles.shadow,
                     { backgroundColor: colors.CARD_BACKGROUND },
+                    disabled && { opacity: 0.5 },
                     style,
                 ]}
             >
                 <Block center middle style={styles.iconContainer}>
                     <View style={styles.iconWrapper}>
-                        <Icon name={icon} family={iconFamily} size={100} color={colors.PRIMARY} />
+                        {loading ? (
+                            <ActivityIndicator size='large' color={colors.PRIMARY} />
+                        ) : (
+                            <Icon
+                                name={icon}
+                                family={iconFamily}
+                                size={100}
+                                color={colors.PRIMARY}
+                            />
+                        )}
                     </View>
                 </Block>
                 <Block style={styles.contentContainer}>

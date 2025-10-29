@@ -8,12 +8,13 @@ const Moves = ({
     isEnemyMoves = false,
     boardFlipped = false,
     isPlayerTurn = true,
+    isProcessing = false,
 }) => {
     const cellSize = size / 8;
 
     // Define colors based on whether these are enemy moves
-    // Reduce opacity when it's not the player's turn
-    const opacityMultiplier = isPlayerTurn ? 1 : 0.4;
+    // Reduce opacity when it's not the player's turn or when processing
+    const opacityMultiplier = isPlayerTurn && !isProcessing ? 1 : 0.4;
 
     const colors = isEnemyMoves
         ? {
@@ -53,7 +54,8 @@ const Moves = ({
         return (
             <TouchableWithoutFeedback
                 key={`move-${from}-${to}-${index}`}
-                onPress={() => !isDestination && onSelectMove(move)}
+                onPress={() => !isDestination && !isProcessing && onSelectMove(move)}
+                disabled={isProcessing}
             >
                 <View
                     style={{

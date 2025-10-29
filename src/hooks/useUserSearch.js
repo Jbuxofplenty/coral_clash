@@ -11,6 +11,7 @@ export const useUserSearch = () => {
     const [searching, setSearching] = useState(false);
     const [showDropdown, setShowDropdown] = useState(false);
     const [sending, setSending] = useState(false);
+    const [sendingUserId, setSendingUserId] = useState(null);
     const searchTimeoutRef = useRef(null);
 
     const handleSearch = async (query) => {
@@ -69,6 +70,7 @@ export const useUserSearch = () => {
 
         try {
             setSending(true);
+            setSendingUserId(selectedUser.id);
             await sendFriendRequest(selectedUser.id);
             // Clear search state completely
             setSearchQuery('');
@@ -84,6 +86,7 @@ export const useUserSearch = () => {
             showAlert('Error', error.message || 'Failed to send friend request');
         } finally {
             setSending(false);
+            setSendingUserId(null);
         }
     };
 
@@ -94,6 +97,7 @@ export const useUserSearch = () => {
         searching,
         showDropdown,
         sending,
+        sendingUserId,
         searchTimeoutRef,
 
         // Handlers

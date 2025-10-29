@@ -680,8 +680,8 @@ const BaseCoralClashBoard = ({
     // executeResign function removed - now using resignAPI from useGameActions hook
 
     const handleSelectPiece = (square) => {
-        // Disable interaction when viewing history or game is over
-        if (isGameOver || isViewingHistory) {
+        // Disable interaction when viewing history, game is over, or processing a move
+        if (isGameOver || isViewingHistory || isGameActionProcessing) {
             return;
         }
 
@@ -727,7 +727,7 @@ const BaseCoralClashBoard = ({
     };
 
     const handleSelectMove = async (move) => {
-        if (coralClash.isGameOver()) {
+        if (coralClash.isGameOver() || isGameActionProcessing) {
             return;
         }
 
@@ -1101,6 +1101,7 @@ const BaseCoralClashBoard = ({
                         size={boardSize}
                         userColor={userColor}
                         boardFlipped={isBoardFlipped}
+                        isProcessing={isGameActionProcessing}
                     />
                     <Moves
                         visibleMoves={visibleMoves}
@@ -1109,6 +1110,7 @@ const BaseCoralClashBoard = ({
                         isEnemyMoves={isViewingEnemyMoves}
                         boardFlipped={isBoardFlipped}
                         isPlayerTurn={isPlayerTurn}
+                        isProcessing={isGameActionProcessing}
                     />
                 </View>
 

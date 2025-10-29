@@ -29,6 +29,7 @@ export default function Home({ navigation }) {
     const [historyLoading, setHistoryLoading] = useState(true);
     const [timeControlModalVisible, setTimeControlModalVisible] = useState(false);
     const [pendingGameAction, setPendingGameAction] = useState(null); // 'computer' or 'matchmaking'
+    const [creatingGame, setCreatingGame] = useState(false); // Track when a game is being created
 
     // Wrap callbacks in useCallback to prevent infinite re-renders
     const handleGameAccepted = useCallback(
@@ -354,6 +355,7 @@ export default function Home({ navigation }) {
 
     const handleTimeControlSelect = async (timeControl) => {
         setTimeControlModalVisible(false);
+        setCreatingGame(true);
 
         try {
             if (pendingGameAction === 'computer') {
@@ -399,6 +401,7 @@ export default function Home({ navigation }) {
                 showAlert('Error', `Failed to start ${pendingGameAction}. Please try again.`);
             }
         } finally {
+            setCreatingGame(false);
             setPendingGameAction(null);
         }
     };
@@ -469,6 +472,8 @@ export default function Home({ navigation }) {
                     icon='desktop'
                     iconFamily='font-awesome'
                     onPress={handleStartComputerGame}
+                    disabled={creatingGame || searching}
+                    loading={creatingGame && pendingGameAction === 'computer'}
                 />
 
                 {!user && (
@@ -478,6 +483,7 @@ export default function Home({ navigation }) {
                         icon='question-circle'
                         iconFamily='font-awesome'
                         onPress={() => navigation.navigate('How-To Play')}
+                        disabled={creatingGame || searching}
                     />
                 )}
 
@@ -488,6 +494,7 @@ export default function Home({ navigation }) {
                         icon='folder-open'
                         iconFamily='font-awesome'
                         onPress={handleOpenFixtureLoader}
+                        disabled={creatingGame || searching}
                     />
                 )}
 
