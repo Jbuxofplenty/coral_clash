@@ -44,11 +44,22 @@ export default function HowToPlay({ navigation }) {
                     </Text>
                     <View style={styles.bulletSection}>
                         <Text style={[styles.bulletPoint, { color: colors.TEXT }]}>
-                            • <Text bold>Checkmate</Text> your opponent's Whale (when the Whale is
-                            in <Text bold>check</Text> and cannot escape)
+                            •{' '}
+                            <Text bold style={{ color: colors.TEXT }}>
+                                Checkmate
+                            </Text>{' '}
+                            your opponent's Whale (when the Whale is in{' '}
+                            <Text bold style={{ color: colors.TEXT }}>
+                                check
+                            </Text>{' '}
+                            and cannot escape)
                         </Text>
                         <Text style={[styles.bulletPoint, { color: colors.TEXT }]}>
-                            • Control the <Text bold>most area with Coral</Text> when:
+                            • Control the{' '}
+                            <Text bold style={{ color: colors.TEXT }}>
+                                most area with Coral
+                            </Text>{' '}
+                            when:
                         </Text>
                         <View style={styles.subBulletSection}>
                             <Text style={[styles.subBullet, { color: colors.TEXT }]}>
@@ -101,12 +112,18 @@ export default function HowToPlay({ navigation }) {
                     </Text>
                     <View style={styles.bulletSection}>
                         <Text style={[styles.bulletPoint, { color: colors.TEXT }]}>
-                            • <Text bold>Hunter</Text> pieces (without four coral icons) can remove
-                            Coral
+                            •{' '}
+                            <Text bold style={{ color: colors.TEXT }}>
+                                Hunter
+                            </Text>{' '}
+                            pieces (without four coral icons) can remove Coral
                         </Text>
                         <Text style={[styles.bulletPoint, { color: colors.TEXT }]}>
-                            • <Text bold>Gatherer</Text> pieces (with four coral icons) can place
-                            Coral
+                            •{' '}
+                            <Text bold style={{ color: colors.TEXT }}>
+                                Gatherer
+                            </Text>{' '}
+                            pieces (with four coral icons) can place Coral
                         </Text>
                     </View>
                     <View style={styles.examplesContainer}>
@@ -157,12 +174,26 @@ export default function HowToPlay({ navigation }) {
                     </Text>
                     <View style={styles.bulletSection}>
                         <Text style={[styles.bulletPoint, { color: colors.TEXT }]}>
-                            • <Text bold>Hunter pieces</Text> (without coral icons) get{' '}
-                            <Text bold>STOPPED BY</Text> Coral - they cannot move through it
+                            •{' '}
+                            <Text bold style={{ color: colors.TEXT }}>
+                                Hunter pieces
+                            </Text>{' '}
+                            (without coral icons) get{' '}
+                            <Text bold style={{ color: colors.TEXT }}>
+                                STOPPED BY
+                            </Text>{' '}
+                            Coral - they cannot move through it
                         </Text>
                         <Text style={[styles.bulletPoint, { color: colors.TEXT }]}>
-                            • <Text bold>Gatherer pieces</Text> (with four coral icons) are more
-                            powerful - they can pass <Text bold>THROUGH</Text> Coral freely
+                            •{' '}
+                            <Text bold style={{ color: colors.TEXT }}>
+                                Gatherer pieces
+                            </Text>{' '}
+                            (with four coral icons) are more powerful - they can pass{' '}
+                            <Text bold style={{ color: colors.TEXT }}>
+                                THROUGH
+                            </Text>{' '}
+                            Coral freely
                         </Text>
                     </View>
 
@@ -187,7 +218,10 @@ export default function HowToPlay({ navigation }) {
 
                     <View style={styles.pieceSection}>
                         <Text style={[styles.pieceTitle, { color: colors.TEXT }]}>
-                            🐋 <Text bold>Whale</Text>
+                            🐋{' '}
+                            <Text bold style={{ color: colors.TEXT }}>
+                                Whale
+                            </Text>
                         </Text>
                         <Text style={[styles.text, { color: colors.TEXT }]}>
                             Can move half the piece any number of squares in any direction, or
@@ -205,7 +239,10 @@ export default function HowToPlay({ navigation }) {
 
                     <View style={styles.pieceSection}>
                         <Text style={[styles.pieceTitle, { color: colors.TEXT }]}>
-                            🐬 <Text bold>Dolphin</Text>
+                            🐬{' '}
+                            <Text bold style={{ color: colors.TEXT }}>
+                                Dolphin
+                            </Text>
                         </Text>
                         <Text style={[styles.text, { color: colors.TEXT }]}>
                             Moves any number of squares vertically, horizontally, or diagonally.
@@ -221,7 +258,10 @@ export default function HowToPlay({ navigation }) {
 
                     <View style={styles.pieceSection}>
                         <Text style={[styles.pieceTitle, { color: colors.TEXT }]}>
-                            🐢 <Text bold>Turtle</Text>
+                            🐢{' '}
+                            <Text bold style={{ color: colors.TEXT }}>
+                                Turtle
+                            </Text>
                         </Text>
                         <Text style={[styles.text, { color: colors.TEXT }]}>
                             Moves any number of squares vertically or horizontally.
@@ -237,7 +277,10 @@ export default function HowToPlay({ navigation }) {
 
                     <View style={styles.pieceSection}>
                         <Text style={[styles.pieceTitle, { color: colors.TEXT }]}>
-                            🐡 <Text bold>Pufferfish</Text>
+                            🐡{' '}
+                            <Text bold style={{ color: colors.TEXT }}>
+                                Pufferfish
+                            </Text>
                         </Text>
                         <Text style={[styles.text, { color: colors.TEXT }]}>
                             Moves any number of squares diagonally.
@@ -253,7 +296,10 @@ export default function HowToPlay({ navigation }) {
 
                     <View style={styles.pieceSection}>
                         <Text style={[styles.pieceTitle, { color: colors.TEXT }]}>
-                            🐙 <Text bold>Octopus</Text>
+                            🐙{' '}
+                            <Text bold style={{ color: colors.TEXT }}>
+                                Octopus
+                            </Text>
                         </Text>
                         <Text style={[styles.text, { color: colors.TEXT }]}>
                             Moves one square diagonally.
@@ -269,7 +315,10 @@ export default function HowToPlay({ navigation }) {
 
                     <View style={styles.pieceSection}>
                         <Text style={[styles.pieceTitle, { color: colors.TEXT }]}>
-                            🦀 <Text bold>Crab</Text>
+                            🦀{' '}
+                            <Text bold style={{ color: colors.TEXT }}>
+                                Crab
+                            </Text>
                         </Text>
                         <Text style={[styles.text, { color: colors.TEXT }]}>
                             Moves one square vertically or horizontally.
@@ -291,7 +340,9 @@ export default function HowToPlay({ navigation }) {
 
                     <View style={styles.ruleSection}>
                         <Text style={[styles.ruleTitle, { color: colors.TEXT }]}>
-                            <Text bold>Capture</Text>
+                            <Text bold style={{ color: colors.TEXT }}>
+                                Capture
+                            </Text>
                         </Text>
                         <Text style={[styles.text, { color: colors.TEXT }]}>
                             Move to a square occupied by an enemy piece. Whales can capture two
@@ -308,7 +359,9 @@ export default function HowToPlay({ navigation }) {
 
                     <View style={styles.ruleSection}>
                         <Text style={[styles.ruleTitle, { color: colors.TEXT }]}>
-                            <Text bold>Hunter Effect</Text>
+                            <Text bold style={{ color: colors.TEXT }}>
+                                Hunter Effect
+                            </Text>
                         </Text>
                         <Text style={[styles.text, { color: colors.TEXT }]}>
                             Hunter pieces (without coral icons) stop when moving onto Coral and can
@@ -325,7 +378,9 @@ export default function HowToPlay({ navigation }) {
 
                     <View style={styles.ruleSection}>
                         <Text style={[styles.ruleTitle, { color: colors.TEXT }]}>
-                            <Text bold>Gatherer Effect</Text>
+                            <Text bold style={{ color: colors.TEXT }}>
+                                Gatherer Effect
+                            </Text>
                         </Text>
                         <Text style={[styles.text, { color: colors.TEXT }]}>
                             Gatherer pieces (with four coral icons) can place Coral on empty squares
@@ -347,15 +402,25 @@ export default function HowToPlay({ navigation }) {
                     </Text>
                     <View style={styles.bulletSection}>
                         <Text style={[styles.bulletPoint, { color: colors.TEXT }]}>
-                            • <Text bold>Stalemate:</Text> When a player has no legal moves and
-                            their Whale is not in check
+                            •{' '}
+                            <Text bold style={{ color: colors.TEXT }}>
+                                Stalemate:
+                            </Text>{' '}
+                            When a player has no legal moves and their Whale is not in check
                         </Text>
                         <Text style={[styles.bulletPoint, { color: colors.TEXT }]}>
-                            • <Text bold>Threefold repetition:</Text> Same position occurs three
-                            times with the same player to move
+                            •{' '}
+                            <Text bold style={{ color: colors.TEXT }}>
+                                Threefold repetition:
+                            </Text>{' '}
+                            Same position occurs three times with the same player to move
                         </Text>
                         <Text style={[styles.bulletPoint, { color: colors.TEXT }]}>
-                            • <Text bold>Resignation:</Text> A player may resign at any time
+                            •{' '}
+                            <Text bold style={{ color: colors.TEXT }}>
+                                Resignation:
+                            </Text>{' '}
+                            A player may resign at any time
                         </Text>
                     </View>
                 </Block>
