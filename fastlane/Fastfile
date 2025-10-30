@@ -15,11 +15,21 @@ platform :ios do
       xcodeproj: "./ios/CoralClash.xcodeproj"
     )
     
+    # Setup App Store Connect API Key if provided
+    api_key = nil
+    if ENV["APP_STORE_CONNECT_API_KEY_PATH"]
+      api_key = app_store_connect_api_key(
+        key_id: ENV["APP_STORE_CONNECT_API_KEY_KEY_ID"],
+        issuer_id: ENV["APP_STORE_CONNECT_API_KEY_ISSUER_ID"],
+        key_filepath: ENV["APP_STORE_CONNECT_API_KEY_PATH"]
+      )
+    end
+    
     # Sync code signing
     sync_code_signing(
       type: "appstore",
       readonly: is_ci,
-      api_key_path: ENV["APP_STORE_CONNECT_API_KEY_PATH"]
+      api_key: api_key
     )
     
     # Build the app
@@ -41,9 +51,19 @@ platform :ios do
   lane :beta do
     build
     
+    # Setup App Store Connect API Key if provided
+    api_key = nil
+    if ENV["APP_STORE_CONNECT_API_KEY_PATH"]
+      api_key = app_store_connect_api_key(
+        key_id: ENV["APP_STORE_CONNECT_API_KEY_KEY_ID"],
+        issuer_id: ENV["APP_STORE_CONNECT_API_KEY_ISSUER_ID"],
+        key_filepath: ENV["APP_STORE_CONNECT_API_KEY_PATH"]
+      )
+    end
+    
     # Upload to TestFlight
     upload_to_testflight(
-      api_key_path: ENV["APP_STORE_CONNECT_API_KEY_PATH"],
+      api_key: api_key,
       skip_waiting_for_build_processing: true,
       skip_submission: true,
       distribute_external: false,
@@ -55,9 +75,19 @@ platform :ios do
   lane :release do
     build
     
+    # Setup App Store Connect API Key if provided
+    api_key = nil
+    if ENV["APP_STORE_CONNECT_API_KEY_PATH"]
+      api_key = app_store_connect_api_key(
+        key_id: ENV["APP_STORE_CONNECT_API_KEY_KEY_ID"],
+        issuer_id: ENV["APP_STORE_CONNECT_API_KEY_ISSUER_ID"],
+        key_filepath: ENV["APP_STORE_CONNECT_API_KEY_PATH"]
+      )
+    end
+    
     # Upload to App Store
     upload_to_app_store(
-      api_key_path: ENV["APP_STORE_CONNECT_API_KEY_PATH"],
+      api_key: api_key,
       skip_metadata: true,
       skip_screenshots: true,
       submit_for_review: false,
