@@ -117,8 +117,10 @@ platform :android do
   lane :build do |options|
     track = options[:track] || "internal"
     
-    # Get version code from environment or gradle
-    version_code = ENV["VERSION_CODE"]
+    # Increment version code
+    increment_version_code(
+      gradle_file_path: "./android/app/build.gradle"
+    )
     
     # Build the app
     gradle(
