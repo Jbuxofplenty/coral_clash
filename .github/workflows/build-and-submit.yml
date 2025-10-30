@@ -78,50 +78,31 @@ jobs:
       - name: Run Expo Prebuild for iOS
         run: npx expo prebuild --platform ios --clean
 
-      - name: Verify Match Git Authentication
+      - name: Configure Git Authentication for Match
         env:
           MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
-          GIT_TERMINAL_PROMPT: 0
         run: |
-          echo "🔍 Testing Match Git authentication..."
+          echo "🔍 Configuring Git authentication for Fastlane Match..."
           
-          # Check if secret is set
-          if [ -z "$MATCH_GIT_BASIC_AUTHORIZATION" ]; then
-            echo "❌ MATCH_GIT_BASIC_AUTHORIZATION secret is not set"
-            exit 1
-          fi
+          # Decode username:token from base64
+          decoded=$(echo "$MATCH_GIT_BASIC_AUTHORIZATION" | base64 --decode)
+          username=$(echo "$decoded" | cut -d: -f1)
+          token=$(echo "$decoded" | cut -d: -f2)
           
-          # Decode and verify format
-          decoded=$(echo "$MATCH_GIT_BASIC_AUTHORIZATION" | base64 --decode 2>/dev/null)
-          if [ $? -ne 0 ]; then
-            echo "❌ Failed to decode - not valid base64"
-            exit 1
-          fi
+          echo "✅ Credentials decoded for user: $username"
           
-          # Check format (should be username:token)
-          if [[ "$decoded" == *":"* ]]; then
-            username=$(echo "$decoded" | cut -d: -f1)
-            echo "✅ Format correct: $username:***"
-          else
-            echo "❌ Format incorrect - should be 'username:token'"
-            exit 1
-          fi
+          # Configure git to use token authentication for GitHub
+          git config --global url."https://${username}:${token}@github.com/".insteadOf "https://github.com/"
           
-          # Configure git to use the authorization header globally for this session
-          git config --global http.https://github.com/.extraheader "Authorization: Basic $MATCH_GIT_BASIC_AUTHORIZATION"
+          echo "✅ Git configured to use token authentication"
           
-          # Test clone
+          # Test it works
           temp_dir=$(mktemp -d)
-          if GIT_TERMINAL_PROMPT=0 git clone https://github.com/Jbuxofplenty/fastlane_match.git "$temp_dir" 2>&1; then
+          if git clone https://github.com/Jbuxofplenty/fastlane_match.git "$temp_dir" 2>&1 | head -5; then
             echo "✅ Successfully authenticated with Match repository"
             rm -rf "$temp_dir"
-            echo "✅ Git authentication is properly configured"
           else
-            echo "❌ Failed to clone Match repository"
-            echo "Please verify:"
-            echo "1. MATCH_GIT_BASIC_AUTHORIZATION secret is set in GitHub"
-            echo "2. Personal Access Token has 'repo' scope"
-            echo "3. Token has not expired"
+            echo "❌ Authentication test failed"
             rm -rf "$temp_dir"
             exit 1
           fi
@@ -136,30 +117,20 @@ jobs:
         env:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
-          MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
           APP_STORE_CONNECT_API_KEY_PATH: ${{ env.APP_STORE_CONNECT_API_KEY_PATH }}
           FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ${{ secrets.APPLE_ID }}
-          GIT_TERMINAL_PROMPT: 0
           CI: true
-        run: |
-          # Configure git for Fastlane Match
-          git config --global http.https://github.com/.extraheader "Authorization: Basic $MATCH_GIT_BASIC_AUTHORIZATION"
-          bundle exec fastlane ios beta
+        run: bundle exec fastlane ios beta
 
       - name: Build and Submit to App Store (Production)
         if: inputs.profile == 'production'
         env:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
-          MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
           APP_STORE_CONNECT_API_KEY_PATH: ${{ env.APP_STORE_CONNECT_API_KEY_PATH }}
           FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ${{ secrets.APPLE_ID }}
-          GIT_TERMINAL_PROMPT: 0
           CI: true
-        run: |
-          # Configure git for Fastlane Match
-          git config --global http.https://github.com/.extraheader "Authorization: Basic $MATCH_GIT_BASIC_AUTHORIZATION"
-          bundle exec fastlane ios release
+        run: bundle exec fastlane ios release
 
       - name: Upload iOS build artifacts
         if: always()
