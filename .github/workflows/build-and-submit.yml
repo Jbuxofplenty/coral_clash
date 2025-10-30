@@ -83,11 +83,14 @@ jobs:
           
           # Test it works
           temp_dir=$(mktemp -d)
-          if git clone https://github.com/Jbuxofplenty/fastlane_match.git "$temp_dir" 2>&1 | head -5; then
+          echo "Testing clone..."
+          
+          if git clone https://github.com/Jbuxofplenty/fastlane_match.git "$temp_dir" 2>&1; then
             echo "✅ Successfully authenticated with Match repository"
             rm -rf "$temp_dir"
           else
-            echo "❌ Authentication test failed"
+            echo "❌ Authentication test failed - check your token"
+            echo "Token may be expired or doesn't have 'repo' scope"
             rm -rf "$temp_dir"
             exit 1
           fi
