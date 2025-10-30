@@ -259,7 +259,6 @@ export default function ActiveGamesCard({
                         const status = getGameStatus(game);
                         const isPending = game.status === 'pending';
                         const isRecipient = game.opponentId === user?.uid;
-                        const isComputerGame = opponent.isComputer;
                         const isProcessing =
                             acceptingGameId === game.id ||
                             decliningGameId === game.id ||
@@ -429,7 +428,7 @@ export default function ActiveGamesCard({
                                                 </TouchableOpacity>
                                             )}
                                         </Block>
-                                    ) : isComputerGame ? (
+                                    ) : (
                                         <Block row middle>
                                             {resigningGameId === game.id ? (
                                                 <View
@@ -472,13 +471,6 @@ export default function ActiveGamesCard({
                                                 color={colors.TEXT_SECONDARY}
                                             />
                                         </Block>
-                                    ) : (
-                                        <Icon
-                                            name='chevron-right'
-                                            family='font-awesome'
-                                            size={16}
-                                            color={colors.TEXT_SECONDARY}
-                                        />
                                     )}
                                 </Block>
                             </TouchableOpacity>
