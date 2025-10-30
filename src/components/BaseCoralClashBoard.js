@@ -1196,6 +1196,7 @@ const BaseCoralClashBoard = ({
                         isActive={isTopPlayerActive}
                         color={topPlayerColor}
                         coralRemaining={coralClash.getCoralRemaining(topPlayerColor)}
+                        coralUnderControl={coralClash.getCoralAreaControl(topPlayerColor)}
                         timeRemaining={topPlayerTime}
                     />
                 </View>
@@ -1250,6 +1251,7 @@ const BaseCoralClashBoard = ({
                         isActive={isBottomPlayerActive}
                         color={bottomPlayerColor}
                         coralRemaining={coralClash.getCoralRemaining(bottomPlayerColor)}
+                        coralUnderControl={coralClash.getCoralAreaControl(bottomPlayerColor)}
                         timeRemaining={bottomPlayerTime}
                     />
                 </View>

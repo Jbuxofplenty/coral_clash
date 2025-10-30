@@ -13,6 +13,7 @@ import Avatar from './Avatar';
  * @param {boolean} props.isActive - Whether it's this player's turn
  * @param {string} props.color - Player's color ('w' or 'b')
  * @param {number} props.coralRemaining - Number of coral pieces remaining for this player
+ * @param {number} props.coralUnderControl - Number of coral pieces under control (not occupied by opponent)
  */
 export default function PlayerStatusBar({
     playerName = 'Player',
@@ -22,6 +23,7 @@ export default function PlayerStatusBar({
     isActive = false,
     color = 'w',
     coralRemaining,
+    coralUnderControl,
 }) {
     const { colors } = useTheme();
     const { height } = useWindowDimensions();
@@ -77,17 +79,55 @@ export default function PlayerStatusBar({
                             {formatTime(timeRemaining)}
                         </Text>
                     )}
-                    {coralRemaining !== undefined && coralRemaining !== null && (
-                        <Text
-                            style={[
-                                styles.coralCounter,
-                                { color: 'white' },
-                                isCompact && styles.coralCounterCompact,
-                            ]}
-                        >
-                            🪸 {coralRemaining}
-                        </Text>
-                    )}
+                    {(coralRemaining !== undefined && coralRemaining !== null) ||
+                    (coralUnderControl !== undefined && coralUnderControl !== null) ? (
+                        <View style={styles.coralStats}>
+                            {coralRemaining !== undefined && coralRemaining !== null && (
+                                <View style={styles.coralItem}>
+                                    <Text
+                                        style={[
+                                            styles.coralLabel,
+                                            { color: 'rgba(255, 255, 255, 0.7)' },
+                                            isCompact && styles.coralLabelCompact,
+                                        ]}
+                                    >
+                                        Remaining
+                                    </Text>
+                                    <Text
+                                        style={[
+                                            styles.coralValue,
+                                            { color: 'white' },
+                                            isCompact && styles.coralValueCompact,
+                                        ]}
+                                    >
+                                        🪸 {coralRemaining}
+                                    </Text>
+                                </View>
+                            )}
+                            {coralUnderControl !== undefined && coralUnderControl !== null && (
+                                <View style={styles.coralItem}>
+                                    <Text
+                                        style={[
+                                            styles.coralLabel,
+                                            { color: 'rgba(255, 255, 255, 0.7)' },
+                                            isCompact && styles.coralLabelCompact,
+                                        ]}
+                                    >
+                                        Under Control
+                                    </Text>
+                                    <Text
+                                        style={[
+                                            styles.coralValue,
+                                            { color: '#4ADE80' }, // Green color for control
+                                            isCompact && styles.coralValueCompact,
+                                        ]}
+                                    >
+                                        🔱 {coralUnderControl}
+                                    </Text>
+                                </View>
+                            )}
+                        </View>
+                    ) : null}
                 </View>
             </View>
 
@@ -143,10 +183,30 @@ const styles = StyleSheet.create({
     timerCompact: {
         fontSize: 11,
     },
-    coralCounter: {
-        fontSize: 14,
+    coralStats: {
+        flexDirection: 'row',
+        gap: 16,
     },
-    coralCounterCompact: {
+    coralItem: {
+        flexDirection: 'column',
+        alignItems: 'flex-start',
+    },
+    coralLabel: {
+        fontSize: 9,
+        fontWeight: '500',
+        textTransform: 'uppercase',
+        letterSpacing: 0.5,
+        marginBottom: 2,
+    },
+    coralLabelCompact: {
+        fontSize: 8,
+        marginBottom: 1,
+    },
+    coralValue: {
+        fontSize: 14,
+        fontWeight: '700',
+    },
+    coralValueCompact: {
         fontSize: 11,
     },
     colorIndicator: {
