@@ -78,6 +78,50 @@ jobs:
       - name: Run Expo Prebuild for iOS
         run: npx expo prebuild --platform ios --clean
 
+      - name: Verify Match Git Authentication
+        env:
+          MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
+        run: |
+          echo "🔍 Testing Match Git authentication..."
+          
+          # Check if secret is set
+          if [ -z "$MATCH_GIT_BASIC_AUTHORIZATION" ]; then
+            echo "❌ MATCH_GIT_BASIC_AUTHORIZATION secret is not set"
+            exit 1
+          fi
+          
+          # Decode and verify format
+          decoded=$(echo "$MATCH_GIT_BASIC_AUTHORIZATION" | base64 --decode 2>/dev/null)
+          if [ $? -ne 0 ]; then
+            echo "❌ Failed to decode - not valid base64"
+            exit 1
+          fi
+          
+          # Check format (should be username:token)
+          if [[ "$decoded" == *":"* ]]; then
+            username=$(echo "$decoded" | cut -d: -f1)
+            echo "✅ Format correct: $username:***"
+          else
+            echo "❌ Format incorrect - should be 'username:token'"
+            exit 1
+          fi
+          
+          # Test clone
+          temp_dir=$(mktemp -d)
+          if git clone -c http.extraheader="Authorization: Basic $MATCH_GIT_BASIC_AUTHORIZATION" \
+              https://github.com/Jbuxofplenty/fastlane_match.git "$temp_dir" 2>&1; then
+            echo "✅ Successfully authenticated with Match repository"
+            rm -rf "$temp_dir"
+          else
+            echo "❌ Failed to clone Match repository"
+            echo "Please verify:"
+            echo "1. MATCH_GIT_BASIC_AUTHORIZATION secret is set in GitHub"
+            echo "2. Personal Access Token has 'repo' scope"
+            echo "3. Token has not expired"
+            rm -rf "$temp_dir"
+            exit 1
+          fi
+
       - name: Install CocoaPods
         run: |
           cd ios
