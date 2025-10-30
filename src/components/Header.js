@@ -2,7 +2,7 @@ import { useNavigation } from '@react-navigation/native';
 import { Block, NavBar, theme } from 'galio-framework';
 
 import React from 'react';
-import { Platform, StyleSheet } from 'react-native';
+import { Platform, StyleSheet, TouchableOpacity } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useAuth, useTheme } from '../contexts';
@@ -18,12 +18,20 @@ function Header({ back, title, transparent }) {
         return back ? navigation.goBack() : navigation.openDrawer();
     };
 
+    const handleAvatarPress = () => {
+        navigation.navigate('Settings');
+    };
+
     const renderRight = () => {
         if (!user) {
             return null;
         }
 
-        return <Avatar size='medium' style={{ marginRight: 8 }} />;
+        return (
+            <TouchableOpacity onPress={handleAvatarPress} activeOpacity={0.7}>
+                <Avatar size='medium' style={{ marginRight: 8 }} />
+            </TouchableOpacity>
+        );
     };
 
     const headerStyles = {
