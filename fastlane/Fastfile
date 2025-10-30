@@ -25,19 +25,24 @@ platform :ios do
       )
     end
     
+    # Sync code signing first to download provisioning profiles
+    # Force regenerate if needed to include all capabilities (Associated Domains, Push Notifications)
+    sync_code_signing(
+      type: "appstore",
+      readonly: is_ci,
+      api_key: api_key,
+      force_for_new_devices: !is_ci  # Regenerate locally if devices change
+    )
+    
     # Configure manual code signing (expo prebuild defaults to automatic)
+    # Must be done AFTER sync_code_signing downloads the profile
     update_code_signing_settings(
       use_automatic_signing: false,
       path: "./ios/CoralClash.xcodeproj",
       team_id: "FWV22U8U39",
-      code_sign_identity: "iPhone Distribution"
-    )
-    
-    # Sync code signing
-    sync_code_signing(
-      type: "appstore",
-      readonly: is_ci,
-      api_key: api_key
+      code_sign_identity: "iPhone Distribution",
+      profile_name: "match AppStore com.jbuxofplenty.coralclash",
+      targets: "CoralClash"
     )
     
     # Build the app
