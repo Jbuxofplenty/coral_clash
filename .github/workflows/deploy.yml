@@ -27,5 +27,3 @@ jobs:
       profile: 'production'
       platform: ${{ github.event.inputs.platform || 'all' }}
       environment: 'production'
-    secrets:
-      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
