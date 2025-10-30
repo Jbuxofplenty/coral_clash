@@ -1,5 +1,5 @@
 import { Icon } from 'galio-framework';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
     Animated,
     Clipboard,
@@ -12,7 +12,13 @@ import {
     View,
     useWindowDimensions,
 } from 'react-native';
-import { CoralClash, WHALE, applyFixture, restoreGameFromSnapshot } from '../../shared';
+import {
+    CoralClash,
+    WHALE,
+    applyFixture,
+    createGameSnapshot,
+    restoreGameFromSnapshot,
+} from '../../shared';
 import { useAlert, useAuth, useGamePreferences, useTheme } from '../contexts';
 import { useCoralClash, useFirebaseFunctions, useGameActions } from '../hooks';
 import Coral from './Coral';
@@ -37,7 +43,7 @@ const DEV_FEATURES_ENABLED = process.env.EXPO_PUBLIC_ENABLE_DEV_FEATURES === 'tr
  * - fixture: Fixture data for dev mode
  * - gameId: Online game ID (null for offline)
  * - gameState: Initial game state
- * - opponentType: 'computer' or undefined for PvP
+ * - opponentType: 'computer', 'passandplay', or undefined for PvP
  * - topPlayerData: { name, avatarKey, isComputer }
  * - bottomPlayerData: { name, avatarKey, isComputer }
  * - renderControls: Function to render control buttons
@@ -45,7 +51,8 @@ const DEV_FEATURES_ENABLED = process.env.EXPO_PUBLIC_ENABLE_DEV_FEATURES === 'tr
  * - onMoveComplete: Callback after a move is successfully made
  * - enableUndo: Boolean indicating if undo feature is enabled
  * - onUndo: Callback for undo action
- * - userColor: Color the current user is playing as ('w' or 'b', null for spectator/offline)
+ * - onResign: Optional callback after successful resign (for cleanup like storage)
+ * - userColor: Color the current user is playing as ('w' or 'b', null for both/spectator)
  * - effectiveBoardFlip: Override for board flip (for PvP games where user plays as black)
  */
 const BaseCoralClashBoard = ({
@@ -61,6 +68,7 @@ const BaseCoralClashBoard = ({
     onMoveComplete,
     enableUndo = false,
     onUndo,
+    onResign, // Optional callback after successful resign
     userColor = null,
     effectiveBoardFlip = null,
     notificationStatus = null,
@@ -109,6 +117,9 @@ const BaseCoralClashBoard = ({
     const [localTimeRemaining, setLocalTimeRemaining] = useState(null);
     const [_lastUpdateTime, setLastUpdateTime] = useState(null);
 
+    // Turn notification state (shows whose turn it is after a move)
+    const [turnNotification, setTurnNotification] = useState(null);
+
     const openMenu = () => {
         setMenuVisible(true);
         Animated.spring(slideAnim, {
@@ -129,7 +140,10 @@ const BaseCoralClashBoard = ({
 
     // Load game state from active game if provided
     useEffect(() => {
-        if (gameState && !gameStateLoaded && !fixture) {
+        // Only restore if gameState has actual data (not empty object or null)
+        const hasGameState = gameState && Object.keys(gameState).length > 0;
+
+        if (hasGameState && !gameStateLoaded && !fixture) {
             try {
                 restoreGameFromSnapshot(coralClash, gameState);
                 setGameStateLoaded(true);
@@ -187,6 +201,13 @@ const BaseCoralClashBoard = ({
         setWhaleOrientationMoves([]);
         setIsViewingEnemyMoves(false);
     }, [isBoardFlipped]);
+
+    // Clear turn notification when game ends or when viewing history
+    useEffect(() => {
+        if (coralClash.isGameOver() || gameData?.status === 'completed' || isViewingHistory) {
+            setTurnNotification(null);
+        }
+    }, [coralClash, gameData?.status, isViewingHistory]);
 
     // Check game time on mount for online games with time control
     useEffect(() => {
@@ -553,7 +574,7 @@ const BaseCoralClashBoard = ({
         }
 
         if (coralClash.isStalemate()) {
-            return { message: 'Stalemate - Draw! 🤝', type: 'draw' };
+            return { message: 'Stalemate! 🤝', type: 'draw' };
         }
 
         if (coralClash.isDraw()) {
@@ -592,8 +613,13 @@ const BaseCoralClashBoard = ({
 
     // Calculate if it's the player's turn (stable calculation, not inline in JSX)
     // For online games, use server's turn state (isUserTurn from gameData)
-    // For offline games, use local game engine's turn state
-    const isPlayerTurn = gameId ? isUserTurn : userColor ? coralClash.turn() === userColor : true;
+    // For local/offline games, use local game engine's turn state
+    const isOnlineGame = gameId && !gameId.startsWith('local_');
+    const isPlayerTurn = isOnlineGame
+        ? isUserTurn
+        : userColor && coralClash
+          ? coralClash.turn() === userColor
+          : true; // For pass-and-play (userColor is null) or if coralClash not ready, both players can move
 
     const handleUndo = () => {
         if (onUndo) {
@@ -636,38 +662,100 @@ const BaseCoralClashBoard = ({
                         setWhaleDestination(null);
                         setWhaleOrientationMoves([]);
                         setIsViewingEnemyMoves(false);
+
+                        // Call optional resign callback for cleanup (e.g., pass-and-play storage)
+                        if (onResign) {
+                            await onResign();
+                        }
                     }
                 },
             },
         ]);
     };
 
-    // Execute a move - for online games, use backend-first; for offline, apply locally
-    const executeMove = async (moveParams) => {
-        if (gameId) {
-            // Online game: backend-first approach (handled by useGameActions)
-            // The Firestore listener will update the UI automatically
-            const result = await makeMoveAPI(moveParams);
-            if (result) {
-                // Exit history view when a move is made
-                setHistoryIndex(null);
-                // Call the onMoveComplete callback if provided
-                if (onMoveComplete) {
-                    await onMoveComplete(result, moveParams);
-                }
-            }
-            return result;
-        } else {
-            // Offline game: apply locally
-            const moveResult = coralClash.move(moveParams);
-            if (moveResult) {
-                // Exit history view when a move is made
-                setHistoryIndex(null);
-                // Force re-render to update UI (e.g., enable undo button)
-                forceUpdate((n) => n + 1);
-            }
-            return moveResult;
+    // Show turn notification after a move
+    const showTurnNotification = useCallback(() => {
+        if (!coralClash || typeof coralClash.turn !== 'function') {
+            console.warn('CoralClash instance not ready for turn notification');
+            return;
         }
+
+        const currentTurn = coralClash.turn();
+        const currentPlayerColor = currentTurn === 'w' ? 'White' : 'Black';
+
+        // Determine whose turn it is based on game type
+        let message;
+        if (userColor) {
+            // For games where user has a specific color (PvP or computer)
+            const isUsersTurn = currentTurn === userColor;
+            if (isUsersTurn) {
+                message = 'Your turn';
+            } else if (opponentType === 'computer') {
+                message = "Computer's turn";
+            } else {
+                // Get opponent name from player data
+                const opponentData = userColor === 'w' ? topPlayerData : bottomPlayerData;
+                const opponentName = opponentData?.name || 'Opponent';
+                message = `${opponentName}'s turn`;
+            }
+        } else {
+            // For pass-and-play or offline games
+            message = `${currentPlayerColor}'s turn`;
+        }
+
+        setTurnNotification({
+            message,
+            type: 'info',
+            timeout: 2500,
+            onDismiss: () => setTurnNotification(null),
+        });
+    }, [coralClash, userColor, opponentType, topPlayerData, bottomPlayerData]);
+
+    // Execute a move - for online games, use backend-first; for offline/local, apply locally
+    const executeMove = async (moveParams) => {
+        // Online game: backend-first approach
+        if (isOnlineGame) {
+            const result = await makeMoveAPI(moveParams);
+            if (!result) return null;
+
+            setHistoryIndex(null);
+            await onMoveComplete?.(result, moveParams);
+
+            // Show turn notification if game is not over
+            if (!result.gameOver && !coralClash.isGameOver()) {
+                showTurnNotification();
+            }
+
+            return result;
+        }
+
+        // Offline/local game: apply locally
+        const moveResult = coralClash.move(moveParams);
+        if (!moveResult) return null;
+
+        setHistoryIndex(null);
+        forceUpdate((n) => n + 1);
+
+        // Get game state immediately after the move
+        const currentGameState = createGameSnapshot(coralClash);
+        const isGameOverNow = coralClash.isGameOver();
+
+        await onMoveComplete?.(
+            {
+                success: true,
+                gameState: currentGameState,
+                gameOver: isGameOverNow,
+                opponentType,
+            },
+            moveParams,
+        );
+
+        // Show turn notification if game is not over
+        if (!isGameOverNow) {
+            showTurnNotification();
+        }
+
+        return moveResult;
     };
 
     // executeResign function removed - now using resignAPI from useGameActions hook
@@ -1019,20 +1107,35 @@ const BaseCoralClashBoard = ({
     const currentTurn = coralClash.turn();
 
     // Determine player colors based on userColor (for PvP) or board orientation (for offline)
-    // Bottom player (user) gets userColor, top player (opponent) gets opposite
-    const bottomPlayerColor = userColor || 'w'; // Default to white for offline games
-    const topPlayerColor = bottomPlayerColor === 'w' ? 'b' : 'w';
+    // For pass-and-play (userColor = null), colors depend on board flip
+    let bottomPlayerColor, topPlayerColor;
+    if (userColor) {
+        // PvP or computer: user has a fixed color
+        bottomPlayerColor = userColor;
+        topPlayerColor = userColor === 'w' ? 'b' : 'w';
+    } else {
+        // Pass-and-play: colors change with board flip
+        // When not flipped: White at bottom, Black at top
+        // When flipped: Black at bottom, White at top
+        if (isBoardFlipped) {
+            bottomPlayerColor = 'b';
+            topPlayerColor = 'w';
+        } else {
+            bottomPlayerColor = 'w';
+            topPlayerColor = 'b';
+        }
+    }
 
     // Determine which player is active based on current turn
     // For online games, use server's turn state (isUserTurn) to avoid sync issues after undo
     let isTopPlayerActive, isBottomPlayerActive;
-    if (gameId && gameData) {
+    if (isOnlineGame && gameData) {
         // Online game: use server state
         // isUserTurn tells us if it's the user's turn (bottom player)
         isBottomPlayerActive = isUserTurn;
         isTopPlayerActive = !isUserTurn;
     } else {
-        // Offline game: use local engine state
+        // Offline/local game: use local engine state
         isTopPlayerActive = currentTurn === topPlayerColor;
         isBottomPlayerActive = currentTurn === bottomPlayerColor;
     }
@@ -1131,21 +1234,31 @@ const BaseCoralClashBoard = ({
                 {/* Game Request Banner (Undo/Reset) - Only for PvP games */}
                 {renderGameRequestBanner && renderGameRequestBanner({ coralClash })}
 
-                {/* Game Status Banner */}
-                <GameStatusBanner
-                    message={gameStatus?.message}
-                    type={gameStatus?.type}
-                    visible={!!gameStatus}
-                />
-
-                {/* Notification Status Banner (for undo/reset notifications) */}
-                {notificationStatus && (
+                {/* Status Banners - Priority: notificationStatus > turnNotification > gameStatus */}
+                {notificationStatus ? (
+                    /* Notification Status Banner (for undo/reset notifications) - Highest priority */
                     <GameStatusBanner
                         message={notificationStatus.message}
                         type={notificationStatus.type}
                         visible={true}
                         timeout={notificationStatus.timeout}
                         onDismiss={notificationStatus.onDismiss}
+                    />
+                ) : turnNotification ? (
+                    /* Turn Notification Banner - Shows whose turn it is after a move */
+                    <GameStatusBanner
+                        message={turnNotification.message}
+                        type={turnNotification.type}
+                        visible={true}
+                        timeout={turnNotification.timeout}
+                        onDismiss={turnNotification.onDismiss}
+                    />
+                ) : (
+                    /* Game Status Banner - Only shown when no other notifications */
+                    <GameStatusBanner
+                        message={gameStatus?.message}
+                        type={gameStatus?.type}
+                        visible={!!gameStatus}
                     />
                 )}
             </View>

@@ -12,22 +12,36 @@ import {
 } from 'react-native';
 import { moderateScale } from 'react-native-size-matters';
 import { useTheme } from '../contexts';
+import { deletePassAndPlayGame, getPassAndPlayGames } from '../utils/passAndPlayStorage';
 import Avatar from './Avatar';
 import Icon from './Icon';
 
 const { width } = Dimensions.get('screen');
 
 /**
- * Card component that allows users to select a friend and start a game
+ * Card component that allows users to select a friend and start a game or play pass and play
  * @param {Array} friends - List of friends to display
  * @param {boolean} loading - Loading state for friends
  * @param {boolean} disabled - Whether the card is disabled
  * @param {Function} onSelectFriend - Callback when friend is selected (receives friendId, friendName)
+ * @param {Function} onPassAndPlay - Callback when pass and play is selected
  */
-export default function PlayWithFriendCard({ friends, loading, disabled, onSelectFriend }) {
+export default function PlayWithFriendCard({
+    friends,
+    loading,
+    disabled,
+    onSelectFriend,
+    onPassAndPlay,
+    onResumePassAndPlay,
+}) {
     const { colors } = useTheme();
-    const [modalVisible, setModalVisible] = useState(false);
+    const [optionsModalVisible, setOptionsModalVisible] = useState(false);
+    const [friendModalVisible, setFriendModalVisible] = useState(false);
+    const [passAndPlayModalVisible, setPassAndPlayModalVisible] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
+    const [passAndPlayGames, setPassAndPlayGames] = useState([]);
+    const [loadingPassAndPlay, setLoadingPassAndPlay] = useState(false);
+    const [deletingGameId, setDeletingGameId] = useState(null);
 
     // Filter and sort friends based on search query
     const filteredFriends = useMemo(() => {
@@ -45,19 +59,74 @@ export default function PlayWithFriendCard({ friends, loading, disabled, onSelec
 
     const handleCardPress = () => {
         if (disabled || loading) return;
-        setModalVisible(true);
+        setOptionsModalVisible(true);
+    };
+
+    const handleInviteFriend = () => {
+        setOptionsModalVisible(false);
+        setFriendModalVisible(true);
         setSearchQuery(''); // Reset search when opening
     };
 
+    const handlePassAndPlay = async () => {
+        setOptionsModalVisible(false);
+        setLoadingPassAndPlay(true);
+
+        // Load active pass-and-play games
+        const games = await getPassAndPlayGames();
+        setPassAndPlayGames(games);
+        setLoadingPassAndPlay(false);
+
+        // If no games, start new immediately
+        if (games.length === 0) {
+            onPassAndPlay();
+        } else {
+            // Show games list
+            setPassAndPlayModalVisible(true);
+        }
+    };
+
+    const handleStartNewPassAndPlay = () => {
+        setPassAndPlayModalVisible(false);
+        onPassAndPlay();
+    };
+
+    const handleResumeGame = (game) => {
+        setPassAndPlayModalVisible(false);
+        onResumePassAndPlay(game);
+    };
+
+    const handleClosePassAndPlayModal = () => {
+        setPassAndPlayModalVisible(false);
+    };
+
+    const handleDeleteGame = async (gameId) => {
+        try {
+            setDeletingGameId(gameId);
+            await deletePassAndPlayGame(gameId);
+            // Reload games list
+            const games = await getPassAndPlayGames();
+            setPassAndPlayGames(games);
+        } catch (error) {
+            console.error('Error deleting pass-and-play game:', error);
+        } finally {
+            setDeletingGameId(null);
+        }
+    };
+
     const handleSelectFriend = (friend) => {
-        setModalVisible(false);
+        setFriendModalVisible(false);
         setSearchQuery('');
         onSelectFriend(friend.id, friend.displayName);
     };
 
-    const handleClose = () => {
-        setModalVisible(false);
+    const handleCloseFriendModal = () => {
+        setFriendModalVisible(false);
         setSearchQuery('');
+    };
+
+    const handleCloseOptionsModal = () => {
+        setOptionsModalVisible(false);
     };
 
     return (
@@ -124,12 +193,178 @@ export default function PlayWithFriendCard({ friends, loading, disabled, onSelec
                 </Block>
             </TouchableOpacity>
 
-            {/* Friend Selection Modal */}
+            {/* Options Modal - Choose between Invite Friend or Pass & Play */}
             <Modal
-                visible={modalVisible}
+                visible={optionsModalVisible}
                 transparent={true}
                 animationType='slide'
-                onRequestClose={handleClose}
+                onRequestClose={handleCloseOptionsModal}
+            >
+                <View style={styles.modalOverlay}>
+                    <View
+                        style={[
+                            styles.optionsModalContent,
+                            {
+                                backgroundColor: colors.CARD_BACKGROUND,
+                            },
+                        ]}
+                    >
+                        {/* Header */}
+                        <Block
+                            row
+                            middle
+                            space='between'
+                            style={[
+                                styles.modalHeader,
+                                {
+                                    borderBottomColor: colors.BORDER_COLOR,
+                                },
+                            ]}
+                        >
+                            <Text
+                                style={[
+                                    styles.modalTitle,
+                                    {
+                                        color: colors.TEXT,
+                                    },
+                                ]}
+                            >
+                                Play with Friend
+                            </Text>
+                            <TouchableOpacity onPress={handleCloseOptionsModal}>
+                                <Icon
+                                    name='times'
+                                    family='font-awesome'
+                                    size={24}
+                                    color={colors.TEXT_SECONDARY}
+                                />
+                            </TouchableOpacity>
+                        </Block>
+
+                        {/* Options */}
+                        <Block style={styles.optionsContainer}>
+                            {/* Invite Friend Option */}
+                            <TouchableOpacity
+                                onPress={handleInviteFriend}
+                                style={[
+                                    styles.optionItem,
+                                    {
+                                        backgroundColor: colors.INPUT_BACKGROUND,
+                                        borderColor: colors.BORDER_COLOR,
+                                    },
+                                ]}
+                            >
+                                <Block
+                                    style={[
+                                        styles.optionIconContainer,
+                                        {
+                                            backgroundColor: colors.PRIMARY + '15',
+                                        },
+                                    ]}
+                                >
+                                    <Icon
+                                        name='user-plus'
+                                        family='font-awesome'
+                                        size={28}
+                                        color={colors.PRIMARY}
+                                    />
+                                </Block>
+                                <Block flex style={{ marginLeft: theme.SIZES.BASE }}>
+                                    <Text
+                                        style={[
+                                            styles.optionTitle,
+                                            {
+                                                color: colors.TEXT,
+                                            },
+                                        ]}
+                                    >
+                                        Invite Friend
+                                    </Text>
+                                    <Text
+                                        style={[
+                                            styles.optionDescription,
+                                            {
+                                                color: colors.TEXT_SECONDARY,
+                                            },
+                                        ]}
+                                    >
+                                        Send a game invitation to a friend
+                                    </Text>
+                                </Block>
+                                <Icon
+                                    name='chevron-right'
+                                    family='font-awesome'
+                                    size={16}
+                                    color={colors.TEXT_SECONDARY}
+                                />
+                            </TouchableOpacity>
+
+                            {/* Pass & Play Option */}
+                            <TouchableOpacity
+                                onPress={handlePassAndPlay}
+                                style={[
+                                    styles.optionItem,
+                                    {
+                                        backgroundColor: colors.INPUT_BACKGROUND,
+                                        borderColor: colors.BORDER_COLOR,
+                                    },
+                                ]}
+                            >
+                                <Block
+                                    style={[
+                                        styles.optionIconContainer,
+                                        {
+                                            backgroundColor: colors.SUCCESS + '15',
+                                        },
+                                    ]}
+                                >
+                                    <Icon
+                                        name='refresh'
+                                        family='font-awesome'
+                                        size={28}
+                                        color={colors.SUCCESS}
+                                    />
+                                </Block>
+                                <Block flex style={{ marginLeft: theme.SIZES.BASE }}>
+                                    <Text
+                                        style={[
+                                            styles.optionTitle,
+                                            {
+                                                color: colors.TEXT,
+                                            },
+                                        ]}
+                                    >
+                                        Pass & Play
+                                    </Text>
+                                    <Text
+                                        style={[
+                                            styles.optionDescription,
+                                            {
+                                                color: colors.TEXT_SECONDARY,
+                                            },
+                                        ]}
+                                    >
+                                        Play locally on this device
+                                    </Text>
+                                </Block>
+                                <Icon
+                                    name='chevron-right'
+                                    family='font-awesome'
+                                    size={16}
+                                    color={colors.TEXT_SECONDARY}
+                                />
+                            </TouchableOpacity>
+                        </Block>
+                    </View>
+                </View>
+            </Modal>
+
+            {/* Friend Selection Modal */}
+            <Modal
+                visible={friendModalVisible}
+                transparent={true}
+                animationType='slide'
+                onRequestClose={handleCloseFriendModal}
             >
                 <View style={styles.modalOverlay}>
                     <View
@@ -162,7 +397,7 @@ export default function PlayWithFriendCard({ friends, loading, disabled, onSelec
                             >
                                 Select a Friend
                             </Text>
-                            <TouchableOpacity onPress={handleClose}>
+                            <TouchableOpacity onPress={handleCloseFriendModal}>
                                 <Icon
                                     name='times'
                                     family='font-awesome'
@@ -288,6 +523,207 @@ export default function PlayWithFriendCard({ friends, loading, disabled, onSelec
                     </View>
                 </View>
             </Modal>
+
+            {/* Pass & Play Games Modal */}
+            <Modal
+                visible={passAndPlayModalVisible}
+                transparent={true}
+                animationType='slide'
+                onRequestClose={handleClosePassAndPlayModal}
+            >
+                <View style={styles.modalOverlay}>
+                    <View
+                        style={[
+                            styles.modalContent,
+                            {
+                                backgroundColor: colors.CARD_BACKGROUND,
+                            },
+                        ]}
+                    >
+                        {/* Header */}
+                        <Block
+                            row
+                            middle
+                            space='between'
+                            style={[
+                                styles.modalHeader,
+                                {
+                                    borderBottomColor: colors.BORDER_COLOR,
+                                },
+                            ]}
+                        >
+                            <Text
+                                style={[
+                                    styles.modalTitle,
+                                    {
+                                        color: colors.TEXT,
+                                    },
+                                ]}
+                            >
+                                Pass & Play Games
+                            </Text>
+                            <TouchableOpacity onPress={handleClosePassAndPlayModal}>
+                                <Icon
+                                    name='times'
+                                    family='font-awesome'
+                                    size={24}
+                                    color={colors.TEXT_SECONDARY}
+                                />
+                            </TouchableOpacity>
+                        </Block>
+
+                        {/* Games List */}
+                        <ScrollView
+                            style={styles.passAndPlayList}
+                            showsVerticalScrollIndicator={false}
+                        >
+                            {/* Start New Game Button */}
+                            <TouchableOpacity
+                                onPress={handleStartNewPassAndPlay}
+                                style={[
+                                    styles.passAndPlayItem,
+                                    styles.newGameItem,
+                                    {
+                                        backgroundColor: colors.PRIMARY + '10',
+                                        borderColor: colors.PRIMARY,
+                                    },
+                                ]}
+                            >
+                                <Block
+                                    style={[
+                                        styles.newGameIconContainer,
+                                        {
+                                            backgroundColor: colors.PRIMARY + '20',
+                                        },
+                                    ]}
+                                >
+                                    <Icon
+                                        name='plus'
+                                        family='font-awesome'
+                                        size={20}
+                                        color={colors.PRIMARY}
+                                    />
+                                </Block>
+                                <Text
+                                    style={[
+                                        styles.newGameText,
+                                        {
+                                            color: colors.PRIMARY,
+                                        },
+                                    ]}
+                                >
+                                    Start New Game
+                                </Text>
+                                <Icon
+                                    name='chevron-right'
+                                    family='font-awesome'
+                                    size={16}
+                                    color={colors.PRIMARY}
+                                />
+                            </TouchableOpacity>
+
+                            {/* Active Games */}
+                            {loadingPassAndPlay ? (
+                                <Block center style={{ padding: theme.SIZES.BASE * 2 }}>
+                                    <ActivityIndicator size='large' color={colors.PRIMARY} />
+                                </Block>
+                            ) : passAndPlayGames.length === 0 ? (
+                                <Block center style={{ padding: theme.SIZES.BASE * 2 }}>
+                                    <Text
+                                        style={[
+                                            styles.emptyText,
+                                            {
+                                                color: colors.TEXT_SECONDARY,
+                                            },
+                                        ]}
+                                    >
+                                        No active games
+                                    </Text>
+                                </Block>
+                            ) : (
+                                passAndPlayGames.map((game) => (
+                                    <TouchableOpacity
+                                        key={game.id}
+                                        onPress={() => handleResumeGame(game)}
+                                        style={[
+                                            styles.passAndPlayItem,
+                                            {
+                                                backgroundColor: colors.INPUT_BACKGROUND,
+                                                borderColor: colors.BORDER_COLOR,
+                                                opacity: deletingGameId === game.id ? 0.6 : 1,
+                                            },
+                                        ]}
+                                        disabled={deletingGameId === game.id}
+                                    >
+                                        <Avatar
+                                            avatarKey='crab'
+                                            size='small'
+                                            style={styles.gameAvatar}
+                                        />
+                                        <Block flex>
+                                            <Text
+                                                style={[
+                                                    styles.gameTitle,
+                                                    {
+                                                        color: colors.TEXT,
+                                                    },
+                                                ]}
+                                            >
+                                                vs Guest 1
+                                            </Text>
+                                            <Text
+                                                style={[
+                                                    styles.gameSubtitle,
+                                                    {
+                                                        color: colors.TEXT_SECONDARY,
+                                                    },
+                                                ]}
+                                            >
+                                                {new Date(game.updatedAt).toLocaleDateString()} •{' '}
+                                                {game.timeControl?.type || 'Unlimited'}
+                                            </Text>
+                                        </Block>
+                                        <TouchableOpacity
+                                            onPress={(e) => {
+                                                e.stopPropagation();
+                                                handleDeleteGame(game.id);
+                                            }}
+                                            style={[
+                                                styles.deleteButton,
+                                                {
+                                                    backgroundColor: colors.ERROR + '10',
+                                                },
+                                            ]}
+                                            disabled={deletingGameId === game.id}
+                                        >
+                                            {deletingGameId === game.id ? (
+                                                <ActivityIndicator
+                                                    size='small'
+                                                    color={colors.ERROR}
+                                                />
+                                            ) : (
+                                                <Icon
+                                                    name='times'
+                                                    family='font-awesome'
+                                                    size={16}
+                                                    color={colors.ERROR}
+                                                />
+                                            )}
+                                        </TouchableOpacity>
+                                        <Icon
+                                            name='chevron-right'
+                                            family='font-awesome'
+                                            size={16}
+                                            color={colors.TEXT_SECONDARY}
+                                            style={{ marginLeft: 8 }}
+                                        />
+                                    </TouchableOpacity>
+                                ))
+                            )}
+                        </ScrollView>
+                    </View>
+                </View>
+            </Modal>
         </>
     );
 }
@@ -326,6 +762,11 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
         justifyContent: 'flex-end',
     },
+    optionsModalContent: {
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
+        paddingBottom: theme.SIZES.BASE * 2,
+    },
     modalContent: {
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
@@ -339,6 +780,32 @@ const styles = StyleSheet.create({
     modalTitle: {
         fontSize: 20,
         fontWeight: '600',
+    },
+    optionsContainer: {
+        padding: theme.SIZES.BASE * 1.5,
+    },
+    optionItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: theme.SIZES.BASE * 1.5,
+        borderRadius: 12,
+        marginBottom: theme.SIZES.BASE,
+        borderWidth: 1,
+    },
+    optionIconContainer: {
+        width: moderateScale(50),
+        height: moderateScale(50),
+        borderRadius: moderateScale(25),
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    optionTitle: {
+        fontSize: 18,
+        fontWeight: '600',
+        marginBottom: 4,
+    },
+    optionDescription: {
+        fontSize: 14,
     },
     searchContainer: {
         padding: theme.SIZES.BASE,
@@ -380,5 +847,54 @@ const styles = StyleSheet.create({
     emptyText: {
         fontSize: 16,
         textAlign: 'center',
+    },
+    passAndPlayList: {
+        flex: 1,
+        paddingHorizontal: theme.SIZES.BASE,
+        paddingTop: theme.SIZES.BASE,
+    },
+    passAndPlayItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: theme.SIZES.BASE,
+        borderRadius: 10,
+        marginBottom: theme.SIZES.BASE * 0.75,
+        borderWidth: 1,
+    },
+    newGameItem: {
+        borderWidth: 2,
+        borderStyle: 'dashed',
+    },
+    newGameIconContainer: {
+        width: moderateScale(40),
+        height: moderateScale(40),
+        borderRadius: moderateScale(20),
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: theme.SIZES.BASE,
+    },
+    newGameText: {
+        flex: 1,
+        fontSize: 16,
+        fontWeight: '600',
+    },
+    gameAvatar: {
+        marginRight: theme.SIZES.BASE,
+    },
+    gameTitle: {
+        fontSize: 16,
+        fontWeight: '600',
+        marginBottom: 2,
+    },
+    gameSubtitle: {
+        fontSize: 12,
+    },
+    deleteButton: {
+        width: 32,
+        height: 32,
+        borderRadius: 16,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: 8,
     },
 });

@@ -16,6 +16,7 @@ import { collection, db, onSnapshot, query, where } from '../config/firebase';
 import { useAlert, useAuth, useTheme } from '../contexts';
 import { useFirebaseFunctions, useGame, useMatchmaking } from '../hooks';
 import { useFriends } from '../hooks/useFriends';
+import { savePassAndPlayGame } from '../utils/passAndPlayStorage';
 
 const { width, height } = Dimensions.get('screen');
 
@@ -367,6 +368,28 @@ export default function Home({ navigation }) {
         setTimeControlModalVisible(true);
     };
 
+    const handlePassAndPlay = () => {
+        setPendingGameAction('passandplay');
+        setTimeControlModalVisible(true);
+    };
+
+    const handleResumePassAndPlay = (game) => {
+        // Navigate to existing pass-and-play game
+        // Only pass gameState if it has actual data (not empty object)
+        const hasGameState = game.gameState && Object.keys(game.gameState).length > 0;
+
+        navigation.navigate('Game', {
+            gameId: game.id,
+            opponentType: 'passandplay',
+            ...(hasGameState && { gameState: game.gameState }),
+            timeControl: game.timeControl,
+            opponentData: {
+                displayName: 'Guest 1',
+                avatarKey: 'crab',
+            },
+        });
+    };
+
     const handleTimeControlSelect = async (timeControl) => {
         setTimeControlModalVisible(false);
         setCreatingGame(true);
@@ -400,6 +423,26 @@ export default function Home({ navigation }) {
                 await sendGameRequest(selectedFriend.id, selectedFriend.name, timeControl);
                 // Game request sent successfully via useGame hook
                 setSelectedFriend(null);
+            } else if (pendingGameAction === 'passandplay') {
+                // Create and save pass-and-play game with initial state
+                const gameId = await savePassAndPlayGame({
+                    opponentType: 'passandplay',
+                    timeControl: timeControl,
+                    // Pass empty object for gameState - will be initialized as default position
+                    gameState: {},
+                });
+
+                // Navigate to pass and play game
+                navigation.navigate('Game', {
+                    gameId: gameId,
+                    opponentType: 'passandplay',
+                    timeControl: timeControl,
+                    opponentData: {
+                        displayName: 'Guest 1',
+                        avatarKey: 'crab', // Different avatar for guest player
+                    },
+                    // Don't pass gameState on navigation - let CoralClash initialize fresh
+                });
             }
         } catch (error) {
             console.error(`Failed to start ${pendingGameAction}:`, error);
@@ -490,6 +533,8 @@ export default function Home({ navigation }) {
                             loading={friendsLoading}
                             disabled={creatingGame || searching || sendingGameRequest}
                             onSelectFriend={handleSelectFriend}
+                            onPassAndPlay={handlePassAndPlay}
+                            onResumePassAndPlay={handleResumePassAndPlay}
                         />
                     </>
                 )}

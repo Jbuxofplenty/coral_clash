@@ -39,6 +39,14 @@ export const useGameActions = (coralClash, gameId, onStateUpdate) => {
             return; // Skip for offline games or when user is logged out
         }
 
+        // Skip Firebase listener for local pass-and-play games
+        if (gameId.startsWith('local_')) {
+            if (isMountedRef.current) {
+                setIsLoading(false);
+            }
+            return;
+        }
+
         let hasUnsubscribed = false; // Flag to prevent multiple unsubscribe attempts
 
         // Subscribe to game document

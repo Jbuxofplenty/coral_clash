@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Dimensions, StyleSheet } from 'react-native';
 
 import ComputerCoralClashBoard from '../components/ComputerCoralClashBoard';
+import PassAndPlayCoralClashBoard from '../components/PassAndPlayCoralClashBoard';
 import PvPCoralClashBoard from '../components/PvPCoralClashBoard';
 import { useNotifications, useTheme } from '../contexts';
 
@@ -17,8 +18,9 @@ export default function Game({ route }) {
     const fixture = route?.params?.fixture;
     const gameId = route?.params?.gameId;
     const gameState = route?.params?.gameState;
-    const opponentType = route?.params?.opponentType; // 'computer' or undefined for PvP
-    const opponentData = route?.params?.opponentData; // For PvP games
+    const opponentType = route?.params?.opponentType; // 'computer', 'passandplay', or undefined for PvP
+    const opponentData = route?.params?.opponentData; // For PvP and pass-and-play games
+    const timeControl = route?.params?.timeControl; // For pass-and-play games
 
     // Use a key that changes when the screen comes into focus to force timer re-sync
     const [focusKey, setFocusKey] = useState(0);
@@ -69,8 +71,17 @@ export default function Game({ route }) {
     );
 
     // Select the appropriate board component
-    const BoardComponent =
-        opponentType === 'computer' || !gameId ? ComputerCoralClashBoard : PvPCoralClashBoard;
+    // Use ComputerCoralClashBoard for: computer games or offline games without opponentType
+    // Use PassAndPlayCoralClashBoard for: pass-and-play games
+    // Use PvPCoralClashBoard for: online PvP games
+    let BoardComponent;
+    if (opponentType === 'passandplay') {
+        BoardComponent = PassAndPlayCoralClashBoard;
+    } else if (opponentType === 'computer' || !gameId) {
+        BoardComponent = ComputerCoralClashBoard;
+    } else {
+        BoardComponent = PvPCoralClashBoard;
+    }
 
     return (
         <LinearGradient
@@ -85,6 +96,8 @@ export default function Game({ route }) {
                 gameId={gameId}
                 gameState={gameState}
                 opponentData={opponentData}
+                opponentType={opponentType}
+                timeControl={timeControl}
                 notificationStatus={
                     showStatus && statusMessage
                         ? {
