@@ -124,10 +124,32 @@ platform :android do
   lane :build do |options|
     track = options[:track] || "internal"
     
-    # Increment version code
-    increment_version_code(
-      gradle_file_path: "./android/app/build.gradle"
+    # Get latest version code from Play Store and increment
+    production_versions = google_play_track_version_codes(
+      package_name: "com.jbuxofplenty.coralclash",
+      track: "production",
+      json_key: ENV["GOOGLE_PLAY_JSON_KEY_PATH"]
     )
+    
+    # If there are existing versions, use the highest + 1, otherwise start at 1
+    latest_version_code = production_versions.max || 0
+    new_version_code = latest_version_code + 1
+    
+    UI.message("📱 Latest Play Store version code: #{latest_version_code}")
+    UI.message("📱 New version code: #{new_version_code}")
+    
+    # Update versionCode in build.gradle
+    gradle_file = "./android/app/build.gradle"
+    gradle_content = File.read(gradle_file)
+    
+    # Replace versionCode line
+    updated_content = gradle_content.gsub(
+      /versionCode\s+\d+/,
+      "versionCode #{new_version_code}"
+    )
+    
+    File.write(gradle_file, updated_content)
+    UI.success("✅ Updated versionCode to #{new_version_code}")
     
     # Build the app
     gradle(
@@ -138,7 +160,7 @@ platform :android do
         "android.injected.signing.store.file" => ENV["ANDROID_KEYSTORE_PATH"],
         "android.injected.signing.store.password" => ENV["ANDROID_KEYSTORE_PASSWORD"],
         "android.injected.signing.key.alias" => ENV["ANDROID_KEY_ALIAS"],
-        "android.injected.signing.key.password" => ENV["ANDROID_KEY_PASSWORD"],
+        "android.injected.signing.key.password" => ENV["ANDROID_KEY_PASSWORD"]
       }
     )
   end
