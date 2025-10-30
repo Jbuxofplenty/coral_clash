@@ -27,3 +27,4 @@ jobs:
       profile: 'production'
       platform: ${{ github.event.inputs.platform || 'all' }}
       environment: 'production'
+    secrets: inherit

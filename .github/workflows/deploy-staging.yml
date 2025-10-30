@@ -39,6 +39,7 @@ jobs:
       profile: 'preview'
       platform: ${{ github.event.inputs.platform || 'all' }}
       environment: 'staging'
+    secrets: inherit
   
   deploy-firebase:
     name: Deploy Firebase Functions
