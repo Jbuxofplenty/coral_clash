@@ -43,10 +43,14 @@
 - Include examples in documentation
 - Keep docs concise and actionable
 
-## EAS & Expo
+## Build & Deployment
 
-- Use `eas build` for remote builds, not local builds
+- Use Fastlane for building and submitting apps (iOS & Android)
+- Use `npx expo prebuild` to generate native directories
+- Never commit generated `ios/` or `android/` directories
 - Version bumping is handled by CI/CD workflows
+- iOS builds require Fastlane Match for code signing
+- Android builds require keystore (never commit `.keystore` files)
 
 ## Communication
 

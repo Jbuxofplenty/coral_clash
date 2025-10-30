@@ -1,0 +1,125 @@
+# Fastfile for Coral Clash
+# Documentation: https://docs.fastlane.tools
+
+default_platform(:ios)
+
+# iOS Platform
+platform :ios do
+  desc "Build iOS app"
+  lane :build do |options|
+    # Setup CI creates a temporary keychain for CI builds
+    setup_ci if ENV['CI']
+    
+    # Get the build number from environment or increment
+    build_number = ENV["BUILD_NUMBER"] || increment_build_number(
+      xcodeproj: "./ios/CoralClash.xcodeproj"
+    )
+    
+    # Sync code signing
+    sync_code_signing(
+      type: "appstore",
+      readonly: is_ci,
+      api_key_path: ENV["APP_STORE_CONNECT_API_KEY_PATH"]
+    )
+    
+    # Build the app
+    build_app(
+      workspace: "./ios/CoralClash.xcworkspace",
+      scheme: "CoralClash",
+      export_method: "app-store",
+      export_options: {
+        provisioningProfiles: {
+          "com.jbuxofplenty.coralclash" => "match AppStore com.jbuxofplenty.coralclash"
+        }
+      },
+      output_directory: "./build/ios",
+      output_name: "CoralClash.ipa"
+    )
+  end
+
+  desc "Upload to TestFlight"
+  lane :beta do
+    build
+    
+    # Upload to TestFlight
+    upload_to_testflight(
+      api_key_path: ENV["APP_STORE_CONNECT_API_KEY_PATH"],
+      skip_waiting_for_build_processing: true,
+      skip_submission: true,
+      distribute_external: false,
+      changelog: ENV["CHANGELOG"] || "Bug fixes and performance improvements"
+    )
+  end
+
+  desc "Upload to App Store"
+  lane :release do
+    build
+    
+    # Upload to App Store
+    upload_to_app_store(
+      api_key_path: ENV["APP_STORE_CONNECT_API_KEY_PATH"],
+      skip_metadata: true,
+      skip_screenshots: true,
+      submit_for_review: false,
+      automatic_release: false,
+      force: true,
+      precheck_include_in_app_purchases: false
+    )
+  end
+end
+
+# Android Platform
+platform :android do
+  desc "Build Android app"
+  lane :build do |options|
+    track = options[:track] || "internal"
+    
+    # Get version code from environment or gradle
+    version_code = ENV["VERSION_CODE"]
+    
+    # Build the app
+    gradle(
+      project_dir: "./android",
+      task: "bundle",
+      build_type: "Release",
+      properties: {
+        "android.injected.signing.store.file" => ENV["ANDROID_KEYSTORE_PATH"],
+        "android.injected.signing.store.password" => ENV["ANDROID_KEYSTORE_PASSWORD"],
+        "android.injected.signing.key.alias" => ENV["ANDROID_KEY_ALIAS"],
+        "android.injected.signing.key.password" => ENV["ANDROID_KEY_PASSWORD"],
+      }
+    )
+  end
+
+  desc "Upload to Play Store Internal Testing"
+  lane :beta do
+    build(track: "internal")
+    
+    # Upload to Play Store Internal Testing track
+    upload_to_play_store(
+      track: "internal",
+      aab: "./android/app/build/outputs/bundle/release/app-release.aab",
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      json_key: ENV["GOOGLE_PLAY_JSON_KEY_PATH"]
+    )
+  end
+
+  desc "Upload to Play Store Production"
+  lane :release do
+    build(track: "production")
+    
+    # Upload to Play Store Production track
+    upload_to_play_store(
+      track: "production",
+      aab: "./android/app/build/outputs/bundle/release/app-release.aab",
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      release_status: "draft",
+      json_key: ENV["GOOGLE_PLAY_JSON_KEY_PATH"]
+    )
+  end
+end
+

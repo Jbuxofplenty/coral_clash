@@ -21,6 +21,7 @@ service-account*.json
 .env.preview
 .env.production
 .env.*
+.env.fastlane
 
 # Firebase Emulator logs and data
 firestore-debug.log
@@ -49,3 +50,35 @@ build-*.tar.gz
 # Google Cloud
 coral-clash-*.json
 google-service-account.json
+google-play-key.json
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/test_output/
+fastlane/screenshots
+fastlane/metadata
+
+# Ruby
+vendor/bundle
+.bundle
+Gemfile.lock
+
+# Android signing
+*.keystore
+release.keystore
+keystore_base64.txt
+
+# Build artifacts
+build/
+*.ipa
+*.dSYM.zip
+
+# App Store Connect
+AuthKey_*.p8
+AuthKey_*.json
+RGCRWYWHJ8.json
+~/.appstoreconnect/
+
+# EAS
+credentials.json

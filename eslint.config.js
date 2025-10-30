@@ -25,6 +25,7 @@ module.exports = [
             '**/*.log',
             '.vscode/**',
             '.idea/**',
+            'fastlane/**',
             'google-service-account.json',
         ],
     },

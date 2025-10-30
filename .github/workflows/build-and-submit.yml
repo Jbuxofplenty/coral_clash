@@ -4,7 +4,7 @@ on:
   workflow_call:
     inputs:
       profile:
-        description: 'EAS build profile to use (preview, production)'
+        description: 'Build profile to use (preview, production)'
         required: true
         type: string
       platform:
@@ -17,20 +17,39 @@ on:
         required: false
         type: string
     secrets:
-      EXPO_TOKEN:
+      APP_STORE_CONNECT_API_KEY_ID:
+        required: true
+      APP_STORE_CONNECT_ISSUER_ID:
+        required: true
+      APP_STORE_CONNECT_API_KEY_CONTENT:
+        required: true
+      APPLE_ID:
+        required: true
+      MATCH_PASSWORD:
+        required: true
+      MATCH_GIT_BASIC_AUTHORIZATION:
+        required: true
+      GOOGLE_PLAY_SERVICE_ACCOUNT_JSON:
+        required: true
+      ANDROID_KEYSTORE_BASE64:
+        required: true
+      ANDROID_KEYSTORE_PASSWORD:
+        required: true
+      ANDROID_KEY_ALIAS:
+        required: true
+      ANDROID_KEY_PASSWORD:
         required: true
 
 jobs:
-  build-and-submit:
-    name: Build and Submit to Stores
-    runs-on: ubuntu-latest
+  build-ios:
+    name: Build and Submit iOS
+    if: inputs.platform == 'ios' || inputs.platform == 'all'
+    runs-on: macos-latest
     environment: ${{ inputs.environment }}
     
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.ref_name }}  # Use branch name to get latest commit
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -38,44 +57,157 @@ jobs:
           node-version: '20'
           cache: 'yarn'
 
-      - name: Setup Expo and EAS
-        uses: expo/expo-github-action@v8
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
         with:
-          eas-version: latest
-          token: ${{ secrets.EXPO_TOKEN }}
+          ruby-version: '3.2'
+          bundler-cache: true
 
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
-      - name: Build iOS app
-        if: inputs.platform == 'ios' || inputs.platform == 'all'
-        run: eas build --platform ios --profile ${{ inputs.profile }} --non-interactive
-
-      - name: Build Android app
-        if: inputs.platform == 'android' || inputs.platform == 'all'
-        run: eas build --platform android --profile ${{ inputs.profile }} --non-interactive
-
-      - name: Wait for EAS to sync builds
-        if: (inputs.platform == 'ios' || inputs.platform == 'android' || inputs.platform == 'all')
+      - name: Setup App Store Connect API Key
         run: |
-          echo "Waiting 30 seconds for EAS to sync build metadata..."
-          sleep 30
+          mkdir -p ~/.appstoreconnect/private_keys
+          echo "${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}" > ~/.appstoreconnect/private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}.p8
+          echo "APP_STORE_CONNECT_API_KEY_PATH=~/.appstoreconnect/private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}.p8" >> $GITHUB_ENV
 
-      - name: Submit to App Store
-        if: inputs.platform == 'ios' || inputs.platform == 'all'
-        run: eas submit --platform ios --profile ${{ inputs.profile }} --latest --non-interactive
+      - name: Run Expo Prebuild for iOS
+        run: npx expo prebuild --platform ios --clean
 
-      - name: Submit to Play Store
-        if: inputs.platform == 'android' || inputs.platform == 'all'
-        run: eas submit --platform android --profile ${{ inputs.profile }} --latest --non-interactive
+      - name: Install CocoaPods
+        run: |
+          cd ios
+          pod install
 
-      - name: Build summary
+      - name: Build and Submit to TestFlight (Preview)
+        if: inputs.profile == 'preview'
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
+          APP_STORE_CONNECT_API_KEY_PATH: ${{ env.APP_STORE_CONNECT_API_KEY_PATH }}
+          FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ${{ secrets.APPLE_ID }}
+          CI: true
+        run: bundle exec fastlane ios beta
+
+      - name: Build and Submit to App Store (Production)
+        if: inputs.profile == 'production'
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
+          APP_STORE_CONNECT_API_KEY_PATH: ${{ env.APP_STORE_CONNECT_API_KEY_PATH }}
+          FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ${{ secrets.APPLE_ID }}
+          CI: true
+        run: bundle exec fastlane ios release
+
+      - name: Upload iOS build artifacts
         if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-build-${{ inputs.profile }}
+          path: |
+            ./build/ios/*.ipa
+            ./ios/fastlane/report.xml
+          retention-days: 30
+
+  build-android:
+    name: Build and Submit Android
+    if: inputs.platform == 'android' || inputs.platform == 'all'
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'yarn'
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Setup Android Keystore
+        run: |
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/app/release.keystore
+          echo "ANDROID_KEYSTORE_PATH=${{ github.workspace }}/android/app/release.keystore" >> $GITHUB_ENV
+
+      - name: Setup Google Play Service Account
+        run: |
+          echo '${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}' > google-play-key.json
+          echo "GOOGLE_PLAY_JSON_KEY_PATH=${{ github.workspace }}/google-play-key.json" >> $GITHUB_ENV
+
+      - name: Run Expo Prebuild for Android
+        run: npx expo prebuild --platform android --clean
+
+      - name: Build and Submit to Internal Testing (Preview)
+        if: inputs.profile == 'preview'
+        env:
+          ANDROID_KEYSTORE_PATH: ${{ env.ANDROID_KEYSTORE_PATH }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          GOOGLE_PLAY_JSON_KEY_PATH: ${{ env.GOOGLE_PLAY_JSON_KEY_PATH }}
+        run: bundle exec fastlane android beta
+
+      - name: Build and Submit to Production (Production)
+        if: inputs.profile == 'production'
+        env:
+          ANDROID_KEYSTORE_PATH: ${{ env.ANDROID_KEYSTORE_PATH }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          GOOGLE_PLAY_JSON_KEY_PATH: ${{ env.GOOGLE_PLAY_JSON_KEY_PATH }}
+        run: bundle exec fastlane android release
+
+      - name: Upload Android build artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-build-${{ inputs.profile }}
+          path: |
+            ./android/app/build/outputs/bundle/release/*.aab
+            ./android/app/build/outputs/apk/release/*.apk
+            ./android/fastlane/report.xml
+          retention-days: 30
+
+  summary:
+    name: Build Summary
+    needs: [build-ios, build-android]
+    if: always()
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Build summary
         run: |
           echo "### 🚀 Deployment Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "- **Profile**: ${{ inputs.profile }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Platform**: ${{ inputs.platform }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Status**: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **iOS Status**: ${{ needs.build-ios.result || 'skipped' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Android Status**: ${{ needs.build-android.result || 'skipped' }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "📊 Check build status: [EAS Dashboard](https://expo.dev/accounts/[your-account]/projects/coral-clash/builds)" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ inputs.profile }}" == "preview" ]; then
+            echo "📱 **iOS**: Check TestFlight for build availability" >> $GITHUB_STEP_SUMMARY
+            echo "🤖 **Android**: Check Play Console Internal Testing track" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "📱 **iOS**: Build submitted to App Store (pending review)" >> $GITHUB_STEP_SUMMARY
+            echo "🤖 **Android**: Build submitted to Play Store (pending review)" >> $GITHUB_STEP_SUMMARY
+          fi

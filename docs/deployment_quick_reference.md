@@ -1,4 +1,4 @@
-# Deployment Quick Reference
+# Deployment Quick Reference (Native Builds)
 
 ## 🚀 Quick Deploy Commands
 
@@ -27,35 +27,70 @@ git push origin v1.8.0
 # Go to Actions → "Deploy to Production" → "Run workflow"
 ```
 
-## 📦 Local Build & Submit Commands
+---
+
+## 📦 Local Build Commands
+
+### Prerequisites
 
 ```bash
-# Staging builds
-npm run build:staging              # Build both platforms
-npm run build:staging:ios          # Build iOS only
-npm run build:staging:android      # Build Android only
+# Install Fastlane and dependencies
+bundle install
 
-# Production builds
-npm run build:production           # Build both platforms
-npm run build:production:ios       # Build iOS only
-npm run build:production:android   # Build Android only
-
-# Submit to stores
-npm run submit:staging             # Submit to TestFlight + Internal Testing
-npm run submit:production          # Submit to App Store + Play Store
+# Generate native projects
+yarn prebuild:ios      # iOS only
+yarn prebuild:android  # Android only
+yarn prebuild:all      # Both platforms
 ```
+
+### iOS (requires macOS)
+
+```bash
+# Install CocoaPods
+cd ios && pod install && cd ..
+
+# Build only
+yarn build:ios
+
+# Build and submit to TestFlight
+yarn build:staging:ios
+
+# Build and submit to App Store
+yarn build:production:ios
+```
+
+### Android
+
+```bash
+# Setup environment variables first
+export ANDROID_KEYSTORE_PATH="./release.keystore"
+export ANDROID_KEYSTORE_PASSWORD="your-password"
+export ANDROID_KEY_ALIAS="coral-clash"
+export ANDROID_KEY_PASSWORD="your-password"
+export GOOGLE_PLAY_JSON_KEY_PATH="./google-play-key.json"
+
+# Build only
+yarn build:android
+
+# Build and submit to Internal Testing
+yarn build:staging:android
+
+# Build and submit to Production
+yarn build:production:android
+```
+
+---
 
 ## 🏗️ Workflow Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                  build-and-submit.yml                        │
-│              (Reusable Workflow - Shared Code)               │
+│                     test.yml                                 │
+│                (Reusable Test Workflow)                      │
 │                                                              │
-│  • Setup Node & Expo                                         │
-│  • Install dependencies                                      │
-│  • Build for iOS/Android                                     │
-│  • Submit to stores                                          │
+│  • Run app tests                                             │
+│  • Run shared module tests                                   │
+│  • Run functions tests                                       │
 └─────────────────────────────────────────────────────────────┘
          ▲                                    ▲
          │                                    │
@@ -71,8 +106,27 @@ npm run submit:production          # Submit to App Store + Play Store
 │                      │         │  Profile: production     │
 │  Profile: preview    │         │  Env: production         │
 │  Env: staging        │         │                          │
-└──────────────────────┘         └──────────────────────────┘
+└──────────┬───────────┘         └───────────┬──────────────┘
+           │                                 │
+           │                                 │
+           ▼                                 ▼
+┌─────────────────────────────────────────────────────────────┐
+│              build-and-submit.yml                            │
+│              (Reusable Build Workflow)                       │
+│                                                              │
+│  iOS Job (macos-latest):                                    │
+│  • npx expo prebuild --platform ios                         │
+│  • pod install                                              │
+│  • bundle exec fastlane ios beta/release                    │
+│                                                              │
+│  Android Job (ubuntu-latest):                               │
+│  • npx expo prebuild --platform android                     │
+│  • Setup keystore                                           │
+│  • bundle exec fastlane android beta/release                │
+└─────────────────────────────────────────────────────────────┘
 ```
+
+---
 
 ## 🏷️ Git Tag Naming Convention
 
@@ -82,6 +136,8 @@ npm run submit:production          # Submit to App Store + Play Store
 | `v*-beta.*` | Staging     | `v1.8.0-beta.1` | TestFlight + Internal Testing |
 | `v*-rc.*`   | Staging     | `v1.8.0-rc.1`   | TestFlight + Internal Testing |
 
+---
+
 ## 🔍 Monitoring Deployments
 
 ### GitHub Actions
@@ -90,24 +146,35 @@ npm run submit:production          # Submit to App Store + Play Store
 Your Repo → Actions tab → Select workflow run
 ```
 
-### EAS Dashboard
+### App Store Connect (iOS)
 
 ```
-https://expo.dev/accounts/[your-account]/projects/coral-clash/builds
+https://appstoreconnect.apple.com/
+→ My Apps → Coral Clash
+→ TestFlight (for staging)
+→ App Store (for production)
 ```
 
-### EAS CLI
+### Google Play Console (Android)
+
+```
+https://play.google.com/console/
+→ Coral Clash
+→ Release → Testing → Internal testing (for staging)
+→ Release → Production (for production)
+```
+
+### Fastlane CLI
 
 ```bash
-# List recent builds
-eas build:list
+# View all available lanes
+bundle exec fastlane lanes
 
-# View specific build
-eas build:view [build-id]
-
-# Check submission status
-eas submission:list
+# View iOS builds (requires proper auth)
+# Check App Store Connect for actual builds
 ```
+
+---
 
 ## 🎯 Typical Release Flow
 
@@ -116,7 +183,7 @@ eas submission:list
 ```bash
 # 1. Commit your changes
 git add .
-git commit -m "Add new feature"
+git commit -m "feat: add new feature"
 
 # 2. Push to develop (auto-deploys to staging)
 git push origin develop
@@ -125,7 +192,7 @@ git push origin develop
 git tag v1.8.0-beta.1
 git push origin v1.8.0-beta.1
 
-# 3. Wait ~15-30 mins for builds
+# 3. Wait ~20-30 mins for builds
 # 4. Check TestFlight (iOS) / Internal Testing (Android)
 # 5. Test with beta testers
 ```
@@ -137,105 +204,165 @@ git push origin v1.8.0-beta.1
 git checkout main
 git merge develop
 
-# 2. Update version in app.json
+# 2. Update version in app.json (if needed)
 # Edit: "version": "1.8.0"
 
-# 3. Commit version bump
+# 3. Commit version bump (if changed)
 git add app.json
-git commit -m "Bump version to 1.8.0"
+git commit -m "chore: bump version to 1.8.0"
 
 # 4. Create production tag
 git tag v1.8.0
 git push origin main --tags
 
-# 5. Wait ~15-30 mins for builds
+# 5. Wait ~20-30 mins for builds
 # 6. Wait 24-48 hours for store review
 # 7. Release goes live!
 ```
 
-## 🛡️ GitHub Environments (Optional Protection)
+---
 
-You can add deployment protection rules in GitHub:
+## 🔐 GitHub Secrets Required
 
-1. Go to Settings → Environments
-2. Create `staging` and `production` environments
-3. Add protection rules:
-    - **Required reviewers**: Require approval before deploy
-    - **Wait timer**: Add delay before deployment
-    - **Deployment branches**: Limit which branches can deploy
+All secrets are added in: **Settings → Secrets and variables → Actions**
 
-The workflows are already configured to use these environments!
+### iOS Secrets
+
+- `APP_STORE_CONNECT_API_KEY_ID`
+- `APP_STORE_CONNECT_ISSUER_ID`
+- `APP_STORE_CONNECT_API_KEY_CONTENT`
+- `APPLE_ID`
+- `MATCH_PASSWORD`
+- `MATCH_GIT_BASIC_AUTHORIZATION`
+
+### Android Secrets
+
+- `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON`
+- `ANDROID_KEYSTORE_BASE64`
+- `ANDROID_KEYSTORE_PASSWORD`
+- `ANDROID_KEY_ALIAS`
+- `ANDROID_KEY_PASSWORD`
+
+See [GitHub Secrets Setup Guide](./github_secrets_setup.md) for detailed instructions.
+
+---
 
 ## ⚡ Pro Tips
 
-### 1. Build without submitting
+### 1. Test Locally Before CI
 
 ```bash
-eas build --profile production --platform all --no-submit
+# Test iOS build (macOS only)
+yarn prebuild:ios
+cd ios && pod install && cd ..
+yarn build:ios
+
+# Test Android build
+yarn prebuild:android
+yarn build:android
 ```
 
-### 2. Submit an older build
+### 2. Quick Prebuild
 
 ```bash
-eas submission:list  # Find the build ID
-eas submit --platform ios --id [build-id]
+# Regenerate native projects when needed
+yarn prebuild:all
 ```
 
-### 3. Cancel a build
+### 3. View Fastlane Lanes
 
 ```bash
-eas build:list  # Find the build ID
-eas build:cancel [build-id]
+bundle exec fastlane lanes
 ```
 
-### 4. View build logs
+### 4. Manual Fastlane Commands
 
 ```bash
-eas build:view [build-id]
+# iOS
+bundle exec fastlane ios build
+bundle exec fastlane ios beta
+bundle exec fastlane ios release
+
+# Android
+bundle exec fastlane android build
+bundle exec fastlane android beta
+bundle exec fastlane android release
 ```
 
-### 5. Configure build notifications
+### 5. Setup Match (First Time)
 
 ```bash
-# In eas.json, add to build profiles:
-"notifications": {
-  "email": true,
-  "slack": {
-    "webhookUrl": "YOUR_SLACK_WEBHOOK"
-  }
-}
+# Initialize Match for iOS code signing
+bundle exec fastlane match init
+
+# Generate certificates
+bundle exec fastlane match appstore
 ```
+
+---
 
 ## 🐛 Troubleshooting
 
-### Build stuck on "waiting in queue"
+### Build stuck on "Running Tests"
 
-- Check EAS plan limits (free plans have queue limits)
-- Consider upgrading to paid plan for priority builds
+- Tests run before deployment to ensure quality
+- Check test.yml workflow for failures
+- Fix failing tests before deployment proceeds
 
-### "No credentials found"
+### iOS: "No matching provisioning profiles"
 
 ```bash
-eas credentials
+bundle exec fastlane match appstore --force_for_new_devices
 ```
 
-Follow prompts to configure iOS certificates and Android keystores
+### Android: "Keystore was tampered with"
 
-### Submission fails with "Invalid binary"
+- Verify `ANDROID_KEYSTORE_PASSWORD` in GitHub Secrets
+- Re-encode keystore: `base64 -i release.keystore | tr -d '\n'`
 
-- Ensure your app.json version matches
-- Check that all required assets are present
-- Verify bundle ID matches what's in App Store Connect
+### GitHub Action fails with authentication error
 
-### GitHub Action fails with "EXPO_TOKEN not found"
+- Check all secrets are correctly set
+- For iOS: Verify App Store Connect API key
+- For Android: Verify service account JSON
 
-- Go to repo Settings → Secrets → Actions
-- Verify `EXPO_TOKEN` exists and is valid
-- Generate new token if expired
+### Prebuild fails
 
-## 📚 Additional Resources
+```bash
+# Clean and retry
+npx expo prebuild --clean
+```
 
-- [Full Setup Guide](./deployment_setup.md)
-- [EAS Build Docs](https://docs.expo.dev/build/introduction/)
-- [EAS Submit Docs](https://docs.expo.dev/submit/introduction/)
-- [GitHub Actions Docs](https://docs.github.com/en/actions)
+### CocoaPods installation fails (iOS)
+
+```bash
+cd ios
+pod deintegrate
+pod install --repo-update
+cd ..
+```
+
+---
+
+## 📚 Additional Documentation
+
+- [GitHub Secrets Setup Guide](./github_secrets_setup.md) - How to configure all required secrets
+- [Native Build Deployment Guide](./native_build_deployment.md) - Comprehensive deployment guide
+- [EAS to Native Migration Guide](./eas_to_native_migration.md) - Migration from EAS builds
+- [Fastlane Documentation](https://docs.fastlane.tools/) - Official Fastlane docs
+- [Expo Prebuild Documentation](https://docs.expo.dev/workflow/prebuild/) - Expo prebuild guide
+
+---
+
+## 🎉 Quick Start Checklist
+
+For first-time setup:
+
+- [ ] Install Fastlane: `bundle install`
+- [ ] Setup iOS code signing: `bundle exec fastlane match appstore`
+- [ ] Generate Android keystore (if needed)
+- [ ] Add all GitHub secrets
+- [ ] Test local builds
+- [ ] Test staging deployment
+- [ ] Verify builds in TestFlight/Play Console
+- [ ] You're ready to deploy! 🚀

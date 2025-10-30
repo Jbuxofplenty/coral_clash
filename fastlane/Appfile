@@ -1,0 +1,6 @@
+# iOS
+app_identifier("com.jbuxofplenty.coralclash") # The bundle identifier of your app
+apple_id(ENV["APPLE_ID"]) # Your Apple Developer Portal email address
+
+itc_team_id("FWV22U8U39") # App Store Connect Team ID
+team_id("FWV22U8U39") # Developer Portal Team ID
