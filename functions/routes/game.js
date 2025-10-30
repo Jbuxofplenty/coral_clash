@@ -234,6 +234,14 @@ export const createComputerGame = onCall(getAppCheckConfig(), async (request) =>
 
         const gameRef = await db.collection('games').add(gameData);
 
+        // Create timeout task for user's first move if time control is enabled
+        if (finalTimeControl.totalSeconds && timeRemaining && timeRemaining[userId]) {
+            const taskName = await createTimeoutTask(gameRef.id, timeRemaining[userId]);
+            if (taskName) {
+                await gameRef.update({ pendingTimeoutTask: taskName });
+            }
+        }
+
         return {
             success: true,
             gameId: gameRef.id,
@@ -306,6 +314,13 @@ export const respondToGameInvite = onCall(getAppCheckConfig(), async (request) =
                 [gameData.opponentId]: gameData.timeControl.totalSeconds,
             };
             updateData.lastMoveTime = serverTimestamp();
+
+            // Create timeout task for the first player (white/current turn)
+            const firstPlayerTime = gameData.timeControl.totalSeconds;
+            const taskName = await createTimeoutTask(gameId, firstPlayerTime);
+            if (taskName) {
+                updateData.pendingTimeoutTask = taskName;
+            }
         }
 
         // Update game status
@@ -507,12 +522,28 @@ export const makeMove = onCall(getAppCheckConfig(), async (request) => {
             updateData.pendingTimeoutTask = null; // Clear task reference
         }
 
-        await db.collection('games').doc(gameId).update(updateData);
-
-        // Cancel pending timeout task if game is over
-        if (gameResult.isOver && gameData.pendingTimeoutTask) {
+        // Cancel old timeout task before creating new one
+        if (gameData.pendingTimeoutTask) {
             await cancelPendingTimeoutTask(gameId, gameData.pendingTimeoutTask);
         }
+
+        // Create new timeout task for next player (if game continues and time control enabled)
+        if (
+            !gameResult.isOver &&
+            nextTurn &&
+            gameData.timeControl?.totalSeconds &&
+            updatedTimeRemaining
+        ) {
+            const nextPlayerTime = updatedTimeRemaining[nextTurn];
+            if (nextPlayerTime && nextPlayerTime > 0) {
+                const taskName = await createTimeoutTask(gameId, nextPlayerTime);
+                if (taskName) {
+                    updateData.pendingTimeoutTask = taskName;
+                }
+            }
+        }
+
+        await db.collection('games').doc(gameId).update(updateData);
 
         // Notify opponent (if game continues and not computer)
         if (!gameResult.isOver && nextTurn && nextTurn !== 'computer') {
@@ -867,6 +898,66 @@ async function cancelPendingTimeoutTask(gameId, taskName) {
     } catch (error) {
         // Task might already be executed or not exist, which is fine
         console.log(`Could not cancel task for game ${gameId}:`, error.message);
+    }
+}
+
+/**
+ * Create a Cloud Task to handle time expiration for the current player
+ * @param {string} gameId - The game ID
+ * @param {number} timeRemainingSeconds - Seconds remaining for the current player
+ * @returns {Promise<string|null>} Task name or null if skipped
+ */
+async function createTimeoutTask(gameId, timeRemainingSeconds) {
+    // Skip in emulator - timeouts won't work properly in local development
+    if (process.env.FUNCTIONS_EMULATOR === 'true') {
+        console.log(`[Emulator] Skipping timeout task creation for game ${gameId}`);
+        return null;
+    }
+
+    // Don't create task if time is unlimited or already expired
+    if (!timeRemainingSeconds || timeRemainingSeconds <= 0) {
+        return null;
+    }
+
+    try {
+        const client = new CloudTasksClient();
+        const project = process.env.GCLOUD_PROJECT;
+        const location = process.env.FUNCTION_REGION || 'us-central1';
+        const queue = 'game-timeouts'; // You'll need to create this queue in GCP
+
+        // Task should execute when time expires
+        const scheduleTime = new Date(Date.now() + timeRemainingSeconds * 1000);
+
+        const queuePath = client.queuePath(project, location, queue);
+
+        // Get the function URL - adjust based on your deployment
+        const functionUrl = `https://${location}-${project}.cloudfunctions.net/handleTimeExpiration`;
+
+        const task = {
+            httpRequest: {
+                httpMethod: 'POST',
+                url: functionUrl,
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: Buffer.from(JSON.stringify({ gameId })).toString('base64'),
+                oidcToken: {
+                    serviceAccountEmail: `${project}@appspot.gserviceaccount.com`,
+                },
+            },
+            scheduleTime: {
+                seconds: Math.floor(scheduleTime.getTime() / 1000),
+            },
+        };
+
+        const [response] = await client.createTask({ parent: queuePath, task });
+        console.log(`Created timeout task for game ${gameId}: ${response.name}`);
+
+        return response.name;
+    } catch (error) {
+        console.error(`Error creating timeout task for game ${gameId}:`, error);
+        // Don't fail the move if task creation fails
+        return null;
     }
 }
 
@@ -1286,7 +1377,12 @@ export const requestGameReset = onCall(getAppCheckConfig(), async (request) => {
             const newGame = new CoralClash();
             const initialGameState = createGameSnapshot(newGame);
 
-            await db.collection('games').doc(gameId).update({
+            // Cancel old timeout task before resetting
+            if (gameData.pendingTimeoutTask) {
+                await cancelPendingTimeoutTask(gameId, gameData.pendingTimeoutTask);
+            }
+
+            const updateData = {
                 gameState: initialGameState,
                 fen: newGame.fen(),
                 moves: [],
@@ -1294,7 +1390,23 @@ export const requestGameReset = onCall(getAppCheckConfig(), async (request) => {
                 resetRequestedBy: null,
                 resetRequestStatus: null,
                 updatedAt: serverTimestamp(),
-            });
+            };
+
+            // Create new timeout task if time control is enabled
+            if (gameData.timeControl?.totalSeconds && gameData.timeRemaining) {
+                const playerTime =
+                    gameData.timeRemaining[gameData.creatorId] || gameData.timeControl.totalSeconds;
+                const taskName = await createTimeoutTask(gameId, playerTime);
+                if (taskName) {
+                    updateData.pendingTimeoutTask = taskName;
+                } else {
+                    updateData.pendingTimeoutTask = null;
+                }
+            } else {
+                updateData.pendingTimeoutTask = null;
+            }
+
+            await db.collection('games').doc(gameId).update(updateData);
 
             return {
                 success: true,
@@ -1383,7 +1495,12 @@ export const respondToResetRequest = onCall(getAppCheckConfig(), async (request)
             const newGame = new CoralClash();
             const initialGameState = createGameSnapshot(newGame);
 
-            await db.collection('games').doc(gameId).update({
+            // Cancel old timeout task before resetting
+            if (gameData.pendingTimeoutTask) {
+                await cancelPendingTimeoutTask(gameId, gameData.pendingTimeoutTask);
+            }
+
+            const updateData = {
                 gameState: initialGameState,
                 fen: newGame.fen(),
                 moves: [],
@@ -1391,7 +1508,24 @@ export const respondToResetRequest = onCall(getAppCheckConfig(), async (request)
                 resetRequestedBy: null,
                 resetRequestStatus: 'approved',
                 updatedAt: serverTimestamp(),
-            });
+            };
+
+            // Create new timeout task if time control is enabled
+            if (gameData.timeControl?.totalSeconds && gameData.timeRemaining) {
+                // Get the current turn player's time (creator always starts after reset)
+                const playerTime =
+                    gameData.timeRemaining[gameData.creatorId] || gameData.timeControl.totalSeconds;
+                const taskName = await createTimeoutTask(gameId, playerTime);
+                if (taskName) {
+                    updateData.pendingTimeoutTask = taskName;
+                } else {
+                    updateData.pendingTimeoutTask = null;
+                }
+            } else {
+                updateData.pendingTimeoutTask = null;
+            }
+
+            await db.collection('games').doc(gameId).update(updateData);
 
             // Send push notification to requester
             const userDoc = await db.collection('users').doc(userId).get();
@@ -1749,12 +1883,32 @@ export const requestUndo = onCall(getAppCheckConfig(), async (request) => {
             // Determine whose turn it is after undo
             const nextTurn = determineCurrentTurn(gameData, newGameState.turn);
 
-            // Update game document
-            await db.collection('games').doc(gameId).update({
+            // Cancel old timeout task before creating new one
+            if (gameData.pendingTimeoutTask) {
+                await cancelPendingTimeoutTask(gameId, gameData.pendingTimeoutTask);
+            }
+
+            const updateData = {
                 gameState: newGameState,
                 currentTurn: nextTurn,
                 updatedAt: serverTimestamp(),
-            });
+            };
+
+            // Create new timeout task for the current player if time control is enabled
+            if (gameData.timeControl?.totalSeconds && gameData.timeRemaining && nextTurn) {
+                const nextPlayerTime = gameData.timeRemaining[nextTurn];
+                if (nextPlayerTime && nextPlayerTime > 0) {
+                    const taskName = await createTimeoutTask(gameId, nextPlayerTime);
+                    if (taskName) {
+                        updateData.pendingTimeoutTask = taskName;
+                    }
+                } else {
+                    updateData.pendingTimeoutTask = null;
+                }
+            }
+
+            // Update game document
+            await db.collection('games').doc(gameId).update(updateData);
 
             return {
                 success: true,
@@ -1865,8 +2019,12 @@ export const respondToUndoRequest = onCall(getAppCheckConfig(), async (request) 
             // Determine whose turn it is after undo
             const nextTurn = determineCurrentTurn(gameData, newGameState.turn);
 
-            // Update game document - clear undo request and update state
-            await db.collection('games').doc(gameId).update({
+            // Cancel old timeout task before creating new one
+            if (gameData.pendingTimeoutTask) {
+                await cancelPendingTimeoutTask(gameId, gameData.pendingTimeoutTask);
+            }
+
+            const updateData = {
                 gameState: newGameState,
                 currentTurn: nextTurn,
                 undoRequestedBy: null,
@@ -1874,7 +2032,23 @@ export const respondToUndoRequest = onCall(getAppCheckConfig(), async (request) 
                 undoRequestAtMoveNumber: null,
                 undoRequestStatus: null,
                 updatedAt: serverTimestamp(),
-            });
+            };
+
+            // Create new timeout task for the current player if time control is enabled
+            if (gameData.timeControl?.totalSeconds && gameData.timeRemaining && nextTurn) {
+                const nextPlayerTime = gameData.timeRemaining[nextTurn];
+                if (nextPlayerTime && nextPlayerTime > 0) {
+                    const taskName = await createTimeoutTask(gameId, nextPlayerTime);
+                    if (taskName) {
+                        updateData.pendingTimeoutTask = taskName;
+                    }
+                } else {
+                    updateData.pendingTimeoutTask = null;
+                }
+            }
+
+            // Update game document - clear undo request and update state
+            await db.collection('games').doc(gameId).update(updateData);
 
             // Send notification to requester
             const userDoc = await db.collection('users').doc(userId).get();
