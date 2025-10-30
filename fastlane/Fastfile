@@ -25,6 +25,14 @@ platform :ios do
       )
     end
     
+    # Configure manual code signing (expo prebuild defaults to automatic)
+    update_code_signing_settings(
+      use_automatic_signing: false,
+      path: "./ios/CoralClash.xcodeproj",
+      team_id: "FWV22U8U39",
+      code_sign_identity: "iPhone Distribution"
+    )
+    
     # Sync code signing
     sync_code_signing(
       type: "appstore",

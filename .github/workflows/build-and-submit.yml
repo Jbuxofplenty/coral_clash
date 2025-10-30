@@ -92,14 +92,6 @@ jobs:
       - name: Run Expo Prebuild for iOS
         run: npx expo prebuild --platform ios --clean
 
-      - name: Configure Manual Code Signing
-        run: |
-          # Disable automatic signing and set development team
-          sed -i '' 's/ProvisioningStyle = Automatic;/ProvisioningStyle = Manual;/g' ios/CoralClash.xcodeproj/project.pbxproj
-          sed -i '' 's/CODE_SIGN_STYLE = Automatic;/CODE_SIGN_STYLE = Manual;/g' ios/CoralClash.xcodeproj/project.pbxproj
-          sed -i '' 's/DevelopmentTeam = "";/DevelopmentTeam = FWV22U8U39;/g' ios/CoralClash.xcodeproj/project.pbxproj
-          echo "✅ Configured manual code signing with team FWV22U8U39"
-
       - name: Install CocoaPods
         run: |
           cd ios
