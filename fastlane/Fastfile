@@ -140,6 +140,7 @@ platform :android do
     
     # Upload to Play Store Internal Testing track
     upload_to_play_store(
+      package_name: "com.jbuxofplenty.coralclash",
       track: "internal",
       aab: "./android/app/build/outputs/bundle/release/app-release.aab",
       skip_upload_metadata: true,
@@ -155,6 +156,7 @@ platform :android do
     
     # Upload to Play Store Production track
     upload_to_play_store(
+      package_name: "com.jbuxofplenty.coralclash",
       track: "production",
       aab: "./android/app/build/outputs/bundle/release/app-release.aab",
       skip_upload_metadata: true,
