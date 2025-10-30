@@ -67,33 +67,15 @@ jobs:
         env:
           MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
         run: |
-          echo "🔍 Configuring Git authentication for Fastlane Match..."
-          
           # Decode username:token from base64
           decoded=$(echo "$MATCH_GIT_BASIC_AUTHORIZATION" | base64 --decode)
           username=$(echo "$decoded" | cut -d: -f1)
           token=$(echo "$decoded" | cut -d: -f2)
           
-          echo "✅ Credentials decoded for user: $username"
-          
           # Configure git to use token authentication for GitHub
           git config --global url."https://${username}:${token}@github.com/".insteadOf "https://github.com/"
           
-          echo "✅ Git configured to use token authentication"
-          
-          # Test it works
-          temp_dir=$(mktemp -d)
-          echo "Testing clone..."
-          
-          if git clone https://github.com/Jbuxofplenty/fastlane_match.git "$temp_dir" 2>&1; then
-            echo "✅ Successfully authenticated with Match repository"
-            rm -rf "$temp_dir"
-          else
-            echo "❌ Authentication test failed - check your token"
-            echo "Token may be expired or doesn't have 'repo' scope"
-            rm -rf "$temp_dir"
-            exit 1
-          fi
+          echo "✅ Git configured for Fastlane Match"
 
       - name: Install dependencies
         run: yarn install --frozen-lockfile
