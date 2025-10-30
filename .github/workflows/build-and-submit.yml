@@ -149,6 +149,11 @@ jobs:
       - name: Run Expo Prebuild for Android
         run: npx expo prebuild --platform android --clean
 
+      - name: Update Gradle Memory Settings
+        run: |
+          # Update JVM memory settings for large builds
+          sed -i 's/org.gradle.jvmargs=.*/org.gradle.jvmargs=-Xmx4096m -XX:MaxMetaspaceSize=1024m/' android/gradle.properties
+
       - name: Setup Android Keystore
         run: |
           echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/app/release.keystore
