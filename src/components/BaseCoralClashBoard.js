@@ -577,21 +577,44 @@ const BaseCoralClashBoard = ({
             return { message: 'Stalemate! 🤝', type: 'draw' };
         }
 
+        // Check for threefold repetition explicitly before other draw conditions
+        if (coralClash.isThreefoldRepetition()) {
+            return { message: 'Draw by Repetition! 🤝', type: 'draw' };
+        }
+
+        // Check for insufficient material
+        if (coralClash.isInsufficientMaterial()) {
+            return { message: 'Draw - Insufficient Material! 🤝', type: 'draw' };
+        }
+
+        // Check for coral tie (must check _shouldTriggerCoralScoring directly, not isDraw)
+        const shouldTriggerCoral =
+            coralClash.getCoralRemaining('w') === 0 ||
+            coralClash.getCoralRemaining('b') === 0 ||
+            // Check if crab/octopus reached back row
+            (() => {
+                const board = coralClash.board();
+                // Check rank 8 (index 0) for white pieces
+                const whiteReachedEnd = board[0].some(
+                    (sq) => sq && sq.color === 'w' && (sq.type === 'c' || sq.type === 'o'),
+                );
+                // Check rank 1 (index 7) for black pieces
+                const blackReachedEnd = board[7].some(
+                    (sq) => sq && sq.color === 'b' && (sq.type === 'c' || sq.type === 'o'),
+                );
+                return whiteReachedEnd || blackReachedEnd;
+            })();
+
+        if (shouldTriggerCoral && coralWinner === null) {
+            const score = coralClash.getCoralAreaControl('w');
+            return {
+                message: `Draw - Coral Tie! 🤝🪸\n${score} - ${score}`,
+                type: 'draw',
+            };
+        }
+
+        // Generic draw (50-move rule)
         if (coralClash.isDraw()) {
-            // Check if this is specifically a coral tie
-            const coralScoringTriggered =
-                coralClash.getCoralRemaining('w') === 0 ||
-                coralClash.getCoralRemaining('b') === 0 ||
-                coralClash.isGameOver();
-
-            if (coralScoringTriggered && coralWinner === null && coralClash.isGameOver()) {
-                const score = coralClash.getCoralAreaControl('w');
-                return {
-                    message: `Draw - Coral Tie! 🤝🪸\n${score} - ${score}`,
-                    type: 'draw',
-                };
-            }
-
             return { message: 'Draw! 🤝', type: 'draw' };
         }
 
