@@ -138,20 +138,7 @@ platform :android do
     UI.message("📱 Latest Play Store version code: #{latest_version_code}")
     UI.message("📱 New version code: #{new_version_code}")
     
-    # Update versionCode in build.gradle
-    gradle_file = "./android/app/build.gradle"
-    gradle_content = File.read(gradle_file)
-    
-    # Replace versionCode line
-    updated_content = gradle_content.gsub(
-      /versionCode\s+\d+/,
-      "versionCode #{new_version_code}"
-    )
-    
-    File.write(gradle_file, updated_content)
-    UI.success("✅ Updated versionCode to #{new_version_code}")
-    
-    # Build the app
+    # Build the app with version code as Gradle property (no file modification needed!)
     gradle(
       project_dir: "./android",
       task: "bundle",
@@ -160,7 +147,8 @@ platform :android do
         "android.injected.signing.store.file" => ENV["ANDROID_KEYSTORE_PATH"],
         "android.injected.signing.store.password" => ENV["ANDROID_KEYSTORE_PASSWORD"],
         "android.injected.signing.key.alias" => ENV["ANDROID_KEY_ALIAS"],
-        "android.injected.signing.key.password" => ENV["ANDROID_KEY_PASSWORD"]
+        "android.injected.signing.key.password" => ENV["ANDROID_KEY_PASSWORD"],
+        "versionCode" => new_version_code.to_s
       }
     )
   end

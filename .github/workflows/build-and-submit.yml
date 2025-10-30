@@ -161,6 +161,12 @@ jobs:
       - name: Run Expo Prebuild for Android
         run: npx expo prebuild --platform android --clean
 
+      - name: Configure Dynamic Version Code
+        run: |
+          # Update build.gradle to read versionCode from Gradle property
+          sed -i 's/versionCode [0-9]*/versionCode project.hasProperty("versionCode") ? project.property("versionCode").toInteger() : 1/' android/app/build.gradle
+          echo "✅ Configured dynamic versionCode in build.gradle"
+
       - name: Update Gradle Memory Settings
         run: |
           # Update JVM memory settings for large builds
