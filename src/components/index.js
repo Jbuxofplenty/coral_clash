@@ -8,6 +8,7 @@ import Icon from './Icon';
 import LoadingScreen from './LoadingScreen';
 import MatchmakingCard from './MatchmakingCard';
 import PlayerStatusBar from './PlayerStatusBar';
+import PlayWithFriendCard from './PlayWithFriendCard';
 import Product from './Product';
 import TimeControlModal from './TimeControlModal';
 
@@ -22,6 +23,7 @@ export {
     LoadingScreen,
     MatchmakingCard,
     PlayerStatusBar,
+    PlayWithFriendCard,
     Product,
     TimeControlModal,
 };

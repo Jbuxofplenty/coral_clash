@@ -1,5 +1,5 @@
-import React from 'react';
-import { Image, View } from 'react-native';
+import React, { useState } from 'react';
+import { ActivityIndicator, Image, View } from 'react-native';
 import { moderateScale, scale } from 'react-native-size-matters';
 import { DEFAULT_AVATARS, DEFAULT_AVATAR_NAME } from '../constants/avatars';
 import { useAuth, useTheme } from '../contexts';
@@ -25,6 +25,7 @@ export default function Avatar({
 }) {
     const { user } = useAuth();
     const { colors } = useTheme();
+    const [imageLoaded, setImageLoaded] = useState(false);
 
     // Get avatar key from props or user data (only if not computer)
     // If avatarKey is explicitly undefined (not passed), use current user's avatar
@@ -72,11 +73,22 @@ export default function Avatar({
                     color={colors.PRIMARY}
                 />
             ) : (
-                <Image
-                    source={avatarSource}
-                    style={[avatarImageStyle, imageStyle]}
-                    resizeMode='contain'
-                />
+                <>
+                    {!imageLoaded && (
+                        <ActivityIndicator
+                            size='small'
+                            color={colors.PRIMARY}
+                            style={{ position: 'absolute' }}
+                        />
+                    )}
+                    <Image
+                        source={avatarSource}
+                        style={[avatarImageStyle, imageStyle, { opacity: imageLoaded ? 1 : 0 }]}
+                        resizeMode='contain'
+                        fadeDuration={0}
+                        onLoadEnd={() => setImageLoaded(true)}
+                    />
+                </>
             )}
         </View>
     );

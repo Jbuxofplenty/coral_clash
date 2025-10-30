@@ -8,12 +8,14 @@ import {
     GameHistoryCard,
     GameModeCard,
     MatchmakingCard,
+    PlayWithFriendCard,
     TimeControlModal,
 } from '../components/';
 import FixtureLoaderModal from '../components/FixtureLoaderModal';
 import { collection, db, onSnapshot, query, where } from '../config/firebase';
 import { useAlert, useAuth, useTheme } from '../contexts';
 import { useFirebaseFunctions, useGame, useMatchmaking } from '../hooks';
+import { useFriends } from '../hooks/useFriends';
 
 const { width, height } = Dimensions.get('screen');
 
@@ -28,8 +30,9 @@ export default function Home({ navigation }) {
     const [gameHistory, setGameHistory] = useState([]);
     const [historyLoading, setHistoryLoading] = useState(true);
     const [timeControlModalVisible, setTimeControlModalVisible] = useState(false);
-    const [pendingGameAction, setPendingGameAction] = useState(null); // 'computer' or 'matchmaking'
+    const [pendingGameAction, setPendingGameAction] = useState(null); // 'computer', 'matchmaking', or 'friend'
     const [creatingGame, setCreatingGame] = useState(false); // Track when a game is being created
+    const [selectedFriend, setSelectedFriend] = useState(null); // Store selected friend for game invite
 
     // Wrap callbacks in useCallback to prevent infinite re-renders
     const handleGameAccepted = useCallback(
@@ -68,6 +71,8 @@ export default function Home({ navigation }) {
     // useGame hook with navigation callbacks for real-time game events
     const {
         startComputerGame,
+        sendGameRequest,
+        sendingGameRequest,
         activeGames,
         loading: activeGamesLoading,
         acceptGameInvite,
@@ -75,6 +80,9 @@ export default function Home({ navigation }) {
     } = useGame({
         onGameAccepted: handleGameAccepted,
     });
+
+    // useFriends hook to get friends list
+    const { friends, loading: friendsLoading } = useFriends();
 
     // useMatchmaking hook for random matchmaking
     const {
@@ -353,6 +361,12 @@ export default function Home({ navigation }) {
         return { success: true };
     };
 
+    const handleSelectFriend = (friendId, friendName) => {
+        setSelectedFriend({ id: friendId, name: friendName });
+        setPendingGameAction('friend');
+        setTimeControlModalVisible(true);
+    };
+
     const handleTimeControlSelect = async (timeControl) => {
         setTimeControlModalVisible(false);
         setCreatingGame(true);
@@ -382,6 +396,10 @@ export default function Home({ navigation }) {
                 if (result && !result.success && result.error) {
                     showAlert('Cannot Join Matchmaking', result.error);
                 }
+            } else if (pendingGameAction === 'friend' && selectedFriend) {
+                await sendGameRequest(selectedFriend.id, selectedFriend.name, timeControl);
+                // Game request sent successfully via useGame hook
+                setSelectedFriend(null);
             }
         } catch (error) {
             console.error(`Failed to start ${pendingGameAction}:`, error);
@@ -409,6 +427,7 @@ export default function Home({ navigation }) {
     const handleTimeControlCancel = () => {
         setTimeControlModalVisible(false);
         setPendingGameAction(null);
+        setSelectedFriend(null);
     };
 
     const handleOpenFixtureLoader = () => {
@@ -457,13 +476,22 @@ export default function Home({ navigation }) {
 
                 {/* Game Mode Cards */}
                 {user && (
-                    <MatchmakingCard
-                        searching={searching}
-                        queueCount={queueCount}
-                        loading={matchmakingLoading}
-                        onStartSearch={handleStartMatchmaking}
-                        onStopSearch={stopSearching}
-                    />
+                    <>
+                        <MatchmakingCard
+                            searching={searching}
+                            queueCount={queueCount}
+                            loading={matchmakingLoading}
+                            onStartSearch={handleStartMatchmaking}
+                            onStopSearch={stopSearching}
+                        />
+
+                        <PlayWithFriendCard
+                            friends={friends}
+                            loading={friendsLoading}
+                            disabled={creatingGame || searching || sendingGameRequest}
+                            onSelectFriend={handleSelectFriend}
+                        />
+                    </>
                 )}
 
                 <GameModeCard
