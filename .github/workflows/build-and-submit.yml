@@ -81,6 +81,7 @@ jobs:
       - name: Verify Match Git Authentication
         env:
           MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
+          GIT_TERMINAL_PROMPT: 0
         run: |
           echo "🔍 Testing Match Git authentication..."
           
@@ -106,12 +107,15 @@ jobs:
             exit 1
           fi
           
+          # Configure git to use the authorization header globally for this session
+          git config --global http.https://github.com/.extraheader "Authorization: Basic $MATCH_GIT_BASIC_AUTHORIZATION"
+          
           # Test clone
           temp_dir=$(mktemp -d)
-          if git clone -c http.extraheader="Authorization: Basic $MATCH_GIT_BASIC_AUTHORIZATION" \
-              https://github.com/Jbuxofplenty/fastlane_match.git "$temp_dir" 2>&1; then
+          if GIT_TERMINAL_PROMPT=0 git clone https://github.com/Jbuxofplenty/fastlane_match.git "$temp_dir" 2>&1; then
             echo "✅ Successfully authenticated with Match repository"
             rm -rf "$temp_dir"
+            echo "✅ Git authentication is properly configured"
           else
             echo "❌ Failed to clone Match repository"
             echo "Please verify:"
@@ -135,8 +139,12 @@ jobs:
           MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
           APP_STORE_CONNECT_API_KEY_PATH: ${{ env.APP_STORE_CONNECT_API_KEY_PATH }}
           FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ${{ secrets.APPLE_ID }}
+          GIT_TERMINAL_PROMPT: 0
           CI: true
-        run: bundle exec fastlane ios beta
+        run: |
+          # Configure git for Fastlane Match
+          git config --global http.https://github.com/.extraheader "Authorization: Basic $MATCH_GIT_BASIC_AUTHORIZATION"
+          bundle exec fastlane ios beta
 
       - name: Build and Submit to App Store (Production)
         if: inputs.profile == 'production'
@@ -146,8 +154,12 @@ jobs:
           MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
           APP_STORE_CONNECT_API_KEY_PATH: ${{ env.APP_STORE_CONNECT_API_KEY_PATH }}
           FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ${{ secrets.APPLE_ID }}
+          GIT_TERMINAL_PROMPT: 0
           CI: true
-        run: bundle exec fastlane ios release
+        run: |
+          # Configure git for Fastlane Match
+          git config --global http.https://github.com/.extraheader "Authorization: Basic $MATCH_GIT_BASIC_AUTHORIZATION"
+          bundle exec fastlane ios release
 
       - name: Upload iOS build artifacts
         if: always()
