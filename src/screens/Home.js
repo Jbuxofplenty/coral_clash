@@ -9,6 +9,7 @@ import {
     GameModeCard,
     MatchmakingCard,
     PlayWithFriendCard,
+    SignUpPromptCard,
     TimeControlModal,
 } from '../components/';
 import FixtureLoaderModal from '../components/FixtureLoaderModal';
@@ -506,6 +507,20 @@ export default function Home({ navigation }) {
                 contentContainerStyle={styles.scrollContent}
                 style={styles.scrollView}
             >
+                {/* Sign Up Prompt Card - show at top when user is not logged in */}
+                {!user && <SignUpPromptCard onPress={() => navigation.navigate('Log In')} />}
+
+                {!user && (
+                    <GameModeCard
+                        title='How-To Play'
+                        description='Learn the rules and strategies of Coral Clash'
+                        icon='question-circle'
+                        iconFamily='font-awesome'
+                        onPress={() => navigation.navigate('How-To Play')}
+                        disabled={creatingGame || searching}
+                    />
+                )}
+
                 {/* Active Games Card - show at top if there are games */}
                 {activeGames.length > 0 && (
                     <ActiveGamesCard
@@ -549,17 +564,6 @@ export default function Home({ navigation }) {
                     disabled={creatingGame || searching}
                     loading={creatingGame && pendingGameAction === 'computer'}
                 />
-
-                {!user && (
-                    <GameModeCard
-                        title='How-To Play'
-                        description='Learn the rules and strategies of Coral Clash'
-                        icon='question-circle'
-                        iconFamily='font-awesome'
-                        onPress={() => navigation.navigate('How-To Play')}
-                        disabled={creatingGame || searching}
-                    />
-                )}
 
                 {enableDevFeatures && (
                     <GameModeCard

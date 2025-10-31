@@ -10,6 +10,7 @@ import MatchmakingCard from './MatchmakingCard';
 import PlayerStatusBar from './PlayerStatusBar';
 import PlayWithFriendCard from './PlayWithFriendCard';
 import Product from './Product';
+import SignUpPromptCard from './SignUpPromptCard';
 import TimeControlModal from './TimeControlModal';
 
 export {
@@ -25,5 +26,6 @@ export {
     PlayerStatusBar,
     PlayWithFriendCard,
     Product,
+    SignUpPromptCard,
     TimeControlModal,
 };
