@@ -97,7 +97,16 @@ const BaseCoralClashBoard = ({
         gameData,
         isLoading: _gameActionsLoading,
         isProcessing: isGameActionProcessing,
-    } = useGameActions(coralClash, gameId, () => forceUpdate((n) => n + 1));
+    } = useGameActions(coralClash, gameId, () => {
+        // Clear visible moves when game state updates from Firestore
+        setVisibleMoves([]);
+        setSelectedSquare(null);
+        setWhaleDestination(null);
+        setWhaleOrientationMoves([]);
+        setIsViewingEnemyMoves(false);
+        // Force re-render
+        forceUpdate((n) => n + 1);
+    });
     const [visibleMoves, setVisibleMoves] = useState([]);
     const [selectedSquare, setSelectedSquare] = useState(null);
     const [whaleDestination, setWhaleDestination] = useState(null);
@@ -147,13 +156,15 @@ const BaseCoralClashBoard = ({
             try {
                 restoreGameFromSnapshot(coralClash, gameState);
                 setGameStateLoaded(true);
+                // Clear visible moves when loading game state
+                clearVisibleMoves();
                 forceUpdate((n) => n + 1);
             } catch (error) {
                 console.error(`Failed to load game state on ${Platform.OS}:`, error);
                 showAlert('Error', 'Failed to load game state');
             }
         }
-    }, [gameState, gameStateLoaded, fixture, coralClash, width, showAlert]);
+    }, [gameState, gameStateLoaded, fixture, coralClash, width, showAlert, clearVisibleMoves]);
 
     // Load fixture if provided (for dev mode scenarios)
     useEffect(() => {
@@ -161,13 +172,15 @@ const BaseCoralClashBoard = ({
             try {
                 applyFixture(coralClash, fixture);
                 setFixtureLoaded(true);
+                // Clear visible moves when loading fixture
+                clearVisibleMoves();
                 forceUpdate((n) => n + 1); // Force re-render to show coral and turn state
             } catch (error) {
                 console.error('Failed to load fixture:', error);
                 showAlert('Error', 'Failed to load game state');
             }
         }
-    }, [fixture, fixtureLoaded, coralClash, showAlert]);
+    }, [fixture, fixtureLoaded, coralClash, showAlert, clearVisibleMoves]);
 
     // Firestore listener is now managed in useGameActions hook
     // No need for duplicate listener here
@@ -390,6 +403,9 @@ const BaseCoralClashBoard = ({
     const handleHistoryBack = () => {
         if (!canGoBack) return;
 
+        // Clear visible moves when navigating history
+        clearVisibleMoves();
+
         if (historyIndex === null) {
             // Start viewing history from one move back
             // If length is 1, go to -1 (starting position)
@@ -399,17 +415,13 @@ const BaseCoralClashBoard = ({
             // Go back one more move (can go to -1 for starting position)
             setHistoryIndex(historyIndex - 1);
         }
-
-        // Clear selection state
-        setVisibleMoves([]);
-        setSelectedSquare(null);
-        setWhaleDestination(null);
-        setWhaleOrientationMoves([]);
-        setIsViewingEnemyMoves(false);
     };
 
     const handleHistoryForward = () => {
         if (!canGoForward) return;
+
+        // Clear visible moves when navigating history
+        clearVisibleMoves();
 
         if (historyIndex >= currentHistoryLength - 2) {
             // We're at or near the end, go to current state
@@ -418,13 +430,6 @@ const BaseCoralClashBoard = ({
             // Go forward one move
             setHistoryIndex(historyIndex + 1);
         }
-
-        // Clear selection state
-        setVisibleMoves([]);
-        setSelectedSquare(null);
-        setWhaleDestination(null);
-        setWhaleOrientationMoves([]);
-        setIsViewingEnemyMoves(false);
     };
 
     // Get game status message with type for unified banner styling
@@ -742,6 +747,9 @@ const BaseCoralClashBoard = ({
 
     // Execute a move - for online games, use backend-first; for offline/local, apply locally
     const executeMove = async (moveParams) => {
+        // Clear visible moves immediately when making a move
+        clearVisibleMoves();
+
         // Online game: backend-first approach
         if (isOnlineGame) {
             const result = await makeMoveAPI(moveParams);
