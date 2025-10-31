@@ -6,6 +6,8 @@ import Icon from './Icon';
 
 // Available fixtures - keep this list updated when adding new fixtures
 const FIXTURES = [
+    { name: 'whale-rotation', label: 'Whale Rotation Bug Fix' },
+    { name: 'whale-double-jeopardy', label: 'Whale Double Jeopardy' },
     { name: 'whale-move-diagonally', label: 'Whale Diagonal Movement' },
     { name: 'whale-move-diagonally-2', label: 'Whale Diagonal #2' },
     { name: 'octopus-check', label: 'Octopus Check (Debug)' },
@@ -20,19 +22,37 @@ const FIXTURES = [
 
 const FixtureLoaderModal = ({ visible, onClose, onSelectFixture }) => {
     const [selectedFixture, setSelectedFixture] = useState(null);
+    const [selectedMode, setSelectedMode] = useState('computer'); // Default to computer mode
     const { showAlert } = useAlert();
+
+    const gameModes = [
+        { value: 'computer', label: 'vs Computer', icon: 'computer' },
+        { value: 'passandplay', label: 'Pass & Play', icon: 'people' },
+    ];
 
     const handleSelectFixture = (fixtureName) => {
         setSelectedFixture(fixtureName);
+    };
 
-        // Load the fixture and navigate
+    const handleCancelSelection = () => {
+        setSelectedFixture(null);
+        setSelectedMode('computer');
+    };
+
+    const handleLoadFixture = () => {
+        if (!selectedFixture) return;
+
+        // Load the fixture and navigate with selected mode
         try {
-            const fixture = FIXTURE_FILES[fixtureName];
+            const fixture = FIXTURE_FILES[selectedFixture];
             if (!fixture) {
-                throw new Error(`Fixture not found: ${fixtureName}`);
+                throw new Error(`Fixture not found: ${selectedFixture}`);
             }
-            onSelectFixture(fixture, fixtureName);
+            onSelectFixture(fixture, selectedFixture, selectedMode);
             onClose();
+            // Reset selections for next time
+            setSelectedFixture(null);
+            setSelectedMode('computer');
         } catch (error) {
             showAlert('Error', `Failed to load fixture: ${error.message}`);
         }
@@ -83,10 +103,65 @@ const FixtureLoaderModal = ({ visible, onClose, onSelectFixture }) => {
                         ))}
                     </ScrollView>
 
+                    {selectedFixture && (
+                        <View style={styles.modeSelector}>
+                            <View style={styles.modeSelectorHeader}>
+                                <Text style={styles.modeSelectorTitle}>Game Mode:</Text>
+                                <TouchableOpacity
+                                    onPress={handleCancelSelection}
+                                    style={styles.cancelButton}
+                                >
+                                    <Icon
+                                        name='arrow-back'
+                                        family='MaterialIcons'
+                                        size={20}
+                                        color='#666'
+                                    />
+                                    <Text style={styles.cancelButtonText}>Back</Text>
+                                </TouchableOpacity>
+                            </View>
+                            <View style={styles.modeOptions}>
+                                {gameModes.map((mode) => (
+                                    <TouchableOpacity
+                                        key={mode.value}
+                                        style={[
+                                            styles.modeButton,
+                                            selectedMode === mode.value &&
+                                                styles.modeButtonSelected,
+                                        ]}
+                                        onPress={() => setSelectedMode(mode.value)}
+                                    >
+                                        <Icon
+                                            name={mode.icon}
+                                            family='MaterialIcons'
+                                            size={20}
+                                            color={selectedMode === mode.value ? '#fff' : '#1e3c72'}
+                                        />
+                                        <Text
+                                            style={[
+                                                styles.modeButtonText,
+                                                selectedMode === mode.value &&
+                                                    styles.modeButtonTextSelected,
+                                            ]}
+                                        >
+                                            {mode.label}
+                                        </Text>
+                                    </TouchableOpacity>
+                                ))}
+                            </View>
+                        </View>
+                    )}
+
                     <View style={styles.modalFooter}>
-                        <Text style={styles.footerText}>
-                            💡 Fixtures are from shared/game/__fixtures__/
-                        </Text>
+                        {selectedFixture ? (
+                            <TouchableOpacity style={styles.loadButton} onPress={handleLoadFixture}>
+                                <Text style={styles.loadButtonText}>Load Game</Text>
+                            </TouchableOpacity>
+                        ) : (
+                            <Text style={styles.footerText}>
+                                💡 Fixtures are from shared/game/__fixtures__/
+                            </Text>
+                        )}
                     </View>
                 </View>
             </View>
@@ -172,6 +247,75 @@ const styles = StyleSheet.create({
         fontSize: 12,
         color: '#666',
         textAlign: 'center',
+    },
+    modeSelector: {
+        padding: 16,
+        borderTopWidth: 1,
+        borderTopColor: '#e0e0e0',
+        backgroundColor: '#f5f5f5',
+    },
+    modeSelectorHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 12,
+    },
+    modeSelectorTitle: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#333',
+    },
+    cancelButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 4,
+        paddingVertical: 4,
+        paddingHorizontal: 8,
+    },
+    cancelButtonText: {
+        fontSize: 14,
+        color: '#666',
+        fontWeight: '500',
+    },
+    modeOptions: {
+        flexDirection: 'row',
+        gap: 12,
+    },
+    modeButton: {
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 12,
+        backgroundColor: '#fff',
+        borderRadius: 8,
+        borderWidth: 2,
+        borderColor: '#e0e0e0',
+        gap: 8,
+    },
+    modeButtonSelected: {
+        backgroundColor: '#1e3c72',
+        borderColor: '#1e3c72',
+    },
+    modeButtonText: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#1e3c72',
+    },
+    modeButtonTextSelected: {
+        color: '#fff',
+    },
+    loadButton: {
+        backgroundColor: '#1e3c72',
+        paddingVertical: 14,
+        paddingHorizontal: 24,
+        borderRadius: 8,
+        alignItems: 'center',
+    },
+    loadButtonText: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: '600',
     },
 });
 

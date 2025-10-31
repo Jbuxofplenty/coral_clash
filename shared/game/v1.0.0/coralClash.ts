@@ -2024,13 +2024,24 @@ export class CoralClash {
                     moveObj = exactMatch || null;
                 } else if (candidates.length > 1 && 'coralRemovedSquares' in move) {
                     // Whale-specific: match specific squares where coral is removed
+                    // ALSO check whaleSecondSquare if this is a whale move!
                     const exactMatch = candidates.find((m) => {
                         const candidateSquares = m.coralRemovedSquares || [];
                         const requestedSquares = move.coralRemovedSquares || [];
                         if (candidateSquares.length !== requestedSquares.length) return false;
                         const candidateAlg = candidateSquares.map((sq) => algebraic(sq)).sort();
                         const requestedAlg = requestedSquares.sort();
-                        return JSON.stringify(candidateAlg) === JSON.stringify(requestedAlg);
+                        const coralMatches =
+                            JSON.stringify(candidateAlg) === JSON.stringify(requestedAlg);
+
+                        // For whale moves, ALSO check whaleSecondSquare
+                        if (m.piece === WHALE && 'whaleSecondSquare' in move) {
+                            const whaleMatches =
+                                algebraic(m.whaleOtherSquare!) === move.whaleSecondSquare;
+                            return coralMatches && whaleMatches;
+                        }
+
+                        return coralMatches;
                     });
                     // IMPORTANT: If user explicitly specified coral removal, we MUST use exact match
                     moveObj = exactMatch || null;

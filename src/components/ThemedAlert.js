@@ -21,7 +21,14 @@ const { width } = Dimensions.get('window');
  * const { showAlert } = useAlert();
  * showAlert('Title', 'Message', [{ text: 'OK', onPress: () => {} }]);
  */
-export default function ThemedAlert({ visible, title, message, buttons = [], onDismiss }) {
+export default function ThemedAlert({
+    visible,
+    title,
+    message,
+    buttons = [],
+    onDismiss,
+    vertical = false,
+}) {
     const { colors, isDarkMode } = useTheme();
     const [isProcessing, setIsProcessing] = useState(false);
 
@@ -100,7 +107,9 @@ export default function ThemedAlert({ visible, title, message, buttons = [], onD
                     )}
 
                     {/* Buttons */}
-                    <View style={styles.buttonContainer}>
+                    <View
+                        style={[styles.buttonContainer, vertical && styles.buttonContainerVertical]}
+                    >
                         {buttons.map((button, index) => {
                             const isDestructive = button.style === 'destructive';
                             const isCancel = button.style === 'cancel';
@@ -111,7 +120,10 @@ export default function ThemedAlert({ visible, title, message, buttons = [], onD
                                     key={index}
                                     style={[
                                         styles.button,
-                                        !isLast && styles.buttonBorder,
+                                        vertical && styles.buttonVertical,
+                                        vertical
+                                            ? !isLast && styles.buttonBorderBottom
+                                            : !isLast && styles.buttonBorderRight,
                                         {
                                             borderColor: colors.BORDER,
                                             opacity: isProcessing ? 0.6 : 1,
@@ -198,14 +210,25 @@ const styles = StyleSheet.create({
         borderTopWidth: StyleSheet.hairlineWidth,
         borderTopColor: 'rgba(60, 60, 67, 0.36)',
     },
+    buttonContainerVertical: {
+        flexDirection: 'column',
+    },
     button: {
         flex: 1,
         paddingVertical: 12,
         alignItems: 'center',
         justifyContent: 'center',
     },
-    buttonBorder: {
+    buttonVertical: {
+        flex: 0,
+        width: '100%',
+    },
+    buttonBorderRight: {
         borderRightWidth: StyleSheet.hairlineWidth,
+    },
+    buttonBorderBottom: {
+        borderBottomWidth: StyleSheet.hairlineWidth,
+        borderBottomColor: 'rgba(60, 60, 67, 0.36)',
     },
     buttonText: {
         fontSize: 17,

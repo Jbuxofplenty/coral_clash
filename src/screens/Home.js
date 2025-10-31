@@ -477,11 +477,12 @@ export default function Home({ navigation }) {
         setFixtureModalVisible(true);
     };
 
-    const handleSelectFixture = (fixture, fixtureName) => {
-        // Navigate to game with the fixture
+    const handleSelectFixture = (fixture, fixtureName, gameMode) => {
+        // Navigate to game with the fixture and selected game mode
         navigation.navigate('Game', {
             fixture: fixture,
             fixtureName: fixtureName,
+            opponentType: gameMode, // Pass the selected mode ('computer' or 'passandplay')
         });
     };
 

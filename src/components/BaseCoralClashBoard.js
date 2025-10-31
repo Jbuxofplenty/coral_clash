@@ -645,6 +645,9 @@ const BaseCoralClashBoard = ({
           : true; // For pass-and-play (userColor is null) or if coralClash not ready, both players can move
 
     const handleUndo = () => {
+        // Clear visible moves immediately to prevent showing invalidated moves
+        clearVisibleMoves();
+
         if (onUndo) {
             onUndo(coralClash);
             // Exit history view when undo is performed
@@ -652,11 +655,6 @@ const BaseCoralClashBoard = ({
             // Force re-render to show updated board after undo
             forceUpdate((n) => n + 1);
         }
-        setVisibleMoves([]);
-        setSelectedSquare(null);
-        setWhaleDestination(null);
-        setWhaleOrientationMoves([]);
-        setIsViewingEnemyMoves(false);
     };
 
     const handleResign = async () => {
@@ -680,11 +678,7 @@ const BaseCoralClashBoard = ({
                 onPress: async () => {
                     const success = await resignAPI();
                     if (success) {
-                        setVisibleMoves([]);
-                        setSelectedSquare(null);
-                        setWhaleDestination(null);
-                        setWhaleOrientationMoves([]);
-                        setIsViewingEnemyMoves(false);
+                        clearVisibleMoves();
 
                         // Call optional resign callback for cleanup (e.g., pass-and-play storage)
                         if (onResign) {
@@ -697,6 +691,15 @@ const BaseCoralClashBoard = ({
     };
 
     // Show turn notification after a move
+    // Helper function to clear visible moves and selection state
+    const clearVisibleMoves = useCallback(() => {
+        setVisibleMoves([]);
+        setSelectedSquare(null);
+        setWhaleDestination(null);
+        setWhaleOrientationMoves([]);
+        setIsViewingEnemyMoves(false);
+    }, []);
+
     const showTurnNotification = useCallback(() => {
         if (!coralClash || typeof coralClash.turn !== 'function') {
             console.warn('CoralClash instance not ready for turn notification');
@@ -797,6 +800,26 @@ const BaseCoralClashBoard = ({
             setWhaleOrientationMoves([]);
             setIsViewingEnemyMoves(false);
             return;
+        }
+
+        // If whale destination is set and user clicks on a square, treat it as orientation selection
+        if (whaleDestination) {
+            // Check if this square is one of the orientation options by looking in whaleOrientationMoves
+            // Find the original move where to === whaleDestination and whaleSecondSquare === clicked square
+            const orientationMove = whaleOrientationMoves.find(
+                (m) => m.to === whaleDestination && m.whaleSecondSquare === square,
+            );
+
+            if (orientationMove) {
+                // Treat this as a move selection, not a piece selection
+                // Pass a move object that handleSelectMove expects: with 'to' set to the clicked square
+                // so that move.to in handleSelectMove matches the whaleSecondSquare we want
+                handleSelectMove({
+                    ...orientationMove,
+                    to: square, // This is the key: move.to will be the whaleSecondSquare for the lookup
+                });
+                return;
+            }
         }
 
         const piece = coralClash.get(square);
@@ -929,11 +952,11 @@ const BaseCoralClashBoard = ({
                     const alertButtons = coralOptions.map((option) => {
                         let label = '';
                         if (option.squares.length === 0) {
-                            label = "Don't remove coral";
+                            label = "Don't remove";
                         } else if (option.squares.length === 1) {
-                            label = `Remove coral from ${option.squares[0]}`;
+                            label = `Remove from ${option.squares[0]}`;
                         } else {
-                            label = `Remove coral from both (${option.squares.join(', ')})`;
+                            label = `Remove from both (${option.squares.join(', ')})`;
                         }
 
                         return {
@@ -958,9 +981,15 @@ const BaseCoralClashBoard = ({
                         'Hunter Effect (Whale)',
                         'Choose coral removal option:',
                         alertButtons,
+                        true, // vertical layout
                     );
                     return;
                 } else {
+                    console.log('[DEBUG] Single move - executing directly:', {
+                        from: selectedMove.from,
+                        to: selectedMove.to,
+                        whaleSecondSquare: selectedMove.whaleSecondSquare,
+                    });
                     await executeMove({
                         from: selectedMove.from,
                         to: selectedMove.to,
@@ -1300,7 +1329,8 @@ const BaseCoralClashBoard = ({
                 </View>
 
                 {/* Game Request Banner (Undo/Reset) - Only for PvP games */}
-                {renderGameRequestBanner && renderGameRequestBanner({ coralClash })}
+                {renderGameRequestBanner &&
+                    renderGameRequestBanner({ coralClash, clearVisibleMoves })}
 
                 {/* Status Banners - Priority: notificationStatus > turnNotification > gameStatus */}
                 {notificationStatus ? (
@@ -1337,6 +1367,7 @@ const BaseCoralClashBoard = ({
                     openMenu,
                     canUndo,
                     handleUndo,
+                    clearVisibleMoves,
                     colors,
                     // History navigation
                     canGoBack,

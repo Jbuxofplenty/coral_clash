@@ -123,7 +123,7 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
     }, [gameId, user]);
 
     // Handler for undo request from control bar
-    const handleUndoRequest = async () => {
+    const handleUndoRequest = async (clearVisibleMoves) => {
         showAlert(
             'Request Undo',
             `Request to undo the last move? ${liveOpponentData?.displayName || 'Your opponent'} will need to approve.`,
@@ -136,12 +136,13 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
                     text: 'Request',
                     onPress: async () => {
                         try {
+                            // Clear visible moves immediately when undo is requested
+                            // since board state will be updated and shown moves could be invalidated
+                            if (clearVisibleMoves) {
+                                clearVisibleMoves();
+                            }
                             // Undo just the last move (the player's own move)
                             await requestUndo({ gameId, moveCount: 1 });
-                            showAlert(
-                                'Request Sent',
-                                'Your opponent will be notified of your undo request.',
-                            );
                         } catch (error) {
                             console.error('Error requesting undo:', error);
                             showAlert('Error', 'Failed to send undo request. Please try again.');
@@ -153,8 +154,13 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
     };
 
     // Handler for responding to undo request
-    const handleUndoResponse = async (approve) => {
+    const handleUndoResponse = async (approve, clearVisibleMoves) => {
         try {
+            // Clear visible moves immediately when responding to undo
+            // since board state may be updated and shown moves could be invalidated
+            if (clearVisibleMoves) {
+                clearVisibleMoves();
+            }
             await respondToUndoRequest({ gameId, approve });
             // No need to show alert - the banner will disappear automatically via Firestore listener
         } catch (error) {
@@ -199,6 +205,7 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
     // PvP-specific: Render control buttons (menu, undo, and history navigation)
     const renderControls = ({
         openMenu,
+        clearVisibleMoves,
         colors,
         canGoBack,
         canGoForward,
@@ -227,7 +234,7 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
 
                 <TouchableOpacity
                     style={baseStyles.controlButton}
-                    onPress={handleUndoRequest}
+                    onPress={() => handleUndoRequest(clearVisibleMoves)}
                     disabled={!canRequestUndo}
                     activeOpacity={0.7}
                 >
@@ -299,10 +306,6 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
                         onPress: async () => {
                             try {
                                 await requestGameReset({ gameId });
-                                showAlert(
-                                    'Request Sent',
-                                    'Your opponent will be notified of your reset request.',
-                                );
                             } catch (error) {
                                 console.error('Error requesting reset:', error);
                                 showAlert(
@@ -405,7 +408,7 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
     };
 
     // Render game request banner (undo or reset) - placed below bottom player status bar
-    const renderGameRequestBanner = ({ coralClash: _coralClash }) => {
+    const renderGameRequestBanner = ({ coralClash: _coralClash, clearVisibleMoves }) => {
         // Priority: Show undo request first, then reset request
         if (undoRequestData) {
             // Calculate dynamic move count based on current game state using shared logic
@@ -489,7 +492,7 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
                         </Text>
                         <View style={{ flexDirection: 'row' }}>
                             <TouchableOpacity
-                                onPress={() => handleUndoResponse(false)}
+                                onPress={() => handleUndoResponse(false, clearVisibleMoves)}
                                 style={{
                                     width: 40,
                                     height: 40,
@@ -507,7 +510,7 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
                                 />
                             </TouchableOpacity>
                             <TouchableOpacity
-                                onPress={() => handleUndoResponse(true)}
+                                onPress={() => handleUndoResponse(true, clearVisibleMoves)}
                                 style={{
                                     width: 40,
                                     height: 40,

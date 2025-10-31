@@ -1527,13 +1527,19 @@ export const respondToResetRequest = onCall(getAppCheckConfig(), async (request)
 
             await db.collection('games').doc(gameId).update(updateData);
 
-            // Send push notification to requester
+            // Send push notification to requester (person who asked for reset)
             const userDoc = await db.collection('users').doc(userId).get();
             const userData = userDoc.exists ? userDoc.data() : {};
             const userName = formatDisplayName(userData.displayName, userData.discriminator);
 
             await sendResetApprovedNotification(requesterId, userId, userName, gameId).catch(
                 (error) => console.error('Error sending reset approved notification:', error),
+            );
+
+            // Also send notification to approver (yourself) for in-app status display
+            await sendResetApprovedNotification(userId, requesterId, 'Reset request', gameId).catch(
+                (error) =>
+                    console.error('Error sending reset approved notification to approver:', error),
             );
 
             return {

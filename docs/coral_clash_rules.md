@@ -32,9 +32,9 @@ Threefold repetition: If the same position occurs three times with the same play
 
 2. 17 pieces: 1 Whale, 2 Dolphins (1 Hunter, 1 Gatherer), 4 Turtles (2 Hunters, 2
 
-    Gatherers), 2 Pufferfish (1 Hunter, 1 Gatherer), 4 Crab (2 Hunters, 2 Gatherers), and 4
+   Gatherers), 2 Pufferfish (1 Hunter, 1 Gatherer), 4 Crab (2 Hunters, 2 Gatherers), and 4
 
-    Octopus (2 Hunters, 2 Gatherers).
+   Octopus (2 Hunters, 2 Gatherers).
 
 **Gatherer Pieces:** Pieces that have four Coral icons.
 
@@ -42,7 +42,7 @@ Threefold repetition: If the same position occurs three times with the same play
 
 1. Pufferfish in the corners
 
-    1 Hunter Pufferfish on the left, Gatherer Pufferfish on the right
+   1 Hunter Pufferfish on the left, Gatherer Pufferfish on the right
 
 2. Hunter Turtles next to the Pufferfish
 
@@ -50,14 +50,14 @@ Threefold repetition: If the same position occurs three times with the same play
 
 4. Whale occupies the two remaining squares in the middle
 
-    Dolphins occupy the two squares in the row above the Whale
-    1. Hunter Dolphin on the left, Gatherer Dolphin on the right
+   Dolphins occupy the two squares in the row above the Whale
+   1. Hunter Dolphin on the left, Gatherer Dolphin on the right
 
 5. Crab and Octopus are placed in the following pattern in front of all the other pieces
 
-    1 The pattern is: Hunter Crab, Gatherer Octopus, Gatherer Crab, Hunter Octopus,
+   1 The pattern is: Hunter Crab, Gatherer Octopus, Gatherer Crab, Hunter Octopus,
 
-    Gatherer Octopus, Hunter Crab, Hunter Octopus, Gatherer Crab
+   Gatherer Octopus, Hunter Crab, Hunter Octopus, Gatherer Crab
 
 6. Place a Coral under each Octopus in the third row (for a total of two)
 

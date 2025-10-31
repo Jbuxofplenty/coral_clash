@@ -17,6 +17,7 @@ export function AlertProvider({ children }) {
         title: '',
         message: '',
         buttons: [],
+        vertical: false,
     });
 
     /**
@@ -24,6 +25,7 @@ export function AlertProvider({ children }) {
      * @param {string} title - Alert title
      * @param {string} message - Alert message
      * @param {Array} buttons - Array of button objects with text, onPress, and style properties
+     * @param {boolean} vertical - Whether to stack buttons vertically (default: false)
      *
      * Example:
      * showAlert('Delete Item', 'Are you sure?', [
@@ -31,12 +33,13 @@ export function AlertProvider({ children }) {
      *   { text: 'Delete', style: 'destructive', onPress: () => deleteItem() }
      * ])
      */
-    const showAlert = (title, message, buttons = [{ text: 'OK' }]) => {
+    const showAlert = (title, message, buttons = [{ text: 'OK' }], vertical = false) => {
         setAlertState({
             visible: true,
             title,
             message,
             buttons,
+            vertical,
         });
     };
 
@@ -46,6 +49,7 @@ export function AlertProvider({ children }) {
             title: '',
             message: '',
             buttons: [],
+            vertical: false,
         });
     };
 
@@ -58,6 +62,7 @@ export function AlertProvider({ children }) {
                 message={alertState.message}
                 buttons={alertState.buttons}
                 onDismiss={dismissAlert}
+                vertical={alertState.vertical}
             />
         </AlertContext.Provider>
     );

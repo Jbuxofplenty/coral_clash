@@ -283,25 +283,44 @@ export default function ActiveGamesCard({
                                 disabled={isPending}
                             >
                                 <Block row middle space='between' flex>
-                                    <Block row middle flex>
+                                    <Block row middle flex style={{ minWidth: 0 }}>
                                         <Avatar
                                             avatarKey={opponent.avatarKey}
                                             computer={opponent.isComputer}
                                             size='small'
                                             style={styles.avatar}
                                         />
-                                        <Block flex style={styles.gameInfo}>
-                                            <Block row middle style={{ marginBottom: 3 }}>
+                                        <Block
+                                            flex
+                                            style={[
+                                                styles.gameInfo,
+                                                { minWidth: 0, overflow: 'hidden' },
+                                            ]}
+                                        >
+                                            <Block
+                                                row
+                                                middle
+                                                style={{ marginBottom: 3, flexShrink: 1 }}
+                                            >
                                                 <Text
                                                     size={moderateScale(16)}
                                                     bold
-                                                    style={{ color: colors.TEXT }}
+                                                    style={{ color: colors.TEXT, flexShrink: 1 }}
                                                     numberOfLines={1}
+                                                    ellipsizeMode='tail'
                                                 >
                                                     vs {opponent.displayName}
                                                 </Text>
                                             </Block>
-                                            <Block row middle>
+                                            <Block
+                                                row
+                                                middle
+                                                style={{
+                                                    flexShrink: 1,
+                                                    flexWrap: 'nowrap',
+                                                    overflow: 'hidden',
+                                                }}
+                                            >
                                                 {status.icon ? (
                                                     <>
                                                         <Icon
@@ -309,13 +328,19 @@ export default function ActiveGamesCard({
                                                             family='font-awesome'
                                                             size={moderateScale(12)}
                                                             color={status.color}
+                                                            style={{ flexShrink: 0 }}
                                                         />
                                                         <Text
                                                             size={moderateScale(13)}
                                                             style={[
                                                                 styles.statusText,
-                                                                { color: status.color },
+                                                                {
+                                                                    color: status.color,
+                                                                    flexShrink: 1,
+                                                                },
                                                             ]}
+                                                            numberOfLines={1}
+                                                            ellipsizeMode='tail'
                                                         >
                                                             {status.text}
                                                         </Text>
@@ -323,7 +348,8 @@ export default function ActiveGamesCard({
                                                             size={moderateScale(13)}
                                                             style={{
                                                                 color: colors.TEXT_SECONDARY,
-                                                                marginHorizontal: 6,
+                                                                marginHorizontal: 4,
+                                                                flexShrink: 0,
                                                             }}
                                                         >
                                                             •
@@ -335,13 +361,17 @@ export default function ActiveGamesCard({
                                                     family={timeControlInfo.iconFamily}
                                                     size={moderateScale(11)}
                                                     color={colors.TEXT}
+                                                    style={{ flexShrink: 0 }}
                                                 />
                                                 <Text
                                                     size={moderateScale(12)}
                                                     style={{
                                                         color: colors.TEXT,
                                                         marginLeft: 5,
+                                                        flexShrink: 1,
                                                     }}
+                                                    numberOfLines={1}
+                                                    ellipsizeMode='tail'
                                                 >
                                                     {timeControlInfo.label}
                                                 </Text>
