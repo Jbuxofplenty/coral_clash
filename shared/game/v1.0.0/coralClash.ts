@@ -964,6 +964,13 @@ export class CoralClash {
                 const offset = RAYS[index];
                 let j = i + offset;
 
+                // For whales, get both squares it occupies to exclude coral at its own positions
+                let whaleSquares: number[] = [];
+                if (piece.type === WHALE) {
+                    const [first, second] = this._kings[color];
+                    whaleSquares = [first, second];
+                }
+
                 let blocked = false;
                 while (j !== square) {
                     // Check if square is occupied (including whale's second square)
@@ -972,9 +979,15 @@ export class CoralClash {
                         break;
                     }
                     // Hunter pieces are blocked by coral
+                    // IMPORTANT: Exclude coral at the attacker's own squares (for whales on coral)
                     if (piece.role === 'hunter' && this._coral[j]) {
-                        blocked = true;
-                        break;
+                        // Don't block on coral at whale's own position
+                        if (piece.type === WHALE && whaleSquares.includes(j)) {
+                            // This is coral at the whale's current position, don't block
+                        } else {
+                            blocked = true;
+                            break;
+                        }
                     }
                     j += offset;
                 }
@@ -1630,10 +1643,18 @@ export class CoralClash {
                     newSecond !== secondSq;
 
                 // Check for coral blocking (whale is hunter, cannot move through coral)
+                // IMPORTANT: Exclude coral at whale's CURRENT positions (rule: "Whales that are already on
+                // Coral with half of the piece are not stopped when the other half of the piece moves onto the same Coral")
                 const firstHasCoral =
-                    this._coral[newFirst] !== null && this._coral[newFirst] !== undefined;
+                    this._coral[newFirst] !== null &&
+                    this._coral[newFirst] !== undefined &&
+                    newFirst !== firstSq &&
+                    newFirst !== secondSq;
                 const secondHasCoral =
-                    this._coral[newSecond] !== null && this._coral[newSecond] !== undefined;
+                    this._coral[newSecond] !== null &&
+                    this._coral[newSecond] !== undefined &&
+                    newSecond !== firstSq &&
+                    newSecond !== secondSq;
 
                 // Both must be empty to slide through
                 if (!firstBlocked && !secondBlocked) {
@@ -1642,6 +1663,7 @@ export class CoralClash {
                     addWhaleMove(secondSq, newSecond, newFirst);
 
                     // Hunter pieces (whale) stop if either square has coral (can't move through)
+                    // But NOT if the coral is at a square the whale currently occupies
                     if (firstHasCoral || secondHasCoral) {
                         break;
                     }

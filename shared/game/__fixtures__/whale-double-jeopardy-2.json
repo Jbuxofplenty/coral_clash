@@ -1,8 +1,8 @@
 {
     "schemaVersion": "1.2.0",
-    "exportedAt": "2025-10-31T04:33:00.046Z",
+    "exportedAt": "2025-10-31T04:58:26.212Z",
     "state": {
-        "fen": "ftt3tf/coc1h1tc/2doo2o/D4c2/1DTd4/3OOC1O/C1H4C/FTO2TTF b - - 0 11",
+        "fen": "ftt3tf/co2h2c/1dcoo2o/D4c2/1DTd4/C2OOC1O/1FH4C/1TO2TtF w - - 0 14",
         "board": [
             [
                 {
@@ -52,12 +52,7 @@
                     "color": "b",
                     "role": "gatherer"
                 },
-                {
-                    "square": "c7",
-                    "type": "c",
-                    "color": "b",
-                    "role": "gatherer"
-                },
+                null,
                 null,
                 {
                     "square": "e7",
@@ -69,12 +64,7 @@
                     "type": "h",
                     "color": "b"
                 },
-                {
-                    "square": "g7",
-                    "type": "t",
-                    "color": "b",
-                    "role": "gatherer"
-                },
+                null,
                 {
                     "square": "h7",
                     "type": "c",
@@ -84,12 +74,17 @@
             ],
             [
                 null,
-                null,
                 {
-                    "square": "c6",
+                    "square": "b6",
                     "type": "d",
                     "color": "b",
                     "role": "hunter"
+                },
+                {
+                    "square": "c6",
+                    "type": "c",
+                    "color": "b",
+                    "role": "gatherer"
                 },
                 {
                     "square": "d6",
@@ -158,7 +153,12 @@
                 null
             ],
             [
-                null,
+                {
+                    "square": "a3",
+                    "type": "c",
+                    "color": "w",
+                    "role": "hunter"
+                },
                 null,
                 null,
                 {
@@ -188,13 +188,13 @@
                 }
             ],
             [
+                null,
                 {
-                    "square": "a2",
-                    "type": "c",
+                    "square": "b2",
+                    "type": "f",
                     "color": "w",
                     "role": "hunter"
                 },
-                null,
                 {
                     "square": "c2",
                     "type": "h",
@@ -216,12 +216,7 @@
                 }
             ],
             [
-                {
-                    "square": "a1",
-                    "type": "f",
-                    "color": "w",
-                    "role": "hunter"
-                },
+                null,
                 {
                     "square": "b1",
                     "type": "t",
@@ -245,8 +240,8 @@
                 {
                     "square": "g1",
                     "type": "t",
-                    "color": "w",
-                    "role": "hunter"
+                    "color": "b",
+                    "role": "gatherer"
                 },
                 {
                     "square": "h1",
@@ -256,30 +251,8 @@
                 }
             ]
         ],
-        "history": [
-            "Da5",
-            "Dc6",
-            "c3",
-            "f6",
-            "c4",
-            "f5",
-            "d4",
-            "Df7*",
-            "Ded2*",
-            "Df6",
-            "Ddb4",
-            "Tf7",
-            "Tc4",
-            "Oh6",
-            "Hed2",
-            "Tfg7*",
-            "Oc1",
-            "Dxd4",
-            "Oh3",
-            "Hf7",
-            "f3"
-        ],
-        "turn": "b",
+        "history": ["Dcb6", "a3", "Txg1", "Fb2", "c6"],
+        "turn": "w",
         "whalePositions": {
             "w": ["c2", "d2"],
             "b": ["e7", "f7"]

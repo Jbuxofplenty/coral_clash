@@ -8,6 +8,7 @@ import Icon from './Icon';
 const FIXTURES = [
     { name: 'whale-rotation', label: 'Whale Rotation Bug Fix' },
     { name: 'whale-double-jeopardy', label: 'Whale Double Jeopardy' },
+    { name: 'whale-double-jeopardy-2', label: 'Whale on Coral Bug Fix' },
     { name: 'whale-move-diagonally', label: 'Whale Diagonal Movement' },
     { name: 'whale-move-diagonally-2', label: 'Whale Diagonal #2' },
     { name: 'octopus-check', label: 'Octopus Check (Debug)' },

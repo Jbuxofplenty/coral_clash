@@ -276,7 +276,7 @@ describe('Game State Snapshot and Restore', () => {
             expect(exported).toHaveProperty('schemaVersion');
             expect(exported).toHaveProperty('exportedAt');
             expect(exported).toHaveProperty('state');
-            expect(exported.schemaVersion).toBe('1.2.0');
+            expect(exported.schemaVersion).toBe('1.3.0');
         });
 
         it('should export complete game state including history', () => {

@@ -40,11 +40,15 @@ const PassAndPlayCoralClashBoard = ({
     const { showAlert } = useAlert();
 
     // Manage board flipping locally for pass-and-play (don't persist to storage)
-    // Initialize based on whose turn it is in saved game state
+    // Initialize based on whose turn it is in saved game state or fixture
     const [isBoardFlipped, setIsBoardFlipped] = useState(() => {
         // If loading a saved game, check whose turn it is
         if (gameState && gameState.turn) {
             return gameState.turn === 'b'; // Flip if it's black's turn
+        }
+        // If loading a fixture, check whose turn it is
+        if (fixture && fixture.state && fixture.state.turn) {
+            return fixture.state.turn === 'b'; // Flip if it's black's turn
         }
         return false; // New game starts with white (not flipped)
     });

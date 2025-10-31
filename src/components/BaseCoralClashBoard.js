@@ -161,6 +161,7 @@ const BaseCoralClashBoard = ({
             try {
                 applyFixture(coralClash, fixture);
                 setFixtureLoaded(true);
+                forceUpdate((n) => n + 1); // Force re-render to show coral and turn state
             } catch (error) {
                 console.error('Failed to load fixture:', error);
                 showAlert('Error', 'Failed to load game state');
@@ -632,7 +633,9 @@ const BaseCoralClashBoard = ({
     const historyLength = coralClash.history().length;
     // Check both local game engine state AND server-side completion status (e.g., timeout)
     const isGameOver = coralClash.isGameOver() || gameData?.status === 'completed';
-    const canUndo = enableUndo && historyLength >= 2 && !isGameOver;
+    // For pass-and-play, allow undo after 1 move; for computer games, require 2 moves
+    const minHistoryForUndo = opponentType === 'passandplay' ? 1 : 2;
+    const canUndo = enableUndo && historyLength >= minHistoryForUndo && !isGameOver;
 
     // Calculate if it's the player's turn (stable calculation, not inline in JSX)
     // For online games, use server's turn state (isUserTurn from gameData)
