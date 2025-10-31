@@ -12,10 +12,8 @@
 
 ## Git Operations
 
-- NEVER run `git push` unless explicitly requested by the user
-- ALWAYS commit changes locally first before pushing
+- NEVER run `git commit/push` unless explicitly requested by the user
 - Ask for confirmation before force pushing or destructive git operations
-- Only commit when we fully fix a bug or add a feature and ask if user is satisfied before
 
 ## Firebase Development
 

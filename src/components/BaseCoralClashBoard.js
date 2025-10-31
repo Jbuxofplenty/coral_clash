@@ -789,6 +789,16 @@ const BaseCoralClashBoard = ({
             return;
         }
 
+        // Clear enemy moves when clicking anywhere on the board while viewing them
+        if (isViewingEnemyMoves) {
+            setVisibleMoves([]);
+            setSelectedSquare(null);
+            setWhaleDestination(null);
+            setWhaleOrientationMoves([]);
+            setIsViewingEnemyMoves(false);
+            return;
+        }
+
         const piece = coralClash.get(square);
         const currentTurn = coralClash.turn();
         // For online games (PvP or computer), check against userColor
@@ -835,7 +845,13 @@ const BaseCoralClashBoard = ({
             return;
         }
 
+        // Clear enemy moves when clicking on move indicators while viewing them
         if (isViewingEnemyMoves) {
+            setVisibleMoves([]);
+            setSelectedSquare(null);
+            setWhaleDestination(null);
+            setWhaleOrientationMoves([]);
+            setIsViewingEnemyMoves(false);
             return;
         }
 
@@ -1206,6 +1222,33 @@ const BaseCoralClashBoard = ({
                 {/* Game Board */}
                 <View style={{ position: 'relative', alignSelf: 'center' }}>
                     <EmptyBoard size={boardSize} boardFlipped={isBoardFlipped} />
+                    {/* Transparent overlay to capture clicks on all squares - rendered first so pieces/moves can intercept */}
+                    <TouchableOpacity
+                        style={{
+                            position: 'absolute',
+                            width: boardSize,
+                            height: boardSize,
+                            top: 0,
+                            left: 0,
+                        }}
+                        activeOpacity={1}
+                        onPress={(event) => {
+                            // Calculate which square was clicked based on coordinates
+                            const { locationX, locationY } = event.nativeEvent;
+                            const cellSize = boardSize / 8;
+                            const col = Math.floor(locationX / cellSize);
+                            const row = Math.floor((boardSize - locationY) / cellSize);
+
+                            // Convert to chess notation
+                            const file = String.fromCharCode(
+                                'a'.charCodeAt(0) + (isBoardFlipped ? 7 - col : col),
+                            );
+                            const rank = (isBoardFlipped ? 8 - row : row + 1).toString();
+                            const square = `${file}${rank}`;
+
+                            handleSelectPiece(square);
+                        }}
+                    />
                     <Coral
                         coralClash={
                             isViewingHistory && historicalCoralClash
