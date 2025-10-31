@@ -2,19 +2,19 @@ const { withAppDelegate } = require('@expo/config-plugins');
 
 /**
  * Expo Config Plugin to fix bundle loading for Expo SDK 52+
- * 
+ *
  * The default AppDelegate looks for 'main.jsbundle' but Expo SDK 52's
  * export:embed creates bundles in '_expo/static/js/ios/AppEntry-[hash].hbc' format.
  * This plugin updates the bundleURL() method to read from metadata.json.
  */
 module.exports = function withFixedBundleURL(config) {
-  return withAppDelegate(config, (config) => {
-    const contents = config.modResults.contents;
+    return withAppDelegate(config, (config) => {
+        const contents = config.modResults.contents;
 
-    // Find and replace the bundleURL() method
-    const oldBundleMethod = /override func bundleURL\(\) -> URL\? \{[\s\S]*?(?=\n  \})/;
-    
-    const newBundleMethod = `override func bundleURL() -> URL? {
+        // Find and replace the bundleURL() method
+        const oldBundleMethod = /override func bundleURL\(\) -> URL\? \{[\s\S]*?(?=\n  \})/;
+
+        const newBundleMethod = `override func bundleURL() -> URL? {
 #if DEBUG
     return RCTBundleURLProvider.sharedSettings().jsBundleURL(forBundleRoot: ".expo/.virtual-metro-entry")
 #else
@@ -32,9 +32,8 @@ module.exports = function withFixedBundleURL(config) {
 #endif
   }`;
 
-    config.modResults.contents = contents.replace(oldBundleMethod, newBundleMethod);
+        config.modResults.contents = contents.replace(oldBundleMethod, newBundleMethod);
 
-    return config;
-  });
+        return config;
+    });
 };
-

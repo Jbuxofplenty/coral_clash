@@ -73,6 +73,7 @@ keystore_base64.txt
 build/
 *.ipa
 *.dSYM.zip
+*.ips
 
 # App Store Connect
 AuthKey_*.p8
