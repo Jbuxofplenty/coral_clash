@@ -1,6 +1,6 @@
 export default {
     testEnvironment: 'node',
-    testMatch: ['**/__tests__/**/*.test.js', '!shared/**'],
+    testMatch: ['**/__tests__/**/*.test.{js,ts}', '!shared/**'],
     testPathIgnorePatterns: ['/node_modules/', '/shared/'],
     collectCoverageFrom: [
         'routes/**/*.js',

@@ -90,36 +90,54 @@ describe('Whale Movement on Coral', () => {
         expect(moveToG5H5).toBeUndefined();
     });
 
-    test('FIXED: whale at c2,d2 with coral at d2 can parallel slide to e2,f2', () => {
+    test('FIXED: whale can parallel slide across entire row with coral at starting position', () => {
+        // Load the whale-double-jeopardy-2 fixture
+        // This has: white whale at c2,d2 with coral at d2, black whale at c7,d7
         const game = new CoralClash();
         applyFixture(game, whaleDoubleJeopardy2);
 
-        // Verify game state
+        // Verify setup
         expect(game.turn()).toBe('w');
         const whalePos = game.whalePositions();
         expect(whalePos.w).toEqual(['c2', 'd2']);
-
-        // Verify coral at d2 (one of the whale's squares)
         expect(game.getCoral('d2')).toBe('w');
 
         // Get all white whale moves
         const whaleMoves = game.moves({ verbose: true, piece: 'h', color: 'w' });
 
-        // FIXED: whale can now parallel slide right from c2,d2 to e2,f2
-        // This is a horizontal slide where both halves move right by TWO squares
-        // First half: c2 -> e2 (passes through d2 which has coral)
-        // Second half: d2 -> f2 (passes through e2)
+        // FIXED: Whale should be able to parallel slide to ALL positions along row 2
         // The whale is NOT blocked by coral at d2 since that's where it currently sits
-        //
-        // FIX: Modified _generateWhaleMoves to exclude coral at whale's current positions
-        // when checking firstHasCoral and secondHasCoral
-        const parallelSlideRight2 = whaleMoves.find(
+
+        // Test parallel slide right to e2,f2 (dist=2)
+        const slideToE2F2 = whaleMoves.find(
             (m: any) =>
                 (m.from === 'c2' && m.to === 'e2' && m.whaleSecondSquare === 'f2') ||
                 (m.from === 'd2' && m.to === 'f2' && m.whaleSecondSquare === 'e2'),
         );
+        expect(slideToE2F2).toBeDefined();
 
-        // This move exists - whale can slide through coral at its own position
-        expect(parallelSlideRight2).toBeDefined();
+        // Test parallel slide right to f2,g2 (dist=3)
+        const slideToF2G2 = whaleMoves.find(
+            (m: any) =>
+                (m.from === 'c2' && m.to === 'f2' && m.whaleSecondSquare === 'g2') ||
+                (m.from === 'd2' && m.to === 'g2' && m.whaleSecondSquare === 'f2'),
+        );
+        expect(slideToF2G2).toBeDefined();
+
+        // Test parallel slide right to g2,h2 (dist=4)
+        const slideToG2H2 = whaleMoves.find(
+            (m: any) =>
+                (m.from === 'c2' && m.to === 'g2' && m.whaleSecondSquare === 'h2') ||
+                (m.from === 'd2' && m.to === 'h2' && m.whaleSecondSquare === 'g2'),
+        );
+        expect(slideToG2H2).toBeDefined();
+
+        // Test parallel slide left to a2,b2 (dist=2)
+        const slideToA2B2 = whaleMoves.find(
+            (m: any) =>
+                (m.from === 'c2' && m.to === 'a2' && m.whaleSecondSquare === 'b2') ||
+                (m.from === 'd2' && m.to === 'b2' && m.whaleSecondSquare === 'a2'),
+        );
+        expect(slideToA2B2).toBeDefined();
     });
 });
