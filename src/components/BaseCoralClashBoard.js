@@ -901,13 +901,70 @@ const BaseCoralClashBoard = ({
                     }
                 });
 
-                if (orientationMap.size === 1) {
+                // Check if there are multiple coral removal options even with single orientation
+                const uniqueCoralOptions = new Set();
+                movesToThisSquare.forEach((m) => {
+                    const squares = (m.coralRemovedSquares || []).sort().join(',');
+                    uniqueCoralOptions.add(squares);
+                });
+
+                if (orientationMap.size === 1 && uniqueCoralOptions.size === 1) {
+                    // Only one orientation AND only one coral option - execute immediately
                     const onlyMove = Array.from(orientationMap.values())[0];
                     await executeMove({ from: onlyMove.from, to: onlyMove.to });
                     setSelectedSquare(null);
                     setVisibleMoves([]);
                     setWhaleDestination(null);
                     setWhaleOrientationMoves([]);
+                    return;
+                } else if (orientationMap.size === 1 && uniqueCoralOptions.size > 1) {
+                    // Only one orientation but MULTIPLE coral options - prompt now
+                    const coralOptionsMap = new Map();
+                    movesToThisSquare.forEach((m) => {
+                        const key = (m.coralRemovedSquares || []).sort().join(',');
+                        if (!coralOptionsMap.has(key)) {
+                            coralOptionsMap.set(key, {
+                                move: m,
+                                squares: m.coralRemovedSquares || [],
+                            });
+                        }
+                    });
+                    const coralOptions = Array.from(coralOptionsMap.values());
+
+                    const alertButtons = coralOptions.map((option) => {
+                        let label = '';
+                        if (option.squares.length === 0) {
+                            label = "Don't remove";
+                        } else if (option.squares.length === 1) {
+                            label = `Remove from ${option.squares[0]}`;
+                        } else {
+                            label = `Remove from both (${option.squares.join(', ')})`;
+                        }
+
+                        return {
+                            text: label,
+                            onPress: async () => {
+                                await executeMove({
+                                    from: option.move.from,
+                                    to: option.move.to,
+                                    whaleSecondSquare: option.move.whaleSecondSquare,
+                                    coralRemovedSquares: option.squares,
+                                    ...(option.move.promotion && { promotion: 'q' }),
+                                });
+                                setVisibleMoves([]);
+                                setSelectedSquare(null);
+                                setWhaleDestination(null);
+                                setWhaleOrientationMoves([]);
+                            },
+                        };
+                    });
+
+                    showAlert(
+                        'Hunter Effect (Whale)',
+                        'Choose coral removal option:',
+                        alertButtons,
+                        true, // vertical layout
+                    );
                     return;
                 }
 
@@ -946,11 +1003,27 @@ const BaseCoralClashBoard = ({
                         m.whaleSecondSquare === selectedMove.whaleSecondSquare,
                 );
 
-                if (allOrientationMoves.length > 1) {
-                    const coralOptions = allOrientationMoves.map((m) => ({
-                        move: m,
-                        squares: m.coralRemovedSquares || [],
-                    }));
+                // Check if there are coral removal options
+                const uniqueCoralOptions = new Set();
+                allOrientationMoves.forEach((m) => {
+                    const squares = (m.coralRemovedSquares || []).sort().join(',');
+                    uniqueCoralOptions.add(squares);
+                });
+
+                if (uniqueCoralOptions.size > 1) {
+                    // Multiple coral removal options - show prompt
+                    // Deduplicate by coral removal squares
+                    const coralOptionsMap = new Map();
+                    allOrientationMoves.forEach((m) => {
+                        const key = (m.coralRemovedSquares || []).sort().join(',');
+                        if (!coralOptionsMap.has(key)) {
+                            coralOptionsMap.set(key, {
+                                move: m,
+                                squares: m.coralRemovedSquares || [],
+                            });
+                        }
+                    });
+                    const coralOptions = Array.from(coralOptionsMap.values());
 
                     const alertButtons = coralOptions.map((option) => {
                         let label = '';
@@ -988,11 +1061,6 @@ const BaseCoralClashBoard = ({
                     );
                     return;
                 } else {
-                    console.log('[DEBUG] Single move - executing directly:', {
-                        from: selectedMove.from,
-                        to: selectedMove.to,
-                        whaleSecondSquare: selectedMove.whaleSecondSquare,
-                    });
                     await executeMove({
                         from: selectedMove.from,
                         to: selectedMove.to,

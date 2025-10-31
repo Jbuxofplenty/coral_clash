@@ -16,6 +16,7 @@ import whaleDoubleJeopardy2 from './whale-double-jeopardy-2.json';
 import whaleDoubleJeopardy from './whale-double-jeopardy.json';
 import whaleMoveDigonally2 from './whale-move-diagonally-2.json';
 import whaleMoveDigonally from './whale-move-diagonally.json';
+import whaleRemove2Coral from './whale-remove-2-coral.json';
 import whaleRemovesCoral from './whale-removes-coral.json';
 import whaleRotation2 from './whale-rotation-2.json';
 import whaleRotation from './whale-rotation.json';
@@ -35,6 +36,7 @@ export {
     whaleDoubleJeopardy2,
     whaleMoveDigonally,
     whaleMoveDigonally2,
+    whaleRemove2Coral,
     whaleRemovesCoral,
     whaleRotation,
     whaleRotation2,
@@ -48,6 +50,7 @@ export const FIXTURES = {
     'whale-double-jeopardy-2': whaleDoubleJeopardy2,
     'whale-move-diagonally': whaleMoveDigonally,
     'whale-move-diagonally-2': whaleMoveDigonally2,
+    'whale-remove-2-coral': whaleRemove2Coral,
     'octopus-check': octopusCheck,
     'multiple-checks': multipleChecks,
     'check-pinned': checkPinned,

@@ -28,7 +28,15 @@ platform :ios do
       # Not specifying version - gets highest build across ALL versions
     )
     
-    UI.important("📱 Latest TestFlight build number (all versions): #{latest_build}")
+    UI.important("📱 Latest TestFlight build number from API: #{latest_build}")
+    
+    # Ensure we start from build 11 minimum (to account for expired EAS builds 6-10)
+    # The API only returns active builds, not expired ones
+    minimum_build = 10
+    if latest_build < minimum_build
+      UI.warning("⚠️  API returned #{latest_build}, but we have expired builds up to 10")
+      latest_build = minimum_build
+    end
     
     # Ensure we always increment from the latest, never go backwards
     new_build = latest_build + 1

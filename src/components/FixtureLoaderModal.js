@@ -11,6 +11,7 @@ const FIXTURES = [
     { name: 'whale-double-jeopardy-2', label: 'Whale on Coral Bug Fix' },
     { name: 'whale-move-diagonally', label: 'Whale Diagonal Movement' },
     { name: 'whale-move-diagonally-2', label: 'Whale Diagonal #2' },
+    { name: 'whale-remove-2-coral', label: 'Whale Remove 2 Coral' },
     { name: 'octopus-check', label: 'Octopus Check (Debug)' },
     { name: 'multiple-checks', label: 'Multiple Checks (Pinned Piece)' },
     { name: 'check-pinned', label: 'Check with Pinned Piece' },
