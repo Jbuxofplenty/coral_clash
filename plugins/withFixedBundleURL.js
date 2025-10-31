@@ -11,8 +11,8 @@ module.exports = function withFixedBundleURL(config) {
     return withAppDelegate(config, (config) => {
         const contents = config.modResults.contents;
 
-        // Find and replace the bundleURL() method
-        const oldBundleMethod = /override func bundleURL\(\) -> URL\? \{[\s\S]*?(?=\n  \})/;
+        // Find and replace the bundleURL() method including its closing brace
+        const oldBundleMethod = /override func bundleURL\(\) -> URL\? \{[\s\S]*?\n  \}/;
 
         const newBundleMethod = `override func bundleURL() -> URL? {
 #if DEBUG
