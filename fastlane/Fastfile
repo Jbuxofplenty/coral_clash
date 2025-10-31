@@ -21,15 +21,23 @@ platform :ios do
     end
     
     # Get latest build number from App Store Connect and increment
+    # This checks ALL builds across all versions to ensure we never go backwards
     latest_build = latest_testflight_build_number(
       api_key: api_key,
       app_identifier: "com.jbuxofplenty.coralclash"
+      # Not specifying version - gets highest build across ALL versions
     )
+    
+    UI.important("📱 Latest TestFlight build number (all versions): #{latest_build}")
+    
+    # Ensure we always increment from the latest, never go backwards
+    new_build = latest_build + 1
+    UI.success("📱 Setting new build number to: #{new_build}")
     
     # Increment build number to be higher than what's in App Store Connect
     increment_build_number(
       xcodeproj: "./ios/CoralClash.xcodeproj",
-      build_number: latest_build + 1
+      build_number: new_build
     )
     
     # Sync code signing first to download provisioning profiles
