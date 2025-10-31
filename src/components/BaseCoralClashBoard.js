@@ -1,5 +1,5 @@
 import { Icon } from 'galio-framework';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
     Animated,
     Clipboard,
@@ -87,6 +87,87 @@ const BaseCoralClashBoard = ({
     const isBoardFlipped = effectiveBoardFlip !== null ? effectiveBoardFlip : contextBoardFlipped;
     const coralClash = useCoralClash();
 
+    // Track previous turn to detect changes from Firestore updates
+    const previousTurnRef = useRef(null);
+    const hasInitializedRef = useRef(false);
+
+    // State declarations needed by callback
+    const [visibleMoves, setVisibleMoves] = useState([]);
+    const [selectedSquare, setSelectedSquare] = useState(null);
+    const [whaleDestination, setWhaleDestination] = useState(null);
+    const [whaleOrientationMoves, setWhaleOrientationMoves] = useState([]);
+    const [isViewingEnemyMoves, setIsViewingEnemyMoves] = useState(false);
+    const [updateCounter, forceUpdate] = useState(0);
+    const [turnNotification, setTurnNotification] = useState(null);
+
+    // Callback for when game state updates from Firestore
+    const handleStateUpdate = useCallback(() => {
+        // Clear visible moves when game state updates from Firestore
+        setVisibleMoves([]);
+        setSelectedSquare(null);
+        setWhaleDestination(null);
+        setWhaleOrientationMoves([]);
+        setIsViewingEnemyMoves(false);
+        // Force re-render
+        forceUpdate((n) => n + 1);
+
+        // Show turn notification when turn changes (opponent made a move)
+        // Only for online games (not local games)
+        if (
+            coralClash &&
+            typeof coralClash.turn === 'function' &&
+            gameId &&
+            !gameId.startsWith('local_')
+        ) {
+            const currentTurn = coralClash.turn();
+
+            // Only show notification if:
+            // 1. Component has been initialized (not first load)
+            // 2. Turn actually changed (a move was made)
+            // 3. Game is not over
+            if (
+                hasInitializedRef.current &&
+                previousTurnRef.current !== null &&
+                previousTurnRef.current !== currentTurn &&
+                !coralClash.isGameOver()
+            ) {
+                // Check if it's the user's turn or opponent's turn
+                let message;
+                if (userColor) {
+                    const isUsersTurn = currentTurn === userColor;
+                    if (isUsersTurn) {
+                        message = 'Your turn';
+                    } else if (opponentType === 'computer') {
+                        message = "Computer's turn";
+                    } else {
+                        // For PvP: Opponent is always topPlayerData (user is always bottom)
+                        const opponentName = topPlayerData?.name || 'Opponent';
+                        message = `${opponentName}'s turn`;
+                    }
+                } else {
+                    // Fallback for games without userColor
+                    const currentPlayerColor = currentTurn === 'w' ? 'White' : 'Black';
+                    message = `${currentPlayerColor}'s turn`;
+                }
+
+                setTurnNotification({
+                    message,
+                    type: 'info',
+                    timeout: 2500,
+                    onDismiss: () => setTurnNotification(null),
+                });
+            }
+
+            // Update previous turn tracker
+            previousTurnRef.current = currentTurn;
+
+            // Mark as initialized after first update
+            if (!hasInitializedRef.current) {
+                hasInitializedRef.current = true;
+            }
+        }
+    }, [coralClash, gameId, userColor, opponentType, topPlayerData]);
+
     // Centralized game actions and state management
     const {
         makeMove: makeMoveAPI,
@@ -97,24 +178,11 @@ const BaseCoralClashBoard = ({
         gameData,
         isLoading: _gameActionsLoading,
         isProcessing: isGameActionProcessing,
-    } = useGameActions(coralClash, gameId, () => {
-        // Clear visible moves when game state updates from Firestore
-        setVisibleMoves([]);
-        setSelectedSquare(null);
-        setWhaleDestination(null);
-        setWhaleOrientationMoves([]);
-        setIsViewingEnemyMoves(false);
-        // Force re-render
-        forceUpdate((n) => n + 1);
-    });
-    const [visibleMoves, setVisibleMoves] = useState([]);
-    const [selectedSquare, setSelectedSquare] = useState(null);
-    const [whaleDestination, setWhaleDestination] = useState(null);
-    const [whaleOrientationMoves, setWhaleOrientationMoves] = useState([]);
-    const [isViewingEnemyMoves, setIsViewingEnemyMoves] = useState(false);
+    } = useGameActions(coralClash, gameId, handleStateUpdate);
+
+    // Additional state declarations
     const [fixtureLoaded, setFixtureLoaded] = useState(false);
     const [gameStateLoaded, setGameStateLoaded] = useState(false);
-    const [updateCounter, forceUpdate] = useState(0);
     const [menuVisible, setMenuVisible] = useState(false);
     const [slideAnim] = useState(new Animated.Value(0));
     const [historyIndex, setHistoryIndex] = useState(null); // null = current state, 0+ = viewing history
@@ -125,9 +193,6 @@ const BaseCoralClashBoard = ({
     // Time tracking state for local countdown
     const [localTimeRemaining, setLocalTimeRemaining] = useState(null);
     const [_lastUpdateTime, setLastUpdateTime] = useState(null);
-
-    // Turn notification state (shows whose turn it is after a move)
-    const [turnNotification, setTurnNotification] = useState(null);
 
     const openMenu = () => {
         setMenuVisible(true);
@@ -758,10 +823,8 @@ const BaseCoralClashBoard = ({
             setHistoryIndex(null);
             await onMoveComplete?.(result, moveParams);
 
-            // Show turn notification if game is not over
-            if (!result.gameOver && !coralClash.isGameOver()) {
-                showTurnNotification();
-            }
+            // Don't show turn notification here for online games
+            // The Firestore listener will handle it for both players when game state updates
 
             return result;
         }
