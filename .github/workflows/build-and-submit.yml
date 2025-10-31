@@ -100,20 +100,36 @@ jobs:
       - name: Build and Submit to TestFlight (Preview)
         if: inputs.profile == 'preview'
         env:
+          # Secrets
           APPLE_ID: ${{ secrets.APPLE_ID }}
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
           APP_STORE_CONNECT_API_KEY_PATH: ${{ env.APP_STORE_CONNECT_API_KEY_PATH }}
           FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ${{ secrets.APPLE_ID }}
+          # App Configuration (from GitHub Variables)
+          IOS_APP_IDENTIFIER: ${{ vars.IOS_APP_IDENTIFIER }}
+          IOS_TEAM_ID: ${{ vars.IOS_TEAM_ID }}
+          IOS_SCHEME: ${{ vars.IOS_SCHEME }}
+          IOS_WORKSPACE_PATH: ${{ vars.IOS_WORKSPACE_PATH }}
+          IOS_PROJECT_PATH: ${{ vars.IOS_PROJECT_PATH }}
+          IOS_OUTPUT_NAME: ${{ vars.IOS_OUTPUT_NAME }}
           CI: true
         run: bundle exec fastlane ios beta
 
       - name: Build and Submit to App Store (Production)
         if: inputs.profile == 'production'
         env:
+          # Secrets
           APPLE_ID: ${{ secrets.APPLE_ID }}
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
           APP_STORE_CONNECT_API_KEY_PATH: ${{ env.APP_STORE_CONNECT_API_KEY_PATH }}
           FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ${{ secrets.APPLE_ID }}
+          # App Configuration (from GitHub Variables)
+          IOS_APP_IDENTIFIER: ${{ vars.IOS_APP_IDENTIFIER }}
+          IOS_TEAM_ID: ${{ vars.IOS_TEAM_ID }}
+          IOS_SCHEME: ${{ vars.IOS_SCHEME }}
+          IOS_WORKSPACE_PATH: ${{ vars.IOS_WORKSPACE_PATH }}
+          IOS_PROJECT_PATH: ${{ vars.IOS_PROJECT_PATH }}
+          IOS_OUTPUT_NAME: ${{ vars.IOS_OUTPUT_NAME }}
           CI: true
         run: bundle exec fastlane ios release
 
@@ -185,21 +201,29 @@ jobs:
       - name: Build and Submit to Internal Testing (Preview)
         if: inputs.profile == 'preview'
         env:
+          # Secrets
           ANDROID_KEYSTORE_PATH: ${{ env.ANDROID_KEYSTORE_PATH }}
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
           GOOGLE_PLAY_JSON_KEY_PATH: ${{ env.GOOGLE_PLAY_JSON_KEY_PATH }}
+          # App Configuration (from GitHub Variables)
+          ANDROID_PACKAGE_NAME: ${{ vars.ANDROID_PACKAGE_NAME }}
+          ANDROID_PROJECT_DIR: ${{ vars.ANDROID_PROJECT_DIR }}
         run: bundle exec fastlane android beta
 
       - name: Build and Submit to Production (Production)
         if: inputs.profile == 'production'
         env:
+          # Secrets
           ANDROID_KEYSTORE_PATH: ${{ env.ANDROID_KEYSTORE_PATH }}
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
           GOOGLE_PLAY_JSON_KEY_PATH: ${{ env.GOOGLE_PLAY_JSON_KEY_PATH }}
+          # App Configuration (from GitHub Variables)
+          ANDROID_PACKAGE_NAME: ${{ vars.ANDROID_PACKAGE_NAME }}
+          ANDROID_PROJECT_DIR: ${{ vars.ANDROID_PROJECT_DIR }}
         run: bundle exec fastlane android release
 
       - name: Upload Android build artifacts

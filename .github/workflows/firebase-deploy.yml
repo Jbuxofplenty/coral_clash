@@ -81,10 +81,12 @@ jobs:
       - name: Deploy to Firebase
         run: |
           TARGET="${{ github.event.inputs.target || 'all' }}"
+          PROJECT="${{ vars.FIREBASE_PROJECT_ID || 'default' }}"
+          
           if [ "$TARGET" = "all" ]; then
-            firebase deploy --project coral-clash --non-interactive
+            firebase deploy --project "$PROJECT" --non-interactive
           else
-            firebase deploy --only $TARGET --project coral-clash --non-interactive
+            firebase deploy --only $TARGET --project "$PROJECT" --non-interactive
           fi
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
@@ -92,7 +94,7 @@ jobs:
       - name: Deploy Summary
         run: |
           echo "✅ Firebase deployment completed successfully!"
-          echo "🔗 Project: coral-clash"
+          echo "🔗 Project: ${{ vars.FIREBASE_PROJECT_ID || 'default' }}"
           echo "📦 Deployed: ${{ github.event.inputs.target || 'all' }}"
           echo "🌿 Branch: ${{ github.ref_name }}"
           echo "📝 Commit: ${{ github.sha }}"

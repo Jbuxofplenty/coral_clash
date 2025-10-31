@@ -1,7 +1,23 @@
-# Fastfile for Coral Clash
+# Fastfile for React Native Apps
 # Documentation: https://docs.fastlane.tools
+#
+# This Fastfile is generalized to work with any React Native app.
+# Configure app-specific values via GitHub Actions Variables or environment variables.
 
 default_platform(:ios)
+
+# ========================================
+# Configuration from Environment Variables
+# ========================================
+IOS_APP_IDENTIFIER = ENV["IOS_APP_IDENTIFIER"] || "com.example.app"
+IOS_TEAM_ID = ENV["IOS_TEAM_ID"] || ""
+IOS_SCHEME = ENV["IOS_SCHEME"] || "App"
+IOS_WORKSPACE_PATH = ENV["IOS_WORKSPACE_PATH"] || "./ios/#{IOS_SCHEME}.xcworkspace"
+IOS_PROJECT_PATH = ENV["IOS_PROJECT_PATH"] || "./ios/#{IOS_SCHEME}.xcodeproj"
+IOS_OUTPUT_NAME = ENV["IOS_OUTPUT_NAME"] || "#{IOS_SCHEME}.ipa"
+
+ANDROID_PACKAGE_NAME = ENV["ANDROID_PACKAGE_NAME"] || "com.example.app"
+ANDROID_PROJECT_DIR = ENV["ANDROID_PROJECT_DIR"] || "./android"
 
 # iOS Platform
 platform :ios do
@@ -24,7 +40,7 @@ platform :ios do
     # This checks ALL builds across all versions to ensure we never go backwards
     latest_build = latest_testflight_build_number(
       api_key: api_key,
-      app_identifier: "com.jbuxofplenty.coralclash"
+      app_identifier: IOS_APP_IDENTIFIER
       # Not specifying version - gets highest build across ALL versions
     )
     
@@ -36,7 +52,7 @@ platform :ios do
     
     # Increment build number to be higher than what's in App Store Connect
     increment_build_number(
-      xcodeproj: "./ios/CoralClash.xcodeproj",
+      xcodeproj: IOS_PROJECT_PATH,
       build_number: new_build
     )
     
@@ -53,25 +69,25 @@ platform :ios do
     # Must be done AFTER sync_code_signing downloads the profile
     update_code_signing_settings(
       use_automatic_signing: false,
-      path: "./ios/CoralClash.xcodeproj",
-      team_id: "FWV22U8U39",
+      path: IOS_PROJECT_PATH,
+      team_id: IOS_TEAM_ID,
       code_sign_identity: "iPhone Distribution",
-      profile_name: "match AppStore com.jbuxofplenty.coralclash",
-      targets: "CoralClash"
+      profile_name: "match AppStore #{IOS_APP_IDENTIFIER}",
+      targets: IOS_SCHEME
     )
     
     # Build the app
     build_app(
-      workspace: "./ios/CoralClash.xcworkspace",
-      scheme: "CoralClash",
+      workspace: IOS_WORKSPACE_PATH,
+      scheme: IOS_SCHEME,
       export_method: "app-store",
       export_options: {
         provisioningProfiles: {
-          "com.jbuxofplenty.coralclash" => "match AppStore com.jbuxofplenty.coralclash"
+          IOS_APP_IDENTIFIER => "match AppStore #{IOS_APP_IDENTIFIER}"
         }
       },
       output_directory: "./build/ios",
-      output_name: "CoralClash.ipa"
+      output_name: IOS_OUTPUT_NAME
     )
   end
 
@@ -139,7 +155,7 @@ platform :android do
     ['internal', 'alpha', 'beta', 'production'].each do |track_name|
       begin
         versions = google_play_track_version_codes(
-          package_name: "com.jbuxofplenty.coralclash",
+          package_name: ANDROID_PACKAGE_NAME,
           track: track_name,
           json_key: ENV["GOOGLE_PLAY_JSON_KEY_PATH"]
         )
@@ -160,7 +176,7 @@ platform :android do
     
     # Build the app with version code as Gradle property (no file modification needed!)
     gradle(
-      project_dir: "./android",
+      project_dir: ANDROID_PROJECT_DIR,
       task: "bundle",
       build_type: "Release",
       properties: {
@@ -179,9 +195,9 @@ platform :android do
     
     # Upload to Play Store Internal Testing track
     upload_to_play_store(
-      package_name: "com.jbuxofplenty.coralclash",
+      package_name: ANDROID_PACKAGE_NAME,
       track: "internal",
-      aab: "./android/app/build/outputs/bundle/release/app-release.aab",
+      aab: "#{ANDROID_PROJECT_DIR}/app/build/outputs/bundle/release/app-release.aab",
       skip_upload_metadata: true,
       skip_upload_images: true,
       skip_upload_screenshots: true,
@@ -195,9 +211,9 @@ platform :android do
     
     # Upload to Play Store Production track
     upload_to_play_store(
-      package_name: "com.jbuxofplenty.coralclash",
+      package_name: ANDROID_PACKAGE_NAME,
       track: "production",
-      aab: "./android/app/build/outputs/bundle/release/app-release.aab",
+      aab: "#{ANDROID_PROJECT_DIR}/app/build/outputs/bundle/release/app-release.aab",
       skip_upload_metadata: true,
       skip_upload_images: true,
       skip_upload_screenshots: true,
