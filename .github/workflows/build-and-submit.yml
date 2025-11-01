@@ -97,8 +97,9 @@ jobs:
           cd ios
           pod install
 
-      - name: Generate JavaScript Bundle
-        run: npx expo export:embed --platform ios
+      - name: Configure Node Binary for Xcode
+        run: |
+          echo "export NODE_BINARY=$(command -v node)" > ios/.xcode.env.local
 
       - name: Build and Submit to TestFlight (Preview)
         if: inputs.profile == 'preview'
@@ -179,9 +180,6 @@ jobs:
 
       - name: Run Expo Prebuild for Android
         run: npx expo prebuild --platform android --clean
-
-      - name: Generate JavaScript Bundle
-        run: npx expo export:embed --platform android
 
       - name: Configure Dynamic Version Code
         run: |
