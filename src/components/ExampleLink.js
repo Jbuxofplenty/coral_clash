@@ -86,5 +86,7 @@ const styles = StyleSheet.create({
     exampleLinkText: {
         fontSize: 15,
         fontWeight: '600',
+        flex: 1,
+        flexWrap: 'wrap',
     },
 });

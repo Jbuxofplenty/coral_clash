@@ -1,6 +1,6 @@
 import { Icon } from 'galio-framework';
 import React, { useEffect, useState } from 'react';
-import { Text, TouchableOpacity, View } from 'react-native';
+import { Text, TouchableOpacity, View, useWindowDimensions } from 'react-native';
 import { calculateUndoMoveCount } from '../../shared';
 import { db, doc, onSnapshot } from '../config/firebase';
 import { useAlert, useAuth, useGamePreferences, useTheme } from '../contexts';
@@ -36,6 +36,10 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
     const { isBoardFlipped } = useGamePreferences();
     const { colors } = useTheme();
     const { showAlert } = useAlert();
+    const { height } = useWindowDimensions();
+    
+    // Use compact mode on smaller screens (iPhone SE, etc.)
+    const isCompact = height < 700;
     const { requestGameReset, requestUndo, respondToUndoRequest, respondToResetRequest } =
         useFirebaseFunctions();
     const [userColor, setUserColor] = useState(null);
@@ -426,8 +430,8 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
                     <View
                         style={{
                             backgroundColor: colors.INPUT,
-                            paddingVertical: 14,
-                            paddingHorizontal: 16,
+                            paddingVertical: isCompact ? 8 : 14,
+                            paddingHorizontal: isCompact ? 12 : 16,
                             flexDirection: 'row',
                             alignItems: 'center',
                             justifyContent: 'space-between',
@@ -436,10 +440,10 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
                         <Text
                             style={{
                                 color: colors.TEXT,
-                                fontSize: 15,
+                                fontSize: isCompact ? 12 : 15,
                                 fontWeight: '600',
                                 flex: 1,
-                                marginRight: 12,
+                                marginRight: isCompact ? 8 : 12,
                             }}
                         >
                             Waiting for {liveOpponentData?.displayName || 'opponent'} to respond to
@@ -448,9 +452,9 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
                         <TouchableOpacity
                             onPress={handleCancelUndoRequest}
                             style={{
-                                width: 40,
-                                height: 40,
-                                borderRadius: 20,
+                                width: isCompact ? 32 : 40,
+                                height: isCompact ? 32 : 40,
+                                borderRadius: isCompact ? 16 : 20,
                                 backgroundColor: colors.ERROR + '15',
                                 justifyContent: 'center',
                                 alignItems: 'center',
@@ -459,7 +463,7 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
                             <IconComponent
                                 name='times'
                                 family='font-awesome'
-                                size={18}
+                                size={isCompact ? 14 : 18}
                                 color={colors.ERROR}
                             />
                         </TouchableOpacity>
@@ -471,8 +475,8 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
                     <View
                         style={{
                             backgroundColor: colors.INPUT,
-                            paddingVertical: 14,
-                            paddingHorizontal: 16,
+                            paddingVertical: isCompact ? 8 : 14,
+                            paddingHorizontal: isCompact ? 12 : 16,
                             flexDirection: 'row',
                             alignItems: 'center',
                             justifyContent: 'space-between',
@@ -481,10 +485,10 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
                         <Text
                             style={{
                                 color: colors.TEXT,
-                                fontSize: 15,
+                                fontSize: isCompact ? 12 : 15,
                                 fontWeight: '600',
                                 flex: 1,
-                                marginRight: 12,
+                                marginRight: isCompact ? 8 : 12,
                             }}
                         >
                             {liveOpponentData?.displayName || 'Opponent'} wants to undo{' '}
@@ -494,9 +498,9 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
                             <TouchableOpacity
                                 onPress={() => handleUndoResponse(false, clearVisibleMoves)}
                                 style={{
-                                    width: 40,
-                                    height: 40,
-                                    borderRadius: 20,
+                                    width: isCompact ? 32 : 40,
+                                    height: isCompact ? 32 : 40,
+                                    borderRadius: isCompact ? 16 : 20,
                                     backgroundColor: colors.ERROR + '15',
                                     justifyContent: 'center',
                                     alignItems: 'center',
@@ -505,26 +509,26 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
                                 <IconComponent
                                     name='times'
                                     family='font-awesome'
-                                    size={18}
+                                    size={isCompact ? 14 : 18}
                                     color={colors.ERROR}
                                 />
                             </TouchableOpacity>
                             <TouchableOpacity
                                 onPress={() => handleUndoResponse(true, clearVisibleMoves)}
                                 style={{
-                                    width: 40,
-                                    height: 40,
-                                    borderRadius: 20,
+                                    width: isCompact ? 32 : 40,
+                                    height: isCompact ? 32 : 40,
+                                    borderRadius: isCompact ? 16 : 20,
                                     backgroundColor: colors.SUCCESS + '15',
                                     justifyContent: 'center',
                                     alignItems: 'center',
-                                    marginLeft: 10,
+                                    marginLeft: isCompact ? 8 : 10,
                                 }}
                             >
                                 <IconComponent
                                     name='check'
                                     family='font-awesome'
-                                    size={18}
+                                    size={isCompact ? 14 : 18}
                                     color={colors.SUCCESS}
                                 />
                             </TouchableOpacity>
@@ -541,8 +545,8 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
                     <View
                         style={{
                             backgroundColor: colors.INPUT,
-                            paddingVertical: 14,
-                            paddingHorizontal: 16,
+                            paddingVertical: isCompact ? 8 : 14,
+                            paddingHorizontal: isCompact ? 12 : 16,
                             flexDirection: 'row',
                             alignItems: 'center',
                             justifyContent: 'space-between',
@@ -551,10 +555,10 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
                         <Text
                             style={{
                                 color: colors.TEXT,
-                                fontSize: 15,
+                                fontSize: isCompact ? 12 : 15,
                                 fontWeight: '600',
                                 flex: 1,
-                                marginRight: 12,
+                                marginRight: isCompact ? 8 : 12,
                             }}
                         >
                             Waiting for {liveOpponentData?.displayName || 'opponent'} to respond to
@@ -563,9 +567,9 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
                         <TouchableOpacity
                             onPress={handleCancelResetRequest}
                             style={{
-                                width: 40,
-                                height: 40,
-                                borderRadius: 20,
+                                width: isCompact ? 32 : 40,
+                                height: isCompact ? 32 : 40,
+                                borderRadius: isCompact ? 16 : 20,
                                 backgroundColor: colors.ERROR + '15',
                                 justifyContent: 'center',
                                 alignItems: 'center',
@@ -574,7 +578,7 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
                             <IconComponent
                                 name='times'
                                 family='font-awesome'
-                                size={18}
+                                size={isCompact ? 14 : 18}
                                 color={colors.ERROR}
                             />
                         </TouchableOpacity>
@@ -586,8 +590,8 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
                     <View
                         style={{
                             backgroundColor: colors.INPUT,
-                            paddingVertical: 14,
-                            paddingHorizontal: 16,
+                            paddingVertical: isCompact ? 8 : 14,
+                            paddingHorizontal: isCompact ? 12 : 16,
                             flexDirection: 'row',
                             alignItems: 'center',
                             justifyContent: 'space-between',
@@ -596,10 +600,10 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
                         <Text
                             style={{
                                 color: colors.TEXT,
-                                fontSize: 15,
+                                fontSize: isCompact ? 12 : 15,
                                 fontWeight: '600',
                                 flex: 1,
-                                marginRight: 12,
+                                marginRight: isCompact ? 8 : 12,
                             }}
                         >
                             {liveOpponentData?.displayName || 'Opponent'} wants to reset the game
@@ -608,9 +612,9 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
                             <TouchableOpacity
                                 onPress={() => handleResetResponse(false)}
                                 style={{
-                                    width: 40,
-                                    height: 40,
-                                    borderRadius: 20,
+                                    width: isCompact ? 32 : 40,
+                                    height: isCompact ? 32 : 40,
+                                    borderRadius: isCompact ? 16 : 20,
                                     backgroundColor: colors.ERROR + '15',
                                     justifyContent: 'center',
                                     alignItems: 'center',
@@ -619,26 +623,26 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
                                 <IconComponent
                                     name='times'
                                     family='font-awesome'
-                                    size={18}
+                                    size={isCompact ? 14 : 18}
                                     color={colors.ERROR}
                                 />
                             </TouchableOpacity>
                             <TouchableOpacity
                                 onPress={() => handleResetResponse(true)}
                                 style={{
-                                    width: 40,
-                                    height: 40,
-                                    borderRadius: 20,
+                                    width: isCompact ? 32 : 40,
+                                    height: isCompact ? 32 : 40,
+                                    borderRadius: isCompact ? 16 : 20,
                                     backgroundColor: colors.SUCCESS + '15',
                                     justifyContent: 'center',
                                     alignItems: 'center',
-                                    marginLeft: 10,
+                                    marginLeft: isCompact ? 8 : 10,
                                 }}
                             >
                                 <IconComponent
                                     name='check'
                                     family='font-awesome'
-                                    size={18}
+                                    size={isCompact ? 14 : 18}
                                     color={colors.SUCCESS}
                                 />
                             </TouchableOpacity>
