@@ -49,15 +49,27 @@ export const AuthProvider = ({ children }) => {
         webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID?.substring(0, 20) + '...',
     });
 
+    // Get the appropriate redirect URI for native OAuth flows
+    const getRedirectUri = () => {
+        if (Platform.OS === 'ios') {
+            // iOS: Use reversed iOS client ID
+            const clientId = process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID?.split('-')[0];
+            return `com.googleusercontent.apps.${clientId}:/oauth2redirect`;
+        } else if (Platform.OS === 'android') {
+            // Android: Use reversed Android client ID
+            const clientId = process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID?.split('-')[0];
+            return `com.googleusercontent.apps.${clientId}:/oauth2redirect`;
+        }
+        return undefined; // Web will use default
+    };
+
     const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
         expoClientId: process.env.EXPO_PUBLIC_GOOGLE_EXPO_CLIENT_ID,
         iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
         androidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID,
         webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
-        // Use the reversed iOS client ID as the redirect URI (native iOS OAuth flow)
-        redirectUri: Platform.OS === 'ios' 
-            ? `com.googleusercontent.apps.${process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID?.split('-')[0]}:/oauth2redirect`
-            : undefined,
+        // Use the native redirect URI format for iOS and Android
+        redirectUri: getRedirectUri(),
     });
 
     // Debug: Log OAuth request initialization
