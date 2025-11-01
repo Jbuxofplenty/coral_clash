@@ -103,23 +103,14 @@ function Login({ navigation }) {
     };
 
     const handleGoogleSignIn = async () => {
-        console.log('🔑 [Login.js] handleGoogleSignIn started');
         setLoading(true);
         setError('');
         setSuccessMessage('');
         try {
-            console.log('🔑 [Login.js] Calling signInWithGoogle()...');
-            const result = await signInWithGoogle();
-            console.log('🔑 [Login.js] signInWithGoogle completed:', result);
+            await signInWithGoogle();
         } catch (err) {
-            console.error('❌ [Login.js] handleGoogleSignIn error:', {
-                message: err.message,
-                code: err.code,
-                fullError: err,
-            });
             setError(err.message || 'Google sign-in failed');
         } finally {
-            console.log('🔑 [Login.js] handleGoogleSignIn finished');
             setLoading(false);
         }
     };
