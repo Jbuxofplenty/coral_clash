@@ -24,7 +24,6 @@ function Login({ navigation }) {
         signIn,
         signUp,
         signInWithGoogle,
-        googleSignInAvailable,
         resetPassword,
         loading: authLoading,
         error: authError,
@@ -216,32 +215,23 @@ function Login({ navigation }) {
                                                     backgroundColor: colors.CARD_BACKGROUND,
                                                     borderColor: colors.BORDER_COLOR,
                                                 },
-                                                !googleSignInAvailable &&
-                                                    styles.googleButtonDisabled,
                                             ]}
                                             onPress={handleGoogleSignIn}
-                                            disabled={
-                                                !googleSignInAvailable || loading || authLoading
-                                            }
+                                            disabled={loading || authLoading}
                                         >
                                             <Ionicons
                                                 name='logo-google'
                                                 size={24}
-                                                color={googleSignInAvailable ? '#DB4437' : '#ccc'}
+                                                color='#DB4437'
                                             />
                                             <Text
                                                 size={moderateScale(16)}
                                                 color={colors.TEXT}
-                                                style={[
-                                                    styles.googleButtonText,
-                                                    !googleSignInAvailable &&
-                                                        styles.googleButtonTextDisabled,
-                                                ]}
+                                                style={styles.googleButtonText}
                                             >
                                                 {isSignUp
                                                     ? 'Sign up with Google'
                                                     : 'Sign in with Google'}
-                                                {!googleSignInAvailable && ' (Production only)'}
                                             </Text>
                                         </TouchableOpacity>
 
@@ -511,12 +501,6 @@ const styles = StyleSheet.create({
     googleButtonText: {
         marginLeft: theme.SIZES.BASE,
         fontWeight: '600',
-    },
-    googleButtonDisabled: {
-        opacity: 0.5,
-    },
-    googleButtonTextDisabled: {
-        opacity: 0.5,
     },
 });
 

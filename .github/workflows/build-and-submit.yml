@@ -89,6 +89,13 @@ jobs:
           echo "APP_STORE_CONNECT_API_KEY_KEY_ID=${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}" >> $GITHUB_ENV
           echo "APP_STORE_CONNECT_API_KEY_ISSUER_ID=${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}" >> $GITHUB_ENV
 
+      - name: Restore Firebase Service Files
+        run: |
+          echo "📄 Restoring Firebase service files..."
+          echo "${{ secrets.GOOGLE_SERVICES_JSON }}" | base64 -d > google-services.json
+          echo "${{ secrets.GOOGLE_SERVICE_INFO_PLIST }}" | base64 -d > GoogleService-Info.plist
+          echo "✅ Firebase service files restored"
+
       - name: Run Expo Prebuild for iOS
         run: npx expo prebuild --platform ios --clean
 
@@ -221,6 +228,13 @@ jobs:
 
       - name: Install dependencies
         run: yarn install --frozen-lockfile
+
+      - name: Restore Firebase Service Files
+        run: |
+          echo "📄 Restoring Firebase service files..."
+          echo "${{ secrets.GOOGLE_SERVICES_JSON }}" | base64 -d > google-services.json
+          echo "${{ secrets.GOOGLE_SERVICE_INFO_PLIST }}" | base64 -d > GoogleService-Info.plist
+          echo "✅ Firebase service files restored"
 
       - name: Run Expo Prebuild for Android
         run: npx expo prebuild --platform android --clean

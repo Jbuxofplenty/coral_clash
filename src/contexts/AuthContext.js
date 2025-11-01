@@ -1,6 +1,4 @@
-import * as Google from 'expo-auth-session/providers/google';
-import Constants from 'expo-constants';
-import * as WebBrowser from 'expo-web-browser';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import {
     GoogleAuthProvider,
     createUserWithEmailAndPassword,
@@ -13,11 +11,7 @@ import {
 } from 'firebase/auth';
 import { doc, getDoc, onSnapshot, setDoc } from 'firebase/firestore';
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { Platform } from 'react-native';
 import { auth, db } from '../config/firebase';
-
-// Required for Google Sign-In on web
-WebBrowser.maybeCompleteAuthSession();
 
 const AuthContext = createContext({});
 
@@ -34,47 +28,14 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // Google Sign-In configuration
-    // Only available in production builds, not Expo Go
-    const isExpoGo = Constants.executionEnvironment === 'storeClient';
-    const googleSignInAvailable = !isExpoGo;
-
-    // Debug: Log OAuth configuration
-    console.log('🔑 Google OAuth Configuration:', {
-        isExpoGo,
-        googleSignInAvailable,
-        expoClientId: process.env.EXPO_PUBLIC_GOOGLE_EXPO_CLIENT_ID?.substring(0, 20) + '...',
-        iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID?.substring(0, 20) + '...',
-        androidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID?.substring(0, 20) + '...',
-        webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID?.substring(0, 20) + '...',
-    });
-
-    // Get the appropriate redirect URI for native OAuth flows
-    const getRedirectUri = () => {
-        if (Platform.OS === 'ios') {
-            // iOS: Use reversed iOS client ID (everything before .apps.googleusercontent.com)
-            const clientId = process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID?.split(
-                '.apps.googleusercontent.com',
-            )[0];
-            return `com.googleusercontent.apps.${clientId}:/oauth2redirect`;
-        } else if (Platform.OS === 'android') {
-            // Android: Use reversed Android client ID (everything before .apps.googleusercontent.com)
-            const clientId = process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID?.split(
-                '.apps.googleusercontent.com',
-            )[0];
-            return `com.googleusercontent.apps.${clientId}:/oauth2redirect`;
-        }
-        return undefined; // Web will use default
-    };
-
-    const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
-        expoClientId: process.env.EXPO_PUBLIC_GOOGLE_EXPO_CLIENT_ID,
-        iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
-        androidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID,
-        webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
-        // Use the native redirect URI format for iOS and Android
-        redirectUri: getRedirectUri(),
-    });
+    // Configure Google Sign-In
+    useEffect(() => {
+        GoogleSignin.configure({
+            webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
+            iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
+            offlineAccess: true,
+        });
+    }, []);
 
     useEffect(() => {
         let userDataUnsubscribe = null;
@@ -150,47 +111,6 @@ export const AuthProvider = ({ children }) => {
         };
     }, []);
 
-    // Handle Google Sign-In response
-    useEffect(() => {
-        if (response?.type === 'success') {
-            const { id_token } = response.params;
-            const credential = GoogleAuthProvider.credential(id_token);
-            signInWithCredential(auth, credential)
-                .then(async (userCredential) => {
-                    // Check if this is a new user and create Firestore document
-                    const userDoc = await getDoc(doc(db, 'users', userCredential.user.uid));
-                    if (!userDoc.exists()) {
-                        // Create the basic user document
-                        // The Firestore trigger will automatically add discriminator and default settings
-                        await setDoc(doc(db, 'users', userCredential.user.uid), {
-                            displayName: userCredential.user.displayName,
-                            email: userCredential.user.email,
-                            photoURL: userCredential.user.photoURL,
-                            createdAt: new Date().toISOString(),
-                            stats: {
-                                gamesPlayed: 0,
-                                gamesWon: 0,
-                                gamesLost: 0,
-                                gamesDraw: 0,
-                            },
-                            friends: [],
-                        });
-
-                        // Wait for discriminator and settings to be assigned by Firestore trigger
-                        setTimeout(() => {
-                            refreshUserData();
-                        }, 500);
-                    }
-                })
-                .catch((error) => {
-                    console.error('Google Sign-In Error:', error.message);
-                    setError(error.message);
-                });
-        } else if (response?.type === 'error') {
-            setError(response.error?.message || 'Google sign-in failed');
-        }
-    }, [response]);
-
     const signUp = async (email, password, displayName) => {
         try {
             setError(null);
@@ -239,21 +159,54 @@ export const AuthProvider = ({ children }) => {
     };
 
     const signInWithGoogle = async () => {
-        if (!googleSignInAvailable) {
-            const error =
-                'Google Sign-In is only available in production builds. Use email/password sign-in for development.';
-            setError(error);
-            throw new Error(error);
-        }
-
         try {
             setError(null);
 
-            if (!request) {
-                console.error('❌ OAuth request not ready');
-                throw new Error('OAuth request not initialized');
+            // Check if Google Play Services are available (Android only)
+            await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+
+            // Sign in with Google
+            const userInfo = await GoogleSignin.signIn();
+
+            // Get the ID token
+            const idToken = userInfo.data?.idToken;
+
+            if (!idToken) {
+                throw new Error('No ID token received from Google Sign-In');
             }
-            await promptAsync();
+
+            // Create Firebase credential
+            const credential = GoogleAuthProvider.credential(idToken);
+
+            // Sign in to Firebase
+            const userCredential = await signInWithCredential(auth, credential);
+
+            // Check if this is a new user and create Firestore document
+            const userDoc = await getDoc(doc(db, 'users', userCredential.user.uid));
+            if (!userDoc.exists()) {
+                // Create the basic user document
+                // The Firestore trigger will automatically add discriminator and default settings
+                await setDoc(doc(db, 'users', userCredential.user.uid), {
+                    displayName: userCredential.user.displayName,
+                    email: userCredential.user.email,
+                    photoURL: userCredential.user.photoURL,
+                    createdAt: new Date().toISOString(),
+                    stats: {
+                        gamesPlayed: 0,
+                        gamesWon: 0,
+                        gamesLost: 0,
+                        gamesDraw: 0,
+                    },
+                    friends: [],
+                });
+
+                // Wait for discriminator and settings to be assigned by Firestore trigger
+                setTimeout(() => {
+                    refreshUserData();
+                }, 500);
+            }
+
+            return userCredential.user;
         } catch (error) {
             console.error('❌ signInWithGoogle error:', error);
             setError(error.message);
@@ -274,6 +227,12 @@ export const AuthProvider = ({ children }) => {
     const logOut = async () => {
         try {
             setError(null);
+            // Sign out from Google if signed in
+            const isSignedIn = await GoogleSignin.isSignedIn();
+            if (isSignedIn) {
+                await GoogleSignin.signOut();
+            }
+            // Sign out from Firebase
             await signOut(auth);
         } catch (err) {
             setError(err.message);
@@ -316,7 +275,6 @@ export const AuthProvider = ({ children }) => {
         signUp,
         signIn,
         signInWithGoogle,
-        googleSignInAvailable,
         resetPassword,
         logOut,
         refreshUserData,

@@ -85,3 +85,7 @@ RGCRWYWHJ8.json
 credentials.json
 dist/
 client_secret_*.apps.googleusercontent.com.json
+
+# Google sign in
+google-services.json
+GoogleService-Info.plist
