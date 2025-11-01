@@ -97,9 +97,21 @@ jobs:
           cd ios
           pod install
 
-      - name: Configure Node Binary for Xcode
+      - name: Configure Node Binary and Skip Auto-Bundling
         run: |
           echo "export NODE_BINARY=$(command -v node)" > ios/.xcode.env.local
+          # Skip Xcode's bundling phase since we'll bundle explicitly first
+          echo "export SKIP_BUNDLING=1" >> ios/.xcode.env.local
+
+      - name: Bundle JavaScript with Metro
+        run: |
+          # Use npx react-native to bundle (what Xcode would normally do)
+          npx react-native bundle \
+            --entry-file node_modules/expo/AppEntry.js \
+            --platform ios \
+            --dev false \
+            --bundle-output ios/main.jsbundle \
+            --assets-dest ios
 
       - name: Build and Submit to TestFlight (Preview)
         if: inputs.profile == 'preview'
