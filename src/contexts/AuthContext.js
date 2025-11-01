@@ -168,6 +168,12 @@ export const AuthProvider = ({ children }) => {
             // Sign in with Google
             const userInfo = await GoogleSignin.signIn();
 
+            // Check if user cancelled (library returns { type: 'cancelled', data: null })
+            if (!userInfo || userInfo.type === 'cancelled') {
+                console.log('User cancelled Google Sign-In');
+                return null;
+            }
+
             // Get the ID token
             const idToken = userInfo.data?.idToken;
 
@@ -208,6 +214,22 @@ export const AuthProvider = ({ children }) => {
 
             return userCredential.user;
         } catch (error) {
+            // Check if user cancelled the sign-in flow
+            // GoogleSignin errors can have different structures
+            const errorCode = error.code || error.statusCode || error.toString();
+            const isCancellation =
+                errorCode === 'SIGN_IN_CANCELLED' ||
+                errorCode === '-5' ||
+                errorCode === 12501 || // Android cancellation code
+                error.message?.includes('SIGN_IN_CANCELLED') ||
+                error.message?.includes('cancelled') ||
+                error.message?.includes('canceled');
+
+            if (isCancellation) {
+                console.log('User cancelled Google Sign-In');
+                return null; // Don't show error for user cancellation
+            }
+
             console.error('❌ signInWithGoogle error:', error);
             setError(error.message);
             throw error;

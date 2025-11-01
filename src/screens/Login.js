@@ -106,7 +106,11 @@ function Login({ navigation }) {
         setError('');
         setSuccessMessage('');
         try {
-            await signInWithGoogle();
+            const result = await signInWithGoogle();
+            // If result is null, user cancelled - no error needed
+            if (result === null) {
+                console.log('User cancelled Google Sign-In');
+            }
         } catch (err) {
             setError(err.message || 'Google sign-in failed');
         } finally {
