@@ -3,6 +3,7 @@
         "name": "Coral Clash",
         "description": "Coral Clash Board Game",
         "slug": "coral-clash",
+        "scheme": "coralclash",
         "platforms": ["ios", "android"],
         "version": "1.0.0",
         "orientation": "default",
@@ -47,6 +48,9 @@
                         {
                             "scheme": "https",
                             "host": "coral-clash.firebaseapp.com"
+                        },
+                        {
+                            "scheme": "coralclash"
                         }
                     ],
                     "category": ["BROWSABLE", "DEFAULT"]
