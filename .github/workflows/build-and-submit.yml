@@ -100,15 +100,16 @@ jobs:
         run: |
           echo "📝 Restoring .env file for ${{ inputs.profile }} environment..."
           if [ "${{ inputs.profile }}" == "preview" ]; then
-            cat > .env << 'ENV_FILE_EOF'
-          ${{ secrets.STAGING_ENV_FILE }}
-          ENV_FILE_EOF
+            printf "%s\n" "${{ secrets.STAGING_ENV_FILE }}" > .env
           else
-            cat > .env << 'ENV_FILE_EOF'
-          ${{ secrets.PRODUCTION_ENV_FILE }}
-          ENV_FILE_EOF
+            printf "%s\n" "${{ secrets.PRODUCTION_ENV_FILE }}" > .env
           fi
           echo "✅ .env file restored"
+          
+          # Debug: Show file was created and has content
+          echo "🔍 Debug: .env file info..."
+          wc -l .env
+          head -2 .env | sed 's/=.*/=***/'
           
           # Load environment variables into GitHub Actions environment
           echo "🔧 Loading environment variables..."
@@ -228,15 +229,16 @@ jobs:
         run: |
           echo "📝 Restoring .env file for ${{ inputs.profile }} environment..."
           if [ "${{ inputs.profile }}" == "preview" ]; then
-            cat > .env << 'ENV_FILE_EOF'
-          ${{ secrets.STAGING_ENV_FILE }}
-          ENV_FILE_EOF
+            printf "%s\n" "${{ secrets.STAGING_ENV_FILE }}" > .env
           else
-            cat > .env << 'ENV_FILE_EOF'
-          ${{ secrets.PRODUCTION_ENV_FILE }}
-          ENV_FILE_EOF
+            printf "%s\n" "${{ secrets.PRODUCTION_ENV_FILE }}" > .env
           fi
           echo "✅ .env file restored"
+          
+          # Debug: Show file was created and has content
+          echo "🔍 Debug: .env file info..."
+          wc -l .env
+          head -2 .env | sed 's/=.*/=***/'
           
           # Load environment variables into GitHub Actions environment
           echo "🔧 Loading environment variables..."
