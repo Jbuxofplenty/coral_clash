@@ -185,6 +185,42 @@ describe('Game State Snapshot and Restore', () => {
             }
         });
 
+        it('should use getStartingRole() for starting position instead of snapshot roles', () => {
+            const game1 = new CoralClash();
+            
+            // Create a snapshot at starting position
+            const snapshot = createGameSnapshot(game1);
+            
+            // Manually corrupt the pieceRoles in the snapshot (simulating old saved data)
+            snapshot.pieceRoles = {
+                c1: 'hunter', // Should be gatherer
+                f1: 'hunter', // Should be gatherer
+                a1: 'gatherer', // Should be hunter
+            };
+            
+            const game2 = new CoralClash();
+            restoreGameFromSnapshot(game2, snapshot);
+            
+            // Verify that correct roles were assigned from getStartingRole(), not from snapshot
+            const c1Piece = game2.get('c1');
+            expect(c1Piece).toBeTruthy();
+            if (c1Piece) {
+                expect(c1Piece.role).toBe('gatherer'); // Should be gatherer, not hunter
+            }
+            
+            const f1Piece = game2.get('f1');
+            expect(f1Piece).toBeTruthy();
+            if (f1Piece) {
+                expect(f1Piece.role).toBe('gatherer'); // Should be gatherer, not hunter
+            }
+            
+            const a1Piece = game2.get('a1');
+            expect(a1Piece).toBeTruthy();
+            if (a1Piece) {
+                expect(a1Piece.role).toBe('hunter'); // Should be hunter, not gatherer
+            }
+        });
+
         it('should restore coral state', () => {
             const game1 = new CoralClash();
 
