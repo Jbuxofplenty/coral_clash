@@ -100,9 +100,13 @@ jobs:
         run: |
           echo "📝 Restoring .env file for ${{ inputs.profile }} environment..."
           if [ "${{ inputs.profile }}" == "preview" ]; then
-            echo "${{ secrets.STAGING_ENV_FILE }}" > .env
+            cat > .env << 'ENV_FILE_EOF'
+          ${{ secrets.STAGING_ENV_FILE }}
+          ENV_FILE_EOF
           else
-            echo "${{ secrets.PRODUCTION_ENV_FILE }}" > .env
+            cat > .env << 'ENV_FILE_EOF'
+          ${{ secrets.PRODUCTION_ENV_FILE }}
+          ENV_FILE_EOF
           fi
           echo "✅ .env file restored"
           
@@ -224,9 +228,13 @@ jobs:
         run: |
           echo "📝 Restoring .env file for ${{ inputs.profile }} environment..."
           if [ "${{ inputs.profile }}" == "preview" ]; then
-            echo "${{ secrets.STAGING_ENV_FILE }}" > .env
+            cat > .env << 'ENV_FILE_EOF'
+          ${{ secrets.STAGING_ENV_FILE }}
+          ENV_FILE_EOF
           else
-            echo "${{ secrets.PRODUCTION_ENV_FILE }}" > .env
+            cat > .env << 'ENV_FILE_EOF'
+          ${{ secrets.PRODUCTION_ENV_FILE }}
+          ENV_FILE_EOF
           fi
           echo "✅ .env file restored"
           
