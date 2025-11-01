@@ -25,6 +25,11 @@ on:
           - android
           - all
 
+# Prevent concurrent deployments - cancel in-progress runs when new one starts
+concurrency:
+  group: staging-deployment
+  cancel-in-progress: true
+
 jobs:
   test:
     name: Run Tests
