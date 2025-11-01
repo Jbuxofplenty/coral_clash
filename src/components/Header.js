@@ -2,7 +2,7 @@ import { useNavigation } from '@react-navigation/native';
 import { Block, NavBar, theme } from 'galio-framework';
 
 import React from 'react';
-import { Platform, StyleSheet, TouchableOpacity } from 'react-native';
+import { StyleSheet, TouchableOpacity } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useAuth, useTheme } from '../contexts';
@@ -56,7 +56,7 @@ function Header({ back, title, transparent }) {
                 right={renderRight()}
                 rightStyle={{
                     alignItems: 'center',
-                    ...(Platform.OS === 'android' && { flex: 0.3 }),
+                    flex: 0.3,
                 }}
                 leftStyle={{ flex: 0.3, paddingTop: 2 }}
                 leftIconName={back ? 'chevron-left' : 'menu'}
