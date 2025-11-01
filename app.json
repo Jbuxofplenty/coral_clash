@@ -28,6 +28,7 @@
                 "CFBundleURLTypes": [
                     {
                         "CFBundleURLSchemes": [
+                            "coralclash",
                             "com.googleusercontent.apps.796262519653-kpb392l6mqjfb3rf2jic67tpkdfq9i59"
                         ]
                     }
