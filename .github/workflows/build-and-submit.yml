@@ -46,6 +46,24 @@ jobs:
     if: inputs.platform == 'ios' || inputs.platform == 'all'
     runs-on: macos-latest
     environment: ${{ inputs.environment }}
+    env:
+      # Set environment variables for entire job based on profile
+      # These are needed for prebuild, bundling, and native code compilation
+      EXPO_PUBLIC_FIREBASE_API_KEY: ${{ inputs.profile == 'preview' && secrets.STAGING_EXPO_PUBLIC_FIREBASE_API_KEY || secrets.PRODUCTION_EXPO_PUBLIC_FIREBASE_API_KEY }}
+      EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN: ${{ inputs.profile == 'preview' && secrets.STAGING_EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN || secrets.PRODUCTION_EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN }}
+      EXPO_PUBLIC_FIREBASE_DATABASE_URL: ${{ inputs.profile == 'preview' && secrets.STAGING_EXPO_PUBLIC_FIREBASE_DATABASE_URL || secrets.PRODUCTION_EXPO_PUBLIC_FIREBASE_DATABASE_URL }}
+      EXPO_PUBLIC_FIREBASE_PROJECT_ID: ${{ inputs.profile == 'preview' && secrets.STAGING_EXPO_PUBLIC_FIREBASE_PROJECT_ID || secrets.PRODUCTION_EXPO_PUBLIC_FIREBASE_PROJECT_ID }}
+      EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET: ${{ inputs.profile == 'preview' && secrets.STAGING_EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET || secrets.PRODUCTION_EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET }}
+      EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: ${{ inputs.profile == 'preview' && secrets.STAGING_EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || secrets.PRODUCTION_EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID }}
+      EXPO_PUBLIC_FIREBASE_APP_ID: ${{ inputs.profile == 'preview' && secrets.STAGING_EXPO_PUBLIC_FIREBASE_APP_ID || secrets.PRODUCTION_EXPO_PUBLIC_FIREBASE_APP_ID }}
+      EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID: ${{ inputs.profile == 'preview' && secrets.STAGING_EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID || secrets.PRODUCTION_EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID }}
+      EXPO_PUBLIC_FIREBASE_FUNCTIONS_URL: ${{ inputs.profile == 'preview' && secrets.STAGING_EXPO_PUBLIC_FIREBASE_FUNCTIONS_URL || secrets.PRODUCTION_EXPO_PUBLIC_FIREBASE_FUNCTIONS_URL }}
+      EXPO_PUBLIC_USE_FIREBASE_EMULATOR: ${{ inputs.profile == 'preview' && secrets.STAGING_EXPO_PUBLIC_USE_FIREBASE_EMULATOR || secrets.PRODUCTION_EXPO_PUBLIC_USE_FIREBASE_EMULATOR }}
+      EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID: ${{ inputs.profile == 'preview' && secrets.STAGING_EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID || secrets.PRODUCTION_EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID }}
+      EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID: ${{ inputs.profile == 'preview' && secrets.STAGING_EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID || secrets.PRODUCTION_EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID }}
+      EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID: ${{ inputs.profile == 'preview' && secrets.STAGING_EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID || secrets.PRODUCTION_EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID }}
+      EXPO_PUBLIC_GOOGLE_EXPO_CLIENT_ID: ${{ inputs.profile == 'preview' && secrets.STAGING_EXPO_PUBLIC_GOOGLE_EXPO_CLIENT_ID || secrets.PRODUCTION_EXPO_PUBLIC_GOOGLE_EXPO_CLIENT_ID }}
+      EXPO_PUBLIC_ENABLE_DEV_FEATURES: ${{ inputs.profile == 'preview' && secrets.STAGING_EXPO_PUBLIC_ENABLE_DEV_FEATURES || secrets.PRODUCTION_EXPO_PUBLIC_ENABLE_DEV_FEATURES }}
     
     steps:
       - name: Checkout code
@@ -97,60 +115,21 @@ jobs:
           echo "✅ Firebase service files restored"
 
       - name: Run Expo Prebuild for iOS
-        run: npx expo prebuild --platform ios --clean
+        run: |
+          echo "🔨 Running Expo prebuild for iOS with ${{ inputs.profile }} environment variables..."
+          npx expo prebuild --platform ios --clean
+          echo "✅ Expo prebuild complete"
 
       - name: Install CocoaPods
         run: |
           cd ios
           pod install
 
-      - name: Bundle JavaScript with Expo (iOS)
-        if: inputs.profile == 'preview'
-        env:
-          # Staging environment variables - Expo will bake these into the bundle
-          EXPO_PUBLIC_FIREBASE_API_KEY: ${{ secrets.STAGING_EXPO_PUBLIC_FIREBASE_API_KEY }}
-          EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN: ${{ secrets.STAGING_EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN }}
-          EXPO_PUBLIC_FIREBASE_DATABASE_URL: ${{ secrets.STAGING_EXPO_PUBLIC_FIREBASE_DATABASE_URL }}
-          EXPO_PUBLIC_FIREBASE_PROJECT_ID: ${{ secrets.STAGING_EXPO_PUBLIC_FIREBASE_PROJECT_ID }}
-          EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET: ${{ secrets.STAGING_EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET }}
-          EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.STAGING_EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID }}
-          EXPO_PUBLIC_FIREBASE_APP_ID: ${{ secrets.STAGING_EXPO_PUBLIC_FIREBASE_APP_ID }}
-          EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID: ${{ secrets.STAGING_EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID }}
-          EXPO_PUBLIC_FIREBASE_FUNCTIONS_URL: ${{ secrets.STAGING_EXPO_PUBLIC_FIREBASE_FUNCTIONS_URL }}
-          EXPO_PUBLIC_USE_FIREBASE_EMULATOR: ${{ secrets.STAGING_EXPO_PUBLIC_USE_FIREBASE_EMULATOR }}
-          EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID: ${{ secrets.STAGING_EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID }}
-          EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID: ${{ secrets.STAGING_EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID }}
-          EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID: ${{ secrets.STAGING_EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID }}
-          EXPO_PUBLIC_GOOGLE_EXPO_CLIENT_ID: ${{ secrets.STAGING_EXPO_PUBLIC_GOOGLE_EXPO_CLIENT_ID }}
-          EXPO_PUBLIC_ENABLE_DEV_FEATURES: ${{ secrets.STAGING_EXPO_PUBLIC_ENABLE_DEV_FEATURES }}
+      - name: Bundle JavaScript with Expo
         run: |
-          echo "📦 Bundling JavaScript for iOS (staging)..."
+          echo "📦 Bundling JavaScript for iOS (${{ inputs.profile }})..."
           npx expo export:embed --eager --platform ios --dev false
-          echo "✅ iOS JavaScript bundle created with staging environment variables"
-
-      - name: Bundle JavaScript with Expo (iOS Production)
-        if: inputs.profile == 'production'
-        env:
-          # Production environment variables - Expo will bake these into the bundle
-          EXPO_PUBLIC_FIREBASE_API_KEY: ${{ secrets.PRODUCTION_EXPO_PUBLIC_FIREBASE_API_KEY }}
-          EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN: ${{ secrets.PRODUCTION_EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN }}
-          EXPO_PUBLIC_FIREBASE_DATABASE_URL: ${{ secrets.PRODUCTION_EXPO_PUBLIC_FIREBASE_DATABASE_URL }}
-          EXPO_PUBLIC_FIREBASE_PROJECT_ID: ${{ secrets.PRODUCTION_EXPO_PUBLIC_FIREBASE_PROJECT_ID }}
-          EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET: ${{ secrets.PRODUCTION_EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET }}
-          EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.PRODUCTION_EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID }}
-          EXPO_PUBLIC_FIREBASE_APP_ID: ${{ secrets.PRODUCTION_EXPO_PUBLIC_FIREBASE_APP_ID }}
-          EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID: ${{ secrets.PRODUCTION_EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID }}
-          EXPO_PUBLIC_FIREBASE_FUNCTIONS_URL: ${{ secrets.PRODUCTION_EXPO_PUBLIC_FIREBASE_FUNCTIONS_URL }}
-          EXPO_PUBLIC_USE_FIREBASE_EMULATOR: ${{ secrets.PRODUCTION_EXPO_PUBLIC_USE_FIREBASE_EMULATOR }}
-          EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID: ${{ secrets.PRODUCTION_EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID }}
-          EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID: ${{ secrets.PRODUCTION_EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID }}
-          EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID: ${{ secrets.PRODUCTION_EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID }}
-          EXPO_PUBLIC_GOOGLE_EXPO_CLIENT_ID: ${{ secrets.PRODUCTION_EXPO_PUBLIC_GOOGLE_EXPO_CLIENT_ID }}
-          EXPO_PUBLIC_ENABLE_DEV_FEATURES: ${{ secrets.PRODUCTION_EXPO_PUBLIC_ENABLE_DEV_FEATURES }}
-        run: |
-          echo "📦 Bundling JavaScript for iOS (production)..."
-          npx expo export:embed --eager --platform ios --dev false
-          echo "✅ iOS JavaScript bundle created with production environment variables"
+          echo "✅ iOS JavaScript bundle created with ${{ inputs.profile }} environment variables"
 
       - name: Build and Submit to TestFlight (Preview)
         if: inputs.profile == 'preview'
@@ -203,6 +182,24 @@ jobs:
     if: inputs.platform == 'android' || inputs.platform == 'all'
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
+    env:
+      # Set environment variables for entire job based on profile
+      # These are needed for prebuild, bundling, and native code compilation
+      EXPO_PUBLIC_FIREBASE_API_KEY: ${{ inputs.profile == 'preview' && secrets.STAGING_EXPO_PUBLIC_FIREBASE_API_KEY || secrets.PRODUCTION_EXPO_PUBLIC_FIREBASE_API_KEY }}
+      EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN: ${{ inputs.profile == 'preview' && secrets.STAGING_EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN || secrets.PRODUCTION_EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN }}
+      EXPO_PUBLIC_FIREBASE_DATABASE_URL: ${{ inputs.profile == 'preview' && secrets.STAGING_EXPO_PUBLIC_FIREBASE_DATABASE_URL || secrets.PRODUCTION_EXPO_PUBLIC_FIREBASE_DATABASE_URL }}
+      EXPO_PUBLIC_FIREBASE_PROJECT_ID: ${{ inputs.profile == 'preview' && secrets.STAGING_EXPO_PUBLIC_FIREBASE_PROJECT_ID || secrets.PRODUCTION_EXPO_PUBLIC_FIREBASE_PROJECT_ID }}
+      EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET: ${{ inputs.profile == 'preview' && secrets.STAGING_EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET || secrets.PRODUCTION_EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET }}
+      EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: ${{ inputs.profile == 'preview' && secrets.STAGING_EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || secrets.PRODUCTION_EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID }}
+      EXPO_PUBLIC_FIREBASE_APP_ID: ${{ inputs.profile == 'preview' && secrets.STAGING_EXPO_PUBLIC_FIREBASE_APP_ID || secrets.PRODUCTION_EXPO_PUBLIC_FIREBASE_APP_ID }}
+      EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID: ${{ inputs.profile == 'preview' && secrets.STAGING_EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID || secrets.PRODUCTION_EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID }}
+      EXPO_PUBLIC_FIREBASE_FUNCTIONS_URL: ${{ inputs.profile == 'preview' && secrets.STAGING_EXPO_PUBLIC_FIREBASE_FUNCTIONS_URL || secrets.PRODUCTION_EXPO_PUBLIC_FIREBASE_FUNCTIONS_URL }}
+      EXPO_PUBLIC_USE_FIREBASE_EMULATOR: ${{ inputs.profile == 'preview' && secrets.STAGING_EXPO_PUBLIC_USE_FIREBASE_EMULATOR || secrets.PRODUCTION_EXPO_PUBLIC_USE_FIREBASE_EMULATOR }}
+      EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID: ${{ inputs.profile == 'preview' && secrets.STAGING_EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID || secrets.PRODUCTION_EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID }}
+      EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID: ${{ inputs.profile == 'preview' && secrets.STAGING_EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID || secrets.PRODUCTION_EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID }}
+      EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID: ${{ inputs.profile == 'preview' && secrets.STAGING_EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID || secrets.PRODUCTION_EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID }}
+      EXPO_PUBLIC_GOOGLE_EXPO_CLIENT_ID: ${{ inputs.profile == 'preview' && secrets.STAGING_EXPO_PUBLIC_GOOGLE_EXPO_CLIENT_ID || secrets.PRODUCTION_EXPO_PUBLIC_GOOGLE_EXPO_CLIENT_ID }}
+      EXPO_PUBLIC_ENABLE_DEV_FEATURES: ${{ inputs.profile == 'preview' && secrets.STAGING_EXPO_PUBLIC_ENABLE_DEV_FEATURES || secrets.PRODUCTION_EXPO_PUBLIC_ENABLE_DEV_FEATURES }}
     
     steps:
       - name: Checkout code
@@ -237,7 +234,10 @@ jobs:
           echo "✅ Firebase service files restored"
 
       - name: Run Expo Prebuild for Android
-        run: npx expo prebuild --platform android --clean
+        run: |
+          echo "🔨 Running Expo prebuild for Android with ${{ inputs.profile }} environment variables..."
+          npx expo prebuild --platform android --clean
+          echo "✅ Expo prebuild complete"
 
       - name: Configure Dynamic Version Code
         run: |
@@ -260,53 +260,11 @@ jobs:
           echo '${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}' > google-play-key.json
           echo "GOOGLE_PLAY_JSON_KEY_PATH=${{ github.workspace }}/google-play-key.json" >> $GITHUB_ENV
 
-      - name: Bundle JavaScript with Expo (Android)
-        if: inputs.profile == 'preview'
-        env:
-          # Staging environment variables - Expo will bake these into the bundle
-          EXPO_PUBLIC_FIREBASE_API_KEY: ${{ secrets.STAGING_EXPO_PUBLIC_FIREBASE_API_KEY }}
-          EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN: ${{ secrets.STAGING_EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN }}
-          EXPO_PUBLIC_FIREBASE_DATABASE_URL: ${{ secrets.STAGING_EXPO_PUBLIC_FIREBASE_DATABASE_URL }}
-          EXPO_PUBLIC_FIREBASE_PROJECT_ID: ${{ secrets.STAGING_EXPO_PUBLIC_FIREBASE_PROJECT_ID }}
-          EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET: ${{ secrets.STAGING_EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET }}
-          EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.STAGING_EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID }}
-          EXPO_PUBLIC_FIREBASE_APP_ID: ${{ secrets.STAGING_EXPO_PUBLIC_FIREBASE_APP_ID }}
-          EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID: ${{ secrets.STAGING_EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID }}
-          EXPO_PUBLIC_FIREBASE_FUNCTIONS_URL: ${{ secrets.STAGING_EXPO_PUBLIC_FIREBASE_FUNCTIONS_URL }}
-          EXPO_PUBLIC_USE_FIREBASE_EMULATOR: ${{ secrets.STAGING_EXPO_PUBLIC_USE_FIREBASE_EMULATOR }}
-          EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID: ${{ secrets.STAGING_EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID }}
-          EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID: ${{ secrets.STAGING_EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID }}
-          EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID: ${{ secrets.STAGING_EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID }}
-          EXPO_PUBLIC_GOOGLE_EXPO_CLIENT_ID: ${{ secrets.STAGING_EXPO_PUBLIC_GOOGLE_EXPO_CLIENT_ID }}
-          EXPO_PUBLIC_ENABLE_DEV_FEATURES: ${{ secrets.STAGING_EXPO_PUBLIC_ENABLE_DEV_FEATURES }}
+      - name: Bundle JavaScript with Expo
         run: |
-          echo "📦 Bundling JavaScript for Android (staging)..."
+          echo "📦 Bundling JavaScript for Android (${{ inputs.profile }})..."
           npx expo export:embed --eager --platform android --dev false
-          echo "✅ Android JavaScript bundle created with staging environment variables"
-
-      - name: Bundle JavaScript with Expo (Android Production)
-        if: inputs.profile == 'production'
-        env:
-          # Production environment variables - Expo will bake these into the bundle
-          EXPO_PUBLIC_FIREBASE_API_KEY: ${{ secrets.PRODUCTION_EXPO_PUBLIC_FIREBASE_API_KEY }}
-          EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN: ${{ secrets.PRODUCTION_EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN }}
-          EXPO_PUBLIC_FIREBASE_DATABASE_URL: ${{ secrets.PRODUCTION_EXPO_PUBLIC_FIREBASE_DATABASE_URL }}
-          EXPO_PUBLIC_FIREBASE_PROJECT_ID: ${{ secrets.PRODUCTION_EXPO_PUBLIC_FIREBASE_PROJECT_ID }}
-          EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET: ${{ secrets.PRODUCTION_EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET }}
-          EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.PRODUCTION_EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID }}
-          EXPO_PUBLIC_FIREBASE_APP_ID: ${{ secrets.PRODUCTION_EXPO_PUBLIC_FIREBASE_APP_ID }}
-          EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID: ${{ secrets.PRODUCTION_EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID }}
-          EXPO_PUBLIC_FIREBASE_FUNCTIONS_URL: ${{ secrets.PRODUCTION_EXPO_PUBLIC_FIREBASE_FUNCTIONS_URL }}
-          EXPO_PUBLIC_USE_FIREBASE_EMULATOR: ${{ secrets.PRODUCTION_EXPO_PUBLIC_USE_FIREBASE_EMULATOR }}
-          EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID: ${{ secrets.PRODUCTION_EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID }}
-          EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID: ${{ secrets.PRODUCTION_EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID }}
-          EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID: ${{ secrets.PRODUCTION_EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID }}
-          EXPO_PUBLIC_GOOGLE_EXPO_CLIENT_ID: ${{ secrets.PRODUCTION_EXPO_PUBLIC_GOOGLE_EXPO_CLIENT_ID }}
-          EXPO_PUBLIC_ENABLE_DEV_FEATURES: ${{ secrets.PRODUCTION_EXPO_PUBLIC_ENABLE_DEV_FEATURES }}
-        run: |
-          echo "📦 Bundling JavaScript for Android (production)..."
-          npx expo export:embed --eager --platform android --dev false
-          echo "✅ Android JavaScript bundle created with production environment variables"
+          echo "✅ Android JavaScript bundle created with ${{ inputs.profile }} environment variables"
 
       - name: Build and Submit to Internal Testing (Preview)
         if: inputs.profile == 'preview'
