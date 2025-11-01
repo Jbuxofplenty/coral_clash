@@ -180,6 +180,9 @@ jobs:
       - name: Run Expo Prebuild for Android
         run: npx expo prebuild --platform android --clean
 
+      - name: Generate JavaScript Bundle
+        run: npx expo export:embed --platform android
+
       - name: Configure Dynamic Version Code
         run: |
           # Update build.gradle to read versionCode from Gradle property
