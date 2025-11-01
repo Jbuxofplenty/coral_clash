@@ -103,6 +103,24 @@ jobs:
           # Skip Xcode's bundling phase since we'll bundle explicitly first
           echo "export SKIP_BUNDLING=1" >> ios/.xcode.env.local
 
+      - name: Create Environment File for Bundle (Preview)
+        if: inputs.profile == 'preview'
+        run: |
+          # Convert JSON secret to .env file - automatically includes ALL variables
+          echo '${{ secrets.STAGING_CLIENT_ENV_JSON }}' | jq -r 'to_entries | .[] | "\(.key)=\(.value)"' > .env
+          echo "✅ Created .env file with staging configuration"
+          echo "Environment variables loaded:"
+          cat .env | sed 's/=.*/=***/' # Show keys but hide values
+
+      - name: Create Environment File for Bundle (Production)
+        if: inputs.profile == 'production'
+        run: |
+          # Convert JSON secret to .env file - automatically includes ALL variables
+          echo '${{ secrets.PRODUCTION_CLIENT_ENV_JSON }}' | jq -r 'to_entries | .[] | "\(.key)=\(.value)"' > .env
+          echo "✅ Created .env file with production configuration"
+          echo "Environment variables loaded:"
+          cat .env | sed 's/=.*/=***/' # Show keys but hide values
+
       - name: Bundle JavaScript with Expo
         run: |
           # Use Expo CLI to generate the JavaScript bundle
@@ -219,6 +237,24 @@ jobs:
         run: |
           echo '${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}' > google-play-key.json
           echo "GOOGLE_PLAY_JSON_KEY_PATH=${{ github.workspace }}/google-play-key.json" >> $GITHUB_ENV
+
+      - name: Create Environment File for Bundle (Preview)
+        if: inputs.profile == 'preview'
+        run: |
+          # Convert JSON secret to .env file - automatically includes ALL variables
+          echo '${{ secrets.STAGING_CLIENT_ENV_JSON }}' | jq -r 'to_entries | .[] | "\(.key)=\(.value)"' > .env
+          echo "✅ Created .env file with staging configuration"
+          echo "Environment variables loaded:"
+          cat .env | sed 's/=.*/=***/' # Show keys but hide values
+
+      - name: Create Environment File for Bundle (Production)
+        if: inputs.profile == 'production'
+        run: |
+          # Convert JSON secret to .env file - automatically includes ALL variables
+          echo '${{ secrets.PRODUCTION_CLIENT_ENV_JSON }}' | jq -r 'to_entries | .[] | "\(.key)=\(.value)"' > .env
+          echo "✅ Created .env file with production configuration"
+          echo "Environment variables loaded:"
+          cat .env | sed 's/=.*/=***/' # Show keys but hide values
 
       - name: Build and Submit to Internal Testing (Preview)
         if: inputs.profile == 'preview'
