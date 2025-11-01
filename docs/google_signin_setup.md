@@ -45,13 +45,13 @@ This guide will help you set up Google Sign-In for Coral Clash.
 4. Enter your Android Package name: `com.jbuxofplenty.coralclash`
 5. Get your SHA-1 certificate fingerprint:
 
-    ```bash
-    # For debug builds
-    keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android -keypass android
+   ```bash
+   # For debug builds
+   keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android -keypass android
 
-    # For release builds (use your keystore)
-    keytool -list -v -keystore path/to/your/keystore -alias your-alias
-    ```
+   # For release builds (use your keystore)
+   keytool -list -v -keystore path/to/your/keystore -alias your-alias
+   ```
 
 6. Enter the SHA-1 fingerprint
 7. Click **Create**
@@ -65,9 +65,9 @@ For testing in Expo Go during development:
 2. Find the **Web client** (created by Firebase)
 3. Edit it
 4. Under **Authorized redirect URIs**, add:
-    ```
-    https://auth.expo.io/@your-expo-username/coral-clash
-    ```
+   ```
+   https://auth.expo.io/@your-expo-username/coral-clash
+   ```
 5. The Web client ID can also be used as `EXPO_PUBLIC_GOOGLE_EXPO_CLIENT_ID`
 
 ## Step 3: Update Environment Variables

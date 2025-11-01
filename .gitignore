@@ -84,3 +84,4 @@ RGCRWYWHJ8.json
 # EAS
 credentials.json
 dist/
+client_secret_*.apps.googleusercontent.com.json
