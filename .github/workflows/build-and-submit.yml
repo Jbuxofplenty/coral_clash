@@ -96,7 +96,7 @@ jobs:
           echo "${{ secrets.GOOGLE_SERVICE_INFO_PLIST }}" | base64 -d > GoogleService-Info.plist
           echo "✅ Firebase service files restored"
 
-      - name: Restore .env file
+      - name: Restore and Load Environment Variables
         run: |
           echo "📝 Restoring .env file for ${{ inputs.profile }} environment..."
           if [ "${{ inputs.profile }}" == "preview" ]; then
@@ -104,21 +104,19 @@ jobs:
           else
             echo "${{ secrets.PRODUCTION_ENV_FILE }}" > .env
           fi
-          echo "✅ .env file restored"
-          echo "🔍 Debug: File has $(wc -l < .env) lines"
-          head -2 .env | sed 's/=.*/=***/'
-
-      - name: Load environment variables from .env
-        uses: xom9ikk/dotenv@v2.3.0
-        with:
-          path: ./
-          load-mode: strict
-
-      - name: Verify environment variables loaded
-        run: |
-          echo "✅ Environment variables loaded"
+          echo "✅ .env file restored ($(wc -l < .env) lines)"
+          
+          # Show first few lines for debugging
+          echo "🔍 Debug: First 3 lines (sanitized):"
+          head -3 .env | sed 's/=.*/=***/'
+          
+          # Export variables to GITHUB_ENV for subsequent steps
+          echo "🔧 Loading environment variables..."
+          cat .env >> $GITHUB_ENV
+          
+          echo "✅ Environment variables loaded to GITHUB_ENV"
           echo "🔍 Debug: Checking loaded variables (sanitized)..."
-          env | grep EXPO_PUBLIC | head -3 | sed 's/=.*/=***/'
+          grep EXPO_PUBLIC .env | head -3 | sed 's/=.*/=***/'
 
       - name: Run Expo Prebuild for iOS
         run: |
@@ -221,7 +219,7 @@ jobs:
           echo "${{ secrets.GOOGLE_SERVICE_INFO_PLIST }}" | base64 -d > GoogleService-Info.plist
           echo "✅ Firebase service files restored"
 
-      - name: Restore .env file
+      - name: Restore and Load Environment Variables
         run: |
           echo "📝 Restoring .env file for ${{ inputs.profile }} environment..."
           if [ "${{ inputs.profile }}" == "preview" ]; then
@@ -229,21 +227,19 @@ jobs:
           else
             echo "${{ secrets.PRODUCTION_ENV_FILE }}" > .env
           fi
-          echo "✅ .env file restored"
-          echo "🔍 Debug: File has $(wc -l < .env) lines"
-          head -2 .env | sed 's/=.*/=***/'
-
-      - name: Load environment variables from .env
-        uses: xom9ikk/dotenv@v2.3.0
-        with:
-          path: ./
-          load-mode: strict
-
-      - name: Verify environment variables loaded
-        run: |
-          echo "✅ Environment variables loaded"
+          echo "✅ .env file restored ($(wc -l < .env) lines)"
+          
+          # Show first few lines for debugging
+          echo "🔍 Debug: First 3 lines (sanitized):"
+          head -3 .env | sed 's/=.*/=***/'
+          
+          # Export variables to GITHUB_ENV for subsequent steps
+          echo "🔧 Loading environment variables..."
+          cat .env >> $GITHUB_ENV
+          
+          echo "✅ Environment variables loaded to GITHUB_ENV"
           echo "🔍 Debug: Checking loaded variables (sanitized)..."
-          env | grep EXPO_PUBLIC | head -3 | sed 's/=.*/=***/'
+          grep EXPO_PUBLIC .env | head -3 | sed 's/=.*/=***/'
 
       - name: Run Expo Prebuild for Android
         run: |
