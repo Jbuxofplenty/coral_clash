@@ -38,12 +38,25 @@ export const AuthProvider = ({ children }) => {
     const isExpoGo = Constants.executionEnvironment === 'storeClient';
     const googleSignInAvailable = !isExpoGo;
 
+    // Debug: Log OAuth configuration
+    console.log('🔑 Google OAuth Configuration:', {
+        isExpoGo,
+        googleSignInAvailable,
+        expoClientId: process.env.EXPO_PUBLIC_GOOGLE_EXPO_CLIENT_ID?.substring(0, 20) + '...',
+        iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID?.substring(0, 20) + '...',
+        androidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID?.substring(0, 20) + '...',
+        webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID?.substring(0, 20) + '...',
+    });
+
     const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
         expoClientId: process.env.EXPO_PUBLIC_GOOGLE_EXPO_CLIENT_ID,
         iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
         androidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID,
         webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
     });
+
+    // Debug: Log OAuth request initialization
+    console.log('🔑 OAuth request initialized:', { requestReady: !!request });
 
     useEffect(() => {
         let userDataUnsubscribe = null;
@@ -121,14 +134,28 @@ export const AuthProvider = ({ children }) => {
 
     // Handle Google Sign-In response
     useEffect(() => {
+        console.log('🔑 OAuth response received:', {
+            type: response?.type,
+            hasParams: !!response?.params,
+            hasIdToken: !!response?.params?.id_token,
+            error: response?.error,
+        });
+
         if (response?.type === 'success') {
+            console.log('✅ OAuth success! Exchanging token with Firebase...');
             const { id_token } = response.params;
             const credential = GoogleAuthProvider.credential(id_token);
             signInWithCredential(auth, credential)
                 .then(async (userCredential) => {
+                    console.log('✅ Firebase credential exchange successful:', {
+                        uid: userCredential.user.uid,
+                        email: userCredential.user.email,
+                    });
+
                     // Check if this is a new user and create Firestore document
                     const userDoc = await getDoc(doc(db, 'users', userCredential.user.uid));
                     if (!userDoc.exists()) {
+                        console.log('📝 New user - creating Firestore document...');
                         // Create the basic user document
                         // The Firestore trigger will automatically add discriminator and default settings
                         await setDoc(doc(db, 'users', userCredential.user.uid), {
@@ -145,18 +172,34 @@ export const AuthProvider = ({ children }) => {
                             friends: [],
                         });
 
+                        console.log('✅ Firestore document created, waiting for trigger...');
                         // Wait for discriminator and settings to be assigned by Firestore trigger
                         setTimeout(() => {
                             refreshUserData();
                         }, 500);
+                    } else {
+                        console.log('✅ Existing user signed in');
                     }
                 })
                 .catch((error) => {
-                    console.error('Google Sign-In Error:', error.message);
+                    console.error('❌ Firebase credential exchange failed:', {
+                        code: error.code,
+                        message: error.message,
+                        fullError: error,
+                    });
                     setError(error.message);
                 });
         } else if (response?.type === 'error') {
+            console.error('❌ OAuth error:', {
+                type: response.type,
+                error: response.error,
+                errorCode: response.error?.code,
+            });
             setError(response.error?.message || 'Google sign-in failed');
+        } else if (response?.type === 'cancel') {
+            console.log('🚫 User cancelled OAuth flow');
+        } else if (response?.type === 'dismiss') {
+            console.log('🚫 User dismissed OAuth flow');
         }
     }, [response]);
 
@@ -208,9 +251,14 @@ export const AuthProvider = ({ children }) => {
     };
 
     const signInWithGoogle = async () => {
+        console.log('🔑 signInWithGoogle called');
+        console.log('🔑 Google Sign-In available:', googleSignInAvailable);
+        console.log('🔑 OAuth request ready:', !!request);
+
         if (!googleSignInAvailable) {
             const error =
                 'Google Sign-In is only available in production builds. Use email/password sign-in for development.';
+            console.error('❌ Google Sign-In not available:', error);
             setError(error);
             throw new Error(error);
         }
@@ -222,9 +270,21 @@ export const AuthProvider = ({ children }) => {
                 console.error('❌ OAuth request not ready');
                 throw new Error('OAuth request not initialized');
             }
-            await promptAsync();
+
+            console.log('🔑 Prompting user for OAuth authentication...');
+            const result = await promptAsync();
+            console.log('🔑 promptAsync result:', {
+                type: result?.type,
+                hasParams: !!result?.params,
+            });
+
+            return result;
         } catch (error) {
-            console.error('❌ signInWithGoogle error:', error);
+            console.error('❌ signInWithGoogle error:', {
+                message: error.message,
+                code: error.code,
+                fullError: error,
+            });
             setError(error.message);
             throw error;
         }
