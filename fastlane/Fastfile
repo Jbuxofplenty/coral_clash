@@ -140,6 +140,57 @@ platform :ios do
       precheck_include_in_app_purchases: false
     )
   end
+
+  desc "Build Debug version with symbols for crash analysis"
+  lane :debug do
+    # Setup CI creates a temporary keychain for CI builds
+    setup_ci if ENV['CI']
+    
+    # Sync code signing with development profile
+    sync_code_signing(
+      type: "development",
+      readonly: is_ci,
+      force_for_new_devices: true
+    )
+    
+    # Configure manual code signing for development
+    update_code_signing_settings(
+      use_automatic_signing: false,
+      path: IOS_PROJECT_PATH,
+      team_id: IOS_TEAM_ID,
+      code_sign_identity: "iPhone Developer",
+      profile_name: "match Development #{IOS_APP_IDENTIFIER}",
+      targets: IOS_SCHEME
+    )
+    
+    # Build in Debug configuration with symbols
+    build_app(
+      workspace: IOS_WORKSPACE_PATH,
+      scheme: IOS_SCHEME,
+      configuration: "Debug",
+      export_method: "development",
+      export_options: {
+        provisioningProfiles: {
+          IOS_APP_IDENTIFIER => "match Development #{IOS_APP_IDENTIFIER}"
+        },
+        uploadSymbols: true,
+        compileBitcode: false
+      },
+      output_directory: "./build/ios",
+      output_name: "#{IOS_SCHEME}-Debug.ipa",
+      include_symbols: true,
+      include_bitcode: false
+    )
+    
+    UI.success("🔍 Debug build complete with symbols!")
+    UI.message("📍 IPA: ./build/ios/#{IOS_SCHEME}-Debug.ipa")
+    UI.message("📍 dSYM: ./build/ios/#{IOS_SCHEME}.app.dSYM.zip")
+    UI.message("")
+    UI.message("To install:")
+    UI.message("  1. Connect your device")
+    UI.message("  2. Drag the IPA to Xcode > Devices and Simulators")
+    UI.message("  3. Any crashes will now show file names and line numbers!")
+  end
 end
 
 # Android Platform

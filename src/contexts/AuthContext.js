@@ -11,6 +11,7 @@ import {
 } from 'firebase/auth';
 import { doc, getDoc, onSnapshot, setDoc } from 'firebase/firestore';
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { Platform } from 'react-native';
 import { auth, db } from '../config/firebase';
 
 const AuthContext = createContext({});
@@ -163,7 +164,9 @@ export const AuthProvider = ({ children }) => {
             setError(null);
 
             // Check if Google Play Services are available (Android only)
-            await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+            if (Platform.OS === 'android') {
+                await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+            }
 
             // Sign in with Google
             const userInfo = await GoogleSignin.signIn();
