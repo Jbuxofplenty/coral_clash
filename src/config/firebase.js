@@ -18,7 +18,7 @@ import {
     where,
 } from 'firebase/firestore';
 import { connectFunctionsEmulator, getFunctions } from 'firebase/functions';
-import { Platform, Alert } from 'react-native';
+import { Alert, Platform } from 'react-native';
 
 // 🔍 DEBUG: Log app startup (this runs when module is imported)
 console.log('🚀 [Firebase Config] Module loading...');
