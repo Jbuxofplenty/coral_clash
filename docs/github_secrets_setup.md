@@ -5,6 +5,7 @@ This guide explains how to set up GitHub secrets for building and deploying your
 ## Overview
 
 The CI/CD pipeline needs:
+
 1. **Environment variables** (Firebase config, Google OAuth IDs, etc.) to be baked into the JavaScript bundle
 2. **Firebase service files** (`google-services.json`, `GoogleService-Info.plist`) for Google Sign-In configuration
 
@@ -39,21 +40,25 @@ This script will:
 The script creates:
 
 ### Individual Environment Variable Secrets
+
 Each `EXPO_PUBLIC_*` variable becomes a separate secret:
 
 **Staging (from `.env.preview`)**:
+
 - `STAGING_EXPO_PUBLIC_FIREBASE_API_KEY`
 - `STAGING_EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN`
 - `STAGING_EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID`
 - ... (one secret per variable)
 
 **Production (from `.env.production`)**:
+
 - `PRODUCTION_EXPO_PUBLIC_FIREBASE_API_KEY`
 - `PRODUCTION_EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN`
 - `PRODUCTION_EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID`
 - ... (one secret per variable)
 
 ### Firebase Service File Secrets (Base64-encoded)
+
 - `GOOGLE_SERVICES_JSON` - Android Firebase configuration
 - `GOOGLE_SERVICE_INFO_PLIST` - iOS Firebase configuration
 
@@ -96,6 +101,7 @@ To add a new environment variable:
 ## How It Works in CI
 
 ### Environment Variables
+
 1. When a build starts, the workflow checks the `profile` input (preview or production)
 2. Based on the profile, it sets environment variables in the `env:` block:
    - `STAGING_EXPO_PUBLIC_*` for preview builds
@@ -105,6 +111,7 @@ To add a new environment variable:
 5. The bundle is packaged into the final `.ipa` or `.apk`
 
 ### Firebase Service Files
+
 1. Before `npx expo prebuild`, the workflow restores the Firebase service files:
    ```bash
    echo "${{ secrets.GOOGLE_SERVICES_JSON }}" | base64 -d > google-services.json

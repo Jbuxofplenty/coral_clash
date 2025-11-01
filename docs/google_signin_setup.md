@@ -63,12 +63,14 @@ This guide will help you set up Google Sign-In for Coral Clash using `@react-nat
 Download the Firebase configuration files for your platforms:
 
 ### iOS
+
 1. In Firebase Console > **Project Settings** > **General**
 2. Under **Your apps**, find your iOS app
 3. Click **Download GoogleService-Info.plist**
 4. Place the file in your project root (ignored by `.gitignore`)
 
 ### Android
+
 1. In Firebase Console > **Project Settings** > **General**
 2. Under **Your apps**, find your Android app
 3. Click **Download google-services.json**
@@ -96,10 +98,7 @@ The Firebase config plugin automatically handles URL scheme configuration. Ensur
 ```json
 {
   "expo": {
-    "plugins": [
-      "expo-font",
-      "@react-native-google-signin/google-signin"
-    ],
+    "plugins": ["expo-font", "@react-native-google-signin/google-signin"],
     "ios": {
       "googleServicesFile": "./GoogleService-Info.plist"
     },
@@ -111,6 +110,7 @@ The Firebase config plugin automatically handles URL scheme configuration. Ensur
 ```
 
 The plugin will automatically:
+
 - Extract the `REVERSED_CLIENT_ID` from `GoogleService-Info.plist`
 - Add it as a URL scheme to your iOS `Info.plist`
 - Configure Android for Google Sign-In
@@ -143,6 +143,7 @@ The config plugin will configure everything during prebuild.
 ### "TurboModuleRegistry.getEnforcing(...): 'RNGoogleSignin' could not be found"
 
 This means the native module isn't linked properly:
+
 1. Run `npx expo prebuild --clean` to regenerate native code
 2. Clear CocoaPods cache: `pod cache clean --all` (iOS only)
 3. Run `npx expo run:ios` or `npx expo run:android` again
@@ -189,11 +190,13 @@ This means the native module isn't linked properly:
 If you're migrating from `expo-auth-session`:
 
 ### What Changed
+
 - **Library**: `expo-auth-session` → `@react-native-google-signin/google-signin`
 - **Configuration**: Manual URL schemes → Automatic via Firebase config plugin
 - **Auth Flow**: `promptAsync()` → `GoogleSignin.signIn()`
 
 ### Benefits
+
 - ✅ Official Google-supported library
 - ✅ Better native integration
 - ✅ Automatic URL scheme configuration
@@ -201,4 +204,5 @@ If you're migrating from `expo-auth-session`:
 - ✅ Simpler setup with Firebase
 
 ### Code Changes
+
 See `src/contexts/AuthContext.js` for the updated implementation using `GoogleSignin`.
