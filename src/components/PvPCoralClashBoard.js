@@ -1,12 +1,12 @@
 import { Icon } from 'galio-framework';
 import React, { useEffect, useState } from 'react';
-import { Text, TouchableOpacity, View, useWindowDimensions } from 'react-native';
+import { Text, TouchableOpacity, View } from 'react-native';
 import { calculateUndoMoveCount } from '../../shared';
 import { db, doc, onSnapshot } from '../config/firebase';
-import { useAlert, useAuth, useGamePreferences, useTheme } from '../contexts';
+import { useAlert, useAuth, useGamePreferences } from '../contexts';
 import { useFirebaseFunctions } from '../hooks';
 import BaseCoralClashBoard, { baseStyles } from './BaseCoralClashBoard';
-import IconComponent from './Icon';
+import GameRequestBanner from './GameRequestBanner';
 
 /**
  * Format display name with discriminator
@@ -34,12 +34,7 @@ const formatDisplayName = (displayName, discriminator) => {
 const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notificationStatus }) => {
     const { user } = useAuth();
     const { isBoardFlipped } = useGamePreferences();
-    const { colors } = useTheme();
     const { showAlert } = useAlert();
-    const { height } = useWindowDimensions();
-    
-    // Use compact mode on smaller screens (iPhone SE, etc.)
-    const isCompact = height < 700;
     const { requestGameReset, requestUndo, respondToUndoRequest, respondToResetRequest } =
         useFirebaseFunctions();
     const [userColor, setUserColor] = useState(null);
@@ -427,113 +422,21 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
             if (undoRequestData.isUserTheRequester) {
                 // User sent the undo request - show waiting banner with cancel option
                 return (
-                    <View
-                        style={{
-                            backgroundColor: colors.INPUT,
-                            paddingVertical: isCompact ? 8 : 14,
-                            paddingHorizontal: isCompact ? 12 : 16,
-                            flexDirection: 'row',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                        }}
-                    >
-                        <Text
-                            style={{
-                                color: colors.TEXT,
-                                fontSize: isCompact ? 12 : 15,
-                                fontWeight: '600',
-                                flex: 1,
-                                marginRight: isCompact ? 8 : 12,
-                            }}
-                        >
-                            Waiting for {liveOpponentData?.displayName || 'opponent'} to respond to
-                            undo {dynamicMoveCount} move(s) request...
-                        </Text>
-                        <TouchableOpacity
-                            onPress={handleCancelUndoRequest}
-                            style={{
-                                width: isCompact ? 32 : 40,
-                                height: isCompact ? 32 : 40,
-                                borderRadius: isCompact ? 16 : 20,
-                                backgroundColor: colors.ERROR + '15',
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                            }}
-                        >
-                            <IconComponent
-                                name='times'
-                                family='font-awesome'
-                                size={isCompact ? 14 : 18}
-                                color={colors.ERROR}
-                            />
-                        </TouchableOpacity>
-                    </View>
+                    <GameRequestBanner
+                        mode='waiting'
+                        message={`Waiting for ${liveOpponentData?.displayName || 'opponent'} to respond to undo ${dynamicMoveCount} move(s) request...`}
+                        onCancel={handleCancelUndoRequest}
+                    />
                 );
             } else {
                 // Opponent sent undo request - show approval banner with icon buttons
                 return (
-                    <View
-                        style={{
-                            backgroundColor: colors.INPUT,
-                            paddingVertical: isCompact ? 8 : 14,
-                            paddingHorizontal: isCompact ? 12 : 16,
-                            flexDirection: 'row',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                        }}
-                    >
-                        <Text
-                            style={{
-                                color: colors.TEXT,
-                                fontSize: isCompact ? 12 : 15,
-                                fontWeight: '600',
-                                flex: 1,
-                                marginRight: isCompact ? 8 : 12,
-                            }}
-                        >
-                            {liveOpponentData?.displayName || 'Opponent'} wants to undo{' '}
-                            {dynamicMoveCount} move(s)
-                        </Text>
-                        <View style={{ flexDirection: 'row' }}>
-                            <TouchableOpacity
-                                onPress={() => handleUndoResponse(false, clearVisibleMoves)}
-                                style={{
-                                    width: isCompact ? 32 : 40,
-                                    height: isCompact ? 32 : 40,
-                                    borderRadius: isCompact ? 16 : 20,
-                                    backgroundColor: colors.ERROR + '15',
-                                    justifyContent: 'center',
-                                    alignItems: 'center',
-                                }}
-                            >
-                                <IconComponent
-                                    name='times'
-                                    family='font-awesome'
-                                    size={isCompact ? 14 : 18}
-                                    color={colors.ERROR}
-                                />
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                onPress={() => handleUndoResponse(true, clearVisibleMoves)}
-                                style={{
-                                    width: isCompact ? 32 : 40,
-                                    height: isCompact ? 32 : 40,
-                                    borderRadius: isCompact ? 16 : 20,
-                                    backgroundColor: colors.SUCCESS + '15',
-                                    justifyContent: 'center',
-                                    alignItems: 'center',
-                                    marginLeft: isCompact ? 8 : 10,
-                                }}
-                            >
-                                <IconComponent
-                                    name='check'
-                                    family='font-awesome'
-                                    size={isCompact ? 14 : 18}
-                                    color={colors.SUCCESS}
-                                />
-                            </TouchableOpacity>
-                        </View>
-                    </View>
+                    <GameRequestBanner
+                        mode='approval'
+                        message={`${liveOpponentData?.displayName || 'Opponent'} wants to undo ${dynamicMoveCount} move(s)`}
+                        onDecline={() => handleUndoResponse(false, clearVisibleMoves)}
+                        onAccept={() => handleUndoResponse(true, clearVisibleMoves)}
+                    />
                 );
             }
         }
@@ -542,112 +445,21 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
             if (resetRequestData.isUserTheRequester) {
                 // User sent the reset request - show waiting banner with cancel option
                 return (
-                    <View
-                        style={{
-                            backgroundColor: colors.INPUT,
-                            paddingVertical: isCompact ? 8 : 14,
-                            paddingHorizontal: isCompact ? 12 : 16,
-                            flexDirection: 'row',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                        }}
-                    >
-                        <Text
-                            style={{
-                                color: colors.TEXT,
-                                fontSize: isCompact ? 12 : 15,
-                                fontWeight: '600',
-                                flex: 1,
-                                marginRight: isCompact ? 8 : 12,
-                            }}
-                        >
-                            Waiting for {liveOpponentData?.displayName || 'opponent'} to respond to
-                            reset request...
-                        </Text>
-                        <TouchableOpacity
-                            onPress={handleCancelResetRequest}
-                            style={{
-                                width: isCompact ? 32 : 40,
-                                height: isCompact ? 32 : 40,
-                                borderRadius: isCompact ? 16 : 20,
-                                backgroundColor: colors.ERROR + '15',
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                            }}
-                        >
-                            <IconComponent
-                                name='times'
-                                family='font-awesome'
-                                size={isCompact ? 14 : 18}
-                                color={colors.ERROR}
-                            />
-                        </TouchableOpacity>
-                    </View>
+                    <GameRequestBanner
+                        mode='waiting'
+                        message={`Waiting for ${liveOpponentData?.displayName || 'opponent'} to respond to reset request...`}
+                        onCancel={handleCancelResetRequest}
+                    />
                 );
             } else {
                 // Opponent sent reset request - show approval banner with icon buttons
                 return (
-                    <View
-                        style={{
-                            backgroundColor: colors.INPUT,
-                            paddingVertical: isCompact ? 8 : 14,
-                            paddingHorizontal: isCompact ? 12 : 16,
-                            flexDirection: 'row',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                        }}
-                    >
-                        <Text
-                            style={{
-                                color: colors.TEXT,
-                                fontSize: isCompact ? 12 : 15,
-                                fontWeight: '600',
-                                flex: 1,
-                                marginRight: isCompact ? 8 : 12,
-                            }}
-                        >
-                            {liveOpponentData?.displayName || 'Opponent'} wants to reset the game
-                        </Text>
-                        <View style={{ flexDirection: 'row' }}>
-                            <TouchableOpacity
-                                onPress={() => handleResetResponse(false)}
-                                style={{
-                                    width: isCompact ? 32 : 40,
-                                    height: isCompact ? 32 : 40,
-                                    borderRadius: isCompact ? 16 : 20,
-                                    backgroundColor: colors.ERROR + '15',
-                                    justifyContent: 'center',
-                                    alignItems: 'center',
-                                }}
-                            >
-                                <IconComponent
-                                    name='times'
-                                    family='font-awesome'
-                                    size={isCompact ? 14 : 18}
-                                    color={colors.ERROR}
-                                />
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                onPress={() => handleResetResponse(true)}
-                                style={{
-                                    width: isCompact ? 32 : 40,
-                                    height: isCompact ? 32 : 40,
-                                    borderRadius: isCompact ? 16 : 20,
-                                    backgroundColor: colors.SUCCESS + '15',
-                                    justifyContent: 'center',
-                                    alignItems: 'center',
-                                    marginLeft: isCompact ? 8 : 10,
-                                }}
-                            >
-                                <IconComponent
-                                    name='check'
-                                    family='font-awesome'
-                                    size={isCompact ? 14 : 18}
-                                    color={colors.SUCCESS}
-                                />
-                            </TouchableOpacity>
-                        </View>
-                    </View>
+                    <GameRequestBanner
+                        mode='approval'
+                        message={`${liveOpponentData?.displayName || 'Opponent'} wants to reset the game`}
+                        onDecline={() => handleResetResponse(false)}
+                        onAccept={() => handleResetResponse(true)}
+                    />
                 );
             }
         }
