@@ -59,12 +59,14 @@ echo ""
 
 # Upload staging .env file
 echo "📤 Uploading .env.preview as STAGING_ENV_FILE..."
-cat .env.preview | gh secret set STAGING_ENV_FILE --body -
+# Filter out comments and empty lines before uploading
+grep -v '^\s*#' .env.preview | grep -v '^\s*$' | gh secret set STAGING_ENV_FILE --body -
 if [ $? -eq 0 ]; then
-    echo "✅ STAGING_ENV_FILE uploaded"
+    echo "✅ STAGING_ENV_FILE uploaded (filtered)"
     # Count EXPO_PUBLIC_ variables
     staging_count=$(grep -c "^EXPO_PUBLIC_" .env.preview || true)
     echo "   Contains $staging_count environment variables"
+    echo "   (Comments and empty lines removed)"
 else
     echo "❌ Failed to upload STAGING_ENV_FILE"
     exit 1
@@ -73,12 +75,14 @@ echo ""
 
 # Upload production .env file
 echo "📤 Uploading .env.production as PRODUCTION_ENV_FILE..."
-cat .env.production | gh secret set PRODUCTION_ENV_FILE --body -
+# Filter out comments and empty lines before uploading
+grep -v '^\s*#' .env.production | grep -v '^\s*$' | gh secret set PRODUCTION_ENV_FILE --body -
 if [ $? -eq 0 ]; then
-    echo "✅ PRODUCTION_ENV_FILE uploaded"
+    echo "✅ PRODUCTION_ENV_FILE uploaded (filtered)"
     # Count EXPO_PUBLIC_ variables
     production_count=$(grep -c "^EXPO_PUBLIC_" .env.production || true)
     echo "   Contains $production_count environment variables"
+    echo "   (Comments and empty lines removed)"
 else
     echo "❌ Failed to upload PRODUCTION_ENV_FILE"
     exit 1
