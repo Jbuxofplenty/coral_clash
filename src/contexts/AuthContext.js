@@ -52,12 +52,16 @@ export const AuthProvider = ({ children }) => {
     // Get the appropriate redirect URI for native OAuth flows
     const getRedirectUri = () => {
         if (Platform.OS === 'ios') {
-            // iOS: Use reversed iOS client ID
-            const clientId = process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID?.split('-')[0];
+            // iOS: Use reversed iOS client ID (everything before .apps.googleusercontent.com)
+            const clientId = process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID?.split(
+                '.apps.googleusercontent.com',
+            )[0];
             return `com.googleusercontent.apps.${clientId}:/oauth2redirect`;
         } else if (Platform.OS === 'android') {
-            // Android: Use reversed Android client ID
-            const clientId = process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID?.split('-')[0];
+            // Android: Use reversed Android client ID (everything before .apps.googleusercontent.com)
+            const clientId = process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID?.split(
+                '.apps.googleusercontent.com',
+            )[0];
             return `com.googleusercontent.apps.${clientId}:/oauth2redirect`;
         }
         return undefined; // Web will use default
