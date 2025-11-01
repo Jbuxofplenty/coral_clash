@@ -114,6 +114,32 @@ jobs:
           echo "${{ secrets.GOOGLE_SERVICE_INFO_PLIST }}" | base64 -d > GoogleService-Info.plist
           echo "✅ Firebase service files restored"
 
+      - name: Create .env file for prebuild and bundling
+        run: |
+          echo "📝 Creating .env file for Expo (needed by config plugins and Metro bundler)..."
+          cat > .env << 'EOF'
+EXPO_PUBLIC_FIREBASE_API_KEY=${EXPO_PUBLIC_FIREBASE_API_KEY}
+EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN=${EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN}
+EXPO_PUBLIC_FIREBASE_DATABASE_URL=${EXPO_PUBLIC_FIREBASE_DATABASE_URL}
+EXPO_PUBLIC_FIREBASE_PROJECT_ID=${EXPO_PUBLIC_FIREBASE_PROJECT_ID}
+EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET=${EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET}
+EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=${EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID}
+EXPO_PUBLIC_FIREBASE_APP_ID=${EXPO_PUBLIC_FIREBASE_APP_ID}
+EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID=${EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID}
+EXPO_PUBLIC_FIREBASE_FUNCTIONS_URL=${EXPO_PUBLIC_FIREBASE_FUNCTIONS_URL}
+EXPO_PUBLIC_USE_FIREBASE_EMULATOR=${EXPO_PUBLIC_USE_FIREBASE_EMULATOR}
+EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID=${EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID}
+EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID=${EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID}
+EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID=${EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID}
+EXPO_PUBLIC_GOOGLE_EXPO_CLIENT_ID=${EXPO_PUBLIC_GOOGLE_EXPO_CLIENT_ID}
+EXPO_PUBLIC_ENABLE_DEV_FEATURES=${EXPO_PUBLIC_ENABLE_DEV_FEATURES}
+EOF
+          # Use envsubst to replace variables (it's available on macOS runners)
+          envsubst < .env > .env.tmp && mv .env.tmp .env
+          echo "✅ .env file created"
+          echo "🔍 Debug: Checking .env file (first 3 lines, sanitized)..."
+          head -3 .env | sed 's/=.*/=***/'
+
       - name: Run Expo Prebuild for iOS
         run: |
           echo "🔨 Running Expo prebuild for iOS with ${{ inputs.profile }} environment variables..."
@@ -232,6 +258,32 @@ jobs:
           echo "${{ secrets.GOOGLE_SERVICES_JSON }}" | base64 -d > google-services.json
           echo "${{ secrets.GOOGLE_SERVICE_INFO_PLIST }}" | base64 -d > GoogleService-Info.plist
           echo "✅ Firebase service files restored"
+
+      - name: Create .env file for prebuild and bundling
+        run: |
+          echo "📝 Creating .env file for Expo (needed by config plugins and Metro bundler)..."
+          cat > .env << 'EOF'
+EXPO_PUBLIC_FIREBASE_API_KEY=${EXPO_PUBLIC_FIREBASE_API_KEY}
+EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN=${EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN}
+EXPO_PUBLIC_FIREBASE_DATABASE_URL=${EXPO_PUBLIC_FIREBASE_DATABASE_URL}
+EXPO_PUBLIC_FIREBASE_PROJECT_ID=${EXPO_PUBLIC_FIREBASE_PROJECT_ID}
+EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET=${EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET}
+EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=${EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID}
+EXPO_PUBLIC_FIREBASE_APP_ID=${EXPO_PUBLIC_FIREBASE_APP_ID}
+EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID=${EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID}
+EXPO_PUBLIC_FIREBASE_FUNCTIONS_URL=${EXPO_PUBLIC_FIREBASE_FUNCTIONS_URL}
+EXPO_PUBLIC_USE_FIREBASE_EMULATOR=${EXPO_PUBLIC_USE_FIREBASE_EMULATOR}
+EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID=${EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID}
+EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID=${EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID}
+EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID=${EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID}
+EXPO_PUBLIC_GOOGLE_EXPO_CLIENT_ID=${EXPO_PUBLIC_GOOGLE_EXPO_CLIENT_ID}
+EXPO_PUBLIC_ENABLE_DEV_FEATURES=${EXPO_PUBLIC_ENABLE_DEV_FEATURES}
+EOF
+          # Use envsubst to replace variables
+          envsubst < .env > .env.tmp && mv .env.tmp .env
+          echo "✅ .env file created"
+          echo "🔍 Debug: Checking .env file (first 3 lines, sanitized)..."
+          head -3 .env | sed 's/=.*/=***/'
 
       - name: Run Expo Prebuild for Android
         run: |
