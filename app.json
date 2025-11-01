@@ -24,7 +24,14 @@
             "appleTeamId": "FWV22U8U39",
             "associatedDomains": ["webcredentials:coral-clash.firebaseapp.com"],
             "infoPlist": {
-                "ITSAppUsesNonExemptEncryption": false
+                "ITSAppUsesNonExemptEncryption": false,
+                "CFBundleURLTypes": [
+                    {
+                        "CFBundleURLSchemes": [
+                            "com.googleusercontent.apps.796262519653-kpb392l6mqjfb3rf2jic67tpkdfq9i59"
+                        ]
+                    }
+                ]
             }
         },
         "plugins": ["expo-font"],
