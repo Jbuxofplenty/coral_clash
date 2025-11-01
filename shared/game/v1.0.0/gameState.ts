@@ -549,7 +549,12 @@ export function restoreGameFromSnapshot(coralClash: any, snapshot: any): void {
     }
 
     // Restore piece roles (hunter/gatherer status)
-    if (snapshot.pieceRoles) {
+    // IMPORTANT: Skip restoring roles if no moves have been made and we're in starting position
+    // This allows getStartingRole() to assign correct roles for games saved with old logic
+    const historyLength = coralClash.history().length;
+    const isStartingPosition = historyLength === 0;
+
+    if (snapshot.pieceRoles && !isStartingPosition) {
         const Ox88 = {
             a8: 0x00,
             b8: 0x01,

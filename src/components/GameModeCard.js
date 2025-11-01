@@ -4,6 +4,7 @@ import {
     ActivityIndicator,
     Dimensions,
     StyleSheet,
+    TouchableOpacity,
     TouchableWithoutFeedback,
     View,
 } from 'react-native';
@@ -23,11 +24,97 @@ const { width } = Dimensions.get('screen');
  * @param {Function} props.onPress - Handler for when card is pressed
  * @param {boolean} props.disabled - Whether the card is disabled
  * @param {boolean} props.loading - Whether the card is in loading state
+ * @param {boolean} props.horizontal - Whether to use horizontal layout (like PlayWithFriendCard)
  * @param {Object} props.style - Additional styles
  */
-function GameModeCard({ title, description, icon, iconFamily, onPress, disabled, loading, style }) {
+function GameModeCard({
+    title,
+    description,
+    icon,
+    iconFamily,
+    onPress,
+    disabled,
+    loading,
+    horizontal,
+    style,
+}) {
     const { colors } = useTheme();
 
+    // Horizontal layout (similar to PlayWithFriendCard)
+    if (horizontal) {
+        return (
+            <TouchableOpacity
+                onPress={onPress}
+                disabled={disabled || loading}
+                activeOpacity={0.8}
+                style={[
+                    styles.horizontalCard,
+                    {
+                        backgroundColor: colors.CARD_BACKGROUND,
+                        shadowColor: colors.SHADOW,
+                        opacity: disabled ? 0.6 : 1,
+                    },
+                    style,
+                ]}
+            >
+                <Block row middle space='between' style={styles.horizontalCardContent}>
+                    <Block row middle flex>
+                        <Block
+                            style={[
+                                styles.horizontalIconContainer,
+                                {
+                                    backgroundColor: colors.PRIMARY + '15',
+                                },
+                            ]}
+                        >
+                            {loading ? (
+                                <ActivityIndicator size='small' color={colors.PRIMARY} />
+                            ) : (
+                                <Icon
+                                    name={icon}
+                                    family={iconFamily}
+                                    size={moderateScale(28)}
+                                    color={colors.PRIMARY}
+                                />
+                            )}
+                        </Block>
+                        <Block flex style={{ marginLeft: theme.SIZES.BASE }}>
+                            <Text
+                                style={[
+                                    styles.horizontalTitle,
+                                    {
+                                        color: colors.TEXT,
+                                    },
+                                ]}
+                            >
+                                {title}
+                            </Text>
+                            {description && (
+                                <Text
+                                    style={[
+                                        styles.horizontalDescription,
+                                        {
+                                            color: colors.TEXT_SECONDARY,
+                                        },
+                                    ]}
+                                >
+                                    {description}
+                                </Text>
+                            )}
+                        </Block>
+                    </Block>
+                    <Icon
+                        name='chevron-right'
+                        family='font-awesome'
+                        size={16}
+                        color={colors.TEXT_SECONDARY}
+                    />
+                </Block>
+            </TouchableOpacity>
+        );
+    }
+
+    // Original vertical layout
     return (
         <TouchableWithoutFeedback onPress={disabled ? null : onPress}>
             <Block
@@ -122,5 +209,34 @@ const styles = StyleSheet.create({
         shadowRadius: 8,
         shadowOpacity: 0.2,
         elevation: 4,
+    },
+    // Horizontal layout styles
+    horizontalCard: {
+        marginVertical: theme.SIZES.BASE,
+        marginHorizontal: width > 600 ? 'auto' : 0,
+        maxWidth: width > 600 ? 600 : '100%',
+        borderRadius: 12,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+        elevation: 3,
+    },
+    horizontalCardContent: {
+        padding: theme.SIZES.BASE * 1.5,
+    },
+    horizontalIconContainer: {
+        width: moderateScale(60),
+        height: moderateScale(60),
+        borderRadius: moderateScale(30),
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    horizontalTitle: {
+        fontSize: 18,
+        fontWeight: '600',
+        marginBottom: 4,
+    },
+    horizontalDescription: {
+        fontSize: 14,
     },
 });

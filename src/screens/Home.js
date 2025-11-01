@@ -563,6 +563,7 @@ export default function Home({ navigation }) {
                     onPress={handleStartComputerGame}
                     disabled={creatingGame || searching}
                     loading={creatingGame && pendingGameAction === 'computer'}
+                    horizontal={!!user}
                 />
 
                 {enableDevFeatures && (
