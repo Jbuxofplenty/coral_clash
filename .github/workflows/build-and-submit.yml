@@ -98,7 +98,7 @@ jobs:
           pod install
 
       - name: Generate JavaScript Bundle
-        run: npx expo export:embed
+        run: npx expo export:embed --platform ios
 
       - name: Build and Submit to TestFlight (Preview)
         if: inputs.profile == 'preview'
