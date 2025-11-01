@@ -97,51 +97,29 @@ jobs:
           cd ios
           pod install
 
-      - name: Configure Node Binary and Skip Auto-Bundling
-        run: |
-          echo "export NODE_BINARY=$(command -v node)" > ios/.xcode.env.local
-          # Skip Xcode's bundling phase since we'll bundle explicitly first
-          echo "export SKIP_BUNDLING=1" >> ios/.xcode.env.local
-
-      - name: Create Environment File for Bundle (Preview)
+      - name: Create Environment File (Preview)
         if: inputs.profile == 'preview'
         run: |
-          # Write .env file directly from secret - no JSON conversion needed!
+          # Write .env file for Expo to read during bundling
           cat > .env << 'EOF'
           ${{ secrets.STAGING_CLIENT_ENV }}
           EOF
-          
           echo "✅ Created .env file with staging configuration"
-          echo "Environment variables loaded:"
-          grep -v '^#' .env | grep -v '^$' | sed 's/=.*/=***/' || true
 
-      - name: Create Environment File for Bundle (Production)
+      - name: Create Environment File (Production)
         if: inputs.profile == 'production'
         run: |
-          # Write .env file directly from secret - no JSON conversion needed!
+          # Write .env file for Expo to read during bundling
           cat > .env << 'EOF'
           ${{ secrets.PRODUCTION_CLIENT_ENV }}
           EOF
-          
           echo "✅ Created .env file with production configuration"
-          echo "Environment variables loaded:"
-          grep -v '^#' .env | grep -v '^$' | sed 's/=.*/=***/' || true
 
-      - name: Bundle JavaScript with Expo
+      - name: Configure Node for Xcode
         run: |
-          # Use Expo CLI to generate the JavaScript bundle
-          npx expo export --platform ios --output-dir dist
-          
-          # Copy the generated bundle into the CoralClash.app resources folder
-          # This ensures Xcode includes them in the final .ipa
-          mkdir -p ios/CoralClash/_expo/static/js/ios
-          cp -r dist/_expo/static/js/ios/* ios/CoralClash/_expo/static/js/ios/
-          cp dist/metadata.json ios/CoralClash/metadata.json
-          
-          # Verify files were copied
-          echo "✅ Bundle files copied:"
-          ls -la ios/CoralClash/_expo/static/js/ios/
-          ls -la ios/CoralClash/metadata.json
+          # Set NODE_BINARY so Xcode can find node during its bundling phase
+          echo "export NODE_BINARY=$(command -v node)" > ios/.xcode.env.local
+          echo "✅ Configured Node binary for Xcode: $(command -v node)"
 
       - name: Build and Submit to TestFlight (Preview)
         if: inputs.profile == 'preview'
@@ -244,29 +222,23 @@ jobs:
           echo '${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}' > google-play-key.json
           echo "GOOGLE_PLAY_JSON_KEY_PATH=${{ github.workspace }}/google-play-key.json" >> $GITHUB_ENV
 
-      - name: Create Environment File for Bundle (Preview)
+      - name: Create Environment File (Preview)
         if: inputs.profile == 'preview'
         run: |
-          # Write .env file directly from secret - no JSON conversion needed!
+          # Write .env file for Expo/Gradle to read during bundling
           cat > .env << 'EOF'
           ${{ secrets.STAGING_CLIENT_ENV }}
           EOF
-          
           echo "✅ Created .env file with staging configuration"
-          echo "Environment variables loaded:"
-          grep -v '^#' .env | grep -v '^$' | sed 's/=.*/=***/' || true
 
-      - name: Create Environment File for Bundle (Production)
+      - name: Create Environment File (Production)
         if: inputs.profile == 'production'
         run: |
-          # Write .env file directly from secret - no JSON conversion needed!
+          # Write .env file for Expo/Gradle to read during bundling
           cat > .env << 'EOF'
           ${{ secrets.PRODUCTION_CLIENT_ENV }}
           EOF
-          
           echo "✅ Created .env file with production configuration"
-          echo "Environment variables loaded:"
-          grep -v '^#' .env | grep -v '^$' | sed 's/=.*/=***/' || true
 
       - name: Build and Submit to Internal Testing (Preview)
         if: inputs.profile == 'preview'
