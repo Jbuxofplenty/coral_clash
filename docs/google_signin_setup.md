@@ -1,12 +1,13 @@
 # Google Sign-In Setup Guide
 
-This guide will help you set up Google Sign-In for Coral Clash.
+This guide will help you set up Google Sign-In for Coral Clash using `@react-native-google-signin/google-signin` with Firebase.
 
 ## Prerequisites
 
 - Firebase project (coral-clash)
 - Google Cloud Console access
 - App configured in Firebase console
+- Firebase service files (`google-services.json` and `GoogleService-Info.plist`)
 
 ## Step 1: Enable Google Sign-In in Firebase
 
@@ -57,102 +58,147 @@ This guide will help you set up Google Sign-In for Coral Clash.
 7. Click **Create**
 8. Copy the **Client ID** - this is your `EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID`
 
-### For Expo Go (Development)
+## Step 2.5: Download Firebase Service Files
 
-For testing in Expo Go during development:
+Download the Firebase configuration files for your platforms:
 
-1. In Google Cloud Console > **Credentials**
-2. Find the **Web client** (created by Firebase)
-3. Edit it
-4. Under **Authorized redirect URIs**, add:
-   ```
-   https://auth.expo.io/@your-expo-username/coral-clash
-   ```
-5. The Web client ID can also be used as `EXPO_PUBLIC_GOOGLE_EXPO_CLIENT_ID`
+### iOS
+1. In Firebase Console > **Project Settings** > **General**
+2. Under **Your apps**, find your iOS app
+3. Click **Download GoogleService-Info.plist**
+4. Place the file in your project root (ignored by `.gitignore`)
+
+### Android
+1. In Firebase Console > **Project Settings** > **General**
+2. Under **Your apps**, find your Android app
+3. Click **Download google-services.json**
+4. Place the file in your project root (ignored by `.gitignore`)
+
+**Important**: These files are uploaded to GitHub Secrets for CI/CD builds.
 
 ## Step 3: Update Environment Variables
 
-Edit your `.env` file and add the Client IDs:
+Edit your `.env.preview` and `.env.production` files and add the Client IDs:
 
 ```bash
 # Google OAuth Client IDs
 EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID=123456789-abcdefg.apps.googleusercontent.com
 EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID=123456789-hijklmn.apps.googleusercontent.com
 EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID=123456789-opqrstu.apps.googleusercontent.com
-EXPO_PUBLIC_GOOGLE_EXPO_CLIENT_ID=123456789-abcdefg.apps.googleusercontent.com
 ```
 
-## Step 4: Configure iOS (for production builds)
+**Note**: We're using `@react-native-google-signin/google-signin` which works in both development and production builds.
 
-If you're building for iOS, add the URL scheme to `ios/coralclash/Info.plist`:
+## Step 4: Configure app.json
 
-```xml
-<key>CFBundleURLTypes</key>
-<array>
-  <dict>
-    <key>CFBundleURLSchemes</key>
-    <array>
-      <string>coralclash</string>
-      <string>com.googleusercontent.apps.YOUR-IOS-CLIENT-ID-REVERSED</string>
-    </array>
-  </dict>
-</array>
+The Firebase config plugin automatically handles URL scheme configuration. Ensure your `app.json` has:
+
+```json
+{
+  "expo": {
+    "plugins": [
+      "expo-font",
+      "@react-native-google-signin/google-signin"
+    ],
+    "ios": {
+      "googleServicesFile": "./GoogleService-Info.plist"
+    },
+    "android": {
+      "googleServicesFile": "./google-services.json"
+    }
+  }
+}
 ```
 
-Replace `YOUR-IOS-CLIENT-ID-REVERSED` with your iOS Client ID in reverse order (e.g., if your client ID is `123-abc.apps.googleusercontent.com`, use `com.googleusercontent.apps.123-abc`).
+The plugin will automatically:
+- Extract the `REVERSED_CLIENT_ID` from `GoogleService-Info.plist`
+- Add it as a URL scheme to your iOS `Info.plist`
+- Configure Android for Google Sign-In
 
-## Step 5: Test
+**No manual URL scheme configuration needed!**
 
-1. Restart your Expo development server
+## Step 5: Rebuild Native Code
+
+After adding the Firebase service files and updating `app.json`, rebuild your native code:
+
+```bash
+npx expo prebuild --clean
+npx expo run:ios    # For iOS
+npx expo run:android # For Android
+```
+
+The config plugin will configure everything during prebuild.
+
+## Step 6: Test
+
+1. Run your app on a simulator/emulator or physical device
 2. Open the Login screen
 3. Click "Sign in with Google"
 4. Complete the Google sign-in flow
 
-## Testing with Emulators
-
-Google Sign-In works with Firebase Emulators! When `EXPO_PUBLIC_USE_FIREBASE_EMULATOR=true`:
-
-- Authentication will be handled by the Auth Emulator
-- User profiles will be stored in the local Firestore Emulator
-- No real Google accounts are needed for testing
+**Important**: Google Sign-In requires native builds. It won't work in Expo Go.
 
 ## Troubleshooting
+
+### "TurboModuleRegistry.getEnforcing(...): 'RNGoogleSignin' could not be found"
+
+This means the native module isn't linked properly:
+1. Run `npx expo prebuild --clean` to regenerate native code
+2. Clear CocoaPods cache: `pod cache clean --all` (iOS only)
+3. Run `npx expo run:ios` or `npx expo run:android` again
 
 ### "Developer Error" or "Invalid Client"
 
 - Verify all Client IDs are correct in `.env`
 - Make sure the bundle ID/package name matches exactly
 - Check that OAuth consent screen is configured
+- Ensure `GoogleService-Info.plist` and `google-services.json` are in the project root
 
 ### iOS Sign-In Not Working
 
-- Verify the URL scheme is added to Info.plist
-- Ensure the iOS Client ID is correct
-- Check that the bundle ID matches
+- Verify the `GoogleService-Info.plist` is in the project root
+- Check that the config plugin is in `app.json`
+- Run `npx expo prebuild --clean` to regenerate `Info.plist`
+- Verify the URL scheme was added: Check `ios/CoralClash/Info.plist` for `CFBundleURLSchemes`
 
 ### Android Sign-In Not Working
 
-- Verify SHA-1 fingerprint is correct
-- Ensure package name matches
-- For release builds, use release keystore SHA-1
-
-### Expo Go Sign-In Issues
-
-- Make sure you're using the Web Client ID for `EXPO_PUBLIC_GOOGLE_EXPO_CLIENT_ID`
-- Verify the redirect URI is added to the Web client in Google Cloud Console
-- The redirect URI format: `https://auth.expo.io/@your-expo-username/coral-clash`
+- Verify SHA-1 fingerprint is correct in Google Cloud Console
+- Ensure package name matches exactly
+- For release builds, add the release keystore SHA-1
+- Check that `google-services.json` is in the project root
 
 ## Security Notes
 
-1. **Never commit** `.env` file with real credentials
+1. **Never commit** `.env` files or Firebase service files with real credentials
 2. Keep Client IDs in `.env` files only
-3. Use different Client IDs for development and production
+3. Use different credentials for staging and production
 4. Regularly rotate credentials if compromised
 5. Enable **App Check** in Firebase for production
+6. Firebase service files are in `.gitignore` - keep them there!
 
 ## Additional Resources
 
+- [Official Library Docs](https://react-native-google-signin.github.io/docs/setting-up/expo)
 - [Firebase Authentication Docs](https://firebase.google.com/docs/auth)
 - [Google Sign-In for iOS](https://developers.google.com/identity/sign-in/ios/start)
 - [Google Sign-In for Android](https://developers.google.com/identity/sign-in/android/start)
-- [Expo AuthSession](https://docs.expo.dev/versions/latest/sdk/auth-session/)
+
+## Migration Guide
+
+If you're migrating from `expo-auth-session`:
+
+### What Changed
+- **Library**: `expo-auth-session` → `@react-native-google-signin/google-signin`
+- **Configuration**: Manual URL schemes → Automatic via Firebase config plugin
+- **Auth Flow**: `promptAsync()` → `GoogleSignin.signIn()`
+
+### Benefits
+- ✅ Official Google-supported library
+- ✅ Better native integration
+- ✅ Automatic URL scheme configuration
+- ✅ Works in development and production
+- ✅ Simpler setup with Firebase
+
+### Code Changes
+See `src/contexts/AuthContext.js` for the updated implementation using `GoogleSignin`.
