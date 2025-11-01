@@ -18,12 +18,7 @@ import {
     where,
 } from 'firebase/firestore';
 import { connectFunctionsEmulator, getFunctions } from 'firebase/functions';
-import { Alert, Platform } from 'react-native';
-
-// 🔍 DEBUG: Log app startup (this runs when module is imported)
-console.log('🚀 [Firebase Config] Module loading...');
-console.log('🔍 [Firebase Config] Platform:', Platform.OS);
-console.log('🔍 [Firebase Config] __DEV__:', __DEV__);
+import { Platform } from 'react-native';
 
 // Your web app's Firebase configuration
 // Note: In Expo, use EXPO_PUBLIC_ prefix for environment variables accessible in client code
@@ -38,64 +33,8 @@ const firebaseConfig = {
     measurementId: process.env.EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
-// 🔍 DEBUG: Log environment variable availability
-console.log('🔍 [Firebase Config] Environment variables check:');
-console.log(
-    '  - FIREBASE_API_KEY:',
-    process.env.EXPO_PUBLIC_FIREBASE_API_KEY ? '✅ Set' : '❌ UNDEFINED',
-);
-console.log(
-    '  - FIREBASE_PROJECT_ID:',
-    process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID ? '✅ Set' : '❌ UNDEFINED',
-);
-console.log(
-    '  - FIREBASE_APP_ID:',
-    process.env.EXPO_PUBLIC_FIREBASE_APP_ID ? '✅ Set' : '❌ UNDEFINED',
-);
-console.log('  - USE_FIREBASE_EMULATOR:', process.env.EXPO_PUBLIC_USE_FIREBASE_EMULATOR);
-
-// 🔍 DEBUG: Validate config before initialization
-const missingKeys = Object.entries(firebaseConfig)
-    .filter(([_key, value]) => !value)
-    .map(([key]) => key);
-
-if (missingKeys.length > 0) {
-    const errorMsg = `🔥 FIREBASE CONFIG ERROR: Missing required environment variables: ${missingKeys.join(', ')}. Check that .env file was created during build with EXPO_PUBLIC_* variables.`;
-
-    console.error('❌ [Firebase Config]', errorMsg);
-    console.error('❌ [Firebase Config] Platform:', Platform.OS);
-    console.error('❌ [Firebase Config] Config state:', {
-        apiKey: !!firebaseConfig.apiKey ? 'set' : 'MISSING',
-        projectId: !!firebaseConfig.projectId ? 'set' : 'MISSING',
-        appId: !!firebaseConfig.appId ? 'set' : 'MISSING',
-    });
-
-    // Show alert in dev mode
-    if (__DEV__) {
-        Alert.alert('Firebase Config Error', errorMsg);
-    }
-
-    // Throw error with clear message that will show up in crash reports
-    throw new Error(errorMsg);
-} else {
-    console.log('✅ [Firebase Config] All required config values present');
-}
-
 // Initialize Firebase
-console.log('🔄 [Firebase Config] Initializing Firebase app...');
-let app;
-try {
-    app = initializeApp(firebaseConfig);
-    console.log('✅ [Firebase Config] Firebase app initialized successfully');
-    console.log('✅ [Firebase Config] Project ID:', firebaseConfig.projectId);
-} catch (error) {
-    console.error('❌ [Firebase Config] FIREBASE INITIALIZATION FAILED:', error);
-    console.error('❌ [Firebase Config] Error code:', error.code);
-    console.error('❌ [Firebase Config] Error message:', error.message);
-
-    // Re-throw with more context
-    throw new Error(`Firebase initialization failed (${error.code}): ${error.message}`);
-}
+const app = initializeApp(firebaseConfig);
 
 // Set EXPO_PUBLIC_USE_FIREBASE_EMULATOR=true in .env to enable
 // Set EXPO_PUBLIC_EMULATOR_HOST to your computer's local IP (e.g., 192.168.x.x) for physical devices

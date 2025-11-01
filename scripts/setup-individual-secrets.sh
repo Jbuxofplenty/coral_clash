@@ -36,7 +36,7 @@ echo ""
 # Function to upload secrets from an env file
 upload_secrets() {
     local env_file=$1
-    local suffix=$2
+    local prefix=$2
     local env_name=$3
     
     echo -e "${BLUE}📤 Uploading ${env_name} secrets...${NC}"
@@ -56,7 +56,7 @@ upload_secrets() {
             
             # Only upload EXPO_PUBLIC_ variables
             if [[ "$key" =~ ^EXPO_PUBLIC_ ]]; then
-                local secret_name="${key}_${suffix}"
+                local secret_name="${prefix}_${key}"
                 
                 # Upload to GitHub Secrets
                 echo "$value" | gh secret set "$secret_name" --body -
@@ -86,8 +86,8 @@ echo -e "${GREEN}  ✅ All Secrets Uploaded Successfully!${NC}"
 echo -e "${GREEN}=================================================${NC}"
 echo ""
 echo -e "${BLUE}📝 Summary:${NC}"
-echo "  - Staging secrets: EXPO_PUBLIC_*_STAGING"
-echo "  - Production secrets: EXPO_PUBLIC_*_PRODUCTION"
+echo "  - Staging secrets: STAGING_EXPO_PUBLIC_*"
+echo "  - Production secrets: PRODUCTION_EXPO_PUBLIC_*"
 echo ""
 echo -e "${YELLOW}💡 These secrets are now referenced in the CI workflow${NC}"
 echo -e "${YELLOW}   and will be baked into the JavaScript bundle during build.${NC}"
