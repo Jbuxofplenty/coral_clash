@@ -106,34 +106,26 @@ jobs:
       - name: Create Environment File for Bundle (Preview)
         if: inputs.profile == 'preview'
         run: |
-          # Write JSON secret to temp file first to avoid shell expansion issues
-          cat > env.json << 'EOF'
-          ${{ secrets.STAGING_CLIENT_ENV_JSON }}
+          # Write .env file directly from secret - no JSON conversion needed!
+          cat > .env << 'EOF'
+          ${{ secrets.STAGING_CLIENT_ENV }}
           EOF
-          
-          # Convert JSON to .env file - automatically includes ALL variables
-          cat env.json | jq -r 'to_entries | .[] | "\(.key)=\(.value)"' > .env
-          rm env.json
           
           echo "✅ Created .env file with staging configuration"
           echo "Environment variables loaded:"
-          cat .env | sed 's/=.*/=***/' # Show keys but hide values
+          grep -v '^#' .env | grep -v '^$' | sed 's/=.*/=***/' || true
 
       - name: Create Environment File for Bundle (Production)
         if: inputs.profile == 'production'
         run: |
-          # Write JSON secret to temp file first to avoid shell expansion issues
-          cat > env.json << 'EOF'
-          ${{ secrets.PRODUCTION_CLIENT_ENV_JSON }}
+          # Write .env file directly from secret - no JSON conversion needed!
+          cat > .env << 'EOF'
+          ${{ secrets.PRODUCTION_CLIENT_ENV }}
           EOF
-          
-          # Convert JSON to .env file - automatically includes ALL variables
-          cat env.json | jq -r 'to_entries | .[] | "\(.key)=\(.value)"' > .env
-          rm env.json
           
           echo "✅ Created .env file with production configuration"
           echo "Environment variables loaded:"
-          cat .env | sed 's/=.*/=***/' # Show keys but hide values
+          grep -v '^#' .env | grep -v '^$' | sed 's/=.*/=***/' || true
 
       - name: Bundle JavaScript with Expo
         run: |
@@ -255,34 +247,26 @@ jobs:
       - name: Create Environment File for Bundle (Preview)
         if: inputs.profile == 'preview'
         run: |
-          # Write JSON secret to temp file first to avoid shell expansion issues
-          cat > env.json << 'EOF'
-          ${{ secrets.STAGING_CLIENT_ENV_JSON }}
+          # Write .env file directly from secret - no JSON conversion needed!
+          cat > .env << 'EOF'
+          ${{ secrets.STAGING_CLIENT_ENV }}
           EOF
-          
-          # Convert JSON to .env file - automatically includes ALL variables
-          cat env.json | jq -r 'to_entries | .[] | "\(.key)=\(.value)"' > .env
-          rm env.json
           
           echo "✅ Created .env file with staging configuration"
           echo "Environment variables loaded:"
-          cat .env | sed 's/=.*/=***/' # Show keys but hide values
+          grep -v '^#' .env | grep -v '^$' | sed 's/=.*/=***/' || true
 
       - name: Create Environment File for Bundle (Production)
         if: inputs.profile == 'production'
         run: |
-          # Write JSON secret to temp file first to avoid shell expansion issues
-          cat > env.json << 'EOF'
-          ${{ secrets.PRODUCTION_CLIENT_ENV_JSON }}
+          # Write .env file directly from secret - no JSON conversion needed!
+          cat > .env << 'EOF'
+          ${{ secrets.PRODUCTION_CLIENT_ENV }}
           EOF
-          
-          # Convert JSON to .env file - automatically includes ALL variables
-          cat env.json | jq -r 'to_entries | .[] | "\(.key)=\(.value)"' > .env
-          rm env.json
           
           echo "✅ Created .env file with production configuration"
           echo "Environment variables loaded:"
-          cat .env | sed 's/=.*/=***/' # Show keys but hide values
+          grep -v '^#' .env | grep -v '^$' | sed 's/=.*/=***/' || true
 
       - name: Build and Submit to Internal Testing (Preview)
         if: inputs.profile == 'preview'
