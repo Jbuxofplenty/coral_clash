@@ -27,7 +27,7 @@
                 "ITSAppUsesNonExemptEncryption": false
             }
         },
-        "plugins": ["expo-font"],
+        "plugins": ["expo-font", "./plugins/withFixedBundleURL.js"],
         "android": {
             "package": "com.jbuxofplenty.coralclash",
             "runtimeVersion": {
