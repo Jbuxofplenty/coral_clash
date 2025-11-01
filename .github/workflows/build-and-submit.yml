@@ -96,7 +96,7 @@ jobs:
           echo "${{ secrets.GOOGLE_SERVICE_INFO_PLIST }}" | base64 -d > GoogleService-Info.plist
           echo "✅ Firebase service files restored"
 
-      - name: Restore and Load Environment Variables
+      - name: Restore .env file
         run: |
           echo "📝 Restoring .env file for ${{ inputs.profile }} environment..."
           if [ "${{ inputs.profile }}" == "preview" ]; then
@@ -105,21 +105,17 @@ jobs:
             printf "%s\n" "${{ secrets.PRODUCTION_ENV_FILE }}" > .env
           fi
           echo "✅ .env file restored"
-          
-          # Debug: Show file was created and has content
-          echo "🔍 Debug: .env file info..."
-          wc -l .env
+          echo "🔍 Debug: File has $(wc -l < .env) lines"
           head -2 .env | sed 's/=.*/=***/'
-          
-          # Load environment variables into GitHub Actions environment
-          echo "🔧 Loading environment variables..."
-          set -a  # automatically export all variables
-          source .env
-          set +a
-          
-          # Export to GITHUB_ENV so they're available in subsequent steps
-          cat .env >> $GITHUB_ENV
-          
+
+      - name: Load environment variables from .env
+        uses: xom9ikk/dotenv@v2.3.0
+        with:
+          path: ./
+          load-mode: strict
+
+      - name: Verify environment variables loaded
+        run: |
           echo "✅ Environment variables loaded"
           echo "🔍 Debug: Checking loaded variables (sanitized)..."
           env | grep EXPO_PUBLIC | head -3 | sed 's/=.*/=***/'
@@ -225,7 +221,7 @@ jobs:
           echo "${{ secrets.GOOGLE_SERVICE_INFO_PLIST }}" | base64 -d > GoogleService-Info.plist
           echo "✅ Firebase service files restored"
 
-      - name: Restore and Load Environment Variables
+      - name: Restore .env file
         run: |
           echo "📝 Restoring .env file for ${{ inputs.profile }} environment..."
           if [ "${{ inputs.profile }}" == "preview" ]; then
@@ -234,21 +230,17 @@ jobs:
             printf "%s\n" "${{ secrets.PRODUCTION_ENV_FILE }}" > .env
           fi
           echo "✅ .env file restored"
-          
-          # Debug: Show file was created and has content
-          echo "🔍 Debug: .env file info..."
-          wc -l .env
+          echo "🔍 Debug: File has $(wc -l < .env) lines"
           head -2 .env | sed 's/=.*/=***/'
-          
-          # Load environment variables into GitHub Actions environment
-          echo "🔧 Loading environment variables..."
-          set -a  # automatically export all variables
-          source .env
-          set +a
-          
-          # Export to GITHUB_ENV so they're available in subsequent steps
-          cat .env >> $GITHUB_ENV
-          
+
+      - name: Load environment variables from .env
+        uses: xom9ikk/dotenv@v2.3.0
+        with:
+          path: ./
+          load-mode: strict
+
+      - name: Verify environment variables loaded
+        run: |
           echo "✅ Environment variables loaded"
           echo "🔍 Debug: Checking loaded variables (sanitized)..."
           env | grep EXPO_PUBLIC | head -3 | sed 's/=.*/=***/'
