@@ -80,8 +80,8 @@ function getStartingRole(square: Square, type: PieceSymbol, color: Color): Piece
             if (file === 'h' && type === CRAB) return 'gatherer';
         } else if (rank === 3) {
             // Third rank octopuses from setup
-            if (file === 'd' && type === OCTOPUS) return 'gatherer'; // Octopus with coral
-            if (file === 'e' && type === OCTOPUS) return 'gatherer'; // Octopus with coral
+            if (file === 'd' && type === OCTOPUS) return 'gatherer'; // Gatherer octopus (d3 has coral)
+            if (file === 'e' && type === OCTOPUS) return 'hunter'; // Hunter octopus (e3 has coral)
         }
     } else if (color === BLACK) {
         if (rank === 8) {
@@ -94,18 +94,18 @@ function getStartingRole(square: Square, type: PieceSymbol, color: Color): Piece
             if (file === 'h' && type === PUFFERFISH) return 'gatherer';
         } else if (rank === 7) {
             // Seventh rank (mirror of white's second rank)
-            if (file === 'a' && type === CRAB) return 'hunter';
-            if (file === 'b' && type === OCTOPUS) return 'gatherer';
-            if (file === 'c' && type === CRAB) return 'gatherer';
-            if (file === 'd' && type === DOLPHIN) return 'hunter';
-            if (file === 'e' && type === DOLPHIN) return 'gatherer';
-            if (file === 'f' && type === CRAB) return 'hunter';
-            if (file === 'g' && type === OCTOPUS) return 'hunter';
-            if (file === 'h' && type === CRAB) return 'gatherer';
+            if (file === 'a' && type === CRAB) return 'gatherer';
+            if (file === 'b' && type === OCTOPUS) return 'hunter';
+            if (file === 'c' && type === CRAB) return 'hunter';
+            if (file === 'd' && type === DOLPHIN) return 'gatherer';
+            if (file === 'e' && type === DOLPHIN) return 'hunter';
+            if (file === 'f' && type === CRAB) return 'gatherer';
+            if (file === 'g' && type === OCTOPUS) return 'gatherer';
+            if (file === 'h' && type === CRAB) return 'hunter';
         } else if (rank === 6) {
             // Sixth rank octopuses
-            if (file === 'd' && type === OCTOPUS) return 'gatherer'; // Octopus with coral
-            if (file === 'e' && type === OCTOPUS) return 'gatherer'; // Octopus with coral
+            if (file === 'd' && type === OCTOPUS) return 'hunter'; // Hunter octopus (d6 has coral)
+            if (file === 'e' && type === OCTOPUS) return 'gatherer'; // Gatherer octopus (e6 has coral)
         }
     }
 
@@ -125,9 +125,9 @@ function getStartingRole(square: Square, type: PieceSymbol, color: Color): Piece
 // - This is a simplified FEN representation since standard FEN doesn't support 2-square pieces
 //
 // Coral placement (tracked separately, initialized in _initializeStartingCoral):
-//   - White: d3, e3 have coral (under Gatherer Octopuses)
-//   - Black: d6, e6 have coral (under Gatherer Octopuses)
-//   - Blue player (black) places one additional coral
+//   - White: d3, e3 have coral (under starting octopuses)
+//   - Black: d6, e6 have coral (under starting octopuses)
+//   - Blue player (black) places one additional coral at c7
 export const DEFAULT_POSITION = 'ftth1ttf/cocddcoc/3oo3/8/8/3OO3/COCDDCOC/FTTH1TTF w - - 0 1';
 
 export type PieceRole = 'hunter' | 'gatherer';
@@ -655,21 +655,21 @@ export class CoralClash {
      * Initialize coral placement for the Coral Clash starting position
      */
     private _initializeStartingCoral() {
-        // Place coral under Gatherer Octopuses for white (d3, e3)
+        // Place coral under starting octopuses for white (d3, e3)
         this._coral[Ox88.d3] = WHITE;
         this._coralRemaining.w--;
         this._coral[Ox88.e3] = WHITE;
         this._coralRemaining.w--;
 
-        // Place coral under Gatherer Octopuses for black (d6, e6)
+        // Place coral under starting octopuses for black (d6, e6)
         this._coral[Ox88.d6] = BLACK;
         this._coralRemaining.b--;
         this._coral[Ox88.e6] = BLACK;
         this._coralRemaining.b--;
 
-        // Blue player (black) places one additional coral - defaulting to a6 for now
+        // Blue player (black) places one additional coral - defaulting to c7 for now
         // In actual game, this would be chosen by the player
-        this._coral[Ox88.a6] = BLACK;
+        this._coral[Ox88.c7] = BLACK;
         this._coralRemaining.b--;
     }
 
