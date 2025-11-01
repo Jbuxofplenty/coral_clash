@@ -13,6 +13,7 @@ import {
 } from 'firebase/auth';
 import { doc, getDoc, onSnapshot, setDoc } from 'firebase/firestore';
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { Platform } from 'react-native';
 import { auth, db } from '../config/firebase';
 
 // Required for Google Sign-In on web
@@ -53,6 +54,10 @@ export const AuthProvider = ({ children }) => {
         iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
         androidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID,
         webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
+        // Use the reversed iOS client ID as the redirect URI (native iOS OAuth flow)
+        redirectUri: Platform.OS === 'ios' 
+            ? `com.googleusercontent.apps.${process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID?.split('-')[0]}:/oauth2redirect`
+            : undefined,
     });
 
     // Debug: Log OAuth request initialization
