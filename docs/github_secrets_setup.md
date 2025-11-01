@@ -22,44 +22,34 @@ Run the automated script:
 This script will:
 
 1. Read your `.env.preview` and `.env.production` files
-2. Create GitHub secrets with `STAGING_` and `PRODUCTION_` prefixes
-3. Upload all secrets to your GitHub repository
+2. Convert them to JSON format
+3. Upload as two GitHub secrets:
+   - `STAGING_CLIENT_ENV_JSON` (from `.env.preview`)
+   - `PRODUCTION_CLIENT_ENV_JSON` (from `.env.production`)
 
 ## What Gets Created
 
-### Staging Secrets (from `.env.preview`)
+The script creates **2 secrets** containing all your environment variables:
 
-- `STAGING_EXPO_PUBLIC_FIREBASE_API_KEY`
-- `STAGING_EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN`
-- `STAGING_EXPO_PUBLIC_FIREBASE_DATABASE_URL`
-- `STAGING_EXPO_PUBLIC_FIREBASE_PROJECT_ID`
-- `STAGING_EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET`
-- `STAGING_EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID`
-- `STAGING_EXPO_PUBLIC_FIREBASE_APP_ID`
-- `STAGING_EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID`
-- `STAGING_EXPO_PUBLIC_FIREBASE_FUNCTIONS_URL`
-- `STAGING_EXPO_PUBLIC_USE_FIREBASE_EMULATOR`
-- `STAGING_EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID`
-- `STAGING_EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID`
-- `STAGING_EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID`
-- `STAGING_EXPO_PUBLIC_GOOGLE_EXPO_CLIENT_ID`
-- `STAGING_EXPO_PUBLIC_ENABLE_DEV_FEATURES`
+- **`STAGING_CLIENT_ENV_JSON`**: All variables from `.env.preview` as JSON
+- **`PRODUCTION_CLIENT_ENV_JSON`**: All variables from `.env.production` as JSON
 
-### Production Secrets (from `.env.production`)
+Example JSON structure:
 
-Same variables but with `PRODUCTION_` prefix instead of `STAGING_`.
-
-## Manual Setup
-
-If you prefer to set secrets manually:
-
-```bash
-# For staging
-echo "your-value" | gh secret set STAGING_EXPO_PUBLIC_FIREBASE_API_KEY
-
-# For production
-echo "your-value" | gh secret set PRODUCTION_EXPO_PUBLIC_FIREBASE_API_KEY
+```json
+{
+  "EXPO_PUBLIC_FIREBASE_API_KEY": "your-api-key",
+  "EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN": "your-project.firebaseapp.com",
+  "EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID": "123456789.apps.googleusercontent.com",
+  ...
+}
 ```
+
+**Benefits**:
+
+- ✅ Zero maintenance - never need to update the workflow
+- ✅ Add/remove variables by just updating `.env` files and re-running the script
+- ✅ Single source of truth (your `.env` files)
 
 ## Viewing Secrets
 
@@ -77,19 +67,26 @@ To update secrets, just run the setup script again:
 ./scripts/setup-github-secrets.sh
 ```
 
-Or manually update:
+It will overwrite the existing JSON secrets with the latest values from your `.env` files.
 
-```bash
-echo "new-value" | gh secret set STAGING_EXPO_PUBLIC_FIREBASE_API_KEY
-```
+## Adding New Environment Variables
+
+To add a new environment variable:
+
+1. Add it to your `.env.preview` and/or `.env.production` files
+2. Re-run the setup script: `./scripts/setup-github-secrets.sh`
+3. Done! The workflow automatically picks up all variables from the JSON secret
+
+**No workflow changes needed!**
 
 ## How It Works in CI
 
 1. When a build starts, the workflow checks the `profile` input (preview or production)
-2. Based on the profile, it exports either `STAGING_*` or `PRODUCTION_*` secrets as environment variables
-3. These environment variables are available when `npx expo export` runs
-4. Expo bakes these values into the JavaScript bundle
-5. The bundle is then packaged into the final `.ipa` or `.apk`
+2. Based on the profile, it creates a `.env` file from either `STAGING_CLIENT_ENV_JSON` or `PRODUCTION_CLIENT_ENV_JSON`
+3. The JSON is automatically expanded to `.env` format using `jq`
+4. When `npx expo export` runs, it reads the `.env` file
+5. Expo bakes these values into the JavaScript bundle
+6. The bundle is then packaged into the final `.ipa` or `.apk`
 
 ## Environment File Structure
 
@@ -146,45 +143,29 @@ gh secret list
 
 ### Environment variables not being baked into bundle
 
-The environment variables must be set **before** the `npx expo export` command runs. The workflow has dedicated steps for this:
+Check the CI logs for the "Create Environment File for Bundle" step. You should see:
 
-- "Set Environment Variables for Bundle (Preview)"
-- "Set Environment Variables for Bundle (Production)"
-
-These steps run before bundling to ensure the values are available.
-
-## How It Works
-
-The setup script automatically converts your `.env` files to JSON and uploads them as single secrets:
-
-- **`STAGING_CLIENT_ENV_JSON`**: All variables from `.env.preview`
-- **`PRODUCTION_CLIENT_ENV_JSON`**: All variables from `.env.production`
-
-### Example JSON Structure
-
-```json
-{
-  "EXPO_PUBLIC_FIREBASE_API_KEY": "your-api-key",
-  "EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN": "your-project.firebaseapp.com",
-  "EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID": "123456789.apps.googleusercontent.com",
-  ...
-}
+```
+✅ Created .env file with staging configuration
+Environment variables loaded:
+EXPO_PUBLIC_FIREBASE_API_KEY=***
+EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN=***
+...
 ```
 
-### In the Workflow
+If you don't see this, verify:
 
-The CI automatically expands these JSON secrets to `.env` files:
+1. The secrets exist: `gh secret list | grep CLIENT_ENV_JSON`
+2. The JSON is valid: Re-run `./scripts/setup-github-secrets.sh`
+3. The workflow step runs before bundling
 
-```yaml
-- name: Create Environment File for Bundle (Preview)
-  run: |
-    echo '${{ secrets.STAGING_CLIENT_ENV_JSON }}' | jq -r 'to_entries | .[] | "\(.key)=\(.value)"' > .env
-```
+### Invalid JSON error
 
-**Benefits**:
-- ✅ Zero maintenance - never update the workflow
-- ✅ Add/remove variables by just updating `.env` files and re-running the setup script
-- ✅ Single source of truth
+If you see `jq: parse error: Invalid numeric literal`, your JSON secret is malformed. Fix it by:
+
+1. Make sure your `.env` files don't have syntax errors
+2. Re-run the setup script: `./scripts/setup-github-secrets.sh`
+3. The script now validates JSON before uploading
 
 ## Related Documentation
 
