@@ -27,46 +27,31 @@ Run the automated script:
 
 This script will:
 
-1. Read your `.env.preview` and `.env.production` files
-2. Upload each `EXPO_PUBLIC_*` variable as an individual GitHub secret
-   - `STAGING_EXPO_PUBLIC_*` (from `.env.preview`)
-   - `PRODUCTION_EXPO_PUBLIC_*` (from `.env.production`)
-3. Upload Firebase service files (base64-encoded)
-   - `GOOGLE_SERVICES_JSON`
-   - `GOOGLE_SERVICE_INFO_PLIST`
+1. Upload your entire `.env.preview` file as `STAGING_ENV_FILE`
+2. Upload your entire `.env.production` file as `PRODUCTION_ENV_FILE`
+3. Upload Firebase service files (base64-encoded) as `GOOGLE_SERVICES_JSON` and `GOOGLE_SERVICE_INFO_PLIST`
+4. Clean up any old deprecated individual environment variable secrets
 
 ## What Gets Created
 
-The script creates:
+The script creates **4 GitHub secrets**:
 
-### Individual Environment Variable Secrets
+### Environment File Secrets
 
-Each `EXPO_PUBLIC_*` variable becomes a separate secret:
-
-**Staging (from `.env.preview`)**:
-
-- `STAGING_EXPO_PUBLIC_FIREBASE_API_KEY`
-- `STAGING_EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN`
-- `STAGING_EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID`
-- ... (one secret per variable)
-
-**Production (from `.env.production`)**:
-
-- `PRODUCTION_EXPO_PUBLIC_FIREBASE_API_KEY`
-- `PRODUCTION_EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN`
-- `PRODUCTION_EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID`
-- ... (one secret per variable)
+- **`STAGING_ENV_FILE`** - Contains all environment variables from `.env.preview`
+- **`PRODUCTION_ENV_FILE`** - Contains all environment variables from `.env.production`
 
 ### Firebase Service File Secrets (Base64-encoded)
 
-- `GOOGLE_SERVICES_JSON` - Android Firebase configuration
-- `GOOGLE_SERVICE_INFO_PLIST` - iOS Firebase configuration
+- **`GOOGLE_SERVICES_JSON`** - Android Firebase configuration
+- **`GOOGLE_SERVICE_INFO_PLIST`** - iOS Firebase configuration
 
 **Benefits**:
 
-- ✅ Explicit - Each variable is clearly referenced in the workflow
-- ✅ Secure - Variables are isolated from each other
-- ✅ Expo-compatible - Matches how `expo export:embed` expects environment variables
+- ✅ **Simple** - Only 4 secrets total instead of 30+
+- ✅ **Maintainable** - Add new env vars without updating the workflow
+- ✅ **Secure** - Secrets are encrypted at rest by GitHub
+- ✅ **Expo-compatible** - Metro bundler reads `.env` files natively
 
 ## Viewing Secrets
 
@@ -92,23 +77,21 @@ To add a new environment variable:
 
 1. Add it to your `.env.preview` and/or `.env.production` files with the `EXPO_PUBLIC_` prefix
 2. Re-run the setup script: `./scripts/setup-github-secrets.sh`
-3. Add the new secret to `.github/workflows/build-and-submit.yml` in the `env:` blocks:
-   ```yaml
-   env:
-     EXPO_PUBLIC_YOUR_NEW_VAR: ${{ secrets.STAGING_EXPO_PUBLIC_YOUR_NEW_VAR }}
-   ```
+3. **That's it!** No workflow changes needed - the entire .env file is uploaded automatically
 
 ## How It Works in CI
 
 ### Environment Variables
 
 1. When a build starts, the workflow checks the `profile` input (preview or production)
-2. Based on the profile, it sets environment variables in the `env:` block:
-   - `STAGING_EXPO_PUBLIC_*` for preview builds
-   - `PRODUCTION_EXPO_PUBLIC_*` for production builds
-3. When `npx expo export:embed` runs, Expo reads these environment variables
-4. Expo bakes these values into the JavaScript bundle
-5. The bundle is packaged into the final `.ipa` or `.apk`
+2. It restores the appropriate `.env` file from GitHub secrets:
+   - `STAGING_ENV_FILE` → `.env` for preview builds
+   - `PRODUCTION_ENV_FILE` → `.env` for production builds
+3. The `.env` file is loaded into the GitHub Actions environment using `source .env`
+4. Variables are also exported to `$GITHUB_ENV` so they're available in all subsequent steps
+5. When `npx expo prebuild` and `npx expo export:embed` run, they read the `.env` file
+6. Expo's Metro bundler automatically inlines `EXPO_PUBLIC_*` variables into the JavaScript bundle
+7. The bundle is packaged into the final `.ipa` or `.apk`
 
 ### Firebase Service Files
 
@@ -170,38 +153,57 @@ Make sure you ran the setup script:
 ./scripts/setup-github-secrets.sh
 ```
 
-Then check they were created:
+Then verify the secrets were created:
 
 ```bash
-gh secret list | grep EXPO_PUBLIC
+gh secret list | grep ENV_FILE
 gh secret list | grep GOOGLE_SERVICE
 ```
 
-### Environment variables not being baked into bundle
+You should see:
+- `STAGING_ENV_FILE`
+- `PRODUCTION_ENV_FILE`
+- `GOOGLE_SERVICES_JSON`
+- `GOOGLE_SERVICE_INFO_PLIST`
 
-Check the CI logs for the "Bundle JavaScript with Expo" step. The environment variables should be set in the `env:` block above the bundling command.
+### Environment variables not being baked into bundle
 
 If variables are `undefined` in your app:
 
-1. Verify the secrets exist: `gh secret list | grep EXPO_PUBLIC`
-2. Check that the secret names in the workflow match the uploaded secrets
-3. Ensure all secrets are referenced in the `env:` block before `npx expo export:embed`
+1. Verify the `.env` secrets exist:
+   ```bash
+   gh secret list | grep ENV_FILE
+   ```
+2. Check the "Restore and Load Environment Variables" step in CI logs:
+   - Look for "✅ .env file restored"
+   - Look for "✅ Environment variables loaded"
+   - Check the debug output shows your variables (sanitized)
+3. Ensure variables use the `EXPO_PUBLIC_` prefix in your `.env` files
 4. Re-run the setup script: `./scripts/setup-github-secrets.sh`
 
 ### Firebase service files not found in CI
 
 If you see errors about missing `GoogleService-Info.plist` or `google-services.json`:
 
-1. Verify the secrets exist: `gh secret list | grep GOOGLE_SERVICE`
+1. Verify the secrets exist:
+   ```bash
+   gh secret list | grep GOOGLE_SERVICE
+   ```
 2. Check the "Restore Firebase Service Files" step in CI logs
 3. Re-run the setup script to upload them: `./scripts/setup-github-secrets.sh`
 
-### Google Sign-In not working in CI builds
+### Google Sign-In crashing in CI builds
+
+If Google Sign-In crashes with "invalid client ID" or similar errors:
 
 1. Verify Firebase service files are uploaded: `gh secret list | grep GOOGLE_SERVICE`
-2. Check that `app.json` has the config plugin: `@react-native-google-signin/google-signin`
-3. Ensure `GoogleService-Info.plist` and `google-services.json` paths are correct in `app.json`
-4. Check the prebuild logs for URL scheme configuration
+2. Check that `.env` file contains Google OAuth client IDs:
+   - `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID`
+   - `EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID`
+   - `EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID`
+3. Ensure `app.json` has the config plugin: `@react-native-google-signin/google-signin`
+4. Check the "Restore and Load Environment Variables" step shows variables were loaded
+5. Check the prebuild logs for URL scheme configuration
 
 ## Related Documentation
 

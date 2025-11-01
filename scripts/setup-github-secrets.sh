@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Setup GitHub Secrets for Coral Clash
-# This script creates GitHub secrets from your .env files for each environment
+# This script uploads .env files and Firebase service files as GitHub secrets
 
 set -e
 
@@ -25,9 +25,13 @@ echo "✅ GitHub CLI is authenticated"
 echo ""
 
 # Clean up old deprecated secrets if they exist
-echo "🧹 Cleaning up old deprecated secrets..."
-gh secret delete STAGING_CLIENT_ENV 2>/dev/null && echo "  ✅ Deleted STAGING_CLIENT_ENV" || true
-gh secret delete PRODUCTION_CLIENT_ENV 2>/dev/null && echo "  ✅ Deleted PRODUCTION_CLIENT_ENV" || true
+echo "🧹 Cleaning up old individual environment variable secrets (deprecated)..."
+gh secret list | grep "STAGING_EXPO_PUBLIC_" | awk '{print $1}' | while read secret; do
+    gh secret delete "$secret" 2>/dev/null && echo "  ✅ Deleted $secret" || true
+done
+gh secret list | grep "PRODUCTION_EXPO_PUBLIC_" | awk '{print $1}' | while read secret; do
+    gh secret delete "$secret" 2>/dev/null && echo "  ✅ Deleted $secret" || true
+done
 echo ""
 
 # Check if .env files exist
@@ -48,59 +52,39 @@ echo "  • .env.preview (staging)"
 echo "  • .env.production (production)"
 echo ""
 
-# Function to upload individual secrets from an env file
-upload_individual_secrets() {
-    local env_file=$1
-    local prefix=$2
-    local env_name=$3
-    
-    echo "========================================"
-    echo "Uploading ${env_name} environment variables"
-    echo "========================================"
-    echo ""
-    
-    # Read each line from the env file
-    local count=0
-    while IFS= read -r line || [ -n "$line" ]; do
-        # Skip comments and empty lines
-        if [[ "$line" =~ ^#.*$ ]] || [[ -z "$line" ]]; then
-            continue
-        fi
-        
-        # Extract key and value
-        if [[ "$line" =~ ^([^=]+)=(.*)$ ]]; then
-            local key="${BASH_REMATCH[1]}"
-            local value="${BASH_REMATCH[2]}"
-            
-            # Only upload EXPO_PUBLIC_ variables
-            if [[ "$key" =~ ^EXPO_PUBLIC_ ]]; then
-                local secret_name="${prefix}_${key}"
-                
-                # Upload to GitHub Secrets
-                echo "$value" | gh secret set "$secret_name" --body -
-                
-                if [ $? -eq 0 ]; then
-                    echo "  ✅ $secret_name"
-                    ((count++))
-                else
-                    echo "  ❌ Failed to upload $secret_name"
-                fi
-            fi
-        fi
-    done < "$env_file"
-    
-    echo ""
-    echo "✅ Uploaded $count ${env_name} secrets"
-    echo ""
-}
-
-# Upload staging secrets (STAGING_EXPO_PUBLIC_*)
-upload_individual_secrets ".env.preview" "STAGING" "staging"
-
-# Upload production secrets (PRODUCTION_EXPO_PUBLIC_*)
-upload_individual_secrets ".env.production" "PRODUCTION" "production"
-
+echo "========================================"
+echo "Uploading environment files"
+echo "========================================"
 echo ""
+
+# Upload staging .env file
+echo "📤 Uploading .env.preview as STAGING_ENV_FILE..."
+cat .env.preview | gh secret set STAGING_ENV_FILE --body -
+if [ $? -eq 0 ]; then
+    echo "✅ STAGING_ENV_FILE uploaded"
+    # Count EXPO_PUBLIC_ variables
+    staging_count=$(grep -c "^EXPO_PUBLIC_" .env.preview || true)
+    echo "   Contains $staging_count environment variables"
+else
+    echo "❌ Failed to upload STAGING_ENV_FILE"
+    exit 1
+fi
+echo ""
+
+# Upload production .env file
+echo "📤 Uploading .env.production as PRODUCTION_ENV_FILE..."
+cat .env.production | gh secret set PRODUCTION_ENV_FILE --body -
+if [ $? -eq 0 ]; then
+    echo "✅ PRODUCTION_ENV_FILE uploaded"
+    # Count EXPO_PUBLIC_ variables
+    production_count=$(grep -c "^EXPO_PUBLIC_" .env.production || true)
+    echo "   Contains $production_count environment variables"
+else
+    echo "❌ Failed to upload PRODUCTION_ENV_FILE"
+    exit 1
+fi
+echo ""
+
 echo "========================================"
 echo "Setting up Firebase service files"
 echo "========================================"
@@ -137,20 +121,17 @@ echo "✅ All GitHub secrets created successfully!"
 echo "========================================"
 echo ""
 echo "Created secrets:"
-echo "  • STAGING_EXPO_PUBLIC_* (individual staging env vars)"
-echo "  • PRODUCTION_EXPO_PUBLIC_* (individual production env vars)"
+echo "  • STAGING_ENV_FILE (contains all staging env vars)"
+echo "  • PRODUCTION_ENV_FILE (contains all production env vars)"
 echo "  • GOOGLE_SERVICES_JSON (for Android builds)"
 echo "  • GOOGLE_SERVICE_INFO_PLIST (for iOS builds)"
 echo ""
-echo "Individual environment variables are explicitly referenced in CI workflow."
-echo "Firebase secrets are base64-encoded and will be restored during CI builds."
+echo "The .env files will be restored and loaded in CI/CD automatically."
 echo ""
 echo "To view your secrets:"
 echo "  gh secret list"
 echo ""
-echo "To add a new environment variable:"
-echo "  1. Add it to .env.preview or .env.production"
+echo "To update environment variables:"
+echo "  1. Update .env.preview or .env.production locally"
 echo "  2. Run this script again: ./scripts/setup-github-secrets.sh"
-echo "  3. Add the new secret to .github/workflows/build-and-submit.yml env blocks"
 echo ""
-

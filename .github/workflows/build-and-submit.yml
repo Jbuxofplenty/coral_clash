@@ -46,24 +46,6 @@ jobs:
     if: inputs.platform == 'ios' || inputs.platform == 'all'
     runs-on: macos-latest
     environment: ${{ inputs.environment }}
-    env:
-      # Set environment variables for entire job based on profile
-      # These are needed for prebuild, bundling, and native code compilation
-      EXPO_PUBLIC_FIREBASE_API_KEY: ${{ inputs.profile == 'preview' && secrets.STAGING_EXPO_PUBLIC_FIREBASE_API_KEY || secrets.PRODUCTION_EXPO_PUBLIC_FIREBASE_API_KEY }}
-      EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN: ${{ inputs.profile == 'preview' && secrets.STAGING_EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN || secrets.PRODUCTION_EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN }}
-      EXPO_PUBLIC_FIREBASE_DATABASE_URL: ${{ inputs.profile == 'preview' && secrets.STAGING_EXPO_PUBLIC_FIREBASE_DATABASE_URL || secrets.PRODUCTION_EXPO_PUBLIC_FIREBASE_DATABASE_URL }}
-      EXPO_PUBLIC_FIREBASE_PROJECT_ID: ${{ inputs.profile == 'preview' && secrets.STAGING_EXPO_PUBLIC_FIREBASE_PROJECT_ID || secrets.PRODUCTION_EXPO_PUBLIC_FIREBASE_PROJECT_ID }}
-      EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET: ${{ inputs.profile == 'preview' && secrets.STAGING_EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET || secrets.PRODUCTION_EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET }}
-      EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: ${{ inputs.profile == 'preview' && secrets.STAGING_EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || secrets.PRODUCTION_EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID }}
-      EXPO_PUBLIC_FIREBASE_APP_ID: ${{ inputs.profile == 'preview' && secrets.STAGING_EXPO_PUBLIC_FIREBASE_APP_ID || secrets.PRODUCTION_EXPO_PUBLIC_FIREBASE_APP_ID }}
-      EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID: ${{ inputs.profile == 'preview' && secrets.STAGING_EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID || secrets.PRODUCTION_EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID }}
-      EXPO_PUBLIC_FIREBASE_FUNCTIONS_URL: ${{ inputs.profile == 'preview' && secrets.STAGING_EXPO_PUBLIC_FIREBASE_FUNCTIONS_URL || secrets.PRODUCTION_EXPO_PUBLIC_FIREBASE_FUNCTIONS_URL }}
-      EXPO_PUBLIC_USE_FIREBASE_EMULATOR: ${{ inputs.profile == 'preview' && secrets.STAGING_EXPO_PUBLIC_USE_FIREBASE_EMULATOR || secrets.PRODUCTION_EXPO_PUBLIC_USE_FIREBASE_EMULATOR }}
-      EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID: ${{ inputs.profile == 'preview' && secrets.STAGING_EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID || secrets.PRODUCTION_EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID }}
-      EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID: ${{ inputs.profile == 'preview' && secrets.STAGING_EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID || secrets.PRODUCTION_EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID }}
-      EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID: ${{ inputs.profile == 'preview' && secrets.STAGING_EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID || secrets.PRODUCTION_EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID }}
-      EXPO_PUBLIC_GOOGLE_EXPO_CLIENT_ID: ${{ inputs.profile == 'preview' && secrets.STAGING_EXPO_PUBLIC_GOOGLE_EXPO_CLIENT_ID || secrets.PRODUCTION_EXPO_PUBLIC_GOOGLE_EXPO_CLIENT_ID }}
-      EXPO_PUBLIC_ENABLE_DEV_FEATURES: ${{ inputs.profile == 'preview' && secrets.STAGING_EXPO_PUBLIC_ENABLE_DEV_FEATURES || secrets.PRODUCTION_EXPO_PUBLIC_ENABLE_DEV_FEATURES }}
     
     steps:
       - name: Checkout code
@@ -114,31 +96,28 @@ jobs:
           echo "${{ secrets.GOOGLE_SERVICE_INFO_PLIST }}" | base64 -d > GoogleService-Info.plist
           echo "✅ Firebase service files restored"
 
-      - name: Create .env file for prebuild and bundling
+      - name: Restore and Load Environment Variables
         run: |
-          echo "📝 Creating .env file for Expo (needed by config plugins and Metro bundler)..."
-          cat > .env << 'EOF'
-EXPO_PUBLIC_FIREBASE_API_KEY=${EXPO_PUBLIC_FIREBASE_API_KEY}
-EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN=${EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN}
-EXPO_PUBLIC_FIREBASE_DATABASE_URL=${EXPO_PUBLIC_FIREBASE_DATABASE_URL}
-EXPO_PUBLIC_FIREBASE_PROJECT_ID=${EXPO_PUBLIC_FIREBASE_PROJECT_ID}
-EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET=${EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET}
-EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=${EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID}
-EXPO_PUBLIC_FIREBASE_APP_ID=${EXPO_PUBLIC_FIREBASE_APP_ID}
-EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID=${EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID}
-EXPO_PUBLIC_FIREBASE_FUNCTIONS_URL=${EXPO_PUBLIC_FIREBASE_FUNCTIONS_URL}
-EXPO_PUBLIC_USE_FIREBASE_EMULATOR=${EXPO_PUBLIC_USE_FIREBASE_EMULATOR}
-EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID=${EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID}
-EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID=${EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID}
-EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID=${EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID}
-EXPO_PUBLIC_GOOGLE_EXPO_CLIENT_ID=${EXPO_PUBLIC_GOOGLE_EXPO_CLIENT_ID}
-EXPO_PUBLIC_ENABLE_DEV_FEATURES=${EXPO_PUBLIC_ENABLE_DEV_FEATURES}
-EOF
-          # Use envsubst to replace variables (it's available on macOS runners)
-          envsubst < .env > .env.tmp && mv .env.tmp .env
-          echo "✅ .env file created"
-          echo "🔍 Debug: Checking .env file (first 3 lines, sanitized)..."
-          head -3 .env | sed 's/=.*/=***/'
+          echo "📝 Restoring .env file for ${{ inputs.profile }} environment..."
+          if [ "${{ inputs.profile }}" == "preview" ]; then
+            echo "${{ secrets.STAGING_ENV_FILE }}" > .env
+          else
+            echo "${{ secrets.PRODUCTION_ENV_FILE }}" > .env
+          fi
+          echo "✅ .env file restored"
+          
+          # Load environment variables into GitHub Actions environment
+          echo "🔧 Loading environment variables..."
+          set -a  # automatically export all variables
+          source .env
+          set +a
+          
+          # Export to GITHUB_ENV so they're available in subsequent steps
+          cat .env >> $GITHUB_ENV
+          
+          echo "✅ Environment variables loaded"
+          echo "🔍 Debug: Checking loaded variables (sanitized)..."
+          env | grep EXPO_PUBLIC | head -3 | sed 's/=.*/=***/'
 
       - name: Run Expo Prebuild for iOS
         run: |
@@ -208,24 +187,6 @@ EOF
     if: inputs.platform == 'android' || inputs.platform == 'all'
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
-    env:
-      # Set environment variables for entire job based on profile
-      # These are needed for prebuild, bundling, and native code compilation
-      EXPO_PUBLIC_FIREBASE_API_KEY: ${{ inputs.profile == 'preview' && secrets.STAGING_EXPO_PUBLIC_FIREBASE_API_KEY || secrets.PRODUCTION_EXPO_PUBLIC_FIREBASE_API_KEY }}
-      EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN: ${{ inputs.profile == 'preview' && secrets.STAGING_EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN || secrets.PRODUCTION_EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN }}
-      EXPO_PUBLIC_FIREBASE_DATABASE_URL: ${{ inputs.profile == 'preview' && secrets.STAGING_EXPO_PUBLIC_FIREBASE_DATABASE_URL || secrets.PRODUCTION_EXPO_PUBLIC_FIREBASE_DATABASE_URL }}
-      EXPO_PUBLIC_FIREBASE_PROJECT_ID: ${{ inputs.profile == 'preview' && secrets.STAGING_EXPO_PUBLIC_FIREBASE_PROJECT_ID || secrets.PRODUCTION_EXPO_PUBLIC_FIREBASE_PROJECT_ID }}
-      EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET: ${{ inputs.profile == 'preview' && secrets.STAGING_EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET || secrets.PRODUCTION_EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET }}
-      EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: ${{ inputs.profile == 'preview' && secrets.STAGING_EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || secrets.PRODUCTION_EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID }}
-      EXPO_PUBLIC_FIREBASE_APP_ID: ${{ inputs.profile == 'preview' && secrets.STAGING_EXPO_PUBLIC_FIREBASE_APP_ID || secrets.PRODUCTION_EXPO_PUBLIC_FIREBASE_APP_ID }}
-      EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID: ${{ inputs.profile == 'preview' && secrets.STAGING_EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID || secrets.PRODUCTION_EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID }}
-      EXPO_PUBLIC_FIREBASE_FUNCTIONS_URL: ${{ inputs.profile == 'preview' && secrets.STAGING_EXPO_PUBLIC_FIREBASE_FUNCTIONS_URL || secrets.PRODUCTION_EXPO_PUBLIC_FIREBASE_FUNCTIONS_URL }}
-      EXPO_PUBLIC_USE_FIREBASE_EMULATOR: ${{ inputs.profile == 'preview' && secrets.STAGING_EXPO_PUBLIC_USE_FIREBASE_EMULATOR || secrets.PRODUCTION_EXPO_PUBLIC_USE_FIREBASE_EMULATOR }}
-      EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID: ${{ inputs.profile == 'preview' && secrets.STAGING_EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID || secrets.PRODUCTION_EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID }}
-      EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID: ${{ inputs.profile == 'preview' && secrets.STAGING_EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID || secrets.PRODUCTION_EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID }}
-      EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID: ${{ inputs.profile == 'preview' && secrets.STAGING_EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID || secrets.PRODUCTION_EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID }}
-      EXPO_PUBLIC_GOOGLE_EXPO_CLIENT_ID: ${{ inputs.profile == 'preview' && secrets.STAGING_EXPO_PUBLIC_GOOGLE_EXPO_CLIENT_ID || secrets.PRODUCTION_EXPO_PUBLIC_GOOGLE_EXPO_CLIENT_ID }}
-      EXPO_PUBLIC_ENABLE_DEV_FEATURES: ${{ inputs.profile == 'preview' && secrets.STAGING_EXPO_PUBLIC_ENABLE_DEV_FEATURES || secrets.PRODUCTION_EXPO_PUBLIC_ENABLE_DEV_FEATURES }}
     
     steps:
       - name: Checkout code
@@ -259,31 +220,28 @@ EOF
           echo "${{ secrets.GOOGLE_SERVICE_INFO_PLIST }}" | base64 -d > GoogleService-Info.plist
           echo "✅ Firebase service files restored"
 
-      - name: Create .env file for prebuild and bundling
+      - name: Restore and Load Environment Variables
         run: |
-          echo "📝 Creating .env file for Expo (needed by config plugins and Metro bundler)..."
-          cat > .env << 'EOF'
-EXPO_PUBLIC_FIREBASE_API_KEY=${EXPO_PUBLIC_FIREBASE_API_KEY}
-EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN=${EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN}
-EXPO_PUBLIC_FIREBASE_DATABASE_URL=${EXPO_PUBLIC_FIREBASE_DATABASE_URL}
-EXPO_PUBLIC_FIREBASE_PROJECT_ID=${EXPO_PUBLIC_FIREBASE_PROJECT_ID}
-EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET=${EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET}
-EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=${EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID}
-EXPO_PUBLIC_FIREBASE_APP_ID=${EXPO_PUBLIC_FIREBASE_APP_ID}
-EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID=${EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID}
-EXPO_PUBLIC_FIREBASE_FUNCTIONS_URL=${EXPO_PUBLIC_FIREBASE_FUNCTIONS_URL}
-EXPO_PUBLIC_USE_FIREBASE_EMULATOR=${EXPO_PUBLIC_USE_FIREBASE_EMULATOR}
-EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID=${EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID}
-EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID=${EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID}
-EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID=${EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID}
-EXPO_PUBLIC_GOOGLE_EXPO_CLIENT_ID=${EXPO_PUBLIC_GOOGLE_EXPO_CLIENT_ID}
-EXPO_PUBLIC_ENABLE_DEV_FEATURES=${EXPO_PUBLIC_ENABLE_DEV_FEATURES}
-EOF
-          # Use envsubst to replace variables
-          envsubst < .env > .env.tmp && mv .env.tmp .env
-          echo "✅ .env file created"
-          echo "🔍 Debug: Checking .env file (first 3 lines, sanitized)..."
-          head -3 .env | sed 's/=.*/=***/'
+          echo "📝 Restoring .env file for ${{ inputs.profile }} environment..."
+          if [ "${{ inputs.profile }}" == "preview" ]; then
+            echo "${{ secrets.STAGING_ENV_FILE }}" > .env
+          else
+            echo "${{ secrets.PRODUCTION_ENV_FILE }}" > .env
+          fi
+          echo "✅ .env file restored"
+          
+          # Load environment variables into GitHub Actions environment
+          echo "🔧 Loading environment variables..."
+          set -a  # automatically export all variables
+          source .env
+          set +a
+          
+          # Export to GITHUB_ENV so they're available in subsequent steps
+          cat .env >> $GITHUB_ENV
+          
+          echo "✅ Environment variables loaded"
+          echo "🔍 Debug: Checking loaded variables (sanitized)..."
+          env | grep EXPO_PUBLIC | head -3 | sed 's/=.*/=***/'
 
       - name: Run Expo Prebuild for Android
         run: |
