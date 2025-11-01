@@ -108,10 +108,16 @@ jobs:
           # Use Expo CLI to generate the JavaScript bundle
           npx expo export --platform ios --output-dir dist
           
-          # Copy the generated bundle to where Xcode will package it
-          mkdir -p ios/_expo/static/js/ios
-          cp -r dist/_expo/static/js/ios/* ios/_expo/static/js/ios/
-          cp dist/metadata.json ios/metadata.json
+          # Copy the generated bundle into the CoralClash.app resources folder
+          # This ensures Xcode includes them in the final .ipa
+          mkdir -p ios/CoralClash/_expo/static/js/ios
+          cp -r dist/_expo/static/js/ios/* ios/CoralClash/_expo/static/js/ios/
+          cp dist/metadata.json ios/CoralClash/metadata.json
+          
+          # Verify files were copied
+          echo "✅ Bundle files copied:"
+          ls -la ios/CoralClash/_expo/static/js/ios/
+          ls -la ios/CoralClash/metadata.json
 
       - name: Build and Submit to TestFlight (Preview)
         if: inputs.profile == 'preview'
