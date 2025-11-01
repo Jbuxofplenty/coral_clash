@@ -105,6 +105,9 @@ jobs:
           ${{ secrets.STAGING_CLIENT_ENV }}
           EOF
           echo "✅ Created .env file with staging configuration"
+          echo "📋 Environment variables that will be baked into bundle:"
+          grep -v '^#' .env | grep -v '^$' | wc -l | xargs echo "  Variable count:"
+          grep -v '^#' .env | grep -v '^$' | cut -d= -f1 | xargs
 
       - name: Create Environment File (Production)
         if: inputs.profile == 'production'
@@ -114,12 +117,23 @@ jobs:
           ${{ secrets.PRODUCTION_CLIENT_ENV }}
           EOF
           echo "✅ Created .env file with production configuration"
+          echo "📋 Environment variables that will be baked into bundle:"
+          grep -v '^#' .env | grep -v '^$' | wc -l | xargs echo "  Variable count:"
+          grep -v '^#' .env | grep -v '^$' | cut -d= -f1 | xargs
 
       - name: Configure Node for Xcode
         run: |
           # Set NODE_BINARY so Xcode can find node during its bundling phase
           echo "export NODE_BINARY=$(command -v node)" > ios/.xcode.env.local
-          echo "✅ Configured Node binary for Xcode: $(command -v node)"
+          
+          # CRITICAL: Verify .env file exists and has content
+          if [ -f ".env" ]; then
+            echo "✅ .env file verified at project root"
+            echo "   Size: $(wc -c < .env) bytes"
+          else
+            echo "❌ ERROR: .env file not found!"
+            exit 1
+          fi
 
       - name: Build and Submit to TestFlight (Preview)
         if: inputs.profile == 'preview'
