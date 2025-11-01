@@ -27,10 +27,12 @@ Run the automated script:
 
 This script will:
 
-1. Upload your entire `.env.preview` file as `STAGING_ENV_FILE`
-2. Upload your entire `.env.production` file as `PRODUCTION_ENV_FILE`
+1. Upload your `.env.preview` file as `STAGING_ENV_FILE` (filtering out comments and empty lines)
+2. Upload your `.env.production` file as `PRODUCTION_ENV_FILE` (filtering out comments and empty lines)
 3. Upload Firebase service files (base64-encoded) as `GOOGLE_SERVICES_JSON` and `GOOGLE_SERVICE_INFO_PLIST`
 4. Clean up any old deprecated individual environment variable secrets
+
+**Note**: Comments (lines starting with `#`) and empty lines are automatically filtered out before upload. This is required because GitHub Actions `$GITHUB_ENV` expects only `KEY=VALUE` pairs.
 
 ## What Gets Created
 
@@ -161,6 +163,7 @@ gh secret list | grep GOOGLE_SERVICE
 ```
 
 You should see:
+
 - `STAGING_ENV_FILE`
 - `PRODUCTION_ENV_FILE`
 - `GOOGLE_SERVICES_JSON`
@@ -178,8 +181,13 @@ If variables are `undefined` in your app:
    - Look for "✅ .env file restored"
    - Look for "✅ Environment variables loaded"
    - Check the debug output shows your variables (sanitized)
-3. Ensure variables use the `EXPO_PUBLIC_` prefix in your `.env` files
-4. Re-run the setup script: `./scripts/setup-github-secrets.sh`
+3. **Important**: If you manually updated secrets, ensure they contain ONLY `KEY=VALUE` pairs:
+   - Remove all comments (lines starting with `#`)
+   - Remove all empty lines
+   - GitHub Actions `$GITHUB_ENV` will fail if it encounters non-`KEY=VALUE` lines
+   - The setup script automatically filters these out
+4. Ensure variables use the `EXPO_PUBLIC_` prefix in your `.env` files
+5. Re-run the setup script: `./scripts/setup-github-secrets.sh`
 
 ### Firebase service files not found in CI
 
