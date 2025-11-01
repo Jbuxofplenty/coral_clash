@@ -29,19 +29,14 @@ env_to_json() {
     local env_file=$1
     
     # Use jq to properly construct JSON with correct escaping
-    jq -n 'reduce inputs as $line (
-        {};
-        if $line != "" and ($line | startswith("#") | not) then
-            ($line | capture("^(?<key>[^=]+)=(?<value>.*)$") // {}) as $parsed |
-            if $parsed.key then
-                .[$parsed.key] = $parsed.value
-            else
-                .
-            end
-        else
-            .
-        end
-    )' "$env_file"
+    # -R reads raw strings, -s slurps entire input
+    cat "$env_file" | jq -R -s '
+        split("\n") |
+        map(select(length > 0) | select(startswith("#") | not)) |
+        map(capture("^(?<key>[^=]+)=(?<value>.*)$") // empty) |
+        map(select(.key != null)) |
+        reduce .[] as $item ({}; .[$item.key] = $item.value)
+    '
 }
 
 # List of environments to configure
