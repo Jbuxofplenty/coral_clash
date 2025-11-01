@@ -12,6 +12,7 @@ NC='\033[0m' # No Color
 # 1. Clean previous builds
 echo -e "${BLUE}🧹 Cleaning previous builds...${NC}"
 rm -rf ios/build
+rm -rf build/ios
 
 # 2. Run prebuild
 echo -e "${BLUE}📦 Running expo prebuild...${NC}"
@@ -27,64 +28,22 @@ cd ..
 echo -e "${BLUE}📦 Bundling JavaScript in DEVELOPMENT mode...${NC}"
 npx expo export:embed --eager --platform ios --dev true
 
-# 5. Build with Xcode in Debug configuration
-echo -e "${BLUE}🔨 Building with Debug configuration...${NC}"
-cd ios
-
-xcodebuild \
-  -workspace CoralClash.xcworkspace \
-  -scheme CoralClash \
-  -configuration Debug \
-  -destination generic/platform=iOS \
-  -archivePath "$PWD/build/CoralClash.xcarchive" \
-  archive \
-  CODE_SIGN_STYLE=Automatic \
-  DEVELOPMENT_TEAM="FWV22U8U39" \
-  DEBUG_INFORMATION_FORMAT=dwarf-with-dsym
-
-# 6. Export IPA with symbols
-echo -e "${BLUE}📤 Exporting IPA...${NC}"
-
-cat > ExportOptions.plist <<EOF
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-    <key>method</key>
-    <string>development</string>
-    <key>uploadSymbols</key>
-    <true/>
-    <key>compileBitcode</key>
-    <false/>
-    <key>signingStyle</key>
-    <string>automatic</string>
-    <key>teamID</key>
-    <string>FWV22U8U39</string>
-</dict>
-</plist>
-EOF
-
-xcodebuild \
-  -exportArchive \
-  -archivePath "$PWD/build/CoralClash.xcarchive" \
-  -exportPath "$PWD/build" \
-  -exportOptionsPlist ExportOptions.plist
-
-cd ..
+# 5. Build with Fastlane
+echo -e "${BLUE}🔨 Building debug IPA with Fastlane...${NC}"
+bundle exec fastlane ios debug
 
 echo ""
 echo -e "${GREEN}✅ Debug build complete!${NC}"
 echo ""
 echo "📍 Build artifacts:"
-echo "   IPA: ios/build/CoralClash.ipa"
-echo "   Archive (with dSYM): ios/build/CoralClash.xcarchive"
+echo "   IPA: build/ios/CoralClash-Debug.ipa"
+echo "   dSYM: build/ios/CoralClash.app.dSYM.zip"
 echo ""
 echo "📱 To install on device:"
 echo "   1. Connect your iPhone"
 echo "   2. Open Xcode > Window > Devices and Simulators"
-echo "   3. Drag ios/build/CoralClash.ipa to your device"
+echo "   3. Drag build/ios/CoralClash-Debug.ipa to your device"
 echo ""
-echo "🔍 To symbolicate crashes:"
-echo "   The dSYM is in: ios/build/CoralClash.xcarchive/dSYMs/"
+echo "🔍 Crash reports will now show exact file names and line numbers!"
 echo ""
 
