@@ -1,0 +1,247 @@
+\documentclass[10pt,landscape]{article} % Landscape orientation (16in > 8in)
+
+% === PACKAGES ===
+\usepackage[
+    paperwidth=3.8in, % Custom paper width
+    paperheight=7.7in,  % Custom paper height
+    landscape,
+    margin=0.15in,       
+    headheight=0pt,
+    headsep=0pt,
+    % footskip=0.5in % Adjust footskip if needed within margin
+]{geometry}
+\usepackage{multicol} % To create four columns (panels) side-by-side
+\usepackage{graphicx} % For potential images
+\usepackage{enumitem} % For customizing lists
+
+\usepackage{wallpaper}
+
+\usepackage{sectsty} % To control section font sizes
+% \usepackage{lipsum} % Placeholder text - REMOVE in final version
+
+% === STYLING ===
+\pagestyle{empty} % No page numbers
+% \setlength{\columnsep}{0.3in} % Adjust space between panels if needed
+\setlength{\parindent}{0pt} % No paragraph indentation
+% \setlength{\parskip}{4pt plus 2pt minus 2pt} % Slightly reduced space between paragraphs for tighter fit
+% \sectionfont{\normalsize\bfseries} % Adjust section font size for smaller panels
+% \subsectionfont{\small\bfseries} % Adjust subsection font size
+% \renewcommand{\familydefault}{\sfdefault} % Use a sans-serif font (optional)
+% \setlist{nosep, leftmargin=*} % Compact lists for space saving
+
+\renewcommand{\seriesdefault}{bx}
+\fontfamily{palatino}
+
+
+% === DOCUMENT START ===
+\begin{document}
+
+\raggedbottom
+
+% \vspace*{\fill}
+
+% \includegraphics[width=\textwidth]{images/icons/title.png}
+
+% \vspace*{\fill}
+
+% \newpage
+
+% \section*{Objective}
+% In order to win a game of Coral Clash you must \newline complete one of the following goals:
+% \begin{itemize}
+%     \item \textit{Checkmate:} Threaten the opponent's Whale with capture, and it has no legal move \newline to escape. The threatened player must \newline remove the threat if possible. If a Whale is in check, it must be made safe on the next move.
+%     \item \textit{Most Area Controlled:} Count up the amount of coral of your color that is not occupied by one of your opponents pieces. Triggered when any of the below three conditions is met:
+%         \begin{itemize}[label=\textendash]
+%             \item A player has placed all their Coral
+%             \item A player only has their Whale remaining
+%             \item A Crab or Octopus reaches the row of the board closest to their opponent
+%         \end{itemize}
+% \end{itemize}
+
+% The game can also end in a draw or resignation.
+% \begin{itemize}
+%     \item \textit{Stalemate:} The player whose turn it is has no legal moves, and their Whale is not in check.
+%     \item \textit{Threefold Repetition:} The exact same board \newline position occurs three times with the same player to move.
+% \end{itemize}
+
+
+% \section*{Setup}
+% \begin{enumerate}
+%     \item Place the board so each player has a green square on their right side
+%     \item Collect your pieces from the box:
+%         \begin{itemize}
+%             \item 17 Coral
+%             \item 17 Pieces: 1 Whale, 2 Dolphins, \newline 4 Turtles, 2 Pufferfish, 4 Crab, and \newline 4 Octopus
+%             \begin{itemize}
+%             \item Pieces that do not have four Coral icons \includegraphics[width=0.05\columnwidth]{images/icons/coral.png}  are \textit{Hunters}. 
+%             \item Pieces that have four Coral icons \includegraphics[width=0.05\columnwidth]{images/icons/coral.png} \newline are \textit{Gatherers}. 
+%             \end{itemize}
+%         \end{itemize}
+
+%     \item Position the pieces on the board as follows:
+%     \begin{enumerate}
+%         \item Pufferfish in the corners -- Hunter \newline Pufferfish on the left, Gatherer Pufferfish on the right
+%         \item Hunter Turtles next to the Pufferfish
+%         \item Gatherer Turtles next to the \newline Hunter Turtles
+%         \item Whale occupies the two remaining squares in the middle
+%         \item Dolphins occupy the two squares in the row above the Whale -- Hunter Dolphin on the left, Gatherer Dolphin on the right
+%         \item Crab and Octopus are placed in the \newline following pattern in front of all the other pieces -- Hunter Crab, Gatherer \newline Octopus, Gatherer Crab, Gatherer \newline Octopus, Hunter Octopus, Hunter Crab, Hunter Octopus, Gatherer Crab 
+%         \item Place a Coral under each Octopus in the third row (for a total of two)
+%         \item The blue player places an additional Coral underneath the Hunter Crab that is to the right of the Gatherer Dolphin
+%     \end{enumerate}
+% \end{enumerate}
+
+% \hspace{0.8cm}
+% \includegraphics[width=0.85\columnwidth]{images/board.png}
+
+
+
+% \section*{Turn Overview}
+% \begin{enumerate}[label=\arabic*.]
+%     \item Yellow player goes first. Players alternate turns.
+%     \item On your turn, move one piece.
+%     \item Resolve any Capture, Hunter Movement, \newline Hunter Effect, or Gatherer Effects that result from the move.
+%     \item Check if any Objectives are met.
+% \end{enumerate}
+
+% \section*{Piece Movement}
+% Pieces cannot move through other pieces.  
+
+% \subsection*{\includegraphics[width=0.08\columnwidth]{images/icons/crab.png}  Crab} Moves one square vertically or horizontally.
+
+ 
+
+% \begin{center}
+%         \includegraphics[width=0.4\columnwidth]{images/crab.png}
+% \end{center}
+
+% % 
+
+% \subsection*{\includegraphics[width=0.08\columnwidth]{images/icons/octopus.png} Octopus} Moves one square diagonally. 
+% \begin{center}
+%         \includegraphics[width=0.4\columnwidth]{images/octopus.png}
+% \end{center}
+
+% \subsection*{\includegraphics[width=0.08\columnwidth]{images/icons/puffer.png} Pufferfish} Moves any number of squares diagonally.
+% \begin{center}
+%         \includegraphics[width=0.4\columnwidth]{images/puffer.png}
+% \end{center}
+
+
+% \subsection*{\includegraphics[width=0.08\columnwidth]{images/icons/turtle.png} Turtle} Moves any number of squares vertically \newline or horizontally.
+% \begin{center}
+%         \includegraphics[width=0.4\columnwidth]{images/turtle.png}
+% \end{center}
+
+% \subsection*{\includegraphics[width=0.08\columnwidth]{images/icons/dolphin.png} Dolphin} Moves any number of squares vertically, \newline horizontally, or diagonally.
+% \begin{center}
+%         \includegraphics[width=0.4\columnwidth]{images/dolphin.png}
+% \end{center}
+
+
+
+% \subsection*{\includegraphics[width=0.12\columnwidth]{images/icons/whale.png} Whale}
+% Choose one the two moves below. The Whale may never end its movement in check, where it could be captured; however, the Whale can move through a threatened square. 
+% \begin{itemize}
+%     \item Move half the piece any number of squares \newline vertically, horizontally, or diagonally. 
+%     \begin{center}
+%         \includegraphics[width=0.4\columnwidth]{images/whale.png}
+%     \end{center}
+    
+%     \item Rotate half of the piece to one square \newline vertically or horizontally.
+%     \begin{center}
+%         \includegraphics[width=0.5\columnwidth]{images/whale_flip_1.png}
+%     \end{center}
+    
+%     or
+    
+%     \begin{center}\includegraphics[width=0.5\columnwidth]{images/whale_flip_2.png}
+%     \end{center}
+    
+% \end{itemize}
+
+
+
+% Example: Whale moving through a \newline threatened square.
+
+% \vspace{0.2cm}
+
+% \hspace{2.55cm}
+%         \includegraphics[width=0.5\columnwidth]{images/move_through_threaten.png}
+
+% \newpage
+
+% Example: Whale putting another Whale into check.
+% \begin{center}
+%         \includegraphics[width=0.5\columnwidth]{images/whale_check.png}
+% \end{center}
+
+
+% \section*{Capture}
+% A piece captures an opponent's piece by moving to the square occupied by the enemy piece. Remove the \newline opponent's piece from the board. 
+
+% \begin{center}
+%         \includegraphics[width=0.5\columnwidth]{images/basic_capture.png}
+% \end{center}
+
+% Whales can potentially capture two pieces with the \newline same movement.
+
+% \begin{center}
+%         \includegraphics[width=0.5\columnwidth]{images/double_capture.png}
+% \end{center}
+
+
+
+% \section*{Hunter Movement}
+
+% Pieces that do not have four Coral icons \includegraphics[width=0.05\columnwidth]{images/icons/coral.png} \newline are \textit{Hunters}. 
+
+% When Hunters move to a square with Coral, \newline the movement ends. 
+
+% \begin{center}
+%         \includegraphics[width=0.5\columnwidth]{images/hunter_movement.png}
+% \end{center}
+
+Whales that are already on Coral with half of the piece are not stopped when the other half of the piece moves onto the same Coral.
+
+\begin{center}
+        \includegraphics[width=0.75\columnwidth]{images/whale_special_move.png}
+\end{center}
+
+
+\section*{Hunter Effect}
+When Hunters move to a square with Coral, the piece can remove the Coral from the board, \newline returning it to the player for future use. 
+
+\begin{center}
+        \includegraphics[width=0.5\columnwidth]{images/hunter_effect.png}
+\end{center}
+
+Whales can remove two Coral in the same move
+
+\begin{center}
+        \includegraphics[width=0.5\columnwidth]{images/double_remove.png}
+\end{center}
+
+
+
+or just one Coral if desired.
+
+\begin{center}
+        \includegraphics[width=0.5\columnwidth]{images/single_remove.png}
+\end{center}
+
+
+\section*{Gatherer Effect}
+Pieces that have four Coral icons \includegraphics[width=0.05\columnwidth]{images/icons/coral.png} are \textit{Gatherers}. 
+
+When Gatherers move to a square without Coral, the piece can place Coral on the square.
+
+\begin{center}
+        \includegraphics[width=0.5\columnwidth]{images/gatherer_effect.png}
+\end{center}
+
+
+
+
+\end{document}
+% === DOCUMENT END ===

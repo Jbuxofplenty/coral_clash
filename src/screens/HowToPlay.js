@@ -74,6 +74,17 @@ export default function HowToPlay({ navigation }) {
                             </Text>
                         </View>
                     </View>
+
+                    <Text
+                        style={[styles.text, { color: colors.TEXT, marginTop: theme.SIZES.BASE }]}
+                    >
+                        <Text bold style={{ color: colors.TEXT }}>
+                            Area controlled by Coral:
+                        </Text>{' '}
+                        Count the amount of coral of your color that is not occupied by one of your
+                        opponent's pieces.
+                    </Text>
+
                     <View style={styles.examplesContainer}>
                         <ExampleLink
                             scenarioId='checkmate'
@@ -225,17 +236,102 @@ export default function HowToPlay({ navigation }) {
                             </Text>
                         </Text>
                         <Text style={[styles.text, { color: colors.TEXT }]}>
-                            Can move half the piece any number of squares in any direction, or
-                            rotate half of the piece to an adjacent square. Cannot end movement in
-                            check.
+                            The Whale is your most important piece - if it's checkmated, you lose!
+                            The Whale occupies two squares and has two distinct movement options:
                         </Text>
-                        <ExampleLink
-                            scenarioId='whaleMovement'
-                            label='Whale Movement Example'
-                            navigation={navigation}
-                            viewedExamples={viewedExamples}
-                            onViewed={handleMarkViewed}
-                        />
+
+                        <View style={styles.subBulletSection}>
+                            <Text style={[styles.subBullet, { color: colors.TEXT }]}>
+                                <Text bold style={{ color: colors.TEXT }}>
+                                    1. Sliding Move:
+                                </Text>{' '}
+                                Move half of the piece any number of squares horizontally,
+                                vertically, or diagonally while maintaining its original
+                                orientation. The path must be clear of pieces and coral (with one
+                                exception - see below).
+                            </Text>
+                            <Text style={[styles.subBullet, { color: colors.TEXT }]}>
+                                <Text bold style={{ color: colors.TEXT }}>
+                                    2. Rotation Move:
+                                </Text>{' '}
+                                Rotate half of the piece to an adjacent square (one square
+                                vertically or horizontally).
+                            </Text>
+                        </View>
+
+                        <Text
+                            style={[
+                                styles.text,
+                                { color: colors.TEXT, marginTop: theme.SIZES.BASE },
+                            ]}
+                        >
+                            <Text bold style={{ color: colors.TEXT }}>
+                                Check Rules:
+                            </Text>{' '}
+                            The Whale may never end its movement in check (where it could be
+                            captured), but it CAN move through threatened squares.
+                        </Text>
+
+                        <Text style={[styles.text, { color: colors.TEXT }]}>
+                            <Text bold style={{ color: colors.TEXT }}>
+                                Double Capture:
+                            </Text>{' '}
+                            The Whale can capture up to two enemy pieces in a single move - one with
+                            each half of its body!
+                        </Text>
+
+                        <Text style={[styles.text, { color: colors.TEXT }]}>
+                            <Text bold style={{ color: colors.TEXT }}>
+                                Double Coral Removal:
+                            </Text>{' '}
+                            When the Whale (acting as a Hunter) moves onto coral, it can remove up
+                            to two coral pieces in one move - one from each square it occupies. If
+                            the Whale is already on coral with half of its body, it can still remove
+                            one coral piece.
+                        </Text>
+
+                        <View
+                            style={[
+                                styles.specialCaseBox,
+                                {
+                                    backgroundColor: colors.PRIMARY + '10',
+                                    borderColor: colors.PRIMARY,
+                                },
+                            ]}
+                        >
+                            <Text style={[styles.specialCaseTitle, { color: colors.PRIMARY }]}>
+                                ⚠️ Special Movement Case
+                            </Text>
+                            <Text style={[styles.text, { color: colors.TEXT, marginBottom: 0 }]}>
+                                If half of the Whale is already sitting on coral, that coral does
+                                NOT block the other half from moving through or onto the same coral
+                                square.
+                            </Text>
+                        </View>
+
+                        <View style={styles.examplesContainer}>
+                            <ExampleLink
+                                scenarioId='whaleMovement'
+                                label='Basic Whale Movement'
+                                navigation={navigation}
+                                viewedExamples={viewedExamples}
+                                onViewed={handleMarkViewed}
+                            />
+                            <ExampleLink
+                                scenarioId='whaleRotation'
+                                label='Whale Rotation Example'
+                                navigation={navigation}
+                                viewedExamples={viewedExamples}
+                                onViewed={handleMarkViewed}
+                            />
+                            <ExampleLink
+                                scenarioId='whaleCoralException'
+                                label='Whale Moving Through Own Coral'
+                                navigation={navigation}
+                                viewedExamples={viewedExamples}
+                                onViewed={handleMarkViewed}
+                            />
+                        </View>
                     </View>
 
                     <View style={styles.pieceSection}>
@@ -504,5 +600,16 @@ const styles = StyleSheet.create({
     examplesContainer: {
         marginTop: theme.SIZES.BASE,
         gap: theme.SIZES.BASE / 2,
+    },
+    specialCaseBox: {
+        borderWidth: 2,
+        borderRadius: 8,
+        padding: theme.SIZES.BASE * 1.5,
+        marginVertical: theme.SIZES.BASE,
+    },
+    specialCaseTitle: {
+        fontSize: moderateScale(15),
+        fontWeight: '600',
+        marginBottom: theme.SIZES.BASE / 2,
     },
 });

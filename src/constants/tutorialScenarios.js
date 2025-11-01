@@ -104,6 +104,125 @@ export const TUTORIAL_SCENARIOS = {
         },
     },
 
+    whaleRotation: {
+        id: 'whaleRotation',
+        title: 'Whale Rotation',
+        description:
+            'The Whale can rotate by moving one half to an adjacent square (vertically or horizontally). Watch as the White Whale rotates from a horizontal position to a vertical position. This rotation move is especially useful for navigating tight spaces or changing direction quickly.',
+        fixture: {
+            schemaVersion: '1.1.0',
+            exportedAt: new Date().toISOString(),
+            state: {
+                fen: '8/8/8/8/3H4/8/8/8 w - - 0 1',
+                board: [
+                    [null, null, null, null, null, null, null, null],
+                    [null, null, null, null, null, null, null, null],
+                    [null, null, null, null, null, null, null, null],
+                    [null, null, null, null, null, null, null, null],
+                    [
+                        null,
+                        null,
+                        null,
+                        { square: 'd4', type: 'h', color: 'w' },
+                        { square: 'e4', type: 'h', color: 'w' },
+                        null,
+                        null,
+                        null,
+                    ],
+                    [null, null, null, null, null, null, null, null],
+                    [null, null, null, null, null, null, null, null],
+                    [null, null, null, null, null, null, null, null],
+                ],
+                history: [],
+                turn: 'w',
+                whalePositions: {
+                    w: ['d4', 'e4'],
+                    b: [],
+                },
+                isGameOver: false,
+                inCheck: false,
+                isCheckmate: false,
+                isStalemate: false,
+                isDraw: false,
+                isCoralVictory: null,
+            },
+        },
+        autoPlaySequence: {
+            moves: [
+                { from: 'd4', to: 'd5' }, // Rotate from horizontal (d4-e4) to vertical (d5-e4)
+            ],
+            delayBetweenMoves: 2000,
+            pauseAtEnd: 3000,
+            showPath: true,
+        },
+    },
+
+    whaleCoralException: {
+        id: 'whaleCoralException',
+        title: 'Whale Moving Through Own Coral',
+        description:
+            'Special Rule: When half of the Whale is already sitting on coral, that coral does NOT block the other half from moving through or onto the same coral square. Watch as the White Whale slides from d4-e4 to a4-b4, moving through the coral at d4. Black coral at c, d, e in rows 3 and 5 restricts vertical movement, and coral at f4 blocks rightward movement, but the whale can freely move left along row 4 because one half is already sitting on the white coral at d4.',
+        fixture: {
+            schemaVersion: '1.1.0',
+            exportedAt: new Date().toISOString(),
+            state: {
+                fen: '8/8/8/8/3H4/8/8/8 w - - 0 1',
+                board: [
+                    [null, null, null, null, null, null, null, null],
+                    [null, null, null, null, null, null, null, null],
+                    [null, null, null, null, null, null, null, null],
+                    [null, null, null, null, null, null, null, null],
+                    [
+                        null,
+                        null,
+                        null,
+                        { square: 'd4', type: 'h', color: 'w' },
+                        { square: 'e4', type: 'h', color: 'w' },
+                        null,
+                        null,
+                        null,
+                    ],
+                    [null, null, null, null, null, null, null, null],
+                    [null, null, null, null, null, null, null, null],
+                    [null, null, null, null, null, null, null, null],
+                ],
+                history: [],
+                turn: 'w',
+                whalePositions: {
+                    w: ['d4', 'e4'],
+                    b: [],
+                },
+                coral: [
+                    { square: 'd4', color: 'w' },
+                    // Row 5 coral to block upward movement
+                    { square: 'c5', color: 'b' },
+                    { square: 'd5', color: 'b' },
+                    { square: 'e5', color: 'b' },
+                    // Row 3 coral to block downward movement
+                    { square: 'c3', color: 'b' },
+                    { square: 'd3', color: 'b' },
+                    { square: 'e3', color: 'b' },
+                    // Row 4 coral to block rightward movement
+                    { square: 'f4', color: 'b' },
+                ],
+                isGameOver: false,
+                inCheck: false,
+                isCheckmate: false,
+                isStalemate: false,
+                isDraw: false,
+                isCoralVictory: null,
+            },
+        },
+        autoPlaySequence: {
+            moves: [
+                { from: 'd4', to: 'a4' }, // Move right half from e4 to b4 (through d4 coral), resulting in whale at a4-b4
+            ],
+            delayBetweenMoves: 2000,
+            pauseAtEnd: 3000,
+            showPath: true,
+        },
+    },
+
     coralMovementComparison: {
         id: 'coralMovementComparison',
         title: 'Coral Movement Comparison',
