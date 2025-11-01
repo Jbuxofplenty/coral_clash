@@ -60,13 +60,18 @@ echo ""
 # Upload staging .env file
 echo "📤 Uploading .env.preview as STAGING_ENV_FILE..."
 # Filter out comments and empty lines before uploading
-grep -v '^\s*#' .env.preview | grep -v '^\s*$' | gh secret set STAGING_ENV_FILE --body -
-if [ $? -eq 0 ]; then
-    echo "✅ STAGING_ENV_FILE uploaded (filtered)"
-    # Count EXPO_PUBLIC_ variables
+# Use temp file to ensure proper newline handling
+TEMP_ENV=$(mktemp)
+grep -v '^\s*#' .env.preview | grep -v '^\s*$' > "$TEMP_ENV"
+echo "   Filtered $(wc -l < "$TEMP_ENV" | tr -d ' ') lines (removed comments and empty lines)"
+gh secret set STAGING_ENV_FILE < "$TEMP_ENV"
+SECRET_UPLOAD_STATUS=$?
+rm "$TEMP_ENV"
+
+if [ $SECRET_UPLOAD_STATUS -eq 0 ]; then
+    echo "✅ STAGING_ENV_FILE uploaded successfully"
     staging_count=$(grep -c "^EXPO_PUBLIC_" .env.preview || true)
-    echo "   Contains $staging_count environment variables"
-    echo "   (Comments and empty lines removed)"
+    echo "   Contains $staging_count EXPO_PUBLIC_* variables"
 else
     echo "❌ Failed to upload STAGING_ENV_FILE"
     exit 1
@@ -76,13 +81,18 @@ echo ""
 # Upload production .env file
 echo "📤 Uploading .env.production as PRODUCTION_ENV_FILE..."
 # Filter out comments and empty lines before uploading
-grep -v '^\s*#' .env.production | grep -v '^\s*$' | gh secret set PRODUCTION_ENV_FILE --body -
-if [ $? -eq 0 ]; then
-    echo "✅ PRODUCTION_ENV_FILE uploaded (filtered)"
-    # Count EXPO_PUBLIC_ variables
+# Use temp file to ensure proper newline handling
+TEMP_ENV=$(mktemp)
+grep -v '^\s*#' .env.production | grep -v '^\s*$' > "$TEMP_ENV"
+echo "   Filtered $(wc -l < "$TEMP_ENV" | tr -d ' ') lines (removed comments and empty lines)"
+gh secret set PRODUCTION_ENV_FILE < "$TEMP_ENV"
+SECRET_UPLOAD_STATUS=$?
+rm "$TEMP_ENV"
+
+if [ $SECRET_UPLOAD_STATUS -eq 0 ]; then
+    echo "✅ PRODUCTION_ENV_FILE uploaded successfully"
     production_count=$(grep -c "^EXPO_PUBLIC_" .env.production || true)
-    echo "   Contains $production_count environment variables"
-    echo "   (Comments and empty lines removed)"
+    echo "   Contains $production_count EXPO_PUBLIC_* variables"
 else
     echo "❌ Failed to upload PRODUCTION_ENV_FILE"
     exit 1
