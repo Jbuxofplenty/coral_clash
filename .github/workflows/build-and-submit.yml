@@ -100,9 +100,9 @@ jobs:
         run: |
           echo "📝 Restoring .env file for ${{ inputs.profile }} environment..."
           if [ "${{ inputs.profile }}" == "preview" ]; then
-            printf "%s\n" "${{ secrets.STAGING_ENV_FILE }}" > .env
+            echo "${{ secrets.STAGING_ENV_FILE }}" > .env
           else
-            printf "%s\n" "${{ secrets.PRODUCTION_ENV_FILE }}" > .env
+            echo "${{ secrets.PRODUCTION_ENV_FILE }}" > .env
           fi
           echo "✅ .env file restored"
           echo "🔍 Debug: File has $(wc -l < .env) lines"
@@ -225,9 +225,9 @@ jobs:
         run: |
           echo "📝 Restoring .env file for ${{ inputs.profile }} environment..."
           if [ "${{ inputs.profile }}" == "preview" ]; then
-            printf "%s\n" "${{ secrets.STAGING_ENV_FILE }}" > .env
+            echo "${{ secrets.STAGING_ENV_FILE }}" > .env
           else
-            printf "%s\n" "${{ secrets.PRODUCTION_ENV_FILE }}" > .env
+            echo "${{ secrets.PRODUCTION_ENV_FILE }}" > .env
           fi
           echo "✅ .env file restored"
           echo "🔍 Debug: File has $(wc -l < .env) lines"
