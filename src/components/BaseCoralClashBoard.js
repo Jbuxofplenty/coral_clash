@@ -21,6 +21,7 @@ import {
 } from '../../shared';
 import { useAlert, useAuth, useGamePreferences, useTheme } from '../contexts';
 import { useCoralClash, useFirebaseFunctions, useGameActions } from '../hooks';
+import AnimatedPiece from './AnimatedPiece';
 import Coral from './Coral';
 import EmptyBoard from './EmptyBoard';
 import GameStatusBanner from './GameStatusBanner';
@@ -100,6 +101,14 @@ const BaseCoralClashBoard = ({
     const [updateCounter, forceUpdate] = useState(0);
     const [turnNotification, setTurnNotification] = useState(null);
 
+    // Animation state
+    const [animatingMove, setAnimatingMove] = useState(null);
+    const [animatingPiece, setAnimatingPiece] = useState(null);
+    const lastAnimatedMoveRef = useRef(null);
+
+    // Track previous history length to detect resets
+    const previousHistoryLengthRef = useRef(null);
+
     // Callback for when game state updates from Firestore
     const handleStateUpdate = useCallback(() => {
         // Clear visible moves when game state updates from Firestore
@@ -108,6 +117,46 @@ const BaseCoralClashBoard = ({
         setWhaleDestination(null);
         setWhaleOrientationMoves([]);
         setIsViewingEnemyMoves(false);
+
+        // Trigger move animation for opponent moves
+        if (coralClash && typeof coralClash.history === 'function') {
+            const history = coralClash.history({ verbose: true });
+            const currentHistoryLength = history.length;
+
+            // Check if game was reset (history length went to 0 or decreased significantly)
+            if (
+                previousHistoryLengthRef.current !== null &&
+                currentHistoryLength === 0 &&
+                previousHistoryLengthRef.current > 0
+            ) {
+                // Game was reset - clear animations and reset tracking
+                setAnimatingMove(null);
+                setAnimatingPiece(null);
+                lastAnimatedMoveRef.current = null;
+            } else if (history.length > 0) {
+                const lastMove = history[history.length - 1];
+                const moveKey = `${lastMove.from}-${lastMove.to}-${history.length}`;
+
+                // Only animate if this is a new move we haven't animated yet
+                if (lastAnimatedMoveRef.current !== moveKey) {
+                    lastAnimatedMoveRef.current = moveKey;
+
+                    // Get the piece that was moved (before the move)
+                    const piece = {
+                        type: lastMove.piece,
+                        color: lastMove.color,
+                        role: lastMove.role,
+                    };
+
+                    setAnimatingPiece(piece);
+                    setAnimatingMove(lastMove);
+                }
+            }
+
+            // Update previous history length
+            previousHistoryLengthRef.current = currentHistoryLength;
+        }
+
         // Force re-render
         forceUpdate((n) => n + 1);
 
@@ -471,14 +520,41 @@ const BaseCoralClashBoard = ({
         // Clear visible moves when navigating history
         clearVisibleMoves();
 
+        // Get the move being undone and animate it in reverse
+        const moveHistory = coralClash.history({ verbose: true });
+        let moveToAnimate = null;
+
         if (historyIndex === null) {
-            // Start viewing history from one move back
-            // If length is 1, go to -1 (starting position)
-            // If length is 2+, go to length - 2 (one move back from current)
+            // Going back from current state - animate last move in reverse
+            if (moveHistory.length > 0) {
+                moveToAnimate = moveHistory[moveHistory.length - 1];
+            }
             setHistoryIndex(currentHistoryLength - 2);
         } else if (historyIndex >= 0) {
-            // Go back one more move (can go to -1 for starting position)
+            // Going back from a historical position
+            if (moveHistory[historyIndex]) {
+                moveToAnimate = moveHistory[historyIndex];
+            }
             setHistoryIndex(historyIndex - 1);
+        }
+
+        // Trigger reverse animation
+        if (moveToAnimate) {
+            const moveKey = `reverse-${moveToAnimate.from}-${moveToAnimate.to}-${Date.now()}`;
+            lastAnimatedMoveRef.current = moveKey;
+
+            setAnimatingPiece({
+                type: moveToAnimate.piece,
+                color: moveToAnimate.color,
+                role: moveToAnimate.role,
+            });
+            // Reverse the move direction
+            setAnimatingMove({
+                ...moveToAnimate,
+                from: moveToAnimate.to,
+                to: moveToAnimate.from,
+                whaleSecondSquare: undefined, // Don't use whale second square for reverse
+            });
         }
     };
 
@@ -488,12 +564,37 @@ const BaseCoralClashBoard = ({
         // Clear visible moves when navigating history
         clearVisibleMoves();
 
+        // Get the move being replayed and animate it
+        const moveHistory = coralClash.history({ verbose: true });
+        let moveToAnimate = null;
+
         if (historyIndex >= currentHistoryLength - 2) {
-            // We're at or near the end, go to current state
+            // Going to current state - animate the last move
+            const nextIndex = currentHistoryLength - 1;
+            if (moveHistory[nextIndex]) {
+                moveToAnimate = moveHistory[nextIndex];
+            }
             setHistoryIndex(null);
         } else {
-            // Go forward one move
+            // Going forward one move
+            const nextIndex = historyIndex + 1;
+            if (moveHistory[nextIndex]) {
+                moveToAnimate = moveHistory[nextIndex];
+            }
             setHistoryIndex(historyIndex + 1);
+        }
+
+        // Trigger forward animation
+        if (moveToAnimate) {
+            const moveKey = `forward-${moveToAnimate.from}-${moveToAnimate.to}-${Date.now()}`;
+            lastAnimatedMoveRef.current = moveKey;
+
+            setAnimatingPiece({
+                type: moveToAnimate.piece,
+                color: moveToAnimate.color,
+                role: moveToAnimate.role,
+            });
+            setAnimatingMove(moveToAnimate);
         }
     };
 
@@ -722,6 +823,27 @@ const BaseCoralClashBoard = ({
         clearVisibleMoves();
 
         if (onUndo) {
+            // Get the moves being undone and animate the last one in reverse
+            const moveHistory = coralClash.history({ verbose: true });
+            if (moveHistory.length > 0) {
+                const lastMove = moveHistory[moveHistory.length - 1];
+                const moveKey = `undo-${lastMove.from}-${lastMove.to}-${Date.now()}`;
+                lastAnimatedMoveRef.current = moveKey;
+
+                setAnimatingPiece({
+                    type: lastMove.piece,
+                    color: lastMove.color,
+                    role: lastMove.role,
+                });
+                // Reverse the move direction for undo
+                setAnimatingMove({
+                    ...lastMove,
+                    from: lastMove.to,
+                    to: lastMove.from,
+                    whaleSecondSquare: undefined, // Don't use whale second square for reverse
+                });
+            }
+
             onUndo(coralClash);
             // Exit history view when undo is performed
             setHistoryIndex(null);
@@ -815,6 +937,9 @@ const BaseCoralClashBoard = ({
         // Clear visible moves immediately when making a move
         clearVisibleMoves();
 
+        // Capture piece info before making the move for animation
+        const pieceBeforeMove = coralClash.get(moveParams.from);
+
         // Online game: backend-first approach
         if (isOnlineGame) {
             const result = await makeMoveAPI(moveParams);
@@ -823,8 +948,7 @@ const BaseCoralClashBoard = ({
             setHistoryIndex(null);
             await onMoveComplete?.(result, moveParams);
 
-            // Don't show turn notification here for online games
-            // The Firestore listener will handle it for both players when game state updates
+            // Animation will be triggered by handleStateUpdate via Firestore listener
 
             return result;
         }
@@ -832,6 +956,21 @@ const BaseCoralClashBoard = ({
         // Offline/local game: apply locally
         const moveResult = coralClash.move(moveParams);
         if (!moveResult) return null;
+
+        // Trigger animation for local moves
+        const history = coralClash.history({ verbose: true });
+        if (history.length > 0) {
+            const lastMove = history[history.length - 1];
+            const moveKey = `${lastMove.from}-${lastMove.to}-${history.length}`;
+            lastAnimatedMoveRef.current = moveKey;
+
+            setAnimatingPiece({
+                type: pieceBeforeMove.type,
+                color: pieceBeforeMove.color,
+                role: pieceBeforeMove.role,
+            });
+            setAnimatingMove(lastMove);
+        }
 
         setHistoryIndex(null);
         forceUpdate((n) => n + 1);
@@ -1442,6 +1581,7 @@ const BaseCoralClashBoard = ({
                         userColor={userColor}
                         boardFlipped={isBoardFlipped}
                         isProcessing={isGameActionProcessing}
+                        animatingSquare={animatingMove?.to}
                     />
                     <Moves
                         visibleMoves={visibleMoves}
@@ -1452,6 +1592,21 @@ const BaseCoralClashBoard = ({
                         isPlayerTurn={isPlayerTurn}
                         isProcessing={isGameActionProcessing}
                     />
+                    {/* Animated piece layer */}
+                    {animatingMove && animatingPiece && (
+                        <AnimatedPiece
+                            move={animatingMove}
+                            piece={animatingPiece}
+                            size={boardSize}
+                            boardFlipped={isBoardFlipped}
+                            userColor={userColor}
+                            onComplete={() => {
+                                setAnimatingMove(null);
+                                setAnimatingPiece(null);
+                                forceUpdate((n) => n + 1);
+                            }}
+                        />
+                    )}
                 </View>
 
                 <View style={[styles.spacer, isCompact && styles.spacerCompact]} />
@@ -1474,7 +1629,7 @@ const BaseCoralClashBoard = ({
                 {renderGameRequestBanner &&
                     renderGameRequestBanner({ coralClash, clearVisibleMoves })}
 
-                {/* Status Banners - Priority: notificationStatus > turnNotification > gameStatus */}
+                {/* Status Banners - Priority: notificationStatus > isViewingHistory > turnNotification > gameStatus */}
                 {notificationStatus ? (
                     /* Notification Status Banner (for undo/reset notifications) - Highest priority */
                     <GameStatusBanner
@@ -1483,6 +1638,13 @@ const BaseCoralClashBoard = ({
                         visible={true}
                         timeout={notificationStatus.timeout}
                         onDismiss={notificationStatus.onDismiss}
+                    />
+                ) : isViewingHistory && !isGameOver ? (
+                    /* History Viewing Banner - Shows when user is viewing past moves (only if game not over) */
+                    <GameStatusBanner
+                        message='Viewing past moves - return to current to play'
+                        type='info'
+                        visible={true}
                     />
                 ) : turnNotification ? (
                     /* Turn Notification Banner - Shows whose turn it is after a move */

@@ -11,6 +11,7 @@ const Pieces = ({
     userColor = null,
     boardFlipped = null,
     isProcessing = false,
+    animatingSquare = null,
 }) => {
     const { isBoardFlipped: contextBoardFlipped } = useGamePreferences();
     // Use provided boardFlipped if available, otherwise use context value
@@ -46,6 +47,13 @@ const Pieces = ({
         const isWhale = type === WHALE;
         const whaleKey = `${color}${WHALE}`;
 
+        // Check if this piece is currently being animated - hide it if so
+        const isAnimating = animatingSquare && square === animatingSquare;
+
+        // For whales, also check if any of the whale's squares are being animated
+        const isWhaleAnimating =
+            isWhale && animatingSquare && whaleSquares[whaleKey]?.includes(animatingSquare);
+
         // Determine if piece should have coral decoration based on role
         const hasCoral = role === 'gatherer';
 
@@ -61,7 +69,7 @@ const Pieces = ({
 
         if (isWhale) {
             // Render whale image only once from the first square (leftmost/bottommost)
-            if (!renderedWhaleImages.has(whaleKey)) {
+            if (!renderedWhaleImages.has(whaleKey) && !isWhaleAnimating) {
                 renderedWhaleImages.add(whaleKey);
 
                 // Determine orientation and find the leftmost/bottommost square
@@ -175,8 +183,8 @@ const Pieces = ({
                     />
                 </TouchableWithoutFeedback>,
             );
-        } else {
-            // Regular piece - render normally
+        } else if (!isAnimating) {
+            // Regular piece - render normally (but hide if animating)
             elements.push(
                 <TouchableWithoutFeedback
                     key={`piece-${square}`}
