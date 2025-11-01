@@ -24,34 +24,24 @@ fi
 echo "✅ GitHub CLI is authenticated"
 echo ""
 
-# Function to convert .env file to JSON
+# Function to convert .env file to JSON using jq for proper escaping
 env_to_json() {
     local env_file=$1
-    local json="{"
-    local first=true
     
-    while IFS='=' read -r key value || [ -n "$key" ]; do
-        # Skip empty lines and comments
-        [[ -z "$key" || "$key" =~ ^#.* ]] && continue
-        
-        # Remove leading/trailing whitespace
-        key=$(echo "$key" | xargs)
-        value=$(echo "$value" | xargs)
-        
-        # Escape quotes in value
-        value=$(echo "$value" | sed 's/"/\\"/g')
-        
-        if [ "$first" = true ]; then
-            first=false
+    # Use jq to properly construct JSON with correct escaping
+    jq -n 'reduce inputs as $line (
+        {};
+        if $line != "" and ($line | startswith("#") | not) then
+            ($line | capture("^(?<key>[^=]+)=(?<value>.*)$") // {}) as $parsed |
+            if $parsed.key then
+                .[$parsed.key] = $parsed.value
+            else
+                .
+            end
         else
-            json+=","
-        fi
-        
-        json+="\"$key\":\"$value\""
-    done < "$env_file"
-    
-    json+="}"
-    echo "$json"
+            .
+        end
+    )' "$env_file"
 }
 
 # List of environments to configure
@@ -86,6 +76,17 @@ for ENV in "${ENVIRONMENTS[@]}"; do
     echo "Converting $ENV_FILE to JSON..."
     ENV_JSON=$(env_to_json "$ENV_FILE")
     
+    # Validate JSON
+    if ! echo "$ENV_JSON" | jq empty 2>/dev/null; then
+        echo "❌ Error: Generated invalid JSON from $ENV_FILE"
+        echo "JSON output:"
+        echo "$ENV_JSON"
+        exit 1
+    fi
+    
+    echo "✅ Valid JSON created with $(echo "$ENV_JSON" | jq 'keys | length') variables"
+    echo "Variables: $(echo "$ENV_JSON" | jq -r 'keys | join(", ")')"
+    
     echo "Creating GitHub secret: $SECRET_NAME"
     echo "$ENV_JSON" | gh secret set "$SECRET_NAME" --body -
     
@@ -98,20 +99,18 @@ echo "✅ All GitHub secrets created successfully!"
 echo "========================================"
 echo ""
 echo "Created secrets:"
-echo "  Staging (preview):"
-for VAR_NAME in "${ENV_VARS[@]}"; do
-    echo "    - STAGING_${VAR_NAME}"
-done
+echo "  • STAGING_CLIENT_ENV_JSON (from .env.preview)"
+echo "  • PRODUCTION_CLIENT_ENV_JSON (from .env.production)"
 echo ""
-echo "  Production:"
-for VAR_NAME in "${ENV_VARS[@]}"; do
-    echo "    - PRODUCTION_${VAR_NAME}"
-done
+echo "These JSON secrets contain all environment variables from your .env files."
 echo ""
 echo "To view your secrets:"
 echo "  gh secret list"
 echo ""
-echo "To update a secret:"
-echo "  echo 'new-value' | gh secret set STAGING_EXPO_PUBLIC_FIREBASE_API_KEY"
+echo "To add a new variable:"
+echo "  1. Add it to .env.preview or .env.production"
+echo "  2. Run this script again: ./scripts/setup-github-secrets.sh"
+echo ""
+echo "No workflow changes needed - variables are automatically expanded!"
 echo ""
 
