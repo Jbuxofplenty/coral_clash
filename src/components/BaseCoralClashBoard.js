@@ -548,12 +548,39 @@ const BaseCoralClashBoard = ({
                 color: moveToAnimate.color,
                 role: moveToAnimate.role,
             });
+            
             // Reverse the move direction
+            // For whales, we need to determine the original orientation before the move
+            let reverseWhaleSecondSquare = undefined;
+            if (moveToAnimate.piece === WHALE) {
+                // Determine which move index we're looking at
+                const moveIndex = historyIndex === null 
+                    ? moveHistory.length - 1 
+                    : historyIndex;
+                
+                // Get the board state BEFORE this move was made
+                const tempGame = new CoralClash();
+                // Replay all moves up to but not including the one we're reversing
+                for (let i = 0; i < moveIndex; i++) {
+                    tempGame.move(moveHistory[i]);
+                }
+                // Now get the whale positions from this state
+                const whalePositions = tempGame.whalePositions();
+                const whaleColor = moveToAnimate.color;
+                const whaleKey = whaleColor === 'w' ? 'white' : 'black';
+                const originalWhaleSquares = whalePositions[whaleKey];
+                
+                if (originalWhaleSquares && originalWhaleSquares.length === 2) {
+                    // Find which square is NOT moveToAnimate.from (that's the second square)
+                    reverseWhaleSecondSquare = originalWhaleSquares.find(sq => sq !== moveToAnimate.from);
+                }
+            }
+            
             setAnimatingMove({
                 ...moveToAnimate,
                 from: moveToAnimate.to,
                 to: moveToAnimate.from,
-                whaleSecondSquare: undefined, // Don't use whale second square for reverse
+                whaleSecondSquare: reverseWhaleSecondSquare,
             });
         }
     };
@@ -926,12 +953,35 @@ const BaseCoralClashBoard = ({
                     color: lastMove.color,
                     role: lastMove.role,
                 });
+                
                 // Reverse the move direction for undo
+                // For whales, we need to determine the original orientation before the move
+                let reverseWhaleSecondSquare = undefined;
+                if (lastMove.piece === WHALE) {
+                    // Get the board state BEFORE this move was made to find the original whale position
+                    // We need to look at the previous move's after state, or starting position if this is the first move
+                    const tempGame = new CoralClash();
+                    // Replay all moves except the last one
+                    for (let i = 0; i < moveHistory.length - 1; i++) {
+                        tempGame.move(moveHistory[i]);
+                    }
+                    // Now get the whale positions from this state
+                    const whalePositions = tempGame.whalePositions();
+                    const whaleColor = lastMove.color;
+                    const whaleKey = whaleColor === 'w' ? 'white' : 'black';
+                    const originalWhaleSquares = whalePositions[whaleKey];
+                    
+                    if (originalWhaleSquares && originalWhaleSquares.length === 2) {
+                        // Find which square is NOT lastMove.from (that's the second square)
+                        reverseWhaleSecondSquare = originalWhaleSquares.find(sq => sq !== lastMove.from);
+                    }
+                }
+                
                 setAnimatingMove({
                     ...lastMove,
                     from: lastMove.to,
                     to: lastMove.from,
-                    whaleSecondSquare: undefined, // Don't use whale second square for reverse
+                    whaleSecondSquare: reverseWhaleSecondSquare,
                 });
             }
 
@@ -1718,7 +1768,11 @@ const BaseCoralClashBoard = ({
 
                 {/* Banner Display - Priority-based system ensures only one banner shows at a time */}
                 {/* Priority: notificationStatus > gameRequest > historyViewing > turnNotification > gameStatus */}
-                {activeBanner?.content}
+                {activeBanner?.content && (
+                    <View style={{ width: boardSize, alignSelf: 'center' }}>
+                        {activeBanner.content}
+                    </View>
+                )}
             </View>
 
             {/* Control Bar */}

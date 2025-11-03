@@ -104,18 +104,16 @@ const AnimatedPiece = ({ move, piece, size, boardFlipped, userColor, onComplete 
     const [whaleOrientation, setWhaleOrientation] = useState('horizontal');
 
     useEffect(() => {
-        if (!isWhale || path.length < 2) return;
+        if (!isWhale || !move.whaleSecondSquare) return;
 
-        // Determine orientation based on final two squares
-        const lastSquare = path[path.length - 1];
-        const secondLastSquare = path[path.length - 2];
+        // Determine final orientation from move.to and move.whaleSecondSquare
+        // if move.to and move.whaleSecondSquare are on same rank, orientation is horizontal
+        const toRank = parseInt(move.to[1]) - 1;
+        const whaleSecondRank = parseInt(move.whaleSecondSquare[1]) - 1;
 
-        const lastRank = parseInt(lastSquare[1]) - 1;
-        const secondLastRank = parseInt(secondLastSquare[1]) - 1;
-
-        const orientation = lastRank === secondLastRank ? 'horizontal' : 'vertical';
-        setWhaleOrientation(orientation);
-    }, [isWhale, path]);
+        const finalOrientation = toRank === whaleSecondRank ? 'horizontal' : 'vertical';
+        setWhaleOrientation(finalOrientation);
+    }, [isWhale, move]);
 
     useEffect(() => {
         if (currentPathIndex >= path.length) {
@@ -171,7 +169,16 @@ const AnimatedPiece = ({ move, piece, size, boardFlipped, userColor, onComplete 
                 setCurrentPathIndex(currentPathIndex + 1);
             }, pauseDuration);
         });
-    }, [currentPathIndex, path, size, boardFlipped, positionAnim, opacityAnim, squareToPosition, onComplete]);
+    }, [
+        currentPathIndex,
+        path,
+        size,
+        boardFlipped,
+        positionAnim,
+        opacityAnim,
+        squareToPosition,
+        onComplete,
+    ]);
 
     if (!piece || path.length === 0) return null;
 
