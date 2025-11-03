@@ -990,26 +990,13 @@ describe('Game State Snapshot and Restore', () => {
 
             const whaleRemove2Coral2 = require('../__fixtures__/whale-remove-2-coral-2.json');
 
-            // Copy fixture data into snapshot format
-            const fixtureSnapshot = {
-                fen: whaleRemove2Coral2.state.fen,
-                turn: whaleRemove2Coral2.state.turn,
-                whalePositions: whaleRemove2Coral2.state.whalePositions,
-                coral: whaleRemove2Coral2.state.coral,
-                coralRemaining: whaleRemove2Coral2.state.coralRemaining,
-                pieceRoles: {},
-                pgn: '', // No PGN yet - simulate fresh game
-                isCheck: false,
-                isCheckmate: false,
-                isGameOver: false,
-                isCoralVictory: null,
-                isDraw: false,
-                resigned: null,
-            };
-
-            // Backend restores game from snapshot (THIS loads PGN and replays history)
+            // Load fixture normally
             const game1 = new CoralClash();
-            restoreGameFromSnapshot(game1, fixtureSnapshot);
+            applyFixture(game1, whaleRemove2Coral2);
+
+            // Verify whale is at expected position
+            const whalePos = game1.whalePositions();
+            expect(whalePos.w).toEqual(['d1', 'e1']);
 
             // Find and make whale move that removes both coral pieces
             const whaleMoves = game1.moves({ verbose: true, square: 'd1' }) as any[];

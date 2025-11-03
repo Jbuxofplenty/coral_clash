@@ -282,8 +282,7 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
     const renderMenuItems = ({ closeMenu, coralClash, colors, styles, gameData }) => {
         // Check both local game engine state AND server-side completion status (e.g., timeout)
         const isGameOver = coralClash.isGameOver() || gameData?.status === 'completed';
-        const moveHistory = coralClash.history();
-        const noMovesYet = moveHistory.length === 0;
+        const noMovesYet = coralClash.historyLength() === 0;
 
         const handleResetRequest = async () => {
             closeMenu();

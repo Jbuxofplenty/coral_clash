@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { SQUARES } from '../../shared';
 import { useCoralClashContext } from '../contexts/CoralClashContext';
@@ -13,21 +12,36 @@ const Coral = ({
     const coralClashContext = useCoralClashContext();
     // Use prop if provided (for historical view), otherwise use context
     const coralClash = coralClashProp || coralClashContext;
+
+    // Log which instance we're using
+    console.log('[Coral] Using:', coralClashProp ? 'PROP (historical)' : 'CONTEXT (live)');
+    console.log('[Coral] Prop===Context?', coralClashProp === coralClashContext);
+
     const cellSize = size / 8;
 
-    // Get all squares with coral - memoized and re-computed when updateTrigger changes
-    const coralSquares = useMemo(() => {
-        const squares = [];
-        SQUARES.forEach((square) => {
-            const coralColor = coralClash.getCoral(square);
-            if (coralColor) {
-                squares.push({ square, color: coralColor });
-            }
-        });
+    // Get all squares with coral - computed directly during render
+    // Don't use useMemo as it can capture stale closures of the mutating coralClash object
+    console.log('[Coral] Computing coral squares, updateTrigger:', updateTrigger);
+    console.log('[Coral] Total coral pieces:', coralClash.getAllCoral().length);
+    console.log(
+        '[Coral] Coral squares:',
+        coralClash
+            .getAllCoral()
+            .map((c) => c.square)
+            .join(', '),
+    );
+    console.log('[Coral] White remaining:', coralClash.getCoralRemaining('w'));
+    console.log('[Coral] Black remaining:', coralClash.getCoralRemaining('b'));
 
-        return squares;
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [coralClash, updateTrigger]); // Re-compute when updateTrigger changes (intentional)
+    const coralSquares = [];
+    SQUARES.forEach((square) => {
+        const coralColor = coralClash.getCoral(square);
+        if (coralColor) {
+            coralSquares.push({ square, color: coralColor });
+        }
+    });
+
+    console.log('[Coral] Rendering', coralSquares.length, 'coral squares');
 
     return (
         <>

@@ -143,8 +143,7 @@ const PassAndPlayCoralClashBoard = ({
     // Render menu items
     const renderMenuItems = ({ closeMenu, coralClash, colors, styles, gameData }) => {
         const isGameOver = coralClash.isGameOver() || gameData?.status === 'completed';
-        const moveHistory = coralClash.history();
-        const noMovesYet = moveHistory.length === 0;
+        const noMovesYet = coralClash.historyLength() === 0;
 
         const handleReset = async () => {
             closeMenu();

@@ -65,14 +65,22 @@ export const useGameActions = (coralClash, gameId, onStateUpdate) => {
                         setGameData(data);
                     }
 
+                    console.log('[useGameActions] Firestore snapshot received');
+                    console.log('[useGameActions] Has gameState?', !!data.gameState);
+                    console.log('[useGameActions] Has coralClash?', !!coralClash);
+
                     // Apply the updated game state to the CoralClash instance
                     if (data.gameState && coralClash) {
+                        console.log('[useGameActions] Calling restoreGameFromSnapshot');
                         restoreGameFromSnapshot(coralClash, data.gameState);
 
                         // Only call onStateUpdate if component is still mounted
+                        // Pass the snapshot so we can get history info without calling history()
                         if (isMountedRef.current) {
-                            onStateUpdate?.();
+                            onStateUpdate?.(data.gameState);
                         }
+                    } else {
+                        console.log('[useGameActions] SKIPPING restore - condition failed');
                     }
 
                     // Keep listener active even when game is over

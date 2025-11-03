@@ -2,7 +2,8 @@
  * Tests for game ending conditions in Coral Clash
  */
 
-import { CoralClash } from '../index';
+import { CoralClash, applyFixture } from '../index';
+import whaleAocFixture from '../__fixtures__/whale-aoc.json';
 
 describe('Game Ending Conditions', () => {
     describe('Checkmate', () => {
@@ -211,6 +212,68 @@ describe('Game Ending Conditions', () => {
 
             // White should have 1 coral control (occupied by own piece is OK)
             expect(game.getCoralAreaControl('w')).toBe(1);
+        });
+
+        it('should not count coral when whale occupies BOTH positions with coral', () => {
+            // Load fixture where black whale sits on 2 white coral squares
+            const game = new CoralClash();
+            applyFixture(game, whaleAocFixture);
+
+            // Verify whale positions
+            const whalePos = game.whalePositions();
+            expect(whalePos.w).toEqual(['b4', 'c4']); // White whale at b4-c4
+            expect(whalePos.b).toEqual(['e3', 'e2']); // Black whale at e3-e2
+
+            // Verify coral setup
+            const allCoral = game.getAllCoral();
+            const whiteCoral = allCoral.filter(c => c.color === 'w');
+            const blackCoral = allCoral.filter(c => c.color === 'b');
+
+            console.log('\n=== Whale AOC Debug ===');
+            console.log('White coral squares:', whiteCoral.map(c => c.square));
+            console.log('Black coral squares:', blackCoral.map(c => c.square));
+            console.log('White whale positions:', whalePos.w);
+            console.log('Black whale positions:', whalePos.b);
+
+            // Check which coral is under whale positions
+            const c4Coral = game.getCoral('c4');
+            const e3Coral = game.getCoral('e3');
+            const e2Coral = game.getCoral('e2');
+
+            console.log('c4 coral (white whale):', c4Coral);
+            console.log('e3 coral (black whale):', e3Coral);
+            console.log('e2 coral (black whale):', e2Coral);
+
+            // Black whale (e3, e2) is sitting on 2 white coral squares
+            // These should NOT count toward white's area control
+            expect(e3Coral).toBe('w'); // e3 has white coral
+            expect(e2Coral).toBe('w'); // e2 has white coral
+
+            // White whale (b4, c4) is sitting on 1 white coral square
+            expect(c4Coral).toBe('w'); // c4 has white coral
+
+            // Calculate area of control
+            const whiteAOC = game.getCoralAreaControl('w');
+            const blackAOC = game.getCoralAreaControl('b');
+
+            console.log('White AOC:', whiteAOC);
+            console.log('Black AOC:', blackAOC);
+            console.log('Expected: White=5, Black=5');
+
+            // From fixture:
+            // Total white coral: 7 (c4, g4, d3, e3, e2, f2, g2)
+            // - c4: occupied by white whale (counts)
+            // - e3: occupied by black whale (should NOT count)
+            // - e2: occupied by black whale (should NOT count)
+            // White AOC should be: 7 - 2 = 5
+            //
+            // Total black coral: 6 (c7, d7, d6, e6, b5, d5)
+            // - b5: occupied by white piece (should NOT count)
+            // Black AOC should be: 6 - 1 = 5
+            //
+            // Expected AOC: 5-5 (white-black)
+            expect(whiteAOC).toBe(5);
+            expect(blackAOC).toBe(5);
         });
     });
 

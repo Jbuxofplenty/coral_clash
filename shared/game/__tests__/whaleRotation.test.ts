@@ -12,6 +12,7 @@
  */
 
 import whaleRotation2 from '../__fixtures__/whale-rotation-2.json';
+import whaleRotation3 from '../__fixtures__/whale-rotation-3.json';
 import whaleRotation from '../__fixtures__/whale-rotation.json';
 import { CoralClash, applyFixture } from '../index';
 
@@ -240,5 +241,43 @@ describe('Whale Rotation Bug', () => {
         expect(result2.whaleSecondSquare).toBe('d1');
         expect(result2.coralRemovedSquares).toEqual(['d2']);
         expect(game2.getCoral('d2')).toBeNull(); // Coral removed
+    });
+
+    test('whale-rotation-3.json: rotate to d3,d2 with coral removal at d3', () => {
+        // Bug: Whale should move to d3,d2 but visually appears at c2,c3
+        const game = new CoralClash();
+        applyFixture(game, whaleRotation3);
+
+        // Verify initial state
+        expect(game.whalePositions().w).toEqual(['d2', 'e2']);
+        expect(game.getCoral('d3')).toBe('w'); // Coral at destination
+
+        // Rotate whale: keep d2 fixed, move e2 to d3, remove coral at d3
+        // This should result in whale at d2,d3 (vertical orientation)
+        const result = game.move({
+            from: 'e2',
+            to: 'd3',
+            whaleSecondSquare: 'd2', // Rotation - keep d2 fixed
+            coralRemovedSquares: ['d3'], // Remove coral at d3
+        });
+
+        expect(result).toBeTruthy();
+
+        // CRITICAL: Whale should be at d2,d3, NOT at c2,c3
+        const finalPos = game.whalePositions();
+
+        expect(result.whaleSecondSquare).toBe('d2');
+        expect(result.whaleOrientation).toBe('vertical');
+        expect(result.coralRemovedSquares).toEqual(['d3']);
+
+        // Verify whale is at correct position
+        expect(finalPos.w).toContain('d2');
+        expect(finalPos.w).toContain('d3');
+        expect(finalPos.w).not.toContain('c2'); // BUG: Whale appears here instead
+        expect(finalPos.w).not.toContain('c3'); // BUG: Whale appears here instead
+        expect(finalPos.w).not.toContain('e2');
+
+        // Verify coral was removed
+        expect(game.getCoral('d3')).toBeNull();
     });
 });

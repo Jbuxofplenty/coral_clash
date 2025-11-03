@@ -107,116 +107,144 @@ const BaseCoralClashBoard = ({
     const [animatingPiece, setAnimatingPiece] = useState(null);
     const lastAnimatedMoveRef = useRef(null);
 
+    // Skip whale animations - clear immediately
+    useEffect(() => {
+        if (animatingPiece && animatingPiece.type === WHALE) {
+            setAnimatingMove(null);
+            setAnimatingPiece(null);
+            forceUpdate((n) => n + 1);
+        }
+    }, [animatingPiece]);
+
     // Track previous history length to detect resets
     const previousHistoryLengthRef = useRef(null);
 
     // Callback for when game state updates from Firestore
-    const handleStateUpdate = useCallback(() => {
-        // Clear visible moves when game state updates from Firestore
-        setVisibleMoves([]);
-        setSelectedSquare(null);
-        setWhaleDestination(null);
-        setWhaleOrientationMoves([]);
-        setIsViewingEnemyMoves(false);
+    // snapshot parameter contains the game state from Firestore (includes pgn)
+    const handleStateUpdate = useCallback(
+        (snapshot) => {
+            console.log('[BaseBoard] handleStateUpdate called');
+            console.log('[BaseBoard] Coral state:', coralClash.getAllCoral().length, 'pieces');
+            console.log(
+                '[BaseBoard] Coral squares:',
+                coralClash
+                    .getAllCoral()
+                    .map((c) => c.square)
+                    .join(', '),
+            );
+            console.log('[BaseBoard] Coral remaining:', coralClash.getCoralRemainingCounts());
 
-        // Trigger move animation for opponent moves
-        if (coralClash && typeof coralClash.history === 'function') {
-            const history = coralClash.history({ verbose: true });
-            const currentHistoryLength = history.length;
+            // Clear visible moves when game state updates from Firestore
+            setVisibleMoves([]);
+            setSelectedSquare(null);
+            setWhaleDestination(null);
+            setWhaleOrientationMoves([]);
+            setIsViewingEnemyMoves(false);
 
-            // Check if game was reset (history length went to 0 or decreased significantly)
-            if (
-                previousHistoryLengthRef.current !== null &&
-                currentHistoryLength === 0 &&
-                previousHistoryLengthRef.current > 0
-            ) {
-                // Game was reset - clear animations and reset tracking
-                setAnimatingMove(null);
-                setAnimatingPiece(null);
-                lastAnimatedMoveRef.current = null;
-            } else if (history.length > 0) {
-                const lastMove = history[history.length - 1];
-                const moveKey = `${lastMove.from}-${lastMove.to}-${history.length}`;
+            // Trigger move animation for opponent moves
+            // Get history from PGN without calling history() which has side effects
+            if (coralClash && snapshot?.pgn) {
+                // Parse PGN to get move history - use a temp game instance
+                const tempGame = new CoralClash();
+                tempGame.loadPgn(snapshot.pgn);
+                const history = tempGame.history({ verbose: true });
+                const currentHistoryLength = history.length;
 
-                // Only animate if this is a new move we haven't animated yet
-                if (lastAnimatedMoveRef.current !== moveKey) {
-                    lastAnimatedMoveRef.current = moveKey;
+                // Check if game was reset (history length went to 0 or decreased significantly)
+                if (
+                    previousHistoryLengthRef.current !== null &&
+                    currentHistoryLength === 0 &&
+                    previousHistoryLengthRef.current > 0
+                ) {
+                    // Game was reset - clear animations and reset tracking
+                    setAnimatingMove(null);
+                    setAnimatingPiece(null);
+                    lastAnimatedMoveRef.current = null;
+                } else if (history.length > 0) {
+                    const lastMove = history[history.length - 1];
+                    const moveKey = `${lastMove.from}-${lastMove.to}-${history.length}`;
 
-                    // Get the piece that was moved (before the move)
-                    const piece = {
-                        type: lastMove.piece,
-                        color: lastMove.color,
-                        role: lastMove.role,
-                    };
+                    // Only animate if this is a new move we haven't animated yet
+                    if (lastAnimatedMoveRef.current !== moveKey) {
+                        lastAnimatedMoveRef.current = moveKey;
 
-                    setAnimatingPiece(piece);
-                    setAnimatingMove(lastMove);
-                }
-            }
+                        // Get the piece that was moved (before the move)
+                        const piece = {
+                            type: lastMove.piece,
+                            color: lastMove.color,
+                            role: lastMove.role,
+                        };
 
-            // Update previous history length
-            previousHistoryLengthRef.current = currentHistoryLength;
-        }
-
-        // Force re-render
-        forceUpdate((n) => n + 1);
-
-        // Show turn notification when turn changes (opponent made a move)
-        // Only for online games (not local games)
-        if (
-            coralClash &&
-            typeof coralClash.turn === 'function' &&
-            gameId &&
-            !gameId.startsWith('local_')
-        ) {
-            const currentTurn = coralClash.turn();
-
-            // Only show notification if:
-            // 1. Component has been initialized (not first load)
-            // 2. Turn actually changed (a move was made)
-            // 3. Game is not over
-            if (
-                hasInitializedRef.current &&
-                previousTurnRef.current !== null &&
-                previousTurnRef.current !== currentTurn &&
-                !coralClash.isGameOver()
-            ) {
-                // Check if it's the user's turn or opponent's turn
-                let message;
-                if (userColor) {
-                    const isUsersTurn = currentTurn === userColor;
-                    if (isUsersTurn) {
-                        message = 'Your turn';
-                    } else if (opponentType === 'computer') {
-                        message = "Computer's turn";
-                    } else {
-                        // For PvP: Opponent is always topPlayerData (user is always bottom)
-                        const opponentName = topPlayerData?.name || 'Opponent';
-                        message = `${opponentName}'s turn`;
+                        setAnimatingPiece(piece);
+                        setAnimatingMove(lastMove);
                     }
-                } else {
-                    // Fallback for games without userColor
-                    const currentPlayerColor = currentTurn === 'w' ? 'White' : 'Black';
-                    message = `${currentPlayerColor}'s turn`;
                 }
 
-                setTurnNotification({
-                    message,
-                    type: 'info',
-                    timeout: 5000,
-                    onDismiss: () => setTurnNotification(null),
-                });
+                // Update previous history length
+                previousHistoryLengthRef.current = currentHistoryLength;
             }
 
-            // Update previous turn tracker
-            previousTurnRef.current = currentTurn;
+            // Force re-render
+            forceUpdate((n) => n + 1);
 
-            // Mark as initialized after first update
-            if (!hasInitializedRef.current) {
-                hasInitializedRef.current = true;
+            // Show turn notification when turn changes (opponent made a move)
+            // Only for online games (not local games)
+            if (
+                coralClash &&
+                typeof coralClash.turn === 'function' &&
+                gameId &&
+                !gameId.startsWith('local_')
+            ) {
+                const currentTurn = coralClash.turn();
+
+                // Only show notification if:
+                // 1. Component has been initialized (not first load)
+                // 2. Turn actually changed (a move was made)
+                // 3. Game is not over
+                if (
+                    hasInitializedRef.current &&
+                    previousTurnRef.current !== null &&
+                    previousTurnRef.current !== currentTurn &&
+                    !coralClash.isGameOver()
+                ) {
+                    // Check if it's the user's turn or opponent's turn
+                    let message;
+                    if (userColor) {
+                        const isUsersTurn = currentTurn === userColor;
+                        if (isUsersTurn) {
+                            message = 'Your turn';
+                        } else if (opponentType === 'computer') {
+                            message = "Computer's turn";
+                        } else {
+                            // For PvP: Opponent is always topPlayerData (user is always bottom)
+                            const opponentName = topPlayerData?.name || 'Opponent';
+                            message = `${opponentName}'s turn`;
+                        }
+                    } else {
+                        // Fallback for games without userColor
+                        const currentPlayerColor = currentTurn === 'w' ? 'White' : 'Black';
+                        message = `${currentPlayerColor}'s turn`;
+                    }
+
+                    setTurnNotification({
+                        message,
+                        type: 'info',
+                        timeout: 5000,
+                        onDismiss: () => setTurnNotification(null),
+                    });
+                }
+
+                // Update previous turn tracker
+                previousTurnRef.current = currentTurn;
+
+                // Mark as initialized after first update
+                if (!hasInitializedRef.current) {
+                    hasInitializedRef.current = true;
+                }
             }
-        }
-    }, [coralClash, gameId, userColor, opponentType, topPlayerData]);
+        },
+        [coralClash, gameId, userColor, opponentType, topPlayerData],
+    );
 
     // Centralized game actions and state management
     const {
@@ -1078,6 +1106,16 @@ const BaseCoralClashBoard = ({
 
     // Execute a move - for online games, use backend-first; for offline/local, apply locally
     const executeMove = async (moveParams) => {
+        console.log('[BaseBoard] executeMove called with:', moveParams);
+        console.log('[BaseBoard] Coral BEFORE move:', coralClash.getAllCoral().length, 'pieces');
+        console.log(
+            '[BaseBoard] Coral squares BEFORE:',
+            coralClash
+                .getAllCoral()
+                .map((c) => c.square)
+                .join(', '),
+        );
+
         // Clear visible moves immediately when making a move
         clearVisibleMoves();
 
@@ -1088,6 +1126,16 @@ const BaseCoralClashBoard = ({
         if (isOnlineGame) {
             const result = await makeMoveAPI(moveParams);
             if (!result) return null;
+
+            console.log('[BaseBoard] Online move completed');
+            console.log('[BaseBoard] Coral AFTER move:', coralClash.getAllCoral().length, 'pieces');
+            console.log(
+                '[BaseBoard] Coral squares AFTER:',
+                coralClash
+                    .getAllCoral()
+                    .map((c) => c.square)
+                    .join(', '),
+            );
 
             setHistoryIndex(null);
             await onMoveComplete?.(result, moveParams);
@@ -1654,6 +1702,8 @@ const BaseCoralClashBoard = ({
     const bottomPlayerTime =
         localTimeRemaining && bottomPlayerId ? localTimeRemaining[bottomPlayerId] : null;
 
+    console.log('[BaseBoard] Providing to context, coral count:', coralClash.getAllCoral().length);
+
     return (
         <CoralClashProvider value={coralClash}>
             <View style={styles.container}>
@@ -1705,7 +1755,7 @@ const BaseCoralClashBoard = ({
                             }}
                         />
                         <Coral
-                            coralClash={isViewingHistory ? historicalCoralClash : undefined}
+                            coralClash={isViewingHistory ? historicalCoralClash : null}
                             size={boardSize}
                             boardFlipped={isBoardFlipped}
                             userColor={userColor}
@@ -1734,7 +1784,7 @@ const BaseCoralClashBoard = ({
                             isProcessing={isGameActionProcessing}
                         />
                         {/* Animated piece layer */}
-                        {animatingMove && animatingPiece && (
+                        {animatingMove && animatingPiece && animatingPiece.type !== WHALE && (
                             <AnimatedPiece
                                 move={animatingMove}
                                 piece={animatingPiece}

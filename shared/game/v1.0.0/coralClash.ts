@@ -494,6 +494,28 @@ function getDisambiguator(move: InternalMove, moves: InternalMove[]) {
     let sameRank = 0;
     let sameFile = 0;
 
+    // Coral Clash: For whale moves, check if there are other moves with same from/to but different whaleOtherSquare
+    let whaleSecondSquareAmbiguity = false;
+    if (piece === WHALE && move.whaleOtherSquare !== undefined) {
+        for (let i = 0, len = moves.length; i < len; i++) {
+            if (
+                moves[i].piece === WHALE &&
+                moves[i].from === from &&
+                moves[i].to === to &&
+                moves[i].whaleOtherSquare !== undefined &&
+                moves[i].whaleOtherSquare !== move.whaleOtherSquare
+            ) {
+                whaleSecondSquareAmbiguity = true;
+                break;
+            }
+        }
+    }
+
+    // If whale has second square ambiguity, use the other square as disambiguator
+    if (whaleSecondSquareAmbiguity) {
+        return algebraic(move.whaleOtherSquare!);
+    }
+
     for (let i = 0, len = moves.length; i < len; i++) {
         const ambigFrom = moves[i].from;
         const ambigTo = moves[i].to;
@@ -721,12 +743,13 @@ export class CoralClash {
         if (tokens.length >= 2 && tokens.length < 6) {
             const adjustments = ['-', '-', '0', '1'];
             fen = tokens.concat(adjustments.slice(-(6 - tokens.length))).join(' ');
+            tokens = fen.split(/\s+/);
         }
 
-        tokens = fen.split(/\s+/);
-
         if (!skipValidation) {
-            const { ok, error } = validateFen(fen);
+            // Only validate first 6 fields (standard FEN)
+            const standardFen = tokens.slice(0, 6).join(' ');
+            const { ok, error } = validateFen(standardFen);
             if (!ok) {
                 throw new Error(error);
             }
@@ -748,7 +771,7 @@ export class CoralClash {
                 const color = piece < 'a' ? WHITE : BLACK;
                 const type = piece.toLowerCase() as PieceSymbol;
                 const sq = algebraic(square);
-                // Assign role based on starting position in Coral Clash
+                // Assign role based on starting position in Coral Clash (will be overridden if roles field present)
                 const role = getStartingRole(sq, type, color);
                 this._put({ type, color, role }, sq);
                 square++;
@@ -763,11 +786,79 @@ export class CoralClash {
         this._halfMoves = parseInt(tokens[4], 10);
         this._moveNumber = parseInt(tokens[5], 10);
 
+        // Coral Clash Extended FEN fields (tokens 6-8):
+        // Field 7 (index 6): Piece roles
+        if (tokens.length > 6 && tokens[6] !== '-') {
+            const roleEntries = tokens[6].split(',');
+            roleEntries.forEach((entry) => {
+                if (entry.length >= 3) {
+                    const sq = entry.slice(0, 2) as Square; // e.g. "c4"
+                    const roleChar = entry.charAt(2); // 'g' or 'h'
+                    const role: PieceRole = roleChar === 'g' ? 'gatherer' : 'hunter';
+                    const square0x88 = Ox88[sq];
+                    if (square0x88 !== undefined && this._board[square0x88]) {
+                        this._board[square0x88].role = role;
+                    }
+                }
+            });
+        }
+
+        // Field 8 (index 7): Coral positions
+        if (tokens.length > 7 && tokens[7] !== '-') {
+            const coralEntries = tokens[7].split(',');
+            coralEntries.forEach((entry) => {
+                if (entry.length >= 3) {
+                    const sq = entry.slice(0, 2) as Square; // e.g. "d3"
+                    const colorChar = entry.charAt(2); // 'w' or 'b'
+                    const square0x88 = Ox88[sq];
+                    if (square0x88 !== undefined) {
+                        this._coral[square0x88] = colorChar as Color;
+                    }
+                }
+            });
+        }
+
+        // Field 9 (index 8): Coral remaining counts
+        if (tokens.length > 8 && tokens[8] !== '-') {
+            const counts = tokens[8].split(',');
+            if (counts.length === 2) {
+                this._coralRemaining.w = parseInt(counts[0], 10);
+                this._coralRemaining.b = parseInt(counts[1], 10);
+            }
+        }
+
+        // Field 10 (index 9): Whale positions
+        if (tokens.length > 9 && tokens[9] !== '-') {
+            const whaleEntries = tokens[9].split(',');
+            whaleEntries.forEach((entry, index) => {
+                if (entry.length === 4) {
+                    // Format: "d2e2" = whale at d2 and e2
+                    const sq1 = entry.slice(0, 2) as Square;
+                    const sq2 = entry.slice(2, 4) as Square;
+                    const sq1_0x88 = Ox88[sq1];
+                    const sq2_0x88 = Ox88[sq2];
+
+                    if (sq1_0x88 !== undefined && sq2_0x88 !== undefined) {
+                        // First entry is white whale, second is black whale
+                        if (index === 0) {
+                            this._kings.w = [sq1_0x88, sq2_0x88];
+                        } else if (index === 1) {
+                            this._kings.b = [sq1_0x88, sq2_0x88];
+                        }
+                    }
+                }
+            });
+        }
+
         this._updateSetup(fen);
         this._incPositionCount(fen);
 
-        // Initialize starting coral if loading default position
-        if (fen === DEFAULT_POSITION) {
+        // Initialize starting coral if loading default position (and no coral field provided)
+        if (
+            fen === DEFAULT_POSITION ||
+            (tokens.length <= 7 &&
+                fen.startsWith('ftth1ttf/cocddcoc/3oo3/8/8/3OO3/COCDDCOC/FTTH1TTF w - - 0 1'))
+        ) {
             this._initializeStartingCoral();
         }
     }
@@ -807,7 +898,65 @@ export class CoralClash {
         const castling = '-';
         const epSquare = '-';
 
-        return [fen, this._turn, castling, epSquare, this._halfMoves, this._moveNumber].join(' ');
+        // Coral Clash Extensions to FEN:
+        // Field 7: Piece roles (comma-separated square+role, e.g. "c4g,d3h")
+        // Field 8: Coral positions (comma-separated square+color, e.g. "d3w,e3w,c7b")
+        // Field 9: Coral remaining counts (white,black, e.g. "17,17")
+        // Field 10: Whale positions (white whale squares + black whale squares, e.g. "d2e2,d7e7")
+
+        // Collect piece roles
+        const roles: string[] = [];
+        for (let i = Ox88.a8; i <= Ox88.h1; i++) {
+            if (this._board[i] && this._board[i].role) {
+                const sq = algebraic(i);
+                const roleChar = this._board[i].role === 'gatherer' ? 'g' : 'h';
+                roles.push(sq + roleChar);
+            }
+            if ((i + 1) & 0x88) {
+                i += 8;
+            }
+        }
+        const rolesField = roles.length > 0 ? roles.join(',') : '-';
+
+        // Collect coral positions
+        const coralPositions: string[] = [];
+        for (let i = 0; i < 128; i++) {
+            if (this._coral[i]) {
+                const sq = algebraic(i);
+                coralPositions.push(sq + this._coral[i]);
+            }
+        }
+        const coralField = coralPositions.length > 0 ? coralPositions.join(',') : '-';
+
+        // Coral remaining counts
+        const coralRemainingField = `${this._coralRemaining.w},${this._coralRemaining.b}`;
+
+        // Whale positions (both squares for each whale)
+        const whalePositions: string[] = [];
+        if (this._kings.w[0] !== EMPTY) {
+            const w1 = algebraic(this._kings.w[0]);
+            const w2 = algebraic(this._kings.w[1]);
+            whalePositions.push(w1 + w2);
+        }
+        if (this._kings.b[0] !== EMPTY) {
+            const b1 = algebraic(this._kings.b[0]);
+            const b2 = algebraic(this._kings.b[1]);
+            whalePositions.push(b1 + b2);
+        }
+        const whaleField = whalePositions.length > 0 ? whalePositions.join(',') : '-';
+
+        return [
+            fen,
+            this._turn,
+            castling,
+            epSquare,
+            this._halfMoves,
+            this._moveNumber,
+            rolesField,
+            coralField,
+            coralRemainingField,
+            whaleField,
+        ].join(' ');
     }
 
     /*
@@ -1331,7 +1480,7 @@ export class CoralClash {
         const moves = this._moves({ square, piece, color });
 
         if (verbose) {
-            return moves.map((move) => this._makePretty(move));
+            return moves.map((move) => this._makePretty(move, moves));
         } else {
             return moves.map((move) => this._moveToSan(move, moves));
         }
@@ -2122,7 +2271,8 @@ export class CoralClash {
          * need to make a copy of move because we can't generate SAN after the move
          * is made
          */
-        const prettyMove = this._makePretty(moveObj);
+        const allMoves = this._moves({ legal: true });
+        const prettyMove = this._makePretty(moveObj, allMoves);
 
         this._makeMove(moveObj);
         this._incPositionCount(prettyMove.after);
@@ -3106,7 +3256,7 @@ export class CoralClash {
     }
 
     // pretty = external move object
-    private _makePretty(uglyMove: InternalMove): Move {
+    private _makePretty(uglyMove: InternalMove, moves: InternalMove[] = []): Move {
         const {
             color,
             piece,
@@ -3137,7 +3287,7 @@ export class CoralClash {
             piece,
             from: fromAlgebraic,
             to: toAlgebraic,
-            san: this._moveToSan(uglyMove, []), // Don't generate moves recursively - causes exponential cost and state corruption
+            san: this._moveToSan(uglyMove, moves), // Pass moves array for proper disambiguation
             flags: prettyFlags,
             lan: fromAlgebraic + toAlgebraic,
             before: this.fen(),
@@ -3302,10 +3452,11 @@ export class CoralClash {
                 break;
             }
 
+            const allMoves = this._moves();
             if (verbose) {
-                moveHistory.push(this._makePretty(move));
+                moveHistory.push(this._makePretty(move, allMoves));
             } else {
-                moveHistory.push(this._moveToSan(move, this._moves()));
+                moveHistory.push(this._moveToSan(move, allMoves));
             }
             this._makeMove(move);
         }
@@ -3515,7 +3666,15 @@ export class CoralClash {
             // Count coral of this color that isn't occupied by opponent
             if (this._coral[i] === color) {
                 const piece = this._board[i];
-                if (!piece || piece.color !== opponent) {
+                
+                // Check if this square is occupied by opponent's whale (either position)
+                const isOpponentWhaleFirst = this._kings[opponent][0] === i;
+                const isOpponentWhaleSecond = this._kings[opponent][1] === i;
+                const isOpponentWhale = isOpponentWhaleFirst || isOpponentWhaleSecond;
+                
+                // Count if: no piece on square AND not occupied by opponent whale's second position
+                // OR piece exists but is not opponent's
+                if (!isOpponentWhale && (!piece || piece.color !== opponent)) {
                     count++;
                 }
             }
