@@ -3,6 +3,7 @@
  */
 
 import {
+    applyFixture,
     CoralClash,
     createGameSnapshot,
     exportGameState,
@@ -936,6 +937,116 @@ describe('Game State Snapshot and Restore', () => {
             expect(coralAfterRestore.length).toBe(coralCountBefore - 1);
             expect(coralAfterRestore.find((c: any) => c.square === 'e3')).toBeUndefined();
             expect(coralAfterRestore.find((c: any) => c.square === 'f3')).toBeDefined();
+        });
+    });
+
+    describe('Whale Coral Removal - History Bug Fix', () => {
+        it('should handle whale-remove-2-coral-2 fixture correctly', () => {
+            // 1. Load fixture with whale at d1,e1 and coral at d2,e2
+            // 2. Move whale to d2,e2 removing both coral pieces
+            // 3. Export game state (calls history() internally)
+            // 4. Import game state
+            // 5. Bug: e2 coral reappears incorrectly
+            const whaleRemove2Coral2 = require('../__fixtures__/whale-remove-2-coral-2.json');
+
+            const game1 = new CoralClash();
+            applyFixture(game1, whaleRemove2Coral2);
+
+            // Verify initial state from fixture
+            expect(game1.whalePositions().w).toEqual(['d1', 'e1']);
+            expect(game1.getCoral('d2')).toBe('w');
+            expect(game1.getCoral('e2')).toBe('w');
+
+            // Find and make whale move to d2,e2 that removes both coral pieces
+            const whaleMoves = game1.moves({ verbose: true, square: 'd1' }) as any[];
+            const moveToD2E2 = whaleMoves.find(
+                (m: any) =>
+                    ((m.to === 'd2' && m.whaleSecondSquare === 'e2') ||
+                        (m.to === 'e2' && m.whaleSecondSquare === 'd2')) &&
+                    m.coralRemovedSquares &&
+                    m.coralRemovedSquares.length === 2,
+            );
+
+            expect(moveToD2E2).toBeDefined();
+            game1.move(moveToD2E2);
+
+            // Verify coral removed
+            expect(game1.getCoral('d2')).toBeNull();
+            expect(game1.getCoral('e2')).toBeNull();
+
+            // Export and import
+            const exported = exportGameState(game1);
+            const game2 = new CoralClash();
+            importGameState(game2, exported);
+
+            // CRITICAL: Coral should NOT reappear
+            expect(game2.getCoral('d2')).toBeNull();
+            expect(game2.getCoral('e2')).toBeNull();
+        });
+
+        it('should preserve coral when createGameSnapshot is called with HISTORY (PvP backend flow)', () => {
+            // This reproduces the EXACT backend flow that causes the bug
+            // Backend flow: restoreGameFromSnapshot (loads PGN) -> make move -> createGameSnapshot (calls pgn())
+
+            const whaleRemove2Coral2 = require('../__fixtures__/whale-remove-2-coral-2.json');
+
+            // Copy fixture data into snapshot format
+            const fixtureSnapshot = {
+                fen: whaleRemove2Coral2.state.fen,
+                turn: whaleRemove2Coral2.state.turn,
+                whalePositions: whaleRemove2Coral2.state.whalePositions,
+                coral: whaleRemove2Coral2.state.coral,
+                coralRemaining: whaleRemove2Coral2.state.coralRemaining,
+                pieceRoles: {},
+                pgn: '', // No PGN yet - simulate fresh game
+                isCheck: false,
+                isCheckmate: false,
+                isGameOver: false,
+                isCoralVictory: null,
+                isDraw: false,
+                resigned: null,
+            };
+
+            // Backend restores game from snapshot (THIS loads PGN and replays history)
+            const game1 = new CoralClash();
+            restoreGameFromSnapshot(game1, fixtureSnapshot);
+
+            // Find and make whale move that removes both coral pieces
+            const whaleMoves = game1.moves({ verbose: true, square: 'd1' }) as any[];
+            const moveToD2E2 = whaleMoves.find(
+                (m: any) =>
+                    ((m.to === 'd2' && m.whaleSecondSquare === 'e2') ||
+                        (m.to === 'e2' && m.whaleSecondSquare === 'd2')) &&
+                    m.coralRemovedSquares &&
+                    m.coralRemovedSquares.length === 2,
+            );
+
+            expect(moveToD2E2).toBeDefined();
+            game1.move(moveToD2E2);
+
+            // Verify coral removed
+            expect(game1.getCoral('d2')).toBeNull();
+            expect(game1.getCoral('e2')).toBeNull();
+            const coralCountBefore = game1.getAllCoral().length;
+
+            // THIS IS WHERE THE BUG OCCURS
+            // createGameSnapshot calls pgn() which does undo/replay
+            // If replay is buggy, coral will reappear
+            const snapshot = createGameSnapshot(game1);
+
+            // CRITICAL: Snapshot should NOT have coral at d2 or e2
+            expect(snapshot.coral.find((c: any) => c.square === 'd2')).toBeUndefined();
+            expect(snapshot.coral.find((c: any) => c.square === 'e2')).toBeUndefined();
+            expect(snapshot.coral.length).toBe(coralCountBefore);
+
+            // Now restore from snapshot (this is what happens in PvP when Firestore updates)
+            const game2 = new CoralClash();
+            restoreGameFromSnapshot(game2, snapshot);
+
+            // CRITICAL: After restoration, coral should STILL not be at d2 or e2
+            expect(game2.getCoral('d2')).toBeNull();
+            expect(game2.getCoral('e2')).toBeNull();
+            expect(game2.getAllCoral().length).toBe(coralCountBefore);
         });
     });
 });

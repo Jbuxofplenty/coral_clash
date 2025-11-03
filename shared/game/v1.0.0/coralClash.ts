@@ -2817,13 +2817,19 @@ export class CoralClash {
 
         // Coral Clash: Add coral notation
         // * = coral placed (gatherer)
-        // ~ = coral removed (hunter, including whale multi-square removal)
+        // ~ = coral removed (hunter single square)
+        // ~sq1,sq2 = whale removed coral from specific squares
         if (move.coralPlaced === true) {
             output += '*';
         } else if (move.coralRemoved === true) {
             output += '~';
         } else if (move.coralRemovedSquares && move.coralRemovedSquares.length > 0) {
-            output += '~';
+            // Whale multi-square removal: encode which squares
+            const squares = move.coralRemovedSquares
+                .map((sq) => algebraic(sq))
+                .sort()
+                .join(',');
+            output += '~' + squares;
         }
 
         // Don't call _makeMove/_undoMove here - causes recursion bug!
@@ -2844,35 +2850,77 @@ export class CoralClash {
     // convert a move from Standard Algebraic Notation (SAN) to 0x88 coordinates
     private _moveFromSan(move: string, strict = false): InternalMove | null {
         // Coral Clash: Check for coral notation before stripping
-        // * = coral placed, ~ = coral removed
+        // * = coral placed, ~ = coral removed (simple)
+        // ~sq1,sq2 = whale removed coral from specific squares
         const hasCoralPlaced = move.includes('*');
         const hasCoralRemoved = move.includes('~');
 
+        // Extract specific squares for whale coral removal (e.g., "~d2,e2")
+        let coralRemovedSquares: string[] = [];
+        const coralRemovalMatch = move.match(/~([a-h][1-8](?:,[a-h][1-8])*)/);
+        if (coralRemovalMatch) {
+            coralRemovedSquares = coralRemovalMatch[1].split(',');
+        }
+
         // strip off any move decorations: e.g Nf3+?! becomes Nf3
         // Also strip our custom coral symbols for the base move matching
-        const cleanMove = strippedSan(move).replace(/[*~]/g, '');
+        // Strip ~sq1,sq2 notation (whale multi-square removal)
+        let cleanMove = strippedSan(move);
+        if (coralRemovalMatch) {
+            cleanMove = cleanMove.replace('~' + coralRemovalMatch[1], '');
+        }
+        // Strip remaining * and ~ symbols
+        cleanMove = cleanMove.replace(/[*~]/g, '');
 
         let pieceType = inferPieceType(cleanMove);
         let moves = this._moves({ legal: true, piece: pieceType });
 
         // strict parser
         for (let i = 0, len = moves.length; i < len; i++) {
-            const moveNotation = strippedSan(this._moveToSan(moves[i], moves)).replace(/[*~]/g, '');
+            // Get the move notation and strip coral symbols
+            let moveNotation = strippedSan(this._moveToSan(moves[i], moves));
+            // Strip whale multi-square removal notation (e.g., "~d2,e2")
+            const moveCoralMatch = moveNotation.match(/~([a-h][1-8](?:,[a-h][1-8])*)/);
+            if (moveCoralMatch) {
+                moveNotation = moveNotation.replace('~' + moveCoralMatch[1], '');
+            }
+            // Strip remaining * and ~ symbols
+            moveNotation = moveNotation.replace(/[*~]/g, '');
+
             if (cleanMove === moveNotation) {
                 // Coral Clash: If move has coral notation, match it to the right variant
                 if (hasCoralPlaced && moves[i].coralPlaced !== true) {
                     continue; // Skip this move, doesn't match coral placement
                 }
-                // Check for coral removal (single square OR whale multi-square)
-                const moveHasCoralRemoval =
-                    moves[i].coralRemoved === true ||
-                    (moves[i].coralRemovedSquares !== undefined &&
-                        moves[i].coralRemovedSquares!.length > 0);
-                if (hasCoralRemoved && !moveHasCoralRemoval) {
-                    continue; // Skip this move, doesn't match coral removal
+
+                // Check for coral removal
+                if (hasCoralRemoved) {
+                    // If specific squares are specified (whale multi-square removal)
+                    if (coralRemovedSquares.length > 0) {
+                        const moveSquares = (moves[i].coralRemovedSquares || [])
+                            .map((sq) => algebraic(sq))
+                            .sort();
+                        const targetSquares = coralRemovedSquares.slice().sort();
+                        if (JSON.stringify(moveSquares) !== JSON.stringify(targetSquares)) {
+                            continue; // Doesn't match the specific squares
+                        }
+                    } else {
+                        // Simple removal check (hunter single square or unspecified whale removal)
+                        const moveHasCoralRemoval =
+                            moves[i].coralRemoved === true ||
+                            (moves[i].coralRemovedSquares !== undefined &&
+                                moves[i].coralRemovedSquares!.length > 0);
+                        if (!moveHasCoralRemoval) {
+                            continue; // Skip this move, doesn't match coral removal
+                        }
+                    }
                 }
                 // If no coral notation in PGN, prefer moves without coral action (backward compat)
                 if (!hasCoralPlaced && !hasCoralRemoved) {
+                    const moveHasCoralRemoval =
+                        moves[i].coralRemoved === true ||
+                        (moves[i].coralRemovedSquares !== undefined &&
+                            moves[i].coralRemovedSquares!.length > 0);
                     if (moves[i].coralPlaced === true || moveHasCoralRemoval) {
                         // Check if there's a variant without coral action
                         const variantWithoutCoral = moves.find((m) => {
