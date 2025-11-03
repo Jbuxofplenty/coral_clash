@@ -11,6 +11,7 @@
 import whaleCheck2 from '../__fixtures__/whale-check-2.json';
 import whaleCheck4 from '../__fixtures__/whale-check-4.json';
 import whaleCheck5 from '../__fixtures__/whale-check-5.json';
+import whaleCheck6 from '../__fixtures__/whale-check-6.json';
 import whaleCheck from '../__fixtures__/whale-check.json';
 import { CoralClash, applyFixture } from '../index';
 
@@ -260,5 +261,47 @@ describe('Whale Check Validation Bug', () => {
 
         // This verifies that the attack path is being considered
         expect(movesToC3D3.length).toBe(0);
+    });
+
+    test('whale-check-6.json: black whale can rotate to e6,e7 (coral blocks white parallel slide)', () => {
+        const game = new CoralClash();
+        applyFixture(game, whaleCheck6);
+
+        // Verify initial state
+        expect(game.turn()).toBe('b');
+        expect(game.whalePositions().b).toEqual(['e7', 'f7']);
+        expect(game.whalePositions().w).toEqual(['g4', 'h4']);
+        expect(game.inCheck()).toBe(true); // Black is in check from white octopus at e6
+
+        // White octopus at e6 is threatening black whale at f7
+        expect(game.get('e6')).toMatchObject({ type: 'o', color: 'w' });
+
+        // Black coral at g5 is critical - it blocks white whale parallel slide
+        expect(game.getCoral('g5')).toBe('b');
+
+        // Black whale should be able to rotate f7 -> e6 (capturing white octopus)
+        // This would create position e6,e7
+        const blackMoves = game.moves({ verbose: true, piece: 'h' });
+        const rotationToE6 = blackMoves.filter(
+            (m: any) => m.from === 'f7' && m.to === 'e6' && m.whaleSecondSquare === 'e7',
+        );
+
+        expect(rotationToE6.length).toBeGreaterThan(0);
+
+        // Verify the move can be made
+        const move = rotationToE6[0];
+        expect(move).toMatchObject({
+            from: 'f7',
+            to: 'e6',
+            piece: 'h',
+            captured: 'o',
+            whaleSecondSquare: 'e7',
+        });
+
+        // Make the move and verify it's legal
+        const result = game.move({ from: 'f7', to: 'e6', whaleSecondSquare: 'e7' });
+        expect(result).toBeTruthy();
+        expect(game.whalePositions().b).toEqual(['e7', 'e6']);
+        expect(game.get('e6')).toMatchObject({ type: 'h', color: 'b' });
     });
 });

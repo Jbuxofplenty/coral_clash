@@ -1187,6 +1187,33 @@ export class CoralClash {
             return (fileDiff === 1 && rankDiff === 0) || (fileDiff === 0 && rankDiff === 1);
         };
 
+        // Helper to check if a path is clear from start to end
+        const isPathClear = (from: number, offset: number, steps: number): boolean => {
+            let checkSq = from + offset;
+            for (let i = 0; i < steps - 1; i++) {
+                if ((checkSq & 0x88) !== 0) return false; // Off board
+                const isOwnWhaleSquare = whaleSquares.includes(checkSq);
+                if (this._isSquareOccupied(checkSq) && !isOwnWhaleSquare) {
+                    if (DEBUG) {
+                        console.log(
+                            `    ✗ Path blocked at ${algebraic(checkSq)} by piece (for parallel slide validation)`,
+                        );
+                    }
+                    return false;
+                }
+                if (this._coral[checkSq] && !isOwnWhaleSquare) {
+                    if (DEBUG) {
+                        console.log(
+                            `    ✗ Path blocked at ${algebraic(checkSq)} by coral (for parallel slide validation)`,
+                        );
+                    }
+                    return false;
+                }
+                checkSq += offset;
+            }
+            return true;
+        };
+
         // Check if whale can reach targetSquare with a valid move
         // We need to check both single-half sliding and parallel sliding
 
@@ -1218,12 +1245,21 @@ export class CoralClash {
                     // Option 2: Parallel slide (both halves move same direction)
                     const newSecondSq = whaleSecond + offset * steps;
                     if ((newSecondSq & 0x88) === 0 && areAdjacent(targetSquare, newSecondSq)) {
-                        if (DEBUG) {
-                            console.log(
-                                `    ✓ Parallel slide valid: ${algebraic(targetSquare)} adjacent to ${algebraic(newSecondSq)}`,
-                            );
+                        // Also check if the second half's path is clear
+                        if (isPathClear(whaleSecond, offset, steps)) {
+                            if (DEBUG) {
+                                console.log(
+                                    `    ✓ Parallel slide valid: ${algebraic(targetSquare)} adjacent to ${algebraic(newSecondSq)}, both paths clear`,
+                                );
+                            }
+                            return true;
+                        } else {
+                            if (DEBUG) {
+                                console.log(
+                                    `    ✗ Parallel slide blocked: second half cannot reach ${algebraic(newSecondSq)}`,
+                                );
+                            }
                         }
-                        return true;
                     }
                     if (DEBUG) {
                         console.log(
@@ -1278,12 +1314,21 @@ export class CoralClash {
                     // Option 2: Parallel slide (both halves move same direction)
                     const newFirstSq = whaleFirst + offset * steps;
                     if ((newFirstSq & 0x88) === 0 && areAdjacent(newFirstSq, targetSquare)) {
-                        if (DEBUG) {
-                            console.log(
-                                `    ✓ Parallel slide valid: ${algebraic(newFirstSq)} adjacent to ${algebraic(targetSquare)}`,
-                            );
+                        // Also check if the first half's path is clear
+                        if (isPathClear(whaleFirst, offset, steps)) {
+                            if (DEBUG) {
+                                console.log(
+                                    `    ✓ Parallel slide valid: ${algebraic(newFirstSq)} adjacent to ${algebraic(targetSquare)}, both paths clear`,
+                                );
+                            }
+                            return true;
+                        } else {
+                            if (DEBUG) {
+                                console.log(
+                                    `    ✗ Parallel slide blocked: first half cannot reach ${algebraic(newFirstSq)}`,
+                                );
+                            }
                         }
-                        return true;
                     }
                     if (DEBUG) {
                         console.log(
