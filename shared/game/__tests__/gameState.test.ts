@@ -185,39 +185,41 @@ describe('Game State Snapshot and Restore', () => {
             }
         });
 
-        it('should use getStartingRole() for starting position instead of snapshot roles', () => {
+        it('should use getStartingRole() for games at starting position (migration)', () => {
             const game1 = new CoralClash();
-            
+
             // Create a snapshot at starting position
             const snapshot = createGameSnapshot(game1);
-            
+
             // Manually corrupt the pieceRoles in the snapshot (simulating old saved data)
+            // This simulates a game saved with OLD role logic before getStartingRole() was updated
             snapshot.pieceRoles = {
-                c1: 'hunter', // Should be gatherer
-                f1: 'hunter', // Should be gatherer
-                a1: 'gatherer', // Should be hunter
+                c1: 'hunter', // OLD logic, should be 'gatherer' with NEW logic
+                f1: 'hunter', // OLD logic, should be 'gatherer' with NEW logic
+                a1: 'gatherer', // OLD logic, should be 'hunter' with NEW logic
             };
-            
+
             const game2 = new CoralClash();
             restoreGameFromSnapshot(game2, snapshot);
-            
-            // Verify that correct roles were assigned from getStartingRole(), not from snapshot
+
+            // Verify that NEW roles from getStartingRole() are used, NOT old corrupted snapshot roles
+            // This ensures saved games at starting position get migrated to new role logic
             const c1Piece = game2.get('c1');
             expect(c1Piece).toBeTruthy();
             if (c1Piece) {
-                expect(c1Piece.role).toBe('gatherer'); // Should be gatherer, not hunter
+                expect(c1Piece.role).toBe('gatherer'); // Migrated to NEW correct role
             }
-            
+
             const f1Piece = game2.get('f1');
             expect(f1Piece).toBeTruthy();
             if (f1Piece) {
-                expect(f1Piece.role).toBe('gatherer'); // Should be gatherer, not hunter
+                expect(f1Piece.role).toBe('gatherer'); // Migrated to NEW correct role
             }
-            
+
             const a1Piece = game2.get('a1');
             expect(a1Piece).toBeTruthy();
             if (a1Piece) {
-                expect(a1Piece.role).toBe('hunter'); // Should be hunter, not gatherer
+                expect(a1Piece.role).toBe('hunter'); // Migrated to NEW correct role
             }
         });
 

@@ -66,9 +66,6 @@ const AnimatedPiece = ({ move, piece, size, boardFlipped, userColor, onComplete 
             }
         }
 
-        // For whale moves with whaleSecondSquare, this represents the final orientation
-        // The 'to' square is already the final position, whaleSecondSquare is metadata
-
         return path;
     };
 
@@ -184,17 +181,35 @@ const AnimatedPiece = ({ move, piece, size, boardFlipped, userColor, onComplete 
 
     const imageKey = getPieceImageKey();
 
+    // For diagonal whale moves, render as single cell to avoid overlap during animation
+    const isDiagonalMove =
+        isWhale &&
+        path.length > 2 &&
+        Math.abs(path[path.length - 1].charCodeAt(0) - path[0].charCodeAt(0)) ===
+            Math.abs(parseInt(path[path.length - 1][1]) - parseInt(path[0][1]));
+
     // Base style for the piece
     const baseStyle = {
         position: 'absolute',
-        width: isWhale ? cellSize * 2 : cellSize,
+        width: isWhale && !isDiagonalMove ? cellSize * 2 : cellSize,
         height: cellSize,
     };
 
-    // Apply rotation for vertical whales
+    // Apply rotation and position adjustment for vertical whales
     const transform = [...positionAnim.getTranslateTransform()];
     if (isWhale && whaleOrientation === 'vertical') {
-        // For vertical whales, adjust positioning similar to Pieces.js
+        // For vertical whales, we need to adjust position because rotation happens around center
+        // When rotating 90° clockwise, the 2-wide becomes 2-tall, 1-tall becomes 1-wide
+        // Shift left and up to align the rotated image with the two vertical squares
+        transform.push({ translateX: -cellSize / 2 });
+        transform.push({ translateY: cellSize / 2 });
+
+        // When board is flipped, compensate for the flip
+        if (boardFlipped) {
+            transform.push({ translateY: -cellSize });
+        }
+
+        // Apply the 90° clockwise rotation
         transform.push({ rotate: '90deg' });
     }
 

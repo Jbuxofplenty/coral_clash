@@ -1379,4 +1379,292 @@ describe('CoralClash Whale Mechanics', () => {
             });
         });
     });
+
+    describe('History Navigation - Role Preservation', () => {
+        it('should preserve piece roles when undoing moves', () => {
+            const game = new CoralClash();
+
+            // Get initial roles
+            const a2Crab = game.get('a2');
+            const f2Crab = game.get('f2');
+            const a1Puff = game.get('a1');
+
+            expect(a2Crab && a2Crab.role).toBe('hunter');
+            expect(f2Crab && f2Crab.role).toBe('hunter');
+            expect(a1Puff && a1Puff.role).toBe('hunter');
+
+            // Make simple moves (using hunter pieces)
+            game.move('a2a3'); // Hunter crab moves
+            game.move('a7a6'); // Black gatherer crab
+            game.move('f2f3'); // Hunter crab moves
+            game.move('f7f6'); // Black gatherer crab
+
+            // Verify roles after moves
+            const a3 = game.get('a3');
+            expect(a3 && a3.role).toBe('hunter');
+            const f3 = game.get('f3');
+            expect(f3 && f3.role).toBe('hunter');
+
+            // Undo all moves
+            game.undo();
+            const f7After = game.get('f7');
+            expect(f7After && f7After.type).toBe('c'); // Black crab back
+
+            game.undo();
+            const f2After = game.get('f2');
+            expect(f2After && f2After.role).toBe('hunter'); // Hunter crab back
+
+            game.undo();
+            const a7After = game.get('a7');
+            expect(a7After && a7After.type).toBe('c'); // Black crab back
+
+            game.undo();
+            const a2After = game.get('a2');
+            expect(a2After && a2After.role).toBe('hunter'); // Hunter crab back
+
+            // Verify all starting positions have correct roles
+            const a2Final = game.get('a2');
+            expect(a2Final && a2Final.role).toBe('hunter');
+            const f2Final = game.get('f2');
+            expect(f2Final && f2Final.role).toBe('hunter');
+            const a1Final = game.get('a1');
+            expect(a1Final && a1Final.role).toBe('hunter');
+        });
+
+        it('should preserve roles after multiple undos and redos', () => {
+            const game = new CoralClash();
+
+            // Make some moves (using hunter pieces to avoid coral placement)
+            game.move('a2a3'); // Hunter crab
+            const a2Role = 'hunter';
+
+            game.move('a7a6'); // Black gatherer crab
+
+            game.move('f2f3'); // Hunter crab
+            const f2Role = 'hunter';
+
+            // Verify roles
+            const a3 = game.get('a3');
+            expect(a3 && a3.role).toBe(a2Role);
+            const f3 = game.get('f3');
+            expect(f3 && f3.role).toBe(f2Role);
+
+            // Undo twice
+            game.undo();
+            game.undo();
+
+            // f3 should be gone, a3 should still be there
+            const a3After = game.get('a3');
+            expect(a3After && a3After.role).toBe(a2Role);
+            expect(game.get('f3')).toBeFalsy();
+
+            // Redo by making moves again
+            game.move('a7a6');
+            game.move('f2f3');
+
+            // Role should still be correct
+            const f3After = game.get('f3');
+            expect(f3After && f3After.role).toBe(f2Role);
+
+            // Undo again
+            game.undo();
+            const f2After = game.get('f2');
+            expect(f2After && f2After.role).toBe(f2Role);
+        });
+
+        it('should preserve roles through captures', () => {
+            const game = new CoralClash();
+
+            // Start with default position and set up a scenario where a capture will happen
+            // Move pieces until we have a capture opportunity
+            game.move('a2a3'); // White hunter crab
+            game.move('a7a6'); // Black gatherer crab
+            game.move('a3a4'); // White hunter crab
+            game.move('a6a5'); // Black gatherer crab
+            game.move('a4a5'); // White hunter crab captures black gatherer crab
+
+            // Verify capture occurred
+            const a5 = game.get('a5');
+            expect(a5 && a5.color).toBe('w');
+            expect(a5 && a5.type).toBe('c');
+            expect(a5 && a5.role).toBe('hunter'); // White crab from a2 is hunter
+
+            // Undo the capture
+            game.undo();
+
+            // Black gatherer crab should be restored at a5
+            const a5After = game.get('a5');
+            expect(a5After && a5After.color).toBe('b');
+            expect(a5After && a5After.type).toBe('c');
+            expect(a5After && a5After.role).toBe('gatherer'); // Black crab role restored
+
+            // White hunter crab should be back at a4
+            const a4After = game.get('a4');
+            expect(a4After && a4After.color).toBe('w');
+            expect(a4After && a4After.type).toBe('c');
+            expect(a4After && a4After.role).toBe('hunter');
+        });
+
+        it('should preserve roles when using PGN import/export', () => {
+            const game = new CoralClash();
+
+            // Make some moves (using hunter pieces)
+            game.move('a2a3'); // Hunter crab
+            game.move('a7a6'); // Black gatherer crab
+            game.move('f2f3'); // Hunter crab
+            game.move('f7f6'); // Black gatherer crab
+
+            // Export to PGN
+            const pgn = game.pgn();
+
+            // Create new game and load PGN
+            const game2 = new CoralClash();
+            game2.loadPgn(pgn);
+
+            // Verify roles are correct
+            const a3 = game2.get('a3');
+            expect(a3 && a3.role).toBe('hunter');
+            const f3 = game2.get('f3');
+            expect(f3 && f3.role).toBe('hunter');
+
+            // Undo moves in new game
+            game2.undo();
+            game2.undo();
+
+            // Verify roles after undo
+            const f2After = game2.get('f2');
+            expect(f2After && f2After.role).toBe('hunter');
+            const a3After = game2.get('a3');
+            expect(a3After && a3After.role).toBe('hunter');
+
+            game2.undo();
+            game2.undo();
+
+            // Back to start - verify starting roles
+            const a2Final = game2.get('a2');
+            expect(a2Final && a2Final.role).toBe('hunter');
+            const f2Final = game2.get('f2');
+            expect(f2Final && f2Final.role).toBe('hunter');
+        });
+
+        it('should preserve roles for all starting pieces after undo', () => {
+            const game = new CoralClash();
+
+            // Record all starting roles
+            const startingRoles: { [square: string]: string } = {};
+            const board = game.board();
+            board.forEach((row) => {
+                row.forEach((square) => {
+                    if (square && square.role) {
+                        startingRoles[square.square] = square.role;
+                    }
+                });
+            });
+
+            // Make several simple moves (using hunter pieces to avoid coral placement)
+            game.move('a2a3'); // Hunter crab
+            game.move('a7a6'); // Black gatherer crab
+            game.move('f2f3'); // Hunter crab
+            game.move('f7f6'); // Black gatherer crab
+
+            // Undo all moves
+            for (let i = 0; i < 4; i++) {
+                game.undo();
+            }
+
+            // Verify all starting roles are preserved
+            const boardAfterUndo = game.board();
+            boardAfterUndo.forEach((row) => {
+                row.forEach((square) => {
+                    if (square && square.role) {
+                        expect(square.role).toBe(startingRoles[square.square]);
+                    }
+                });
+            });
+        });
+    });
+
+    describe('Move Role Field', () => {
+        it('should include role field in gatherer moves', () => {
+            const game = new CoralClash();
+            // White crab at c2 is a gatherer
+            const moves = game.moves({ square: 'c2', verbose: true });
+
+            expect(moves.length).toBeGreaterThan(0);
+            moves.forEach((move) => {
+                expect(move.role).toBe('gatherer');
+            });
+        });
+
+        it('should include role field in hunter moves', () => {
+            const game = new CoralClash();
+            // White crab at a2 is a hunter
+            const moves = game.moves({ square: 'a2', verbose: true });
+
+            expect(moves.length).toBeGreaterThan(0);
+            moves.forEach((move) => {
+                expect(move.role).toBe('hunter');
+            });
+        });
+
+        it('should not include role field for whale moves', () => {
+            // Create a simpler position where both whales can move
+            const game = new CoralClash('3h4/8/8/8/8/8/8/3H4 w - - 0 1');
+
+            const allMoves = game.moves({ verbose: true });
+            const whaleMoves = allMoves.filter((m) => m.piece === 'h');
+
+            expect(whaleMoves.length).toBeGreaterThan(0);
+            whaleMoves.forEach((move) => {
+                expect(move.role).toBeUndefined();
+            });
+        });
+
+        it('should preserve role in move history', () => {
+            const game = new CoralClash();
+
+            // Move gatherer crab (c2)
+            const gathererMove = game.move({ from: 'c2', to: 'c3' });
+            expect(gathererMove).toBeTruthy();
+            expect(gathererMove!.role).toBe('gatherer');
+
+            // Move hunter crab (h7 black)
+            const hunterMove = game.move({ from: 'h7', to: 'h6' });
+            expect(hunterMove).toBeTruthy();
+            expect(hunterMove!.role).toBe('hunter');
+
+            // Check history
+            const history = game.history({ verbose: true });
+            expect(history.length).toBe(2);
+            expect(history[0].role).toBe('gatherer');
+            expect(history[1].role).toBe('hunter');
+        });
+
+        it('should include role when move is returned from game.move()', () => {
+            const game = new CoralClash();
+
+            // Execute a gatherer move
+            const move = game.move({ from: 'c2', to: 'c3' });
+            expect(move).toBeTruthy();
+            expect(move!.piece).toBe('c');
+            expect(move!.role).toBe('gatherer');
+        });
+
+        it('should preserve role through coral placement', () => {
+            const game = new CoralClash();
+
+            // Move gatherer crab (c2) with coral placement
+            const moves = game.moves({ square: 'c2', verbose: true });
+            const moveToC3 = moves.find((m) => m.to === 'c3' && m.coralPlaced === true);
+
+            expect(moveToC3).toBeTruthy();
+            expect(moveToC3!.role).toBe('gatherer');
+
+            // Execute the move
+            const executedMove = game.move({ from: 'c2', to: 'c3', coralPlaced: true });
+            expect(executedMove).toBeTruthy();
+            expect(executedMove!.role).toBe('gatherer');
+            expect(executedMove!.coralPlaced).toBe(true);
+        });
+    });
 });

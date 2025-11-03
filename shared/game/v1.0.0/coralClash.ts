@@ -148,6 +148,7 @@ type InternalMove = {
     captureSquare?: number; // For whale captures: which square (0x88) had the captured piece
     promotion?: PieceSymbol;
     flags: number;
+    role?: PieceRole; // Role of the piece that moved (for animations and display)
     // Coral Clash specific
     coralPlaced?: boolean; // Gatherer placed coral
     coralRemoved?: boolean; // Hunter removed coral
@@ -165,6 +166,7 @@ interface History {
     // Coral Clash specific
     coral: Array<Color | null>; // Snapshot of coral state
     coralRemaining: Record<Color, number>; // Snapshot of remaining coral
+    pieceRole?: PieceRole; // Role of the piece that moved (for proper undo)
 }
 
 export type Move = {
@@ -179,6 +181,7 @@ export type Move = {
     lan: string;
     before: string;
     after: string;
+    role?: PieceRole; // Role of the piece that moved (hunter/gatherer)
     // Whale-specific fields for 2-square piece
     whaleSecondSquare?: Square; // Where the other half of the whale ends up after this move
     whaleOrientation?: 'horizontal' | 'vertical'; // Final orientation after move
@@ -569,11 +572,13 @@ function addMove(
         // Generate move with coral placement
         moves.push({
             ...baseMove,
+            role,
             coralPlaced: true,
         });
         // Also generate move without coral placement (player's choice)
         moves.push({
             ...baseMove,
+            role,
             coralPlaced: false,
         });
     }
@@ -582,17 +587,22 @@ function addMove(
         // Generate move with coral removal
         moves.push({
             ...baseMove,
+            role,
             coralRemoved: true,
         });
         // Also generate move without coral removal (player's choice)
         moves.push({
             ...baseMove,
+            role,
             coralRemoved: false,
         });
     }
     // No coral effect possible
     else {
-        moves.push(baseMove);
+        moves.push({
+            ...baseMove,
+            role,
+        });
     }
 }
 
@@ -2120,6 +2130,10 @@ export class CoralClash {
     }
 
     private _push(move: InternalMove) {
+        // Save the role of the piece that's about to move (for proper undo)
+        const movingPiece = this._board[move.from];
+        const pieceRole = movingPiece?.role;
+
         this._history.push({
             move,
             kings: {
@@ -2133,6 +2147,7 @@ export class CoralClash {
             // Save coral state for undo
             coral: [...this._coral],
             coralRemaining: { b: this._coralRemaining.b, w: this._coralRemaining.w },
+            pieceRole: pieceRole, // Save piece role for undo
         });
     }
 
@@ -2349,18 +2364,21 @@ export class CoralClash {
             }
 
             // Restore whale to only the first old position
-            this._board[oldFirst] = { ...whalePiece };
-
-            // Fix type in case of promotion
-            if (this._board[oldFirst]) {
-                this._board[oldFirst].type = move.piece;
-            }
+            this._board[oldFirst] = {
+                ...whalePiece,
+                type: move.piece, // Fix type in case of promotion
+                role: old.pieceRole, // Restore original role (undefined for whales)
+            };
         } else {
             // Normal piece move
             // IMPORTANT: Create a COPY to avoid reference issues
             const pieceToRestore = this._board[move.to];
             if (pieceToRestore) {
-                this._board[move.from] = { ...pieceToRestore, type: move.piece }; // to undo any promotions
+                this._board[move.from] = {
+                    ...pieceToRestore,
+                    type: move.piece, // to undo any promotions
+                    role: old.pieceRole, // restore the piece's original role
+                };
             } else {
                 this._board[move.from] = pieceToRestore;
             }
@@ -3037,6 +3055,7 @@ export class CoralClash {
             flags,
             captured,
             promotion,
+            role,
             coralPlaced,
             coralRemoved,
             coralRemovedSquares,
@@ -3064,6 +3083,11 @@ export class CoralClash {
             before: this.fen(),
             after: '',
         };
+
+        // Add role information if available
+        if (role !== undefined) {
+            move.role = role;
+        }
 
         // Add coral action information
         if (coralPlaced !== undefined) {

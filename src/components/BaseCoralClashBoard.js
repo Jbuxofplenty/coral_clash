@@ -548,16 +548,14 @@ const BaseCoralClashBoard = ({
                 color: moveToAnimate.color,
                 role: moveToAnimate.role,
             });
-            
+
             // Reverse the move direction
             // For whales, we need to determine the original orientation before the move
             let reverseWhaleSecondSquare = undefined;
             if (moveToAnimate.piece === WHALE) {
                 // Determine which move index we're looking at
-                const moveIndex = historyIndex === null 
-                    ? moveHistory.length - 1 
-                    : historyIndex;
-                
+                const moveIndex = historyIndex === null ? moveHistory.length - 1 : historyIndex;
+
                 // Get the board state BEFORE this move was made
                 const tempGame = new CoralClash();
                 // Replay all moves up to but not including the one we're reversing
@@ -569,13 +567,15 @@ const BaseCoralClashBoard = ({
                 const whaleColor = moveToAnimate.color;
                 const whaleKey = whaleColor === 'w' ? 'white' : 'black';
                 const originalWhaleSquares = whalePositions[whaleKey];
-                
+
                 if (originalWhaleSquares && originalWhaleSquares.length === 2) {
                     // Find which square is NOT moveToAnimate.from (that's the second square)
-                    reverseWhaleSecondSquare = originalWhaleSquares.find(sq => sq !== moveToAnimate.from);
+                    reverseWhaleSecondSquare = originalWhaleSquares.find(
+                        (sq) => sq !== moveToAnimate.from,
+                    );
                 }
             }
-            
+
             setAnimatingMove({
                 ...moveToAnimate,
                 from: moveToAnimate.to,
@@ -953,7 +953,7 @@ const BaseCoralClashBoard = ({
                     color: lastMove.color,
                     role: lastMove.role,
                 });
-                
+
                 // Reverse the move direction for undo
                 // For whales, we need to determine the original orientation before the move
                 let reverseWhaleSecondSquare = undefined;
@@ -970,13 +970,15 @@ const BaseCoralClashBoard = ({
                     const whaleColor = lastMove.color;
                     const whaleKey = whaleColor === 'w' ? 'white' : 'black';
                     const originalWhaleSquares = whalePositions[whaleKey];
-                    
+
                     if (originalWhaleSquares && originalWhaleSquares.length === 2) {
                         // Find which square is NOT lastMove.from (that's the second square)
-                        reverseWhaleSecondSquare = originalWhaleSquares.find(sq => sq !== lastMove.from);
+                        reverseWhaleSecondSquare = originalWhaleSquares.find(
+                            (sq) => sq !== lastMove.from,
+                        );
                     }
                 }
-                
+
                 setAnimatingMove({
                     ...lastMove,
                     from: lastMove.to,
