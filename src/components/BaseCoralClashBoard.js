@@ -1,5 +1,5 @@
 import { Icon } from 'galio-framework';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
     Animated,
     Clipboard,
@@ -202,7 +202,7 @@ const BaseCoralClashBoard = ({
                 setTurnNotification({
                     message,
                     type: 'info',
-                    timeout: 2500,
+                    timeout: 5000,
                     onDismiss: () => setTurnNotification(null),
                 });
             }
@@ -818,6 +818,97 @@ const BaseCoralClashBoard = ({
           ? coralClash.turn() === userColor
           : true; // For pass-and-play (userColor is null) or if coralClash not ready, both players can move
 
+    // Determine which banner to show based on priority
+    // Priority order (highest to lowest):
+    // 1. notificationStatus - Undo/reset acceptance/decline notifications
+    // 2. gameRequestBanner - Undo/reset requests requiring user interaction
+    // 3. isViewingHistory - User is viewing past moves
+    // 4. turnNotification - Turn change notification (temporary, 5 seconds)
+    // 5. gameStatus - Game over/check status (persistent)
+    const activeBanner = useMemo(() => {
+        // Priority 1: Notification status (highest priority - user feedback)
+        if (notificationStatus) {
+            return {
+                type: 'status',
+                content: (
+                    <GameStatusBanner
+                        message={notificationStatus.message}
+                        type={notificationStatus.type}
+                        visible={true}
+                        timeout={notificationStatus.timeout}
+                        onDismiss={notificationStatus.onDismiss}
+                    />
+                ),
+            };
+        }
+
+        // Priority 2: Game request banner (undo/reset requests - requires interaction)
+        if (renderGameRequestBanner) {
+            const requestBanner = renderGameRequestBanner({ coralClash, clearVisibleMoves });
+            if (requestBanner) {
+                return {
+                    type: 'request',
+                    content: requestBanner,
+                };
+            }
+        }
+
+        // Priority 3: History viewing banner (informational)
+        if (isViewingHistory && !isGameOver) {
+            return {
+                type: 'status',
+                content: (
+                    <GameStatusBanner
+                        message='Viewing past moves - return to current to play'
+                        type='info'
+                        visible={true}
+                    />
+                ),
+            };
+        }
+
+        // Priority 4: Turn notification (temporary, 5 seconds)
+        if (turnNotification) {
+            return {
+                type: 'status',
+                content: (
+                    <GameStatusBanner
+                        message={turnNotification.message}
+                        type={turnNotification.type}
+                        visible={true}
+                        timeout={turnNotification.timeout}
+                        onDismiss={turnNotification.onDismiss}
+                    />
+                ),
+            };
+        }
+
+        // Priority 5: Game status (checkmate, draw, check, etc.)
+        if (gameStatus) {
+            return {
+                type: 'status',
+                content: (
+                    <GameStatusBanner
+                        message={gameStatus.message}
+                        type={gameStatus.type}
+                        visible={true}
+                    />
+                ),
+            };
+        }
+
+        return null;
+    }, [
+        notificationStatus,
+        renderGameRequestBanner,
+        isViewingHistory,
+        isGameOver,
+        turnNotification,
+        gameStatus,
+        coralClash,
+        clearVisibleMoves,
+    ]);
+
     const handleUndo = () => {
         // Clear visible moves immediately to prevent showing invalidated moves
         clearVisibleMoves();
@@ -927,7 +1018,7 @@ const BaseCoralClashBoard = ({
         setTurnNotification({
             message,
             type: 'info',
-            timeout: 2500,
+            timeout: 5000,
             onDismiss: () => setTurnNotification(null),
         });
     }, [coralClash, userColor, opponentType, topPlayerData, bottomPlayerData]);
@@ -1625,44 +1716,9 @@ const BaseCoralClashBoard = ({
                     />
                 </View>
 
-                {/* Game Request Banner (Undo/Reset) - Only for PvP games */}
-                {renderGameRequestBanner &&
-                    renderGameRequestBanner({ coralClash, clearVisibleMoves })}
-
-                {/* Status Banners - Priority: notificationStatus > isViewingHistory > turnNotification > gameStatus */}
-                {notificationStatus ? (
-                    /* Notification Status Banner (for undo/reset notifications) - Highest priority */
-                    <GameStatusBanner
-                        message={notificationStatus.message}
-                        type={notificationStatus.type}
-                        visible={true}
-                        timeout={notificationStatus.timeout}
-                        onDismiss={notificationStatus.onDismiss}
-                    />
-                ) : isViewingHistory && !isGameOver ? (
-                    /* History Viewing Banner - Shows when user is viewing past moves (only if game not over) */
-                    <GameStatusBanner
-                        message='Viewing past moves - return to current to play'
-                        type='info'
-                        visible={true}
-                    />
-                ) : turnNotification ? (
-                    /* Turn Notification Banner - Shows whose turn it is after a move */
-                    <GameStatusBanner
-                        message={turnNotification.message}
-                        type={turnNotification.type}
-                        visible={true}
-                        timeout={turnNotification.timeout}
-                        onDismiss={turnNotification.onDismiss}
-                    />
-                ) : (
-                    /* Game Status Banner - Only shown when no other notifications */
-                    <GameStatusBanner
-                        message={gameStatus?.message}
-                        type={gameStatus?.type}
-                        visible={!!gameStatus}
-                    />
-                )}
+                {/* Banner Display - Priority-based system ensures only one banner shows at a time */}
+                {/* Priority: notificationStatus > gameRequest > historyViewing > turnNotification > gameStatus */}
+                {activeBanner?.content}
             </View>
 
             {/* Control Bar */}

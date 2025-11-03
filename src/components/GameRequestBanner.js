@@ -1,5 +1,6 @@
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View, useWindowDimensions } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { moderateScale, scale } from 'react-native-size-matters';
 import { useTheme } from '../contexts';
 import Icon from './Icon';
 
@@ -14,14 +15,10 @@ import Icon from './Icon';
  */
 const GameRequestBanner = ({ message, mode = 'waiting', onCancel, onDecline, onAccept }) => {
     const { colors } = useTheme();
-    const { height } = useWindowDimensions();
 
-    // Use compact mode on smaller screens (iPhone SE, etc.)
-    const isCompact = height < 700;
-
-    const buttonSize = isCompact ? 32 : 40;
-    const buttonRadius = isCompact ? 16 : 20;
-    const iconSize = isCompact ? 14 : 18;
+    const buttonSize = scale(40);
+    const buttonRadius = scale(20);
+    const iconSize = moderateScale(18);
 
     return (
         <View
@@ -29,8 +26,8 @@ const GameRequestBanner = ({ message, mode = 'waiting', onCancel, onDecline, onA
                 styles.banner,
                 {
                     backgroundColor: colors.INPUT,
-                    paddingVertical: isCompact ? 8 : 14,
-                    paddingHorizontal: isCompact ? 12 : 16,
+                    paddingVertical: scale(14),
+                    paddingHorizontal: scale(16),
                 },
             ]}
         >
@@ -39,8 +36,8 @@ const GameRequestBanner = ({ message, mode = 'waiting', onCancel, onDecline, onA
                     styles.message,
                     {
                         color: colors.TEXT,
-                        fontSize: isCompact ? 12 : 15,
-                        marginRight: isCompact ? 8 : 12,
+                        fontSize: moderateScale(13),
+                        marginRight: scale(12),
                     },
                 ]}
             >
@@ -92,7 +89,7 @@ const GameRequestBanner = ({ message, mode = 'waiting', onCancel, onDecline, onA
                                 height: buttonSize,
                                 borderRadius: buttonRadius,
                                 backgroundColor: colors.SUCCESS + '15',
-                                marginLeft: isCompact ? 8 : 10,
+                                marginLeft: scale(10),
                             },
                         ]}
                     >
@@ -129,4 +126,3 @@ const styles = StyleSheet.create({
 });
 
 export default GameRequestBanner;
-

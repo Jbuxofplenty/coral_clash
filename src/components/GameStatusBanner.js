@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
-import { StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
+import { moderateScale, scale } from 'react-native-size-matters';
 import { useTheme } from '../contexts';
 import Icon from './Icon';
 
@@ -14,10 +15,6 @@ import Icon from './Icon';
  */
 const GameStatusBanner = ({ message, type = 'info', visible = true, timeout = 0, onDismiss }) => {
     const { colors } = useTheme();
-    const { height } = useWindowDimensions();
-
-    // Use compact mode on smaller screens (iPhone SE, etc.)
-    const isCompact = height < 700;
 
     // Auto-dismiss after timeout
     useEffect(() => {
@@ -106,29 +103,40 @@ const GameStatusBanner = ({ message, type = 'info', visible = true, timeout = 0,
         <View
             style={[
                 styles.statusBanner,
-                { backgroundColor: colors.INPUT },
-                isCompact && styles.statusBannerCompact,
+                {
+                    backgroundColor: colors.INPUT,
+                    marginTop: scale(8),
+                    paddingVertical: scale(14),
+                    paddingHorizontal: scale(16),
+                },
             ]}
         >
             <View
                 style={[
                     styles.iconContainer,
-                    { backgroundColor: config.iconBg },
-                    isCompact && styles.iconContainerCompact,
+                    {
+                        backgroundColor: config.iconBg,
+                        width: scale(40),
+                        height: scale(40),
+                        borderRadius: scale(20),
+                        marginRight: scale(12),
+                    },
                 ]}
             >
                 <Icon
                     name={config.icon}
                     family='font-awesome'
-                    size={isCompact ? 16 : 20}
+                    size={moderateScale(20)}
                     color={config.iconColor}
                 />
             </View>
             <Text
                 style={[
                     styles.statusText,
-                    { color: colors.TEXT },
-                    isCompact && styles.statusTextCompact,
+                    {
+                        color: colors.TEXT,
+                        fontSize: moderateScale(15),
+                    },
                 ]}
             >
                 {message}
@@ -139,38 +147,16 @@ const GameStatusBanner = ({ message, type = 'info', visible = true, timeout = 0,
 
 const styles = StyleSheet.create({
     statusBanner: {
-        marginTop: 8,
-        paddingVertical: 14,
-        paddingHorizontal: 16,
         flexDirection: 'row',
         alignItems: 'center',
     },
-    statusBannerCompact: {
-        marginTop: 4,
-        paddingVertical: 8,
-        paddingHorizontal: 12,
-    },
     iconContainer: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
         justifyContent: 'center',
         alignItems: 'center',
-        marginRight: 12,
-    },
-    iconContainerCompact: {
-        width: 32,
-        height: 32,
-        borderRadius: 16,
-        marginRight: 8,
     },
     statusText: {
-        fontSize: 15,
         fontWeight: '600',
         flex: 1,
-    },
-    statusTextCompact: {
-        fontSize: 12,
     },
 });
 
