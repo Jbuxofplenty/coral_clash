@@ -105,8 +105,8 @@ const GameStatusBanner = ({ message, type = 'info', visible = true, timeout = 0,
                 styles.statusBanner,
                 {
                     backgroundColor: colors.INPUT,
-                    marginTop: scale(8),
-                    paddingVertical: scale(14),
+                    marginVertical: scale(5),
+                    paddingVertical: scale(10),
                     paddingHorizontal: scale(16),
                 },
             ]}
@@ -126,7 +126,7 @@ const GameStatusBanner = ({ message, type = 'info', visible = true, timeout = 0,
                 <Icon
                     name={config.icon}
                     family='font-awesome'
-                    size={moderateScale(20)}
+                    size={moderateScale(18)}
                     color={config.iconColor}
                 />
             </View>
@@ -135,7 +135,7 @@ const GameStatusBanner = ({ message, type = 'info', visible = true, timeout = 0,
                     styles.statusText,
                     {
                         color: colors.TEXT,
-                        fontSize: moderateScale(15),
+                        fontSize: moderateScale(13),
                     },
                 ]}
             >
@@ -149,6 +149,7 @@ const styles = StyleSheet.create({
     statusBanner: {
         flexDirection: 'row',
         alignItems: 'center',
+        width: '100%',
     },
     iconContainer: {
         justifyContent: 'center',
