@@ -1,10 +1,10 @@
-import { Dimensions, useWindowDimensions } from 'react-native';
+import { ActivityIndicator, Dimensions, useWindowDimensions, View } from 'react-native';
 import { Header, Icon } from '../components';
 
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { createStackNavigator } from '@react-navigation/stack';
 import React from 'react';
-import { useAlert, useAuth } from '../contexts';
+import { useAlert, useAuth, useTheme } from '../contexts';
 import Friends from '../screens/Friends';
 import GameScreen from '../screens/Game';
 import HomeScreen from '../screens/Home';
@@ -80,12 +80,29 @@ function HowToPlayStack(_props) {
 }
 
 export default function AppStack(_props) {
-    const { user, logOut } = useAuth();
+    const { user, loading, logOut } = useAuth();
     const { showAlert } = useAlert();
+    const { colors } = useTheme();
     const { height } = useWindowDimensions();
 
     // Use compact mode on smaller screens (iPhone SE, etc.)
     const isCompact = height < 700;
+
+    // Show loading indicator while checking authentication
+    if (loading) {
+        return (
+            <View
+                style={{
+                    flex: 1,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    backgroundColor: colors.GRADIENT_END,
+                }}
+            >
+                <ActivityIndicator size='large' color={colors.PRIMARY} />
+            </View>
+        );
+    }
 
     return (
         <Drawer.Navigator

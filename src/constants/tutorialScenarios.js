@@ -59,6 +59,81 @@ export const TUTORIAL_SCENARIOS = {
         },
     },
 
+    coralVictory: {
+        id: 'coralVictory',
+        title: 'Coral Victory - Area of Control',
+        description:
+            "White has 4 coral (denoted by pink borders around squares): c3, d3, e3, f3. Black has 4 coral (denoted by black borders around squares): c6, d6, e6, f6. The Black Gatherer Dolphin (with coral icons on border) at c3 is sitting on one of White's coral, so White only controls 3 coral (d3, e3, f3). Black controls all 4 coral (c6, d6, e6, f6) = Black wins 4 to 3! Remember: coral occupied by an opponent's piece does NOT count toward your area of control.",
+        fixture: {
+            schemaVersion: '1.1.0',
+            exportedAt: new Date().toISOString(),
+            state: {
+                fen: 'hh6/8/8/8/8/2d5/8/5HH w - - 0 1',
+                board: [
+                    [
+                        { square: 'a8', type: 'h', color: 'b' },
+                        { square: 'b8', type: 'h', color: 'b' },
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                    ],
+                    [null, null, null, null, null, null, null, null],
+                    [null, null, null, null, null, null, null, null],
+                    [null, null, null, null, null, null, null, null],
+                    [null, null, null, null, null, null, null, null],
+                    [
+                        null,
+                        null,
+                        { square: 'c3', type: 'd', color: 'b', role: 'gatherer' },
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                    ],
+                    [null, null, null, null, null, null, null, null],
+                    [
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        { square: 'f1', type: 'h', color: 'w' },
+                        { square: 'g1', type: 'h', color: 'w' },
+                        null,
+                    ],
+                ],
+                history: [],
+                turn: 'w',
+                whalePositions: {
+                    w: ['f1', 'g1'],
+                    b: ['a8', 'b8'],
+                },
+                coral: [
+                    // White coral (4 total, but one is occupied)
+                    { square: 'c3', color: 'w' }, // Occupied by black dolphin - doesn't count for white!
+                    { square: 'd3', color: 'w' },
+                    { square: 'e3', color: 'w' },
+                    { square: 'f3', color: 'w' },
+                    // Black coral (4 total, all unoccupied)
+                    { square: 'c6', color: 'b' },
+                    { square: 'd6', color: 'b' },
+                    { square: 'e6', color: 'b' },
+                    { square: 'f6', color: 'b' },
+                ],
+                isGameOver: false,
+                inCheck: false,
+                isCheckmate: false,
+                isStalemate: false,
+                isDraw: false,
+                isCoralVictory: null,
+            },
+        },
+    },
+
     whaleMovement: {
         id: 'whaleMovement',
         title: 'Whale Movement',

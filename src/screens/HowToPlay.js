@@ -100,6 +100,13 @@ export default function HowToPlay({ navigation }) {
                             viewedExamples={viewedExamples}
                             onViewed={handleMarkViewed}
                         />
+                        <ExampleLink
+                            scenarioId='coralVictory'
+                            label='Coral Victory Example'
+                            navigation={navigation}
+                            viewedExamples={viewedExamples}
+                            onViewed={handleMarkViewed}
+                        />
                     </View>
                 </Block>
 
@@ -182,6 +189,13 @@ export default function HowToPlay({ navigation }) {
                     </Text>
 
                     <Text style={[styles.text, { color: colors.TEXT }]}>
+                        <Text bold style={{ color: colors.TEXT }}>
+                            Important:
+                        </Text>{' '}
+                        Pieces cannot move through other pieces - they must have a clear path.
+                    </Text>
+
+                    <Text style={[styles.text, { color: colors.TEXT }]}>
                         Each piece type comes in two variants that interact with Coral differently:
                     </Text>
                     <View style={styles.bulletSection}>
@@ -247,8 +261,8 @@ export default function HowToPlay({ navigation }) {
                                 </Text>{' '}
                                 Move half of the piece any number of squares horizontally,
                                 vertically, or diagonally while maintaining its original
-                                orientation. The path must be clear of pieces and coral (with one
-                                exception - see below).
+                                orientation. The Whale follows Hunter movement rules - it is stopped
+                                by coral. However, there is one special exception (see below).
                             </Text>
                             <Text style={[styles.subBullet, { color: colors.TEXT }]}>
                                 <Text bold style={{ color: colors.TEXT }}>
@@ -284,10 +298,11 @@ export default function HowToPlay({ navigation }) {
                             <Text bold style={{ color: colors.TEXT }}>
                                 Double Coral Removal:
                             </Text>{' '}
-                            When the Whale (acting as a Hunter) moves onto coral, it can remove up
-                            to two coral pieces in one move - one from each square it occupies. If
-                            the Whale is already on coral with half of its body, it can still remove
-                            one coral piece.
+                            When the Whale (acting as a Hunter) lands on coral, it can choose to
+                            remove one or both coral pieces. If both halves land on coral, you can
+                            remove both, just one, or neither. If only one half lands on new coral
+                            (while the other half is already on coral), you can choose to remove
+                            that one coral piece.
                         </Text>
 
                         <View
@@ -457,13 +472,28 @@ export default function HowToPlay({ navigation }) {
                     <View style={styles.ruleSection}>
                         <Text style={[styles.ruleTitle, { color: colors.TEXT }]}>
                             <Text bold style={{ color: colors.TEXT }}>
-                                Hunter Effect
+                                Hunter Movement & Effect
                             </Text>
                         </Text>
                         <Text style={[styles.text, { color: colors.TEXT }]}>
-                            Hunter pieces (without coral icons) stop when moving onto Coral and can
-                            remove it from the board.
+                            Hunter pieces (without coral icons) have two important behaviors:
                         </Text>
+                        <View style={styles.bulletSection}>
+                            <Text style={[styles.bulletPoint, { color: colors.TEXT }]}>
+                                •{' '}
+                                <Text bold style={{ color: colors.TEXT }}>
+                                    Movement stops
+                                </Text>{' '}
+                                when landing on Coral
+                            </Text>
+                            <Text style={[styles.bulletPoint, { color: colors.TEXT }]}>
+                                •{' '}
+                                <Text bold style={{ color: colors.TEXT }}>
+                                    Can remove
+                                </Text>{' '}
+                                that Coral from the board
+                            </Text>
+                        </View>
                         <ExampleLink
                             scenarioId='hunterEffect'
                             label='Hunter Effect Example'
