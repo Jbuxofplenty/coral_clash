@@ -534,6 +534,15 @@ export function restoreGameFromSnapshot(coralClash: any, snapshot: any): void {
     // IMPORTANT: PGN doesn't encode coral choices (e.g., whether a gatherer placed coral)
     // So we ALWAYS need to restore coral from the snapshot to get the exact coral state
     if (snapshot.coral) {
+        console.log(
+            '[restoreGameFromSnapshot] Restoring coral - before clear, coral count:',
+            coralClash.getAllCoral().length,
+        );
+        console.log(
+            '[restoreGameFromSnapshot] Snapshot has coral placements:',
+            snapshot.coral.length,
+        );
+
         // Clear existing coral (PGN replay might have placed coral incorrectly)
         coralClash._coral = new Array(128).fill(null);
 
@@ -541,6 +550,15 @@ export function restoreGameFromSnapshot(coralClash: any, snapshot: any): void {
         snapshot.coral.forEach(({ square, color }: { square: any; color: any }) => {
             coralClash.placeCoral(square, color);
         });
+
+        console.log(
+            '[restoreGameFromSnapshot] After restore, coral count:',
+            coralClash.getAllCoral().length,
+        );
+        console.log(
+            '[restoreGameFromSnapshot] Coral squares:',
+            coralClash.getAllCoral().map((c: any) => c.square),
+        );
     }
 
     // Restore coral remaining counts

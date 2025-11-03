@@ -413,6 +413,8 @@ export const makeMove = onCall(getAppCheckConfig(), async (request) => {
         const { gameId, move, version } = data;
         const userId = auth.uid;
 
+        console.log('[makeMove] Received move:', JSON.stringify(move, null, 2));
+
         // Validate game version
         validateGameVersion(version);
 
@@ -438,7 +440,20 @@ export const makeMove = onCall(getAppCheckConfig(), async (request) => {
         // Pass full game state (includes coral data) not just FEN
         const currentGameState = gameData.gameState || { fen: gameData.fen };
 
+        console.log('[makeMove] Calling validateMove with move:', JSON.stringify(move, null, 2));
         const validation = validateMove(currentGameState, move);
+        console.log(
+            '[makeMove] Validation result:',
+            JSON.stringify(
+                {
+                    valid: validation.valid,
+                    error: validation.error,
+                    resultMove: validation.result,
+                },
+                null,
+                2,
+            ),
+        );
 
         if (!validation.valid) {
             console.error('[makeMove] Invalid move:', {

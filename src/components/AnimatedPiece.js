@@ -181,17 +181,11 @@ const AnimatedPiece = ({ move, piece, size, boardFlipped, userColor, onComplete 
 
     const imageKey = getPieceImageKey();
 
-    // For diagonal whale moves, render as single cell to avoid overlap during animation
-    const isDiagonalMove =
-        isWhale &&
-        path.length > 2 &&
-        Math.abs(path[path.length - 1].charCodeAt(0) - path[0].charCodeAt(0)) ===
-            Math.abs(parseInt(path[path.length - 1][1]) - parseInt(path[0][1]));
-
     // Base style for the piece
+    // Render whales as single cell during animation to avoid overlap
     const baseStyle = {
         position: 'absolute',
-        width: isWhale && !isDiagonalMove ? cellSize * 2 : cellSize,
+        width: cellSize,
         height: cellSize,
     };
 
