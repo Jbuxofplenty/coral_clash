@@ -225,12 +225,12 @@ const AnimatedPiece = ({ move, piece, size, boardFlipped, userColor, onComplete 
 
     // Apply rotation and position adjustment for vertical whales
     const transform = [...positionAnim.getTranslateTransform()];
-    
+
     // Apply scale for whales (must come before rotation)
     if (isWhale) {
         transform.push({ scaleX: scaleAnim });
     }
-    
+
     if (isWhale && whaleOrientation === 'vertical') {
         // For vertical whales, we need to adjust position because rotation happens around center
         // When rotating 90° clockwise, the 2-wide becomes 2-tall, 1-tall becomes 1-wide
