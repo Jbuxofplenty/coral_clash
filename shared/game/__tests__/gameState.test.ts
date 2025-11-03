@@ -609,14 +609,14 @@ describe('Game State Snapshot and Restore', () => {
 
             // Verify undo works
             game2.undo();
-            expect(game2.history().length).toBe(3);
+            expect(game2.historyLength()).toBe(3);
         });
 
         it('should support empty history (starting position)', () => {
             const game1 = new CoralClash();
 
             // No moves made
-            expect(game1.history().length).toBe(0);
+            expect(game1.historyLength()).toBe(0);
 
             // Create and restore snapshot
             const snapshot = createGameSnapshot(game1);
@@ -624,7 +624,7 @@ describe('Game State Snapshot and Restore', () => {
             restoreGameFromSnapshot(game2, snapshot);
 
             // Verify history is still empty
-            expect(game2.history().length).toBe(0);
+            expect(game2.historyLength()).toBe(0);
             expect(game2.fen()).toBe(game1.fen());
         });
 
@@ -640,7 +640,7 @@ describe('Game State Snapshot and Restore', () => {
             game1.move(moves3[0]); // White move
 
             // Verify history includes all moves
-            expect(game1.history().length).toBe(3);
+            expect(game1.historyLength()).toBe(3);
 
             // Create and restore snapshot
             const snapshot = createGameSnapshot(game1);
@@ -648,7 +648,7 @@ describe('Game State Snapshot and Restore', () => {
             restoreGameFromSnapshot(game2, snapshot);
 
             // Verify move history is preserved
-            expect(game2.history().length).toBe(3);
+            expect(game2.historyLength()).toBe(3);
             expect(game2.history()).toEqual(game1.history());
 
             // Verify board position matches
@@ -683,7 +683,7 @@ describe('Game State Snapshot and Restore', () => {
             expect(game2.fen()).toBe(game1.fen());
 
             // But history will be empty (expected for legacy snapshots)
-            expect(game2.history().length).toBe(0);
+            expect(game2.historyLength()).toBe(0);
         });
     });
 

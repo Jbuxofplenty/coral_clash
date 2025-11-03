@@ -1,8 +1,18 @@
 import { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { SQUARES } from '../../shared';
+import { useCoralClashContext } from '../contexts/CoralClashContext';
 
-const Coral = ({ coralClash, size, boardFlipped = false, userColor = null, updateTrigger = 0 }) => {
+const Coral = ({
+    coralClash: coralClashProp,
+    size,
+    boardFlipped = false,
+    userColor = null,
+    updateTrigger = 0,
+}) => {
+    const coralClashContext = useCoralClashContext();
+    // Use prop if provided (for historical view), otherwise use context
+    const coralClash = coralClashProp || coralClashContext;
     const cellSize = size / 8;
 
     // Get all squares with coral - memoized and re-computed when updateTrigger changes

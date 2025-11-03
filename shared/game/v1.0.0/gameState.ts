@@ -628,7 +628,7 @@ export function restoreGameFromSnapshot(coralClash: any, snapshot: any): void {
     //   during load()/loadPgn(). This ensures old saved games get migrated to new role logic.
     // - For games in progress: Restore roles from snapshot to preserve them correctly.
     // This handles both fresh games and migrations when getStartingRole() logic changes.
-    const historyLength = coralClash.history().length;
+    const historyLength = coralClash.historyLength();
     const isStartingPosition = historyLength === 0;
 
     if (snapshot.pieceRoles && !isStartingPosition) {

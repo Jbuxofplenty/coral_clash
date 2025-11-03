@@ -214,7 +214,7 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
         isViewingHistory,
         gameData,
     }) => {
-        const historyLength = coralClash.history().length;
+        const historyLength = coralClash.historyLength();
         // Check both local game engine state AND server-side completion status (e.g., timeout)
         const isGameOver = coralClash.isGameOver() || gameData?.status === 'completed';
         // Disable undo if game is over, viewing history, no moves, or if there's a pending reset request
@@ -411,7 +411,7 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
         // Priority: Show undo request first, then reset request
         if (undoRequestData) {
             // Calculate dynamic move count based on current game state using shared logic
-            // Use currentMoveCount from Firestore listener instead of coralClash.history().length
+            // Use currentMoveCount from Firestore listener instead of coralClash.historyLength()
             // to ensure we have the latest value from the server
             const dynamicMoveCount = calculateUndoMoveCount(
                 undoRequestData.moveCount,

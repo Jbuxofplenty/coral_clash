@@ -2004,7 +2004,7 @@ export const respondToUndoRequest = onCall(getAppCheckConfig(), async (request) 
 
             // Calculate dynamic move count using shared logic
             // This handles cases where moves were made after the undo request was sent
-            const currentHistoryLength = coralClash.history().length;
+            const currentHistoryLength = coralClash.historyLength();
             let moveCount = calculateUndoMoveCount(
                 originalMoveCount,
                 undoRequestAtMoveNumber,

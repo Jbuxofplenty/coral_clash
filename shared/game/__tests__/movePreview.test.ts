@@ -183,7 +183,7 @@ describe('Move Preview', () => {
             game.moves({ piece: 'h', verbose: true, color: 'b' });
 
             // History should be unchanged
-            expect(game.history().length).toBe(initialHistoryLength);
+            expect(game.historyLength()).toBe(initialHistoryLength);
             expect(game.history()).toEqual(initialHistory);
         });
     });

@@ -2817,10 +2817,12 @@ export class CoralClash {
 
         // Coral Clash: Add coral notation
         // * = coral placed (gatherer)
-        // ~ = coral removed (hunter)
+        // ~ = coral removed (hunter, including whale multi-square removal)
         if (move.coralPlaced === true) {
             output += '*';
         } else if (move.coralRemoved === true) {
+            output += '~';
+        } else if (move.coralRemovedSquares && move.coralRemovedSquares.length > 0) {
             output += '~';
         }
 
@@ -2861,20 +2863,30 @@ export class CoralClash {
                 if (hasCoralPlaced && moves[i].coralPlaced !== true) {
                     continue; // Skip this move, doesn't match coral placement
                 }
-                if (hasCoralRemoved && moves[i].coralRemoved !== true) {
+                // Check for coral removal (single square OR whale multi-square)
+                const moveHasCoralRemoval =
+                    moves[i].coralRemoved === true ||
+                    (moves[i].coralRemovedSquares !== undefined &&
+                        moves[i].coralRemovedSquares!.length > 0);
+                if (hasCoralRemoved && !moveHasCoralRemoval) {
                     continue; // Skip this move, doesn't match coral removal
                 }
                 // If no coral notation in PGN, prefer moves without coral action (backward compat)
                 if (!hasCoralPlaced && !hasCoralRemoved) {
-                    if (moves[i].coralPlaced === true || moves[i].coralRemoved === true) {
+                    if (moves[i].coralPlaced === true || moveHasCoralRemoval) {
                         // Check if there's a variant without coral action
-                        const variantWithoutCoral = moves.find(
-                            (m) =>
+                        const variantWithoutCoral = moves.find((m) => {
+                            const mHasCoralRemoval =
+                                m.coralRemoved === true ||
+                                (m.coralRemovedSquares !== undefined &&
+                                    m.coralRemovedSquares.length > 0);
+                            return (
                                 algebraic(m.from) === algebraic(moves[i].from) &&
                                 algebraic(m.to) === algebraic(moves[i].to) &&
                                 m.coralPlaced !== true &&
-                                m.coralRemoved !== true,
-                        );
+                                !mHasCoralRemoval
+                            );
+                        });
                         if (variantWithoutCoral) {
                             continue; // Skip this variant, use the one without coral
                         }
@@ -3214,6 +3226,14 @@ export class CoralClash {
         }
 
         return null;
+    }
+
+    /**
+     * Get the number of moves in history without side effects
+     * Unlike history(), this does not undo/replay moves
+     */
+    historyLength(): number {
+        return this._history.length;
     }
 
     history(): string[];
