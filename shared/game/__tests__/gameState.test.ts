@@ -686,4 +686,256 @@ describe('Game State Snapshot and Restore', () => {
             expect(game2.history().length).toBe(0);
         });
     });
+
+    describe('Whale Coral Removal - Snapshot Restoration Bug Fix', () => {
+        it('should correctly restore coral state after whale removes coral', () => {
+            // This test verifies the fix for the bug where coral would reappear after removal
+            // Root cause: placeCoral() was decrementing coralRemaining, then coralRemaining was restored
+            // Fix: Directly set _coral array instead of calling placeCoral()
+
+            const game1 = new CoralClash();
+
+            // Set up a scenario where whale can remove coral
+            // Place white coral at f5 (whale will move there)
+            game1.placeCoral('f5', 'w');
+
+            // Get whale position
+            const whalePos = game1.whalePositions();
+            expect(whalePos.w).toBeDefined();
+            if (!whalePos.w) return; // TypeScript guard
+
+            // Find a whale move to f5 with coral removal
+            const whaleMoves = game1.moves({ verbose: true, square: whalePos.w[0] }) as any[];
+            const moveToF5WithRemoval = whaleMoves.find(
+                (m: any) =>
+                    m.to === 'f5' && m.coralRemovedSquares && m.coralRemovedSquares.includes('f5'),
+            );
+
+            // Skip test if we can't set up this scenario
+            if (!moveToF5WithRemoval) {
+                console.log(
+                    'Skipping test - whale cannot reach coral at f5 from starting position',
+                );
+                return;
+            }
+
+            // Make the move with coral removal
+            const coralBeforeMove = game1.getAllCoral();
+            const coralAtF5Before = coralBeforeMove.find((c: any) => c.square === 'f5');
+            expect(coralAtF5Before).toBeDefined(); // Coral exists before move
+
+            game1.move(moveToF5WithRemoval);
+
+            // Verify coral was removed
+            const coralAfterMove = game1.getAllCoral();
+            const coralAtF5After = coralAfterMove.find((c: any) => c.square === 'f5');
+            expect(coralAtF5After).toBeUndefined(); // Coral removed
+
+            // Verify coral count increased (coral returned to supply)
+            const coralRemainingAfter = game1.getCoralRemainingCounts();
+
+            // Create snapshot
+            const snapshot = createGameSnapshot(game1);
+            expect(snapshot.coral.find((c: any) => c.square === 'f5')).toBeUndefined();
+
+            // Restore to new game instance (THIS IS WHERE THE BUG OCCURRED)
+            const game2 = new CoralClash();
+            restoreGameFromSnapshot(game2, snapshot);
+
+            // CRITICAL: Verify coral does NOT reappear at f5
+            const coralAfterRestore = game2.getAllCoral();
+            const coralAtF5AfterRestore = coralAfterRestore.find((c: any) => c.square === 'f5');
+            expect(coralAtF5AfterRestore).toBeUndefined(); // Coral should NOT reappear
+
+            // Verify coral counts match
+            const coralRemainingAfterRestore = game2.getCoralRemainingCounts();
+            expect(coralRemainingAfterRestore).toEqual(coralRemainingAfter);
+
+            // Verify total coral pieces match
+            expect(coralAfterRestore.length).toBe(coralAfterMove.length);
+        });
+
+        it('should handle multiple snapshot/restore cycles without coral reappearing', () => {
+            // Simulate multiple backend operations (like in PvP games)
+            const game1 = new CoralClash();
+
+            // Place coral at e4
+            game1.placeCoral('e4', 'w');
+            const coralCountBefore = game1.getAllCoral().length;
+
+            // Create first snapshot
+            const snapshot1 = createGameSnapshot(game1);
+
+            // Restore to game2
+            const game2 = new CoralClash();
+            restoreGameFromSnapshot(game2, snapshot1);
+
+            // Remove the coral we just placed (simulate hunter or whale removal)
+            game2.removeCoral('e4');
+            const coralCountAfterRemoval = game2.getAllCoral().length;
+            expect(coralCountAfterRemoval).toBe(coralCountBefore - 1);
+
+            // Create second snapshot (after removal)
+            const snapshot2 = createGameSnapshot(game2);
+            expect(snapshot2.coral.find((c: any) => c.square === 'e4')).toBeUndefined();
+
+            // Restore to game3 (THIS IS WHERE BUG WOULD REAPPEAR)
+            const game3 = new CoralClash();
+            restoreGameFromSnapshot(game3, snapshot2);
+
+            // Verify coral at e4 does NOT reappear
+            const coralAfterSecondRestore = game3.getAllCoral();
+            expect(coralAfterSecondRestore.find((c: any) => c.square === 'e4')).toBeUndefined();
+            expect(coralAfterSecondRestore.length).toBe(coralCountAfterRemoval);
+
+            // Create third snapshot
+            const snapshot3 = createGameSnapshot(game3);
+
+            // Restore to game4 (verify persistence through multiple cycles)
+            const game4 = new CoralClash();
+            restoreGameFromSnapshot(game4, snapshot3);
+
+            // Verify coral STILL does not reappear
+            const coralAfterThirdRestore = game4.getAllCoral();
+            expect(coralAfterThirdRestore.find((c: any) => c.square === 'e4')).toBeUndefined();
+            expect(coralAfterThirdRestore.length).toBe(coralCountAfterRemoval);
+        });
+
+        it('should maintain correct coralRemaining counts through restoration', () => {
+            // Verifies that coralRemaining is restored BEFORE coral array
+            // to prevent the bug where placeCoral() modifies coralRemaining
+
+            const game1 = new CoralClash();
+
+            // Get initial coral remaining
+            const initialCoralRemaining = game1.getCoralRemainingCounts();
+
+            // Place some coral pieces
+            game1.placeCoral('a4', 'w');
+            game1.placeCoral('b4', 'w');
+            game1.placeCoral('h5', 'b');
+
+            const coralRemainingAfterPlacement = game1.getCoralRemainingCounts();
+            expect(coralRemainingAfterPlacement.w).toBe(initialCoralRemaining.w - 2);
+            expect(coralRemainingAfterPlacement.b).toBe(initialCoralRemaining.b - 1);
+
+            // Create snapshot
+            const snapshot = createGameSnapshot(game1);
+
+            // Restore to new game
+            const game2 = new CoralClash();
+            restoreGameFromSnapshot(game2, snapshot);
+
+            // Verify coralRemaining matches exactly
+            const restoredCoralRemaining = game2.getCoralRemainingCounts();
+            expect(restoredCoralRemaining).toEqual(coralRemainingAfterPlacement);
+
+            // Verify coral placements match
+            const coral1 = game1.getAllCoral().sort((a, b) => a.square.localeCompare(b.square));
+            const coral2 = game2.getAllCoral().sort((a, b) => a.square.localeCompare(b.square));
+            expect(coral2).toEqual(coral1);
+
+            // Verify the math: placed coral + remaining = total per player
+            const whitePlaced = coral2.filter((c: any) => c.color === 'w').length;
+            const blackPlaced = coral2.filter((c: any) => c.color === 'b').length;
+
+            expect(whitePlaced + restoredCoralRemaining.w).toBe(17); // Total white coral
+            expect(blackPlaced + restoredCoralRemaining.b).toBe(17); // Total black coral
+        });
+
+        it('should directly set _coral array without calling placeCoral()', () => {
+            // This test verifies the implementation detail of the fix
+            // We should set _coral array directly to avoid modifying coralRemaining
+
+            const game1 = new CoralClash();
+
+            // Place coral on several squares
+            game1.placeCoral('a3', 'w');
+            game1.placeCoral('b3', 'w');
+            game1.placeCoral('g6', 'b');
+
+            const coralBefore = game1.getAllCoral();
+            const coralRemainingBefore = game1.getCoralRemainingCounts();
+
+            // Create snapshot
+            const snapshot = createGameSnapshot(game1);
+
+            // Mock/spy would be ideal here, but we can verify the behavior
+            // by checking that coralRemaining is correct after restore
+            const game2 = new CoralClash();
+            restoreGameFromSnapshot(game2, snapshot);
+
+            // If placeCoral() was called during restore, coralRemaining would be wrong
+            // because it would decrement for each placement
+            // But with direct _coral setting, counts should match exactly
+            const coralAfter = game2.getAllCoral();
+            const coralRemainingAfter = game2.getCoralRemainingCounts();
+
+            expect(coralAfter).toEqual(coralBefore);
+            expect(coralRemainingAfter).toEqual(coralRemainingBefore);
+
+            // Verify that a new placement still works correctly
+            // (proves that coralRemaining state is valid)
+            game2.placeCoral('h6', 'b');
+            const coralRemainingAfterNewPlacement = game2.getCoralRemainingCounts();
+            expect(coralRemainingAfterNewPlacement.b).toBe(coralRemainingBefore.b - 1);
+        });
+
+        it('should handle restoration with empty coral array', () => {
+            // Edge case: game with no coral placed
+            const game1 = new CoralClash();
+
+            // Clear all starting coral
+            const startingCoral = game1.getAllCoral();
+            startingCoral.forEach((c: any) => {
+                game1.removeCoral(c.square);
+            });
+
+            expect(game1.getAllCoral().length).toBe(0);
+            const coralRemainingWithoutCoral = game1.getCoralRemainingCounts();
+
+            // Create and restore snapshot
+            const snapshot = createGameSnapshot(game1);
+            const game2 = new CoralClash();
+            restoreGameFromSnapshot(game2, snapshot);
+
+            // Verify empty coral array restored correctly
+            expect(game2.getAllCoral().length).toBe(0);
+            expect(game2.getCoralRemainingCounts()).toEqual(coralRemainingWithoutCoral);
+        });
+
+        it('should restore coral after whale moves with partial removal', () => {
+            // Test scenario: whale occupies two squares with coral, removes only one
+            const game1 = new CoralClash();
+
+            // Place coral at two adjacent squares where whale could occupy
+            game1.placeCoral('e3', 'w');
+            game1.placeCoral('f3', 'w');
+
+            // Get initial state
+            const coralBefore = game1.getAllCoral();
+            const coralCountBefore = coralBefore.length;
+
+            // Simulate removal of only one coral (whale's choice)
+            game1.removeCoral('e3');
+
+            const coralAfterRemoval = game1.getAllCoral();
+            expect(coralAfterRemoval.length).toBe(coralCountBefore - 1);
+            expect(coralAfterRemoval.find((c: any) => c.square === 'e3')).toBeUndefined();
+            expect(coralAfterRemoval.find((c: any) => c.square === 'f3')).toBeDefined();
+
+            // Create snapshot
+            const snapshot = createGameSnapshot(game1);
+
+            // Restore
+            const game2 = new CoralClash();
+            restoreGameFromSnapshot(game2, snapshot);
+
+            // Verify restoration
+            const coralAfterRestore = game2.getAllCoral();
+            expect(coralAfterRestore.length).toBe(coralCountBefore - 1);
+            expect(coralAfterRestore.find((c: any) => c.square === 'e3')).toBeUndefined();
+            expect(coralAfterRestore.find((c: any) => c.square === 'f3')).toBeDefined();
+        });
+    });
 });

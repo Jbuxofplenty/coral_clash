@@ -19,6 +19,7 @@ const AnimatedPiece = ({ move, piece, size, boardFlipped, userColor, onComplete 
     const [currentPathIndex, setCurrentPathIndex] = useState(0);
     const positionAnim = useRef(new Animated.ValueXY()).current;
     const opacityAnim = useRef(new Animated.Value(1)).current;
+    const scaleAnim = useRef(new Animated.Value(1)).current;
 
     // Build the path: from square -> intermediate squares -> to square
     const buildPath = () => {
@@ -125,6 +126,10 @@ const AnimatedPiece = ({ move, piece, size, boardFlipped, userColor, onComplete 
         // Initial position setup
         if (currentPathIndex === 0) {
             positionAnim.setValue({ x: targetPos.x, y: targetPos.y });
+            // Start whales at full size (2 cells wide)
+            if (isWhale) {
+                scaleAnim.setValue(2);
+            }
             setCurrentPathIndex(1);
             return;
         }
@@ -137,9 +142,12 @@ const AnimatedPiece = ({ move, piece, size, boardFlipped, userColor, onComplete 
                 (path[0].charCodeAt(0) - path[1].charCodeAt(0)) *
                     (parseInt(path[0][1]) - parseInt(path[1][1])),
             ) === 2;
-        const duration = isKnightMove ? 200 : currentPathIndex === 1 ? 200 : 120;
+        const isFirstMove = currentPathIndex === 1;
+        const isLastSquare = currentPathIndex >= path.length - 1;
+        const duration = isKnightMove ? 200 : isFirstMove ? 200 : 120;
 
-        Animated.parallel([
+        // Build animation sequence
+        const animations = [
             Animated.timing(positionAnim, {
                 toValue: { x: targetPos.x, y: targetPos.y },
                 duration,
@@ -158,9 +166,33 @@ const AnimatedPiece = ({ move, piece, size, boardFlipped, userColor, onComplete 
                     useNativeDriver: true,
                 }),
             ]),
-        ]).start(() => {
+        ];
+
+        // Add scale animation for whales
+        if (isWhale) {
+            if (isFirstMove) {
+                // Shrink from 2 cells to 1 cell when starting movement
+                animations.push(
+                    Animated.timing(scaleAnim, {
+                        toValue: 1,
+                        duration,
+                        useNativeDriver: true,
+                    }),
+                );
+            } else if (isLastSquare) {
+                // Grow from 1 cell back to 2 cells when landing
+                animations.push(
+                    Animated.timing(scaleAnim, {
+                        toValue: 2,
+                        duration,
+                        useNativeDriver: true,
+                    }),
+                );
+            }
+        }
+
+        Animated.parallel(animations).start(() => {
             // Pause briefly on intermediate squares, no pause on final square
-            const isLastSquare = currentPathIndex >= path.length - 1;
             const pauseDuration = isLastSquare ? 0 : 80;
             setTimeout(() => {
                 setCurrentPathIndex(currentPathIndex + 1);
@@ -173,8 +205,10 @@ const AnimatedPiece = ({ move, piece, size, boardFlipped, userColor, onComplete 
         boardFlipped,
         positionAnim,
         opacityAnim,
+        scaleAnim,
         squareToPosition,
         onComplete,
+        isWhale,
     ]);
 
     if (!piece || path.length === 0) return null;
@@ -191,6 +225,12 @@ const AnimatedPiece = ({ move, piece, size, boardFlipped, userColor, onComplete 
 
     // Apply rotation and position adjustment for vertical whales
     const transform = [...positionAnim.getTranslateTransform()];
+    
+    // Apply scale for whales (must come before rotation)
+    if (isWhale) {
+        transform.push({ scaleX: scaleAnim });
+    }
+    
     if (isWhale && whaleOrientation === 'vertical') {
         // For vertical whales, we need to adjust position because rotation happens around center
         // When rotating 90° clockwise, the 2-wide becomes 2-tall, 1-tall becomes 1-wide

@@ -530,40 +530,96 @@ export function restoreGameFromSnapshot(coralClash: any, snapshot: any): void {
         }
     }
 
+    // Restore coral remaining counts FIRST (before placing coral)
+    // This ensures we have the correct counts when placing coral
+    if (snapshot.coralRemaining) {
+        coralClash._coralRemaining = { ...snapshot.coralRemaining };
+    }
+
     // Restore coral state
     // IMPORTANT: PGN doesn't encode coral choices (e.g., whether a gatherer placed coral)
     // So we ALWAYS need to restore coral from the snapshot to get the exact coral state
+    // Note: We directly set _coral to avoid decrementing coralRemaining (which was already restored above)
     if (snapshot.coral) {
-        console.log(
-            '[restoreGameFromSnapshot] Restoring coral - before clear, coral count:',
-            coralClash.getAllCoral().length,
-        );
-        console.log(
-            '[restoreGameFromSnapshot] Snapshot has coral placements:',
-            snapshot.coral.length,
-        );
+        const Ox88 = {
+            a8: 0x00,
+            b8: 0x01,
+            c8: 0x02,
+            d8: 0x03,
+            e8: 0x04,
+            f8: 0x05,
+            g8: 0x06,
+            h8: 0x07,
+            a7: 0x10,
+            b7: 0x11,
+            c7: 0x12,
+            d7: 0x13,
+            e7: 0x14,
+            f7: 0x15,
+            g7: 0x16,
+            h7: 0x17,
+            a6: 0x20,
+            b6: 0x21,
+            c6: 0x22,
+            d6: 0x23,
+            e6: 0x24,
+            f6: 0x25,
+            g6: 0x26,
+            h6: 0x27,
+            a5: 0x30,
+            b5: 0x31,
+            c5: 0x32,
+            d5: 0x33,
+            e5: 0x34,
+            f5: 0x35,
+            g5: 0x36,
+            h5: 0x37,
+            a4: 0x40,
+            b4: 0x41,
+            c4: 0x42,
+            d4: 0x43,
+            e4: 0x44,
+            f4: 0x45,
+            g4: 0x46,
+            h4: 0x47,
+            a3: 0x50,
+            b3: 0x51,
+            c3: 0x52,
+            d3: 0x53,
+            e3: 0x54,
+            f3: 0x55,
+            g3: 0x56,
+            h3: 0x57,
+            a2: 0x60,
+            b2: 0x61,
+            c2: 0x62,
+            d2: 0x63,
+            e2: 0x64,
+            f2: 0x65,
+            g2: 0x66,
+            h2: 0x67,
+            a1: 0x70,
+            b1: 0x71,
+            c1: 0x72,
+            d1: 0x73,
+            e1: 0x74,
+            f1: 0x75,
+            g1: 0x76,
+            h1: 0x77,
+        };
 
         // Clear existing coral (PGN replay might have placed coral incorrectly)
         coralClash._coral = new Array(128).fill(null);
 
         // Restore coral placements from snapshot (source of truth)
+        // IMPORTANT: Directly set _coral array instead of calling placeCoral()
+        // to avoid decrementing _coralRemaining (which was already restored above)
         snapshot.coral.forEach(({ square, color }: { square: any; color: any }) => {
-            coralClash.placeCoral(square, color);
+            const sq = (Ox88 as any)[square];
+            if (sq !== undefined) {
+                coralClash._coral[sq] = color;
+            }
         });
-
-        console.log(
-            '[restoreGameFromSnapshot] After restore, coral count:',
-            coralClash.getAllCoral().length,
-        );
-        console.log(
-            '[restoreGameFromSnapshot] Coral squares:',
-            coralClash.getAllCoral().map((c: any) => c.square),
-        );
-    }
-
-    // Restore coral remaining counts
-    if (snapshot.coralRemaining) {
-        coralClash._coralRemaining = { ...snapshot.coralRemaining };
     }
 
     // Restore piece roles (hunter/gatherer status)

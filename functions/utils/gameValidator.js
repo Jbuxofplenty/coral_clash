@@ -13,8 +13,6 @@ import {
  */
 function validateMove(gameState, move) {
     try {
-        console.log('[validateMove] Input move:', JSON.stringify(move, null, 2));
-
         // Create game instance and restore full state (including coral)
         const game = new CoralClash();
 
@@ -25,12 +23,8 @@ function validateMove(gameState, move) {
 
         restoreGameFromSnapshot(game, gameState);
 
-        console.log('[validateMove] Calling game.move with:', JSON.stringify(move, null, 2));
-
         // Try to make the move
         const result = game.move(move);
-
-        console.log('[validateMove] Move result:', JSON.stringify(result, null, 2));
 
         if (!result) {
             return {

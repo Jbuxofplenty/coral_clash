@@ -111,19 +111,6 @@ const BaseCoralClashBoard = ({
 
     // Callback for when game state updates from Firestore
     const handleStateUpdate = useCallback(() => {
-        console.log('[handleStateUpdate] Called - updating game state from Firestore');
-
-        // Log coral state after update
-        if (coralClash) {
-            const allCoral = coralClash.getAllCoral();
-            const coralRemaining = coralClash.getCoralRemainingCounts();
-            console.log('[handleStateUpdate] Coral state after update:', {
-                coralPieces: allCoral.length,
-                coralRemaining,
-                coralSquares: allCoral.map((c) => c.square),
-            });
-        }
-
         // Clear visible moves when game state updates from Firestore
         setVisibleMoves([]);
         setSelectedSquare(null);
@@ -1090,8 +1077,6 @@ const BaseCoralClashBoard = ({
 
     // Execute a move - for online games, use backend-first; for offline/local, apply locally
     const executeMove = async (moveParams) => {
-        console.log('[executeMove] Move params:', moveParams);
-
         // Clear visible moves immediately when making a move
         clearVisibleMoves();
 
@@ -1100,9 +1085,7 @@ const BaseCoralClashBoard = ({
 
         // Online game: backend-first approach
         if (isOnlineGame) {
-            console.log('[executeMove] Calling makeMoveAPI with:', moveParams);
             const result = await makeMoveAPI(moveParams);
-            console.log('[executeMove] makeMoveAPI result:', result);
             if (!result) return null;
 
             setHistoryIndex(null);
@@ -1114,9 +1097,7 @@ const BaseCoralClashBoard = ({
         }
 
         // Offline/local game: apply locally
-        console.log('[executeMove] Calling coralClash.move with:', moveParams);
         const moveResult = coralClash.move(moveParams);
-        console.log('[executeMove] Move result:', moveResult);
         if (!moveResult) return null;
 
         // Trigger animation for local moves
@@ -1302,7 +1283,6 @@ const BaseCoralClashBoard = ({
                         }
                     });
                     const coralOptions = Array.from(coralOptionsMap.values());
-                    console.log('[Coral Removal #1] Available options:', coralOptions);
 
                     const alertButtons = coralOptions.map((option) => {
                         let label = '';
@@ -1317,12 +1297,6 @@ const BaseCoralClashBoard = ({
                         return {
                             text: label,
                             onPress: async () => {
-                                console.log('[Coral Removal #1] Option selected:', {
-                                    from: option.move.from,
-                                    to: option.move.to,
-                                    whaleSecondSquare: option.move.whaleSecondSquare,
-                                    coralRemovedSquares: option.squares,
-                                });
                                 await executeMove({
                                     from: option.move.from,
                                     to: option.move.to,
@@ -1403,7 +1377,6 @@ const BaseCoralClashBoard = ({
                         }
                     });
                     const coralOptions = Array.from(coralOptionsMap.values());
-                    console.log('[Coral Removal #2] Available options:', coralOptions);
 
                     const alertButtons = coralOptions.map((option) => {
                         let label = '';
@@ -1418,12 +1391,6 @@ const BaseCoralClashBoard = ({
                         return {
                             text: label,
                             onPress: async () => {
-                                console.log('[Coral Removal #2] Option selected:', {
-                                    from: option.move.from,
-                                    to: option.move.to,
-                                    whaleSecondSquare: option.move.whaleSecondSquare,
-                                    coralRemovedSquares: option.squares,
-                                });
                                 await executeMove({
                                     from: option.move.from,
                                     to: option.move.to,
