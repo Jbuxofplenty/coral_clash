@@ -2,8 +2,9 @@
  * Tests for game ending conditions in Coral Clash
  */
 
-import { CoralClash, applyFixture } from '../index';
+import gameEndingFixture from '../__fixtures__/game-ending.json';
 import whaleAocFixture from '../__fixtures__/whale-aoc.json';
+import { CoralClash, applyFixture } from '../index';
 
 describe('Game Ending Conditions', () => {
     describe('Checkmate', () => {
@@ -125,42 +126,72 @@ describe('Game Ending Conditions', () => {
     describe('Coral Victory - Crab/Octopus Reaches Back Row', () => {
         it('should trigger coral scoring when white crab reaches rank 8', () => {
             const game = new CoralClash();
+            applyFixture(game, gameEndingFixture);
 
-            // Place a white crab on rank 8
-            game['_board'][0] = { type: 'c', color: 'w', role: 'hunter' }; // a8
+            expect(game.turn()).toBe('w');
+            expect(game.get('h7')).toMatchObject({ type: 'c', color: 'w' });
 
-            expect(game['_shouldTriggerCoralScoring']()).toBe(true);
+            // White crab moves from h7 to h8 (reaches black's back row)
+            const result = game.move({ from: 'h7', to: 'h8' });
+
+            expect(result).toBeTruthy();
+            expect(game.get('h8')).toMatchObject({ type: 'c', color: 'w' });
             expect(game.isGameOver()).toBe(true);
+            expect(game['_shouldTriggerCoralScoring']()).toBe(true);
         });
 
         it('should trigger coral scoring when black crab reaches rank 1', () => {
             const game = new CoralClash();
+            applyFixture(game, gameEndingFixture);
 
-            // Place a black crab on rank 1
-            game['_board'][112] = { type: 'c', color: 'b', role: 'hunter' }; // a1
+            expect(game.turn()).toBe('w');
+            expect(game.get('a2')).toMatchObject({ type: 'c', color: 'b' });
 
-            expect(game['_shouldTriggerCoralScoring']()).toBe(true);
+            // White makes a non-interfering move
+            game.move({ from: 'c2', to: 'c3' });
+
+            // Black crab moves from a2 to a1 (reaches white's back row)
+            const result = game.move({ from: 'a2', to: 'a1' });
+
+            expect(result).toBeTruthy();
+            expect(game.get('a1')).toMatchObject({ type: 'c', color: 'b' });
             expect(game.isGameOver()).toBe(true);
+            expect(game['_shouldTriggerCoralScoring']()).toBe(true);
         });
 
         it('should trigger coral scoring when white octopus reaches rank 8', () => {
             const game = new CoralClash();
+            applyFixture(game, gameEndingFixture);
 
-            // Place a white octopus on rank 8
-            game['_board'][0] = { type: 'o', color: 'w', role: 'hunter' }; // a8
+            expect(game.turn()).toBe('w');
+            expect(game.get('g7')).toMatchObject({ type: 'o', color: 'w' });
 
-            expect(game['_shouldTriggerCoralScoring']()).toBe(true);
+            // White octopus moves from g7 to h8 (diagonal, reaches black's back row)
+            const result = game.move({ from: 'g7', to: 'h8' });
+
+            expect(result).toBeTruthy();
+            expect(game.get('h8')).toMatchObject({ type: 'o', color: 'w' });
             expect(game.isGameOver()).toBe(true);
+            expect(game['_shouldTriggerCoralScoring']()).toBe(true);
         });
 
         it('should trigger coral scoring when black octopus reaches rank 1', () => {
             const game = new CoralClash();
+            applyFixture(game, gameEndingFixture);
 
-            // Place a black octopus on rank 1
-            game['_board'][112] = { type: 'o', color: 'b', role: 'hunter' }; // a1
+            expect(game.turn()).toBe('w');
+            expect(game.get('b2')).toMatchObject({ type: 'o', color: 'b' });
 
-            expect(game['_shouldTriggerCoralScoring']()).toBe(true);
+            // White makes a non-interfering move
+            game.move({ from: 'd3', to: 'c4' });
+
+            // Black octopus moves from b2 to a1 (diagonal, reaches white's back row)
+            const result = game.move({ from: 'b2', to: 'a1' });
+
+            expect(result).toBeTruthy();
+            expect(game.get('a1')).toMatchObject({ type: 'o', color: 'b' });
             expect(game.isGameOver()).toBe(true);
+            expect(game['_shouldTriggerCoralScoring']()).toBe(true);
         });
     });
 
@@ -226,12 +257,18 @@ describe('Game Ending Conditions', () => {
 
             // Verify coral setup
             const allCoral = game.getAllCoral();
-            const whiteCoral = allCoral.filter(c => c.color === 'w');
-            const blackCoral = allCoral.filter(c => c.color === 'b');
+            const whiteCoral = allCoral.filter((c) => c.color === 'w');
+            const blackCoral = allCoral.filter((c) => c.color === 'b');
 
             console.log('\n=== Whale AOC Debug ===');
-            console.log('White coral squares:', whiteCoral.map(c => c.square));
-            console.log('Black coral squares:', blackCoral.map(c => c.square));
+            console.log(
+                'White coral squares:',
+                whiteCoral.map((c) => c.square),
+            );
+            console.log(
+                'Black coral squares:',
+                blackCoral.map((c) => c.square),
+            );
             console.log('White whale positions:', whalePos.w);
             console.log('Black whale positions:', whalePos.b);
 

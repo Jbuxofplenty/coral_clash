@@ -12,6 +12,7 @@ const Pieces = ({
     boardFlipped = null,
     isProcessing = false,
     animatingSquare = null,
+    capturedPiece = null,
 }) => {
     const { isBoardFlipped: contextBoardFlipped } = useGamePreferences();
     // Use provided boardFlipped if available, otherwise use context value
@@ -206,6 +207,43 @@ const Pieces = ({
             );
         }
     });
+
+    // Render captured piece if it exists (during animation)
+    if (capturedPiece) {
+        const { square, type, color, role } = capturedPiece;
+        const [file, rank] = square.split('');
+        const fileIndex = file.charCodeAt(0) - 'a'.charCodeAt(0);
+        const left = isBoardFlipped ? (7 - fileIndex) * cellSize : fileIndex * cellSize;
+        const bottom = isBoardFlipped ? (8 - parseInt(rank)) * cellSize : (rank - 1) * cellSize;
+
+        // Determine if piece should have coral decoration
+        const hasCoral = role === 'gatherer';
+
+        // Determine display color (same logic as regular pieces)
+        const isUserPiece = userColor ? color === userColor : color === 'w';
+        const displayColor = isUserPiece ? 'W' : 'B';
+
+        const pieceKey = hasCoral
+            ? `${displayColor}${type.toUpperCase()}C`
+            : `${displayColor}${type.toUpperCase()}`;
+
+        // Render the captured piece (non-interactive)
+        elements.push(
+            <Image
+                key={`captured-piece-${square}`}
+                style={{
+                    position: 'absolute',
+                    width: cellSize,
+                    height: cellSize,
+                    left,
+                    bottom,
+                    opacity: isProcessing ? 0.5 : 1,
+                }}
+                source={PieceImages[pieceKey]}
+                resizeMode='contain'
+            />,
+        );
+    }
 
     return elements;
 };

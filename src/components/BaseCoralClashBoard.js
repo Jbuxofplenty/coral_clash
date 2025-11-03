@@ -105,6 +105,7 @@ const BaseCoralClashBoard = ({
     // Animation state
     const [animatingMove, setAnimatingMove] = useState(null);
     const [animatingPiece, setAnimatingPiece] = useState(null);
+    const [capturedPiece, setCapturedPiece] = useState(null); // Track captured piece during animation
     const lastAnimatedMoveRef = useRef(null);
 
     // Skip whale animations - clear immediately
@@ -112,6 +113,7 @@ const BaseCoralClashBoard = ({
         if (animatingPiece && animatingPiece.type === WHALE) {
             setAnimatingMove(null);
             setAnimatingPiece(null);
+            setCapturedPiece(null);
             forceUpdate((n) => n + 1);
         }
     }, [animatingPiece]);
@@ -159,6 +161,7 @@ const BaseCoralClashBoard = ({
                     // Game was reset - clear animations and reset tracking
                     setAnimatingMove(null);
                     setAnimatingPiece(null);
+                    setCapturedPiece(null);
                     lastAnimatedMoveRef.current = null;
                 } else if (history.length > 0) {
                     const lastMove = history[history.length - 1];
@@ -174,6 +177,21 @@ const BaseCoralClashBoard = ({
                             color: lastMove.color,
                             role: lastMove.role,
                         };
+
+                        // If there was a capture, save the captured piece data
+                        if (lastMove.captured) {
+                            // Determine the square where the piece was captured
+                            // For regular pieces, it's the 'to' square
+                            // The captured piece color is opposite of the moving piece
+                            const capturedColor = lastMove.color === 'w' ? 'b' : 'w';
+                            setCapturedPiece({
+                                type: lastMove.captured,
+                                color: capturedColor,
+                                square: lastMove.to,
+                            });
+                        } else {
+                            setCapturedPiece(null);
+                        }
 
                         setAnimatingPiece(piece);
                         setAnimatingMove(lastMove);
@@ -611,6 +629,10 @@ const BaseCoralClashBoard = ({
                 to: moveToAnimate.from,
                 whaleSecondSquare: reverseWhaleSecondSquare,
             });
+
+            // For backward animation (undo-like), captured piece reappears on board
+            // so we don't need to render it separately
+            setCapturedPiece(null);
         }
     };
 
@@ -650,6 +672,19 @@ const BaseCoralClashBoard = ({
                 color: moveToAnimate.color,
                 role: moveToAnimate.role,
             });
+
+            // If the move was a capture, show the captured piece during animation
+            if (moveToAnimate.captured) {
+                const capturedColor = moveToAnimate.color === 'w' ? 'b' : 'w';
+                setCapturedPiece({
+                    type: moveToAnimate.captured,
+                    color: capturedColor,
+                    square: moveToAnimate.to,
+                });
+            } else {
+                setCapturedPiece(null);
+            }
+
             setAnimatingMove(moveToAnimate);
         }
     };
@@ -1014,6 +1049,10 @@ const BaseCoralClashBoard = ({
                     to: lastMove.from,
                     whaleSecondSquare: reverseWhaleSecondSquare,
                 });
+
+                // For undo animation, captured piece reappears on board
+                // so we don't need to render it separately
+                setCapturedPiece(null);
             }
 
             onUndo(coralClash);
@@ -1121,6 +1160,8 @@ const BaseCoralClashBoard = ({
 
         // Capture piece info before making the move for animation
         const pieceBeforeMove = coralClash.get(moveParams.from);
+        // Also capture the piece at the destination (if any) for capture animation
+        const pieceAtDestination = coralClash.get(moveParams.to);
 
         // Online game: backend-first approach
         if (isOnlineGame) {
@@ -1161,6 +1202,19 @@ const BaseCoralClashBoard = ({
                 color: pieceBeforeMove.color,
                 role: pieceBeforeMove.role,
             });
+
+            // If there was a capture, save the captured piece for rendering during animation
+            if (pieceAtDestination) {
+                setCapturedPiece({
+                    type: pieceAtDestination.type,
+                    color: pieceAtDestination.color,
+                    square: moveParams.to,
+                    role: pieceAtDestination.role,
+                });
+            } else {
+                setCapturedPiece(null);
+            }
+
             setAnimatingMove(lastMove);
         }
 
@@ -1773,6 +1827,7 @@ const BaseCoralClashBoard = ({
                             boardFlipped={isBoardFlipped}
                             isProcessing={isGameActionProcessing}
                             animatingSquare={animatingMove?.to}
+                            capturedPiece={capturedPiece}
                         />
                         <Moves
                             visibleMoves={visibleMoves}
@@ -1794,6 +1849,7 @@ const BaseCoralClashBoard = ({
                                 onComplete={() => {
                                     setAnimatingMove(null);
                                     setAnimatingPiece(null);
+                                    setCapturedPiece(null);
                                     forceUpdate((n) => n + 1);
                                 }}
                             />

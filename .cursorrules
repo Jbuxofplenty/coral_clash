@@ -35,6 +35,15 @@
 - Keep functions focused and single-purpose
 - Always add tests for BE related code (not react components atm)
 
+## Testing
+
+- **ALWAYS** load a fixture or use INITIAL_STATE when writing tests for game logic
+- Never test with an empty board state unless explicitly testing initialization
+- Use `applyFixture(game, fixture)` for complex game states
+- Use `game.load(fen)` for simple board setups
+- Create fixtures in `shared/game/__fixtures__/` for reusable test scenarios
+- All tests must pass before committing - remove or fix failing tests
+
 ## Documentation
 
 - Update relevant documentation when making significant changes

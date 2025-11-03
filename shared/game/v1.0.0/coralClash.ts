@@ -1089,6 +1089,7 @@ export class CoralClash {
             }
 
             const piece = this._board[i];
+
             const difference = i - square;
 
             // skip - to/from square are the same
@@ -1160,6 +1161,161 @@ export class CoralClash {
         return false;
     }
 
+    /**
+     * Check if a whale can attack a specific square.
+     * This is separate from _attacked to handle whale's 2-square nature cleanly.
+     *
+     * @param whaleColor - The color of the whale doing the attacking
+     * @param targetSquare - The square to check if whale can attack
+     * @returns true if the whale can attack the target square
+     */
+    private _whaleAttacked(whaleColor: Color, targetSquare: number): boolean {
+        const [whaleFirst, whaleSecond] = this._kings[whaleColor];
+        const whaleSquares = [whaleFirst, whaleSecond];
+
+        const DEBUG = false; // Set to true to enable debug logging
+        if (DEBUG) {
+            console.log(
+                `\n[_whaleAttacked] Checking if ${whaleColor} whale at [${algebraic(whaleFirst)},${algebraic(whaleSecond)}] can attack ${algebraic(targetSquare)}`,
+            );
+        }
+
+        // Helper to check if two squares are orthogonally adjacent
+        const areAdjacent = (sq1: number, sq2: number): boolean => {
+            const fileDiff = Math.abs((sq1 & 0xf) - (sq2 & 0xf));
+            const rankDiff = Math.abs((sq1 >> 4) - (sq2 >> 4));
+            return (fileDiff === 1 && rankDiff === 0) || (fileDiff === 0 && rankDiff === 1);
+        };
+
+        // Check if whale can reach targetSquare with a valid move
+        // We need to check both single-half sliding and parallel sliding
+
+        // Try sliding from first half
+        for (const offset of [-17, -16, -15, 1, 17, 16, 15, -1]) {
+            let currentSq = whaleFirst + offset;
+            let steps = 0;
+
+            while ((currentSq & 0x88) === 0) {
+                steps++;
+
+                if (currentSq === targetSquare) {
+                    if (DEBUG) {
+                        console.log(
+                            `  [first half] Found path from ${algebraic(whaleFirst)} to ${algebraic(targetSquare)} with offset ${offset}, steps ${steps}`,
+                        );
+                    }
+                    // Check if this creates a valid whale position
+                    // Option 1: Single-half slide (first half moves, second stays)
+                    if (areAdjacent(targetSquare, whaleSecond)) {
+                        if (DEBUG) {
+                            console.log(
+                                `    ✓ Single-half slide valid: ${algebraic(targetSquare)} adjacent to ${algebraic(whaleSecond)}`,
+                            );
+                        }
+                        return true;
+                    }
+
+                    // Option 2: Parallel slide (both halves move same direction)
+                    const newSecondSq = whaleSecond + offset * steps;
+                    if ((newSecondSq & 0x88) === 0 && areAdjacent(targetSquare, newSecondSq)) {
+                        if (DEBUG) {
+                            console.log(
+                                `    ✓ Parallel slide valid: ${algebraic(targetSquare)} adjacent to ${algebraic(newSecondSq)}`,
+                            );
+                        }
+                        return true;
+                    }
+                    if (DEBUG) {
+                        console.log(
+                            `    ✗ No valid whale position: ${algebraic(targetSquare)} not adjacent to ${algebraic(whaleSecond)} (single) or ${algebraic(newSecondSq)} (parallel)`,
+                        );
+                    }
+                }
+
+                const isOwnWhaleSquare = whaleSquares.includes(currentSq);
+                if (this._isSquareOccupied(currentSq) && !isOwnWhaleSquare) {
+                    if (DEBUG && currentSq !== targetSquare) {
+                        console.log(`  [first half] Blocked at ${algebraic(currentSq)} by piece`);
+                    }
+                    break;
+                }
+                if (this._coral[currentSq] && !isOwnWhaleSquare) {
+                    if (DEBUG && currentSq !== targetSquare) {
+                        console.log(`  [first half] Blocked at ${algebraic(currentSq)} by coral`);
+                    }
+                    break;
+                }
+
+                currentSq += offset;
+            }
+        }
+
+        // Try sliding from second half
+        for (const offset of [-17, -16, -15, 1, 17, 16, 15, -1]) {
+            let currentSq = whaleSecond + offset;
+            let steps = 0;
+
+            while ((currentSq & 0x88) === 0) {
+                steps++;
+
+                if (currentSq === targetSquare) {
+                    if (DEBUG) {
+                        console.log(
+                            `  [second half] Found path from ${algebraic(whaleSecond)} to ${algebraic(targetSquare)} with offset ${offset}, steps ${steps}`,
+                        );
+                    }
+                    // Check if this creates a valid whale position
+                    // Option 1: Single-half slide (second half moves, first stays)
+                    if (areAdjacent(targetSquare, whaleFirst)) {
+                        if (DEBUG) {
+                            console.log(
+                                `    ✓ Single-half slide valid: ${algebraic(targetSquare)} adjacent to ${algebraic(whaleFirst)}`,
+                            );
+                        }
+                        return true;
+                    }
+
+                    // Option 2: Parallel slide (both halves move same direction)
+                    const newFirstSq = whaleFirst + offset * steps;
+                    if ((newFirstSq & 0x88) === 0 && areAdjacent(newFirstSq, targetSquare)) {
+                        if (DEBUG) {
+                            console.log(
+                                `    ✓ Parallel slide valid: ${algebraic(newFirstSq)} adjacent to ${algebraic(targetSquare)}`,
+                            );
+                        }
+                        return true;
+                    }
+                    if (DEBUG) {
+                        console.log(
+                            `    ✗ No valid whale position: ${algebraic(targetSquare)} not adjacent to ${algebraic(whaleFirst)} (single) or ${algebraic(newFirstSq)} (parallel)`,
+                        );
+                    }
+                }
+
+                const isOwnWhaleSquare = whaleSquares.includes(currentSq);
+                if (this._isSquareOccupied(currentSq) && !isOwnWhaleSquare) {
+                    if (DEBUG && currentSq !== targetSquare) {
+                        console.log(`  [second half] Blocked at ${algebraic(currentSq)} by piece`);
+                    }
+                    break;
+                }
+                if (this._coral[currentSq] && !isOwnWhaleSquare) {
+                    if (DEBUG && currentSq !== targetSquare) {
+                        console.log(`  [second half] Blocked at ${algebraic(currentSq)} by coral`);
+                    }
+                    break;
+                }
+
+                currentSq += offset;
+            }
+        }
+
+        if (DEBUG) {
+            console.log(`  ✗ Cannot attack ${algebraic(targetSquare)}`);
+        }
+        return false;
+    }
+
     private _isKingAttacked(color: Color) {
         // Whale occupies 2 squares - it's in check if EITHER square is attacked
         const [firstSquare, secondSquare] = this._kings[color];
@@ -1168,11 +1324,15 @@ export class CoralClash {
 
         const attackingColor = swapColor(color);
 
-        // Check if first square is attacked
+        // Check if first square is attacked by regular pieces
         if (this._attacked(attackingColor, firstSquare)) return true;
 
-        // Check if second square is attacked
+        // Check if second square is attacked by regular pieces
         if (secondSquare !== -1 && this._attacked(attackingColor, secondSquare)) return true;
+
+        // Also check if attacked by enemy whale (validates proper whale moves)
+        if (this._whaleAttacked(attackingColor, firstSquare)) return true;
+        if (secondSquare !== -1 && this._whaleAttacked(attackingColor, secondSquare)) return true;
 
         return false;
     }
@@ -1523,6 +1683,13 @@ export class CoralClash {
         color: Color,
         them: Color,
     ) {
+        const DEBUG = false; // Set to true to enable debug logging
+        if (DEBUG) {
+            console.log(
+                `\n[_generateWhaleMoves] Generating moves for ${color} whale at [${algebraic(firstSq)},${algebraic(secondSq)}]`,
+            );
+        }
+
         // For single-half sliding (TYPE 1 & 2), only orthogonal directions work
         // (diagonal sliding of one half can't maintain orthogonal adjacency with stationary half)
         const slideOffsets = [-16, 1, 16, -1]; // up, right, down, left
@@ -1537,6 +1704,8 @@ export class CoralClash {
             capturedRole?: PieceRole,
             captureSquare?: number, // Which square had the captured piece (for proper undo)
         ) => {
+            // Note: We don't need to check for check here - the standard legal move
+            // filtering in _moves() will handle it by checking _isKingAttacked after the move
             const flags = captured ? BITS.CAPTURE : BITS.NORMAL;
 
             // Check if whale will land on coral (whale is a hunter piece, can remove coral)
@@ -1901,22 +2070,52 @@ export class CoralClash {
 
         // Rotate SECOND half around FIRST half (first stays fixed)
         // Try all squares adjacent to firstSq (the stationary half)
+        if (DEBUG) {
+            console.log(
+                `  [TYPE 4b] Rotating SECOND half (${algebraic(secondSq)}) around FIRST half (${algebraic(firstSq)})`,
+            );
+        }
         for (const offset of orthogonalOffsets) {
             const to = firstSq + offset; // Square adjacent to stationary half
-            if (to & 0x88) continue; // Off board
-            if (to === secondSq) continue; // Already occupied by the moving half
+            if (to & 0x88) {
+                if (DEBUG) console.log(`    ${algebraic(to)}: off board`);
+                continue; // Off board
+            }
+            if (to === secondSq) {
+                if (DEBUG) console.log(`    ${algebraic(to)}: already occupied by moving half`);
+                continue; // Already occupied by the moving half
+            }
+
+            if (DEBUG) {
+                console.log(
+                    `    Checking ${algebraic(to)}: occupied=${this._isSquareOccupied(to)}, occupiedByThem=${this._isSquareOccupied(to, them)}`,
+                );
+            }
 
             // The result is always valid: 'to' is adjacent to firstSq by construction
             // (we're iterating through orthogonal offsets from firstSq)
 
             // Check if square is empty or capturable
             if (!this._isSquareOccupied(to)) {
+                if (DEBUG)
+                    console.log(
+                        `      ✓ Adding rotation move ${algebraic(secondSq)} -> ${algebraic(to)}, other stays at ${algebraic(firstSq)}`,
+                    );
                 addWhaleMove(secondSq, to, firstSq);
             } else if (this._isSquareOccupied(to, them)) {
                 const capturedType = this._board[to]?.type || WHALE;
                 const capturedRole = this._board[to]?.role;
+                if (DEBUG)
+                    console.log(
+                        `      ✓ Adding rotation capture move ${algebraic(secondSq)} -> ${algebraic(to)}, other stays at ${algebraic(firstSq)}`,
+                    );
                 addWhaleMove(secondSq, to, firstSq, capturedType, capturedRole, to);
+            } else {
+                if (DEBUG) console.log(`      ✗ Blocked by own piece`);
             }
+        }
+        if (DEBUG) {
+            console.log(`  [_generateWhaleMoves] Total moves generated: ${moves.length}`);
         }
     }
 
@@ -3666,12 +3865,12 @@ export class CoralClash {
             // Count coral of this color that isn't occupied by opponent
             if (this._coral[i] === color) {
                 const piece = this._board[i];
-                
+
                 // Check if this square is occupied by opponent's whale (either position)
                 const isOpponentWhaleFirst = this._kings[opponent][0] === i;
                 const isOpponentWhaleSecond = this._kings[opponent][1] === i;
                 const isOpponentWhale = isOpponentWhaleFirst || isOpponentWhaleSecond;
-                
+
                 // Count if: no piece on square AND not occupied by opponent whale's second position
                 // OR piece exists but is not opponent's
                 if (!isOpponentWhale && (!piece || piece.color !== opponent)) {
