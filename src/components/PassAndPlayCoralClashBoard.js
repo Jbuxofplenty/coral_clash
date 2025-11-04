@@ -25,7 +25,7 @@ const formatDisplayName = (displayName, discriminator) => {
  * PassAndPlayCoralClashBoard - Board for local pass-and-play games
  * Extends BaseCoralClashBoard with:
  * - Single-move undo functionality
- * - Automatic board flipping after each move
+ * - Automatic board flipping after each move (after animation completes)
  * - No approval needed for actions (undo, reset, resign)
  * - Local multiplayer between two players on the same device
  */
@@ -53,7 +53,7 @@ const PassAndPlayCoralClashBoard = ({
         return false; // New game starts with white (not flipped)
     });
 
-    // Handle move completion - save state and flip board after each move
+    // Handle move completion - save state and flip board after animation completes
     const handleMoveComplete = async (result, _move) => {
         // Save or delete game state from local storage
         if (gameId && gameId.startsWith('local_')) {
@@ -68,9 +68,12 @@ const PassAndPlayCoralClashBoard = ({
             }
         }
 
-        // Flip board for next player's turn
+        // Flip board for next player's turn after animation completes
+        // Wait for animation to finish (typical animations are 200-400ms)
         if (!result.gameOver) {
-            setIsBoardFlipped((prev) => !prev);
+            setTimeout(() => {
+                setIsBoardFlipped((prev) => !prev);
+            }, 500);
         }
     };
 
@@ -200,12 +203,16 @@ const PassAndPlayCoralClashBoard = ({
         );
     };
 
-    // Undo single move and flip board back
+    // Undo single move and flip board back after animation
     const handleUndo = async (coralClash) => {
         if (!coralClash) return;
 
         coralClash.undo();
-        setIsBoardFlipped((prev) => !prev);
+
+        // Flip board back after undo animation completes
+        setTimeout(() => {
+            setIsBoardFlipped((prev) => !prev);
+        }, 500);
     };
 
     // Handle resign - delete game from storage
