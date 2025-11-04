@@ -67,7 +67,6 @@ export const useGameActions = (coralClash, gameId, onStateUpdate) => {
 
                     // Apply the updated game state to the CoralClash instance
                     if (data.gameState && coralClash) {
-                        console.log('[useGameActions] Calling restoreGameFromSnapshot');
                         restoreGameFromSnapshot(coralClash, data.gameState);
 
                         // Only call onStateUpdate if component is still mounted

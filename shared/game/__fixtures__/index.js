@@ -12,6 +12,14 @@ import crabEndOfBoard from './crab-end-of-board.json';
 import crabMovement from './crab-movement.json';
 import multipleChecks from './multiple-checks.json';
 import octopusCheck from './octopus-check.json';
+import whaleCheck2 from './whale-check-2.json';
+import whaleCheck3 from './whale-check-3.json';
+import whaleCheck4 from './whale-check-4.json';
+import whaleCheck5 from './whale-check-5.json';
+import whaleCheck6 from './whale-check-6.json';
+import whaleCheck7 from './whale-check-7.json';
+import whaleCheck8 from './whale-check-8.json';
+import whaleCheck from './whale-check.json';
 import whaleDoubleJeopardy2 from './whale-double-jeopardy-2.json';
 import whaleDoubleJeopardy from './whale-double-jeopardy.json';
 import whaleMoveDigonally2 from './whale-move-diagonally-2.json';
@@ -32,6 +40,14 @@ export {
     crabMovement,
     multipleChecks,
     octopusCheck,
+    whaleCheck,
+    whaleCheck2,
+    whaleCheck3,
+    whaleCheck4,
+    whaleCheck5,
+    whaleCheck6,
+    whaleCheck7,
+    whaleCheck8,
     whaleDoubleJeopardy,
     whaleDoubleJeopardy2,
     whaleMoveDigonally,
@@ -61,4 +77,12 @@ export const FIXTURES = {
     'crab-movement': crabMovement,
     'crab-check': crabCheck,
     'check-non-turn': checkNonTurn,
+    'whale-check': whaleCheck,
+    'whale-check-2': whaleCheck2,
+    'whale-check-3': whaleCheck3,
+    'whale-check-4': whaleCheck4,
+    'whale-check-5': whaleCheck5,
+    'whale-check-6': whaleCheck6,
+    'whale-check-7': whaleCheck7,
+    'whale-check-8': whaleCheck8,
 };

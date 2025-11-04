@@ -679,6 +679,28 @@ export class CoralClash {
     // tracks number of times a position has been seen for repetition checking
     private _positionCount: Record<string, number> = {};
 
+    // Cache for whale attack moves (for performance during check validation)
+    // Key: "color_firstSquare_secondSquare" (e.g., "w_68_84")
+    // Value: array of pseudo-legal moves with whale captures allowed
+    private _whaleAttackMovesCache: Map<string, InternalMove[]> = new Map();
+
+    // Cache for whale attack validation results (for even better performance)
+    // Key: "color_firstSquare_secondSquare_targetSquare" (e.g., "w_68_84_100")
+    // Value: boolean (can whale legally attack the target square?)
+    private _whaleAttackResultCache: Map<string, boolean> = new Map();
+
+    // Track validation depth to avoid clearing caches during temporary validation moves
+    private _validationDepth = 0;
+
+    // Performance tracking (debug only)
+    private _perfStats = {
+        canWhaleLegallyAttackCalls: 0,
+        cacheHits: 0,
+        cacheMisses: 0,
+        movesGenerated: 0,
+        makeUndoCycles: 0,
+    };
+
     constructor(fen = DEFAULT_POSITION) {
         this.load(fen);
     }
@@ -720,6 +742,10 @@ export class CoralClash {
         this._coral = new Array<Color | null>(128);
         this._coralRemaining = { w: 17, b: 17 };
         this._resigned = null;
+
+        // Clear whale attack caches
+        this._whaleAttackMovesCache.clear();
+        this._whaleAttackResultCache.clear();
 
         /*
          * Delete the SetUp and FEN headers (if preserved), the board is empty and
@@ -1090,6 +1116,12 @@ export class CoralClash {
 
             const piece = this._board[i];
 
+            // Skip whale attacks - those are checked separately via _whaleAttacked
+            // This prevents infinite recursion in legal whale attack validation
+            if (piece.type === WHALE) {
+                continue;
+            }
+
             const difference = i - square;
 
             // skip - to/from square are the same
@@ -1119,35 +1151,22 @@ export class CoralClash {
                     continue;
                 }
 
-                // For sliding pieces (turtle, pufferfish, dolphin, whale),
+                // For sliding pieces (turtle, pufferfish, dolphin),
                 // check if there are blocking pieces in the path
                 const offset = RAYS[index];
                 let j = i + offset;
 
-                // For whales, get both squares it occupies to exclude coral at its own positions
-                let whaleSquares: number[] = [];
-                if (piece.type === WHALE) {
-                    const [first, second] = this._kings[color];
-                    whaleSquares = [first, second];
-                }
-
                 let blocked = false;
                 while (j !== square) {
-                    // Check if square is occupied (including whale's second square)
+                    // Check if square is occupied
                     if (this._isSquareOccupied(j)) {
                         blocked = true;
                         break;
                     }
                     // Hunter pieces are blocked by coral
-                    // IMPORTANT: Exclude coral at the attacker's own squares (for whales on coral)
                     if (piece.role === 'hunter' && this._coral[j]) {
-                        // Don't block on coral at whale's own position
-                        if (piece.type === WHALE && whaleSquares.includes(j)) {
-                            // This is coral at the whale's current position, don't block
-                        } else {
-                            blocked = true;
-                            break;
-                        }
+                        blocked = true;
+                        break;
                     }
                     j += offset;
                 }
@@ -1162,23 +1181,125 @@ export class CoralClash {
     }
 
     /**
+     * Check if a whale can LEGALLY attack a specific square.
+     * "Legal" means the attack wouldn't leave the attacking whale in check.
+     * This implements mutual check validation.
+     *
+     * @param whaleColor - The color of the whale doing the attacking
+     * @param targetSquare - The square to check if whale can attack
+     * @returns true if the whale can legally attack the target square
+     */
+    private _canWhaleLegallyAttack(whaleColor: Color, targetSquare: number): boolean {
+        this._perfStats.canWhaleLegallyAttackCalls++;
+
+        const [whaleFirst, whaleSecond] = this._kings[whaleColor];
+
+        // Check result cache first - this avoids ALL expensive operations
+        const resultCacheKey = `${whaleColor}_${whaleFirst}_${whaleSecond}_${targetSquare}`;
+        const cachedResult = this._whaleAttackResultCache.get(resultCacheKey);
+        if (cachedResult !== undefined) {
+            this._perfStats.cacheHits++;
+            return cachedResult;
+        }
+
+        this._perfStats.cacheMisses++;
+
+        // Check moves cache
+        const movesCacheKey = `${whaleColor}_${whaleFirst}_${whaleSecond}`;
+        let moves = this._whaleAttackMovesCache.get(movesCacheKey);
+
+        if (!moves) {
+            // Generate all pseudo-legal moves for the attacking whale
+            // Allow whale captures for attack validation purposes
+            moves = [];
+            const them = swapColor(whaleColor);
+            this._generateWhaleMoves(moves, whaleFirst, whaleSecond, whaleColor, them, true);
+            this._perfStats.movesGenerated += moves.length;
+
+            // Cache the moves
+            this._whaleAttackMovesCache.set(movesCacheKey, moves);
+        }
+
+        // Check if any move reaches the target square without leaving attacker in check
+        const targetAlg = algebraic(targetSquare);
+        const them = swapColor(whaleColor);
+
+        for (const move of moves) {
+            const toAlg = algebraic(move.to);
+            const otherAlg = algebraic(move.whaleOtherSquare!);
+
+            // Does this move reach the target square?
+            if (toAlg === targetAlg || otherAlg === targetAlg) {
+                this._perfStats.makeUndoCycles++;
+                // Make the move and check if it leaves the attacker in check
+                // We only check non-whale attacks to avoid infinite recursion
+                // Mark that we're in validation context so caches aren't cleared
+                this._validationDepth++;
+                this._makeMove(move);
+                const [firstSquare, secondSquare] = this._kings[whaleColor];
+                let attackerInCheck = false;
+
+                // Check if attacked by regular pieces (non-whale)
+                if (this._attacked(them, firstSquare)) {
+                    attackerInCheck = true;
+                } else if (secondSquare !== -1 && this._attacked(them, secondSquare)) {
+                    attackerInCheck = true;
+                }
+
+                this._undoMove();
+                this._validationDepth--;
+
+                if (!attackerInCheck) {
+                    // Found a legal move that attacks the target square
+                    // Cache this positive result
+                    this._whaleAttackResultCache.set(resultCacheKey, true);
+                    return true;
+                }
+            }
+        }
+
+        // No legal move found that attacks the target square
+        // Cache this negative result
+        this._whaleAttackResultCache.set(resultCacheKey, false);
+        return false;
+    }
+
+    /**
      * Check if a whale can attack a specific square.
-     * This is separate from _attacked to handle whale's 2-square nature cleanly.
+     * Uses legal whale attack validation (mutual check validation).
      *
      * @param whaleColor - The color of the whale doing the attacking
      * @param targetSquare - The square to check if whale can attack
      * @returns true if the whale can attack the target square
      */
     private _whaleAttacked(whaleColor: Color, targetSquare: number): boolean {
+        return this._canWhaleLegallyAttack(whaleColor, targetSquare);
+    }
+
+    /**
+     * Get and reset performance statistics (for debugging)
+     */
+    getPerfStats() {
+        const stats = { ...this._perfStats };
+        // Reset stats
+        this._perfStats = {
+            canWhaleLegallyAttackCalls: 0,
+            cacheHits: 0,
+            cacheMisses: 0,
+            movesGenerated: 0,
+            makeUndoCycles: 0,
+        };
+        return stats;
+    }
+
+    /* LEGACY PHYSICAL ATTACK CODE - NO LONGER USED
+     * The following code implemented physical whale attack validation (checking if a whale
+     * can physically reach a square, ignoring whether the move would be check).
+     * This has been replaced with legal-only validation (_canWhaleLegallyAttack).
+     * Kept for reference but not executed.
+     
         const [whaleFirst, whaleSecond] = this._kings[whaleColor];
         const whaleSquares = [whaleFirst, whaleSecond];
-
-        const DEBUG = false; // Set to true to enable debug logging
-        if (DEBUG) {
-            console.log(
-                `\n[_whaleAttacked] Checking if ${whaleColor} whale at [${algebraic(whaleFirst)},${algebraic(whaleSecond)}] can attack ${algebraic(targetSquare)}`,
-            );
-        }
 
         // Helper to check if two squares are orthogonally adjacent
         const areAdjacent = (sq1: number, sq2: number): boolean => {
@@ -1188,12 +1309,15 @@ export class CoralClash {
         };
 
         // Helper to check if a path is clear from start to end
+        // For attack validation: the target square itself doesn't block the attack
         const isPathClear = (from: number, offset: number, steps: number): boolean => {
             let checkSq = from + offset;
             for (let i = 0; i < steps - 1; i++) {
                 if ((checkSq & 0x88) !== 0) return false; // Off board
                 const isOwnWhaleSquare = whaleSquares.includes(checkSq);
-                if (this._isSquareOccupied(checkSq) && !isOwnWhaleSquare) {
+                const isTargetSquare = checkSq === targetSquare; // Don't block on target square itself
+
+                if (this._isSquareOccupied(checkSq) && !isOwnWhaleSquare && !isTargetSquare) {
                     if (DEBUG) {
                         console.log(
                             `    ✗ Path blocked at ${algebraic(checkSq)} by piece (for parallel slide validation)`,
@@ -1201,7 +1325,7 @@ export class CoralClash {
                     }
                     return false;
                 }
-                if (this._coral[checkSq] && !isOwnWhaleSquare) {
+                if (this._coral[checkSq] && !isOwnWhaleSquare && !isTargetSquare) {
                     if (DEBUG) {
                         console.log(
                             `    ✗ Path blocked at ${algebraic(checkSq)} by coral (for parallel slide validation)`,
@@ -1248,11 +1372,11 @@ export class CoralClash {
                         // Check if newSecondSq is occupied by whale's own piece (not capturable)
                         // Allow if: empty, enemy piece (capturable), or whale's own square (during move)
                         const pieceAtNewSecondSq = this._board[newSecondSq];
-                        const isOwnPiece = 
-                            pieceAtNewSecondSq && 
+                        const isOwnPiece =
+                            pieceAtNewSecondSq &&
                             pieceAtNewSecondSq.color === whaleColor &&
                             !whaleSquares.includes(newSecondSq);
-                        
+
                         if (isOwnPiece) {
                             if (DEBUG) {
                                 console.log(
@@ -1333,11 +1457,11 @@ export class CoralClash {
                         // Check if newFirstSq is occupied by whale's own piece (not capturable)
                         // Allow if: empty, enemy piece (capturable), or whale's own square (during move)
                         const pieceAtNewFirstSq = this._board[newFirstSq];
-                        const isOwnPiece = 
-                            pieceAtNewFirstSq && 
+                        const isOwnPiece =
+                            pieceAtNewFirstSq &&
                             pieceAtNewFirstSq.color === whaleColor &&
                             !whaleSquares.includes(newFirstSq);
-                        
+
                         if (isOwnPiece) {
                             if (DEBUG) {
                                 console.log(
@@ -1392,6 +1516,7 @@ export class CoralClash {
         }
         return false;
     }
+    END OF LEGACY CODE */
 
     private _isKingAttacked(color: Color) {
         // Whale occupies 2 squares - it's in check if EITHER square is attacked
@@ -1759,6 +1884,7 @@ export class CoralClash {
         secondSq: number,
         color: Color,
         them: Color,
+        allowWhaleCaptures = false, // For attack validation, allow whale captures
     ) {
         const DEBUG = false; // Set to true to enable debug logging
         if (DEBUG) {
@@ -1941,8 +2067,9 @@ export class CoralClash {
                 } else if (this._isSquareOccupied(to, them)) {
                     // Capture
                     const capturedType = this._board[to]?.type || WHALE;
-                    // NEVER generate whale captures - game ends at checkmate
-                    if (capturedType !== WHALE) {
+                    // NEVER generate whale captures in actual gameplay - game ends at checkmate
+                    // But allow for attack validation purposes
+                    if (capturedType !== WHALE || allowWhaleCaptures) {
                         const capturedRole = this._board[to]?.role;
                         addWhaleMove(firstSq, to, secondSq, capturedType, capturedRole, to);
                     }
@@ -1992,8 +2119,9 @@ export class CoralClash {
                 } else if (this._isSquareOccupied(to, them)) {
                     // Capture
                     const capturedType = this._board[to]?.type || WHALE;
-                    // NEVER generate whale captures - game ends at checkmate
-                    if (capturedType !== WHALE) {
+                    // NEVER generate whale captures in actual gameplay - game ends at checkmate
+                    // But allow for attack validation purposes
+                    if (capturedType !== WHALE || allowWhaleCaptures) {
                         const capturedRole = this._board[to]?.role;
                         addWhaleMove(secondSq, to, firstSq, capturedType, capturedRole, to);
                     }
@@ -2088,8 +2216,9 @@ export class CoralClash {
                         const capturedType =
                             this._board[newFirst]?.type || this._board[newSecond]?.type || WHALE;
 
-                        // NEVER generate whale captures - game ends at checkmate
-                        if (capturedType !== WHALE) {
+                        // NEVER generate whale captures in actual gameplay - game ends at checkmate
+                        // But allow for attack validation purposes
+                        if (capturedType !== WHALE || allowWhaleCaptures) {
                             const capturedRole =
                                 this._board[newFirst]?.role || this._board[newSecond]?.role;
                             // Determine which square has the captured piece
@@ -2140,8 +2269,12 @@ export class CoralClash {
                 addWhaleMove(firstSq, to, secondSq);
             } else if (this._isSquareOccupied(to, them)) {
                 const capturedType = this._board[to]?.type || WHALE;
-                const capturedRole = this._board[to]?.role;
-                addWhaleMove(firstSq, to, secondSq, capturedType, capturedRole, to);
+                // NEVER generate whale captures in actual gameplay - game ends at checkmate
+                // But allow for attack validation purposes
+                if (capturedType !== WHALE || allowWhaleCaptures) {
+                    const capturedRole = this._board[to]?.role;
+                    addWhaleMove(firstSq, to, secondSq, capturedType, capturedRole, to);
+                }
             }
         }
 
@@ -2181,12 +2314,16 @@ export class CoralClash {
                 addWhaleMove(secondSq, to, firstSq);
             } else if (this._isSquareOccupied(to, them)) {
                 const capturedType = this._board[to]?.type || WHALE;
-                const capturedRole = this._board[to]?.role;
-                if (DEBUG)
-                    console.log(
-                        `      ✓ Adding rotation capture move ${algebraic(secondSq)} -> ${algebraic(to)}, other stays at ${algebraic(firstSq)}`,
-                    );
-                addWhaleMove(secondSq, to, firstSq, capturedType, capturedRole, to);
+                // NEVER generate whale captures in actual gameplay - game ends at checkmate
+                // But allow for attack validation purposes
+                if (capturedType !== WHALE || allowWhaleCaptures) {
+                    const capturedRole = this._board[to]?.role;
+                    if (DEBUG)
+                        console.log(
+                            `      ✓ Adding rotation capture move ${algebraic(secondSq)} -> ${algebraic(to)}, other stays at ${algebraic(firstSq)}`,
+                        );
+                    addWhaleMove(secondSq, to, firstSq, capturedType, capturedRole, to);
+                }
             } else {
                 if (DEBUG) console.log(`      ✗ Blocked by own piece`);
             }
@@ -2414,11 +2551,14 @@ export class CoralClash {
         const legalMoves = [];
 
         for (let i = 0, len = moves.length; i < len; i++) {
+            // Mark as validation context to preserve caches
+            this._validationDepth++;
             this._makeMove(moves[i]);
             if (!this._isKingAttacked(us)) {
                 legalMoves.push(moves[i]);
             }
             this._undoMove();
+            this._validationDepth--;
         }
 
         return legalMoves;
@@ -2582,9 +2722,18 @@ export class CoralClash {
         const them = swapColor(us);
         this._push(move);
 
+        // Clear whale attack caches (board state changed)
+        // But only if we're not in validation mode (temporary make/undo)
+        if (this._validationDepth === 0) {
+            this._whaleAttackMovesCache.clear();
+            this._whaleAttackResultCache.clear();
+        }
+
         // Whale should NEVER be captured - game ends at checkmate first
         // If this happens, it indicates a bug in move generation or validation
-        if (move.captured === WHALE) {
+        // However, during validation (_validationDepth > 0), we intentionally allow
+        // whale captures to check if attacks would be legal
+        if (move.captured === WHALE && this._validationDepth === 0) {
             console.error('[_makeMove] ILLEGAL: Whale capture attempted!', {
                 from: algebraic(move.from),
                 to: algebraic(move.to),
@@ -2749,6 +2898,13 @@ export class CoralClash {
         const us = move.color; // Use move.color to undo the move correctly
         const them = swapColor(us);
 
+        // Clear whale attack caches (board state will change)
+        // But only if we're not in validation mode (temporary make/undo)
+        if (this._validationDepth === 0) {
+            this._whaleAttackMovesCache.clear();
+            this._whaleAttackResultCache.clear();
+        }
+
         // Special handling for whale moves - save current position BEFORE restoring history
         let whaleCurrentPositions: [number, number] | null = null;
         if (move.piece === WHALE) {
@@ -2815,7 +2971,10 @@ export class CoralClash {
         if (move.captured) {
             if (move.captured === WHALE) {
                 // Whale capture should never happen in normal play
-                console.error('[_undoMove] Undoing illegal whale capture');
+                // But it's allowed during validation
+                if (this._validationDepth === 0) {
+                    console.error('[_undoMove] Undoing illegal whale capture');
+                }
             } else {
                 // Regular capture - restore with role
                 // For whale captures, use captureSquare (which square had the captured piece)

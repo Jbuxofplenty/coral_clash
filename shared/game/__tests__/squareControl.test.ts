@@ -16,7 +16,7 @@ describe('Square Control and Attack Detection', () => {
         expect(whalePos.w).toEqual(['b4', 'c4']); // White whale horizontal at b4,c4
         expect(whalePos.b).toEqual(['e3', 'e2']); // Black whale vertical at e3,e2
 
-        // e4 is empty and white whale cannot reach it from b4,c4
+        // e4 is empty but white whale cannot move there since it would be in check from black whale
         expect(game.isAttacked('e4', 'w')).toBe(false);
     });
 
@@ -24,20 +24,39 @@ describe('Square Control and Attack Detection', () => {
         const game = new CoralClash();
         applyFixture(game, whaleCheck);
 
-        // White whale at b4,c4 should be able to attack squares on same row and diagonals
+        // White whale at b4,c4 should be able to attack squares on same row
         // Adjacent on row 4
         expect(game.isAttacked('a4', 'w')).toBe(true);
         expect(game.isAttacked('d4', 'w')).toBe(true);
 
-        // Adjacent diagonally
-        expect(game.isAttacked('b5', 'w')).toBe(true);
-        expect(game.isAttacked('c5', 'w')).toBe(true);
+        // Adjacent diagonally - whale cannot attack diagonally adjacent squares
+        // because the whale's own second square blocks the sliding path
+        expect(game.isAttacked('b5', 'w')).toBe(false);
+        expect(game.isAttacked('c5', 'w')).toBe(false);
 
-        // Further diagonal
+        // Further diagonal - also blocked
         expect(game.isAttacked('e5', 'w')).toBe(true);
 
-        // But NOT e4 (it's not on a valid attack line from b4,c4)
+        // e4 is NOT reachable (whale's own second square blocks the path)
         expect(game.isAttacked('e4', 'w')).toBe(false);
+
+        // Black whale at e3,e2 can move to g4,g5 via diagonal slide and to d2
+        const blackWhaleMoves = game.moves({ verbose: true, piece: 'h', color: 'b' });
+        
+        const movesToG4G5 = blackWhaleMoves.filter(
+            (m: any) =>
+                (m.to === 'g4' && m.whaleSecondSquare === 'g5') ||
+                (m.to === 'g5' && m.whaleSecondSquare === 'g4'),
+        );
+        expect(movesToG4G5.length).toBeGreaterThan(0);
+
+        const movesToD2 = blackWhaleMoves.filter(
+            (m: any) => m.to === 'd2' || m.whaleSecondSquare === 'd2',
+        );
+        expect(movesToD2.length).toBeGreaterThan(0);
+
+        // These are all the possible moves for the black whale
+        expect(blackWhaleMoves.length).toBe(movesToG4G5.length + movesToD2.length);
     });
 
     test('isAttacked works correctly for empty and occupied squares', () => {

@@ -20,6 +20,14 @@ const FIXTURES = [
     { name: 'coral-blocks-attack', label: 'Coral Blocks Attack' },
     { name: 'whale-removes-coral', label: 'Whale Removes Coral' },
     { name: 'crab-movement', label: 'Crab Movement Debug' },
+    { name: 'whale-check', label: '🐋 Whale Check #1 (Square Control Test - W:b4,c4 B:e3,e2)' },
+    { name: 'whale-check-2', label: '🐋 Whale Check #2' },
+    { name: 'whale-check-3', label: '🐋 Whale Check #3' },
+    { name: 'whale-check-4', label: '🐋 Whale Check #4' },
+    { name: 'whale-check-5', label: '🐋 Whale Check #5' },
+    { name: 'whale-check-6', label: '🐋 Whale Check #6' },
+    { name: 'whale-check-7', label: '🐋 Whale Check #7 (Puffer Block)' },
+    { name: 'whale-check-8', label: '🐋 Whale Check #8 (Turtle Protection)' },
 ];
 
 const FixtureLoaderModal = ({ visible, onClose, onSelectFixture }) => {
