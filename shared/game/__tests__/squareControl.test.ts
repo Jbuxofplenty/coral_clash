@@ -42,7 +42,7 @@ describe('Square Control and Attack Detection', () => {
 
         // Black whale at e3,e2 can move to g4,g5 via diagonal slide and to d2
         const blackWhaleMoves = game.moves({ verbose: true, piece: 'h', color: 'b' });
-        
+
         const movesToG4G5 = blackWhaleMoves.filter(
             (m: any) =>
                 (m.to === 'g4' && m.whaleSecondSquare === 'g5') ||
