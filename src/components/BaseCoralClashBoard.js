@@ -1052,6 +1052,21 @@ const BaseCoralClashBoard = ({
 
         if (onUndo) {
             onUndo(coralClash);
+            
+            // After undo, update lastAnimatedMoveRef to match the new last move
+            // This prevents handleStateUpdate from re-animating it
+            const newHistory = coralClash.history({ verbose: true });
+            if (newHistory.length > 0) {
+                const lastMove = newHistory[newHistory.length - 1];
+                const moveKey = `${lastMove.from}-${lastMove.to}-${newHistory.length}`;
+                lastAnimatedMoveRef.current = moveKey;
+            } else {
+                lastAnimatedMoveRef.current = null;
+            }
+            
+            // Update history length ref to prevent animation trigger
+            previousHistoryLengthRef.current = newHistory.length;
+            
             // Exit history view when undo is performed
             setHistoryIndex(null);
             // Force re-render to show updated board after undo
