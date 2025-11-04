@@ -1054,8 +1054,14 @@ const BaseCoralClashBoard = ({
         if (onUndo) {
             // Get the moves being undone and animate the last one in reverse
             const moveHistory = coralClash.history({ verbose: true });
+            console.log('[UNDO] Total moves in history:', moveHistory.length);
             if (moveHistory.length > 0) {
                 const lastMove = moveHistory[moveHistory.length - 1];
+                console.log('[UNDO] Animating move:', lastMove);
+                console.log('[UNDO] Piece:', lastMove.piece, lastMove.color);
+                console.log('[UNDO] From:', lastMove.from, '-> To:', lastMove.to);
+                console.log('[UNDO] Will animate REVERSE: from', lastMove.to, 'to', lastMove.from);
+                
                 const moveKey = `undo-${lastMove.from}-${lastMove.to}-${Date.now()}`;
                 lastAnimatedMoveRef.current = moveKey;
 
@@ -1104,6 +1110,9 @@ const BaseCoralClashBoard = ({
                 setCapturedPiece(null);
                 setRemovedCoral([]);
                 setPlacedCoral([]);
+
+                // Trigger re-render so AnimatedPiece component appears
+                forceUpdate((n) => n + 1);
             } else {
                 // No animation, apply undo immediately
                 onUndo(coralClash);
@@ -1919,7 +1928,9 @@ const BaseCoralClashBoard = ({
                             userColor={userColor}
                             boardFlipped={isBoardFlipped}
                             isProcessing={isGameActionProcessing}
-                            animatingSquare={animatingMove?.from}
+                            animatingSquare={
+                                pendingUndoRef.current ? animatingMove?.from : animatingMove?.to
+                            }
                             capturedPiece={capturedPiece}
                         />
                         <Moves
@@ -1940,18 +1951,18 @@ const BaseCoralClashBoard = ({
                                 boardFlipped={isBoardFlipped}
                                 userColor={userColor}
                                 onComplete={() => {
-                                    setAnimatingMove(null);
-                                    setAnimatingPiece(null);
-                                    setCapturedPiece(null);
-                                    setRemovedCoral([]);
-                                    setPlacedCoral([]);
-
-                                    // If this was an undo animation, apply the undo now
+                                    // If this was an undo animation, apply the undo now BEFORE clearing animation state
                                     if (pendingUndoRef.current) {
                                         pendingUndoRef.current = false;
                                         onUndo(coralClash);
                                         setHistoryIndex(null);
                                     }
+
+                                    setAnimatingMove(null);
+                                    setAnimatingPiece(null);
+                                    setCapturedPiece(null);
+                                    setRemovedCoral([]);
+                                    setPlacedCoral([]);
 
                                     forceUpdate((n) => n + 1);
                                 }}
