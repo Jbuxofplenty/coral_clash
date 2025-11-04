@@ -109,7 +109,6 @@ const BaseCoralClashBoard = ({
     const [removedCoral, setRemovedCoral] = useState([]); // Track coral being removed during animation
     const [placedCoral, setPlacedCoral] = useState([]); // Track coral being placed (hide during animation, show after)
     const lastAnimatedMoveRef = useRef(null);
-    const pendingUndoRef = useRef(false); // Track if undo should be applied after animation
 
     // Skip whale animations - clear immediately
     useEffect(() => {
@@ -1052,72 +1051,11 @@ const BaseCoralClashBoard = ({
         clearVisibleMoves();
 
         if (onUndo) {
-            // Get the moves being undone and animate the last one in reverse
-            const moveHistory = coralClash.history({ verbose: true });
-            console.log('[UNDO] Total moves in history:', moveHistory.length);
-            if (moveHistory.length > 0) {
-                const lastMove = moveHistory[moveHistory.length - 1];
-                console.log('[UNDO] Animating move:', lastMove);
-                console.log('[UNDO] Piece:', lastMove.piece, lastMove.color);
-                console.log('[UNDO] From:', lastMove.from, '-> To:', lastMove.to);
-                console.log('[UNDO] Will animate REVERSE: from', lastMove.to, 'to', lastMove.from);
-                
-                const moveKey = `undo-${lastMove.from}-${lastMove.to}-${Date.now()}`;
-                lastAnimatedMoveRef.current = moveKey;
-
-                // Mark that we need to apply undo after animation completes
-                pendingUndoRef.current = true;
-
-                setAnimatingPiece({
-                    type: lastMove.piece,
-                    color: lastMove.color,
-                    role: lastMove.role,
-                });
-
-                // Reverse the move direction for undo
-                // For whales, we need to determine the original orientation before the move
-                let reverseWhaleSecondSquare = undefined;
-                if (lastMove.piece === WHALE) {
-                    // Get the board state BEFORE this move was made to find the original whale position
-                    const tempGame = new CoralClash();
-                    // Replay all moves except the last one
-                    for (let i = 0; i < moveHistory.length - 1; i++) {
-                        tempGame.move(moveHistory[i]);
-                    }
-                    // Now get the whale positions from this state
-                    const whalePositions = tempGame.whalePositions();
-                    const whaleColor = lastMove.color;
-                    const whaleKey = whaleColor === 'w' ? 'w' : 'b';
-                    const originalWhaleSquares = whalePositions[whaleKey];
-
-                    if (originalWhaleSquares && originalWhaleSquares.length === 2) {
-                        // Find which square is NOT lastMove.from (that's the second square)
-                        reverseWhaleSecondSquare = originalWhaleSquares.find(
-                            (sq) => sq !== lastMove.from,
-                        );
-                    }
-                }
-
-                setAnimatingMove({
-                    ...lastMove,
-                    from: lastMove.to,
-                    to: lastMove.from,
-                    whaleSecondSquare: reverseWhaleSecondSquare,
-                });
-
-                // For undo animation, captured piece and coral reappear on board
-                // so we don't need to render them separately
-                setCapturedPiece(null);
-                setRemovedCoral([]);
-                setPlacedCoral([]);
-
-                // Trigger re-render so AnimatedPiece component appears
-                forceUpdate((n) => n + 1);
-            } else {
-                // No animation, apply undo immediately
-                onUndo(coralClash);
-                forceUpdate((n) => n + 1);
-            }
+            onUndo(coralClash);
+            // Exit history view when undo is performed
+            setHistoryIndex(null);
+            // Force re-render to show updated board after undo
+            forceUpdate((n) => n + 1);
         }
     };
 
@@ -1951,19 +1889,11 @@ const BaseCoralClashBoard = ({
                                 boardFlipped={isBoardFlipped}
                                 userColor={userColor}
                                 onComplete={() => {
-                                    // If this was an undo animation, apply the undo now BEFORE clearing animation state
-                                    if (pendingUndoRef.current) {
-                                        pendingUndoRef.current = false;
-                                        onUndo(coralClash);
-                                        setHistoryIndex(null);
-                                    }
-
                                     setAnimatingMove(null);
                                     setAnimatingPiece(null);
                                     setCapturedPiece(null);
                                     setRemovedCoral([]);
                                     setPlacedCoral([]);
-
                                     forceUpdate((n) => n + 1);
                                 }}
                             />
