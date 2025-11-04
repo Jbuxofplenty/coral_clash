@@ -1059,6 +1059,9 @@ const BaseCoralClashBoard = ({
                 const moveKey = `undo-${lastMove.from}-${lastMove.to}-${Date.now()}`;
                 lastAnimatedMoveRef.current = moveKey;
 
+                // Mark that we need to apply undo after animation completes
+                pendingUndoRef.current = true;
+
                 setAnimatingPiece({
                     type: lastMove.piece,
                     color: lastMove.color,
@@ -1070,7 +1073,6 @@ const BaseCoralClashBoard = ({
                 let reverseWhaleSecondSquare = undefined;
                 if (lastMove.piece === WHALE) {
                     // Get the board state BEFORE this move was made to find the original whale position
-                    // We need to look at the previous move's after state, or starting position if this is the first move
                     const tempGame = new CoralClash();
                     // Replay all moves except the last one
                     for (let i = 0; i < moveHistory.length - 1; i++) {
@@ -1090,9 +1092,6 @@ const BaseCoralClashBoard = ({
                     }
                 }
 
-                // Mark that we need to apply undo after animation completes
-                pendingUndoRef.current = true;
-
                 setAnimatingMove({
                     ...lastMove,
                     from: lastMove.to,
@@ -1108,7 +1107,6 @@ const BaseCoralClashBoard = ({
             } else {
                 // No animation, apply undo immediately
                 onUndo(coralClash);
-                setHistoryIndex(null);
                 forceUpdate((n) => n + 1);
             }
         }
