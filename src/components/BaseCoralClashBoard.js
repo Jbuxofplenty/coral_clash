@@ -106,7 +106,10 @@ const BaseCoralClashBoard = ({
     const [animatingMove, setAnimatingMove] = useState(null);
     const [animatingPiece, setAnimatingPiece] = useState(null);
     const [capturedPiece, setCapturedPiece] = useState(null); // Track captured piece during animation
+    const [removedCoral, setRemovedCoral] = useState([]); // Track coral being removed during animation
+    const [placedCoral, setPlacedCoral] = useState([]); // Track coral being placed (hide during animation, show after)
     const lastAnimatedMoveRef = useRef(null);
+    const pendingUndoRef = useRef(false); // Track if undo should be applied after animation
 
     // Skip whale animations - clear immediately
     useEffect(() => {
@@ -114,6 +117,8 @@ const BaseCoralClashBoard = ({
             setAnimatingMove(null);
             setAnimatingPiece(null);
             setCapturedPiece(null);
+            setRemovedCoral([]);
+            setPlacedCoral([]);
             forceUpdate((n) => n + 1);
         }
     }, [animatingPiece]);
@@ -162,6 +167,8 @@ const BaseCoralClashBoard = ({
                     setAnimatingMove(null);
                     setAnimatingPiece(null);
                     setCapturedPiece(null);
+                    setRemovedCoral([]);
+                    setPlacedCoral([]);
                     lastAnimatedMoveRef.current = null;
                 } else if (history.length > 0) {
                     const lastMove = history[history.length - 1];
@@ -191,6 +198,25 @@ const BaseCoralClashBoard = ({
                             });
                         } else {
                             setCapturedPiece(null);
+                        }
+
+                        // If coral was removed, save the coral data for rendering during animation
+                        if (lastMove.coralRemoved) {
+                            const coralSquares = lastMove.coralRemovedSquares || [lastMove.to];
+                            const removedCoralData = coralSquares.map((sq) => ({
+                                square: sq,
+                                color: lastMove.color === 'w' ? 'b' : 'w', // Opposite color's coral
+                            }));
+                            setRemovedCoral(removedCoralData);
+                        } else {
+                            setRemovedCoral([]);
+                        }
+
+                        // If coral was placed, hide it during animation (show after)
+                        if (lastMove.coralPlaced) {
+                            setPlacedCoral([{ square: lastMove.to, color: lastMove.color }]);
+                        } else {
+                            setPlacedCoral([]);
                         }
 
                         setAnimatingPiece(piece);
@@ -630,9 +656,11 @@ const BaseCoralClashBoard = ({
                 whaleSecondSquare: reverseWhaleSecondSquare,
             });
 
-            // For backward animation (undo-like), captured piece reappears on board
-            // so we don't need to render it separately
+            // For backward animation (undo-like), captured piece and coral reappear on board
+            // so we don't need to render them separately
             setCapturedPiece(null);
+            setRemovedCoral([]);
+            setPlacedCoral([]);
         }
     };
 
@@ -683,6 +711,25 @@ const BaseCoralClashBoard = ({
                 });
             } else {
                 setCapturedPiece(null);
+            }
+
+            // If coral was removed, show it during animation
+            if (moveToAnimate.coralRemoved) {
+                const coralSquares = moveToAnimate.coralRemovedSquares || [moveToAnimate.to];
+                const removedCoralData = coralSquares.map((sq) => ({
+                    square: sq,
+                    color: moveToAnimate.color === 'w' ? 'b' : 'w', // Opposite color's coral
+                }));
+                setRemovedCoral(removedCoralData);
+            } else {
+                setRemovedCoral([]);
+            }
+
+            // If coral was placed, hide it during animation
+            if (moveToAnimate.coralPlaced) {
+                setPlacedCoral([{ square: moveToAnimate.to, color: moveToAnimate.color }]);
+            } else {
+                setPlacedCoral([]);
             }
 
             setAnimatingMove(moveToAnimate);
@@ -1032,7 +1079,7 @@ const BaseCoralClashBoard = ({
                     // Now get the whale positions from this state
                     const whalePositions = tempGame.whalePositions();
                     const whaleColor = lastMove.color;
-                    const whaleKey = whaleColor === 'w' ? 'white' : 'black';
+                    const whaleKey = whaleColor === 'w' ? 'w' : 'b';
                     const originalWhaleSquares = whalePositions[whaleKey];
 
                     if (originalWhaleSquares && originalWhaleSquares.length === 2) {
@@ -1050,16 +1097,20 @@ const BaseCoralClashBoard = ({
                     whaleSecondSquare: reverseWhaleSecondSquare,
                 });
 
-                // For undo animation, captured piece reappears on board
-                // so we don't need to render it separately
+                // For undo animation, captured piece and coral reappear on board
+                // so we don't need to render them separately
                 setCapturedPiece(null);
-            }
+                setRemovedCoral([]);
+                setPlacedCoral([]);
 
-            onUndo(coralClash);
-            // Exit history view when undo is performed
-            setHistoryIndex(null);
-            // Force re-render to show updated board after undo
-            forceUpdate((n) => n + 1);
+                // Mark that we need to apply undo after animation completes
+                pendingUndoRef.current = true;
+            } else {
+                // No animation, apply undo immediately
+                onUndo(coralClash);
+                setHistoryIndex(null);
+                forceUpdate((n) => n + 1);
+            }
         }
     };
 
@@ -1163,6 +1214,15 @@ const BaseCoralClashBoard = ({
         // Also capture the piece at the destination (if any) for capture animation
         const pieceAtDestination = coralClash.get(moveParams.to);
 
+        // Capture coral data before move (for hunter coral removal animation)
+        const coralAtDestination = coralClash.getCoral(moveParams.to);
+        const coralAtWhaleSquares = moveParams.whaleSecondSquare
+            ? [
+                  coralClash.getCoral(moveParams.to),
+                  coralClash.getCoral(moveParams.whaleSecondSquare),
+              ]
+            : null;
+
         // Online game: backend-first approach
         if (isOnlineGame) {
             const result = await makeMoveAPI(moveParams);
@@ -1213,6 +1273,39 @@ const BaseCoralClashBoard = ({
                 });
             } else {
                 setCapturedPiece(null);
+            }
+
+            // If coral was removed, save it for rendering during animation
+            if (moveParams.coralRemoved) {
+                const removedCoralData = [];
+                if (pieceBeforeMove.type === 'h' && coralAtWhaleSquares) {
+                    // Whale - check both squares
+                    if (coralAtWhaleSquares[0]) {
+                        removedCoralData.push({
+                            square: moveParams.to,
+                            color: coralAtWhaleSquares[0],
+                        });
+                    }
+                    if (coralAtWhaleSquares[1] && moveParams.whaleSecondSquare) {
+                        removedCoralData.push({
+                            square: moveParams.whaleSecondSquare,
+                            color: coralAtWhaleSquares[1],
+                        });
+                    }
+                } else if (coralAtDestination) {
+                    // Regular piece
+                    removedCoralData.push({ square: moveParams.to, color: coralAtDestination });
+                }
+                setRemovedCoral(removedCoralData);
+            } else {
+                setRemovedCoral([]);
+            }
+
+            // If coral was placed, hide it during animation (show after completion)
+            if (moveParams.coralPlaced) {
+                setPlacedCoral([{ square: moveParams.to, color: pieceBeforeMove.color }]);
+            } else {
+                setPlacedCoral([]);
             }
 
             setAnimatingMove(lastMove);
@@ -1814,6 +1907,8 @@ const BaseCoralClashBoard = ({
                             boardFlipped={isBoardFlipped}
                             userColor={userColor}
                             updateTrigger={updateCounter}
+                            removedCoral={removedCoral}
+                            placedCoral={placedCoral}
                         />
                         <Pieces
                             board={
@@ -1826,7 +1921,9 @@ const BaseCoralClashBoard = ({
                             userColor={userColor}
                             boardFlipped={isBoardFlipped}
                             isProcessing={isGameActionProcessing}
-                            animatingSquare={animatingMove?.to}
+                            animatingSquare={
+                                pendingUndoRef.current ? animatingMove?.from : animatingMove?.to
+                            }
                             capturedPiece={capturedPiece}
                         />
                         <Moves
@@ -1850,6 +1947,16 @@ const BaseCoralClashBoard = ({
                                     setAnimatingMove(null);
                                     setAnimatingPiece(null);
                                     setCapturedPiece(null);
+                                    setRemovedCoral([]);
+                                    setPlacedCoral([]);
+
+                                    // If this was an undo animation, apply the undo now
+                                    if (pendingUndoRef.current) {
+                                        pendingUndoRef.current = false;
+                                        onUndo(coralClash);
+                                        setHistoryIndex(null);
+                                    }
+
                                     forceUpdate((n) => n + 1);
                                 }}
                             />

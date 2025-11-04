@@ -8,6 +8,8 @@ const Coral = ({
     boardFlipped = false,
     userColor = null,
     updateTrigger = 0,
+    removedCoral = [], // Coral being removed during animation
+    placedCoral = [], // Coral being placed (hide during animation, show after)
 }) => {
     const coralClashContext = useCoralClashContext();
     // Use prop if provided (for historical view), otherwise use context
@@ -42,10 +44,16 @@ const Coral = ({
     });
 
     console.log('[Coral] Rendering', coralSquares.length, 'coral squares');
+    console.log('[Coral] Removed coral during animation:', removedCoral.length);
+    console.log('[Coral] Placed coral (hidden during animation):', placedCoral.length);
+
+    // Filter out coral that's being placed (should be hidden during animation)
+    const placedCoralSquares = placedCoral.map((c) => c.square);
 
     return (
         <>
-            {coralSquares.map(({ square, color }) => {
+            {/* Render removed coral during animation */}
+            {removedCoral.map(({ square, color }) => {
                 const [file, rank] = square.split('');
                 const fileIndex = file.charCodeAt(0) - 'a'.charCodeAt(0);
                 const left = boardFlipped ? (7 - fileIndex) * cellSize : fileIndex * cellSize;
@@ -53,24 +61,18 @@ const Coral = ({
                     ? (8 - parseInt(rank)) * cellSize
                     : (rank - 1) * cellSize;
 
-                // Use different colors/styles based on whether coral belongs to user or opponent
-                // For PvP games (userColor is provided), user's coral is pink, opponent's is black
-                // For offline games (no userColor), default to white=pink, black=black
                 let coralStyle;
                 if (userColor) {
-                    // PvP game: user's coral is pink, opponent's is black
                     coralStyle = color === userColor ? styles.coralUser : styles.coralOpponent;
                 } else {
-                    // Offline game: keep original behavior (white=pink, black=black)
                     coralStyle = color === 'w' ? styles.coralWhite : styles.coralBlack;
                 }
 
-                // Add small inset so adjacent borders don't stack/appear thicker
                 const inset = cellSize * 0.04;
 
                 return (
                     <View
-                        key={`coral-${square}`}
+                        key={`removed-coral-${square}`}
                         style={[
                             styles.coralBorder,
                             coralStyle,
@@ -86,6 +88,50 @@ const Coral = ({
                     />
                 );
             })}
+            {/* Render normal coral (excluding those being placed during animation) */}
+            {coralSquares
+                .filter(({ square }) => !placedCoralSquares.includes(square))
+                .map(({ square, color }) => {
+                    const [file, rank] = square.split('');
+                    const fileIndex = file.charCodeAt(0) - 'a'.charCodeAt(0);
+                    const left = boardFlipped ? (7 - fileIndex) * cellSize : fileIndex * cellSize;
+                    const bottom = boardFlipped
+                        ? (8 - parseInt(rank)) * cellSize
+                        : (rank - 1) * cellSize;
+
+                    // Use different colors/styles based on whether coral belongs to user or opponent
+                    // For PvP games (userColor is provided), user's coral is pink, opponent's is black
+                    // For offline games (no userColor), default to white=pink, black=black
+                    let coralStyle;
+                    if (userColor) {
+                        // PvP game: user's coral is pink, opponent's is black
+                        coralStyle = color === userColor ? styles.coralUser : styles.coralOpponent;
+                    } else {
+                        // Offline game: keep original behavior (white=pink, black=black)
+                        coralStyle = color === 'w' ? styles.coralWhite : styles.coralBlack;
+                    }
+
+                    // Add small inset so adjacent borders don't stack/appear thicker
+                    const inset = cellSize * 0.04;
+
+                    return (
+                        <View
+                            key={`coral-${square}`}
+                            style={[
+                                styles.coralBorder,
+                                coralStyle,
+                                {
+                                    width: cellSize - inset * 2,
+                                    height: cellSize - inset * 2,
+                                    left: left + inset,
+                                    bottom: bottom + inset,
+                                    borderWidth: cellSize * 0.08,
+                                    borderRadius: cellSize * 0.15,
+                                },
+                            ]}
+                        />
+                    );
+                })}
         </>
     );
 };
