@@ -12,6 +12,7 @@ import whaleCheck2 from '../__fixtures__/whale-check-2.json';
 import whaleCheck4 from '../__fixtures__/whale-check-4.json';
 import whaleCheck5 from '../__fixtures__/whale-check-5.json';
 import whaleCheck6 from '../__fixtures__/whale-check-6.json';
+import whaleCheck7 from '../__fixtures__/whale-check-7.json';
 import whaleCheck from '../__fixtures__/whale-check.json';
 import { CoralClash, applyFixture } from '../index';
 
@@ -303,5 +304,38 @@ describe('Whale Check Validation Bug', () => {
         expect(result).toBeTruthy();
         expect(game.whalePositions().b).toEqual(['e7', 'e6']);
         expect(game.get('e6')).toMatchObject({ type: 'h', color: 'b' });
+    });
+
+    test('whale-check-7.json: white whale can move to h7,h6 (black puffer blocks black whale attack)', () => {
+        const game = new CoralClash();
+        // Skip validation since this fixture has crabs on edge rows (from real game)
+        applyFixture(game, whaleCheck7, { skipValidation: true });
+
+        // Verify initial state
+        expect(game.turn()).toBe('w');
+        expect(game.whalePositions().w).toEqual(['f5', 'f4']);
+        expect(game.whalePositions().b).toEqual(['d8', 'd7']);
+        expect(game.inCheck()).toBe(true); // White is in check
+
+        // Black puffer at h8 should block black whale from attacking h7,h6
+        expect(game.get('h8')).toMatchObject({ type: 'f', color: 'b', role: 'gatherer' });
+
+        // White whale should be able to move to h7,h6
+        const whiteMoves = game.moves({ verbose: true, piece: 'h' });
+        const moveToH7H6 = whiteMoves.filter(
+            (m: any) =>
+                (m.to === 'h7' && m.whaleSecondSquare === 'h6') ||
+                (m.to === 'h6' && m.whaleSecondSquare === 'h7'),
+        );
+
+        // The move should be available because black whale cannot attack h7
+        // Even though black whale at d7 could parallel slide to h7, it would need
+        // to also move d8->h8, but h8 is occupied by black's own puffer
+        expect(moveToH7H6.length).toBeGreaterThan(0);
+
+        // Verify the move can be made
+        const result = game.move({ from: 'f5', to: 'h7', whaleSecondSquare: 'h6' });
+        expect(result).toBeTruthy();
+        expect(game.whalePositions().w).toEqual(['h7', 'h6']);
     });
 });
