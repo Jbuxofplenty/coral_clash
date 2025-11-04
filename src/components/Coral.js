@@ -7,7 +7,7 @@ const Coral = ({
     size,
     boardFlipped = false,
     userColor = null,
-    updateTrigger = 0,
+    updateTrigger: _updateTrigger = 0,
     removedCoral = [], // Coral being removed during animation
     placedCoral = [], // Coral being placed (hide during animation, show after)
 }) => {
@@ -15,25 +15,7 @@ const Coral = ({
     // Use prop if provided (for historical view), otherwise use context
     const coralClash = coralClashProp || coralClashContext;
 
-    // Log which instance we're using
-    console.log('[Coral] Using:', coralClashProp ? 'PROP (historical)' : 'CONTEXT (live)');
-    console.log('[Coral] Prop===Context?', coralClashProp === coralClashContext);
-
     const cellSize = size / 8;
-
-    // Get all squares with coral - computed directly during render
-    // Don't use useMemo as it can capture stale closures of the mutating coralClash object
-    console.log('[Coral] Computing coral squares, updateTrigger:', updateTrigger);
-    console.log('[Coral] Total coral pieces:', coralClash.getAllCoral().length);
-    console.log(
-        '[Coral] Coral squares:',
-        coralClash
-            .getAllCoral()
-            .map((c) => c.square)
-            .join(', '),
-    );
-    console.log('[Coral] White remaining:', coralClash.getCoralRemaining('w'));
-    console.log('[Coral] Black remaining:', coralClash.getCoralRemaining('b'));
 
     const coralSquares = [];
     SQUARES.forEach((square) => {
@@ -42,10 +24,6 @@ const Coral = ({
             coralSquares.push({ square, color: coralColor });
         }
     });
-
-    console.log('[Coral] Rendering', coralSquares.length, 'coral squares');
-    console.log('[Coral] Removed coral during animation:', removedCoral.length);
-    console.log('[Coral] Placed coral (hidden during animation):', placedCoral.length);
 
     // Filter out coral that's being placed (should be hidden during animation)
     const placedCoralSquares = placedCoral.map((c) => c.square);

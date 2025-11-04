@@ -65,10 +65,6 @@ export const useGameActions = (coralClash, gameId, onStateUpdate) => {
                         setGameData(data);
                     }
 
-                    console.log('[useGameActions] Firestore snapshot received');
-                    console.log('[useGameActions] Has gameState?', !!data.gameState);
-                    console.log('[useGameActions] Has coralClash?', !!coralClash);
-
                     // Apply the updated game state to the CoralClash instance
                     if (data.gameState && coralClash) {
                         console.log('[useGameActions] Calling restoreGameFromSnapshot');

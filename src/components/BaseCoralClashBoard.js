@@ -129,17 +129,6 @@ const BaseCoralClashBoard = ({
     // snapshot parameter contains the game state from Firestore (includes pgn)
     const handleStateUpdate = useCallback(
         (snapshot) => {
-            console.log('[BaseBoard] handleStateUpdate called');
-            console.log('[BaseBoard] Coral state:', coralClash.getAllCoral().length, 'pieces');
-            console.log(
-                '[BaseBoard] Coral squares:',
-                coralClash
-                    .getAllCoral()
-                    .map((c) => c.square)
-                    .join(', '),
-            );
-            console.log('[BaseBoard] Coral remaining:', coralClash.getCoralRemainingCounts());
-
             // Clear visible moves when game state updates from Firestore
             setVisibleMoves([]);
             setSelectedSquare(null);
@@ -169,6 +158,23 @@ const BaseCoralClashBoard = ({
                     setRemovedCoral([]);
                     setPlacedCoral([]);
                     lastAnimatedMoveRef.current = null;
+                }
+                // Check if moves were undone (history length decreased)
+                else if (
+                    previousHistoryLengthRef.current !== null &&
+                    currentHistoryLength < previousHistoryLengthRef.current
+                ) {
+                    // Moves were undone - update ref to prevent re-animating the current last move
+                    // Note: Undo animation is not implemented for online games because we only
+                    // receive the game state after the undo, without information about which
+                    // move was undone
+                    if (history.length > 0) {
+                        const lastMove = history[history.length - 1];
+                        const moveKey = `${lastMove.from}-${lastMove.to}-${history.length}`;
+                        lastAnimatedMoveRef.current = moveKey;
+                    } else {
+                        lastAnimatedMoveRef.current = null;
+                    }
                 } else if (history.length > 0) {
                     const lastMove = history[history.length - 1];
                     const moveKey = `${lastMove.from}-${lastMove.to}-${history.length}`;
@@ -1052,7 +1058,7 @@ const BaseCoralClashBoard = ({
 
         if (onUndo) {
             onUndo(coralClash);
-            
+
             // After undo, update lastAnimatedMoveRef to match the new last move
             // This prevents handleStateUpdate from re-animating it
             const newHistory = coralClash.history({ verbose: true });
@@ -1063,10 +1069,10 @@ const BaseCoralClashBoard = ({
             } else {
                 lastAnimatedMoveRef.current = null;
             }
-            
+
             // Update history length ref to prevent animation trigger
             previousHistoryLengthRef.current = newHistory.length;
-            
+
             // Exit history view when undo is performed
             setHistoryIndex(null);
             // Force re-render to show updated board after undo
@@ -1156,16 +1162,6 @@ const BaseCoralClashBoard = ({
 
     // Execute a move - for online games, use backend-first; for offline/local, apply locally
     const executeMove = async (moveParams) => {
-        console.log('[BaseBoard] executeMove called with:', moveParams);
-        console.log('[BaseBoard] Coral BEFORE move:', coralClash.getAllCoral().length, 'pieces');
-        console.log(
-            '[BaseBoard] Coral squares BEFORE:',
-            coralClash
-                .getAllCoral()
-                .map((c) => c.square)
-                .join(', '),
-        );
-
         // Clear visible moves immediately when making a move
         clearVisibleMoves();
 
@@ -1187,16 +1183,6 @@ const BaseCoralClashBoard = ({
         if (isOnlineGame) {
             const result = await makeMoveAPI(moveParams);
             if (!result) return null;
-
-            console.log('[BaseBoard] Online move completed');
-            console.log('[BaseBoard] Coral AFTER move:', coralClash.getAllCoral().length, 'pieces');
-            console.log(
-                '[BaseBoard] Coral squares AFTER:',
-                coralClash
-                    .getAllCoral()
-                    .map((c) => c.square)
-                    .join(', '),
-            );
 
             setHistoryIndex(null);
             await onMoveComplete?.(result, moveParams);
@@ -1808,8 +1794,6 @@ const BaseCoralClashBoard = ({
         localTimeRemaining && topPlayerId ? localTimeRemaining[topPlayerId] : null;
     const bottomPlayerTime =
         localTimeRemaining && bottomPlayerId ? localTimeRemaining[bottomPlayerId] : null;
-
-    console.log('[BaseBoard] Providing to context, coral count:', coralClash.getAllCoral().length);
 
     return (
         <CoralClashProvider value={coralClash}>
