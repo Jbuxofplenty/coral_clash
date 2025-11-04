@@ -19,6 +19,7 @@ import whaleCheck5 from './whale-check-5.json';
 import whaleCheck6 from './whale-check-6.json';
 import whaleCheck7 from './whale-check-7.json';
 import whaleCheck8 from './whale-check-8.json';
+import whaleCheck9 from './whale-check-9.json';
 import whaleCheck from './whale-check.json';
 import whaleDoubleJeopardy2 from './whale-double-jeopardy-2.json';
 import whaleDoubleJeopardy from './whale-double-jeopardy.json';
@@ -48,6 +49,7 @@ export {
     whaleCheck6,
     whaleCheck7,
     whaleCheck8,
+    whaleCheck9,
     whaleDoubleJeopardy,
     whaleDoubleJeopardy2,
     whaleMoveDigonally,
@@ -85,4 +87,5 @@ export const FIXTURES = {
     'whale-check-6': whaleCheck6,
     'whale-check-7': whaleCheck7,
     'whale-check-8': whaleCheck8,
+    'whale-check-9': whaleCheck9,
 };

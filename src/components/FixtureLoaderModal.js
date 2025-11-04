@@ -28,6 +28,7 @@ const FIXTURES = [
     { name: 'whale-check-6', label: '🐋 Whale Check #6' },
     { name: 'whale-check-7', label: '🐋 Whale Check #7 (Puffer Block)' },
     { name: 'whale-check-8', label: '🐋 Whale Check #8 (Turtle Protection)' },
+    { name: 'whale-check-9', label: '🐋 Whale Check #9 (Coral Capture)' },
 ];
 
 const FixtureLoaderModal = ({ visible, onClose, onSelectFixture }) => {

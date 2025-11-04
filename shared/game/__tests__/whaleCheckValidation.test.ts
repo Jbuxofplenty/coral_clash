@@ -14,6 +14,7 @@ import whaleCheck5 from '../__fixtures__/whale-check-5.json';
 import whaleCheck6 from '../__fixtures__/whale-check-6.json';
 import whaleCheck7 from '../__fixtures__/whale-check-7.json';
 import whaleCheck8 from '../__fixtures__/whale-check-8.json';
+import whaleCheck9 from '../__fixtures__/whale-check-9.json';
 import whaleCheck from '../__fixtures__/whale-check.json';
 import { CoralClash, applyFixture } from '../index';
 
@@ -426,6 +427,56 @@ describe('Whale Check Validation Bug', () => {
         expect(e6f6Move).toBeDefined(); // Should be available with legal validation
         expect(e7f7Move).toBeDefined(); // Should be available with legal validation
         expect(f7g7Move).toBeUndefined(); // Still blocked (white can legally attack g7)
+    });
+
+    test('whale-check-9.json: white whale cannot move to d6,e6 (black whale can attack)', () => {
+        const game = new CoralClash();
+        applyFixture(game, whaleCheck9);
+
+        console.log('\n=== whale-check-9.json: White whale at d3,e3 trying to move to d6,e6 ===');
+        console.log('White whale position:', game.whalePositions().w);
+        console.log('Black whale position:', game.whalePositions().b);
+        console.log('Turn:', game.turn());
+
+        // Check coral positions
+        console.log('\nCoral at d6:', game.getCoral('d6'));
+        console.log('Coral at e6:', game.getCoral('e6'));
+
+        // Get all white whale moves
+        const whiteWhaleMoves = game.moves({ verbose: true, piece: 'h' });
+        console.log('\nTotal white whale moves:', whiteWhaleMoves.length);
+
+        // Check if the invalid move (d6,e6) is present
+        const invalidMoves = whiteWhaleMoves.filter(
+            (m: any) =>
+                (m.to === 'd6' && m.whaleSecondSquare === 'e6') ||
+                (m.to === 'e6' && m.whaleSecondSquare === 'd6'),
+        );
+
+        console.log('Moves to d6,e6:', invalidMoves.length);
+        if (invalidMoves.length > 0) {
+            console.log('Invalid moves found:', invalidMoves);
+        }
+
+        // The move should NOT be present because it would put white whale in check
+        // Black whale at d8,e8 can parallel slide to d6,e6 (capturing white whale)
+        // Even though there is black coral at d6 and e6, the whale can capture while sliding
+        expect(invalidMoves.length).toBe(0);
+
+        // Also verify: if we try to make this move manually, it should be rejected
+        let result = null;
+        try {
+            result = game.move({
+                from: 'd3',
+                to: 'd6',
+                whaleSecondSquare: 'e6',
+            });
+        } catch (_error) {
+            result = null;
+        }
+
+        // The specific move we requested should not be made
+        expect(result).toBeNull();
     });
 
     it('performance benchmark: measure optimization impact', () => {
