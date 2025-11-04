@@ -1866,9 +1866,7 @@ const BaseCoralClashBoard = ({
                             userColor={userColor}
                             boardFlipped={isBoardFlipped}
                             isProcessing={isGameActionProcessing}
-                            animatingSquare={
-                                pendingUndoRef.current ? animatingMove?.from : animatingMove?.to
-                            }
+                            animatingSquare={animatingMove?.to}
                             capturedPiece={capturedPiece}
                         />
                         <Moves

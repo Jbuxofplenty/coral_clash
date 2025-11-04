@@ -203,16 +203,12 @@ const PassAndPlayCoralClashBoard = ({
         );
     };
 
-    // Undo single move and flip board back after animation
+    // Undo single move and flip board back
     const handleUndo = async (coralClash) => {
         if (!coralClash) return;
 
         coralClash.undo();
-
-        // Flip board back after undo animation completes
-        setTimeout(() => {
-            setIsBoardFlipped((prev) => !prev);
-        }, 500);
+        setIsBoardFlipped((prev) => !prev);
     };
 
     // Handle resign - delete game from storage
