@@ -1090,6 +1090,9 @@ const BaseCoralClashBoard = ({
                     }
                 }
 
+                // Mark that we need to apply undo after animation completes
+                pendingUndoRef.current = true;
+
                 setAnimatingMove({
                     ...lastMove,
                     from: lastMove.to,
@@ -1102,9 +1105,6 @@ const BaseCoralClashBoard = ({
                 setCapturedPiece(null);
                 setRemovedCoral([]);
                 setPlacedCoral([]);
-
-                // Mark that we need to apply undo after animation completes
-                pendingUndoRef.current = true;
             } else {
                 // No animation, apply undo immediately
                 onUndo(coralClash);
