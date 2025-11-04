@@ -1,68 +1,65 @@
 /**
- * Test if white controls e4 square (ignoring occupation)
+ * Test square control and attack detection
+ * Uses whale-check.json fixture with white whale at b4,c4 and black whale at e3,e2
  */
 
 import whaleCheck from '../__fixtures__/whale-check.json';
 import { CoralClash, applyFixture } from '../index';
 
-describe('Test Square Control', () => {
-    test('can white attack e4 if black whale were not there?', () => {
+describe('Square Control and Attack Detection', () => {
+    test('white whale at b4,c4 cannot attack e4', () => {
         const game = new CoralClash();
         applyFixture(game, whaleCheck);
 
-        console.log('\n=== Before black moves ===');
-        console.log('White whale:', game.whalePositions().w); // b4, c4
-        console.log('Black whale:', game.whalePositions().b); // e3, e2
+        // Verify whale positions
+        const whalePos = game.whalePositions();
+        expect(whalePos.w).toEqual(['b4', 'c4']); // White whale horizontal at b4,c4
+        expect(whalePos.b).toEqual(['e3', 'e2']); // Black whale vertical at e3,e2
 
-        // Can white attack e4 right now (when it's empty)?
-        console.log('Can white attack e4 (empty)?', game.isAttacked('e4', 'w'));
+        // e4 is empty and white whale cannot reach it from b4,c4
+        expect(game.isAttacked('e4', 'w')).toBe(false);
+    });
 
-        // Now move black to e3,e4
-        game.move({ from: 'e2', to: 'e4', whaleSecondSquare: 'e3' });
+    test('white whale at b4,c4 can attack adjacent squares', () => {
+        const game = new CoralClash();
+        applyFixture(game, whaleCheck);
 
-        console.log('\n=== After black moves to e3,e4 ===');
-        console.log('Black whale:', game.whalePositions().b); // e4, e3
+        // White whale at b4,c4 should be able to attack squares on same row and diagonals
+        // Adjacent on row 4
+        expect(game.isAttacked('a4', 'w')).toBe(true);
+        expect(game.isAttacked('d4', 'w')).toBe(true);
 
-        // Can white attack e4 now (occupied by black)?
-        console.log('Can white attack e4 (occupied)?', game.isAttacked('e4', 'w'));
+        // Adjacent diagonally
+        expect(game.isAttacked('b5', 'w')).toBe(true);
+        expect(game.isAttacked('c5', 'w')).toBe(true);
 
-        // The key question: In chess terms, does white "control" e4?
-        // This means: could white attack e4 if the piece there were removed?
+        // Further diagonal
+        expect(game.isAttacked('e5', 'w')).toBe(true);
 
-        // Let's test by temporarily removing black whale and checking
-        const gameInternal = game as any;
+        // But NOT e4 (it's not on a valid attack line from b4,c4)
+        expect(game.isAttacked('e4', 'w')).toBe(false);
+    });
 
-        function squareToIndex(sq: string): number {
-            const file = sq.charCodeAt(0) - 'a'.charCodeAt(0);
-            const rank = 8 - parseInt(sq[1]);
-            return rank * 16 + file;
+    test('isAttacked works correctly for empty and occupied squares', () => {
+        const game = new CoralClash();
+        applyFixture(game, whaleCheck);
+
+        // e4 is empty (get returns false for empty squares)
+        expect(game.get('e4')).toBe(false);
+        expect(game.isAttacked('e4', 'w')).toBe(false);
+
+        // e3 is occupied by black whale
+        const e3Piece = game.get('e3');
+        expect(e3Piece).toBeTruthy();
+        if (e3Piece && typeof e3Piece !== 'boolean') {
+            expect(e3Piece.color).toBe('b');
         }
 
-        const e4 = squareToIndex('e4');
-        const e3 = squareToIndex('e3');
+        // White cannot attack e3 either (not on attack line from b4,c4)
+        expect(game.isAttacked('e3', 'w')).toBe(false);
 
-        // Save black whale position
-        const oldBlackKings = [gameInternal._kings.b[0], gameInternal._kings.b[1]];
-        const oldE4Piece = gameInternal._board[e4];
-        const oldE3Piece = gameInternal._board[e3];
-
-        // Temporarily remove black whale
-        gameInternal._kings.b[0] = -1;
-        gameInternal._kings.b[1] = -1;
-        gameInternal._board[e4] = undefined;
-        gameInternal._board[e3] = undefined;
-
-        console.log('\n=== With black whale temporarily removed ===');
-        console.log('Can white attack e4 now?', gameInternal._attacked('w', e4, false));
-        console.log('Can white attack e4 (skip)?', gameInternal._attacked('w', e4, true));
-
-        // Restore black whale
-        gameInternal._kings.b[0] = oldBlackKings[0];
-        gameInternal._kings.b[1] = oldBlackKings[1];
-        gameInternal._board[e4] = oldE4Piece;
-        gameInternal._board[e3] = oldE3Piece;
-
-        console.log('\n=== Restored ===');
-        console.log('Can white attack e4?', gameInternal._attacked('w', e4, false));
+        // d4 is empty but CAN be attacked by white whale
+        expect(game.get('d4')).toBe(false);
+        expect(game.isAttacked('d4', 'w')).toBe(true);
     });
 });
