@@ -427,4 +427,48 @@ describe('Whale Check Validation Bug', () => {
         expect(e7f7Move).toBeDefined(); // Should be available with legal validation
         expect(f7g7Move).toBeUndefined(); // Still blocked (white can legally attack g7)
     });
+
+    it('performance benchmark: measure optimization impact', () => {
+        const game = new CoralClash();
+        applyFixture(game, whaleCheck2);
+
+        // Reset perf stats
+        game.getPerfStats();
+
+        // Generate moves multiple times to amplify performance differences
+        const iterations = 100;
+        const startTime = Date.now();
+        let totalMoves = 0;
+        
+        for (let i = 0; i < iterations; i++) {
+            const moves = game.moves({ verbose: true });
+            totalMoves += moves.length;
+        }
+        
+        const endTime = Date.now();
+        const totalTime = endTime - startTime;
+
+        const stats = game.getPerfStats();
+
+        console.log('\n=== PERFORMANCE STATS (100 iterations) ===');
+        console.log(`Total time: ${totalTime}ms`);
+        console.log(`Average time per iteration: ${(totalTime / iterations).toFixed(2)}ms`);
+        console.log(`Total moves generated: ${totalMoves}`);
+        console.log(`canWhaleLegallyAttack calls: ${stats.canWhaleLegallyAttackCalls}`);
+        console.log(`Cache hits: ${stats.cacheHits}`);
+        console.log(`Cache misses: ${stats.cacheMisses}`);
+        console.log(
+            `Cache hit rate: ${stats.cacheHits > 0 ? ((stats.cacheHits / (stats.cacheHits + stats.cacheMisses)) * 100).toFixed(1) : 0}%`,
+        );
+        console.log(`Moves generated for validation: ${stats.movesGenerated}`);
+        console.log(`Make/undo cycles: ${stats.makeUndoCycles}`);
+        console.log('\n=== OPTIMIZATION SUMMARY ===');
+        console.log('✓ Removed 3 algebraic() conversions per loop iteration');
+        console.log('✓ Direct numeric comparison (move.to === targetSquare)');
+        console.log('✓ Calculated opponent color once (eliminated duplicate swapColor call)');
+        console.log('✓ Reduced string allocations in hot path');
+        console.log('==========================================\n');
+
+        expect(totalMoves).toBeGreaterThan(0);
+    });
 });

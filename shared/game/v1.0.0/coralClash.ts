@@ -1204,6 +1204,9 @@ export class CoralClash {
 
         this._perfStats.cacheMisses++;
 
+        // Calculate opponent color once
+        const them = swapColor(whaleColor);
+
         // Check moves cache
         const movesCacheKey = `${whaleColor}_${whaleFirst}_${whaleSecond}`;
         let moves = this._whaleAttackMovesCache.get(movesCacheKey);
@@ -1212,7 +1215,6 @@ export class CoralClash {
             // Generate all pseudo-legal moves for the attacking whale
             // Allow whale captures for attack validation purposes
             moves = [];
-            const them = swapColor(whaleColor);
             this._generateWhaleMoves(moves, whaleFirst, whaleSecond, whaleColor, them, true);
             this._perfStats.movesGenerated += moves.length;
 
@@ -1221,15 +1223,10 @@ export class CoralClash {
         }
 
         // Check if any move reaches the target square without leaving attacker in check
-        const targetAlg = algebraic(targetSquare);
-        const them = swapColor(whaleColor);
-
+        // Compare numeric squares directly instead of converting to algebraic notation
         for (const move of moves) {
-            const toAlg = algebraic(move.to);
-            const otherAlg = algebraic(move.whaleOtherSquare!);
-
             // Does this move reach the target square?
-            if (toAlg === targetAlg || otherAlg === targetAlg) {
+            if (move.to === targetSquare || move.whaleOtherSquare === targetSquare) {
                 this._perfStats.makeUndoCycles++;
                 // Make the move and check if it leaves the attacker in check
                 // We only check non-whale attacks to avoid infinite recursion
