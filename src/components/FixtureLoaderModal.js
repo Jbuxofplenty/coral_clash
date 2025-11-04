@@ -20,7 +20,7 @@ const FIXTURES = [
     { name: 'coral-blocks-attack', label: 'Coral Blocks Attack' },
     { name: 'whale-removes-coral', label: 'Whale Removes Coral' },
     { name: 'crab-movement', label: 'Crab Movement Debug' },
-    { name: 'whale-check', label: '🐋 Whale Check #1 (Square Control Test - W:b4,c4 B:e3,e2)' },
+    { name: 'whale-check', label: '🐋 Whale Check #1' },
     { name: 'whale-check-2', label: '🐋 Whale Check #2' },
     { name: 'whale-check-3', label: '🐋 Whale Check #3' },
     { name: 'whale-check-4', label: '🐋 Whale Check #4' },

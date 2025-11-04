@@ -439,12 +439,12 @@ describe('Whale Check Validation Bug', () => {
         const iterations = 100;
         const startTime = Date.now();
         let totalMoves = 0;
-        
+
         for (let i = 0; i < iterations; i++) {
             const moves = game.moves({ verbose: true });
             totalMoves += moves.length;
         }
-        
+
         const endTime = Date.now();
         const totalTime = endTime - startTime;
 
