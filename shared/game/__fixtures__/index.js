@@ -14,6 +14,8 @@ import multipleChecks from './multiple-checks.json';
 import octoDeleted from './octo-deleted.json';
 import octopusCheck from './octopus-check.json';
 import whaleAttack from './whale-attack.json';
+import whaleCheck10 from './whale-check-10.json';
+import whaleCheck11 from './whale-check-11.json';
 import whaleCheck2 from './whale-check-2.json';
 import whaleCheck3 from './whale-check-3.json';
 import whaleCheck4 from './whale-check-4.json';
@@ -22,8 +24,6 @@ import whaleCheck6 from './whale-check-6.json';
 import whaleCheck7 from './whale-check-7.json';
 import whaleCheck8 from './whale-check-8.json';
 import whaleCheck9 from './whale-check-9.json';
-import whaleCheck10 from './whale-check-10.json';
-import whaleCheck11 from './whale-check-11.json';
 import whaleCheck from './whale-check.json';
 import whaleDoubleJeopardy2 from './whale-double-jeopardy-2.json';
 import whaleDoubleJeopardy from './whale-double-jeopardy.json';
@@ -49,6 +49,8 @@ export {
     octopusCheck,
     whaleAttack,
     whaleCheck,
+    whaleCheck10,
+    whaleCheck11,
     whaleCheck2,
     whaleCheck3,
     whaleCheck4,
@@ -57,8 +59,6 @@ export {
     whaleCheck7,
     whaleCheck8,
     whaleCheck9,
-    whaleCheck10,
-    whaleCheck11,
     whaleDoubleJeopardy,
     whaleDoubleJeopardy2,
     whaleMoveDigonally,
