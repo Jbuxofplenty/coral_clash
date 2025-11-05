@@ -2778,24 +2778,30 @@ export class CoralClash {
         }
 
         if (move.captured) {
+            // For whale captures, restore to the whale's FIRST square (from history)
+            // For normal captures, use captureSquare or move.to
+            let restoreSquare: number;
             if (move.captured === WHALE) {
-                // Whale capture should never happen in normal play
-                // But it's allowed during validation
+                // Whales are stored only at their first square
+                // old.kings[them] was already restored above, use it to get the first square
+                restoreSquare = old.kings[them][0];
+
+                // Whale captures should never happen in normal play
                 if (this._validationDepth === 0) {
-                    console.error('[_undoMove] Undoing illegal whale capture');
+                    console.error(
+                        '[_undoMove] Undoing illegal whale capture in non-validation context',
+                    );
                 }
             } else {
-                // Regular capture - restore with role
-                // For whale captures, use captureSquare (which square had the captured piece)
-                // For normal captures, use move.to
-                const restoreSquare =
-                    move.captureSquare !== undefined ? move.captureSquare : move.to;
-                this._board[restoreSquare] = {
-                    type: move.captured,
-                    color: them,
-                    role: move.capturedRole,
-                };
+                // Regular piece - restore to capture square
+                restoreSquare = move.captureSquare !== undefined ? move.captureSquare : move.to;
             }
+
+            this._board[restoreSquare] = {
+                type: move.captured,
+                color: them,
+                role: move.capturedRole,
+            };
         }
 
         // No castling in Coral Clash
@@ -3597,7 +3603,7 @@ export class CoralClash {
      * @returns Object with white and black whale positions
      */
     whalePositions() {
-        return {
+        const positions = {
             w:
                 this._kings.w[0] !== EMPTY
                     ? [algebraic(this._kings.w[0]), algebraic(this._kings.w[1])]
@@ -3607,6 +3613,8 @@ export class CoralClash {
                     ? [algebraic(this._kings.b[0]), algebraic(this._kings.b[1])]
                     : null,
         };
+
+        return positions;
     }
 
     board() {

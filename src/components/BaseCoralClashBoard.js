@@ -966,8 +966,9 @@ const BaseCoralClashBoard = ({
     // 1. notificationStatus - Undo/reset acceptance/decline notifications
     // 2. gameRequestBanner - Undo/reset requests requiring user interaction
     // 3. isViewingHistory - User is viewing past moves
-    // 4. turnNotification - Turn change notification (temporary, 5 seconds)
-    // 5. gameStatus - Game over/check status (persistent)
+    // 4. whaleDestination - Whale orientation selection in progress
+    // 5. turnNotification - Turn change notification (temporary, 5 seconds)
+    // 6. gameStatus - Game over/check status (persistent)
     const activeBanner = useMemo(() => {
         // Priority 1: Notification status (highest priority - user feedback)
         if (notificationStatus) {
@@ -1010,7 +1011,21 @@ const BaseCoralClashBoard = ({
             };
         }
 
-        // Priority 4: Turn notification (temporary, 5 seconds)
+        // Priority 4: Whale orientation selection (informational)
+        if (whaleDestination) {
+            return {
+                type: 'status',
+                content: (
+                    <GameStatusBanner
+                        message='Select the orientation for your whale'
+                        type='info'
+                        visible={true}
+                    />
+                ),
+            };
+        }
+
+        // Priority 5: Turn notification (temporary, 5 seconds)
         if (turnNotification) {
             return {
                 type: 'status',
@@ -1026,7 +1041,7 @@ const BaseCoralClashBoard = ({
             };
         }
 
-        // Priority 5: Game status (checkmate, draw, check, etc.)
+        // Priority 6: Game status (checkmate, draw, check, etc.)
         if (gameStatus) {
             return {
                 type: 'status',
@@ -1046,6 +1061,7 @@ const BaseCoralClashBoard = ({
         renderGameRequestBanner,
         isViewingHistory,
         isGameOver,
+        whaleDestination,
         turnNotification,
         gameStatus,
         coralClash,
