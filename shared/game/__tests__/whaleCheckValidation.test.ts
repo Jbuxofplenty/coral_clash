@@ -15,6 +15,7 @@ import whaleCheck6 from '../__fixtures__/whale-check-6.json';
 import whaleCheck7 from '../__fixtures__/whale-check-7.json';
 import whaleCheck8 from '../__fixtures__/whale-check-8.json';
 import whaleCheck9 from '../__fixtures__/whale-check-9.json';
+import whaleCheck10 from '../__fixtures__/whale-check-10.json';
 import whaleCheck from '../__fixtures__/whale-check.json';
 import { CoralClash, applyFixture } from '../index';
 
@@ -521,5 +522,129 @@ describe('Whale Check Validation Bug', () => {
         console.log('==========================================\n');
 
         expect(totalMoves).toBeGreaterThan(0);
+    });
+
+    test('whale-check-10.json: analyze why black whale is in check (adjacent whales)', () => {
+        const game = new CoralClash();
+        applyFixture(game, whaleCheck10);
+
+        console.log('\n=== whale-check-10.json: Adjacent Whales Analysis ===');
+        console.log('White whale position:', game.whalePositions().w);
+        console.log('Black whale position:', game.whalePositions().b);
+        console.log('Turn:', game.turn());
+        console.log('Black in check:', game.inCheck());
+
+        // The whales are directly adjacent:
+        // White whale: e4, f4
+        // Black whale: e5, f5
+        // e5 is directly north of e4, f5 is directly north of f4
+
+        // Check coral positions at whale squares
+        console.log('\n=== Coral at Whale Positions ===');
+        console.log('Coral at e4 (white whale):', game.getCoral('e4'));
+        console.log('Coral at f4 (white whale):', game.getCoral('f4'));
+        console.log('Coral at e5 (black whale):', game.getCoral('e5'));
+        console.log('Coral at f5 (black whale):', game.getCoral('f5'));
+
+        // Verify white whale can attack black whale's squares
+        console.log('\n=== Can White Whale Attack Black Whale? ===');
+        console.log('Can white attack e5?', game.isAttacked('e5', 'w'));
+        console.log('Can white attack f5?', game.isAttacked('f5', 'w'));
+
+        // Check if white whale can legally attack (considering mutual check)
+        console.log('\n=== Legal Attack Analysis ===');
+        const whiteWhaleMoves = game.moves({ verbose: true, color: 'w', piece: 'h' });
+        console.log('White whale has', whiteWhaleMoves.length, 'legal moves');
+
+        // Can white whale attack e5 or f5 without putting itself in check?
+        const attacksOnBlackWhale = whiteWhaleMoves.filter((m: any) => {
+            return m.to === 'e5' || m.to === 'f5' || m.whaleSecondSquare === 'e5' || m.whaleSecondSquare === 'f5';
+        });
+        
+        console.log('White moves that would attack black whale squares:', attacksOnBlackWhale.length);
+        if (attacksOnBlackWhale.length > 0) {
+            console.log('Sample attacks:', attacksOnBlackWhale.slice(0, 3));
+        }
+
+        // Get all available moves for black whale
+        console.log('\n=== Black Whale Available Moves ===');
+        const blackWhaleMoves = game.moves({ verbose: true, piece: 'h' });
+        console.log('Black whale has', blackWhaleMoves.length, 'legal moves');
+        
+        if (blackWhaleMoves.length > 0) {
+            console.log('\nSample black whale moves:');
+            blackWhaleMoves.slice(0, 5).forEach((m: any) => {
+                console.log(`  - ${m.from} -> ${m.to} (other half: ${m.whaleSecondSquare})`);
+            });
+        } else {
+            console.log('⚠️  BLACK WHALE HAS NO LEGAL MOVES!');
+        }
+
+        // Check if black can escape check
+        console.log('\n=== Can Black Escape Check? ===');
+        
+        // Get all legal moves for black (any piece)
+        const allBlackMoves = game.moves({ verbose: true });
+        console.log('Total legal moves for black:', allBlackMoves.length);
+
+        const movesGroupedByPiece: any = {};
+        allBlackMoves.forEach((m: any) => {
+            if (!movesGroupedByPiece[m.piece]) {
+                movesGroupedByPiece[m.piece] = [];
+            }
+            movesGroupedByPiece[m.piece].push(m);
+        });
+
+        console.log('\nMoves by piece type:');
+        Object.keys(movesGroupedByPiece).forEach((pieceType) => {
+            console.log(`  ${pieceType}: ${movesGroupedByPiece[pieceType].length} moves`);
+        });
+
+        // Check if this is checkmate or stalemate
+        console.log('\n=== Game State ===');
+        console.log('Is checkmate:', game.isCheckmate());
+        console.log('Is stalemate:', game.isStalemate());
+        console.log('Is game over:', game.isGameOver());
+
+        // VALIDATION: Is this check state valid?
+        console.log('\n=== CHECK VALIDITY ANALYSIS ===');
+        
+        // The check is valid if:
+        // 1. White whale can physically reach e5 or f5 (yes - they're adjacent)
+        // 2. White whale can LEGALLY attack those squares (without putting white in check)
+        
+        // If white CAN legally attack, then black IS in valid check
+        // If white CANNOT legally attack (would put white in check), then this is INVALID
+        
+        const canWhiteLegallyAttackE5 = game.isAttacked('e5', 'w');
+        const canWhiteLegallyAttackF5 = game.isAttacked('f5', 'w');
+        
+        console.log('White can legally attack e5:', canWhiteLegallyAttackE5);
+        console.log('White can legally attack f5:', canWhiteLegallyAttackF5);
+        
+        if (canWhiteLegallyAttackE5 || canWhiteLegallyAttackF5) {
+            console.log('\n✅ CHECK IS VALID: White whale can legally attack black whale');
+            console.log('   Black must move to escape check or block the attack');
+        } else {
+            console.log('\n❌ CHECK IS INVALID: White whale cannot legally attack black whale');
+            console.log('   This would be a mutual check situation (invalid game state)');
+        }
+
+        // Assertions
+        expect(game.inCheck()).toBe(true);
+        expect(game.whalePositions().w).toEqual(['e4', 'f4']);
+        expect(game.whalePositions().b).toEqual(['e5', 'f5']);
+        
+        // The check should be valid - white can attack black's position
+        expect(canWhiteLegallyAttackE5 || canWhiteLegallyAttackF5).toBe(true);
+        
+        // Black should have some legal moves to escape (otherwise it's checkmate)
+        if (game.isCheckmate()) {
+            expect(allBlackMoves.length).toBe(0);
+            console.log('\n🏁 This is CHECKMATE - Black has no legal moves');
+        } else {
+            expect(allBlackMoves.length).toBeGreaterThan(0);
+            console.log('\n↔️  Black can escape - this is just check, not checkmate');
+        }
     });
 });
