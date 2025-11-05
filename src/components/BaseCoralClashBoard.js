@@ -21,7 +21,7 @@ import {
 } from '../../shared';
 import { useAlert, useAuth, useGamePreferences, useTheme } from '../contexts';
 import { CoralClashProvider } from '../contexts/CoralClashContext';
-import { useCoralClash, useFirebaseFunctions, useGameActions } from '../hooks';
+import { useCoralClash, useDevFeatures, useFirebaseFunctions, useGameActions } from '../hooks';
 import AnimatedPiece from './AnimatedPiece';
 import Coral from './Coral';
 import EmptyBoard from './EmptyBoard';
@@ -34,9 +34,6 @@ const { height: _SCREEN_HEIGHT } = Dimensions.get('window');
 
 // Game state schema version for fixtures
 const GAME_STATE_VERSION = '1.2.0';
-
-// Check if dev features are enabled
-const DEV_FEATURES_ENABLED = process.env.EXPO_PUBLIC_ENABLE_DEV_FEATURES === 'true';
 
 /**
  * BaseCoralClashBoard - Core game board component with all shared logic
@@ -81,6 +78,7 @@ const BaseCoralClashBoard = ({
     const { user } = useAuth();
     const { showAlert } = useAlert();
     const { checkGameTime } = useFirebaseFunctions();
+    const DEV_FEATURES_ENABLED = useDevFeatures();
 
     // Use compact mode on smaller screens (iPhone SE, etc.)
     const isCompact = height < 700;

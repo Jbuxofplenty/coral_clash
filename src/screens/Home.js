@@ -15,19 +15,17 @@ import {
 import FixtureLoaderModal from '../components/FixtureLoaderModal';
 import { collection, db, onSnapshot, query, where } from '../config/firebase';
 import { useAlert, useAuth, useTheme } from '../contexts';
-import { useFirebaseFunctions, useGame, useMatchmaking } from '../hooks';
+import { useDevFeatures, useFirebaseFunctions, useGame, useMatchmaking } from '../hooks';
 import { useFriends } from '../hooks/useFriends';
 import { savePassAndPlayGame } from '../utils/passAndPlayStorage';
 
 const { width, height } = Dimensions.get('screen');
 
-// Check if dev features are enabled
-const enableDevFeatures = process.env.EXPO_PUBLIC_ENABLE_DEV_FEATURES === 'true';
-
 export default function Home({ navigation }) {
     const { colors } = useTheme();
     const { user } = useAuth();
     const { showAlert } = useAlert();
+    const enableDevFeatures = useDevFeatures();
     const [fixtureModalVisible, setFixtureModalVisible] = useState(false);
     const [gameHistory, setGameHistory] = useState([]);
     const [historyLoading, setHistoryLoading] = useState(true);

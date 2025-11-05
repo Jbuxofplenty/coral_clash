@@ -17,8 +17,13 @@ service cloud.firestore {
             allow read: if isOwner(userId) || 
                 exists(/databases/$(database)/documents/users/$(request.auth.uid)/friends/$(userId));
             
-            // Users can only write to their own profile
-            allow write: if isOwner(userId);
+            // Allow creation (via signUp)
+            allow create: if isOwner(userId);
+            
+            // Allow updates, but prevent modification of admin-only and system fields
+            allow update: if isOwner(userId) && 
+                !request.resource.data.diff(resource.data).affectedKeys()
+                    .hasAny(['internalUser', 'discriminator', 'stats', 'createdAt', 'friends']);
 
             // Friends subcollection
             match /friends/{friendId} {

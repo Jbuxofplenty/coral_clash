@@ -1,5 +1,6 @@
 // Hooks exports
 export { default as useCoralClash } from './useCoralClash';
+export { useDevFeatures } from './useDevFeatures';
 export { default as useFirebaseFunctions } from './useFirebaseFunctions';
 export { useFriends } from './useFriends';
 export { default as useGame } from './useGame';
