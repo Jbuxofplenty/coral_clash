@@ -12,6 +12,7 @@ import crabEndOfBoard from './crab-end-of-board.json';
 import crabMovement from './crab-movement.json';
 import multipleChecks from './multiple-checks.json';
 import octopusCheck from './octopus-check.json';
+import whaleAttack from './whale-attack.json';
 import whaleCheck2 from './whale-check-2.json';
 import whaleCheck3 from './whale-check-3.json';
 import whaleCheck4 from './whale-check-4.json';
@@ -21,7 +22,6 @@ import whaleCheck7 from './whale-check-7.json';
 import whaleCheck8 from './whale-check-8.json';
 import whaleCheck9 from './whale-check-9.json';
 import whaleCheck from './whale-check.json';
-import whaleAttack from './whale-attack.json';
 import whaleDoubleJeopardy2 from './whale-double-jeopardy-2.json';
 import whaleDoubleJeopardy from './whale-double-jeopardy.json';
 import whaleMoveDigonally2 from './whale-move-diagonally-2.json';
@@ -29,6 +29,7 @@ import whaleMoveDigonally from './whale-move-diagonally.json';
 import whaleRemove2Coral from './whale-remove-2-coral.json';
 import whaleRemovesCoral from './whale-removes-coral.json';
 import whaleRotation2 from './whale-rotation-2.json';
+import whaleRotation4 from './whale-rotation-4.json';
 import whaleRotation from './whale-rotation.json';
 
 // Export as named exports
@@ -42,6 +43,7 @@ export {
     crabMovement,
     multipleChecks,
     octopusCheck,
+    whaleAttack,
     whaleCheck,
     whaleCheck2,
     whaleCheck3,
@@ -51,7 +53,6 @@ export {
     whaleCheck7,
     whaleCheck8,
     whaleCheck9,
-    whaleAttack,
     whaleDoubleJeopardy,
     whaleDoubleJeopardy2,
     whaleMoveDigonally,
@@ -60,12 +61,14 @@ export {
     whaleRemovesCoral,
     whaleRotation,
     whaleRotation2,
+    whaleRotation4,
 };
 
 // Export fixtures map for dynamic loading (like in FixtureLoaderModal)
 export const FIXTURES = {
     'whale-rotation': whaleRotation,
     'whale-rotation-2': whaleRotation2,
+    'whale-rotation-4': whaleRotation4,
     'whale-double-jeopardy': whaleDoubleJeopardy,
     'whale-double-jeopardy-2': whaleDoubleJeopardy2,
     'whale-move-diagonally': whaleMoveDigonally,

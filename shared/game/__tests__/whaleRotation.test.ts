@@ -13,6 +13,7 @@
 
 import whaleRotation2 from '../__fixtures__/whale-rotation-2.json';
 import whaleRotation3 from '../__fixtures__/whale-rotation-3.json';
+import whaleRotation4 from '../__fixtures__/whale-rotation-4.json';
 import whaleRotation from '../__fixtures__/whale-rotation.json';
 import { CoralClash, applyFixture } from '../index';
 
@@ -279,5 +280,41 @@ describe('Whale Rotation Bug', () => {
 
         // Verify coral was removed
         expect(game.getCoral('d3')).toBeNull();
+    });
+
+    test('whale-rotation-4.json: whale position should not change when opponent moves', () => {
+        // Bug: After white whale rotates to e2,e3, when black makes any move,
+        // the white whale automatically rotates to e2,f2.
+        const game = new CoralClash();
+        applyFixture(game, whaleRotation4);
+
+        // Verify initial state
+        expect(game.turn()).toBe('b');
+        const initialWhalePos = game.whalePositions().w;
+        expect(initialWhalePos).toEqual(['e3', 'e2']); // Internal representation per FEN
+        expect(game.whalePositions().b).toEqual(['d6', 'e6']);
+
+        // Get a legal black move (any non-whale piece)
+        const blackMoves = game.moves({ verbose: true, color: 'b' });
+        const nonWhaleMoves = blackMoves.filter((m: any) => m.piece !== 'h');
+
+        expect(nonWhaleMoves.length).toBeGreaterThan(0);
+
+        const testMove = nonWhaleMoves[0];
+
+        // Make the black move
+        const result = game.move(testMove);
+        expect(result).not.toBeNull();
+
+        const afterMoveWhalePos = game.whalePositions().w;
+
+        // CRITICAL: White whale should NOT have moved
+        // Bug: it changes from ['e3', 'e2'] to ['e2', 'f2']
+        expect(afterMoveWhalePos).toEqual(initialWhalePos);
+
+        // Verify board state is consistent
+        const board = game.board();
+        const allWhales = board.flat().filter((sq: any) => sq && sq.type === 'h');
+        expect(allWhales.length).toBe(4); // 2 squares for white whale + 2 for black whale
     });
 });

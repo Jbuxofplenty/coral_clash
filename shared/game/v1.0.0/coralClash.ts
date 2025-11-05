@@ -2603,12 +2603,26 @@ export class CoralClash {
             // IMPORTANT: Delete any captured pieces at the new whale positions BEFORE placing the whale
             // Whale captures can happen during parallel slides where one or both destination squares are occupied
             if (move.captured) {
-                // Delete captured piece at newFirst if it's an opponent piece
-                if (this._board[newFirst] && this._board[newFirst].color === them) {
+                // Whale can capture up to two pieces (one at each destination square)
+                // But only delete pieces that are actually being captured (matching move.captured type)
+
+                // Check newFirst
+                const pieceAtFirst = this._board[newFirst];
+                if (
+                    pieceAtFirst &&
+                    pieceAtFirst.color === them &&
+                    pieceAtFirst.type === move.captured
+                ) {
                     delete this._board[newFirst];
                 }
-                // Delete captured piece at newSecond if it's an opponent piece
-                if (this._board[newSecond] && this._board[newSecond].color === them) {
+
+                // Check newSecond
+                const pieceAtSecond = this._board[newSecond];
+                if (
+                    pieceAtSecond &&
+                    pieceAtSecond.color === them &&
+                    pieceAtSecond.type === move.captured
+                ) {
                     delete this._board[newSecond];
                 }
             }
@@ -2750,7 +2764,11 @@ export class CoralClash {
 
             // Delete whale from current storage position
             delete this._board[currentFirst];
-            if (this._board[currentSecond]) {
+            // Only delete from currentSecond if it's OUR whale, not an opponent's piece
+            if (
+                this._board[currentSecond]?.type === WHALE &&
+                this._board[currentSecond]?.color === us
+            ) {
                 delete this._board[currentSecond]; // Cleanup in case of old bugs
             }
 
@@ -2764,6 +2782,7 @@ export class CoralClash {
             // Normal piece move
             // IMPORTANT: Create a COPY to avoid reference issues
             const pieceToRestore = this._board[move.to];
+
             if (pieceToRestore) {
                 this._board[move.from] = {
                     ...pieceToRestore,
