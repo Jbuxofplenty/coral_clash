@@ -44,6 +44,7 @@
 - Create fixtures in `shared/game/__fixtures__/` for reusable test scenarios
 - All tests must pass before committing - remove or fix failing tests
 - When running tests on the coralClash.ts game engine, you need to execute the `yarn test` command from the `shared` directory
+- For UI related tests, run from the root of the repo
 
 ## Documentation
 

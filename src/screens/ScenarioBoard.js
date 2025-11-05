@@ -122,21 +122,55 @@ export default function ScenarioBoard({ route, navigation }) {
 
                             // Check if we should show all possible moves or just the trajectory
                             if (scenario.autoPlaySequence.showAllMoves) {
-                                // Show all possible moves for this piece
-                                pathMoves = coralClash.moves({
-                                    square: move.from,
-                                    verbose: true,
-                                });
+                                // For whale moves with whaleSecondSquare, show the final whale positions
+                                if (move.whaleSecondSquare) {
+                                    // Show both final whale positions as highlights
+                                    pathMoves = [
+                                        {
+                                            to: move.to,
+                                            from: move.from,
+                                            san: move.to,
+                                        },
+                                        {
+                                            to: move.whaleSecondSquare,
+                                            from: move.from,
+                                            san: move.whaleSecondSquare,
+                                        },
+                                    ];
+                                } else {
+                                    // Show all possible moves for this piece
+                                    pathMoves = coralClash.moves({
+                                        square: move.from,
+                                        verbose: true,
+                                    });
+                                }
                             } else {
-                                // Calculate the specific path from source to destination
-                                const pathSquares = calculatePath(move.from, move.to);
+                                // For whale moves with whaleSecondSquare, show the final whale positions
+                                if (move.whaleSecondSquare) {
+                                    // Show both final whale positions as highlights
+                                    pathMoves = [
+                                        {
+                                            to: move.to,
+                                            from: move.from,
+                                            san: move.to,
+                                        },
+                                        {
+                                            to: move.whaleSecondSquare,
+                                            from: move.from,
+                                            san: move.whaleSecondSquare,
+                                        },
+                                    ];
+                                } else {
+                                    // Calculate the specific path from source to destination
+                                    const pathSquares = calculatePath(move.from, move.to);
 
-                                // Create move objects for each square in the path
-                                pathMoves = pathSquares.map((square) => ({
-                                    to: square,
-                                    from: move.from,
-                                    san: square,
-                                }));
+                                    // Create move objects for each square in the path
+                                    pathMoves = pathSquares.map((square) => ({
+                                        to: square,
+                                        from: move.from,
+                                        san: square,
+                                    }));
+                                }
                             }
 
                             setAutoPlayPathMoves(pathMoves);

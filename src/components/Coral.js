@@ -11,8 +11,9 @@ const Coral = ({
     removedCoral = [], // Coral being removed during animation
     placedCoral = [], // Coral being placed (hide during animation, show after)
 }) => {
+    // Always call the hook to satisfy React's Rules of Hooks
     const coralClashContext = useCoralClashContext();
-    // Use prop if provided (for historical view), otherwise use context
+    // Use prop if provided (for scenario boards), otherwise use context
     const coralClash = coralClashProp || coralClashContext;
 
     const cellSize = size / 8;

@@ -8,8 +8,7 @@ export const CoralClashProvider = ({ value, children }) => {
 
 export const useCoralClashContext = () => {
     const context = useContext(CoralClashContext);
-    if (!context) {
-        throw new Error('useCoralClashContext must be used within a CoralClashProvider');
-    }
+    // Allow null context - components can receive coralClash as prop instead
+    // Only throw error if context is required but not provided
     return context;
 };

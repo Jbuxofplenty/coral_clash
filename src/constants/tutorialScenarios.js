@@ -224,7 +224,7 @@ export const TUTORIAL_SCENARIOS = {
         },
         autoPlaySequence: {
             moves: [
-                { from: 'd4', to: 'd5' }, // Rotate from horizontal (d4-e4) to vertical (d5-e4)
+                { from: 'e4', to: 'd5', whaleSecondSquare: 'd4' }, // Rotate: e4 moves to d5, d4 stays (final: d4-d5)
             ],
             delayBetweenMoves: 2000,
             pauseAtEnd: 3000,
@@ -440,6 +440,7 @@ export const TUTORIAL_SCENARIOS = {
                     b: [],
                 },
                 coral: [{ square: 'd4', color: 'b' }],
+                coralRemaining: { w: 17, b: 16 },
                 isGameOver: false,
                 inCheck: false,
                 isCheckmate: false,
@@ -451,7 +452,7 @@ export const TUTORIAL_SCENARIOS = {
         // Auto-play sequence: crab moves onto coral (stops), then removes it
         autoPlaySequence: {
             moves: [
-                { from: 'c4', to: 'd4' }, // Crab moves onto coral and stops
+                { from: 'c4', to: 'd4', coralRemoved: true }, // Crab moves onto coral and removes it
             ],
             delayBetweenMoves: 1500, // 1.5 seconds between moves
             pauseAtEnd: 2500, // 2.5 seconds before reset
@@ -494,6 +495,8 @@ export const TUTORIAL_SCENARIOS = {
                     w: [],
                     b: [],
                 },
+                coral: [],
+                coralRemaining: { w: 17, b: 17 },
                 isGameOver: false,
                 inCheck: false,
                 isCheckmate: false,
@@ -505,7 +508,7 @@ export const TUTORIAL_SCENARIOS = {
         // Auto-play sequence: octopus moves and places coral
         autoPlaySequence: {
             moves: [
-                { from: 'e4', to: 'f5', flags: 'p' }, // Octopus moves diagonally and places coral
+                { from: 'e4', to: 'f5', coralPlaced: true }, // Octopus moves diagonally and places coral
             ],
             delayBetweenMoves: 1500, // 1.5 seconds between moves
             pauseAtEnd: 2500, // 2.5 seconds before reset

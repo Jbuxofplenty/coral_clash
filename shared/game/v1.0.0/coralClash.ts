@@ -679,6 +679,9 @@ export class CoralClash {
     private _coralRemaining: Record<Color, number> = { w: 17, b: 17 }; // Each player starts with 17 coral
     private _resigned: Color | null = null; // Tracks which player resigned, if any
 
+    // Tutorial mode: disables whale validation for tutorial scenarios
+    private _disableValidation = false;
+
     // tracks number of times a position has been seen for repetition checking
     private _positionCount: Record<string, number> = {};
 
@@ -775,6 +778,9 @@ export class CoralClash {
     }
 
     load(fen: string, { skipValidation = false, preserveHeaders = false } = {}) {
+        // Set validation flag for tutorial scenarios
+        this._disableValidation = skipValidation;
+
         let tokens = fen.split(/\s+/);
 
         // append commonly omitted fen tokens
@@ -2338,7 +2344,7 @@ export class CoralClash {
          * return all pseudo-legal moves (this includes moves that allow the king
          * to be captured)
          */
-        if (!legal || this._kings[us][0] === -1) {
+        if (!legal || this._kings[us][0] === -1 || this._disableValidation) {
             return moves;
         }
 
