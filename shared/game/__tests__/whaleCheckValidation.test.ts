@@ -330,7 +330,7 @@ describe('Whale Check Validation Bug', () => {
         expect(game.whalePositions().w).toEqual(['h7', 'h6']);
     });
 
-    test('whale-check-8.json: black whale can move to e6,f6 and e7,f7 (protected by pieces) - TODO: Requires legal-only validation mode', () => {
+    test('whale-check-8.json: black whale can move to e6,f6 and e7,f7 (protected by pieces)', () => {
         const game = new CoralClash();
         applyFixture(game, whaleCheck8, { skipValidation: true });
 
