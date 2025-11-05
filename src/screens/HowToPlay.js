@@ -168,7 +168,7 @@ export default function HowToPlay({ navigation }) {
                         Turn Overview
                     </Text>
                     <Text style={[styles.text, { color: colors.TEXT }]}>
-                        Yellow goes first, then players alternate. On your turn:
+                        White goes first, then players alternate. On your turn:
                     </Text>
                     <View style={styles.bulletSection}>
                         <Text style={[styles.bulletPoint, { color: colors.TEXT }]}>

@@ -57,6 +57,15 @@ export default function PlayWithFriendCard({
         });
     }, [friends, searchQuery]);
 
+    // Sort pass and play games by most recent first
+    const sortedPassAndPlayGames = useMemo(() => {
+        return [...passAndPlayGames].sort((a, b) => {
+            const aTime = new Date(a.updatedAt).getTime();
+            const bTime = new Date(b.updatedAt).getTime();
+            return bTime - aTime; // Newest first
+        });
+    }, [passAndPlayGames]);
+
     const handleCardPress = () => {
         if (disabled || loading) return;
         setOptionsModalVisible(true);
@@ -641,7 +650,7 @@ export default function PlayWithFriendCard({
                                     </Text>
                                 </Block>
                             ) : (
-                                passAndPlayGames.map((game) => (
+                                sortedPassAndPlayGames.map((game) => (
                                     <TouchableOpacity
                                         key={game.id}
                                         onPress={() => handleResumeGame(game)}
