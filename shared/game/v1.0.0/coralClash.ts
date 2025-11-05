@@ -146,6 +146,9 @@ type InternalMove = {
     captured?: PieceSymbol;
     capturedRole?: PieceRole; // Role of captured piece (for proper undo in Coral Clash)
     captureSquare?: number; // For whale captures: which square (0x88) had the captured piece
+    capturedSecond?: PieceSymbol; // For whale double captures: second captured piece type
+    capturedSecondRole?: PieceRole; // For whale double captures: second captured piece role
+    capturedSecondSquare?: number; // For whale double captures: square where second piece was captured
     promotion?: PieceSymbol;
     flags: number;
     role?: PieceRole; // Role of the piece that moved (for animations and display)
@@ -2604,7 +2607,8 @@ export class CoralClash {
             // Whale captures can happen during parallel slides where one or both destination squares are occupied
             if (move.captured) {
                 // Whale can capture up to two pieces (one at each destination square)
-                // But only delete pieces that are actually being captured (matching move.captured type)
+                // Track if we captured at first square to determine if second capture is a double-capture
+                let capturedAtFirst = false;
 
                 // Check newFirst
                 const pieceAtFirst = this._board[newFirst];
@@ -2613,7 +2617,11 @@ export class CoralClash {
                     pieceAtFirst.color === them &&
                     pieceAtFirst.type === move.captured
                 ) {
+                    // Record this as the primary capture
+                    move.captureSquare = newFirst;
+                    move.capturedRole = pieceAtFirst.role;
                     delete this._board[newFirst];
+                    capturedAtFirst = true;
                 }
 
                 // Check newSecond
@@ -2623,6 +2631,16 @@ export class CoralClash {
                     pieceAtSecond.color === them &&
                     pieceAtSecond.type === move.captured
                 ) {
+                    if (capturedAtFirst) {
+                        // We already captured at first square, this is a SECOND capture!
+                        move.capturedSecond = pieceAtSecond.type;
+                        move.capturedSecondRole = pieceAtSecond.role;
+                        move.capturedSecondSquare = newSecond;
+                    } else {
+                        // This is the only capture
+                        move.captureSquare = newSecond;
+                        move.capturedRole = pieceAtSecond.role;
+                    }
                     delete this._board[newSecond];
                 }
             }
@@ -2820,6 +2838,15 @@ export class CoralClash {
                 type: move.captured,
                 color: them,
                 role: move.capturedRole,
+            };
+        }
+
+        // Restore second captured piece for whale double captures (parallel slide capturing two pieces)
+        if (move.capturedSecond && move.capturedSecondSquare !== undefined) {
+            this._board[move.capturedSecondSquare] = {
+                type: move.capturedSecond,
+                color: them,
+                role: move.capturedSecondRole,
             };
         }
 

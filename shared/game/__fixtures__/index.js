@@ -11,6 +11,7 @@ import crabCheck from './crab-check.json';
 import crabEndOfBoard from './crab-end-of-board.json';
 import crabMovement from './crab-movement.json';
 import multipleChecks from './multiple-checks.json';
+import octoDeleted from './octo-deleted.json';
 import octopusCheck from './octopus-check.json';
 import whaleAttack from './whale-attack.json';
 import whaleCheck2 from './whale-check-2.json';
@@ -42,6 +43,7 @@ export {
     crabEndOfBoard,
     crabMovement,
     multipleChecks,
+    octoDeleted,
     octopusCheck,
     whaleAttack,
     whaleCheck,
@@ -69,6 +71,7 @@ export const FIXTURES = {
     'whale-rotation': whaleRotation,
     'whale-rotation-2': whaleRotation2,
     'whale-rotation-4': whaleRotation4,
+    'octo-deleted': octoDeleted,
     'whale-double-jeopardy': whaleDoubleJeopardy,
     'whale-double-jeopardy-2': whaleDoubleJeopardy2,
     'whale-move-diagonally': whaleMoveDigonally,
