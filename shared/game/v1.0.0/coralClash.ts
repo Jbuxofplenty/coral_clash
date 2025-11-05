@@ -1334,28 +1334,9 @@ export class CoralClash {
         // Check if second square is attacked by regular pieces
         if (secondSquare !== -1 && this._attacked(attackingColor, secondSquare)) return true;
 
-        // Check if attacked by enemy whale (validates proper whale moves)
-        // However, if at least one of this whale's squares is protected by a friendly piece,
-        // then the whale is NOT in check from the enemy whale
-        const firstAttackedByWhale = this._whaleAttacked(attackingColor, firstSquare);
-        const secondAttackedByWhale =
-            secondSquare !== -1 ? this._whaleAttacked(attackingColor, secondSquare) : false;
-
-        if (firstAttackedByWhale || secondAttackedByWhale) {
-            // This whale is under attack by enemy whale
-            // Check if at least one square is protected by a friendly piece
-            const firstProtected = this._attacked(color, firstSquare);
-            const secondProtected =
-                secondSquare !== -1 ? this._attacked(color, secondSquare) : false;
-
-            // If at least one square is protected, the whale is NOT in check from the enemy whale
-            if (firstProtected || secondProtected) {
-                return false;
-            }
-
-            // No protection - the whale IS in check from the enemy whale
-            return true;
-        }
+        // Also check if attacked by enemy whale (validates proper whale moves)
+        if (this._whaleAttacked(attackingColor, firstSquare)) return true;
+        if (secondSquare !== -1 && this._whaleAttacked(attackingColor, secondSquare)) return true;
 
         return false;
     }

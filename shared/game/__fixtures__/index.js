@@ -100,7 +100,5 @@ export const FIXTURES = {
     'whale-check-7': whaleCheck7,
     'whale-check-8': whaleCheck8,
     'whale-check-9': whaleCheck9,
-    'whale-check-10': whaleCheck10,
-    'whale-check-11': whaleCheck11,
     'whale-attack': whaleAttack,
 };
