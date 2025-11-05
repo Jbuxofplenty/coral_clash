@@ -299,8 +299,8 @@ describe('Whale Check Validation Bug', () => {
 
     test('whale-check-7.json: white whale can move to h7,h6 (black puffer blocks black whale attack)', () => {
         const game = new CoralClash();
-        // Skip validation since this fixture has crabs on edge rows (from real game)
-        applyFixture(game, whaleCheck7, { skipValidation: true });
+        // Skip FEN validation since this fixture has crabs on edge rows (from real game)
+        applyFixture(game, whaleCheck7, { skipFenValidation: true });
 
         // Verify initial state
         expect(game.turn()).toBe('w');
@@ -332,7 +332,7 @@ describe('Whale Check Validation Bug', () => {
 
     test('whale-check-8.json: black whale can move to e6,f6 and e7,f7 (protected by pieces)', () => {
         const game = new CoralClash();
-        applyFixture(game, whaleCheck8, { skipValidation: true });
+        applyFixture(game, whaleCheck8, { skipFenValidation: true });
 
         // Verify initial state
         expect(game.turn()).toBe('b');

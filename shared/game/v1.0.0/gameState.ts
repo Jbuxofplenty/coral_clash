@@ -40,15 +40,19 @@ export interface GameStateFixture {
  * @param coralClash - The CoralClash instance
  * @param fixture - The game state fixture
  * @param options - Optional configuration
- * @param options.skipValidation - Skip FEN validation (useful for tutorial/demo scenarios)
+ * @param options.skipValidation - Skip whale move validation (useful for tutorial scenarios without whales)
+ * @param options.skipFenValidation - Skip FEN format validation (useful for fixtures with intentionally invalid FEN)
  */
 export function applyFixture(
     coralClash: any,
     fixture: GameStateFixture,
-    options: { skipValidation?: boolean } = {},
+    options: { skipValidation?: boolean; skipFenValidation?: boolean } = {},
 ): void {
     // Load the game state using the FEN
-    coralClash.load(fixture.state.fen, { skipValidation: options.skipValidation ?? false });
+    coralClash.load(fixture.state.fen, {
+        skipValidation: options.skipValidation ?? false,
+        skipFenValidation: options.skipFenValidation ?? false,
+    });
 
     // v1.1.0+: Restore whale positions if present
     // This is necessary because FEN doesn't encode whale orientation
