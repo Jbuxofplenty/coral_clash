@@ -524,10 +524,7 @@ export default function Home({ navigation }) {
                 style={styles.scrollView}
             >
                 {/* Version Warning Banner */}
-                <VersionWarningBanner
-                    visible={versionWarning.visible}
-                    onDismiss={dismissWarning}
-                />
+                <VersionWarningBanner visible={versionWarning.visible} onDismiss={dismissWarning} />
 
                 {/* Sign Up Prompt Card - show at top when user is not logged in */}
                 {!user && <SignUpPromptCard onPress={() => navigation.navigate('Log In')} />}

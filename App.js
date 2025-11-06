@@ -119,7 +119,10 @@ export default function App() {
                         <VersionProvider>
                             <GamePreferencesProvider>
                                 <NotificationProvider>
-                                    <NavigationContainer ref={navigationRef} onReady={onLayoutRootView}>
+                                    <NavigationContainer
+                                        ref={navigationRef}
+                                        onReady={onLayoutRootView}
+                                    >
                                         <GalioProvider theme={materialTheme}>
                                             <AppContent navigationRef={navigationRef} />
                                         </GalioProvider>
