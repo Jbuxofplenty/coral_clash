@@ -2,6 +2,7 @@ name: Deploy to Staging (TestFlight/Internal Testing)
 
 permissions:
   contents: write  # Allow pushing tags
+  packages: write  # Allow publishing to GitHub Packages (for release-shared workflow)
 
 on:
   # Trigger on staging tags (e.g., v1.8.0-beta.1) or push to develop branch
@@ -31,14 +32,25 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  release-shared:
+    name: Release Shared Package
+    # Only run on develop branch pushes (not on tags or manual triggers)
+    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+    uses: ./.github/workflows/release-shared.yml
+    secrets: inherit
+  
   test:
     name: Run Tests
     uses: ./.github/workflows/test.yml
   
   deploy-staging:
     name: Deploy to Staging
-    needs: [test]
-    if: ${{ !cancelled() && needs.test.result == 'success' }}
+    needs: [test, release-shared]
+    # Run after test succeeds, and either release-shared succeeded or was skipped
+    if: |
+      !cancelled() && 
+      needs.test.result == 'success' && 
+      (needs.release-shared.result == 'success' || needs.release-shared.result == 'skipped')
     uses: ./.github/workflows/build-and-submit.yml
     with:
       profile: 'preview'
