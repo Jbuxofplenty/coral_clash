@@ -34,7 +34,17 @@
                 ]
             }
         },
-        "plugins": ["expo-font", "@react-native-google-signin/google-signin"],
+        "plugins": [
+            "expo-font",
+            "@react-native-google-signin/google-signin",
+            [
+                "expo-notifications",
+                {
+                    "icon": "./src/assets/icons/android_icon.png",
+                    "color": "#2a5298"
+                }
+            ]
+        ],
         "android": {
             "googleServicesFile": "./google-services.json",
             "package": "com.jbuxofplenty.coralclash",
