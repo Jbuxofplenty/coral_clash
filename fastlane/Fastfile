@@ -142,7 +142,7 @@ platform :ios do
   end
 
   desc "Build Debug version with symbols for crash analysis"
-  lane :debug do
+  lane :debug_lane do
     # Setup CI creates a temporary keychain for CI builds
     setup_ci if ENV['CI']
     
