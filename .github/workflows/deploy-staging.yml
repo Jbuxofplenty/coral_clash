@@ -166,8 +166,7 @@ jobs:
         run: |
           echo "### Deployment Context Debug ###"
           echo "deploy-staging result: ${{ needs.deploy-staging.result }}"
-          echo "workflow cancelled: ${{ cancelled() }}"
-          echo "Should deploy firebase: ${{ !cancelled() && needs.deploy-staging.result == 'success' }}"
+          echo "Should deploy firebase: ${{ needs.deploy-staging.result == 'success' }}"
   
   deploy-firebase:
     name: Deploy Firebase Functions
