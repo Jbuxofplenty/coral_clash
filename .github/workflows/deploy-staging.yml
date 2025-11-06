@@ -51,8 +51,8 @@ jobs:
   update-dependencies:
     name: Update Package Dependencies
     needs: [release-shared]
-    # Only run if release-shared succeeded (new version published)
-    if: needs.release-shared.result == 'success'
+    # Only run if a new version was actually released
+    if: needs.release-shared.outputs.released == 'true'
     runs-on: ubuntu-latest
     
     steps:
@@ -140,14 +140,14 @@ jobs:
     name: Deploy to Staging
     needs: [test, release-shared, update-dependencies]
     # Run after test succeeds, and either:
-    # - release-shared succeeded and update-dependencies succeeded, OR
-    # - release-shared was skipped
+    # - release-shared was skipped (tag push or manual trigger), OR
+    # - release-shared ran and update-dependencies either succeeded or was skipped (no release)
     if: |
       !cancelled() && 
       needs.test.result == 'success' && 
       (
-        (needs.release-shared.result == 'success' && needs.update-dependencies.result == 'success') ||
-        needs.release-shared.result == 'skipped'
+        needs.release-shared.result == 'skipped' ||
+        (needs.release-shared.result == 'success' && (needs.update-dependencies.result == 'success' || needs.update-dependencies.result == 'skipped'))
       )
     uses: ./.github/workflows/build-and-submit.yml
     with:
