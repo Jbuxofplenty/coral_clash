@@ -28,28 +28,6 @@ async function joinMatchmakingHandler(request) {
         };
     }
 
-    // Check if user already has active games (optional - you can remove this check if you want to allow multiple games)
-    const activeGamesQuery = await db
-        .collection('games')
-        .where('status', 'in', ['pending', 'active'])
-        .where('creatorId', '==', userId)
-        .limit(1)
-        .get();
-
-    const activeGamesQuery2 = await db
-        .collection('games')
-        .where('status', 'in', ['pending', 'active'])
-        .where('opponentId', '==', userId)
-        .limit(1)
-        .get();
-
-    if (!activeGamesQuery.empty || !activeGamesQuery2.empty) {
-        throw new HttpsError(
-            'failed-precondition',
-            'You already have an active game. Finish it before joining matchmaking.',
-        );
-    }
-
     // Get user profile for storing in queue
     const userDoc = await db.collection('users').doc(userId).get();
     if (!userDoc.exists) {

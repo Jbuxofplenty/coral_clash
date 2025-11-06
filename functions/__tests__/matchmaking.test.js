@@ -67,11 +67,6 @@ describe('Matchmaking Functions', () => {
                 exists: false,
             });
 
-            // Mock no active games (2 queries)
-            mocks.mockGet
-                .mockResolvedValueOnce({ empty: true }) // creatorId query
-                .mockResolvedValueOnce({ empty: true }); // opponentId query
-
             // Mock user profile exists
             mocks.mockGet.mockResolvedValueOnce({
                 exists: true,
@@ -107,27 +102,6 @@ describe('Matchmaking Functions', () => {
                 status: 'searching',
                 timeControl: { type: 'unlimited' },
             });
-        });
-
-        it('should reject if user has active game', async () => {
-            // Call handler directly (v2 compatible)
-
-            // Mock user not in queue
-            mocks.mockGet.mockResolvedValueOnce({
-                exists: false,
-            });
-
-            // Mock active game exists
-            mocks.mockGet
-                .mockResolvedValueOnce({ empty: false }) // Has active game as creator
-                .mockResolvedValueOnce({ empty: true });
-
-            await expect(
-                matchmakingRoutes.joinMatchmakingHandler({
-                    data: {},
-                    auth: { uid: userId },
-                }),
-            ).rejects.toThrow('You already have an active game');
         });
 
         it('should reject if user not authenticated', async () => {
