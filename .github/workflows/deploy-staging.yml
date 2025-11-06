@@ -91,13 +91,16 @@ jobs:
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
           
+          # Pull latest changes (semantic-release may have pushed)
+          git pull --rebase origin develop
+          
           git add yarn.lock functions/yarn.lock
           
           if git diff --staged --quiet; then
             echo "No changes to commit"
           else
             git commit -m "chore(deps): update @jbuxofplenty/coral-clash to latest [skip ci]"
-            git push
+            git push origin develop
             echo "✅ Lockfiles updated"
           fi
   
@@ -228,6 +231,53 @@ jobs:
           echo "Production tag will be: **$(echo ${{ steps.extract.outputs.staging_tag }} | sed -E 's/-beta\.[0-9]+$//' | sed -E 's/-rc\.[0-9]+$//')**" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "📱 _Production will deploy to **all platforms** (iOS + Android)_" >> $GITHUB_STEP_SUMMARY
+  
+  sync-to-main:
+    name: Sync develop to main
+    needs: [deploy-firebase]
+    # Only run on develop branch pushes after successful deployment
+    if: |
+      github.event_name == 'push' && 
+      github.ref == 'refs/heads/develop' &&
+      needs.deploy-firebase.result == 'success'
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: develop
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Merge develop to main
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          
+          # Fetch main branch
+          git fetch origin main
+          
+          # Checkout main
+          git checkout main
+          git pull origin main
+          
+          # Merge develop
+          echo "🔀 Merging develop into main..."
+          git merge origin/develop --no-ff -m "chore: sync develop to main after successful staging deployment [skip ci]"
+          
+          # Push to main
+          git push origin main
+          
+          echo "✅ Successfully synced develop to main"
+      
+      - name: Summary
+        run: |
+          echo "### ✅ Branches Synced" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**develop** → **main** merge complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Both branches are now in sync after successful deployment." >> $GITHUB_STEP_SUMMARY
   
   promote-to-production:
     name: Promote to Production
