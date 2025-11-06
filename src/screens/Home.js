@@ -345,20 +345,8 @@ export default function Home({ navigation }) {
     };
 
     const handleStartMatchmaking = () => {
-        // Check if user has any active games
-        const hasActiveGames = activeGames.some((game) => game.status === 'active');
-
-        if (hasActiveGames) {
-            showAlert(
-                'Cannot Join Matchmaking',
-                'You already have an active game. Finish it before joining matchmaking.',
-            );
-            return { success: false, error: 'Active game exists' };
-        }
-
         setPendingGameAction('matchmaking');
         setTimeControlModalVisible(true);
-        return { success: true };
     };
 
     const handleSelectFriend = (friendId, friendName) => {
