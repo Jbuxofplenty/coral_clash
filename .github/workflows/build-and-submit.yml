@@ -56,15 +56,22 @@ jobs:
         with:
           node-version: '20'
           cache: 'yarn'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@jbuxofplenty'
       
-      - name: Build and link Shared package
+      - name: Authenticate with GitHub Packages
+        run: |
+          echo "@jbuxofplenty:registry=https://npm.pkg.github.com" >> .npmrc
+          echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> .npmrc
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Build Shared package
         run: |
           cd shared
           yarn install --frozen-lockfile
           yarn build
           yarn link
-          cd ..
-          yarn link @jbuxofplenty/coral-clash
 
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
@@ -87,7 +94,10 @@ jobs:
           echo "✅ Git configured for Fastlane Match"
 
       - name: Install dependencies
-        run: yarn install
+        run: yarn install --frozen-lockfile
+        
+      - name: Replace with local build
+        run: yarn link @jbuxofplenty/coral-clash
 
       - name: Setup App Store Connect API Key
         run: |
@@ -205,15 +215,22 @@ jobs:
         with:
           node-version: '20'
           cache: 'yarn'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@jbuxofplenty'
       
-      - name: Build and link Shared package
+      - name: Authenticate with GitHub Packages
+        run: |
+          echo "@jbuxofplenty:registry=https://npm.pkg.github.com" >> .npmrc
+          echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> .npmrc
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Build Shared package
         run: |
           cd shared
           yarn install --frozen-lockfile
           yarn build
           yarn link
-          cd ..
-          yarn link @jbuxofplenty/coral-clash
 
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
@@ -228,7 +245,10 @@ jobs:
           java-version: '17'
 
       - name: Install dependencies
-        run: yarn install
+        run: yarn install --frozen-lockfile
+        
+      - name: Replace with local build
+        run: yarn link @jbuxofplenty/coral-clash
 
       - name: Restore Firebase Service Files
         run: |

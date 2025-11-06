@@ -28,6 +28,15 @@ jobs:
             yarn.lock
             functions/yarn.lock
             shared/yarn.lock
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@jbuxofplenty'
+      
+      - name: Authenticate with GitHub Packages
+        run: |
+          echo "@jbuxofplenty:registry=https://npm.pkg.github.com" >> .npmrc
+          echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> .npmrc
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Install Shared dependencies
         run: cd shared && yarn install --frozen-lockfile
@@ -35,14 +44,14 @@ jobs:
       - name: Build Shared module
         run: cd shared && yarn build
         
-      - name: Link Shared package locally
-        run: |
-          cd shared && yarn link
-          cd .. && yarn link @jbuxofplenty/coral-clash
-          cd functions && yarn link @jbuxofplenty/coral-clash
+      - name: Link Shared package globally
+        run: cd shared && yarn link
           
-      - name: Install dependencies (skip registry check for linked package)
-        run: yarn install
+      - name: Install root dependencies (will use published package)
+        run: yarn install --frozen-lockfile
+        
+      - name: Replace published package with local build
+        run: yarn link @jbuxofplenty/coral-clash
         
       - name: Run tests
         run: yarn test:ci
@@ -50,8 +59,11 @@ jobs:
       - name: Run Shared tests
         run: cd shared && yarn test
         
-      - name: Install Functions dependencies
-        run: cd functions && yarn install
+      - name: Install Functions dependencies (will use published package)
+        run: cd functions && yarn install --frozen-lockfile
+        
+      - name: Replace published package with local build in functions
+        run: cd functions && yarn link @jbuxofplenty/coral-clash
         
       - name: Run Functions tests
         run: cd functions && yarn test:ci
