@@ -41,8 +41,8 @@ jobs:
           cd .. && yarn link @jbuxofplenty/coral-clash
           cd functions && yarn link @jbuxofplenty/coral-clash
           
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
+      - name: Install dependencies (skip registry check for linked package)
+        run: yarn install
         
       - name: Run tests
         run: yarn test:ci
@@ -51,7 +51,7 @@ jobs:
         run: cd shared && yarn test
         
       - name: Install Functions dependencies
-        run: cd functions && yarn install --frozen-lockfile
+        run: cd functions && yarn install
         
       - name: Run Functions tests
         run: cd functions && yarn test:ci

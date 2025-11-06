@@ -87,7 +87,7 @@ jobs:
           echo "✅ Git configured for Fastlane Match"
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: yarn install
 
       - name: Setup App Store Connect API Key
         run: |
@@ -228,7 +228,7 @@ jobs:
           java-version: '17'
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: yarn install
 
       - name: Restore Firebase Service Files
         run: |

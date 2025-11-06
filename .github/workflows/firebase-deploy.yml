@@ -62,12 +62,12 @@ jobs:
           yarn link @jbuxofplenty/coral-clash
       
       - name: Install root dependencies
-        run: yarn install --frozen-lockfile
+        run: yarn install
       
       - name: Install functions dependencies
         run: |
           cd functions
-          yarn install --frozen-lockfile
+          yarn install
       
       - name: Run functions tests
         run: |
