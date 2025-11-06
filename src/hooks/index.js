@@ -1,4 +1,5 @@
 // Hooks exports
+export { useAds } from './useAds';
 export { default as useCoralClash } from './useCoralClash';
 export { useDevFeatures } from './useDevFeatures';
 export { default as useFirebaseFunctions } from './useFirebaseFunctions';

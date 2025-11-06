@@ -1,5 +1,6 @@
 import ActiveGamesCard from './ActiveGamesCard';
 import Avatar from './Avatar';
+import BannerAd from './BannerAd';
 import GameHistoryCard from './GameHistoryCard';
 import GameModeCard from './GameModeCard';
 import GameStatusBanner from './GameStatusBanner';
@@ -17,6 +18,7 @@ import VersionWarningBanner from './VersionWarningBanner';
 export {
     ActiveGamesCard,
     Avatar,
+    BannerAd,
     GameHistoryCard,
     GameModeCard,
     GameStatusBanner,

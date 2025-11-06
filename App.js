@@ -16,6 +16,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { Block, GalioProvider } from 'galio-framework';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Image, LogBox, StatusBar } from 'react-native';
+import mobileAds from 'react-native-google-mobile-ads';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { materialTheme } from './src/constants/';
 import {
@@ -81,10 +82,21 @@ export default function App() {
     useEffect(() => {
         async function prepare() {
             try {
+                // Initialize Google Mobile Ads SDK
+                const adapterStatuses = await mobileAds().initialize();
+                console.log('📱 Mobile Ads SDK initialized:', adapterStatuses);
+
+                // Set request configuration for testing
+                await mobileAds().setRequestConfiguration({
+                    // Set to true if you want to test with test ads
+                    // Remove or set to false in production
+                    testDeviceIdentifiers: ['EMULATOR'],
+                });
+
                 //Load Resources
                 await _loadResourcesAsync();
             } catch (e) {
-                console.warn(e);
+                console.warn('Error initializing:', e);
             } finally {
                 // Tell the application to render
                 setAppIsReady(true);

@@ -5,6 +5,7 @@ import { Dimensions, ScrollView, StyleSheet } from 'react-native';
 
 import {
     ActiveGamesCard,
+    BannerAd,
     GameHistoryCard,
     GameModeCard,
     MatchmakingCard,
@@ -525,6 +526,9 @@ export default function Home({ navigation }) {
             >
                 {/* Version Warning Banner */}
                 <VersionWarningBanner visible={versionWarning.visible} onDismiss={dismissWarning} />
+
+                {/* Banner Ad - displayed below header */}
+                <BannerAd />
 
                 {/* Sign Up Prompt Card - show at top when user is not logged in */}
                 {!user && <SignUpPromptCard onPress={() => navigation.navigate('Log In')} />}

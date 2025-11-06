@@ -43,6 +43,13 @@
                     "icon": "./src/assets/icons/android_icon.png",
                     "color": "#2a5298"
                 }
+            ],
+            [
+                "react-native-google-mobile-ads",
+                {
+                    "androidAppId": "ca-app-pub-8519782324189160~6327493409",
+                    "iosAppId": "ca-app-pub-8519782324189160~8486752889"
+                }
             ]
         ],
         "android": {
