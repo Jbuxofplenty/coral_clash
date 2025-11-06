@@ -40,15 +40,16 @@ jobs:
   
   test:
     name: Run Tests
-    needs: [release-shared]
-    # Run if release-shared succeeded or was skipped
-    if: ${{ !cancelled() && (needs.release-shared.result == 'success' || needs.release-shared.result == 'skipped') }}
     uses: ./.github/workflows/test.yml
   
   deploy-staging:
     name: Deploy to Staging
-    needs: [test]
-    if: ${{ !cancelled() && needs.test.result == 'success' }}
+    needs: [test, release-shared]
+    # Run after test succeeds, and either release-shared succeeded or was skipped
+    if: |
+      !cancelled() && 
+      needs.test.result == 'success' && 
+      (needs.release-shared.result == 'success' || needs.release-shared.result == 'skipped')
     uses: ./.github/workflows/build-and-submit.yml
     with:
       profile: 'preview'
