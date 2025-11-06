@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/Jbuxofplenty/coral_clash/compare/v1.1.0...v1.1.1) (2025-11-06)
+
+
+### Bug Fixes
+
+* **ci:** update lockfiles after releasing shared package ([5bf8beb](https://github.com/Jbuxofplenty/coral_clash/commit/5bf8bebc030fa8a0a00bb4d43ccb0ad417a935d1))
+
 # [1.1.0](https://github.com/Jbuxofplenty/coral_clash/compare/v1.0.0...v1.1.0) (2025-11-06)
 
 
