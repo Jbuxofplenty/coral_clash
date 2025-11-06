@@ -12,6 +12,7 @@ import PlayWithFriendCard from './PlayWithFriendCard';
 import Product from './Product';
 import SignUpPromptCard from './SignUpPromptCard';
 import TimeControlModal from './TimeControlModal';
+import VersionWarningBanner from './VersionWarningBanner';
 
 export {
     ActiveGamesCard,
@@ -28,4 +29,5 @@ export {
     Product,
     SignUpPromptCard,
     TimeControlModal,
+    VersionWarningBanner,
 };

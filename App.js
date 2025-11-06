@@ -24,6 +24,7 @@ import {
     GamePreferencesProvider,
     NotificationProvider,
     ThemeProvider,
+    VersionProvider,
     useTheme,
 } from './src/contexts';
 import Screens from './src/navigation/Screens';
@@ -115,15 +116,17 @@ export default function App() {
             <AuthProvider>
                 <ThemeProvider>
                     <AlertProvider>
-                        <GamePreferencesProvider>
-                            <NotificationProvider>
-                                <NavigationContainer ref={navigationRef} onReady={onLayoutRootView}>
-                                    <GalioProvider theme={materialTheme}>
-                                        <AppContent navigationRef={navigationRef} />
-                                    </GalioProvider>
-                                </NavigationContainer>
-                            </NotificationProvider>
-                        </GamePreferencesProvider>
+                        <VersionProvider>
+                            <GamePreferencesProvider>
+                                <NotificationProvider>
+                                    <NavigationContainer ref={navigationRef} onReady={onLayoutRootView}>
+                                        <GalioProvider theme={materialTheme}>
+                                            <AppContent navigationRef={navigationRef} />
+                                        </GalioProvider>
+                                    </NavigationContainer>
+                                </NotificationProvider>
+                            </GamePreferencesProvider>
+                        </VersionProvider>
                     </AlertProvider>
                 </ThemeProvider>
             </AuthProvider>

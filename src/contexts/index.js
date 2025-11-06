@@ -5,3 +5,4 @@ export { CoralClashProvider, useCoralClashContext } from './CoralClashContext';
 export { GamePreferencesProvider, useGamePreferences } from './GamePreferencesContext';
 export { NotificationProvider, useNotifications } from './NotificationContext';
 export { ThemeProvider, useTheme } from './ThemeContext';
+export { VersionProvider, useVersion } from './VersionContext';

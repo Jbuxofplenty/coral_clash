@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { collection, db, doc, getDoc, onSnapshot, query, where } from '../config/firebase';
-import { useAlert, useAuth } from '../contexts';
+import { useAlert, useAuth, useVersion } from '../contexts';
 import { useFirebaseFunctions } from './useFirebaseFunctions';
 
 /**
@@ -16,6 +16,7 @@ export const useGame = (options = {}) => {
     const { onGameAccepted, onGameInvite } = options;
     const { user } = useAuth();
     const { showAlert } = useAlert();
+    const { checkVersion } = useVersion();
     const { createGame, createComputerGame, respondToGameInvite, getActiveGames } =
         useFirebaseFunctions();
     const [loading, setLoading] = useState(true);
@@ -322,6 +323,11 @@ export const useGame = (options = {}) => {
 
                 const result = await createGame(opponentId, timeControl);
 
+                // Check version compatibility
+                if (result.versionCheck) {
+                    checkVersion(result.versionCheck);
+                }
+
                 // Show success message
                 showAlert(
                     'Game Request Sent',
@@ -353,7 +359,7 @@ export const useGame = (options = {}) => {
                 setSendingGameRequest(false);
             }
         },
-        [createGame, showAlert],
+        [createGame, showAlert, checkVersion],
     );
 
     /**
@@ -377,7 +383,14 @@ export const useGame = (options = {}) => {
                 }
 
                 // User is authenticated, create online game via Firebase
-                return await createComputerGame(timeControl, difficulty);
+                const result = await createComputerGame(timeControl, difficulty);
+
+                // Check version compatibility
+                if (result.versionCheck) {
+                    checkVersion(result.versionCheck);
+                }
+
+                return result;
             } catch (error) {
                 console.error('Error starting computer game:', error);
                 showAlert('Error', error.message || 'Failed to start computer game');
@@ -386,7 +399,7 @@ export const useGame = (options = {}) => {
                 setLoading(false);
             }
         },
-        [createComputerGame, user, showAlert],
+        [createComputerGame, user, showAlert, checkVersion],
     );
 
     /**
