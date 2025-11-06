@@ -1,3 +1,10 @@
+## [1.2.1](https://github.com/Jbuxofplenty/coral_clash/compare/v1.2.0...v1.2.1) (2025-11-06)
+
+
+### Bug Fixes
+
+* **ci:** use --autostash for lockfile updates to handle concurrent pushes ([5eec8f6](https://github.com/Jbuxofplenty/coral_clash/commit/5eec8f609de27ccff13d26c910855c701362f77d))
+
 # [1.2.0](https://github.com/Jbuxofplenty/coral_clash/compare/v1.1.1...v1.2.0) (2025-11-06)
 
 
