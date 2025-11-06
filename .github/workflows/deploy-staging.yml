@@ -99,6 +99,14 @@ jobs:
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
           
+          # Verify we're on develop branch
+          CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+          if [ "$CURRENT_BRANCH" != "develop" ]; then
+            echo "❌ Error: Not on develop branch (current: $CURRENT_BRANCH)"
+            exit 1
+          fi
+          echo "✅ Confirmed on develop branch"
+          
           # Check if there are changes to commit
           if git diff --quiet yarn.lock functions/yarn.lock; then
             echo "No lockfile changes to commit"
@@ -113,9 +121,15 @@ jobs:
           echo "📝 Committing lockfile updates..."
           git add yarn.lock functions/yarn.lock
           git commit -m "chore(deps): update @jbuxofplenty/coral-clash to latest [skip ci]"
-          git push origin develop
           
-          echo "✅ Lockfiles updated and pushed"
+          # Push and verify success
+          echo "📤 Pushing to develop..."
+          if git push origin develop; then
+            echo "✅ Lockfiles updated and pushed successfully"
+          else
+            echo "❌ Failed to push lockfile updates to develop"
+            exit 1
+          fi
   
   deploy-staging:
     name: Deploy to Staging
