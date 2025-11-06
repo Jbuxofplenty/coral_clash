@@ -11,9 +11,8 @@
  * - Frontend and backend must use matching versions
  */
 
-// Current game engine version (automatically updated by semantic-release)
-// Path is relative to compiled location in dist/game/
-export const GAME_VERSION = require('../../package.json').version;
+// Current game engine version (automatically updated by semantic-release during build)
+export const GAME_VERSION = '1.1.0';
 
 // Export current version (v1.0.0) as default for easy imports
 // All game logic imports should come from versioned folders
