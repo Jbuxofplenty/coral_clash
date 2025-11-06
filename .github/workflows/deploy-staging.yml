@@ -156,6 +156,19 @@ jobs:
       environment: 'staging'
     secrets: inherit
   
+  debug-context:
+    name: Debug Deployment Context
+    needs: deploy-staging
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print context
+        run: |
+          echo "### Deployment Context Debug ###"
+          echo "deploy-staging result: ${{ needs.deploy-staging.result }}"
+          echo "workflow cancelled: ${{ cancelled() }}"
+          echo "Should deploy firebase: ${{ !cancelled() && needs.deploy-staging.result == 'success' }}"
+  
   deploy-firebase:
     name: Deploy Firebase Functions
     needs: deploy-staging
