@@ -355,9 +355,37 @@ export default function Home({ navigation }) {
         setTimeControlModalVisible(true);
     };
 
-    const handlePassAndPlay = () => {
-        setPendingGameAction('passandplay');
-        setTimeControlModalVisible(true);
+    const handlePassAndPlay = async () => {
+        setCreatingGame(true);
+        try {
+            // Always use unlimited time control for pass-and-play games
+            const timeControl = { type: 'unlimited', totalSeconds: null };
+
+            // Create and save pass-and-play game with initial state
+            const gameId = await savePassAndPlayGame({
+                opponentType: 'passandplay',
+                timeControl: timeControl,
+                // Pass empty object for gameState - will be initialized as default position
+                gameState: {},
+            });
+
+            // Navigate to pass and play game
+            navigation.navigate('Game', {
+                gameId: gameId,
+                opponentType: 'passandplay',
+                timeControl: timeControl,
+                opponentData: {
+                    displayName: 'Guest 1',
+                    avatarKey: 'crab', // Different avatar for guest player
+                },
+                // Don't pass gameState on navigation - let CoralClash initialize fresh
+            });
+        } catch (error) {
+            console.error('Failed to start pass-and-play:', error);
+            showAlert('Error', 'Failed to start pass-and-play game. Please try again.');
+        } finally {
+            setCreatingGame(false);
+        }
     };
 
     const handleResumePassAndPlay = (game) => {
