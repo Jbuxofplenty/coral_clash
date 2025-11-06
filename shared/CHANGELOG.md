@@ -1,3 +1,15 @@
+# [1.2.0](https://github.com/Jbuxofplenty/coral_clash/compare/v1.1.1...v1.2.0) (2025-11-06)
+
+
+### Bug Fixes
+
+* **shared:** use build-time version injection instead of runtime import ([daab3c3](https://github.com/Jbuxofplenty/coral_clash/commit/daab3c3d0590f3a4a9d1b59fc93f530554613862))
+
+
+### Features
+
+* **ci:** auto-sync develop to main after successful deployment ([21e394e](https://github.com/Jbuxofplenty/coral_clash/commit/21e394e5862c59b581bf3b0ed1eedd03fb0f9a66))
+
 ## [1.1.1](https://github.com/Jbuxofplenty/coral_clash/compare/v1.1.0...v1.1.1) (2025-11-06)
 
 
