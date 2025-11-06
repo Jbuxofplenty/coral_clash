@@ -1,3 +1,10 @@
+## [1.2.2](https://github.com/Jbuxofplenty/coral_clash/compare/v1.2.1...v1.2.2) (2025-11-06)
+
+
+### Bug Fixes
+
+* **ci:** ensure update-dependencies checks out latest develop branch ([54f7542](https://github.com/Jbuxofplenty/coral_clash/commit/54f7542850ccf8b0440dcac6fdd01eed28366e9c))
+
 ## [1.2.1](https://github.com/Jbuxofplenty/coral_clash/compare/v1.2.0...v1.2.1) (2025-11-06)
 
 
