@@ -16,8 +16,48 @@ permissions:
   packages: write
 
 jobs:
+  check:
+    name: Check for Shared Changes
+    runs-on: ubuntu-latest
+    outputs:
+      has_changes: ${{ steps.check.outputs.has_changes }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Check for shared package changes
+        id: check
+        run: |
+          # Get the latest release tag
+          LATEST_TAG=$(git tag -l '@jbuxofplenty/coral-clash@*' | sort -V | tail -n1)
+          
+          if [ -z "$LATEST_TAG" ]; then
+            echo "No previous release found - will release"
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          echo "Latest release: $LATEST_TAG"
+          
+          # Check for commits with shared scope since last release
+          SHARED_COMMITS=$(git log "$LATEST_TAG"..HEAD --oneline --grep="^feat(shared):" --grep="^fix(shared):" --grep="^perf(shared):" --regexp-ignore-case)
+          
+          if [ -n "$SHARED_COMMITS" ]; then
+            echo "Found shared package changes:"
+            echo "$SHARED_COMMITS"
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          else
+            echo "No shared package changes since $LATEST_TAG"
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          fi
+  
   release:
     name: Release Shared Package
+    needs: [check]
+    if: needs.check.outputs.has_changes == 'true'
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.release.outputs.version }}
