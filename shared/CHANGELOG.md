@@ -1,3 +1,17 @@
+# [1.1.0](https://github.com/Jbuxofplenty/coral_clash/compare/v1.0.0...v1.1.0) (2025-11-06)
+
+
+### Bug Fixes
+
+* **ci:** use published package for app builds instead of yarn link ([820ef0c](https://github.com/Jbuxofplenty/coral_clash/commit/820ef0c8546d33c4f984e079e3bc7a3c201e4e22))
+* **shared:** correct types path to dist/game/index.d.ts ([9bcd832](https://github.com/Jbuxofplenty/coral_clash/commit/9bcd83218956c61919418f85ffe51db032f523eb))
+
+
+### Features
+
+* **ci:** enable GPG signing for semantic-release commits ([284abbe](https://github.com/Jbuxofplenty/coral_clash/commit/284abbe4e1b7680933f478c22b0fa05cac34764a))
+* **ci:** skip release workflow when no shared package changes ([3ea3b57](https://github.com/Jbuxofplenty/coral_clash/commit/3ea3b57d8dcfeb20327d95d6aa08858f0df71e99))
+
 # 1.0.0 (2025-11-06)
 
 
