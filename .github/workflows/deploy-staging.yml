@@ -48,14 +48,72 @@ jobs:
     uses: ./.github/workflows/release-shared.yml
     secrets: inherit
   
+  update-dependencies:
+    name: Update Package Dependencies
+    needs: [release-shared]
+    # Only run if release-shared succeeded (new version published)
+    if: needs.release-shared.result == 'success'
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'yarn'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@jbuxofplenty'
+      
+      - name: Setup GitHub Packages
+        uses: ./.github/actions/setup-github-packages
+      
+      - name: Update shared package version
+        run: |
+          echo "📦 Upgrading @jbuxofplenty/coral-clash to latest..."
+          
+          # Update root package
+          yarn upgrade @jbuxofplenty/coral-clash --latest
+          
+          # Update functions package
+          cd functions
+          yarn upgrade @jbuxofplenty/coral-clash --latest
+          cd ..
+          
+          echo "✅ Dependencies updated"
+      
+      - name: Commit updated lockfiles
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          
+          git add yarn.lock functions/yarn.lock
+          
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "chore(deps): update @jbuxofplenty/coral-clash to latest [skip ci]"
+            git push
+            echo "✅ Lockfiles updated"
+          fi
+  
   deploy-staging:
     name: Deploy to Staging
-    needs: [test, release-shared]
-    # Run after test succeeds, and either release-shared succeeded or was skipped
+    needs: [test, release-shared, update-dependencies]
+    # Run after test succeeds, and either:
+    # - release-shared succeeded and update-dependencies succeeded, OR
+    # - release-shared was skipped
     if: |
       !cancelled() && 
       needs.test.result == 'success' && 
-      (needs.release-shared.result == 'success' || needs.release-shared.result == 'skipped')
+      (
+        (needs.release-shared.result == 'success' && needs.update-dependencies.result == 'success') ||
+        needs.release-shared.result == 'skipped'
+      )
     uses: ./.github/workflows/build-and-submit.yml
     with:
       profile: 'preview'
