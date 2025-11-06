@@ -159,6 +159,7 @@ jobs:
   deploy-firebase:
     name: Deploy Firebase Functions
     needs: deploy-staging
+    if: needs.deploy-staging.result == 'success'
     uses: ./.github/workflows/firebase-deploy.yml
     with:
       target: 'all'
@@ -266,11 +267,13 @@ jobs:
   
   sync-to-main:
     name: Sync develop to main
-    needs: [deploy-firebase]
-    # Only run on develop branch pushes after successful deployment
+    needs: [release-shared, update-dependencies, deploy-firebase]
+    # Only run on develop branch pushes when release-shared and update-dependencies actually ran
     if: |
       github.event_name == 'push' && 
       github.ref == 'refs/heads/develop' &&
+      needs.release-shared.result == 'success' &&
+      (needs.update-dependencies.result == 'success' || needs.update-dependencies.result == 'skipped') &&
       needs.deploy-firebase.result == 'success'
     runs-on: ubuntu-latest
     
