@@ -91,18 +91,23 @@ jobs:
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
           
-          # Pull latest changes (semantic-release may have pushed)
-          git pull --rebase origin develop
-          
-          git add yarn.lock functions/yarn.lock
-          
-          if git diff --staged --quiet; then
-            echo "No changes to commit"
-          else
-            git commit -m "chore(deps): update @jbuxofplenty/coral-clash to latest [skip ci]"
-            git push origin develop
-            echo "✅ Lockfiles updated"
+          # Check if there are changes to commit
+          if git diff --quiet yarn.lock functions/yarn.lock; then
+            echo "No lockfile changes to commit"
+            exit 0
           fi
+          
+          # Pull latest changes with autostash (semantic-release may have pushed)
+          echo "🔄 Pulling latest from develop with autostash..."
+          git pull --rebase --autostash origin develop
+          
+          # Stage and commit
+          echo "📝 Committing lockfile updates..."
+          git add yarn.lock functions/yarn.lock
+          git commit -m "chore(deps): update @jbuxofplenty/coral-clash to latest [skip ci]"
+          git push origin develop
+          
+          echo "✅ Lockfiles updated and pushed"
   
   deploy-staging:
     name: Deploy to Staging
