@@ -1,3 +1,30 @@
+# [1.4.0](https://github.com/Jbuxofplenty/coral_clash/compare/v1.3.1...v1.4.0) (2025-11-06)
+
+
+### Bug Fixes
+
+* **ci:** add !cancelled() check to deploy-firebase job ([91b46ae](https://github.com/Jbuxofplenty/coral_clash/commit/91b46ae5a2a36507914be7c3b2ba1a2891de7099))
+* **ci:** add !cancelled() check to ensure firebase deploys after staging ([15af8ac](https://github.com/Jbuxofplenty/coral_clash/commit/15af8aca0a1511592528cfdb48c76822374e9f27))
+* **ci:** ensure Firebase deploys after staging builds ([6c1ebab](https://github.com/Jbuxofplenty/coral_clash/commit/6c1ebab262db0278dd5c3bc83a601f7a6f934595))
+* **ci:** remove invalid cancelled() usage from debug output ([b7d067f](https://github.com/Jbuxofplenty/coral_clash/commit/b7d067fbc6458737787336b1538f09644860be4f))
+* **ci:** run sync-to-main in parallel with deploy-firebase ([8c9cf46](https://github.com/Jbuxofplenty/coral_clash/commit/8c9cf46601172272e5a97bd573ec7ccf39cf99d7))
+* **ci:** simplify deploy-firebase condition ([17a050d](https://github.com/Jbuxofplenty/coral_clash/commit/17a050d6c337873c5d7ea1753aebf061b0a0dc33))
+* **ci:** use always() instead of !cancelled() for deploy-firebase ([03dfa0e](https://github.com/Jbuxofplenty/coral_clash/commit/03dfa0ee19ba8ea38cb1405dfe1d5ca4b7bcecec))
+* **ci:** use v* tag pattern instead of package-prefixed tags in release check ([b6be4eb](https://github.com/Jbuxofplenty/coral_clash/commit/b6be4ebdc733904c934b3cd9aba9e53577650874))
+* **client:** use native FCM tokens for standalone Android builds ([a2310f8](https://github.com/Jbuxofplenty/coral_clash/commit/a2310f8892470276a6fa345c233aa325d120bc0d))
+* **shared:** bump coral-clash version for testing ([2b58a88](https://github.com/Jbuxofplenty/coral_clash/commit/2b58a88ec210a34874898b2b845c1deb6dc03054))
+
+
+### Features
+
+* **ci:** skip update-dependencies job when no release is published ([456b5bb](https://github.com/Jbuxofplenty/coral_clash/commit/456b5bbc7a6e5dd74d053c107d770f624d758b11))
+* **client:** add expo-notifications plugin for FCM on Android ([f579272](https://github.com/Jbuxofplenty/coral_clash/commit/f5792729425a625fe3b82ae5618486617d4ae876))
+* **client:** implement version checking system with warning banner ([cb7e57d](https://github.com/Jbuxofplenty/coral_clash/commit/cb7e57deb9f68551173b2a0e54a12f13c6943bfb))
+* **client:** integrate Google Mobile Ads (AdMob) ([a29d567](https://github.com/Jbuxofplenty/coral_clash/commit/a29d567d929f97699ede9b39b077d6e5a66477e3))
+* **client:** linting ([3db4caf](https://github.com/Jbuxofplenty/coral_clash/commit/3db4caf84c848d51e7ff09abea744d5420108e9b))
+* **client:** Remove Active Games Check to Join Matchmaking ([513f535](https://github.com/Jbuxofplenty/coral_clash/commit/513f53542e207abdb6a95a9ed6bdacf19489ac3f))
+* **client:** skip time control modal for pass-and-play games ([de39880](https://github.com/Jbuxofplenty/coral_clash/commit/de39880cedf1510e98ba493470afae8d8e57e696))
+
 ## [1.3.1](https://github.com/Jbuxofplenty/coral_clash/compare/v1.3.0...v1.3.1) (2025-11-06)
 
 
