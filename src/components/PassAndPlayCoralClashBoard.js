@@ -69,11 +69,11 @@ const PassAndPlayCoralClashBoard = ({
         }
 
         // Flip board for next player's turn after animation completes
-        // Wait for animation to finish (typical animations are 200-400ms)
+        // Wait for animation to finish (typical animations are 500ms)
         if (!result.gameOver) {
             setTimeout(() => {
                 setIsBoardFlipped((prev) => !prev);
-            }, 500);
+            }, 1000);
         }
     };
 

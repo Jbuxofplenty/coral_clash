@@ -269,7 +269,12 @@ export default function HowToPlay({ navigation }) {
                                     2. Rotation Move:
                                 </Text>{' '}
                                 Rotate half of the piece to an adjacent square (one square
-                                vertically or horizontally).
+                                vertically or horizontally). When selecting a rotation, first tap
+                                the destination square (shown with a white circle). If there are
+                                multiple valid orientations, you'll then tap the orientation square
+                                (shown with a green circle). If there's only one valid orientation,
+                                the whale will automatically move without showing the orientation
+                                selection.
                             </Text>
                         </View>
 

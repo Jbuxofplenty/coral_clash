@@ -24,4 +24,3 @@ export const useDevFeatures = () => {
 };
 
 export default useDevFeatures;
-

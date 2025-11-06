@@ -73,8 +73,16 @@ const Moves = ({
                             cx={cellSize / 2}
                             cy={cellSize / 2}
                             r={cellSize / 6}
-                            fill={isDestination ? colors.fillLight : colors.fillNormal}
-                            stroke={isDestination ? colors.strokeLight : colors.strokeNormal}
+                            fill={
+                                isDestination
+                                    ? `rgba(255, 255, 255, ${0.7 * opacityMultiplier})`
+                                    : colors.fillNormal
+                            }
+                            stroke={
+                                isDestination
+                                    ? `rgba(230, 230, 230, ${1.0 * opacityMultiplier})`
+                                    : colors.strokeNormal
+                            }
                             strokeWidth='2'
                         />
                     </Svg>

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { restoreGameFromSnapshot } from '../../shared';
 import { db, doc, onSnapshot } from '../config/firebase';
 import { useAlert, useAuth } from '../contexts';
@@ -26,6 +26,8 @@ export const useGameActions = (coralClash, gameId, onStateUpdate) => {
     const [gameData, setGameData] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const isMountedRef = useIsMounted();
+    const previousCurrentTurnRef = useRef(null); // Track previous turn to detect computer moves
+    const pendingTimeoutRef = useRef(null); // Track pending timeout for cleanup
 
     // Real-time Firestore listener for game state updates
     // Centralized data management for all game-related state
@@ -65,25 +67,58 @@ export const useGameActions = (coralClash, gameId, onStateUpdate) => {
                         setGameData(data);
                     }
 
-                    // Apply the updated game state to the CoralClash instance
-                    if (data.gameState && coralClash) {
-                        restoreGameFromSnapshot(coralClash, data.gameState);
+                    // Check if this is a computer game and if computer just made a move
+                    const isComputerGame = data.opponentId === 'computer';
+                    const currentTurn = data.currentTurn;
+                    const previousTurn = previousCurrentTurnRef.current;
+                    // Computer just moved if: turn changed, it's now user's turn, and it's a computer game
+                    const computerJustMoved =
+                        isComputerGame &&
+                        previousTurn &&
+                        previousTurn !== currentTurn &&
+                        currentTurn === user?.uid;
 
-                        // Only call onStateUpdate if component is still mounted
-                        // Pass the snapshot so we can get history info without calling history()
-                        if (isMountedRef.current) {
-                            onStateUpdate?.(data.gameState);
+                    // Function to apply game state
+                    const applyGameState = () => {
+                        if (!isMountedRef.current) return;
+
+                        // Apply the updated game state to the CoralClash instance
+                        if (data.gameState && coralClash) {
+                            restoreGameFromSnapshot(coralClash, data.gameState);
+
+                            // Only call onStateUpdate if component is still mounted
+                            // Pass the snapshot so we can get history info without calling history()
+                            if (isMountedRef.current) {
+                                onStateUpdate?.(data.gameState);
+                            }
+                        } else {
+                            console.log('[useGameActions] SKIPPING restore - condition failed');
                         }
+
+                        // Update previous turn tracker
+                        previousCurrentTurnRef.current = currentTurn;
+
+                        // Keep listener active even when game is over
+                        // The component needs to receive the final state updates (like resignation)
+                        // and display them properly. Unsubscribe only happens on component unmount.
+
+                        if (isMountedRef.current) {
+                            setIsLoading(false);
+                        }
+                    };
+
+                    // Add delay for computer moves to allow previous animation to complete
+                    if (computerJustMoved) {
+                        // Clear any pending timeout
+                        if (pendingTimeoutRef.current) {
+                            clearTimeout(pendingTimeoutRef.current);
+                        }
+                        pendingTimeoutRef.current = setTimeout(() => {
+                            applyGameState();
+                            pendingTimeoutRef.current = null;
+                        }, 500);
                     } else {
-                        console.log('[useGameActions] SKIPPING restore - condition failed');
-                    }
-
-                    // Keep listener active even when game is over
-                    // The component needs to receive the final state updates (like resignation)
-                    // and display them properly. Unsubscribe only happens on component unmount.
-
-                    if (isMountedRef.current) {
-                        setIsLoading(false);
+                        applyGameState();
                     }
                 } else {
                     console.error('Game document does not exist:', gameId);
@@ -104,6 +139,11 @@ export const useGameActions = (coralClash, gameId, onStateUpdate) => {
         return () => {
             if (!hasUnsubscribed) {
                 unsubscribe();
+            }
+            // Clear any pending timeout
+            if (pendingTimeoutRef.current) {
+                clearTimeout(pendingTimeoutRef.current);
+                pendingTimeoutRef.current = null;
             }
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
