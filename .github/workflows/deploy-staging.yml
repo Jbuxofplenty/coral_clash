@@ -92,6 +92,11 @@ jobs:
           yarn upgrade @jbuxofplenty/coral-clash --latest
           cd ..
           
+          # Ensure shared package lockfile is up to date (for build dependencies)
+          cd shared
+          yarn install --check-files
+          cd ..
+          
           echo "✅ Dependencies updated"
       
       - name: Commit updated lockfiles
@@ -107,8 +112,8 @@ jobs:
           fi
           echo "✅ Confirmed on develop branch"
           
-          # Check if there are changes to commit
-          if git diff --quiet yarn.lock functions/yarn.lock; then
+          # Check if there are changes to commit (any of the three lockfiles)
+          if git diff --quiet yarn.lock functions/yarn.lock shared/yarn.lock; then
             echo "No lockfile changes to commit"
             exit 0
           fi
@@ -117,9 +122,9 @@ jobs:
           echo "🔄 Pulling latest from develop with autostash..."
           git pull --rebase --autostash origin develop
           
-          # Stage and commit
+          # Stage and commit all lockfiles
           echo "📝 Committing lockfile updates..."
-          git add yarn.lock functions/yarn.lock
+          git add yarn.lock functions/yarn.lock shared/yarn.lock
           git commit -m "chore(deps): update @jbuxofplenty/coral-clash to latest [skip ci]"
           
           # Push and verify success
