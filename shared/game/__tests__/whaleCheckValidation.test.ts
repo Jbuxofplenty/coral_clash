@@ -10,6 +10,7 @@
 
 import whaleCheck10 from '../__fixtures__/whale-check-10.json';
 import whaleCheck11 from '../__fixtures__/whale-check-11.json';
+import whaleCheck12 from '../__fixtures__/whale-check-12.json';
 import whaleCheck2 from '../__fixtures__/whale-check-2.json';
 import whaleCheck4 from '../__fixtures__/whale-check-4.json';
 import whaleCheck5 from '../__fixtures__/whale-check-5.json';
@@ -792,6 +793,115 @@ describe('Whale Check Validation Bug', () => {
         } else {
             expect(allWhiteMoves.length).toBeGreaterThan(0);
             console.log('\n↔️  White can escape - this is just check, not checkmate');
+        }
+    });
+
+    test('whale-check-12.json: white whale should be able to capture at d6,e6', () => {
+        const game = new CoralClash();
+        applyFixture(game, whaleCheck12);
+
+        console.log('\n=== whale-check-12.json: White Whale Capture Analysis ===');
+        console.log('White whale position:', game.whalePositions().w);
+        console.log('Black whale position:', game.whalePositions().b);
+        console.log('Turn:', game.turn());
+
+        // Check what pieces are at d6 and e6
+        console.log('\n=== Target Squares ===');
+        const d6Piece = game.get('d6');
+        const e6Piece = game.get('e6');
+        console.log('Piece at d6:', d6Piece ? `${d6Piece.color} ${d6Piece.type}` : 'empty');
+        console.log('Piece at e6:', e6Piece ? `${e6Piece.color} ${e6Piece.type}` : 'empty');
+        console.log('Coral at d6:', game.getCoral('d6'));
+        console.log('Coral at e6:', game.getCoral('e6'));
+
+        // The fixture shows:
+        // - White whale at d3, e3
+        // - Black octopus at d6 (role: hunter)
+        // - Black crab at e6 (role: gatherer)
+        // - Black coral at both d6 and e6
+        // - Turn is black (b)
+
+        // Wait, if turn is black, we need to switch to white's turn to test white's moves
+        // But actually, let's check if this is about black's turn and what moves they have
+
+        if (game.turn() === 'b') {
+            console.log('\n=== Current Turn: Black ===');
+            console.log(
+                'Black whale can move, but we want to test if white whale COULD capture d6,e6',
+            );
+
+            // Get black whale moves first
+            const blackWhaleMoves = game.moves({ verbose: true, piece: 'h' });
+            console.log('Black whale has', blackWhaleMoves.length, 'legal moves');
+
+            // Now let's check what white could do if it was their turn
+            // We'll need to make a black move first, then check white's options
+            console.log('\n=== Testing White Whale Capture Capability ===');
+
+            // Get white whale moves (even though it's black's turn, we can query them)
+            const whiteWhaleMoves = game.moves({ verbose: true, color: 'w', piece: 'h' });
+            console.log('White whale would have', whiteWhaleMoves.length, 'legal moves');
+
+            // Check if white can move to d6,e6
+            const captureMoves = whiteWhaleMoves.filter(
+                (m: any) =>
+                    (m.to === 'd6' && m.whaleSecondSquare === 'e6') ||
+                    (m.to === 'e6' && m.whaleSecondSquare === 'd6'),
+            );
+
+            console.log('\nMoves to d6,e6:', captureMoves.length);
+            if (captureMoves.length > 0) {
+                console.log('✅ Found capture moves:', captureMoves);
+                captureMoves.forEach((m: any) => {
+                    console.log(`  - ${m.from} -> ${m.to} (other half: ${m.whaleSecondSquare})`);
+                    console.log(`    Captures: ${m.captured || 'none'}`);
+                });
+            } else {
+                console.log('❌ No capture moves to d6,e6 found');
+            }
+
+            // Check if white whale can physically attack those squares
+            console.log('\n=== Attack Analysis ===');
+            console.log('Can white attack d6?', game.isAttacked('d6', 'w'));
+            console.log('Can white attack e6?', game.isAttacked('e6', 'w'));
+
+            // Check if black whale can attack d6,e6 (which would prevent white from moving there)
+            console.log('\n=== Counter-Attack Analysis ===');
+            console.log('Can black attack d6?', game.isAttacked('d6', 'b'));
+            console.log('Can black attack e6?', game.isAttacked('e6', 'b'));
+
+            // The expected behavior: white whale SHOULD be able to move to d6,e6
+            // capturing BOTH the octopus at d6 AND the crab at e6 simultaneously
+            // Neither black whale nor any other black piece can attack these squares
+            console.log('\n✓ White can capture both pieces at d6,e6 simultaneously!');
+            expect(captureMoves.length).toBeGreaterThan(0);
+        } else {
+            // If it's white's turn, test directly
+            console.log('\n=== Current Turn: White ===');
+
+            const whiteWhaleMoves = game.moves({ verbose: true, piece: 'h' });
+            console.log('White whale has', whiteWhaleMoves.length, 'legal moves');
+
+            const captureMoves = whiteWhaleMoves.filter(
+                (m: any) =>
+                    (m.to === 'd6' && m.whaleSecondSquare === 'e6') ||
+                    (m.to === 'e6' && m.whaleSecondSquare === 'd6'),
+            );
+
+            console.log('\nMoves to d6,e6:', captureMoves.length);
+            if (captureMoves.length > 0) {
+                console.log('✅ Found capture moves:', captureMoves);
+            } else {
+                console.log('❌ No capture moves to d6,e6 found');
+            }
+
+            // The expected behavior: white whale SHOULD be able to move to d6,e6
+            expect(captureMoves.length).toBeGreaterThan(0);
+
+            // Try to make the move
+            const result = game.move({ from: 'd3', to: 'd6', whaleSecondSquare: 'e6' });
+            expect(result).not.toBeNull();
+            expect(game.whalePositions().w).toEqual(['d6', 'e6']);
         }
     });
 });

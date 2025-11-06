@@ -33,6 +33,7 @@ const FIXTURES = [
     { name: 'whale-check-9', label: '🐋 Whale Check #9 (Coral Capture)' },
     { name: 'whale-check-10', label: '🐋 Whale Check #10' },
     { name: 'whale-check-11', label: '🐋 Whale Check #11' },
+    { name: 'whale-check-12', label: '🐋 Whale Check #12 (Capture Move)' },
     { name: 'whale-attack', label: '🐋 Whale Attack (UI Bug)' },
 ];
 

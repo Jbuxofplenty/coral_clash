@@ -1222,6 +1222,7 @@ export class CoralClash {
         // But verify the cache entry is from the current board generation
         const resultCacheKey = `${whaleColor}_${whaleFirst}_${whaleSecond}_${targetSquare}`;
         const cachedEntry = this._whaleAttackResultCache.get(resultCacheKey);
+
         if (cachedEntry !== undefined && cachedEntry.generation === this._boardGeneration) {
             this._perfStats.cacheHits++;
             return cachedEntry.result;
@@ -2622,26 +2623,27 @@ export class CoralClash {
                 // Track if we captured at first square to determine if second capture is a double-capture
                 let capturedAtFirst = false;
 
-                // Check newFirst
+                // Check newFirst - capture ANY enemy piece regardless of type
                 const pieceAtFirst = this._board[newFirst];
                 if (
                     pieceAtFirst &&
-                    pieceAtFirst.color === them &&
-                    pieceAtFirst.type === move.captured
+                    pieceAtFirst.color === them
+                    // NOTE: Don't check type match - whale can capture different piece types simultaneously
                 ) {
-                    // Record this as the primary capture
+                    // Record this as the primary capture (use the piece's actual type, not move.captured)
+                    move.captured = pieceAtFirst.type;
                     move.captureSquare = newFirst;
                     move.capturedRole = pieceAtFirst.role;
                     delete this._board[newFirst];
                     capturedAtFirst = true;
                 }
 
-                // Check newSecond
+                // Check newSecond - capture ANY enemy piece regardless of type
                 const pieceAtSecond = this._board[newSecond];
                 if (
                     pieceAtSecond &&
-                    pieceAtSecond.color === them &&
-                    pieceAtSecond.type === move.captured
+                    pieceAtSecond.color === them
+                    // NOTE: Don't check type match - whale can capture different piece types simultaneously
                 ) {
                     if (capturedAtFirst) {
                         // We already captured at first square, this is a SECOND capture!
@@ -2650,6 +2652,7 @@ export class CoralClash {
                         move.capturedSecondSquare = newSecond;
                     } else {
                         // This is the only capture
+                        move.captured = pieceAtSecond.type;
                         move.captureSquare = newSecond;
                         move.capturedRole = pieceAtSecond.role;
                     }
