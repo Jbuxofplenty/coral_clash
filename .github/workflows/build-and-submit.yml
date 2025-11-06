@@ -61,13 +61,6 @@ jobs:
       
       - name: Setup GitHub Packages
         uses: ./.github/actions/setup-github-packages
-      
-      - name: Build Shared package
-        run: |
-          cd shared
-          yarn install --frozen-lockfile
-          yarn build
-          yarn link
 
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
@@ -91,9 +84,6 @@ jobs:
 
       - name: Install dependencies
         run: yarn install --frozen-lockfile
-        
-      - name: Replace with local build
-        run: yarn link @jbuxofplenty/coral-clash
 
       - name: Setup App Store Connect API Key
         run: |
@@ -216,13 +206,6 @@ jobs:
       
       - name: Setup GitHub Packages
         uses: ./.github/actions/setup-github-packages
-      
-      - name: Build Shared package
-        run: |
-          cd shared
-          yarn install --frozen-lockfile
-          yarn build
-          yarn link
 
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
@@ -238,9 +221,6 @@ jobs:
 
       - name: Install dependencies
         run: yarn install --frozen-lockfile
-        
-      - name: Replace with local build
-        run: yarn link @jbuxofplenty/coral-clash
 
       - name: Restore Firebase Service Files
         run: |
