@@ -59,12 +59,8 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
           scope: '@jbuxofplenty'
       
-      - name: Authenticate with GitHub Packages
-        run: |
-          echo "@jbuxofplenty:registry=https://npm.pkg.github.com" >> .npmrc
-          echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> .npmrc
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Setup GitHub Packages
+        uses: ./.github/actions/setup-github-packages
       
       - name: Build Shared package
         run: |
@@ -218,12 +214,8 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
           scope: '@jbuxofplenty'
       
-      - name: Authenticate with GitHub Packages
-        run: |
-          echo "@jbuxofplenty:registry=https://npm.pkg.github.com" >> .npmrc
-          echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> .npmrc
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Setup GitHub Packages
+        uses: ./.github/actions/setup-github-packages
       
       - name: Build Shared package
         run: |

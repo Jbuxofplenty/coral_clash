@@ -1,0 +1,23 @@
+name: 'Setup GitHub Packages'
+description: 'Configure authentication for GitHub Packages across all directories'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Authenticate with GitHub Packages
+      shell: bash
+      run: |
+        echo "@jbuxofplenty:registry=https://npm.pkg.github.com" >> .npmrc
+        echo "//npm.pkg.github.com/:_authToken=${{ github.token }}" >> .npmrc
+        
+        # Copy to subdirectories that need it
+        if [ -d "functions" ]; then
+          cp .npmrc functions/.npmrc
+        fi
+        
+        if [ -d "shared" ]; then
+          cp .npmrc shared/.npmrc
+        fi
+        
+        echo "✅ GitHub Packages authentication configured"
+
