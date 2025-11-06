@@ -159,7 +159,9 @@ jobs:
   deploy-firebase:
     name: Deploy Firebase Functions
     needs: deploy-staging
-    if: needs.deploy-staging.result == 'success'
+    if: |
+      !cancelled() &&
+      needs.deploy-staging.result == 'success'
     uses: ./.github/workflows/firebase-deploy.yml
     with:
       target: 'all'
