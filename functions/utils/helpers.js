@@ -1,6 +1,6 @@
 // Import from shared library (source of truth)
+import { CoralClash, DEFAULT_POSITION, createGameSnapshot } from '@jbuxofplenty/coral-clash';
 import { FieldValue } from 'firebase-admin/firestore';
-import { CoralClash, DEFAULT_POSITION, createGameSnapshot } from '../shared/dist/game/index.js';
 
 /**
  * Initialize game state for a new Coral Clash game

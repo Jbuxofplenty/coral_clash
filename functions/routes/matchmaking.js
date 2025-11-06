@@ -1,6 +1,7 @@
 import { HttpsError, onCall } from 'firebase-functions/v2/https';
 import { admin } from '../init.js';
 import { getAppCheckConfig } from '../utils/appCheckConfig.js';
+import { validateClientVersion } from '../utils/gameVersion.js';
 import { serverTimestamp } from '../utils/helpers.js';
 
 const db = admin.firestore();
@@ -16,7 +17,10 @@ async function joinMatchmakingHandler(request) {
     }
 
     const userId = auth.uid;
-    const { timeControl } = data;
+    const { timeControl, clientVersion } = data;
+
+    // Validate client version
+    const versionCheck = clientVersion ? validateClientVersion(clientVersion) : null;
 
     // Check if user is already in queue
     const existingEntry = await db.collection('matchmakingQueue').doc(userId).get();
@@ -47,6 +51,7 @@ async function joinMatchmakingHandler(request) {
             discriminator: userData.discriminator || '',
             avatarKey: userData.settings?.avatarKey || 'dolphin',
             timeControl: timeControl || { type: 'unlimited' },
+            clientVersion: clientVersion || 'unknown',
             joinedAt: serverTimestamp(),
             lastHeartbeat: serverTimestamp(), // Track last activity
             status: 'searching', // searching, matched
@@ -55,6 +60,7 @@ async function joinMatchmakingHandler(request) {
     return {
         success: true,
         message: 'Joined matchmaking queue',
+        versionCheck,
     };
 }
 

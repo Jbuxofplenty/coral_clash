@@ -1,6 +1,6 @@
+import { FIXTURES as FIXTURE_FILES } from '@jbuxofplenty/coral-clash/game/__fixtures__';
 import React, { useState } from 'react';
 import { Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { FIXTURES as FIXTURE_FILES } from '../../shared/game/__fixtures__';
 import { useAlert } from '../contexts';
 import Icon from './Icon';
 

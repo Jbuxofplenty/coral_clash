@@ -1,0 +1,82 @@
+name: Release Shared Package
+
+on:
+  workflow_call:
+    outputs:
+      version:
+        description: "Released version of shared package"
+        value: ${{ jobs.release.outputs.version }}
+      released:
+        description: "Whether a new version was released"
+        value: ${{ jobs.release.outputs.released }}
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  release:
+    name: Release Shared Package
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.release.outputs.version }}
+      released: ${{ steps.release.outputs.released }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'yarn'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@jbuxofplenty'
+      
+      - name: Install dependencies
+        run: |
+          cd shared
+          yarn install --frozen-lockfile
+      
+      - name: Build package
+        run: |
+          cd shared
+          yarn build
+      
+      - name: Run tests
+        run: |
+          cd shared
+          yarn test
+      
+      - name: Release
+        id: release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd shared
+          npx semantic-release
+          
+          # Capture version
+          VERSION=$(node -p "require('./package.json').version")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          
+          # Check if release happened (version changed from 0.0.0-development)
+          if [ "$VERSION" != "0.0.0-development" ]; then
+            echo "released=true" >> $GITHUB_OUTPUT
+          else
+            echo "released=false" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Release Summary
+        run: |
+          echo "### 📦 Shared Package Release" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Version**: ${{ steps.release.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Released**: ${{ steps.release.outputs.released }}" >> $GITHUB_STEP_SUMMARY
+

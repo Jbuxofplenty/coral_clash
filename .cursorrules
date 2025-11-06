@@ -4,11 +4,45 @@
 
 - ALWAYS use conventional commit format: `<type>(<scope>): <subject>`
 - Valid types: feat, fix, docs, refactor, test, ci, chore, build, perf, style
+- Valid scopes:
+    - `shared` - Changes to game engine (@jbuxofplenty/coral-clash package)
+    - `client` - Frontend/React Native changes
+    - `server` - Backend/Firebase Functions changes
+    - `ci` - CI/CD workflow changes
+    - `docs` - Documentation only changes
 - Examples:
-    - `feat(ci): add test gate before staging deployment`
-    - `fix(ios): add encryption exemption to Info.plist`
+    - `feat(shared): add whale rotation validation`
+    - `fix(shared): correct coral placement logic`
+    - `feat(client): add version warning banner`
+    - `fix(server): handle timeout edge cases`
     - `docs(deployment): add approval setup guide`
-    - `refactor(workflows): simplify platform selection logic`
+    - `refactor(ci): simplify platform selection logic`
+
+## Semantic Versioning System
+
+- Game engine (`@jbuxofplenty/coral-clash`) uses semantic versioning (semver.org)
+- Version bumps are AUTOMATIC based on conventional commit messages:
+    - `feat(shared):` → MINOR version bump (1.0.0 → 1.1.0) - new features
+    - `fix(shared):` → PATCH version bump (1.0.0 → 1.0.1) - bug fixes
+    - `feat(shared)!:` or `BREAKING CHANGE:` → MAJOR version bump (1.0.0 → 2.0.0) - breaking changes
+- Version is managed by semantic-release in CI/CD pipeline
+- NEVER manually edit version in `shared/package.json` (managed by semantic-release)
+- Package is automatically published to GitHub Packages on push to develop
+- Both client and server MUST use the same published version of @jbuxofplenty/coral-clash
+- Version validation happens server-side - clients with outdated versions get warnings
+
+### Version Compatibility Rules
+
+- Major versions must match (breaking changes)
+- Minor versions must match (new features)
+- Patch versions can differ (bug fixes are compatible)
+
+### When Making Changes to Game Engine
+
+- Always use `shared` scope in commits: `feat(shared):` or `fix(shared):`
+- Be intentional about breaking changes - use `!` or `BREAKING CHANGE:` footer
+- Test changes thoroughly - version bumps trigger automatic deployment
+- Changes to `shared/game/` will trigger new package release
 
 ## Git Operations
 
@@ -27,6 +61,15 @@
 - Run tests before suggesting deployment
 - Use iOS as default platform (until Android setup is complete)
 - Prefer `yarn` over `npm` for package management
+
+### Working with Shared Package Locally
+
+- For local development with unpublished changes to `@jbuxofplenty/coral-clash`:
+    - In functions: `cd functions && yarn dev:link`
+    - In client: `yarn dev:link`
+- When done testing, unlink: `yarn dev:unlink` (then reinstall from registry)
+- NEVER commit with local linked version - always use published package
+- If making changes to game engine, expect a new package version to be published on push
 
 ## Code Quality
 
@@ -57,9 +100,11 @@
 - Use Fastlane for building and submitting apps (iOS & Android)
 - Use `npx expo prebuild` to generate native directories
 - Never commit generated `ios/` or `android/` directories
-- Version bumping is handled by CI/CD workflows
+- Game engine version bumping is AUTOMATIC via semantic-release (see Semantic Versioning System)
+- Deployment workflow: Release shared package → Deploy apps → Deploy Firebase functions
 - iOS builds require Fastlane Match for code signing
 - Android builds require keystore (never commit `.keystore` files)
+- Both client and server pull @jbuxofplenty/coral-clash from GitHub Packages (not local files)
 
 ## Communication
 

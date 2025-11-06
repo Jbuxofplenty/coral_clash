@@ -189,6 +189,42 @@ coral_clash/
 
 ## Development
 
+### Working with the Shared Game Engine
+
+The core game logic is in the `@jbuxofplenty/coral-clash` package, which is published to GitHub Packages and used by both the client and server.
+
+**For local development with unpublished changes:**
+
+```bash
+# Link local shared package for development
+yarn dev:link
+
+# Make changes to shared/game/* and test locally
+cd shared && yarn build && cd ..
+
+# When done testing, unlink and reinstall from registry
+yarn dev:unlink
+```
+
+**Important Notes:**
+
+- Always unlink before committing: `yarn dev:unlink`
+- Never commit with a linked version - always use the published package
+- Changes to `shared/game/` trigger automatic version bumps and publishing when pushed to `develop`
+
+**Version Bump Triggers (via Conventional Commits):**
+
+- `feat(shared):` → MINOR version bump (1.0.0 → 1.1.0) - new features
+- `fix(shared):` → PATCH version bump (1.0.0 → 1.0.1) - bug fixes
+- `feat(shared)!:` or `BREAKING CHANGE:` → MAJOR version bump (1.0.0 → 2.0.0) - breaking changes
+
+Example:
+
+```bash
+git commit -m "feat(shared): add support for tournament mode"
+# Results in automatic MINOR version bump when pushed to develop
+```
+
 ### Running Tests
 
 **Frontend tests:**
@@ -329,19 +365,31 @@ firebase deploy --only firestore --project coral-clash
 
 ### Release Process
 
-**Staging Release:**
+**Staging Release (with automatic package versioning):**
 
 ```bash
-# 1. Merge changes to develop branch
+# 1. Merge changes to develop branch with conventional commit
 git checkout develop
 git merge feature/my-feature
 
-# 2. Tag with beta version
+# 2. Push to develop - triggers automatic package release
+git push origin develop
+
+# 3. GitHub Actions automatically:
+#    - Releases new @jbuxofplenty/coral-clash version (if commits include feat/fix(shared))
+#    - Runs tests
+#    - Builds and submits to TestFlight/Internal Testing
+#    - Deploys Firebase backend
+```
+
+**Staging Release (manual tag):**
+
+```bash
+# 1. Tag with beta version (skips package release)
 git tag v1.8.0-beta.1
 git push origin v1.8.0-beta.1
 
-# 3. GitHub Actions automatically builds and submits to TestFlight/Internal Testing
-# 4. Firebase backend deploys automatically after successful app deployment
+# 2. GitHub Actions builds and submits to TestFlight/Internal Testing
 ```
 
 **Production Release:**
@@ -356,6 +404,7 @@ git tag v1.8.0
 git push origin v1.8.0
 
 # 3. GitHub Actions automatically builds and submits to App Store/Play Store
+# Note: Uses already-published @jbuxofplenty/coral-clash version from develop
 ```
 
 ### Required GitHub Secrets

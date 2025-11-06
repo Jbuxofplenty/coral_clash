@@ -1,6 +1,6 @@
+import { WHALE } from '@jbuxofplenty/coral-clash';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Animated, Image } from 'react-native';
-import { WHALE } from '../../shared';
 import PieceImages from '../assets/images/pieces';
 
 /**

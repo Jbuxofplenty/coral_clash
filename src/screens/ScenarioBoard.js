@@ -1,3 +1,4 @@
+import { applyFixture } from '@jbuxofplenty/coral-clash';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Icon as GalioIcon } from 'galio-framework';
 import React, { useEffect, useState } from 'react';
@@ -10,7 +11,6 @@ import {
     View,
     useWindowDimensions,
 } from 'react-native';
-import { applyFixture } from '../../shared';
 import { Icon } from '../components';
 import Coral from '../components/Coral';
 import EmptyBoard from '../components/EmptyBoard';

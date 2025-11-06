@@ -1,3 +1,10 @@
+import {
+    CoralClash,
+    WHALE,
+    applyFixture,
+    createGameSnapshot,
+    restoreGameFromSnapshot,
+} from '@jbuxofplenty/coral-clash';
 import { Icon } from 'galio-framework';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -12,13 +19,6 @@ import {
     View,
     useWindowDimensions,
 } from 'react-native';
-import {
-    CoralClash,
-    WHALE,
-    applyFixture,
-    createGameSnapshot,
-    restoreGameFromSnapshot,
-} from '../../shared';
 import { useAlert, useAuth, useGamePreferences, useTheme } from '../contexts';
 import { CoralClashProvider } from '../contexts/CoralClashContext';
 import { useCoralClash, useDevFeatures, useFirebaseFunctions, useGameActions } from '../hooks';

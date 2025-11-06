@@ -1,5 +1,5 @@
+import { SQUARES } from '@jbuxofplenty/coral-clash';
 import { StyleSheet, View } from 'react-native';
-import { SQUARES } from '../../shared';
 import { useCoralClashContext } from '../contexts/CoralClashContext';
 
 const Coral = ({

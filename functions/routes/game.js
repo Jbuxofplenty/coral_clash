@@ -1,15 +1,16 @@
 import { CloudTasksClient } from '@google-cloud/tasks';
-import { HttpsError, onCall, onRequest } from 'firebase-functions/v2/https';
-import { admin } from '../init.js';
 import {
     CoralClash,
     GAME_VERSION,
     calculateUndoMoveCount,
     createGameSnapshot,
     restoreGameFromSnapshot,
-} from '../shared/dist/game/index.js';
+} from '@jbuxofplenty/coral-clash';
+import { HttpsError, onCall, onRequest } from 'firebase-functions/v2/https';
+import { admin } from '../init.js';
 import { getAppCheckConfig } from '../utils/appCheckConfig.js';
 import { getGameResult, validateMove } from '../utils/gameValidator.js';
+import { validateClientVersion } from '../utils/gameVersion.js';
 import {
     formatDisplayName,
     increment,
@@ -34,21 +35,18 @@ const db = admin.firestore();
 /**
  * Validate game engine version
  * @param {string} clientVersion - Version from client
- * @throws {HttpsError} If version is invalid or unsupported
+ * @returns {{isCompatible: boolean, requiresUpdate: boolean, serverVersion: string, clientVersion: string}}
  */
 function validateGameVersion(clientVersion) {
-    // If no version provided, use current version (for backward compatibility)
-    const version = clientVersion || GAME_VERSION;
+    const validation = validateClientVersion(clientVersion);
 
-    // Check if version is supported
-    if (version !== GAME_VERSION) {
-        throw new HttpsError(
-            'failed-precondition',
-            `Game version mismatch. Client: ${version}, Server: ${GAME_VERSION}. Please update your app.`,
+    if (!validation.isCompatible) {
+        console.warn(
+            `Version mismatch - Client: ${clientVersion || 'unknown'}, Server: ${validation.serverVersion}`,
         );
     }
 
-    return version;
+    return validation;
 }
 
 /**
@@ -61,8 +59,11 @@ async function createGameHandler(request) {
         throw new HttpsError('unauthenticated', 'User must be authenticated');
     }
 
-    const { opponentId, timeControl } = data;
+    const { opponentId, timeControl, clientVersion } = data;
     const creatorId = auth.uid;
+
+    // Validate client version
+    const versionCheck = clientVersion ? validateGameVersion(clientVersion) : null;
 
     // Validate opponent exists
     const opponentDoc = await db.collection('users').doc(opponentId).get();
@@ -174,6 +175,7 @@ async function createGameHandler(request) {
         success: true,
         gameId: gameRef.id,
         message: 'Game created successfully',
+        versionCheck,
     };
 }
 
@@ -202,8 +204,11 @@ export const createComputerGame = onCall(getAppCheckConfig(), async (request) =>
             throw new HttpsError('unauthenticated', 'User must be authenticated');
         }
 
-        const { timeControl, difficulty } = data;
+        const { timeControl, difficulty, clientVersion } = data;
         const userId = auth.uid;
+
+        // Validate client version
+        const versionCheck = clientVersion ? validateGameVersion(clientVersion) : null;
 
         // Initialize time control and time remaining
         const finalTimeControl = timeControl || { type: 'unlimited' };
@@ -246,6 +251,7 @@ export const createComputerGame = onCall(getAppCheckConfig(), async (request) =>
             success: true,
             gameId: gameRef.id,
             message: 'Computer game created successfully',
+            versionCheck,
         };
     } catch (error) {
         console.error('Error creating computer game:', error);

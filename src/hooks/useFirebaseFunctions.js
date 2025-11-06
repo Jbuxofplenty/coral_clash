@@ -1,5 +1,5 @@
+import { GAME_VERSION } from '@jbuxofplenty/coral-clash';
 import { httpsCallable } from 'firebase/functions';
-import { GAME_VERSION } from '../../shared/game';
 import { auth, functions } from '../config/firebase';
 
 /**
@@ -99,7 +99,7 @@ export const useFirebaseFunctions = () => {
     const createGame = async (opponentId, timeControl = null) => {
         try {
             const callable = httpsCallable(functions, 'createGame');
-            const result = await callable({ opponentId, timeControl });
+            const result = await callable({ opponentId, timeControl, clientVersion: GAME_VERSION });
             return result.data;
         } catch (error) {
             console.error('Error creating game:', error);
@@ -110,7 +110,7 @@ export const useFirebaseFunctions = () => {
     const createComputerGame = async (timeControl = null, difficulty = 'random') => {
         try {
             const callable = httpsCallable(functions, 'createComputerGame');
-            const result = await callable({ timeControl, difficulty });
+            const result = await callable({ timeControl, difficulty, clientVersion: GAME_VERSION });
             return result.data;
         } catch (error) {
             console.error('Error creating computer game:', error);
@@ -311,7 +311,7 @@ export const useFirebaseFunctions = () => {
     const joinMatchmaking = async (timeControl = null) => {
         try {
             const callable = httpsCallable(functions, 'joinMatchmaking');
-            const result = await callable({ timeControl });
+            const result = await callable({ timeControl, clientVersion: GAME_VERSION });
             return result.data;
         } catch (error) {
             console.error('Error joining matchmaking:', error);

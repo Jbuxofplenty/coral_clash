@@ -1,7 +1,7 @@
+import { calculateUndoMoveCount } from '@jbuxofplenty/coral-clash';
 import { Icon } from 'galio-framework';
 import React, { useEffect, useState } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
-import { calculateUndoMoveCount } from '../../shared';
 import { db, doc, onSnapshot } from '../config/firebase';
 import { useAlert, useAuth, useGamePreferences } from '../contexts';
 import { useFirebaseFunctions } from '../hooks';

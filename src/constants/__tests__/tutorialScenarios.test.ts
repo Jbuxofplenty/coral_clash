@@ -3,8 +3,7 @@
  * Ensures the autoplay sequences in tutorial scenarios are valid
  */
 
-import { CoralClash } from '../../../shared/game/v1.0.0/coralClash';
-import { applyFixture } from '../../../shared/game/v1.0.0/gameState';
+import { CoralClash, applyFixture } from '@jbuxofplenty/coral-clash';
 // @ts-ignore - JS file without types
 import { TUTORIAL_SCENARIOS } from '../tutorialScenarios';
 

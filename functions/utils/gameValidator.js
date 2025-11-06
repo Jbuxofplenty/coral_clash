@@ -1,9 +1,5 @@
 // Import from shared library (source of truth)
-import {
-    CoralClash,
-    createGameSnapshot,
-    restoreGameFromSnapshot,
-} from '../shared/dist/game/index.js';
+import { CoralClash, createGameSnapshot, restoreGameFromSnapshot } from '@jbuxofplenty/coral-clash';
 
 /**
  * Validate a move on the server side to prevent cheating

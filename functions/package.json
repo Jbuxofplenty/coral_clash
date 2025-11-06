@@ -3,22 +3,22 @@
     "type": "module",
     "description": "Cloud Functions for Coral Clash",
     "scripts": {
-        "serve": "yarn build:shared && yarn copy:shared && firebase emulators:start --only functions",
+        "serve": "firebase emulators:start --only functions",
         "shell": "firebase functions:shell",
         "start": "yarn shell",
-        "deploy": "yarn build:shared && yarn copy:shared && firebase deploy --only functions",
+        "deploy": "firebase deploy --only functions",
         "logs": "firebase functions:log",
-        "build:shared": "cd ../shared && yarn build",
-        "copy:shared": "rm -rf shared && mkdir -p shared && cp -r ../shared/dist shared/",
         "test": "jest --coverage",
         "test:ci": "jest --coverage --watchAll=false --ci",
-        "pretest": "yarn build:shared && yarn copy:shared"
+        "dev:link": "cd ../shared && yarn link && cd ../functions && yarn link @jbuxofplenty/coral-clash",
+        "dev:unlink": "yarn unlink @jbuxofplenty/coral-clash && yarn install --force"
     },
     "engines": {
         "node": ">=22"
     },
     "main": "index.js",
     "dependencies": {
+        "@jbuxofplenty/coral-clash": "^1.0.0",
         "@google-cloud/tasks": "^5.0.0",
         "@types/node": "^18.0.0",
         "firebase-admin": "^12.0.0",

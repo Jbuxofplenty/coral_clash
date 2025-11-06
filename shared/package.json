@@ -1,9 +1,21 @@
 {
-    "name": "@coral-clash/shared",
+    "name": "@jbuxofplenty/coral-clash",
     "version": "1.0.0",
     "description": "Shared game logic for Coral Clash",
-    "main": "dist/game/index.js",
-    "types": "dist/game/index.d.ts",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "files": [
+        "dist/**/*"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Jbuxofplenty/coral_clash.git",
+        "directory": "shared"
+    },
+    "publishConfig": {
+        "registry": "https://npm.pkg.github.com",
+        "access": "public"
+    },
     "scripts": {
         "build": "tsc",
         "build:watch": "tsc --watch",
@@ -18,8 +30,15 @@
     "author": "",
     "license": "MIT",
     "devDependencies": {
+        "@semantic-release/changelog": "^6.0.3",
+        "@semantic-release/commit-analyzer": "^11.1.0",
+        "@semantic-release/git": "^10.0.1",
+        "@semantic-release/github": "^9.2.6",
+        "@semantic-release/npm": "^11.0.2",
+        "@semantic-release/release-notes-generator": "^12.1.0",
         "@types/jest": "^29.5.0",
         "jest": "^29.7.0",
+        "semantic-release": "^23.0.0",
         "ts-jest": "^29.1.0",
         "typescript": "~5.9.2"
     }

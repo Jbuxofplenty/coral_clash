@@ -89,3 +89,6 @@ client_secret_*.apps.googleusercontent.com.json
 # Google sign in
 google-services.json
 GoogleService-Info.plist
+.npmrc
+functions/.npmrc
+shared/.npmrc

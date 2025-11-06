@@ -1,5 +1,5 @@
+import { restoreGameFromSnapshot } from '@jbuxofplenty/coral-clash';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { restoreGameFromSnapshot } from '../../shared';
 import { db, doc, onSnapshot } from '../config/firebase';
 import { useAlert, useAuth } from '../contexts';
 import useFirebaseFunctions from './useFirebaseFunctions';

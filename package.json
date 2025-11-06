@@ -22,7 +22,8 @@
         "build:production:android": "bundle exec fastlane android release",
         "build:ios": "bundle exec fastlane ios build",
         "build:android": "bundle exec fastlane android build",
-        "postinstall": "cd shared && yarn install && yarn build",
+        "dev:link": "cd shared && yarn link && cd .. && yarn link @jbuxofplenty/coral-clash",
+        "dev:unlink": "yarn unlink @jbuxofplenty/coral-clash && yarn install --force",
         "eject": "expo eject",
         "lint": "eslint .",
         "lint:fix": "eslint . --fix",
@@ -47,6 +48,7 @@
         ]
     },
     "dependencies": {
+        "@jbuxofplenty/coral-clash": "^1.0.0",
         "@react-native-async-storage/async-storage": "2.2.0",
         "@react-native-google-signin/google-signin": "^16.0.0",
         "@react-native-masked-view/masked-view": "0.3.2",
@@ -84,6 +86,8 @@
     "devDependencies": {
         "@babel/core": "^7.28.5",
         "@babel/preset-env": "^7.28.5",
+        "@commitlint/cli": "^20.1.0",
+        "@commitlint/config-conventional": "^20.0.0",
         "@types/jest": "^29.5.14",
         "@types/moment-duration-format": "^2.2.7",
         "@types/react": "~19.1.10",

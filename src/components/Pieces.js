@@ -1,4 +1,4 @@
-import { WHALE } from '../../shared';
+import { WHALE } from '@jbuxofplenty/coral-clash';
 import PieceImages from '../assets/images/pieces';
 import { useGamePreferences } from '../contexts';
 

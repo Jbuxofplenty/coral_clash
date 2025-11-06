@@ -6,13 +6,13 @@
  * Both the mobile app and cloud functions import from here.
  *
  * VERSIONING:
- * - Current version: 1.0.0
+ * - Version is managed by semantic-release
  * - Game logic is versioned to maintain backward compatibility
  * - Frontend and backend must use matching versions
  */
 
-// Current game engine version
-export const GAME_VERSION = '1.0.0';
+// Current game engine version (automatically updated by semantic-release)
+export const GAME_VERSION = require('../package.json').version;
 
 // Export current version (v1.0.0) as default for easy imports
 // All game logic imports should come from versioned folders

@@ -1,6 +1,6 @@
+import { GAME_VERSION } from '@jbuxofplenty/coral-clash';
 import { onDocumentCreated } from 'firebase-functions/v2/firestore';
 import { admin } from '../init.js';
-import { GAME_VERSION } from '../shared/dist/game/index.js';
 import { formatDisplayName, initializeGameState, serverTimestamp } from '../utils/helpers.js';
 
 /**
