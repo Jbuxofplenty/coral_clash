@@ -2151,7 +2151,7 @@
   resolved "https://registry.yarnpkg.com/@istanbuljs/schema/-/schema-0.1.3.tgz#e45e384e4b8ec16bce2fd903af78450f6bf7ec98"
   integrity sha512-ZXRY4jNvVgSVQ8DL3LTcakaAtXwTVUxE81hslsyD2AtoXW/wVob10HkOJ1X/pAlcI7D+2YoZKg5do8G/w6RYgA==
 
-"@jbuxofplenty/coral-clash@^1.2.2":
+"@jbuxofplenty/coral-clash@^1.2.1":
   version "1.2.2"
   resolved "https://npm.pkg.github.com/download/@jbuxofplenty/coral-clash/1.2.2/2495cc7cefb0f23ab1b3b1e301516f55214001ea#2495cc7cefb0f23ab1b3b1e301516f55214001ea"
   integrity sha512-Jc4N7Ympy4Eaz6YACQ2ZL4YX1GS4FMtpI/O6ZvFF6RbBleyFCJN3dSiEzHDzojgTCdha/Do54QjHWSV7HC0c6g==
