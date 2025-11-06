@@ -1,3 +1,17 @@
+# [1.3.0](https://github.com/Jbuxofplenty/coral_clash/compare/v1.2.2...v1.3.0) (2025-11-06)
+
+
+### Bug Fixes
+
+* **ci:** explicitly configure GPG for semantic-release in shared directory ([6f52eef](https://github.com/Jbuxofplenty/coral_clash/commit/6f52eef4e9ed3b3e3d80ef393e99452a307205a9))
+* **ci:** re-enable sync-to-main now that GPG signing is configured ([9dadab4](https://github.com/Jbuxofplenty/coral_clash/commit/9dadab485bccd344745d42de9cc54feb287756ef))
+
+
+### Features
+
+* **ci:** add branch verification and push validation to update-dependencies job ([ab5095a](https://github.com/Jbuxofplenty/coral_clash/commit/ab5095a886f190f7071ed8ee2d72c59cc46bddeb))
+* **ci:** update and commit all three lockfiles (root, functions, shared) ([b82a04a](https://github.com/Jbuxofplenty/coral_clash/commit/b82a04a6aa567e787b2b84191e8e0b6f1b33e5f2))
+
 ## [1.2.2](https://github.com/Jbuxofplenty/coral_clash/compare/v1.2.1...v1.2.2) (2025-11-06)
 
 
