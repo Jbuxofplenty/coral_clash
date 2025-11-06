@@ -159,10 +159,8 @@ jobs:
   deploy-firebase:
     name: Deploy Firebase Functions
     needs: deploy-staging
-    # Run after deploy-staging succeeds, even if upstream jobs were skipped
-    if: |
-      !cancelled() &&
-      needs.deploy-staging.result == 'success'
+    # Always evaluate this job, but only run if deploy-staging succeeded
+    if: always() && needs.deploy-staging.result == 'success'
     uses: ./.github/workflows/firebase-deploy.yml
     with:
       target: 'all'
