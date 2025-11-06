@@ -268,14 +268,14 @@ jobs:
   
   sync-to-main:
     name: Sync develop to main
-    needs: [release-shared, update-dependencies, deploy-firebase]
-    # Only run on develop branch pushes when release-shared and update-dependencies actually ran
+    needs: [release-shared, update-dependencies, deploy-staging]
+    # Only run on develop branch pushes when release-shared and update-dependencies ran successfully
     if: |
       github.event_name == 'push' && 
       github.ref == 'refs/heads/develop' &&
       needs.release-shared.result == 'success' &&
-      (needs.update-dependencies.result == 'success' || needs.update-dependencies.result == 'skipped') &&
-      needs.deploy-firebase.result == 'success'
+      needs.update-dependencies.result == 'success' &&
+      needs.deploy-staging.result == 'success'
     runs-on: ubuntu-latest
     
     steps:
