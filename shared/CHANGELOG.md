@@ -1,3 +1,11 @@
+## [1.3.1](https://github.com/Jbuxofplenty/coral_clash/compare/v1.3.0...v1.3.1) (2025-11-06)
+
+
+### Bug Fixes
+
+* **ci:** commit package.json files along with lockfiles in update-dependencies job ([5fc720e](https://github.com/Jbuxofplenty/coral_clash/commit/5fc720eb743f33218a9a691205626dcc77ed17df))
+* **ci:** update CocoaPods specs repo before installing iOS dependencies ([16b5765](https://github.com/Jbuxofplenty/coral_clash/commit/16b5765a41f8d00ee44f6de4ec40b2e085111ccb))
+
 # [1.3.0](https://github.com/Jbuxofplenty/coral_clash/compare/v1.2.2...v1.3.0) (2025-11-06)
 
 
