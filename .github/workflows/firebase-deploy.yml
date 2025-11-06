@@ -74,7 +74,7 @@ jobs:
       
       - name: Install functions dependencies
         run: cd functions && yarn install --frozen-lockfile
-        
+      
       - name: Replace with local build in functions
         run: cd functions && yarn link @jbuxofplenty/coral-clash
       

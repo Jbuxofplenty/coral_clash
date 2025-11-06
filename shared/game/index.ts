@@ -12,7 +12,8 @@
  */
 
 // Current game engine version (automatically updated by semantic-release)
-export const GAME_VERSION = require('../package.json').version;
+// Path is relative to compiled location in dist/game/
+export const GAME_VERSION = require('../../package.json').version;
 
 // Export current version (v1.0.0) as default for easy imports
 // All game logic imports should come from versioned folders

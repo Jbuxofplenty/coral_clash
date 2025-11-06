@@ -53,11 +53,6 @@ jobs:
       - name: Replace published package with local build
         run: yarn link @jbuxofplenty/coral-clash
         
-      - name: Verify link points to dist
-        run: |
-          ls -la node_modules/@jbuxofplenty/coral-clash/
-          cat node_modules/@jbuxofplenty/coral-clash/package.json | grep '"main"'
-        
       - name: Run tests
         run: yarn test:ci
         

@@ -2,9 +2,11 @@
     "name": "@jbuxofplenty/coral-clash",
     "version": "1.0.0",
     "description": "Shared game logic for Coral Clash",
-    "main": "dist/index.js",
-    "types": "dist/index.d.ts",
+    "main": "index.js",
+    "types": "game/index.d.ts",
     "files": [
+        "index.js",
+        "game/**/*",
         "dist/**/*"
     ],
     "repository": {

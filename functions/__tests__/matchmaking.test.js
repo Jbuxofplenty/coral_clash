@@ -97,6 +97,7 @@ describe('Matchmaking Functions', () => {
                 displayName: 'TestUser',
                 discriminator: '1234',
                 avatarKey: 'dolphin',
+                clientVersion: expect.any(String),
                 joinedAt: expect.any(Object),
                 lastHeartbeat: expect.any(Object),
                 status: 'searching',
