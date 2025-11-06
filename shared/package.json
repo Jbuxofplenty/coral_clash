@@ -1,9 +1,9 @@
 {
     "name": "@jbuxofplenty/coral-clash",
-    "version": "1.0.0",
+    "version": "1.2.2",
     "description": "Shared game logic for Coral Clash",
     "main": "index.js",
-    "types": "game/index.d.ts",
+    "types": "dist/game/index.d.ts",
     "files": [
         "index.js",
         "game/**/*",
@@ -19,6 +19,7 @@
         "access": "public"
     },
     "scripts": {
+        "prebuild": "node scripts/inject-version.js",
         "build": "tsc",
         "build:watch": "tsc --watch",
         "clean": "rm -rf dist game/**/*.js game/**/*.d.ts !game/__fixtures__/*.js",

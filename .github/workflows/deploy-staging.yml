@@ -48,14 +48,88 @@ jobs:
     uses: ./.github/workflows/release-shared.yml
     secrets: inherit
   
+  update-dependencies:
+    name: Update Package Dependencies
+    needs: [release-shared]
+    # Only run if release-shared succeeded (new version published)
+    if: needs.release-shared.result == 'success'
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: develop
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Pull latest changes
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git pull origin develop
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'yarn'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@jbuxofplenty'
+      
+      - name: Setup GitHub Packages
+        uses: ./.github/actions/setup-github-packages
+      
+      - name: Update shared package version
+        run: |
+          echo "📦 Upgrading @jbuxofplenty/coral-clash to latest..."
+          
+          # Update root package
+          yarn upgrade @jbuxofplenty/coral-clash --latest
+          
+          # Update functions package
+          cd functions
+          yarn upgrade @jbuxofplenty/coral-clash --latest
+          cd ..
+          
+          echo "✅ Dependencies updated"
+      
+      - name: Commit updated lockfiles
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          
+          # Check if there are changes to commit
+          if git diff --quiet yarn.lock functions/yarn.lock; then
+            echo "No lockfile changes to commit"
+            exit 0
+          fi
+          
+          # Pull latest changes with autostash (semantic-release may have pushed)
+          echo "🔄 Pulling latest from develop with autostash..."
+          git pull --rebase --autostash origin develop
+          
+          # Stage and commit
+          echo "📝 Committing lockfile updates..."
+          git add yarn.lock functions/yarn.lock
+          git commit -m "chore(deps): update @jbuxofplenty/coral-clash to latest [skip ci]"
+          git push origin develop
+          
+          echo "✅ Lockfiles updated and pushed"
+  
   deploy-staging:
     name: Deploy to Staging
-    needs: [test, release-shared]
-    # Run after test succeeds, and either release-shared succeeded or was skipped
+    needs: [test, release-shared, update-dependencies]
+    # Run after test succeeds, and either:
+    # - release-shared succeeded and update-dependencies succeeded, OR
+    # - release-shared was skipped
     if: |
       !cancelled() && 
       needs.test.result == 'success' && 
-      (needs.release-shared.result == 'success' || needs.release-shared.result == 'skipped')
+      (
+        (needs.release-shared.result == 'success' && needs.update-dependencies.result == 'success') ||
+        needs.release-shared.result == 'skipped'
+      )
     uses: ./.github/workflows/build-and-submit.yml
     with:
       profile: 'preview'
@@ -170,6 +244,53 @@ jobs:
           echo "Production tag will be: **$(echo ${{ steps.extract.outputs.staging_tag }} | sed -E 's/-beta\.[0-9]+$//' | sed -E 's/-rc\.[0-9]+$//')**" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "📱 _Production will deploy to **all platforms** (iOS + Android)_" >> $GITHUB_STEP_SUMMARY
+  
+  sync-to-main:
+    name: Sync develop to main
+    needs: [deploy-firebase]
+    # Only run on develop branch pushes after successful deployment
+    if: |
+      github.event_name == 'push' && 
+      github.ref == 'refs/heads/develop' &&
+      needs.deploy-firebase.result == 'success'
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: develop
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Merge develop to main
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          
+          # Fetch main branch
+          git fetch origin main
+          
+          # Checkout main
+          git checkout main
+          git pull origin main
+          
+          # Merge develop
+          echo "🔀 Merging develop into main..."
+          git merge origin/develop --no-ff -m "chore: sync develop to main after successful staging deployment [skip ci]"
+          
+          # Push to main
+          git push origin main
+          
+          echo "✅ Successfully synced develop to main"
+      
+      - name: Summary
+        run: |
+          echo "### ✅ Branches Synced" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**develop** → **main** merge complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Both branches are now in sync after successful deployment." >> $GITHUB_STEP_SUMMARY
   
   promote-to-production:
     name: Promote to Production

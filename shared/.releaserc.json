@@ -11,8 +11,10 @@
     [
       "@semantic-release/git",
       {
-        "assets": ["package.json", "CHANGELOG.md"],
-        "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
+        "assets": ["package.json", "CHANGELOG.md", "game/index.ts"],
+        "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}",
+        "signCommit": true,
+        "signTag": true
       }
     ]
   ]
