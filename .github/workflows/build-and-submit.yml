@@ -56,6 +56,15 @@ jobs:
         with:
           node-version: '20'
           cache: 'yarn'
+      
+      - name: Build and link Shared package
+        run: |
+          cd shared
+          yarn install --frozen-lockfile
+          yarn build
+          yarn link
+          cd ..
+          yarn link @jbuxofplenty/coral-clash
 
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
@@ -196,6 +205,15 @@ jobs:
         with:
           node-version: '20'
           cache: 'yarn'
+      
+      - name: Build and link Shared package
+        run: |
+          cd shared
+          yarn install --frozen-lockfile
+          yarn build
+          yarn link
+          cd ..
+          yarn link @jbuxofplenty/coral-clash
 
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1

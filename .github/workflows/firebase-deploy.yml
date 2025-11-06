@@ -50,24 +50,24 @@ jobs:
           node-version: '22'
           cache: 'yarn'
       
-      - name: Install root dependencies
-        run: yarn install --frozen-lockfile
-      
-      - name: Build shared module
+      - name: Build and link Shared package
         run: |
           cd shared
           yarn install --frozen-lockfile
           yarn build
+          yarn link
+          cd ..
+          yarn link @jbuxofplenty/coral-clash
+          cd functions
+          yarn link @jbuxofplenty/coral-clash
+      
+      - name: Install root dependencies
+        run: yarn install --frozen-lockfile
       
       - name: Install functions dependencies
         run: |
           cd functions
           yarn install --frozen-lockfile
-      
-      - name: Copy shared module to functions
-        run: |
-          cd functions
-          yarn copy:shared
       
       - name: Run functions tests
         run: |

@@ -28,6 +28,18 @@ jobs:
             yarn.lock
             functions/yarn.lock
             shared/yarn.lock
+      
+      - name: Install Shared dependencies
+        run: cd shared && yarn install --frozen-lockfile
+        
+      - name: Build Shared module
+        run: cd shared && yarn build
+        
+      - name: Link Shared package locally
+        run: |
+          cd shared && yarn link
+          cd .. && yarn link @jbuxofplenty/coral-clash
+          cd functions && yarn link @jbuxofplenty/coral-clash
           
       - name: Install dependencies
         run: yarn install --frozen-lockfile
@@ -35,21 +47,8 @@ jobs:
       - name: Run tests
         run: yarn test:ci
         
-      - name: Install Shared dependencies
-        run: cd shared && yarn install --frozen-lockfile
-        
       - name: Run Shared tests
         run: cd shared && yarn test
-        
-      - name: Build Shared module
-        run: cd shared && yarn build
-        
-      - name: Copy Shared module to Functions
-        run: |
-          cd functions
-          rm -rf shared
-          mkdir -p shared
-          cp -r ../shared/dist shared/
         
       - name: Install Functions dependencies
         run: cd functions && yarn install --frozen-lockfile
