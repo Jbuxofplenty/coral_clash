@@ -32,16 +32,21 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  release-shared:
-    name: Release Shared Package
-    # Only run on develop branch pushes (not on tags or manual triggers)
-    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
-    uses: ./.github/workflows/release-shared.yml
-    secrets: inherit
-  
   test:
     name: Run Tests
     uses: ./.github/workflows/test.yml
+  
+  release-shared:
+    name: Release Shared Package
+    needs: [test]
+    # Only run on develop branch pushes (not on tags or manual triggers)
+    # and only if tests passed
+    if: |
+      github.event_name == 'push' && 
+      github.ref == 'refs/heads/develop' &&
+      needs.test.result == 'success'
+    uses: ./.github/workflows/release-shared.yml
+    secrets: inherit
   
   deploy-staging:
     name: Deploy to Staging
