@@ -256,16 +256,19 @@ async function registerForPushNotificationsAsync() {
             }
 
             try {
-                // For standalone builds (Fastlane), get native FCM/APNs token
-                // For Expo Go development, fall back to Expo push token
-                try {
-                    // Try native device token first (works for standalone builds)
-                    const deviceToken = await Notifications.getDevicePushTokenAsync();
-                    token = deviceToken.data;
-                } catch (_deviceTokenError) {
-                    // Fall back to Expo push token (Expo Go only)
-                    // Note: This won't work for standalone builds, only for development
+                // Use Expo push tokens for iOS (works for both Expo Go and standalone builds)
+                // Use native FCM tokens for Android
+                if (Platform.OS === 'ios') {
+                    // For iOS: Use Expo push token (works with Expo's push service)
                     token = (await Notifications.getExpoPushTokenAsync()).data;
+                } else {
+                    // For Android: Try native FCM token first, fallback to Expo token
+                    try {
+                        const deviceToken = await Notifications.getDevicePushTokenAsync();
+                        token = deviceToken.data;
+                    } catch (_deviceTokenError) {
+                        token = (await Notifications.getExpoPushTokenAsync()).data;
+                    }
                 }
             } catch (_error) {
                 // Silently handle - common in simulators and Expo Go
