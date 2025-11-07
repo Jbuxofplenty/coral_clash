@@ -43,7 +43,7 @@ Notifications.setNotificationHandler({
             shouldShowAlert: false, // Deprecated but keeping for backwards compatibility
             shouldShowBanner: !shouldSuppress, // Don't show banner if suppressed
             shouldPlaySound: !shouldSuppress, // Don't play sound if suppressed
-            shouldSetBadge: !shouldSuppress, // Don't update badge if suppressed
+            shouldSetBadge: false, // Never update badge - disabled
         };
     },
 });
@@ -62,7 +62,6 @@ export function NotificationProvider({ children }) {
     const { user } = useAuth();
     const [expoPushToken, setExpoPushToken] = useState('');
     const [notification, setNotification] = useState(null);
-    const [badgeCount, setBadgeCount] = useState(0);
     const [activeGameId, setActiveGameId] = useState(null);
     const [gameStatusUpdate, setGameStatusUpdate] = useState(null); // For showing status even when suppressed
     const notificationListener = useRef();
@@ -134,12 +133,7 @@ export function NotificationProvider({ children }) {
 
                 setNotification(receivedNotification);
 
-                // Update badge count - use functional update to avoid stale closure
-                setBadgeCount((prevCount) => {
-                    const newCount = prevCount + 1;
-                    Notifications.setBadgeCountAsync(newCount);
-                    return newCount;
-                });
+                // Badge management disabled - no longer updating badge count
             },
         );
 
@@ -160,8 +154,7 @@ export function NotificationProvider({ children }) {
         // Handle app state changes
         const subscription = AppState.addEventListener('change', (nextAppState) => {
             if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
-                // App came to foreground, refresh badge count
-                refreshBadgeCount();
+                // Badge management disabled - no longer refreshing badge count
             }
             appState.current = nextAppState;
         });
@@ -195,21 +188,15 @@ export function NotificationProvider({ children }) {
     }, [notification, activeGameId]);
 
     const refreshBadgeCount = async () => {
-        // In a real app, fetch unread notifications count from Firebase
-        // For now, we'll just get the current badge count
-        const count = await Notifications.getBadgeCountAsync();
-        setBadgeCount(count);
+        // Badge management disabled - no action taken
     };
 
     const clearBadge = async () => {
-        await Notifications.setBadgeCountAsync(0);
-        setBadgeCount(0);
+        // Badge management disabled - no action taken
     };
 
     const decrementBadge = async () => {
-        const newCount = Math.max(0, badgeCount - 1);
-        await Notifications.setBadgeCountAsync(newCount);
-        setBadgeCount(newCount);
+        // Badge management disabled - no action taken
     };
 
     const dismissNotification = () => {
@@ -221,7 +208,6 @@ export function NotificationProvider({ children }) {
             value={{
                 expoPushToken,
                 notification,
-                badgeCount,
                 dismissNotification,
                 clearBadge,
                 decrementBadge,
