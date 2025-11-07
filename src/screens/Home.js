@@ -12,11 +12,10 @@ import {
     PlayWithFriendCard,
     SignUpPromptCard,
     TimeControlModal,
-    VersionWarningBanner,
 } from '../components/';
 import FixtureLoaderModal from '../components/FixtureLoaderModal';
 import { collection, db, onSnapshot, query, where } from '../config/firebase';
-import { useAlert, useAuth, useTheme, useVersion } from '../contexts';
+import { useAlert, useAuth, useTheme } from '../contexts';
 import { useDevFeatures, useFirebaseFunctions, useGame, useMatchmaking } from '../hooks';
 import { useFriends } from '../hooks/useFriends';
 import { savePassAndPlayGame } from '../utils/passAndPlayStorage';
@@ -27,7 +26,6 @@ export default function Home({ navigation }) {
     const { colors } = useTheme();
     const { user } = useAuth();
     const { showAlert } = useAlert();
-    const { versionWarning, dismissWarning } = useVersion();
     const enableDevFeatures = useDevFeatures();
     const [fixtureModalVisible, setFixtureModalVisible] = useState(false);
     const [gameHistory, setGameHistory] = useState([]);
@@ -524,9 +522,6 @@ export default function Home({ navigation }) {
                 contentContainerStyle={styles.scrollContent}
                 style={styles.scrollView}
             >
-                {/* Version Warning Banner */}
-                <VersionWarningBanner visible={versionWarning.visible} onDismiss={dismissWarning} />
-
                 {/* Banner Ad - displayed below header */}
                 <BannerAd />
 

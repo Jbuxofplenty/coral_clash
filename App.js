@@ -27,7 +27,9 @@ import {
     ThemeProvider,
     VersionProvider,
     useTheme,
+    useVersion,
 } from './src/contexts';
+import VersionWarningBanner from './src/components/VersionWarningBanner';
 import Screens from './src/navigation/Screens';
 
 // Ignore expo-notifications warnings in development (keychain access issues in Expo Go)
@@ -62,6 +64,7 @@ function cacheImages(images) {
 
 function AppContent({ navigationRef: _navigationRef }) {
     const { isDarkMode } = useTheme();
+    const { versionWarning, dismissWarning } = useVersion();
 
     return (
         <Block flex>
@@ -71,6 +74,8 @@ function AppContent({ navigationRef: _navigationRef }) {
                 translucent
             />
             <Screens />
+            {/* Version warning toast - overlays all screens */}
+            <VersionWarningBanner visible={versionWarning.visible} onDismiss={dismissWarning} />
         </Block>
     );
 }
