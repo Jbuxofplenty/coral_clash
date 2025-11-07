@@ -213,12 +213,41 @@ The `BannerAd` component handles:
 - Ensure parent container has proper width constraints
 - Test on different device sizes (phones and tablets)
 
+## Google Play Store Configuration
+
+### Advertising ID Declaration Required
+
+When deploying to Google Play Store, you **must** declare that your app uses the Advertising ID:
+
+1. **Go to Play Console** → Your App → **Policy** → **App content**
+2. Find **Advertising ID** section
+3. Select: **"Yes, my app uses the Advertising ID"**
+4. Select purposes: **Advertising**, **Analytics** (as applicable)
+5. Save and submit
+
+**Without this declaration, uploads will fail with:**
+
+```
+Invalid request - This release includes the com.google.android.gms.permission.AD_ID
+permission but your declaration on Play Console says your app doesn't use advertising ID.
+```
+
+### Data Safety Declaration
+
+Also update your **Data Safety** section:
+
+- **Device or other IDs**: Collected → Yes
+- **Purpose**: Advertising or marketing, App functionality, Analytics
+- **Data encryption**: Encrypted in transit
+- **Sharing**: Shared with third parties (AdMob)
+
 ## Additional Resources
 
 - [AdMob Documentation](https://developers.google.com/admob)
 - [react-native-google-mobile-ads Documentation](https://docs.page/invertase/react-native-google-mobile-ads)
 - [AdMob Best Practices](https://support.google.com/admob/answer/6128877)
 - [AdMob Policy Guidelines](https://support.google.com/admob/answer/6128543)
+- [Play Console Data Safety Guide](https://support.google.com/googleplay/android-developer/answer/10787469)
 
 ## Important Notes
 
