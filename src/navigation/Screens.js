@@ -10,6 +10,7 @@ import GameScreen from '../screens/Game';
 import HomeScreen from '../screens/Home';
 import HowToPlay from '../screens/HowToPlay';
 import Login from '../screens/Login';
+import ReportIssue from '../screens/ReportIssue';
 import ScenarioBoard from '../screens/ScenarioBoard';
 import Settings from '../screens/Settings';
 import Stats from '../screens/Stats';
@@ -204,6 +205,31 @@ export default function AppStack(_props) {
                         }}
                     />
                     <Drawer.Screen
+                        name='Report Issue'
+                        component={ReportIssue}
+                        options={{
+                            drawerIcon: ({ _focused, color }) => (
+                                <Icon
+                                    size={isCompact ? 20 : 24}
+                                    name='bug'
+                                    family='font-awesome'
+                                    color={color}
+                                />
+                            ),
+                            header: ({ navigation, scene }) => (
+                                <Header
+                                    title='Report Issue'
+                                    navigation={navigation}
+                                    scene={scene}
+                                    user={user}
+                                />
+                            ),
+                            drawerItemStyle: {
+                                marginTop: isCompact ? 12 : 16,
+                            },
+                        }}
+                    />
+                    <Drawer.Screen
                         name='Settings'
                         component={Settings}
                         options={{
@@ -240,10 +266,6 @@ export default function AppStack(_props) {
                                     color={color}
                                 />
                             ),
-                            drawerItemStyle: {
-                                marginTop: isCompact ? 12 : 16,
-                                marginBottom: isCompact ? 10 : 20,
-                            },
                         }}
                         listeners={({ navigation }) => ({
                             drawerItemPress: (e) => {
@@ -289,6 +311,30 @@ export default function AppStack(_props) {
                         }}
                     />
                     <Drawer.Screen
+                        name='Report Issue'
+                        component={ReportIssue}
+                        options={{
+                            drawerIcon: ({ _focused, color }) => (
+                                <Icon
+                                    size={isCompact ? 20 : 24}
+                                    name='bug-report'
+                                    family='MaterialIcons'
+                                    color={color}
+                                />
+                            ),
+                            header: ({ navigation, scene }) => (
+                                <Header
+                                    title='Report Issue'
+                                    navigation={navigation}
+                                    scene={scene}
+                                />
+                            ),
+                            drawerItemStyle: {
+                                marginTop: 'auto',
+                            },
+                        }}
+                    />
+                    <Drawer.Screen
                         name='Log In'
                         component={Login}
                         options={{
@@ -301,7 +347,6 @@ export default function AppStack(_props) {
                                 />
                             ),
                             drawerItemStyle: {
-                                marginTop: 'auto',
                                 marginBottom: isCompact ? 10 : 20,
                             },
                             header: ({ navigation, scene }) => (

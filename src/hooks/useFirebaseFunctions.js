@@ -352,6 +352,19 @@ export const useFirebaseFunctions = () => {
         }
     };
 
+    // ==================== Issues Functions ====================
+
+    const submitIssue = async ({ subject, description, gameSnapshot }) => {
+        try {
+            const callable = httpsCallable(functions, 'submitIssue');
+            const result = await callable({ subject, description, gameSnapshot });
+            return result.data;
+        } catch (error) {
+            console.error('Error submitting issue:', error);
+            throw error;
+        }
+    };
+
     return {
         // User Profile
         getPublicUserInfo,
@@ -386,6 +399,8 @@ export const useFirebaseFunctions = () => {
         leaveMatchmaking,
         updateMatchmakingHeartbeat,
         getMatchmakingStatus,
+        // Issues
+        submitIssue,
     };
 };
 

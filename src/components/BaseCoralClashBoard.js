@@ -5,6 +5,7 @@ import {
     createGameSnapshot,
     restoreGameFromSnapshot,
 } from '@jbuxofplenty/coral-clash';
+import { useNavigation } from '@react-navigation/native';
 import { Icon } from 'galio-framework';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -72,6 +73,7 @@ const BaseCoralClashBoard = ({
     effectiveBoardFlip = null,
     notificationStatus = null,
 }) => {
+    const navigation = useNavigation();
     const { width, height } = useWindowDimensions();
     const { colors } = useTheme();
     const { isBoardFlipped: contextBoardFlipped, toggleBoardFlip } = useGamePreferences();
@@ -2058,6 +2060,45 @@ const BaseCoralClashBoard = ({
                                             {isBoardFlipped
                                                 ? 'Currently showing black on bottom'
                                                 : 'Currently showing white on bottom'}
+                                        </Text>
+                                    </View>
+                                </TouchableOpacity>
+
+                                {/* Report Bug */}
+                                <TouchableOpacity
+                                    style={[
+                                        styles.menuItem,
+                                        { borderBottomColor: colors.BORDER_COLOR },
+                                    ]}
+                                    onPress={() => {
+                                        closeMenu();
+                                        // Create game snapshot to include with bug report
+                                        const snapshot = createGameSnapshot(coralClash);
+                                        navigation.navigate('Report Issue', {
+                                            gameSnapshot: snapshot,
+                                        });
+                                    }}
+                                    activeOpacity={0.7}
+                                >
+                                    <Icon
+                                        name='bug-report'
+                                        family='MaterialIcons'
+                                        size={28}
+                                        color='#ff9800'
+                                    />
+                                    <View style={styles.menuItemText}>
+                                        <Text
+                                            style={[styles.menuItemTitle, { color: colors.TEXT }]}
+                                        >
+                                            Report Bug
+                                        </Text>
+                                        <Text
+                                            style={[
+                                                styles.menuItemSubtitle,
+                                                { color: colors.TEXT_SECONDARY },
+                                            ]}
+                                        >
+                                            Include current game state
                                         </Text>
                                     </View>
                                 </TouchableOpacity>
