@@ -1,0 +1,47 @@
+name: 'Setup GPG Signing'
+description: 'Configures GPG key for signing commits and tags in GitHub Actions'
+
+inputs:
+  gpg_private_key:
+    description: 'GPG private key for signing'
+    required: true
+  gpg_passphrase:
+    description: 'Passphrase for GPG private key'
+    required: true
+  git_user_name:
+    description: 'Git user name for commits'
+    required: false
+    default: 'Josiah Buxton'
+  git_user_email:
+    description: 'Git user email for commits'
+    required: false
+    default: 'jbuxofplenty@gmail.com'
+
+outputs:
+  keyid:
+    description: 'The GPG key ID that was imported'
+    value: ${{ steps.import_gpg.outputs.keyid }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Import GPG key
+      id: import_gpg
+      uses: crazy-max/ghaction-import-gpg@v6
+      with:
+        gpg_private_key: ${{ inputs.gpg_private_key }}
+        passphrase: ${{ inputs.gpg_passphrase }}
+        git_user_signingkey: true
+        git_commit_gpgsign: true
+    
+    - name: Configure Git with GPG signing
+      shell: bash
+      run: |
+        git config user.name "${{ inputs.git_user_name }}"
+        git config user.email "${{ inputs.git_user_email }}"
+        git config user.signingkey "${{ steps.import_gpg.outputs.keyid }}"
+        git config commit.gpgsign true
+        
+        echo "✅ GPG configured for signed commits"
+        echo "🔑 Key ID: ${{ steps.import_gpg.outputs.keyid }}"
+
