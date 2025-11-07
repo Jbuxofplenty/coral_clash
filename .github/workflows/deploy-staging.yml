@@ -298,9 +298,10 @@ jobs:
           git checkout main
           git pull origin main
           
-          # Merge develop
-          echo "🔀 Merging develop into main..."
-          git merge origin/develop --no-ff -m "chore: sync develop to main after successful staging deployment [skip ci]"
+          # Squash merge develop to avoid unsigned commit issues
+          echo "🔀 Squash merging develop into main..."
+          git merge origin/develop --squash
+          git commit -m "chore(ci): sync develop to main [skip ci]"
           
           # Push to main
           git push origin main
