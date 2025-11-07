@@ -245,7 +245,7 @@ export default function AppStack(_props) {
                                 marginBottom: isCompact ? 10 : 20,
                             },
                         }}
-                        listeners={{
+                        listeners={({ navigation }) => ({
                             drawerItemPress: (e) => {
                                 e.preventDefault();
                                 showAlert('Log Out', 'Are you sure you want to log out?', [
@@ -256,11 +256,19 @@ export default function AppStack(_props) {
                                     {
                                         text: 'Log Out',
                                         style: 'destructive',
-                                        onPress: () => logOut(),
+                                        onPress: async () => {
+                                            try {
+                                                await logOut();
+                                                // Navigate to home screen and close drawer after successful logout
+                                                navigation.navigate('Home');
+                                            } catch (error) {
+                                                console.error('Error during logout:', error);
+                                            }
+                                        },
                                     },
                                 ]);
                             },
-                        }}
+                        })}
                     />
                 </>
             ) : (

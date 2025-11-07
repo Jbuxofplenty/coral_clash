@@ -252,10 +252,15 @@ export const AuthProvider = ({ children }) => {
     const logOut = async () => {
         try {
             setError(null);
-            // Sign out from Google if signed in
-            const isSignedIn = await GoogleSignin.isSignedIn();
-            if (isSignedIn) {
-                await GoogleSignin.signOut();
+            // Sign out from Google if signed in (wrapped in try-catch to handle cases where GoogleSignin is not initialized)
+            try {
+                const isSignedIn = await GoogleSignin.isSignedIn();
+                if (isSignedIn) {
+                    await GoogleSignin.signOut();
+                }
+            } catch (googleSignOutError) {
+                // Silently handle GoogleSignin errors (e.g., not configured, not initialized)
+                console.log('Google Sign-Out skipped:', googleSignOutError.message);
             }
             // Sign out from Firebase
             await signOut(auth);
