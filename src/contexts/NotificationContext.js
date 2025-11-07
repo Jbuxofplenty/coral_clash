@@ -73,6 +73,13 @@ export function NotificationProvider({ children }) {
         activeGameIdRef.current = activeGameId;
     }, [activeGameId]);
 
+    // Clear any existing badge count on app startup (removes old badges)
+    useEffect(() => {
+        Notifications.setBadgeCountAsync(0).catch(() => {
+            // Silently handle errors (common in simulators)
+        });
+    }, []);
+
     // Register for push notifications
     useEffect(() => {
         registerForPushNotificationsAsync()
