@@ -234,7 +234,7 @@ function Login({ navigation }) {
                                         >
                                             <Ionicons
                                                 name='logo-google'
-                                                size={24}
+                                                size={verticalScale(24)}
                                                 color='#DB4437'
                                             />
                                             <Text
@@ -519,7 +519,7 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.1,
         shadowRadius: 4,
         elevation: 2,
-        height: isTablet ? verticalScale(48) : verticalScale(40),
+        height: verticalScale(50),
     },
     googleButtonText: {
         marginLeft: theme.SIZES.BASE,
