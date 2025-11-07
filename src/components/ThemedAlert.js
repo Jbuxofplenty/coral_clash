@@ -57,9 +57,13 @@ export default function ThemedAlert({
         if (button.onPress) {
             try {
                 // Execute in background after modal is dismissed
-                button.onPress().catch((error) => {
-                    console.error('Error in alert button handler:', error);
-                });
+                const result = button.onPress();
+                // Only attach catch if it returns a Promise
+                if (result && typeof result.catch === 'function') {
+                    result.catch((error) => {
+                        console.error('Error in alert button handler:', error);
+                    });
+                }
             } catch (error) {
                 console.error('Error in alert button handler:', error);
             }
