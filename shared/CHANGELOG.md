@@ -1,3 +1,15 @@
+# [1.5.0](https://github.com/Jbuxofplenty/coral_clash/compare/v1.4.0...v1.5.0) (2025-11-07)
+
+
+### Bug Fixes
+
+* **shared:** bump coral-clash version for testing ([587bc61](https://github.com/Jbuxofplenty/coral_clash/commit/587bc61be5fcbff01d5e9cf3ce36656096a5d956))
+
+
+### Features
+
+* **client:** add tablet responsive layout and styling ([0abb107](https://github.com/Jbuxofplenty/coral_clash/commit/0abb10750bce1d3fd29684414c10819fb5256e5a))
+
 # [1.4.0](https://github.com/Jbuxofplenty/coral_clash/compare/v1.3.1...v1.4.0) (2025-11-06)
 
 
