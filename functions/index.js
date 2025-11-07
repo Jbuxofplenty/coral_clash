@@ -7,6 +7,7 @@ import './init.js';
 // Import route modules
 import * as friends from './routes/friends.js';
 import * as game from './routes/game.js';
+import * as issues from './routes/issues.js';
 import * as matchmaking from './routes/matchmaking.js';
 import * as userProfile from './routes/userProfile.js';
 import * as userSettings from './routes/userSettings.js';
@@ -57,6 +58,9 @@ export const joinMatchmaking = matchmaking.joinMatchmaking;
 export const leaveMatchmaking = matchmaking.leaveMatchmaking;
 export const updateMatchmakingHeartbeat = matchmaking.updateMatchmakingHeartbeat;
 export const getMatchmakingStatus = matchmaking.getMatchmakingStatus;
+
+// ==================== Issues APIs ====================
+export const submitIssue = issues.submitIssue;
 
 // ==================== Firestore Triggers ====================
 export { onGameMoveUpdate, onPlayerJoinQueue, onUserCreate };
