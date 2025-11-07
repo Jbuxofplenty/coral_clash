@@ -12,11 +12,12 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import { moderateScale } from 'react-native-size-matters';
+import { moderateScale, verticalScale } from 'react-native-size-matters';
 
 import { useAuth, useTheme } from '../contexts';
 
 const { width, height } = Dimensions.get('screen');
+const isTablet = width >= 768;
 
 function Login({ navigation }) {
     const {
@@ -168,7 +169,7 @@ function Login({ navigation }) {
                     <Block flex center middle style={styles.container}>
                         <Block style={[styles.card, { backgroundColor: colors.CARD_BACKGROUND }]}>
                             <Text
-                                size={moderateScale(32)}
+                                size={isTablet ? moderateScale(20) : moderateScale(32)}
                                 bold
                                 color={colors.PRIMARY}
                                 style={styles.title}
@@ -181,7 +182,7 @@ function Login({ navigation }) {
                             </Text>
                             <Block style={styles.subtitleContainer}>
                                 <Text
-                                    size={moderateScale(16)}
+                                    size={isTablet ? moderateScale(10) : moderateScale(16)}
                                     color={colors.TEXT_SECONDARY}
                                     style={styles.subtitle}
                                 >
@@ -195,7 +196,11 @@ function Login({ navigation }) {
 
                             {error || authError ? (
                                 <Block style={styles.errorContainer}>
-                                    <Text size={moderateScale(14)} color={colors.ERROR} center>
+                                    <Text
+                                        size={isTablet ? moderateScale(10) : moderateScale(14)}
+                                        color={colors.ERROR}
+                                        center
+                                    >
                                         {error || authError}
                                     </Text>
                                 </Block>
@@ -203,7 +208,11 @@ function Login({ navigation }) {
 
                             {successMessage ? (
                                 <Block style={styles.successContainer}>
-                                    <Text size={moderateScale(14)} color={colors.SUCCESS} center>
+                                    <Text
+                                        size={isTablet ? moderateScale(10) : moderateScale(14)}
+                                        color={colors.SUCCESS}
+                                        center
+                                    >
                                         {successMessage}
                                     </Text>
                                 </Block>
@@ -229,7 +238,9 @@ function Login({ navigation }) {
                                                 color='#DB4437'
                                             />
                                             <Text
-                                                size={moderateScale(16)}
+                                                size={
+                                                    isTablet ? moderateScale(10) : moderateScale(16)
+                                                }
                                                 color={colors.TEXT}
                                                 style={styles.googleButtonText}
                                             >
@@ -247,7 +258,9 @@ function Login({ navigation }) {
                                                 ]}
                                             />
                                             <Text
-                                                size={moderateScale(14)}
+                                                size={
+                                                    isTablet ? moderateScale(10) : moderateScale(14)
+                                                }
                                                 color={colors.TEXT_SECONDARY}
                                                 style={styles.dividerText}
                                             >
@@ -367,7 +380,7 @@ function Login({ navigation }) {
                                         style={styles.forgotPasswordButton}
                                     >
                                         <Text
-                                            size={moderateScale(14)}
+                                            size={isTablet ? moderateScale(10) : moderateScale(14)}
                                             color={colors.PRIMARY}
                                             center
                                         >
@@ -380,7 +393,11 @@ function Login({ navigation }) {
                                     onPress={showForgotPassword ? toggleForgotPassword : toggleMode}
                                     style={styles.toggleButton}
                                 >
-                                    <Text size={moderateScale(14)} color={colors.PRIMARY} center>
+                                    <Text
+                                        size={isTablet ? moderateScale(10) : moderateScale(14)}
+                                        color={colors.PRIMARY}
+                                        center
+                                    >
                                         {showForgotPassword
                                             ? 'Back to Sign In'
                                             : isSignUp
@@ -417,10 +434,11 @@ const styles = StyleSheet.create({
     },
     card: {
         borderRadius: 12,
-        padding: width > 600 ? theme.SIZES.BASE * 2.5 : theme.SIZES.BASE * 1.5,
-        paddingVertical: width > 600 ? theme.SIZES.BASE * 3 : theme.SIZES.BASE * 3,
-        width: '100%',
-        maxWidth: width > 600 ? Math.min(600, width * 0.6) : 400,
+        padding: isTablet ? theme.SIZES.BASE * 2.5 : theme.SIZES.BASE * 1.5,
+        paddingVertical: isTablet ? theme.SIZES.BASE * 3 : theme.SIZES.BASE * 3,
+        minHeight: width > 600 ? verticalScale(300) : width / 1.5,
+        maxWidth: width > 600 ? Math.min(800, width * 0.8) : width - theme.SIZES.BASE * 2,
+        width: width > 600 ? '100%' : 'auto',
         shadowColor: theme.COLORS.BLACK,
         shadowOffset: { width: 0, height: 4 },
         shadowRadius: 12,
@@ -428,12 +446,12 @@ const styles = StyleSheet.create({
         elevation: 8,
     },
     title: {
-        marginBottom: width > 600 ? theme.SIZES.BASE * 1.5 : theme.SIZES.BASE,
+        marginBottom: isTablet ? theme.SIZES.BASE * 1.5 : theme.SIZES.BASE,
         textAlign: 'center',
     },
     subtitleContainer: {
-        marginBottom: width > 600 ? theme.SIZES.BASE * 2.5 : theme.SIZES.BASE * 2,
-        paddingHorizontal: width > 600 ? theme.SIZES.BASE : 0,
+        marginBottom: isTablet ? theme.SIZES.BASE * 2.5 : theme.SIZES.BASE * 2,
+        paddingHorizontal: isTablet ? theme.SIZES.BASE : 0,
         minHeight: 'auto',
         flexShrink: 0,
     },
@@ -453,7 +471,7 @@ const styles = StyleSheet.create({
     button: {
         marginTop: theme.SIZES.BASE,
         width: '100%',
-        height: width > 600 ? 100 : 48,
+        height: isTablet ? verticalScale(56) : verticalScale(48),
         borderRadius: 8,
     },
     toggleButton: {
@@ -479,7 +497,7 @@ const styles = StyleSheet.create({
     dividerContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginVertical: width > 600 ? theme.SIZES.BASE * 1.5 : theme.SIZES.BASE * 2,
+        marginVertical: isTablet ? theme.SIZES.BASE * 1.5 : theme.SIZES.BASE * 2,
     },
     divider: {
         flex: 1,
@@ -494,13 +512,14 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         borderWidth: 1,
         borderRadius: 8,
-        paddingVertical: width > 600 ? 10 : 12,
+        paddingVertical: isTablet ? 14 : 12,
         paddingHorizontal: theme.SIZES.BASE,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
         shadowRadius: 4,
         elevation: 2,
+        height: isTablet ? verticalScale(48) : verticalScale(40),
     },
     googleButtonText: {
         marginLeft: theme.SIZES.BASE,

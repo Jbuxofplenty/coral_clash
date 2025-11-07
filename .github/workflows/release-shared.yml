@@ -31,8 +31,8 @@ jobs:
       - name: Check for shared package changes
         id: check
         run: |
-          # Get the latest release tag
-          LATEST_TAG=$(git tag -l '@jbuxofplenty/coral-clash@*' | sort -V | tail -n1)
+          # Get the latest release tag (v* format, excluding beta/rc tags)
+          LATEST_TAG=$(git tag -l 'v*' | grep -v -E '(beta|rc)' | sort -V | tail -n1)
           
           if [ -z "$LATEST_TAG" ]; then
             echo "No previous release found - will release"

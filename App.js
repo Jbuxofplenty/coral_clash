@@ -16,6 +16,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { Block, GalioProvider } from 'galio-framework';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Image, LogBox, StatusBar } from 'react-native';
+import mobileAds from 'react-native-google-mobile-ads';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { materialTheme } from './src/constants/';
 import {
@@ -24,6 +25,7 @@ import {
     GamePreferencesProvider,
     NotificationProvider,
     ThemeProvider,
+    VersionProvider,
     useTheme,
 } from './src/contexts';
 import Screens from './src/navigation/Screens';
@@ -80,10 +82,21 @@ export default function App() {
     useEffect(() => {
         async function prepare() {
             try {
+                // Initialize Google Mobile Ads SDK
+                const adapterStatuses = await mobileAds().initialize();
+                console.log('📱 Mobile Ads SDK initialized:', adapterStatuses);
+
+                // Set request configuration for testing
+                await mobileAds().setRequestConfiguration({
+                    // Set to true if you want to test with test ads
+                    // Remove or set to false in production
+                    testDeviceIdentifiers: ['EMULATOR'],
+                });
+
                 //Load Resources
                 await _loadResourcesAsync();
             } catch (e) {
-                console.warn(e);
+                console.warn('Error initializing:', e);
             } finally {
                 // Tell the application to render
                 setAppIsReady(true);
@@ -115,15 +128,20 @@ export default function App() {
             <AuthProvider>
                 <ThemeProvider>
                     <AlertProvider>
-                        <GamePreferencesProvider>
-                            <NotificationProvider>
-                                <NavigationContainer ref={navigationRef} onReady={onLayoutRootView}>
-                                    <GalioProvider theme={materialTheme}>
-                                        <AppContent navigationRef={navigationRef} />
-                                    </GalioProvider>
-                                </NavigationContainer>
-                            </NotificationProvider>
-                        </GamePreferencesProvider>
+                        <VersionProvider>
+                            <GamePreferencesProvider>
+                                <NotificationProvider>
+                                    <NavigationContainer
+                                        ref={navigationRef}
+                                        onReady={onLayoutRootView}
+                                    >
+                                        <GalioProvider theme={materialTheme}>
+                                            <AppContent navigationRef={navigationRef} />
+                                        </GalioProvider>
+                                    </NavigationContainer>
+                                </NotificationProvider>
+                            </GamePreferencesProvider>
+                        </VersionProvider>
                     </AlertProvider>
                 </ThemeProvider>
             </AuthProvider>

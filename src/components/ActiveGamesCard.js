@@ -7,6 +7,7 @@ import Avatar from './Avatar';
 import Icon from './Icon';
 
 const { width } = Dimensions.get('screen');
+const isTablet = width >= 768;
 
 /**
  * Card component that displays active games (PvP and Computer) on the home screen
@@ -197,20 +198,20 @@ export default function ActiveGamesCard({
                         <Icon
                             name='gamepad'
                             family='font-awesome'
-                            size={moderateScale(20)}
+                            size={isTablet ? moderateScale(50) : moderateScale(20)}
                             color={colors.SUCCESS}
                         />
                     </View>
                     <Block flex>
                         <Text
-                            size={moderateScale(18)}
+                            size={isTablet ? moderateScale(10) : moderateScale(18)}
                             bold
                             style={[styles.title, { color: colors.TEXT }]}
                         >
                             Active Games
                         </Text>
                         <Text
-                            size={moderateScale(12)}
+                            size={isTablet ? moderateScale(10) : moderateScale(12)}
                             style={[styles.subtitle, { color: colors.TEXT_SECONDARY }]}
                         >
                             {activeGames.length} {activeGames.length === 1 ? 'game' : 'games'} in
@@ -225,7 +226,7 @@ export default function ActiveGamesCard({
                     <Block center middle style={styles.loadingContainer}>
                         <ActivityIndicator size='large' color={colors.PRIMARY} />
                         <Text
-                            size={moderateScale(14)}
+                            size={isTablet ? moderateScale(10) : moderateScale(14)}
                             style={[styles.loadingText, { color: colors.TEXT_SECONDARY }]}
                         >
                             Loading games...
@@ -236,18 +237,18 @@ export default function ActiveGamesCard({
                         <Icon
                             name='inbox'
                             family='font-awesome'
-                            size={moderateScale(40)}
+                            size={isTablet ? moderateScale(20) : moderateScale(40)}
                             color={colors.TEXT_SECONDARY}
                             style={styles.emptyIcon}
                         />
                         <Text
-                            size={moderateScale(14)}
+                            size={isTablet ? moderateScale(10) : moderateScale(14)}
                             style={[styles.emptyText, { color: colors.TEXT_SECONDARY }]}
                         >
                             No active games
                         </Text>
                         <Text
-                            size={moderateScale(12)}
+                            size={isTablet ? moderateScale(10) : moderateScale(12)}
                             style={[styles.emptySubtext, { color: colors.TEXT_SECONDARY }]}
                         >
                             Start a game with a friend!
@@ -303,7 +304,11 @@ export default function ActiveGamesCard({
                                                 style={{ marginBottom: 3, flexShrink: 1 }}
                                             >
                                                 <Text
-                                                    size={moderateScale(16)}
+                                                    size={
+                                                        isTablet
+                                                            ? moderateScale(10)
+                                                            : moderateScale(16)
+                                                    }
                                                     bold
                                                     style={{ color: colors.TEXT, flexShrink: 1 }}
                                                     numberOfLines={1}
@@ -326,12 +331,20 @@ export default function ActiveGamesCard({
                                                         <Icon
                                                             name={status.icon}
                                                             family='font-awesome'
-                                                            size={moderateScale(12)}
+                                                            size={
+                                                                isTablet
+                                                                    ? moderateScale(10)
+                                                                    : moderateScale(12)
+                                                            }
                                                             color={status.color}
                                                             style={{ flexShrink: 0 }}
                                                         />
                                                         <Text
-                                                            size={moderateScale(13)}
+                                                            size={
+                                                                isTablet
+                                                                    ? moderateScale(10)
+                                                                    : moderateScale(13)
+                                                            }
                                                             style={[
                                                                 styles.statusText,
                                                                 {
@@ -345,7 +358,11 @@ export default function ActiveGamesCard({
                                                             {status.text}
                                                         </Text>
                                                         <Text
-                                                            size={moderateScale(13)}
+                                                            size={
+                                                                isTablet
+                                                                    ? moderateScale(10)
+                                                                    : moderateScale(13)
+                                                            }
                                                             style={{
                                                                 color: colors.TEXT_SECONDARY,
                                                                 marginHorizontal: 4,
@@ -359,12 +376,20 @@ export default function ActiveGamesCard({
                                                 <Icon
                                                     name={timeControlInfo.icon}
                                                     family={timeControlInfo.iconFamily}
-                                                    size={moderateScale(11)}
+                                                    size={
+                                                        isTablet
+                                                            ? moderateScale(11)
+                                                            : moderateScale(11)
+                                                    }
                                                     color={colors.TEXT}
                                                     style={{ flexShrink: 0 }}
                                                 />
                                                 <Text
-                                                    size={moderateScale(12)}
+                                                    size={
+                                                        isTablet
+                                                            ? moderateScale(10)
+                                                            : moderateScale(12)
+                                                    }
                                                     style={{
                                                         color: colors.TEXT,
                                                         marginLeft: 5,
@@ -538,8 +563,8 @@ const styles = StyleSheet.create({
         paddingBottom: theme.SIZES.BASE * 0.75,
     },
     iconCircle: {
-        width: 40,
-        height: 40,
+        width: isTablet ? moderateScale(60) : moderateScale(40),
+        height: isTablet ? moderateScale(60) : moderateScale(40),
         borderRadius: 20,
         justifyContent: 'center',
         alignItems: 'center',

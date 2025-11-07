@@ -51,8 +51,8 @@ jobs:
   update-dependencies:
     name: Update Package Dependencies
     needs: [release-shared]
-    # Only run if release-shared succeeded (new version published)
-    if: needs.release-shared.result == 'success'
+    # Only run if a new version was actually released
+    if: needs.release-shared.outputs.released == 'true'
     runs-on: ubuntu-latest
     
     steps:
@@ -92,6 +92,11 @@ jobs:
           yarn upgrade @jbuxofplenty/coral-clash --latest
           cd ..
           
+          # Ensure shared package lockfile is up to date (for build dependencies)
+          cd shared
+          yarn install --check-files
+          cd ..
+          
           echo "✅ Dependencies updated"
       
       - name: Commit updated lockfiles
@@ -99,9 +104,17 @@ jobs:
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
           
-          # Check if there are changes to commit
-          if git diff --quiet yarn.lock functions/yarn.lock; then
-            echo "No lockfile changes to commit"
+          # Verify we're on develop branch
+          CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+          if [ "$CURRENT_BRANCH" != "develop" ]; then
+            echo "❌ Error: Not on develop branch (current: $CURRENT_BRANCH)"
+            exit 1
+          fi
+          echo "✅ Confirmed on develop branch"
+          
+          # Check if there are changes to commit (package.json files and lockfiles)
+          if git diff --quiet package.json functions/package.json yarn.lock functions/yarn.lock shared/yarn.lock; then
+            echo "No dependency changes to commit"
             exit 0
           fi
           
@@ -109,26 +122,32 @@ jobs:
           echo "🔄 Pulling latest from develop with autostash..."
           git pull --rebase --autostash origin develop
           
-          # Stage and commit
-          echo "📝 Committing lockfile updates..."
-          git add yarn.lock functions/yarn.lock
+          # Stage and commit all package.json files and lockfiles
+          echo "📝 Committing dependency updates..."
+          git add package.json functions/package.json yarn.lock functions/yarn.lock shared/yarn.lock
           git commit -m "chore(deps): update @jbuxofplenty/coral-clash to latest [skip ci]"
-          git push origin develop
           
-          echo "✅ Lockfiles updated and pushed"
+          # Push and verify success
+          echo "📤 Pushing to develop..."
+          if git push origin develop; then
+            echo "✅ Lockfiles updated and pushed successfully"
+          else
+            echo "❌ Failed to push lockfile updates to develop"
+            exit 1
+          fi
   
   deploy-staging:
     name: Deploy to Staging
     needs: [test, release-shared, update-dependencies]
     # Run after test succeeds, and either:
-    # - release-shared succeeded and update-dependencies succeeded, OR
-    # - release-shared was skipped
+    # - release-shared was skipped (tag push or manual trigger), OR
+    # - release-shared ran and update-dependencies either succeeded or was skipped (no release)
     if: |
       !cancelled() && 
       needs.test.result == 'success' && 
       (
-        (needs.release-shared.result == 'success' && needs.update-dependencies.result == 'success') ||
-        needs.release-shared.result == 'skipped'
+        needs.release-shared.result == 'skipped' ||
+        (needs.release-shared.result == 'success' && (needs.update-dependencies.result == 'success' || needs.update-dependencies.result == 'skipped'))
       )
     uses: ./.github/workflows/build-and-submit.yml
     with:
@@ -140,6 +159,8 @@ jobs:
   deploy-firebase:
     name: Deploy Firebase Functions
     needs: deploy-staging
+    # Always evaluate this job, but only run if deploy-staging succeeded
+    if: always() && needs.deploy-staging.result == 'success'
     uses: ./.github/workflows/firebase-deploy.yml
     with:
       target: 'all'
@@ -247,12 +268,14 @@ jobs:
   
   sync-to-main:
     name: Sync develop to main
-    needs: [deploy-firebase]
-    # Only run on develop branch pushes after successful deployment
+    needs: [release-shared, update-dependencies, deploy-staging]
+    # Only run on develop branch pushes when release-shared and update-dependencies ran successfully
     if: |
       github.event_name == 'push' && 
       github.ref == 'refs/heads/develop' &&
-      needs.deploy-firebase.result == 'success'
+      needs.release-shared.result == 'success' &&
+      needs.update-dependencies.result == 'success' &&
+      needs.deploy-staging.result == 'success'
     runs-on: ubuntu-latest
     
     steps:

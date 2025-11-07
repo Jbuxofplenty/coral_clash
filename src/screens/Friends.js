@@ -12,13 +12,24 @@ import {
     View,
     useWindowDimensions,
 } from 'react-native';
-import { moderateScale } from 'react-native-size-matters';
+import { moderateScale, verticalScale } from 'react-native-size-matters';
 
 import { Avatar, Icon, LoadingScreen, TimeControlModal } from '../components';
 import { useTheme } from '../contexts';
 import { useFriends, useGame, useUserSearch } from '../hooks';
 
 const { width: screenWidth } = Dimensions.get('window');
+const isTablet = screenWidth >= 768;
+
+// Helper function to cap scaling on larger devices
+const responsiveScale = (size, maxScale = 1.3) => {
+    const scaled = moderateScale(size);
+    const scaleFactor = scaled / size;
+    if (scaleFactor > maxScale) {
+        return size * maxScale;
+    }
+    return scaled;
+};
 
 export default function Friends({ navigation: _navigation }) {
     const { colors, isDarkMode: _isDarkMode } = useTheme();
@@ -128,7 +139,7 @@ export default function Friends({ navigation: _navigation }) {
                         />
                         <Block flex style={{ marginRight: 8 }}>
                             <Text
-                                size={moderateScale(16)}
+                                size={responsiveScale(16, 1.2)}
                                 bold
                                 color={colors.TEXT}
                                 numberOfLines={1}
@@ -138,7 +149,7 @@ export default function Friends({ navigation: _navigation }) {
                             </Text>
                             {friend.email && (
                                 <Text
-                                    size={moderateScale(13)}
+                                    size={responsiveScale(13, 1.2)}
                                     color={colors.TEXT_SECONDARY}
                                     numberOfLines={1}
                                     style={{ marginTop: 2 }}
@@ -239,7 +250,7 @@ export default function Friends({ navigation: _navigation }) {
                         ]}
                     >
                         <Text
-                            size={moderateScale(18)}
+                            size={responsiveScale(18, 1.3)}
                             bold
                             color={colors.TEXT}
                             style={{ marginBottom: 16 }}
@@ -295,7 +306,7 @@ export default function Friends({ navigation: _navigation }) {
                                     {searchResults.length === 0 && !searching ? (
                                         <Block style={styles.dropdownItem}>
                                             <Text
-                                                size={moderateScale(14)}
+                                                size={responsiveScale(14, 1.2)}
                                                 color={colors.TEXT_SECONDARY}
                                                 center
                                             >
@@ -334,7 +345,7 @@ export default function Friends({ navigation: _navigation }) {
                                                             />
                                                             <Block flex>
                                                                 <Text
-                                                                    size={moderateScale(15)}
+                                                                    size={responsiveScale(15, 1.2)}
                                                                     bold
                                                                     color={colors.TEXT}
                                                                     numberOfLines={1}
@@ -345,7 +356,7 @@ export default function Friends({ navigation: _navigation }) {
                                                         </Block>
                                                         {searchUser.hasPendingRequest ? (
                                                             <Text
-                                                                size={moderateScale(13)}
+                                                                size={responsiveScale(13, 1.2)}
                                                                 color={colors.WARNING}
                                                                 style={{ marginLeft: 8 }}
                                                             >
@@ -379,7 +390,7 @@ export default function Friends({ navigation: _navigation }) {
                     {incomingRequests.length > 0 && (
                         <Block style={styles.section}>
                             <Text
-                                size={moderateScale(20)}
+                                size={responsiveScale(20, 1.3)}
                                 bold
                                 color={colors.TEXT}
                                 style={{ marginBottom: 12, paddingHorizontal: 4 }}
@@ -414,7 +425,7 @@ export default function Friends({ navigation: _navigation }) {
                                                     />
                                                     <Block flex style={{ marginRight: 8 }}>
                                                         <Text
-                                                            size={moderateScale(16)}
+                                                            size={responsiveScale(16, 1.2)}
                                                             bold
                                                             color={colors.TEXT}
                                                             numberOfLines={1}
@@ -525,7 +536,7 @@ export default function Friends({ navigation: _navigation }) {
                     {outgoingRequests.length > 0 && (
                         <Block style={styles.section}>
                             <Text
-                                size={moderateScale(20)}
+                                size={responsiveScale(20, 1.3)}
                                 bold
                                 color={colors.TEXT}
                                 style={{ marginBottom: 12, paddingHorizontal: 4 }}
@@ -558,7 +569,7 @@ export default function Friends({ navigation: _navigation }) {
                                                     />
                                                     <Block flex style={{ marginRight: 8 }}>
                                                         <Text
-                                                            size={moderateScale(16)}
+                                                            size={responsiveScale(16, 1.2)}
                                                             bold
                                                             color={colors.TEXT}
                                                             numberOfLines={1}
@@ -618,7 +629,7 @@ export default function Friends({ navigation: _navigation }) {
                     {/* Friends List Section */}
                     <Block style={styles.section}>
                         <Text
-                            size={moderateScale(20)}
+                            size={responsiveScale(20, 1.3)}
                             bold
                             color={colors.TEXT}
                             style={{ marginBottom: 12, paddingHorizontal: 4 }}
@@ -656,7 +667,7 @@ export default function Friends({ navigation: _navigation }) {
                                     />
                                 </Block>
                                 <Text
-                                    size={moderateScale(16)}
+                                    size={responsiveScale(16, 1.2)}
                                     bold
                                     color={colors.TEXT}
                                     style={{ marginBottom: 8 }}
@@ -664,7 +675,7 @@ export default function Friends({ navigation: _navigation }) {
                                     No Friends Yet
                                 </Text>
                                 <Text
-                                    size={moderateScale(14)}
+                                    size={responsiveScale(14, 1.2)}
                                     color={colors.TEXT_SECONDARY}
                                     center
                                     style={{ maxWidth: 240 }}
@@ -698,9 +709,8 @@ const styles = StyleSheet.create({
     scrollContainer: {
         paddingBottom: 30,
         padding: theme.SIZES.BASE * 1.5,
-        maxWidth: screenWidth > 600 ? Math.min(800, screenWidth * 0.8) : undefined,
-        width: screenWidth > 600 ? '100%' : 'auto',
-        alignSelf: screenWidth > 600 ? 'center' : 'auto',
+        width: isTablet ? 650 : 'auto',
+        alignSelf: isTablet ? 'center' : 'auto',
     },
     card: {
         borderRadius: 12,
@@ -716,11 +726,11 @@ const styles = StyleSheet.create({
         marginBottom: theme.SIZES.BASE,
     },
     input: {
-        height: screenWidth > 600 ? 44 : 48,
+        height: 48,
         borderRadius: 10,
         borderWidth: 1,
         paddingHorizontal: theme.SIZES.BASE * 1.5,
-        fontSize: screenWidth > 600 ? 14 : 15,
+        fontSize: isTablet ? 15 : 16,
     },
     dropdown: {
         marginTop: 8,
@@ -774,6 +784,12 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     emptyContainer: {
+        minHeight: screenWidth > 600 ? verticalScale(300) : screenWidth / 1.5,
+        maxWidth:
+            screenWidth > 600
+                ? Math.min(800, screenWidth * 0.8)
+                : screenWidth - theme.SIZES.BASE * 2,
+        width: screenWidth > 600 ? '100%' : 'auto',
         paddingVertical: theme.SIZES.BASE * 4,
         paddingHorizontal: theme.SIZES.BASE * 2,
         borderRadius: 12,

@@ -5,6 +5,25 @@ import { DEFAULT_AVATARS, DEFAULT_AVATAR_NAME } from '../constants/avatars';
 import { useAuth, useTheme } from '../contexts';
 import Icon from './Icon';
 
+// Helper function to cap scaling on larger devices
+const responsiveScale = (size, maxScale = 1.3) => {
+    const scaled = moderateScale(size);
+    const scaleFactor = scaled / size;
+    if (scaleFactor > maxScale) {
+        return size * maxScale;
+    }
+    return scaled;
+};
+
+const responsiveBorderScale = (size, maxScale = 1.3) => {
+    const scaled = scale(size);
+    const scaleFactor = scaled / size;
+    if (scaleFactor > maxScale) {
+        return size * maxScale;
+    }
+    return scaled;
+};
+
 /**
  * Avatar component with consistent styling across the app
  * @param {Object} props
@@ -36,12 +55,28 @@ export default function Avatar({
             : user?.settings?.avatarKey || DEFAULT_AVATAR_NAME;
     const avatarSource = DEFAULT_AVATARS[finalAvatarKey] || DEFAULT_AVATARS[DEFAULT_AVATAR_NAME];
 
-    // Size configurations
+    // Size configurations with responsive scaling
     const sizeConfig = {
-        small: { container: moderateScale(36), image: moderateScale(28), border: scale(2) },
-        medium: { container: moderateScale(44), image: moderateScale(36), border: scale(2) },
-        large: { container: moderateScale(60), image: moderateScale(48), border: scale(2) },
-        xlarge: { container: moderateScale(80), image: moderateScale(64), border: scale(3) },
+        small: {
+            container: responsiveScale(36, 1.2),
+            image: responsiveScale(28, 1.2),
+            border: responsiveBorderScale(2, 1.2),
+        },
+        medium: {
+            container: responsiveScale(44, 1.2),
+            image: responsiveScale(36, 1.2),
+            border: responsiveBorderScale(2, 1.2),
+        },
+        large: {
+            container: responsiveScale(60, 1.2),
+            image: responsiveScale(48, 1.2),
+            border: responsiveBorderScale(2, 1.2),
+        },
+        xlarge: {
+            container: responsiveScale(80, 1.2),
+            image: responsiveScale(64, 1.2),
+            border: responsiveBorderScale(3, 1.2),
+        },
     };
 
     const config = sizeConfig[size] || sizeConfig.medium;

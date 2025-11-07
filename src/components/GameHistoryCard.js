@@ -1,12 +1,13 @@
 import { Block, Text, theme } from 'galio-framework';
 import React from 'react';
 import { ActivityIndicator, Dimensions, StyleSheet, View } from 'react-native';
-import { verticalScale } from 'react-native-size-matters';
+import { moderateScale, verticalScale } from 'react-native-size-matters';
 import { useAuth, useTheme } from '../contexts';
 import Avatar from './Avatar';
 import Icon from './Icon';
 
 const { width } = Dimensions.get('screen');
+const isTablet = width >= 768;
 
 /**
  * Card component that displays recent game history on the home screen
@@ -197,15 +198,22 @@ export default function GameHistoryCard({
                         <Icon
                             name='history'
                             family='font-awesome'
-                            size={18}
+                            size={isTablet ? moderateScale(30) : moderateScale(18)}
                             color={colors.PRIMARY}
                         />
                     </View>
                     <Block flex>
-                        <Text size={18} bold style={[styles.title, { color: colors.TEXT }]}>
+                        <Text
+                            size={isTablet ? moderateScale(10) : moderateScale(18)}
+                            bold
+                            style={[styles.title, { color: colors.TEXT }]}
+                        >
                             Game History
                         </Text>
-                        <Text size={12} style={[styles.subtitle, { color: colors.TEXT_SECONDARY }]}>
+                        <Text
+                            size={isTablet ? moderateScale(10) : moderateScale(12)}
+                            style={[styles.subtitle, { color: colors.TEXT_SECONDARY }]}
+                        >
                             Recent games
                         </Text>
                     </Block>
@@ -217,7 +225,7 @@ export default function GameHistoryCard({
                     <Block center middle style={styles.loadingContainer}>
                         <ActivityIndicator size='large' color={colors.PRIMARY} />
                         <Text
-                            size={14}
+                            size={isTablet ? moderateScale(10) : moderateScale(14)}
                             style={[styles.loadingText, { color: colors.TEXT_SECONDARY }]}
                         >
                             Loading history...
@@ -228,18 +236,18 @@ export default function GameHistoryCard({
                         <Icon
                             name='clock-o'
                             family='font-awesome'
-                            size={40}
+                            size={isTablet ? moderateScale(60) : moderateScale(40)}
                             color={colors.TEXT_SECONDARY}
                             style={styles.emptyIcon}
                         />
                         <Text
-                            size={14}
+                            size={isTablet ? moderateScale(10) : moderateScale(14)}
                             style={[styles.emptyText, { color: colors.TEXT_SECONDARY }]}
                         >
                             No game history
                         </Text>
                         <Text
-                            size={12}
+                            size={isTablet ? moderateScale(10) : moderateScale(12)}
                             style={[styles.emptySubtext, { color: colors.TEXT_SECONDARY }]}
                         >
                             Your completed games will appear here
@@ -275,7 +283,9 @@ export default function GameHistoryCard({
                                         />
                                         <Block flex style={styles.gameInfo}>
                                             <Text
-                                                size={16}
+                                                size={
+                                                    isTablet ? moderateScale(10) : moderateScale(16)
+                                                }
                                                 bold
                                                 style={[
                                                     styles.opponentName,
@@ -289,7 +299,11 @@ export default function GameHistoryCard({
                                                 {completedDate && (
                                                     <>
                                                         <Text
-                                                            size={11}
+                                                            size={
+                                                                isTablet
+                                                                    ? moderateScale(10)
+                                                                    : moderateScale(11)
+                                                            }
                                                             style={[
                                                                 styles.dateText,
                                                                 { color: colors.TEXT_SECONDARY },
@@ -298,7 +312,11 @@ export default function GameHistoryCard({
                                                             {completedDate}
                                                         </Text>
                                                         <Text
-                                                            size={11}
+                                                            size={
+                                                                isTablet
+                                                                    ? moderateScale(10)
+                                                                    : moderateScale(11)
+                                                            }
                                                             style={{
                                                                 color: colors.TEXT_SECONDARY,
                                                                 marginHorizontal: 6,
@@ -311,11 +329,19 @@ export default function GameHistoryCard({
                                                 <Icon
                                                     name={timeControlInfo.icon}
                                                     family={timeControlInfo.iconFamily}
-                                                    size={10}
+                                                    size={
+                                                        isTablet
+                                                            ? moderateScale(30)
+                                                            : moderateScale(10)
+                                                    }
                                                     color={colors.TEXT}
                                                 />
                                                 <Text
-                                                    size={11}
+                                                    size={
+                                                        isTablet
+                                                            ? moderateScale(10)
+                                                            : moderateScale(11)
+                                                    }
                                                     style={{
                                                         color: colors.TEXT,
                                                         marginLeft: 5,
@@ -331,11 +357,11 @@ export default function GameHistoryCard({
                                         <Icon
                                             name={result.icon}
                                             family='font-awesome'
-                                            size={12}
+                                            size={isTablet ? moderateScale(30) : moderateScale(12)}
                                             color={result.color}
                                         />
                                         <Text
-                                            size={13}
+                                            size={isTablet ? moderateScale(10) : moderateScale(13)}
                                             style={[styles.resultText, { color: result.color }]}
                                         >
                                             {result.text}
@@ -377,8 +403,8 @@ const styles = StyleSheet.create({
         paddingBottom: theme.SIZES.BASE * 0.75,
     },
     iconCircle: {
-        width: 40,
-        height: 40,
+        width: isTablet ? moderateScale(60) : moderateScale(40),
+        height: isTablet ? moderateScale(60) : moderateScale(40),
         borderRadius: 20,
         justifyContent: 'center',
         alignItems: 'center',
@@ -431,7 +457,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: theme.SIZES.BASE * 2,
     },
     emptyIcon: {
-        marginBottom: theme.SIZES.BASE,
+        marginBottom: isTablet ? moderateScale(10) : theme.SIZES.BASE,
         opacity: 0.5,
     },
     emptyText: {

@@ -2,7 +2,7 @@ import { updateDoc } from 'firebase/firestore';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AppState } from 'react-native';
 import { collection, db, doc, onSnapshot, query, where } from '../config/firebase';
-import { useAuth } from '../contexts';
+import { useAuth, useVersion } from '../contexts';
 import { useFirebaseFunctions } from './useFirebaseFunctions';
 
 /**
@@ -10,6 +10,7 @@ import { useFirebaseFunctions } from './useFirebaseFunctions';
  */
 export const useMatchmaking = ({ onMatchFound } = {}) => {
     const { user } = useAuth();
+    const { checkVersion } = useVersion();
     const { joinMatchmaking, leaveMatchmaking, updateMatchmakingHeartbeat, getMatchmakingStatus } =
         useFirebaseFunctions();
 
@@ -197,6 +198,12 @@ export const useMatchmaking = ({ onMatchFound } = {}) => {
 
             try {
                 const result = await joinMatchmaking(timeControl);
+                
+                // Check version compatibility
+                if (result.versionCheck) {
+                    checkVersion(result.versionCheck);
+                }
+                
                 if (result.success) {
                     setSearching(true);
                 }
@@ -209,7 +216,7 @@ export const useMatchmaking = ({ onMatchFound } = {}) => {
                 setLoading(false);
             }
         },
-        [user, joinMatchmaking],
+        [user, joinMatchmaking, checkVersion],
     );
 
     // Leave matchmaking queue

@@ -8,11 +8,12 @@ import {
     TouchableWithoutFeedback,
     View,
 } from 'react-native';
-import { moderateScale, verticalScale } from 'react-native-size-matters';
+import { moderateScale } from 'react-native-size-matters';
 import { useTheme } from '../contexts';
 import Icon from './Icon';
 
 const { width } = Dimensions.get('screen');
+const isTablet = width >= 768;
 
 /**
  * GameModeCard - A card component for displaying game mode options
@@ -170,12 +171,11 @@ export default GameModeCard;
 const styles = StyleSheet.create({
     card: {
         marginVertical: theme.SIZES.BASE * 1.5,
-        marginHorizontal: width > 600 ? 'auto' : 0,
+        marginHorizontal: isTablet ? 'auto' : 0,
         borderWidth: 0,
-        minHeight: width > 600 ? verticalScale(200) : width / 2,
-        maxWidth: width > 600 ? Math.min(800, width * 0.8) : width - theme.SIZES.BASE * 2,
-        width: width > 600 ? '100%' : 'auto',
-        alignSelf: width > 600 ? 'center' : 'auto',
+        minHeight: isTablet ? 350 : width / 2,
+        width: isTablet ? 650 : width - theme.SIZES.BASE * 2,
+        alignSelf: isTablet ? 'center' : 'auto',
         borderRadius: 12,
         overflow: 'hidden',
     },
@@ -213,8 +213,9 @@ const styles = StyleSheet.create({
     // Horizontal layout styles
     horizontalCard: {
         marginVertical: theme.SIZES.BASE,
-        marginHorizontal: width > 600 ? 'auto' : 0,
-        maxWidth: width > 600 ? 600 : '100%',
+        marginHorizontal: isTablet ? 'auto' : 0,
+        width: isTablet ? 650 : width - theme.SIZES.BASE * 2,
+        alignSelf: isTablet ? 'center' : 'auto',
         borderRadius: 12,
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,

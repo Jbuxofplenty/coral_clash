@@ -5,16 +5,18 @@ import { Dimensions, ScrollView, StyleSheet } from 'react-native';
 
 import {
     ActiveGamesCard,
+    BannerAd,
     GameHistoryCard,
     GameModeCard,
     MatchmakingCard,
     PlayWithFriendCard,
     SignUpPromptCard,
     TimeControlModal,
+    VersionWarningBanner,
 } from '../components/';
 import FixtureLoaderModal from '../components/FixtureLoaderModal';
 import { collection, db, onSnapshot, query, where } from '../config/firebase';
-import { useAlert, useAuth, useTheme } from '../contexts';
+import { useAlert, useAuth, useTheme, useVersion } from '../contexts';
 import { useDevFeatures, useFirebaseFunctions, useGame, useMatchmaking } from '../hooks';
 import { useFriends } from '../hooks/useFriends';
 import { savePassAndPlayGame } from '../utils/passAndPlayStorage';
@@ -25,6 +27,7 @@ export default function Home({ navigation }) {
     const { colors } = useTheme();
     const { user } = useAuth();
     const { showAlert } = useAlert();
+    const { versionWarning, dismissWarning } = useVersion();
     const enableDevFeatures = useDevFeatures();
     const [fixtureModalVisible, setFixtureModalVisible] = useState(false);
     const [gameHistory, setGameHistory] = useState([]);
@@ -345,20 +348,8 @@ export default function Home({ navigation }) {
     };
 
     const handleStartMatchmaking = () => {
-        // Check if user has any active games
-        const hasActiveGames = activeGames.some((game) => game.status === 'active');
-
-        if (hasActiveGames) {
-            showAlert(
-                'Cannot Join Matchmaking',
-                'You already have an active game. Finish it before joining matchmaking.',
-            );
-            return { success: false, error: 'Active game exists' };
-        }
-
         setPendingGameAction('matchmaking');
         setTimeControlModalVisible(true);
-        return { success: true };
     };
 
     const handleSelectFriend = (friendId, friendName) => {
@@ -367,9 +358,37 @@ export default function Home({ navigation }) {
         setTimeControlModalVisible(true);
     };
 
-    const handlePassAndPlay = () => {
-        setPendingGameAction('passandplay');
-        setTimeControlModalVisible(true);
+    const handlePassAndPlay = async () => {
+        setCreatingGame(true);
+        try {
+            // Always use unlimited time control for pass-and-play games
+            const timeControl = { type: 'unlimited', totalSeconds: null };
+
+            // Create and save pass-and-play game with initial state
+            const gameId = await savePassAndPlayGame({
+                opponentType: 'passandplay',
+                timeControl: timeControl,
+                // Pass empty object for gameState - will be initialized as default position
+                gameState: {},
+            });
+
+            // Navigate to pass and play game
+            navigation.navigate('Game', {
+                gameId: gameId,
+                opponentType: 'passandplay',
+                timeControl: timeControl,
+                opponentData: {
+                    displayName: 'Guest 1',
+                    avatarKey: 'crab', // Different avatar for guest player
+                },
+                // Don't pass gameState on navigation - let CoralClash initialize fresh
+            });
+        } catch (error) {
+            console.error('Failed to start pass-and-play:', error);
+            showAlert('Error', 'Failed to start pass-and-play game. Please try again.');
+        } finally {
+            setCreatingGame(false);
+        }
     };
 
     const handleResumePassAndPlay = (game) => {
@@ -505,6 +524,12 @@ export default function Home({ navigation }) {
                 contentContainerStyle={styles.scrollContent}
                 style={styles.scrollView}
             >
+                {/* Version Warning Banner */}
+                <VersionWarningBanner visible={versionWarning.visible} onDismiss={dismissWarning} />
+
+                {/* Banner Ad - displayed below header */}
+                <BannerAd />
+
                 {/* Sign Up Prompt Card - show at top when user is not logged in */}
                 {!user && <SignUpPromptCard onPress={() => navigation.navigate('Log In')} />}
 

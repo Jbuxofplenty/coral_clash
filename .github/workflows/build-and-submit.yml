@@ -132,7 +132,9 @@ jobs:
       - name: Install CocoaPods
         run: |
           cd ios
-          pod install
+          echo "📦 Installing CocoaPods dependencies (with repo update)..."
+          pod install --repo-update
+          echo "✅ CocoaPods dependencies installed"
 
       - name: Bundle JavaScript with Expo
         run: |

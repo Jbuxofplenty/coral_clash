@@ -80,6 +80,9 @@ const BaseCoralClashBoard = ({
     const { checkGameTime } = useFirebaseFunctions();
     const DEV_FEATURES_ENABLED = useDevFeatures();
 
+    // Tablet detection
+    const isTablet = width >= 768;
+
     // Use compact mode on smaller screens (iPhone SE, etc.)
     const isCompact = height < 700;
 
@@ -313,7 +316,14 @@ const BaseCoralClashBoard = ({
     const [historyIndex, setHistoryIndex] = useState(null); // null = current state, 0+ = viewing history
     const [historicalBoard, setHistoricalBoard] = useState(null);
     const [historicalCoralClash, setHistoricalCoralClash] = useState(null); // Store historical game instance for coral
-    const boardSize = Math.min(width, 400);
+
+    // Board size: larger on tablets, but ensure space for UI elements
+    // Account for: player bars (~120px), spacers (~24px), banner (~80px), control bar (~120px), padding (~50px)
+    // Total reserved space: ~394px
+    const reservedVerticalSpace = 400;
+    const availableHeight = height - reservedVerticalSpace;
+    const maxBoardSize = isTablet ? Math.min(width * 0.9, availableHeight, 650) : 400;
+    const boardSize = Math.min(width, maxBoardSize);
 
     // Time tracking state for local countdown
     const [localTimeRemaining, setLocalTimeRemaining] = useState(null);
