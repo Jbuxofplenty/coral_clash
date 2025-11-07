@@ -19,7 +19,6 @@
         "access": "public"
     },
     "scripts": {
-        "prepare": "node scripts/inject-version.js && tsc",
         "build": "tsc",
         "build:watch": "tsc --watch",
         "clean": "rm -rf dist game/**/*.js game/**/*.d.ts !game/__fixtures__/*.js",
@@ -35,6 +34,7 @@
     "devDependencies": {
         "@semantic-release/changelog": "^6.0.3",
         "@semantic-release/commit-analyzer": "^11.1.0",
+        "@semantic-release/exec": "^7.1.0",
         "@semantic-release/git": "^10.0.1",
         "@semantic-release/github": "^9.2.6",
         "@semantic-release/npm": "^11.0.2",
