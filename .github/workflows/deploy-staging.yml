@@ -99,24 +99,11 @@ jobs:
           
           echo "✅ Dependencies updated"
       
-      - name: Import GPG key
-        id: import_gpg
-        uses: crazy-max/ghaction-import-gpg@v6
+      - name: Setup GPG Signing
+        uses: ./.github/actions/setup-gpg-signing
         with:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
-          passphrase: ${{ secrets.GPG_PASSPHRASE }}
-          git_user_signingkey: true
-          git_commit_gpgsign: true
-      
-      - name: Configure Git with GPG signing
-        run: |
-          git config user.name "Josiah Buxton"
-          git config user.email "jbuxofplenty@gmail.com"
-          git config user.signingkey "${{ steps.import_gpg.outputs.keyid }}"
-          git config commit.gpgsign true
-          
-          echo "✅ GPG configured for signed commits"
-          echo "🔑 Key ID: ${{ steps.import_gpg.outputs.keyid }}"
+          gpg_passphrase: ${{ secrets.GPG_PASSPHRASE }}
       
       - name: Commit updated lockfiles
         run: |
@@ -303,22 +290,14 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
       
-      - name: Import GPG key
-        id: import_gpg
-        uses: crazy-max/ghaction-import-gpg@v6
+      - name: Setup GPG Signing
+        uses: ./.github/actions/setup-gpg-signing
         with:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
-          passphrase: ${{ secrets.GPG_PASSPHRASE }}
-          git_user_signingkey: true
-          git_commit_gpgsign: true
+          gpg_passphrase: ${{ secrets.GPG_PASSPHRASE }}
       
       - name: Merge develop to main
         run: |
-          git config user.name "Josiah Buxton"
-          git config user.email "jbuxofplenty@gmail.com"
-          git config user.signingkey "${{ steps.import_gpg.outputs.keyid }}"
-          git config commit.gpgsign true
-          
           # Fetch main branch
           git fetch origin main
           
