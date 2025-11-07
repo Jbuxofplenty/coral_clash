@@ -1,3 +1,13 @@
+## [1.6.1](https://github.com/Jbuxofplenty/coral_clash/compare/v1.6.0...v1.6.1) (2025-11-07)
+
+
+### Bug Fixes
+
+* **client:** use Expo push tokens for iOS to ensure notifications work ([75e92b0](https://github.com/Jbuxofplenty/coral_clash/commit/75e92b06760fb373b073ad52106448b5b726341b))
+* **shared:** use exec plugin for version injection in semantic-release ([af5d5ba](https://github.com/Jbuxofplenty/coral_clash/commit/af5d5badc25b5fed04394862370cc6307655ebe1))
+* **shared:** use exec plugin for version injection in semantic-release ([f2ab645](https://github.com/Jbuxofplenty/coral_clash/commit/f2ab6450de171c5cb65200eec32e98c8de28487f))
+* **shared:** use prepare script for version injection ([cee27b2](https://github.com/Jbuxofplenty/coral_clash/commit/cee27b2c8778d2d2a20d53b39802ea399f34388e))
+
 # [1.6.0](https://github.com/Jbuxofplenty/coral_clash/compare/v1.5.0...v1.6.0) (2025-11-07)
 
 
