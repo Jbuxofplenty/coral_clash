@@ -59,7 +59,6 @@ async function sendFCMNotification(token, notification) {
             apns: {
                 payload: {
                     aps: {
-                        badge: 1,
                         sound: 'default',
                     },
                 },
@@ -93,7 +92,6 @@ async function sendExpoPushNotification(token, notification) {
             title: notification.title,
             body: notification.body,
             data: notification.data || {},
-            badge: 1,
             priority: 'high',
         };
 
