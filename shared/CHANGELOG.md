@@ -1,3 +1,34 @@
+# [1.6.0](https://github.com/Jbuxofplenty/coral_clash/compare/v1.5.0...v1.6.0) (2025-11-07)
+
+
+### Bug Fixes
+
+* **ci:** add GitHub Packages authentication to update-deps workflow ([10d91e8](https://github.com/Jbuxofplenty/coral_clash/commit/10d91e8a9b7c72b00edbefd66529046a291d3566))
+* **ci:** add GitHub Packages authentication to update-deps workflow ([2e1c98b](https://github.com/Jbuxofplenty/coral_clash/commit/2e1c98b3bb878bcd48f0027e1a417abb7e271b7c))
+* **ci:** sign sync-to-main commits with GPG ([35cbc91](https://github.com/Jbuxofplenty/coral_clash/commit/35cbc91c09167b20dad973a8cca43cb1ff59e88f))
+* **ci:** sign sync-to-main commits with GPG ([50f2fb6](https://github.com/Jbuxofplenty/coral_clash/commit/50f2fb6a985f7212155a2141afdd80887775653c))
+* **ci:** sign update-dependencies commits with GPG ([d9e2947](https://github.com/Jbuxofplenty/coral_clash/commit/d9e294725ce5ddb3f3ee2596362e4e6efea1dd7f))
+* **ci:** sign update-dependencies commits with GPG ([324d237](https://github.com/Jbuxofplenty/coral_clash/commit/324d237b0fd35d064175735215bfcb30ad058046))
+* **ci:** use published package for app builds instead of yarn link ([38ad26a](https://github.com/Jbuxofplenty/coral_clash/commit/38ad26ace5fd6d2f183970aac926786c92b9c2c8))
+* **ci:** use squash merge for sync-to-main to avoid unsigned commits ([0ae6dad](https://github.com/Jbuxofplenty/coral_clash/commit/0ae6dadfeab18dfb9d9af1879db33a2d40e1474d))
+* **ci:** use squash merge for sync-to-main to avoid unsigned commits ([810023e](https://github.com/Jbuxofplenty/coral_clash/commit/810023e605f00934a3c0aa7eae9956375b53c1e6))
+* **client:** clear badge count on app startup to remove old badges ([e5c7920](https://github.com/Jbuxofplenty/coral_clash/commit/e5c7920390b1dcbeed22713c43229187d30419f3))
+* **client:** handle Google Sign-In logout errors and navigate to home ([2c842a4](https://github.com/Jbuxofplenty/coral_clash/commit/2c842a436ecfd59b14822d1d5d02efa79bdd76c5))
+* **shared:** bump coral-clash version for testing ([f16ed03](https://github.com/Jbuxofplenty/coral_clash/commit/f16ed034f28ad389d001720dac5a1c075bcef4cc))
+
+
+### Features
+
+* **ci:** merge develop ([25eee7e](https://github.com/Jbuxofplenty/coral_clash/commit/25eee7ef9decfc05083266cd8985bd8093efd9dd))
+* **ci:** merge develop ([b452737](https://github.com/Jbuxofplenty/coral_clash/commit/b4527376d6398632b502a61deba019976e6193df))
+* **ci:** merge main ([4e374a8](https://github.com/Jbuxofplenty/coral_clash/commit/4e374a80c4e0cab13bb20ec7e3fec4f8d09ea536))
+* **ci:** skip release workflow when no shared package changes ([ff1e7ac](https://github.com/Jbuxofplenty/coral_clash/commit/ff1e7acd638b19f2281d1ca66291528185a23b0d))
+* **client:** disable badge notification management ([9481930](https://github.com/Jbuxofplenty/coral_clash/commit/9481930792288b22de7cf50cf70c7a1ebfa24f10))
+* **client:** google sign-in button ([1a17d05](https://github.com/Jbuxofplenty/coral_clash/commit/1a17d0573fc03cb50b1bae9bd4d607a633afbcde))
+* **client:** make version warning a responsive dropdown toast ([e4b223c](https://github.com/Jbuxofplenty/coral_clash/commit/e4b223c07c38f715f88605ef1ff51727cc0768b6))
+* **client:** small changes ([ba36e92](https://github.com/Jbuxofplenty/coral_clash/commit/ba36e9251f5a2dae3079eb5f97a8d375f1da162a))
+* **server:** disable badge count in push notifications ([3c39560](https://github.com/Jbuxofplenty/coral_clash/commit/3c395606462ccc2c7087cfde0e930bac1ff75109))
+
 # [1.5.0](https://github.com/Jbuxofplenty/coral_clash/compare/v1.4.0...v1.5.0) (2025-11-07)
 
 ### Bug Fixes
