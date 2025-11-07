@@ -6,6 +6,7 @@ import { useTheme } from '../contexts';
 import Icon from './Icon';
 
 const { width } = Dimensions.get('screen');
+const isTablet = width >= 768;
 
 /**
  * SignUpPromptCard - A card component prompting users to sign up or log in
@@ -58,25 +59,25 @@ function SignUpPromptCard({ onPress, style }) {
                 </Text>
                 <Block style={styles.featureList}>
                     <Text
-                        size={moderateScale(14)}
+                        size={isTablet ? moderateScale(10) : moderateScale(14)}
                         style={[styles.feature, { color: colors.TEXT_SECONDARY }]}
                     >
                         {'\u2022'} Play with friends online
                     </Text>
                     <Text
-                        size={moderateScale(14)}
+                        size={isTablet ? moderateScale(10) : moderateScale(14)}
                         style={[styles.feature, { color: colors.TEXT_SECONDARY }]}
                     >
                         {'\u2022'} Find random opponents via matchmaking
                     </Text>
                     <Text
-                        size={moderateScale(14)}
+                        size={isTablet ? moderateScale(10) : moderateScale(14)}
                         style={[styles.feature, { color: colors.TEXT_SECONDARY }]}
                     >
                         {'\u2022'} Track your game stats & history
                     </Text>
                     <Text
-                        size={moderateScale(14)}
+                        size={isTablet ? moderateScale(10) : moderateScale(14)}
                         style={[styles.feature, { color: colors.TEXT_SECONDARY }]}
                     >
                         {'\u2022'} Build your friend network
@@ -84,7 +85,11 @@ function SignUpPromptCard({ onPress, style }) {
                 </Block>
                 <Block center style={styles.buttonContainer}>
                     <Button round color={colors.PRIMARY} style={styles.button} onPress={onPress}>
-                        <Text size={moderateScale(16)} bold color='white'>
+                        <Text
+                            size={isTablet ? moderateScale(10) : moderateScale(16)}
+                            bold
+                            color='white'
+                        >
                             Sign Up / Log In
                         </Text>
                     </Button>
@@ -99,12 +104,12 @@ export default SignUpPromptCard;
 const styles = StyleSheet.create({
     card: {
         marginVertical: theme.SIZES.BASE * 1.5,
-        marginHorizontal: width > 600 ? 'auto' : 0,
+        marginHorizontal: isTablet ? 'auto' : 0,
         borderWidth: 0,
         minHeight: width > 600 ? verticalScale(300) : width / 1.5,
         maxWidth: width > 600 ? Math.min(800, width * 0.8) : width - theme.SIZES.BASE * 2,
         width: width > 600 ? '100%' : 'auto',
-        alignSelf: width > 600 ? 'center' : 'auto',
+        alignSelf: isTablet ? 'center' : 'auto',
         borderRadius: 12,
         overflow: 'hidden',
     },
@@ -142,15 +147,14 @@ const styles = StyleSheet.create({
     },
     feature: {
         paddingVertical: 4,
-        lineHeight: 20,
     },
     buttonContainer: {
         paddingTop: theme.SIZES.BASE * 1.5,
         paddingBottom: theme.SIZES.BASE,
     },
     button: {
-        width: width > 600 ? 300 : width * 0.7,
-        height: 48,
+        width: isTablet ? width * 0.5 : width * 0.7,
+        height: verticalScale(48),
     },
     shadow: {
         shadowColor: '#000',

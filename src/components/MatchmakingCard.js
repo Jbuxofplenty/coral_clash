@@ -7,11 +7,12 @@ import {
     TouchableWithoutFeedback,
     View,
 } from 'react-native';
-import { moderateScale, verticalScale } from 'react-native-size-matters';
+import { moderateScale } from 'react-native-size-matters';
 import { useAlert, useTheme } from '../contexts';
 import Icon from './Icon';
 
 const { width } = Dimensions.get('screen');
+const isTablet = width >= 768;
 
 /**
  * MatchmakingCard - A card component for random matchmaking
@@ -67,7 +68,7 @@ function MatchmakingCard({ searching, queueCount, loading, onStartSearch, onStop
                             <Icon
                                 name='users'
                                 family='font-awesome'
-                                size={moderateScale(80)}
+                                size={isTablet ? moderateScale(40) : moderateScale(80)}
                                 color={iconColor}
                             />
                         </View>
@@ -75,7 +76,7 @@ function MatchmakingCard({ searching, queueCount, loading, onStartSearch, onStop
                 </Block>
                 <Block style={styles.contentContainer}>
                     <Text
-                        size={moderateScale(20)}
+                        size={isTablet ? moderateScale(10) : moderateScale(20)}
                         bold
                         style={[styles.title, { color: textColor }]}
                         center
@@ -83,7 +84,7 @@ function MatchmakingCard({ searching, queueCount, loading, onStartSearch, onStop
                         {searching ? 'Searching for Opponent...' : 'Find Random Match'}
                     </Text>
                     <Text
-                        size={moderateScale(14)}
+                        size={isTablet ? moderateScale(10) : moderateScale(14)}
                         style={[
                             styles.description,
                             { color: isActive ? 'rgba(255,255,255,0.8)' : colors.TEXT_SECONDARY },
@@ -105,12 +106,11 @@ export default MatchmakingCard;
 const styles = StyleSheet.create({
     card: {
         marginVertical: theme.SIZES.BASE * 1.5,
-        marginHorizontal: width > 600 ? 'auto' : 0,
+        marginHorizontal: isTablet ? 'auto' : 0,
         borderWidth: 0,
-        minHeight: width > 600 ? verticalScale(200) : width / 2,
-        maxWidth: width > 600 ? Math.min(800, width * 0.8) : width - theme.SIZES.BASE * 2,
-        width: width > 600 ? '100%' : 'auto',
-        alignSelf: width > 600 ? 'center' : 'auto',
+        minHeight: isTablet ? 350 : width / 2,
+        width: isTablet ? 650 : width - theme.SIZES.BASE * 2,
+        alignSelf: isTablet ? 'center' : 'auto',
         borderRadius: 12,
         overflow: 'hidden',
     },

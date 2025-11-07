@@ -17,6 +17,7 @@ import Avatar from './Avatar';
 import Icon from './Icon';
 
 const { width } = Dimensions.get('screen');
+const isTablet = width >= 768;
 
 /**
  * Card component that allows users to select a friend and start a game or play pass and play
@@ -740,8 +741,9 @@ export default function PlayWithFriendCard({
 const styles = StyleSheet.create({
     card: {
         marginVertical: theme.SIZES.BASE,
-        marginHorizontal: width > 600 ? 'auto' : 0,
-        maxWidth: width > 600 ? 600 : '100%',
+        marginHorizontal: isTablet ? 'auto' : 0,
+        width: isTablet ? 650 : width - theme.SIZES.BASE * 2,
+        alignSelf: isTablet ? 'center' : 'auto',
         borderRadius: 12,
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
