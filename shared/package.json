@@ -19,7 +19,7 @@
         "access": "public"
     },
     "scripts": {
-        "prebuild": "node scripts/inject-version.js",
+        "prepare": "node scripts/inject-version.js && tsc",
         "build": "tsc",
         "build:watch": "tsc --watch",
         "clean": "rm -rf dist game/**/*.js game/**/*.d.ts !game/__fixtures__/*.js",
