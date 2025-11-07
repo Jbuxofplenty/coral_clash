@@ -93,26 +93,23 @@ jobs:
           cd shared
           yarn test
       
-      - name: Import GPG key
-        id: import_gpg
-        uses: crazy-max/ghaction-import-gpg@v6
+      - name: Setup GPG Signing
+        id: gpg
+        uses: ./.github/actions/setup-gpg-signing
         with:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
-          passphrase: ${{ secrets.GPG_PASSPHRASE }}
-          git_user_signingkey: true
-          git_commit_gpgsign: true
+          gpg_passphrase: ${{ secrets.GPG_PASSPHRASE }}
       
-      - name: Configure GPG for semantic-release
+      - name: Configure GPG in shared directory
         run: |
           cd shared
-          # Explicitly set git config in shared directory
+          # Git config needs to be set in shared directory for semantic-release
           git config user.name "Josiah Buxton"
           git config user.email "jbuxofplenty@gmail.com"
-          git config user.signingkey "${{ steps.import_gpg.outputs.keyid }}"
+          git config user.signingkey "${{ steps.gpg.outputs.keyid }}"
           git config commit.gpgsign true
           
-          echo "✅ GPG configured for semantic-release"
-          echo "🔑 Key ID: ${{ steps.import_gpg.outputs.keyid }}"
+          echo "✅ GPG configured in shared directory for semantic-release"
       
       - name: Release
         id: release
