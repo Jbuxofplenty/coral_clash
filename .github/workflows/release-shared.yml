@@ -78,11 +78,14 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
           scope: '@jbuxofplenty'
       
-      - name: Install dependencies and build
+      - name: Install dependencies
         run: |
           cd shared
           yarn install --frozen-lockfile
-          # Build is needed for tests (prepare script will rebuild with correct version during release)
+      
+      - name: Build package
+        run: |
+          cd shared
           yarn build
       
       - name: Run tests
