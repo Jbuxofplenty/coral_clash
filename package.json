@@ -48,7 +48,7 @@
         ]
     },
     "dependencies": {
-        "@jbuxofplenty/coral-clash": "^1.6.1",
+        "@jbuxofplenty/coral-clash": "^1.7.0",
         "@react-native-async-storage/async-storage": "2.2.0",
         "@react-native-google-signin/google-signin": "^16.0.0",
         "@react-native-masked-view/masked-view": "0.3.2",

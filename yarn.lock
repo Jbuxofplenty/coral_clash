@@ -2156,10 +2156,10 @@
   resolved "https://registry.yarnpkg.com/@istanbuljs/schema/-/schema-0.1.3.tgz#e45e384e4b8ec16bce2fd903af78450f6bf7ec98"
   integrity sha512-ZXRY4jNvVgSVQ8DL3LTcakaAtXwTVUxE81hslsyD2AtoXW/wVob10HkOJ1X/pAlcI7D+2YoZKg5do8G/w6RYgA==
 
-"@jbuxofplenty/coral-clash@^1.6.1":
-  version "1.6.1"
-  resolved "https://npm.pkg.github.com/download/@jbuxofplenty/coral-clash/1.6.1/2390bf09a52df7d6f1a915c73b16b0eba1ae2409#2390bf09a52df7d6f1a915c73b16b0eba1ae2409"
-  integrity sha512-CoUnEACt/WieT81RjGIM6ErLWweq5RKIpQVIxVF7U3DARwh4hJsi3mbwGWrDf4ZkZLqE9m7IU9S/iVdDgvsECg==
+"@jbuxofplenty/coral-clash@^1.7.0":
+  version "1.7.0"
+  resolved "https://npm.pkg.github.com/download/@jbuxofplenty/coral-clash/1.7.0/bc26d30715c5d8a2745e5fae894572a62217dde2#bc26d30715c5d8a2745e5fae894572a62217dde2"
+  integrity sha512-6H5la/ByCnLkU25iMoz5t0jgHpewj3Jcvyr7Y2t6uhQ/PMq5Tg/jKnIwJzpM4V/64FPZ4Pe0r2Ndb8mfS95TOw==
 
 "@jest/console@^29.7.0":
   version "29.7.0"
