@@ -1,3 +1,19 @@
+# [1.7.0](https://github.com/Jbuxofplenty/coral_clash/compare/v1.6.1...v1.7.0) (2025-11-08)
+
+
+### Bug Fixes
+
+* **client:** catch error in alert ([9ef1222](https://github.com/Jbuxofplenty/coral_clash/commit/9ef1222cd68f7c7ed95d49ea1056dd61c09d4d99))
+* **client:** handle non-promise button handlers in ThemedAlert ([5ba965a](https://github.com/Jbuxofplenty/coral_clash/commit/5ba965a55d542eed7e269ec04231a8c7d860cc8a))
+* **server:** fix all function tests by removing type:module from shared package ([d769402](https://github.com/Jbuxofplenty/coral_clash/commit/d769402734e37adb7649c0591716ac8d5641a628))
+* **shared:** optimize ES module ([45c664e](https://github.com/Jbuxofplenty/coral_clash/commit/45c664e94969f17e80828b194ea9f8dd50290d8c))
+
+
+### Features
+
+* **client:** add issue reporting and bug report feature ([a7ebcee](https://github.com/Jbuxofplenty/coral_clash/commit/a7ebcee8dce7cd7e17ed6c62f0b472b076683e68))
+* **server:** add issue submission API with GitHub integration ([11a3533](https://github.com/Jbuxofplenty/coral_clash/commit/11a3533ab383c192ba57e1cee90070432a9c4673))
+
 ## [1.6.1](https://github.com/Jbuxofplenty/coral_clash/compare/v1.6.0...v1.6.1) (2025-11-07)
 
 
