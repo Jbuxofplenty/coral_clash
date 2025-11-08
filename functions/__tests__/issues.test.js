@@ -3,7 +3,21 @@ import { cleanup, setupStandardMocks } from './testHelpers.js';
 const mocks = setupStandardMocks();
 
 // Mock the shared game library before any imports
-jest.mock('../shared/dist/game/index.js');
+jest.mock('../shared/dist/game/index.js', () => ({
+    CoralClash: jest.fn(),
+    createGameSnapshot: jest.fn(),
+    restoreGameFromSnapshot: jest.fn(),
+    GAME_VERSION: '1.0.0',
+}));
+
+// Also mock the npm package
+jest.mock('@jbuxofplenty/coral-clash', () => ({
+    CoralClash: jest.fn(),
+    createGameSnapshot: jest.fn(),
+    restoreGameFromSnapshot: jest.fn(),
+    GAME_VERSION: '1.0.0',
+    DEFAULT_POSITION: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+}));
 
 jest.mock('firebase-admin', () => ({
     initializeApp: jest.fn(),
