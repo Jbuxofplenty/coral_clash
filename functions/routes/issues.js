@@ -13,7 +13,7 @@ const githubPat = defineSecret('GITHUB_PAT');
  * Handler for submitting an issue
  * Separated for testing purposes
  */
-async function submitIssueHandler(request) {
+export async function submitIssueHandler(request) {
     const { data, auth } = request;
     const { subject, description, gameSnapshot } = data;
 
