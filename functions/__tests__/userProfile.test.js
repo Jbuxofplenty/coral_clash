@@ -5,6 +5,7 @@ const mocks = setupStandardMocks();
 
 // Mock the shared game library before importing anything
 jest.mock('../shared/dist/game/index.js');
+jest.mock('@jbuxofplenty/coral-clash');
 
 // Mock firebase-admin with standard setup
 // Note: Must inline the factory due to Jest hoisting restrictions

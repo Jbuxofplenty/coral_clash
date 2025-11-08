@@ -3,6 +3,7 @@ import { cleanup, setupStandardMocks } from './testHelpers.js';
 const mocks = setupStandardMocks();
 
 jest.mock('../shared/dist/game/index.js');
+jest.mock('@jbuxofplenty/coral-clash');
 
 jest.mock('firebase-admin', () => {
     const mockFirestoreFunc = jest.fn(() => ({

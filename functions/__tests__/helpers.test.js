@@ -19,7 +19,7 @@ describe('Helpers', () => {
 
         it('should create a game state that matches DEFAULT_POSITION', async () => {
             const gameState = initializeGameState();
-            const { CoralClash, DEFAULT_POSITION } = await import('../__mocks__/shared-game.js');
+            const { CoralClash, DEFAULT_POSITION } = await import('@jbuxofplenty/coral-clash');
             const game = new CoralClash(DEFAULT_POSITION);
 
             expect(gameState.fen).toBe(game.fen());
