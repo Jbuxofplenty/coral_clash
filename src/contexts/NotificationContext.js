@@ -256,18 +256,17 @@ async function registerForPushNotificationsAsync() {
             }
 
             try {
-                // Use Expo push tokens for iOS (works for both Expo Go and standalone builds)
-                // Use native FCM tokens for Android
-                if (Platform.OS === 'ios') {
-                    // For iOS: Use Expo push token (works with Expo's push service)
+                // Use Expo push tokens by default for both iOS and Android
+                // Fallback to native FCM tokens if Expo tokens fail
+                try {
                     token = (await Notifications.getExpoPushTokenAsync()).data;
-                } else {
-                    // For Android: Try native FCM token first, fallback to Expo token
+                } catch (_expoTokenError) {
+                    // Fallback to native FCM token if Expo token fails
                     try {
                         const deviceToken = await Notifications.getDevicePushTokenAsync();
                         token = deviceToken.data;
                     } catch (_deviceTokenError) {
-                        token = (await Notifications.getExpoPushTokenAsync()).data;
+                        // Both methods failed - will return undefined
                     }
                 }
             } catch (_error) {
