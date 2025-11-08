@@ -2,7 +2,6 @@
     "name": "@jbuxofplenty/coral-clash",
     "version": "1.6.1",
     "description": "Shared game logic for Coral Clash",
-    "type": "module",
     "main": "index.js",
     "types": "dist/game/index.d.ts",
     "files": [
