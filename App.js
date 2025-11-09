@@ -65,31 +65,6 @@ function cacheImages(images) {
 function AppContent({ navigationRef: _navigationRef }) {
     const { isDarkMode } = useTheme();
     const { versionWarning, dismissWarning } = useVersion();
-    const { user } = useAuth();
-    const hasRequestedATT = useRef(false);
-
-    // Request ATT permission once after user logs in
-    // This runs in App.js so it won't be unmounted during navigation
-    useEffect(() => {
-        const requestATT = async () => {
-            // Only request once per app session
-            if (user && !hasRequestedATT.current) {
-                console.log('🔍 User logged in, requesting ATT permission...');
-                hasRequestedATT.current = true;
-
-                // Small delay to let UI settle after login
-                setTimeout(async () => {
-                    try {
-                        const granted = await requestTrackingPermission();
-                        console.log('📊 ATT permission result:', granted);
-                    } catch (error) {
-                        console.error('📊 Error requesting ATT permission:', error);
-                    }
-                }, 1000);
-            }
-        };
-        requestATT();
-    }, [user]);
 
     return (
         <Block flex>
