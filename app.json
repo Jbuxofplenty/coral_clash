@@ -25,6 +25,7 @@
             "runtimeVersion": "1.0.0",
             "appleTeamId": "FWV22U8U39",
             "associatedDomains": ["webcredentials:coral-clash.firebaseapp.com"],
+            "usesAppleSignIn": true,
             "infoPlist": {
                 "ITSAppUsesNonExemptEncryption": false,
                 "CFBundleURLTypes": [
@@ -37,6 +38,7 @@
         "plugins": [
             "expo-font",
             "@react-native-google-signin/google-signin",
+            "expo-apple-authentication",
             [
                 "expo-notifications",
                 {

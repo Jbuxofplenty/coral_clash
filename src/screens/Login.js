@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import * as AppleAuthentication from 'expo-apple-authentication';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Block, Button, Input, Text, theme } from 'galio-framework';
 import React from 'react';
@@ -25,6 +26,7 @@ function Login({ navigation }) {
         signIn,
         signUp,
         signInWithGoogle,
+        signInWithApple,
         resetPassword,
         loading: authLoading,
         error: authError,
@@ -38,11 +40,23 @@ function Login({ navigation }) {
     const [loading, setLoading] = React.useState(false);
     const [error, setError] = React.useState('');
     const [successMessage, setSuccessMessage] = React.useState('');
+    const [isAppleAuthAvailable, setIsAppleAuthAvailable] = React.useState(false);
 
     // Refs for input fields
     const displayNameRef = React.useRef(null);
     const emailRef = React.useRef(null);
     const passwordRef = React.useRef(null);
+
+    // Check if Apple Authentication is available
+    // iOS: Native support (iOS 13+)
+    // Android: Requires OAuth setup with Apple Developer account
+    React.useEffect(() => {
+        const checkAppleAuthAvailability = async () => {
+            const available = await AppleAuthentication.isAvailableAsync();
+            setIsAppleAuthAvailable(available);
+        };
+        checkAppleAuthAvailability();
+    }, []);
 
     // Redirect to Home if user is already logged in
     React.useEffect(() => {
@@ -114,6 +128,23 @@ function Login({ navigation }) {
             }
         } catch (err) {
             setError(err.message || 'Google sign-in failed');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleAppleSignIn = async () => {
+        setLoading(true);
+        setError('');
+        setSuccessMessage('');
+        try {
+            const result = await signInWithApple();
+            // If result is null, user cancelled - no error needed
+            if (result === null) {
+                console.log('User cancelled Apple Sign-In');
+            }
+        } catch (err) {
+            setError(err.message || 'Apple sign-in failed');
         } finally {
             setLoading(false);
         }
@@ -221,6 +252,38 @@ function Login({ navigation }) {
                             <Block style={styles.form}>
                                 {!showForgotPassword && (
                                     <>
+                                        {isAppleAuthAvailable && (
+                                            <TouchableOpacity
+                                                style={[
+                                                    styles.appleButton,
+                                                    {
+                                                        backgroundColor: '#000',
+                                                    },
+                                                ]}
+                                                onPress={handleAppleSignIn}
+                                                disabled={loading || authLoading}
+                                            >
+                                                <Ionicons
+                                                    name='logo-apple'
+                                                    size={verticalScale(24)}
+                                                    color='#fff'
+                                                />
+                                                <Text
+                                                    size={
+                                                        isTablet
+                                                            ? moderateScale(10)
+                                                            : moderateScale(16)
+                                                    }
+                                                    color='#fff'
+                                                    style={styles.appleButtonText}
+                                                >
+                                                    {isSignUp
+                                                        ? 'Sign up with Apple'
+                                                        : 'Sign in with Apple'}
+                                                </Text>
+                                            </TouchableOpacity>
+                                        )}
+
                                         <TouchableOpacity
                                             style={[
                                                 styles.googleButton,
@@ -505,6 +568,25 @@ const styles = StyleSheet.create({
     },
     dividerText: {
         marginHorizontal: theme.SIZES.BASE,
+    },
+    appleButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: 8,
+        paddingVertical: isTablet ? 14 : 12,
+        paddingHorizontal: theme.SIZES.BASE,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 2,
+        height: verticalScale(50),
+        marginBottom: theme.SIZES.BASE,
+    },
+    appleButtonText: {
+        marginLeft: theme.SIZES.BASE,
+        fontWeight: '600',
     },
     googleButton: {
         flexDirection: 'row',

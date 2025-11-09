@@ -1,6 +1,9 @@
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import * as AppleAuthentication from 'expo-apple-authentication';
+import * as Crypto from 'expo-crypto';
 import {
     GoogleAuthProvider,
+    OAuthProvider,
     createUserWithEmailAndPassword,
     onAuthStateChanged,
     sendPasswordResetEmail,
@@ -239,6 +242,83 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const signInWithApple = async () => {
+        try {
+            setError(null);
+
+            // Generate nonce for security
+            const nonce = Math.random().toString(36).substring(2, 10);
+            const hashedNonce = await Crypto.digestStringAsync(
+                Crypto.CryptoDigestAlgorithm.SHA256,
+                nonce,
+            );
+
+            // Request Apple authentication
+            const appleCredential = await AppleAuthentication.signInAsync({
+                requestedScopes: [
+                    AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+                    AppleAuthentication.AppleAuthenticationScope.EMAIL,
+                ],
+                nonce: hashedNonce,
+            });
+
+            // Create Firebase credential
+            const provider = new OAuthProvider('apple.com');
+            const credential = provider.credential({
+                idToken: appleCredential.identityToken,
+                rawNonce: nonce,
+            });
+
+            // Sign in to Firebase
+            const userCredential = await signInWithCredential(auth, credential);
+
+            // Check if this is a new user and create Firestore document
+            const userDoc = await getDoc(doc(db, 'users', userCredential.user.uid));
+            if (!userDoc.exists()) {
+                // Apple may provide name only on first sign-in
+                const displayName =
+                    appleCredential.fullName?.givenName && appleCredential.fullName?.familyName
+                        ? `${appleCredential.fullName.givenName} ${appleCredential.fullName.familyName}`
+                        : userCredential.user.email?.split('@')[0] || 'Apple User';
+
+                // Create the basic user document
+                // The Firestore trigger will automatically add discriminator and default settings
+                await setDoc(doc(db, 'users', userCredential.user.uid), {
+                    displayName,
+                    email: appleCredential.email || userCredential.user.email,
+                    createdAt: new Date().toISOString(),
+                    stats: {
+                        gamesPlayed: 0,
+                        gamesWon: 0,
+                        gamesLost: 0,
+                        gamesDraw: 0,
+                    },
+                    friends: [],
+                });
+
+                // Update Firebase Auth profile
+                await updateProfile(userCredential.user, { displayName });
+
+                // Wait for discriminator and settings to be assigned by Firestore trigger
+                setTimeout(() => {
+                    refreshUserData();
+                }, 500);
+            }
+
+            return userCredential.user;
+        } catch (error) {
+            // Check if user cancelled the sign-in flow
+            if (error.code === 'ERR_REQUEST_CANCELED') {
+                console.log('User cancelled Apple Sign-In');
+                return null; // Don't show error for user cancellation
+            }
+
+            console.error('❌ signInWithApple error:', error);
+            setError(error.message);
+            throw error;
+        }
+    };
+
     const resetPassword = async (email) => {
         try {
             setError(null);
@@ -305,6 +385,7 @@ export const AuthProvider = ({ children }) => {
         signUp,
         signIn,
         signInWithGoogle,
+        signInWithApple,
         resetPassword,
         logOut,
         refreshUserData,
