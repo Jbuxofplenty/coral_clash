@@ -54,8 +54,6 @@ function Login({ navigation }) {
         const checkAppleAuthAvailability = async () => {
             try {
                 const available = await AppleAuthentication.isAvailableAsync();
-                console.log('🍎 Apple Sign-In available:', available);
-                console.log('🍎 Platform:', Platform.OS);
                 setIsAppleAuthAvailable(available);
             } catch (error) {
                 console.log('🍎 Apple Sign-In check error:', error);
