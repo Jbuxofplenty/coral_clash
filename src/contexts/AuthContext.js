@@ -13,9 +13,10 @@ import {
     updateProfile,
 } from 'firebase/auth';
 import { doc, getDoc, onSnapshot, setDoc } from 'firebase/firestore';
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { Platform } from 'react-native';
 import { auth, db } from '../config/firebase';
+import { requestTrackingPermission } from '../utils/tracking';
 
 const AuthContext = createContext({});
 
@@ -31,6 +32,7 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const hasRequestedATT = useRef(false);
 
     // Configure Google Sign-In
     useEffect(() => {
@@ -114,6 +116,27 @@ export const AuthProvider = ({ children }) => {
             }
         };
     }, []);
+
+    // Request App Tracking Transparency permission after user logs in
+    // This runs once per app session when user authenticates
+    useEffect(() => {
+        const requestATT = async () => {
+            // Only request once per app session, and only when user is authenticated
+            if (user && !loading && !hasRequestedATT.current) {
+                hasRequestedATT.current = true;
+                
+                // Small delay to let UI settle after login
+                setTimeout(async () => {
+                    try {
+                        await requestTrackingPermission();
+                    } catch (error) {
+                        console.error('Error requesting tracking permission:', error);
+                    }
+                }, 1000);
+            }
+        };
+        requestATT();
+    }, [user, loading]);
 
     const signUp = async (email, password, displayName) => {
         try {

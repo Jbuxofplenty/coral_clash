@@ -17,43 +17,30 @@ const getAdsEnabled = () => {
  * @returns {Promise<boolean>} Whether tracking permission was granted
  */
 export const requestTrackingPermission = async () => {
-    console.log('🔍 requestTrackingPermission() called');
-    console.log('🔍 Platform.OS:', Platform.OS);
-    
     // Only request on iOS 14+
     if (Platform.OS !== 'ios') {
-        console.log('📊 Tracking: Not iOS, skipping ATT request');
         return true;
     }
 
     try {
-        console.log('🔍 Calling getTrackingPermissionsAsync()...');
         // Check if we can request tracking
         const { status: currentStatus } = await TrackingTransparency.getTrackingPermissionsAsync();
 
-        console.log('📊 Tracking: Current status:', currentStatus);
-
         // If already granted or denied, don't ask again
         if (currentStatus === 'granted') {
-            console.log('📊 Tracking: Already granted');
             return true;
         }
 
         if (currentStatus === 'denied') {
-            console.log('📊 Tracking: Previously denied');
             return false;
         }
 
-        // Request permission - THIS IS WHERE THE DIALOG SHOULD APPEAR
-        console.log('🔍 About to show ATT dialog via requestTrackingPermissionsAsync()...');
+        // Request permission
         const { status: newStatus } = await TrackingTransparency.requestTrackingPermissionsAsync();
-
-        console.log('📊 Tracking: New status after request:', newStatus);
 
         return newStatus === 'granted';
     } catch (error) {
-        console.error('📊 Tracking: Error requesting permission:', error);
-        console.error('📊 Tracking: Error details:', JSON.stringify(error));
+        console.error('Error requesting tracking permission:', error);
         return false;
     }
 };
@@ -67,7 +54,6 @@ export const requestTrackingPermission = async () => {
 export const isTrackingAllowed = async () => {
     // Check environment variable first
     if (!getAdsEnabled()) {
-        console.log('📊 Tracking: Ads disabled via env variable (EXPO_PUBLIC_ENABLE_ADS)');
         return false;
     }
 
@@ -80,7 +66,7 @@ export const isTrackingAllowed = async () => {
         const { status } = await TrackingTransparency.getTrackingPermissionsAsync();
         return status === 'granted';
     } catch (error) {
-        console.error('📊 Tracking: Error checking permission:', error);
+        console.error('Error checking tracking permission:', error);
         return false;
     }
 };
@@ -100,7 +86,7 @@ export const getTrackingStatus = async () => {
         const { status } = await TrackingTransparency.getTrackingPermissionsAsync();
         return status;
     } catch (error) {
-        console.error('📊 Tracking: Error getting status:', error);
+        console.error('Error getting tracking status:', error);
         return 'error';
     }
 };
