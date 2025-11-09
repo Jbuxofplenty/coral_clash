@@ -28,6 +28,7 @@
             "usesAppleSignIn": true,
             "infoPlist": {
                 "ITSAppUsesNonExemptEncryption": false,
+                "NSUserTrackingUsageDescription": "We use tracking to provide personalized ads and improve your gaming experience. Your privacy is important to us.",
                 "CFBundleURLTypes": [
                     {
                         "CFBundleURLSchemes": ["coralclash"]
@@ -39,6 +40,7 @@
             "expo-font",
             "@react-native-google-signin/google-signin",
             "expo-apple-authentication",
+            "expo-tracking-transparency",
             [
                 "expo-notifications",
                 {
