@@ -264,7 +264,8 @@ function Login({ navigation }) {
                                                 style={[
                                                     styles.appleButton,
                                                     {
-                                                        backgroundColor: '#000',
+                                                        backgroundColor: colors.CARD_BACKGROUND,
+                                                        borderColor: colors.BORDER_COLOR,
                                                     },
                                                 ]}
                                                 onPress={handleAppleSignIn}
@@ -273,7 +274,7 @@ function Login({ navigation }) {
                                                 <Ionicons
                                                     name='logo-apple'
                                                     size={verticalScale(24)}
-                                                    color='#fff'
+                                                    color={colors.TEXT}
                                                 />
                                                 <Text
                                                     size={
@@ -281,7 +282,7 @@ function Login({ navigation }) {
                                                             ? moderateScale(10)
                                                             : moderateScale(16)
                                                     }
-                                                    color='#fff'
+                                                    color={colors.TEXT}
                                                     style={styles.appleButtonText}
                                                 >
                                                     {isSignUp
@@ -581,7 +582,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         borderWidth: 1,
-        borderColor: '#000',
         borderRadius: 8,
         paddingVertical: isTablet ? 14 : 12,
         paddingHorizontal: theme.SIZES.BASE,
