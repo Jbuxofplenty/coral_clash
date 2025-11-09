@@ -91,12 +91,19 @@ export default function App() {
                 const adapterStatuses = await mobileAds().initialize();
                 console.log('📱 Mobile Ads SDK initialized:', adapterStatuses);
 
-                // Set request configuration for testing
-                await mobileAds().setRequestConfiguration({
-                    // Set to true if you want to test with test ads
-                    // Remove or set to false in production
-                    testDeviceIdentifiers: ['EMULATOR'],
-                });
+                // Set request configuration
+                // In development, register test devices to show test ads
+                // In production, this will be skipped so real ads are served
+                if (__DEV__) {
+                    await mobileAds().setRequestConfiguration({
+                        // Test device IDs - add your device ID here during development
+                        testDeviceIdentifiers: [
+                            '08EA2881-FF28-4E64-AE72-35CEEF26E8C9', // Josiah's test device
+                            'EMULATOR',
+                        ],
+                    });
+                    console.log('📱 AdMob configured for test devices');
+                }
 
                 //Load Resources
                 await _loadResourcesAsync();
