@@ -24,6 +24,7 @@ import { cleanupStaleMatchmakingEntries } from './scheduled/cleanupStaleMatchmak
 export const getPublicUserInfo = userProfile.getPublicUserInfo;
 export const getUserProfile = userProfile.getUserProfile;
 export const updateUserProfile = userProfile.updateUserProfile;
+export const deleteAccount = userProfile.deleteAccount;
 
 // ==================== User Settings APIs ====================
 export const getUserSettings = userSettings.getUserSettings;
