@@ -41,6 +41,17 @@ export const useFirebaseFunctions = () => {
         }
     };
 
+    const deleteAccount = async () => {
+        try {
+            const callable = httpsCallable(functions, 'deleteAccount');
+            const result = await callable({});
+            return result.data;
+        } catch (error) {
+            console.error('Error deleting account:', error);
+            throw error;
+        }
+    };
+
     // ==================== User Settings Functions ====================
 
     const getUserSettings = async () => {
@@ -370,6 +381,7 @@ export const useFirebaseFunctions = () => {
         getPublicUserInfo,
         getUserProfile,
         updateUserProfile,
+        deleteAccount,
         // User Settings
         getUserSettings,
         updateUserSettings,

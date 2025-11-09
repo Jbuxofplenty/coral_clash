@@ -132,7 +132,10 @@ export default function Stats({ navigation: _navigation }) {
             });
 
             // Fetch current user data for each opponent to get latest avatars and names
-            const opponentIds = Object.keys(stats).filter((id) => id !== 'computer');
+            // Skip deleted users (those already showing as "Anonymous")
+            const opponentIds = Object.keys(stats).filter(
+                (id) => id !== 'computer' && stats[id].name !== 'Anonymous',
+            );
             for (const opponentId of opponentIds) {
                 try {
                     const result = await getPublicUserInfo(opponentId);
