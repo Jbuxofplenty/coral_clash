@@ -1,19 +1,21 @@
 import { Block, Text, theme } from 'galio-framework';
 import React, { useEffect, useState } from 'react';
-import { Image, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
+import { Alert, Image, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
 
 import { LoadingScreen } from '../components';
 import { DEFAULT_AVATARS, getRandomAvatarKey } from '../constants/avatars';
 import { useAlert, useAuth, useTheme } from '../contexts';
 import { useFirebaseFunctions } from '../hooks';
 
-export default function Settings({ _navigation }) {
-    const { user, refreshUserData } = useAuth();
+export default function Settings({ navigation: _navigation }) {
+    const { user, refreshUserData, logOut } = useAuth();
     const { colors, setThemePreference } = useTheme();
     const { showAlert } = useAlert();
-    const { getUserSettings, updateUserSettings, resetUserSettings } = useFirebaseFunctions();
+    const { getUserSettings, updateUserSettings, resetUserSettings, deleteAccount } =
+        useFirebaseFunctions();
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const [deleting, setDeleting] = useState(false);
     const [settings, setSettings] = useState(null);
 
     useEffect(() => {
@@ -89,6 +91,95 @@ export default function Settings({ _navigation }) {
                 },
             },
         ]);
+    };
+
+    const handleDeleteAccount = () => {
+        // First confirmation - explain consequences
+        showAlert(
+            'Delete Account',
+            'This action is permanent and cannot be undone.\n\n' +
+                '• All your personal data will be removed\n' +
+                '• Your games will continue but you will appear as "Anonymous"\n' +
+                '• Your friends and friend requests will be removed\n' +
+                '• Active games will be forfeited\n\n' +
+                'Are you sure you want to continue?',
+            [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                    text: 'Continue',
+                    style: 'destructive',
+                    onPress: () => {
+                        // Second confirmation - require typing DELETE
+                        showDeleteConfirmation();
+                    },
+                },
+            ],
+        );
+    };
+
+    const showDeleteConfirmation = () => {
+        Alert.prompt(
+            'Confirm Account Deletion',
+            'To confirm, please type DELETE (all caps) below:',
+            [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                    text: 'Delete Account',
+                    style: 'destructive',
+                    onPress: async (text) => {
+                        if (text === 'DELETE') {
+                            await performAccountDeletion();
+                        } else {
+                            showAlert(
+                                'Incorrect Confirmation',
+                                'You must type DELETE exactly to confirm account deletion.',
+                            );
+                        }
+                    },
+                },
+            ],
+            'plain-text',
+        );
+    };
+
+    const performAccountDeletion = async () => {
+        try {
+            setDeleting(true);
+
+            // Call the delete account function
+            await deleteAccount();
+
+            setDeleting(false);
+
+            // Show success message, then logout when dismissed
+            showAlert(
+                'Account Deleted',
+                'Your account has been successfully deleted. You will now be logged out.',
+                [
+                    {
+                        text: 'OK',
+                        onPress: async () => {
+                            // Log out after user acknowledges (AuthProvider handles navigation)
+                            await logOut();
+                        },
+                    },
+                ],
+            );
+        } catch (error) {
+            console.error('Error deleting account:', error);
+            setDeleting(false);
+            showAlert(
+                'Deletion Failed',
+                'Failed to delete account. Please try again or contact support if the problem persists.',
+                [
+                    { text: 'Cancel', style: 'cancel' },
+                    {
+                        text: 'Retry',
+                        onPress: () => handleDeleteAccount(),
+                    },
+                ],
+            );
+        }
     };
 
     const updateTheme = async (themeValue) => {
@@ -204,13 +295,45 @@ export default function Settings({ _navigation }) {
                     <TouchableOpacity
                         style={styles.textButton}
                         onPress={handleResetSettings}
-                        disabled={saving}
+                        disabled={saving || deleting}
                     >
                         <Text size={14} color={colors.PRIMARY} center style={{ fontWeight: '600' }}>
                             Reset to Defaults
                         </Text>
                     </TouchableOpacity>
                 </Block>
+
+                {/* Danger Zone */}
+                <Block style={styles.section}>
+                    <Text h5 bold color={colors.TEXT} style={{ marginBottom: 8 }}>
+                        Danger Zone
+                    </Text>
+                    <Block style={[styles.card, { backgroundColor: colors.CARD_BACKGROUND }]}>
+                        <Text size={14} color={colors.TEXT_SECONDARY} style={{ marginBottom: 16 }}>
+                            Once you delete your account, there is no going back. Please be certain.
+                        </Text>
+                        <TouchableOpacity
+                            style={[
+                                styles.deleteButton,
+                                (saving || deleting) && styles.deleteButtonDisabled,
+                            ]}
+                            onPress={handleDeleteAccount}
+                            disabled={saving || deleting}
+                        >
+                            <Text
+                                size={16}
+                                bold
+                                color='#fff'
+                                style={{ textAlign: 'center' }}
+                            >
+                                {deleting ? 'Deleting Account...' : 'Delete Account'}
+                            </Text>
+                        </TouchableOpacity>
+                    </Block>
+                </Block>
+
+                {/* Bottom padding */}
+                <Block style={{ height: 40 }} />
             </ScrollView>
         </Block>
     );
@@ -323,5 +446,16 @@ const styles = StyleSheet.create({
     avatarImage: {
         width: '100%',
         height: '100%',
+    },
+    deleteButton: {
+        backgroundColor: '#FF3B30',
+        paddingVertical: theme.SIZES.BASE * 1.5,
+        borderRadius: 8,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    deleteButtonDisabled: {
+        backgroundColor: '#FF3B3080',
+        opacity: 0.6,
     },
 });
