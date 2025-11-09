@@ -16,7 +16,6 @@ import {
 import { moderateScale, verticalScale } from 'react-native-size-matters';
 
 import { useAuth, useTheme } from '../contexts';
-import { requestTrackingPermission } from '../utils/tracking';
 
 const { width, height } = Dimensions.get('screen');
 const isTablet = width >= 768;
@@ -65,25 +64,6 @@ function Login({ navigation }) {
         };
         checkAppleAuthAvailability();
     }, []);
-
-    // Request tracking permission after successful login
-    React.useEffect(() => {
-        const requestPermission = async () => {
-            if (user) {
-                // Wait a bit to let the user see they've logged in successfully
-                // before showing the tracking permission dialog
-                setTimeout(async () => {
-                    try {
-                        const granted = await requestTrackingPermission();
-                        console.log('📊 Tracking permission granted:', granted);
-                    } catch (error) {
-                        console.error('📊 Error requesting tracking permission:', error);
-                    }
-                }, 1000);
-            }
-        };
-        requestPermission();
-    }, [user]);
 
     // Redirect to Home if user is already logged in
     React.useEffect(() => {
@@ -600,6 +580,8 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
+        borderWidth: 1,
+        borderColor: '#000',
         borderRadius: 8,
         paddingVertical: isTablet ? 14 : 12,
         paddingHorizontal: theme.SIZES.BASE,
