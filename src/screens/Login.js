@@ -6,17 +6,15 @@ import React from 'react';
 import {
     ActivityIndicator,
     Dimensions,
-    KeyboardAvoidingView,
     Platform,
-    ScrollView,
     StyleSheet,
     TouchableOpacity,
     View,
 } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { moderateScale, verticalScale } from 'react-native-size-matters';
 
 import { useAuth, useTheme } from '../contexts';
-import { requestTrackingPermission } from '../utils/tracking';
 
 const { width, height } = Dimensions.get('screen');
 const isTablet = width >= 768;
@@ -63,25 +61,6 @@ function Login({ navigation }) {
         };
         checkAppleAuthAvailability();
     }, []);
-
-    // Request tracking permission after successful login
-    React.useEffect(() => {
-        const requestPermission = async () => {
-            if (user) {
-                // Wait a bit to let the user see they've logged in successfully
-                // before showing the tracking permission dialog
-                setTimeout(async () => {
-                    try {
-                        const granted = await requestTrackingPermission();
-                        console.log('📊 Tracking permission granted:', granted);
-                    } catch (error) {
-                        console.error('📊 Error requesting tracking permission:', error);
-                    }
-                }, 1000);
-            }
-        };
-        requestPermission();
-    }, [user]);
 
     // Redirect to Home if user is already logged in
     React.useEffect(() => {
@@ -214,185 +193,158 @@ function Login({ navigation }) {
             colors={[colors.GRADIENT_START, colors.GRADIENT_MID, colors.GRADIENT_END]}
             style={styles.gradient}
         >
-            <KeyboardAvoidingView
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                style={styles.keyboardView}
+            <KeyboardAwareScrollView
+                contentContainerStyle={styles.scrollContainer}
+                keyboardShouldPersistTaps='handled'
+                enableOnAndroid={true}
+                enableAutomaticScroll={true}
+                extraScrollHeight={Platform.OS === 'ios' ? 20 : 40}
+                extraHeight={Platform.OS === 'ios' ? 120 : 140}
+                showsVerticalScrollIndicator={false}
             >
-                <ScrollView
-                    contentContainerStyle={styles.scrollContainer}
-                    keyboardShouldPersistTaps='handled'
-                >
-                    <Block flex center middle style={styles.container}>
-                        <Block style={[styles.card, { backgroundColor: colors.CARD_BACKGROUND }]}>
+                <Block flex center middle style={styles.container}>
+                    <Block style={[styles.card, { backgroundColor: colors.CARD_BACKGROUND }]}>
+                        <Text
+                            size={isTablet ? moderateScale(20) : moderateScale(32)}
+                            bold
+                            color={colors.PRIMARY}
+                            style={styles.title}
+                        >
+                            {showForgotPassword
+                                ? 'Reset Password'
+                                : isSignUp
+                                  ? 'Create Account'
+                                  : 'Welcome Back'}
+                        </Text>
+                        <Block style={styles.subtitleContainer}>
                             <Text
-                                size={isTablet ? moderateScale(20) : moderateScale(32)}
-                                bold
-                                color={colors.PRIMARY}
-                                style={styles.title}
+                                size={isTablet ? moderateScale(10) : moderateScale(16)}
+                                color={colors.TEXT_SECONDARY}
+                                style={styles.subtitle}
                             >
                                 {showForgotPassword
-                                    ? 'Reset Password'
+                                    ? 'Enter your email to receive a password reset link'
                                     : isSignUp
-                                      ? 'Create Account'
-                                      : 'Welcome Back'}
+                                      ? 'Create an account to play online. Choose a unique username!'
+                                      : 'Sign in to play against the computer or challenge other players online'}
                             </Text>
-                            <Block style={styles.subtitleContainer}>
+                        </Block>
+
+                        {error || authError ? (
+                            <Block style={styles.errorContainer}>
                                 <Text
-                                    size={isTablet ? moderateScale(10) : moderateScale(16)}
-                                    color={colors.TEXT_SECONDARY}
-                                    style={styles.subtitle}
+                                    size={isTablet ? moderateScale(10) : moderateScale(14)}
+                                    color={colors.ERROR}
+                                    center
                                 >
-                                    {showForgotPassword
-                                        ? 'Enter your email to receive a password reset link'
-                                        : isSignUp
-                                          ? 'Create an account to play online. Choose a unique username!'
-                                          : 'Sign in to play against the computer or challenge other players online'}
+                                    {error || authError}
                                 </Text>
                             </Block>
+                        ) : null}
 
-                            {error || authError ? (
-                                <Block style={styles.errorContainer}>
-                                    <Text
-                                        size={isTablet ? moderateScale(10) : moderateScale(14)}
-                                        color={colors.ERROR}
-                                        center
-                                    >
-                                        {error || authError}
-                                    </Text>
-                                </Block>
-                            ) : null}
+                        {successMessage ? (
+                            <Block style={styles.successContainer}>
+                                <Text
+                                    size={isTablet ? moderateScale(10) : moderateScale(14)}
+                                    color={colors.SUCCESS}
+                                    center
+                                >
+                                    {successMessage}
+                                </Text>
+                            </Block>
+                        ) : null}
 
-                            {successMessage ? (
-                                <Block style={styles.successContainer}>
-                                    <Text
-                                        size={isTablet ? moderateScale(10) : moderateScale(14)}
-                                        color={colors.SUCCESS}
-                                        center
-                                    >
-                                        {successMessage}
-                                    </Text>
-                                </Block>
-                            ) : null}
-
-                            <Block style={styles.form}>
-                                {!showForgotPassword && (
-                                    <>
-                                        {isAppleAuthAvailable && (
-                                            <TouchableOpacity
-                                                style={[
-                                                    styles.appleButton,
-                                                    {
-                                                        backgroundColor: colors.CARD_BACKGROUND,
-                                                        borderColor: colors.BORDER_COLOR,
-                                                    },
-                                                ]}
-                                                onPress={handleAppleSignIn}
-                                                disabled={loading || authLoading}
-                                            >
-                                                <Ionicons
-                                                    name='logo-apple'
-                                                    size={verticalScale(24)}
-                                                    color={colors.TEXT}
-                                                />
-                                                <Text
-                                                    size={
-                                                        isTablet
-                                                            ? moderateScale(10)
-                                                            : moderateScale(16)
-                                                    }
-                                                    color={colors.TEXT}
-                                                    style={styles.appleButtonText}
-                                                >
-                                                    {isSignUp
-                                                        ? 'Sign up with Apple'
-                                                        : 'Sign in with Apple'}
-                                                </Text>
-                                            </TouchableOpacity>
-                                        )}
-
+                        <Block style={styles.form}>
+                            {!showForgotPassword && (
+                                <>
+                                    {isAppleAuthAvailable && (
                                         <TouchableOpacity
                                             style={[
-                                                styles.googleButton,
+                                                styles.appleButton,
                                                 {
                                                     backgroundColor: colors.CARD_BACKGROUND,
                                                     borderColor: colors.BORDER_COLOR,
                                                 },
                                             ]}
-                                            onPress={handleGoogleSignIn}
+                                            onPress={handleAppleSignIn}
                                             disabled={loading || authLoading}
                                         >
                                             <Ionicons
-                                                name='logo-google'
+                                                name='logo-apple'
                                                 size={verticalScale(24)}
-                                                color='#DB4437'
+                                                color={colors.TEXT}
                                             />
                                             <Text
                                                 size={
                                                     isTablet ? moderateScale(10) : moderateScale(16)
                                                 }
                                                 color={colors.TEXT}
-                                                style={styles.googleButtonText}
+                                                style={styles.appleButtonText}
                                             >
                                                 {isSignUp
-                                                    ? 'Sign up with Google'
-                                                    : 'Sign in with Google'}
+                                                    ? 'Sign up with Apple'
+                                                    : 'Sign in with Apple'}
                                             </Text>
                                         </TouchableOpacity>
+                                    )}
 
-                                        <View style={styles.dividerContainer}>
-                                            <View
-                                                style={[
-                                                    styles.divider,
-                                                    { backgroundColor: colors.BORDER_COLOR },
-                                                ]}
-                                            />
-                                            <Text
-                                                size={
-                                                    isTablet ? moderateScale(10) : moderateScale(14)
-                                                }
-                                                color={colors.TEXT_SECONDARY}
-                                                style={styles.dividerText}
-                                            >
-                                                OR
-                                            </Text>
-                                            <View
-                                                style={[
-                                                    styles.divider,
-                                                    { backgroundColor: colors.BORDER_COLOR },
-                                                ]}
-                                            />
-                                        </View>
-                                    </>
-                                )}
-
-                                {!showForgotPassword && isSignUp && (
-                                    <Input
-                                        ref={displayNameRef}
-                                        placeholder='Username (required)'
-                                        value={displayName}
-                                        onChangeText={setDisplayName}
+                                    <TouchableOpacity
                                         style={[
-                                            styles.input,
+                                            styles.googleButton,
                                             {
-                                                backgroundColor: colors.BACKGROUND,
+                                                backgroundColor: colors.CARD_BACKGROUND,
                                                 borderColor: colors.BORDER_COLOR,
                                             },
                                         ]}
-                                        color={colors.TEXT}
-                                        placeholderTextColor={colors.PLACEHOLDER}
-                                        autoCapitalize='words'
-                                        autoCorrect={false}
-                                        textContentType='nickname'
-                                        autoComplete='name'
-                                        returnKeyType='next'
-                                        onSubmitEditing={() => emailRef.current?.focus()}
-                                    />
-                                )}
+                                        onPress={handleGoogleSignIn}
+                                        disabled={loading || authLoading}
+                                    >
+                                        <Ionicons
+                                            name='logo-google'
+                                            size={verticalScale(24)}
+                                            color='#DB4437'
+                                        />
+                                        <Text
+                                            size={isTablet ? moderateScale(10) : moderateScale(16)}
+                                            color={colors.TEXT}
+                                            style={styles.googleButtonText}
+                                        >
+                                            {isSignUp
+                                                ? 'Sign up with Google'
+                                                : 'Sign in with Google'}
+                                        </Text>
+                                    </TouchableOpacity>
+
+                                    <View style={styles.dividerContainer}>
+                                        <View
+                                            style={[
+                                                styles.divider,
+                                                { backgroundColor: colors.BORDER_COLOR },
+                                            ]}
+                                        />
+                                        <Text
+                                            size={isTablet ? moderateScale(10) : moderateScale(14)}
+                                            color={colors.TEXT_SECONDARY}
+                                            style={styles.dividerText}
+                                        >
+                                            OR
+                                        </Text>
+                                        <View
+                                            style={[
+                                                styles.divider,
+                                                { backgroundColor: colors.BORDER_COLOR },
+                                            ]}
+                                        />
+                                    </View>
+                                </>
+                            )}
+
+                            {!showForgotPassword && isSignUp && (
                                 <Input
-                                    ref={emailRef}
-                                    placeholder='Email'
-                                    value={email}
-                                    onChangeText={setEmail}
+                                    ref={displayNameRef}
+                                    placeholder='Username (required)'
+                                    value={displayName}
+                                    onChangeText={setDisplayName}
                                     style={[
                                         styles.input,
                                         {
@@ -402,103 +354,122 @@ function Login({ navigation }) {
                                     ]}
                                     color={colors.TEXT}
                                     placeholderTextColor={colors.PLACEHOLDER}
-                                    keyboardType='email-address'
+                                    autoCapitalize='words'
+                                    autoCorrect={false}
+                                    textContentType='nickname'
+                                    autoComplete='name'
+                                    returnKeyType='next'
+                                    onSubmitEditing={() => emailRef.current?.focus()}
+                                />
+                            )}
+                            <Input
+                                ref={emailRef}
+                                placeholder='Email'
+                                value={email}
+                                onChangeText={setEmail}
+                                style={[
+                                    styles.input,
+                                    {
+                                        backgroundColor: colors.BACKGROUND,
+                                        borderColor: colors.BORDER_COLOR,
+                                    },
+                                ]}
+                                color={colors.TEXT}
+                                placeholderTextColor={colors.PLACEHOLDER}
+                                keyboardType='email-address'
+                                autoCapitalize='none'
+                                autoCorrect={false}
+                                textContentType={isSignUp ? 'username' : 'username'}
+                                autoComplete={isSignUp ? 'email' : 'username'}
+                                returnKeyType={showForgotPassword ? 'done' : 'next'}
+                                onSubmitEditing={() => {
+                                    if (showForgotPassword) {
+                                        handleForgotPassword();
+                                    } else {
+                                        passwordRef.current?.focus();
+                                    }
+                                }}
+                            />
+                            {!showForgotPassword && (
+                                <Input
+                                    ref={passwordRef}
+                                    placeholder='Password'
+                                    value={password}
+                                    onChangeText={setPassword}
+                                    style={[
+                                        styles.input,
+                                        {
+                                            backgroundColor: colors.BACKGROUND,
+                                            borderColor: colors.BORDER_COLOR,
+                                        },
+                                    ]}
+                                    color={colors.TEXT}
+                                    placeholderTextColor={colors.PLACEHOLDER}
+                                    password
+                                    viewPass
                                     autoCapitalize='none'
                                     autoCorrect={false}
-                                    textContentType={isSignUp ? 'username' : 'username'}
-                                    autoComplete={isSignUp ? 'email' : 'username'}
-                                    returnKeyType={showForgotPassword ? 'done' : 'next'}
-                                    onSubmitEditing={() => {
-                                        if (showForgotPassword) {
-                                            handleForgotPassword();
-                                        } else {
-                                            passwordRef.current?.focus();
-                                        }
-                                    }}
+                                    textContentType={isSignUp ? 'newPassword' : 'password'}
+                                    autoComplete={isSignUp ? 'password-new' : 'password'}
+                                    returnKeyType='done'
+                                    onSubmitEditing={handleSubmit}
                                 />
-                                {!showForgotPassword && (
-                                    <Input
-                                        ref={passwordRef}
-                                        placeholder='Password'
-                                        value={password}
-                                        onChangeText={setPassword}
-                                        style={[
-                                            styles.input,
-                                            {
-                                                backgroundColor: colors.BACKGROUND,
-                                                borderColor: colors.BORDER_COLOR,
-                                            },
-                                        ]}
-                                        color={colors.TEXT}
-                                        placeholderTextColor={colors.PLACEHOLDER}
-                                        password
-                                        viewPass
-                                        autoCapitalize='none'
-                                        autoCorrect={false}
-                                        textContentType={isSignUp ? 'newPassword' : 'password'}
-                                        autoComplete={isSignUp ? 'password-new' : 'password'}
-                                        returnKeyType='done'
-                                        onSubmitEditing={handleSubmit}
-                                    />
+                            )}
+
+                            <Button
+                                color={colors.PRIMARY}
+                                style={styles.button}
+                                onPress={showForgotPassword ? handleForgotPassword : handleSubmit}
+                                disabled={loading || authLoading}
+                            >
+                                {loading || authLoading ? (
+                                    <ActivityIndicator color='#fff' />
+                                ) : (
+                                    <Text bold size={moderateScale(16)} color='#fff'>
+                                        {showForgotPassword
+                                            ? 'Send Reset Link'
+                                            : isSignUp
+                                              ? 'Sign Up'
+                                              : 'Sign In'}
+                                    </Text>
                                 )}
+                            </Button>
 
-                                <Button
-                                    color={colors.PRIMARY}
-                                    style={styles.button}
-                                    onPress={
-                                        showForgotPassword ? handleForgotPassword : handleSubmit
-                                    }
-                                    disabled={loading || authLoading}
-                                >
-                                    {loading || authLoading ? (
-                                        <ActivityIndicator color='#fff' />
-                                    ) : (
-                                        <Text bold size={moderateScale(16)} color='#fff'>
-                                            {showForgotPassword
-                                                ? 'Send Reset Link'
-                                                : isSignUp
-                                                  ? 'Sign Up'
-                                                  : 'Sign In'}
-                                        </Text>
-                                    )}
-                                </Button>
-
-                                {!showForgotPassword && !isSignUp && (
-                                    <TouchableOpacity
-                                        onPress={toggleForgotPassword}
-                                        style={styles.forgotPasswordButton}
-                                    >
-                                        <Text
-                                            size={isTablet ? moderateScale(10) : moderateScale(14)}
-                                            color={colors.PRIMARY}
-                                            center
-                                        >
-                                            Forgot Password?
-                                        </Text>
-                                    </TouchableOpacity>
-                                )}
-
+                            {!showForgotPassword && !isSignUp && (
                                 <TouchableOpacity
-                                    onPress={showForgotPassword ? toggleForgotPassword : toggleMode}
-                                    style={styles.toggleButton}
+                                    onPress={toggleForgotPassword}
+                                    style={styles.forgotPasswordButton}
                                 >
                                     <Text
                                         size={isTablet ? moderateScale(10) : moderateScale(14)}
                                         color={colors.PRIMARY}
                                         center
                                     >
-                                        {showForgotPassword
-                                            ? 'Back to Sign In'
-                                            : isSignUp
-                                              ? 'Already have an account? Sign In'
-                                              : "Don't have an account? Sign Up"}
+                                        Forgot Password?
                                     </Text>
                                 </TouchableOpacity>
-                            </Block>
+                            )}
+
+                            <TouchableOpacity
+                                onPress={showForgotPassword ? toggleForgotPassword : toggleMode}
+                                style={styles.toggleButton}
+                            >
+                                <Text
+                                    size={isTablet ? moderateScale(10) : moderateScale(14)}
+                                    color={colors.PRIMARY}
+                                    center
+                                >
+                                    {showForgotPassword
+                                        ? 'Back to Sign In'
+                                        : isSignUp
+                                          ? 'Already have an account? Sign In'
+                                          : "Don't have an account? Sign Up"}
+                                </Text>
+                            </TouchableOpacity>
                         </Block>
                     </Block>
-                </ScrollView>
-            </KeyboardAvoidingView>
+                </Block>
+            </KeyboardAwareScrollView>
         </LinearGradient>
     );
 }
@@ -508,9 +479,6 @@ const styles = StyleSheet.create({
         flex: 1,
         width: width,
         height: height,
-    },
-    keyboardView: {
-        flex: 1,
     },
     scrollContainer: {
         flexGrow: 1,

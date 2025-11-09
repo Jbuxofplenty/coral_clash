@@ -2,11 +2,21 @@ import * as TrackingTransparency from 'expo-tracking-transparency';
 import { Platform } from 'react-native';
 
 /**
- * Check if ads are enabled via environment variable
- * This uses the same flag as useAds hook for consistency
+ * Check if ads are enabled for a given user
+ * Shared logic with useAds hook for consistency
+ *
+ * @param {Object} user - The user object (optional)
+ * @returns {boolean} Whether ads are enabled
  */
-const getAdsEnabled = () => {
-    return process.env.EXPO_PUBLIC_ENABLE_ADS === 'true';
+export const shouldEnableAds = (user = null) => {
+    // Check environment variable - ads must be explicitly enabled
+    const envEnabled = process.env.EXPO_PUBLIC_ENABLE_ADS === 'true';
+
+    // Check if user is NOT an internal user (internal users should never see ads)
+    const userIsNotInternal = user?.internalUser !== true;
+
+    // Ads are enabled if env is true AND user is not internal
+    return envEnabled && userIsNotInternal;
 };
 
 /**
@@ -19,7 +29,6 @@ const getAdsEnabled = () => {
 export const requestTrackingPermission = async () => {
     // Only request on iOS 14+
     if (Platform.OS !== 'ios') {
-        console.log('📊 Tracking: Not iOS, skipping ATT request');
         return true;
     }
 
@@ -27,41 +36,35 @@ export const requestTrackingPermission = async () => {
         // Check if we can request tracking
         const { status: currentStatus } = await TrackingTransparency.getTrackingPermissionsAsync();
 
-        console.log('📊 Tracking: Current status:', currentStatus);
-
         // If already granted or denied, don't ask again
         if (currentStatus === 'granted') {
-            console.log('📊 Tracking: Already granted');
             return true;
         }
 
         if (currentStatus === 'denied') {
-            console.log('📊 Tracking: Previously denied');
             return false;
         }
 
         // Request permission
         const { status: newStatus } = await TrackingTransparency.requestTrackingPermissionsAsync();
 
-        console.log('📊 Tracking: New status:', newStatus);
-
         return newStatus === 'granted';
     } catch (error) {
-        console.error('📊 Tracking: Error requesting permission:', error);
+        console.error('Error requesting tracking permission:', error);
         return false;
     }
 };
 
 /**
  * Check if tracking is allowed
- * This checks both the system permission and the environment variable
+ * This checks both the system permission and ads settings
  *
+ * @param {Object} user - The user object (optional)
  * @returns {Promise<boolean>} Whether tracking is allowed
  */
-export const isTrackingAllowed = async () => {
-    // Check environment variable first
-    if (!getAdsEnabled()) {
-        console.log('📊 Tracking: Ads disabled via env variable (EXPO_PUBLIC_ENABLE_ADS)');
+export const isTrackingAllowed = async (user = null) => {
+    // Check if ads are enabled (env + internal user check)
+    if (!shouldEnableAds(user)) {
         return false;
     }
 
@@ -74,7 +77,7 @@ export const isTrackingAllowed = async () => {
         const { status } = await TrackingTransparency.getTrackingPermissionsAsync();
         return status === 'granted';
     } catch (error) {
-        console.error('📊 Tracking: Error checking permission:', error);
+        console.error('Error checking tracking permission:', error);
         return false;
     }
 };
@@ -94,8 +97,7 @@ export const getTrackingStatus = async () => {
         const { status } = await TrackingTransparency.getTrackingPermissionsAsync();
         return status;
     } catch (error) {
-        console.error('📊 Tracking: Error getting status:', error);
+        console.error('Error getting tracking status:', error);
         return 'error';
     }
 };
-
