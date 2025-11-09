@@ -90,4 +90,3 @@ export const getTrackingStatus = async () => {
         return 'error';
     }
 };
-

@@ -124,7 +124,7 @@ export const AuthProvider = ({ children }) => {
             // Only request once per app session, and only when user is authenticated
             if (user && !loading && !hasRequestedATT.current) {
                 hasRequestedATT.current = true;
-                
+
                 // Small delay to let UI settle after login
                 setTimeout(async () => {
                     try {
