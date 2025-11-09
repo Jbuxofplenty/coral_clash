@@ -126,9 +126,10 @@ export default function Settings({ navigation: _navigation }) {
                 {
                     text: 'Delete Account',
                     style: 'destructive',
-                    onPress: async (text) => {
+                    onPress: (text) => {
                         if (text === 'DELETE') {
-                            await performAccountDeletion();
+                            // Don't await here - let the alert dismiss first
+                            performAccountDeletion();
                         } else {
                             showAlert(
                                 'Incorrect Confirmation',
@@ -146,8 +147,14 @@ export default function Settings({ navigation: _navigation }) {
         try {
             setDeleting(true);
 
-            // Call the delete account function
-            await deleteAccount();
+            // Call the delete account function with timeout
+            // Create a promise that rejects after 30 seconds
+            const timeoutPromise = new Promise((_, reject) => {
+                setTimeout(() => reject(new Error('Request timeout')), 30000);
+            });
+
+            // Race between the actual call and the timeout
+            await Promise.race([deleteAccount(), timeoutPromise]);
 
             setDeleting(false);
 
@@ -168,17 +175,20 @@ export default function Settings({ navigation: _navigation }) {
         } catch (error) {
             console.error('Error deleting account:', error);
             setDeleting(false);
-            showAlert(
-                'Deletion Failed',
-                'Failed to delete account. Please try again or contact support if the problem persists.',
-                [
-                    { text: 'Cancel', style: 'cancel' },
-                    {
-                        text: 'Retry',
-                        onPress: () => handleDeleteAccount(),
-                    },
-                ],
-            );
+
+            // Determine error message
+            const errorMessage =
+                error.message === 'Request timeout'
+                    ? 'The request timed out. Please check your connection and try again.'
+                    : 'Failed to delete account. Please try again or contact support if the problem persists.';
+
+            showAlert('Deletion Failed', errorMessage, [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                    text: 'Retry',
+                    onPress: () => handleDeleteAccount(),
+                },
+            ]);
         }
     };
 
