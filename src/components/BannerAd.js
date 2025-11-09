@@ -3,9 +3,10 @@ import { Platform, StyleSheet, View } from 'react-native';
 import { BannerAdSize, BannerAd as GoogleBannerAd, TestIds } from 'react-native-google-mobile-ads';
 import { useAds } from '../hooks/useAds';
 
-// AdMob Unit IDs (replace with your actual IDs before production)
+// AdMob Unit IDs
+// In development (__DEV__ = true): Uses Google's test ad units (TestIds.BANNER)
+// In production (__DEV__ = false): Uses real ad unit IDs
 const AD_UNIT_IDS = {
-    // Always use test IDs in development for testing
     ios: __DEV__ ? TestIds.BANNER : 'ca-app-pub-8519782324189160/3016478947',
     android: __DEV__ ? TestIds.BANNER : 'ca-app-pub-8519782324189160/7538177884',
 };
@@ -17,6 +18,7 @@ const AD_UNIT_IDS = {
 export const BannerAd = () => {
     const adsEnabled = useAds();
     const [adError, setAdError] = useState(false);
+    const [failureCount, setFailureCount] = useState(0);
 
     // Get the appropriate ad unit ID for the platform
     const adUnitId = Platform.select({
@@ -29,8 +31,20 @@ export const BannerAd = () => {
         // Reset state when ads are toggled
         if (!adsEnabled) {
             setAdError(false);
+            setFailureCount(0);
         }
     }, [adsEnabled]);
+
+    useEffect(() => {
+        // Log ad configuration on mount
+        console.log('📱 BannerAd configuration:', {
+            platform: Platform.OS,
+            adUnitId,
+            isTestAd: __DEV__,
+            adsEnabled,
+        });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     // Don't render anything if ads are disabled
     if (!adsEnabled) {
@@ -38,9 +52,9 @@ export const BannerAd = () => {
         return null;
     }
 
-    // Don't render if there was an error loading the ad
-    if (adError) {
-        console.log('🚫 Ad error - not rendering banner');
+    // Only hide ad after multiple consecutive failures (more forgiving for simulators)
+    if (adError && failureCount > 3) {
+        console.log(`🚫 Ad error - failed ${failureCount} times, not rendering banner`);
         return null;
     }
 
@@ -55,9 +69,12 @@ export const BannerAd = () => {
                 onAdLoaded={() => {
                     console.log('✅ Ad loaded successfully');
                     setAdError(false);
+                    setFailureCount(0);
                 }}
                 onAdFailedToLoad={(error) => {
-                    console.log('❌ Ad failed to load:', error);
+                    const newCount = failureCount + 1;
+                    console.log(`❌ Ad failed to load (attempt ${newCount}):`, error);
+                    setFailureCount(newCount);
                     setAdError(true);
                 }}
             />
