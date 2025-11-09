@@ -5,13 +5,13 @@ import {
     Dimensions,
     Pressable,
     RefreshControl,
-    ScrollView,
     StyleSheet,
     TextInput,
     TouchableOpacity,
     View,
     useWindowDimensions,
 } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { moderateScale, verticalScale } from 'react-native-size-matters';
 
 import { Avatar, Icon, LoadingScreen, TimeControlModal } from '../components';
@@ -224,10 +224,14 @@ export default function Friends({ navigation: _navigation }) {
 
     return (
         <View style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
-            <ScrollView
+            <KeyboardAwareScrollView
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={styles.scrollContainer}
                 keyboardShouldPersistTaps='handled'
+                enableOnAndroid={true}
+                enableAutomaticScroll={true}
+                extraScrollHeight={20}
+                extraHeight={100}
                 refreshControl={
                     <RefreshControl
                         refreshing={refreshing}
@@ -690,7 +694,7 @@ export default function Friends({ navigation: _navigation }) {
                         )}
                     </Block>
                 </Block>
-            </ScrollView>
+            </KeyboardAwareScrollView>
 
             {/* Time Control Modal */}
             <TimeControlModal

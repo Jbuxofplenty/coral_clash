@@ -17,6 +17,9 @@ const getAdsEnabled = () => {
  * @returns {Promise<boolean>} Whether tracking permission was granted
  */
 export const requestTrackingPermission = async () => {
+    console.log('🔍 requestTrackingPermission() called');
+    console.log('🔍 Platform.OS:', Platform.OS);
+    
     // Only request on iOS 14+
     if (Platform.OS !== 'ios') {
         console.log('📊 Tracking: Not iOS, skipping ATT request');
@@ -24,6 +27,7 @@ export const requestTrackingPermission = async () => {
     }
 
     try {
+        console.log('🔍 Calling getTrackingPermissionsAsync()...');
         // Check if we can request tracking
         const { status: currentStatus } = await TrackingTransparency.getTrackingPermissionsAsync();
 
@@ -40,14 +44,16 @@ export const requestTrackingPermission = async () => {
             return false;
         }
 
-        // Request permission
+        // Request permission - THIS IS WHERE THE DIALOG SHOULD APPEAR
+        console.log('🔍 About to show ATT dialog via requestTrackingPermissionsAsync()...');
         const { status: newStatus } = await TrackingTransparency.requestTrackingPermissionsAsync();
 
-        console.log('📊 Tracking: New status:', newStatus);
+        console.log('📊 Tracking: New status after request:', newStatus);
 
         return newStatus === 'granted';
     } catch (error) {
         console.error('📊 Tracking: Error requesting permission:', error);
+        console.error('📊 Tracking: Error details:', JSON.stringify(error));
         return false;
     }
 };

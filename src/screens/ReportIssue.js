@@ -1,17 +1,16 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { Block, Icon, Text } from 'galio-framework';
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import {
     ActivityIndicator,
     Keyboard,
-    KeyboardAvoidingView,
     Platform,
-    ScrollView,
     StyleSheet,
     TextInput,
     TouchableOpacity,
     View,
 } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 import { useAlert, useAuth, useTheme } from '../contexts';
 import { useFirebaseFunctions } from '../hooks';
@@ -28,27 +27,6 @@ export default function ReportIssue({ navigation, route }) {
     const [subject, setSubject] = useState('');
     const [description, setDescription] = useState('');
     const [submitting, setSubmitting] = useState(false);
-
-    // Refs for keyboard awareness
-    const scrollViewRef = useRef(null);
-    const subjectInputRef = useRef(null);
-    const descriptionInputRef = useRef(null);
-
-    // Handle input focus to scroll the input into view
-    const handleInputFocus = (inputRef) => {
-        setTimeout(() => {
-            inputRef.current?.measureLayout(
-                scrollViewRef.current,
-                (_x, y) => {
-                    scrollViewRef.current?.scrollTo({
-                        y: y - 20, // Add some padding above the input
-                        animated: true,
-                    });
-                },
-                (error) => console.error('measureLayout failed:', error),
-            );
-        }, 100);
-    };
 
     const handleSubmit = async () => {
         // Dismiss keyboard first
@@ -116,19 +94,15 @@ export default function ReportIssue({ navigation, route }) {
             start={{ x: 0, y: 0 }}
             end={{ x: 0, y: 1 }}
         >
-            <KeyboardAvoidingView
-                behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-                style={{ flex: 1 }}
-                keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
+            <KeyboardAwareScrollView
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={styles.scrollContent}
+                keyboardShouldPersistTaps='handled'
+                enableOnAndroid={true}
+                enableAutomaticScroll={true}
+                extraScrollHeight={Platform.OS === 'ios' ? 20 : 40}
+                extraHeight={Platform.OS === 'ios' ? 120 : 140}
             >
-                <Block flex style={styles.container}>
-                    <ScrollView
-                        ref={scrollViewRef}
-                        showsVerticalScrollIndicator={false}
-                        contentContainerStyle={styles.scrollContent}
-                        keyboardShouldPersistTaps='handled'
-                        keyboardDismissMode='on-drag'
-                    >
                         {/* Card Container */}
                         <Block
                             style={[
@@ -163,27 +137,24 @@ export default function ReportIssue({ navigation, route }) {
                         <Text size={16} bold color={colors.TEXT} style={styles.label}>
                             Subject
                         </Text>
-                        <View ref={subjectInputRef}>
-                            <TextInput
-                                style={[
-                                    styles.input,
-                                    {
-                                        backgroundColor: colors.CARD_BACKGROUND,
-                                        color: colors.TEXT,
-                                        borderColor: colors.BORDER_COLOR,
-                                    },
-                                ]}
-                                placeholder='Brief summary of the issue'
-                                placeholderTextColor={colors.TEXT_SECONDARY}
-                                value={subject}
-                                onChangeText={setSubject}
-                                maxLength={200}
-                                editable={!submitting}
-                                onFocus={() => handleInputFocus(subjectInputRef)}
-                                returnKeyType='next'
-                                blurOnSubmit={false}
-                            />
-                        </View>
+                        <TextInput
+                            style={[
+                                styles.input,
+                                {
+                                    backgroundColor: colors.CARD_BACKGROUND,
+                                    color: colors.TEXT,
+                                    borderColor: colors.BORDER_COLOR,
+                                },
+                            ]}
+                            placeholder='Brief summary of the issue'
+                            placeholderTextColor={colors.TEXT_SECONDARY}
+                            value={subject}
+                            onChangeText={setSubject}
+                            maxLength={200}
+                            editable={!submitting}
+                            returnKeyType='next'
+                            blurOnSubmit={false}
+                        />
                         <Text
                             size={12}
                             color={colors.TEXT_SECONDARY}
@@ -198,31 +169,28 @@ export default function ReportIssue({ navigation, route }) {
                         <Text size={16} bold color={colors.TEXT} style={styles.label}>
                             Description
                         </Text>
-                        <View ref={descriptionInputRef}>
-                            <TextInput
-                                style={[
-                                    styles.input,
-                                    styles.textArea,
-                                    {
-                                        backgroundColor: colors.CARD_BACKGROUND,
-                                        color: colors.TEXT,
-                                        borderColor: colors.BORDER_COLOR,
-                                    },
-                                ]}
-                                placeholder='Detailed description of the issue or feedback...'
-                                placeholderTextColor={colors.TEXT_SECONDARY}
-                                value={description}
-                                onChangeText={setDescription}
-                                maxLength={5000}
-                                multiline
-                                numberOfLines={8}
-                                textAlignVertical='top'
-                                editable={!submitting}
-                                onFocus={() => handleInputFocus(descriptionInputRef)}
-                                returnKeyType='done'
-                                blurOnSubmit={true}
-                            />
-                        </View>
+                        <TextInput
+                            style={[
+                                styles.input,
+                                styles.textArea,
+                                {
+                                    backgroundColor: colors.CARD_BACKGROUND,
+                                    color: colors.TEXT,
+                                    borderColor: colors.BORDER_COLOR,
+                                },
+                            ]}
+                            placeholder='Detailed description of the issue or feedback...'
+                            placeholderTextColor={colors.TEXT_SECONDARY}
+                            value={description}
+                            onChangeText={setDescription}
+                            maxLength={5000}
+                            multiline
+                            numberOfLines={8}
+                            textAlignVertical='top'
+                            editable={!submitting}
+                            returnKeyType='done'
+                            blurOnSubmit={true}
+                        />
                         <Text
                             size={12}
                             color={colors.TEXT_SECONDARY}
@@ -284,9 +252,7 @@ export default function ReportIssue({ navigation, route }) {
                                 </Block>
                             )}
                         </Block>
-                    </ScrollView>
-                </Block>
-            </KeyboardAvoidingView>
+            </KeyboardAwareScrollView>
         </LinearGradient>
     );
 }
