@@ -16,8 +16,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { Block, GalioProvider } from 'galio-framework';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Image, LogBox, StatusBar } from 'react-native';
-// TODO: Re-enable AdMob - uncomment this import and initialization code below
-// import mobileAds from 'react-native-google-mobile-ads';
+import mobileAds from 'react-native-google-mobile-ads';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import VersionWarningBanner from './src/components/VersionWarningBanner';
 import { materialTheme } from './src/constants/';
@@ -88,18 +87,16 @@ export default function App() {
     useEffect(() => {
         async function prepare() {
             try {
-                // TODO: Re-enable AdMob - uncomment the lines below and restore plugin in app.json
-                // To re-enable: Uncomment these 8 lines + import above + restore plugin config in app.json
                 // Initialize Google Mobile Ads SDK
-                // const adapterStatuses = await mobileAds().initialize();
-                // console.log('📱 Mobile Ads SDK initialized:', adapterStatuses);
+                const adapterStatuses = await mobileAds().initialize();
+                console.log('📱 Mobile Ads SDK initialized:', adapterStatuses);
 
                 // Set request configuration for testing
-                // await mobileAds().setRequestConfiguration({
-                //     // Set to true if you want to test with test ads
-                //     // Remove or set to false in production
-                //     testDeviceIdentifiers: ['EMULATOR'],
-                // });
+                await mobileAds().setRequestConfiguration({
+                    // Set to true if you want to test with test ads
+                    // Remove or set to false in production
+                    testDeviceIdentifiers: ['EMULATOR'],
+                });
 
                 //Load Resources
                 await _loadResourcesAsync();

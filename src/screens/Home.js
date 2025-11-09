@@ -5,8 +5,7 @@ import { Dimensions, ScrollView, StyleSheet } from 'react-native';
 
 import {
     ActiveGamesCard,
-    // TODO: Re-enable AdMob - uncomment BannerAd import below
-    // BannerAd,
+    BannerAd,
     GameHistoryCard,
     GameModeCard,
     MatchmakingCard,
@@ -523,9 +522,8 @@ export default function Home({ navigation }) {
                 contentContainerStyle={styles.scrollContent}
                 style={styles.scrollView}
             >
-                {/* TODO: Re-enable AdMob - uncomment BannerAd component below */}
                 {/* Banner Ad - displayed below header */}
-                {/* <BannerAd /> */}
+                <BannerAd />
 
                 {/* Sign Up Prompt Card - show at top when user is not logged in */}
                 {!user && <SignUpPromptCard onPress={() => navigation.navigate('Log In')} />}
