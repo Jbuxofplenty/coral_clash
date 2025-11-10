@@ -100,6 +100,70 @@ fi
 echo ""
 
 echo "========================================"
+echo "Setting up App Store Connect API Key"
+echo "========================================"
+echo ""
+
+# Check if App Store Connect API key exists
+if [ ! -f "AuthKey_"*.p8 ]; then
+    echo "⚠️  Warning: App Store Connect API Key (AuthKey_*.p8) not found!"
+    echo "   iOS builds will fail without this key"
+    echo "   Download from: https://appstoreconnect.apple.com/access/api"
+    echo "   Place it in the project root"
+    echo ""
+    echo "   Continuing with other secrets..."
+else
+    # Find the API key file
+    API_KEY_FILE=$(ls AuthKey_*.p8 2>/dev/null | head -n 1)
+    API_KEY_ID=$(basename "$API_KEY_FILE" .p8 | sed 's/AuthKey_//')
+    
+    echo "📄 Found API Key: $API_KEY_FILE"
+    echo "   Key ID: $API_KEY_ID"
+    
+    # Read the key content (preserve newlines)
+    API_KEY_CONTENT=$(cat "$API_KEY_FILE")
+    
+    # Upload key content as secret
+    gh secret set APP_STORE_CONNECT_API_KEY_CONTENT --body "$API_KEY_CONTENT"
+    echo "✅ APP_STORE_CONNECT_API_KEY_CONTENT uploaded"
+    
+    # Upload Key ID as secret
+    gh secret set APP_STORE_CONNECT_API_KEY_ID --body "$API_KEY_ID"
+    echo "✅ APP_STORE_CONNECT_API_KEY_ID uploaded: $API_KEY_ID"
+    
+    # Check for Issuer ID in .env.fastlane
+    if [ -f ".env.fastlane" ]; then
+        ISSUER_ID=$(grep "^APP_STORE_CONNECT_API_KEY_ISSUER_ID=" .env.fastlane | cut -d'=' -f2 | tr -d ' ')
+        if [ -n "$ISSUER_ID" ]; then
+            gh secret set APP_STORE_CONNECT_ISSUER_ID --body "$ISSUER_ID"
+            echo "✅ APP_STORE_CONNECT_ISSUER_ID uploaded from .env.fastlane"
+        else
+            echo "⚠️  APP_STORE_CONNECT_ISSUER_ID not found in .env.fastlane"
+            echo "   Set it manually: gh secret set APP_STORE_CONNECT_ISSUER_ID"
+        fi
+        
+        # Check for Apple ID in .env.fastlane
+        APPLE_ID=$(grep "^APPLE_ID=" .env.fastlane | cut -d'=' -f2 | tr -d ' ')
+        if [ -n "$APPLE_ID" ]; then
+            gh secret set APPLE_ID --body "$APPLE_ID"
+            echo "✅ APPLE_ID uploaded from .env.fastlane"
+        else
+            echo "⚠️  APPLE_ID not found in .env.fastlane"
+            echo "   Set it manually: gh secret set APPLE_ID"
+        fi
+    else
+        echo ""
+        echo "⚠️  .env.fastlane not found - set these secrets manually:"
+        echo "   gh secret set APP_STORE_CONNECT_ISSUER_ID"
+        echo "   gh secret set APPLE_ID"
+    fi
+    
+    echo ""
+fi
+
+echo ""
+
+echo "========================================"
 echo "Setting up Firebase service files"
 echo "========================================"
 echo ""
@@ -131,7 +195,7 @@ echo "✅ GOOGLE_SERVICE_INFO_PLIST uploaded"
 
 echo ""
 echo "========================================"
-echo "✅ All GitHub secrets created successfully!"
+echo "✅ Setup Complete!"
 echo "========================================"
 echo ""
 echo "Created secrets:"
@@ -139,6 +203,10 @@ echo "  • STAGING_ENV_FILE (contains all staging env vars)"
 echo "  • PRODUCTION_ENV_FILE (contains all production env vars)"
 echo "  • GOOGLE_SERVICES_JSON (for Android builds)"
 echo "  • GOOGLE_SERVICE_INFO_PLIST (for iOS builds)"
+echo "  • APP_STORE_CONNECT_API_KEY_CONTENT (for iOS builds)"
+echo "  • APP_STORE_CONNECT_API_KEY_ID (API key identifier)"
+echo "  • APP_STORE_CONNECT_ISSUER_ID (if found in .env.fastlane)"
+echo "  • APPLE_ID (if found in .env.fastlane)"
 echo ""
 echo "The .env files will be restored and loaded in CI/CD automatically."
 echo ""
@@ -148,4 +216,9 @@ echo ""
 echo "To update environment variables:"
 echo "  1. Update .env.preview or .env.production locally"
 echo "  2. Run this script again: ./scripts/setup-github-secrets.sh"
+echo ""
+echo "For iOS deployment:"
+echo "  1. Uncomment the API key settings in .env.fastlane if not already done"
+echo "  2. Ensure AuthKey_*.p8 file is in the project root"
+echo "  3. Run this script to upload the keys"
 echo ""
