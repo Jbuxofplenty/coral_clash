@@ -100,6 +100,79 @@ fi
 echo ""
 
 echo "========================================"
+echo "Setting up App Store Connect API Key"
+echo "========================================"
+echo ""
+
+# Check if App Store Connect API JSON key exists
+# Priority: .env.fastlane > environment variable > auto-discovery
+if [ -f ".env.fastlane" ]; then
+    # Load from .env.fastlane if it exists
+    ENV_API_KEY_PATH=$(grep "^APP_STORE_CONNECT_API_KEY_JSON_PATH=" .env.fastlane | cut -d'=' -f2 | tr -d ' "' | tr -d "'")
+    if [ -n "$ENV_API_KEY_PATH" ]; then
+        API_KEY_JSON="$ENV_API_KEY_PATH"
+        echo "📌 Using API key from .env.fastlane: $API_KEY_JSON"
+    fi
+fi
+
+# Fall back to environment variable if not set from .env.fastlane
+if [ -z "$API_KEY_JSON" ] && [ -n "$APP_STORE_CONNECT_API_KEY_JSON_PATH" ]; then
+    API_KEY_JSON="$APP_STORE_CONNECT_API_KEY_JSON_PATH"
+    echo "📌 Using API key from APP_STORE_CONNECT_API_KEY_JSON_PATH env var"
+fi
+
+# Fall back to auto-discovery if still not set
+if [ -z "$API_KEY_JSON" ]; then
+    API_KEY_JSON=$(ls fastlane/*.json 2>/dev/null | head -n 1)
+    if [ -n "$API_KEY_JSON" ]; then
+        echo "📌 Auto-discovered API key: $API_KEY_JSON"
+    fi
+fi
+
+if [ -z "$API_KEY_JSON" ] || [ ! -f "$API_KEY_JSON" ]; then
+    echo "⚠️  Warning: App Store Connect API Key JSON file not found in fastlane/"
+    echo "   iOS builds will fail without this key"
+    echo "   Download from: https://appstoreconnect.apple.com/access/api"
+    echo "   Convert .p8 to JSON format and place in fastlane/ directory"
+    echo ""
+    echo "   JSON format example:"
+    echo '   {'
+    echo '     "key_id": "YOUR_KEY_ID",'
+    echo '     "issuer_id": "YOUR_ISSUER_ID",'
+    echo '     "key": "-----BEGIN PRIVATE KEY-----\\n...\\n-----END PRIVATE KEY-----",'
+    echo '     "duration": 1200,'
+    echo '     "in_house": false'
+    echo '   }'
+    echo ""
+    echo "   Continuing with other secrets..."
+else
+    echo "📄 Found API Key JSON: $API_KEY_JSON"
+    
+    # Read and upload the entire JSON file
+    API_KEY_JSON_CONTENT=$(cat "$API_KEY_JSON")
+    gh secret set APP_STORE_CONNECT_API_KEY_JSON --body "$API_KEY_JSON_CONTENT"
+    echo "✅ APP_STORE_CONNECT_API_KEY_JSON uploaded"
+    
+    # Check for Apple ID in .env.fastlane
+    if [ -f ".env.fastlane" ]; then
+        APPLE_ID=$(grep "^APPLE_ID=" .env.fastlane | cut -d'=' -f2 | tr -d ' ')
+        if [ -n "$APPLE_ID" ]; then
+            gh secret set APPLE_ID --body "$APPLE_ID"
+            echo "✅ APPLE_ID uploaded from .env.fastlane"
+        else
+            echo "⚠️  APPLE_ID not found in .env.fastlane"
+            echo "   Set it manually: gh secret set APPLE_ID"
+        fi
+    else
+        echo "⚠️  Set APPLE_ID secret manually: gh secret set APPLE_ID"
+    fi
+    
+    echo ""
+fi
+
+echo ""
+
+echo "========================================"
 echo "Setting up Firebase service files"
 echo "========================================"
 echo ""
@@ -131,7 +204,7 @@ echo "✅ GOOGLE_SERVICE_INFO_PLIST uploaded"
 
 echo ""
 echo "========================================"
-echo "✅ All GitHub secrets created successfully!"
+echo "✅ Setup Complete!"
 echo "========================================"
 echo ""
 echo "Created secrets:"
@@ -139,6 +212,8 @@ echo "  • STAGING_ENV_FILE (contains all staging env vars)"
 echo "  • PRODUCTION_ENV_FILE (contains all production env vars)"
 echo "  • GOOGLE_SERVICES_JSON (for Android builds)"
 echo "  • GOOGLE_SERVICE_INFO_PLIST (for iOS builds)"
+echo "  • APP_STORE_CONNECT_API_KEY_JSON (for iOS builds - contains key_id, issuer_id, and key)"
+echo "  • APPLE_ID (if found in .env.fastlane)"
 echo ""
 echo "The .env files will be restored and loaded in CI/CD automatically."
 echo ""
@@ -148,4 +223,17 @@ echo ""
 echo "To update environment variables:"
 echo "  1. Update .env.preview or .env.production locally"
 echo "  2. Run this script again: ./scripts/setup-github-secrets.sh"
+echo ""
+echo "For iOS deployment:"
+echo "  Option 1: Add to .env.fastlane (recommended)"
+echo "    APP_STORE_CONNECT_API_KEY_JSON_PATH=fastlane/KEYID.json"
+echo "    ./scripts/setup-github-secrets.sh"
+echo ""
+echo "  Option 2: Set environment variable"
+echo "    export APP_STORE_CONNECT_API_KEY_JSON_PATH=/path/to/your/key.json"
+echo "    ./scripts/setup-github-secrets.sh"
+echo ""
+echo "  Option 3: Auto-discovery (place JSON in fastlane/)"
+echo "    Place key JSON in fastlane/ (e.g., fastlane/KEYID.json)"
+echo "    ./scripts/setup-github-secrets.sh"
 echo ""

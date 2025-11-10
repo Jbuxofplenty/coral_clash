@@ -26,20 +26,10 @@ platform :ios do
     # Setup CI creates a temporary keychain for CI builds
     setup_ci if ENV['CI']
     
-    # Setup App Store Connect API Key if provided
-    api_key = nil
-    if ENV["APP_STORE_CONNECT_API_KEY_PATH"]
-      api_key = app_store_connect_api_key(
-        key_id: ENV["APP_STORE_CONNECT_API_KEY_KEY_ID"],
-        issuer_id: ENV["APP_STORE_CONNECT_API_KEY_ISSUER_ID"],
-        key_filepath: ENV["APP_STORE_CONNECT_API_KEY_PATH"]
-      )
-    end
-    
     # Get latest build number from App Store Connect and increment
     # This checks ALL builds across all versions to ensure we never go backwards
     latest_build = latest_testflight_build_number(
-      api_key: api_key,
+      api_key_path: ENV["APP_STORE_CONNECT_API_KEY_PATH"],
       app_identifier: IOS_APP_IDENTIFIER
       # Not specifying version - gets highest build across ALL versions
     )
@@ -61,7 +51,7 @@ platform :ios do
     sync_code_signing(
       type: "appstore",
       readonly: is_ci,
-      api_key: api_key,
+      api_key_path: ENV["APP_STORE_CONNECT_API_KEY_PATH"],
       force_for_new_devices: !is_ci  # Regenerate locally if devices change
     )
     
@@ -95,16 +85,6 @@ platform :ios do
   lane :beta do
     build
     
-    # Setup App Store Connect API Key if provided
-    api_key = nil
-    if ENV["APP_STORE_CONNECT_API_KEY_PATH"]
-      api_key = app_store_connect_api_key(
-        key_id: ENV["APP_STORE_CONNECT_API_KEY_KEY_ID"],
-        issuer_id: ENV["APP_STORE_CONNECT_API_KEY_ISSUER_ID"],
-        key_filepath: ENV["APP_STORE_CONNECT_API_KEY_PATH"]
-      )
-    end
-    
     # Upload to TestFlight
     upload_params = {
       skip_waiting_for_build_processing: true,
@@ -113,8 +93,8 @@ platform :ios do
       changelog: ENV["CHANGELOG"] || "Bug fixes and performance improvements"
     }
     
-    # Only add api_key if it's set (avoids conflict with api_key_path)
-    upload_params[:api_key] = api_key if api_key
+    # Add api_key_path if available
+    upload_params[:api_key_path] = ENV["APP_STORE_CONNECT_API_KEY_PATH"] if ENV["APP_STORE_CONNECT_API_KEY_PATH"]
     
     upload_to_testflight(upload_params)
   end
@@ -123,30 +103,16 @@ platform :ios do
   lane :release do
     build
     
-    # Setup App Store Connect API Key if provided
-    api_key = nil
-    if ENV["APP_STORE_CONNECT_API_KEY_PATH"]
-      api_key = app_store_connect_api_key(
-        key_id: ENV["APP_STORE_CONNECT_API_KEY_KEY_ID"],
-        issuer_id: ENV["APP_STORE_CONNECT_API_KEY_ISSUER_ID"],
-        key_filepath: ENV["APP_STORE_CONNECT_API_KEY_PATH"]
-      )
-    end
-    
     # Upload to App Store
-    upload_params = {
+    # Note: upload_to_app_store will automatically use APP_STORE_CONNECT_API_KEY_* env vars
+    upload_to_app_store(
       skip_metadata: true,
       skip_screenshots: true,
       submit_for_review: false,
       automatic_release: false,
       force: true,
       precheck_include_in_app_purchases: false
-    }
-    
-    # Only add api_key if it's set (avoids conflict with api_key_path)
-    upload_params[:api_key] = api_key if api_key
-    
-    upload_to_app_store(upload_params)
+    )
   end
 
   desc "Build Debug version with symbols for crash analysis"
@@ -252,9 +218,6 @@ platform :android do
   lane :beta do
     build(track: "internal")
     
-    # Get changelog from environment or use default
-    changelog = ENV["CHANGELOG"] || "Bug fixes and performance improvements"
-    
     # Upload to Play Store Internal Testing track
     upload_to_play_store(
       package_name: ANDROID_PACKAGE_NAME,
@@ -263,20 +226,13 @@ platform :android do
       skip_upload_metadata: true,
       skip_upload_images: true,
       skip_upload_screenshots: true,
-      json_key: ENV["GOOGLE_PLAY_JSON_KEY_PATH"],
-      version_name: ENV["VERSION_NAME"],  # Optional: Override version name for release
-      changelog: changelog  # Release notes for this version
+      json_key: ENV["GOOGLE_PLAY_JSON_KEY_PATH"]
     )
-    
-    UI.success("✅ Uploaded to Internal Testing with changelog: #{changelog}")
   end
 
   desc "Upload to Play Store Production"
   lane :release do
     build(track: "production")
-    
-    # Get changelog from environment or use default
-    changelog = ENV["CHANGELOG"] || "Bug fixes and performance improvements"
     
     # Upload to Play Store Production track
     upload_to_play_store(
@@ -286,13 +242,9 @@ platform :android do
       skip_upload_metadata: true,
       skip_upload_images: true,
       skip_upload_screenshots: true,
-      release_status: "draft",  # Creates draft release that can be reviewed before publishing
-      json_key: ENV["GOOGLE_PLAY_JSON_KEY_PATH"],
-      version_name: ENV["VERSION_NAME"],  # Optional: Override version name for release
-      changelog: changelog  # Release notes for this version
+      release_status: "draft",
+      json_key: ENV["GOOGLE_PLAY_JSON_KEY_PATH"]
     )
-    
-    UI.success("✅ Uploaded to Production (draft) with changelog: #{changelog}")
   end
 end
 
