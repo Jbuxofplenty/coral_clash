@@ -31,7 +31,7 @@ import {
     useVersion,
 } from './src/contexts';
 import Screens from './src/navigation/Screens';
-import { getAdsMode } from './src/utils/tracking';
+import { initializeAdsMode } from './src/utils/featureFlags';
 
 // Ignore expo-notifications warnings in development (keychain access issues in Expo Go)
 // Also ignore Galio Input deprecation warnings (third-party library issue)
@@ -88,10 +88,10 @@ export default function App() {
     useEffect(() => {
         async function prepare() {
             try {
-                // Configure AdMob request settings before initialization
-                const adsMode = getAdsMode();
-                console.log('📱 Ads Mode:', adsMode);
+                // Initialize ads mode feature flag (fetches once and caches for app session)
+                await initializeAdsMode();
 
+                // Configure AdMob request settings before initialization
                 const requestConfig = {
                     ...(__DEV__ && {
                         testDeviceIdentifiers: [
