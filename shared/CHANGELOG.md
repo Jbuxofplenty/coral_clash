@@ -1,3 +1,53 @@
+# [2.0.0](https://github.com/Jbuxofplenty/coral_clash/compare/v1.7.0...v2.0.0) (2025-11-10)
+
+
+### Bug Fixes
+
+* **ci:** add packages:read permission to update-dependencies job ([59e573b](https://github.com/Jbuxofplenty/coral_clash/commit/59e573bc828333b571a6e9481892561c7734a528))
+* **ci:** ensure promote-gate runs after successful firebase deployment ([e608fb9](https://github.com/Jbuxofplenty/coral_clash/commit/e608fb9cecf31f5c6254f70e30071f63fa6c517c))
+* **ci:** let upload_to_app_store auto-detect API key from env vars ([2882284](https://github.com/Jbuxofplenty/coral_clash/commit/2882284fdd87ba63404dca6dc422a99e361ad38f))
+* **ci:** prevent api_key conflict in iOS production upload ([897a024](https://github.com/Jbuxofplenty/coral_clash/commit/897a024ac99b4206a85f443daa3ff4f396cee8c4))
+* **client:** actually remove ATT code from App.js ([c3093ff](https://github.com/Jbuxofplenty/coral_clash/commit/c3093ffe91d2515e1252d0c06c8a5f12fdc60f68))
+* **client:** add border to Apple Sign-In button and debug logging ([509c26b](https://github.com/Jbuxofplenty/coral_clash/commit/509c26b30fefb89dd596ded851163b79cc208245))
+* **client:** adding configs for AdMob ([9c2a588](https://github.com/Jbuxofplenty/coral_clash/commit/9c2a58869e2f2e688c331c9650ccdeae679fe3ba))
+* **client:** increase coordinate font size on small screens ([b17171e](https://github.com/Jbuxofplenty/coral_clash/commit/b17171eb6830c92d59d7874ee0bb4fdbd3758b6e))
+* **client:** lint ([314630b](https://github.com/Jbuxofplenty/coral_clash/commit/314630b92decdbebb626c265a2a70e94687cbd5f))
+* **client:** local changes with shared build ([538d387](https://github.com/Jbuxofplenty/coral_clash/commit/538d3870baf74622c31be4d2c29bbbd7d779f474))
+* **client:** make Apple Sign-In button theme-aware ([4a019dd](https://github.com/Jbuxofplenty/coral_clash/commit/4a019ddfad772be405e55ed93016c4eb8be96e19))
+* **client:** move ATT request to AuthContext to prevent unmounting ([fbe492e](https://github.com/Jbuxofplenty/coral_clash/commit/fbe492eef4aea8044f799969047419b18afcd0c2))
+* **client:** only request ATT permission when ads are enabled ([12e2cb7](https://github.com/Jbuxofplenty/coral_clash/commit/12e2cb7f8d9d8428d25d1c774de00ca9aba163f4))
+* **client:** prevent UI freeze during account deletion ([06b44c5](https://github.com/Jbuxofplenty/coral_clash/commit/06b44c5799b36318af21242af80a24bd51aa664e))
+* **client:** re-enable AdMob and App Tracking Transparency ([d78c9c5](https://github.com/Jbuxofplenty/coral_clash/commit/d78c9c597b7b72124d293796ff8de49ce559deeb))
+* **client:** temporarily disable AdMob to resolve Play Store AD_ID permission issue ([6601f25](https://github.com/Jbuxofplenty/coral_clash/commit/6601f2507caa43a5dbff366e0f42c578f8e2e853))
+* **client:** use expo notifications ([316362a](https://github.com/Jbuxofplenty/coral_clash/commit/316362a40fce632cd4304a2f39392ce19f2fa909))
+* **config:** supportsTablet=false ([5531975](https://github.com/Jbuxofplenty/coral_clash/commit/5531975b6e8de565fd31de4fbcf19cc44dfbaf52))
+* **shared:** correct whale position detection and test expectations ([29eb661](https://github.com/Jbuxofplenty/coral_clash/commit/29eb661a2ba72a5d1d39992b897cd02986395bd5))
+* **shared:** fix _isSquareOccupied to check both whale squares ([f73b5b1](https://github.com/Jbuxofplenty/coral_clash/commit/f73b5b12ca1498b51594440c5367e811d2f330c1))
+* **shared:** implement whale protection rule for check validation ([89c3070](https://github.com/Jbuxofplenty/coral_clash/commit/89c30705fdf7202219ce5c64a24b5393e33be081))
+* **shared:** update squareControl test for protection rule ([3086e33](https://github.com/Jbuxofplenty/coral_clash/commit/3086e3340dd8386bb386981e4d983c518b9d535e))
+
+
+### Features
+
+* **ci:** add App Store Connect API key setup to secrets script ([0299640](https://github.com/Jbuxofplenty/coral_clash/commit/02996400cdd655b41f3480d1f5b36f3d3572f04b))
+* **ci:** prioritize .env.fastlane for API key path in setup script ([9cceb56](https://github.com/Jbuxofplenty/coral_clash/commit/9cceb5667b56c5a97edceccfa0d8e35bec5832eb))
+* **ci:** support APP_STORE_CONNECT_API_KEY_JSON_PATH env var in setup script ([40b7032](https://github.com/Jbuxofplenty/coral_clash/commit/40b70323c0d3a21e72744f82e9982ddb2bd887c2))
+* **ci:** use JSON format for App Store Connect API key ([c1df679](https://github.com/Jbuxofplenty/coral_clash/commit/c1df67995beb372cf5727153211d9f39a3ad8e8c))
+* **client:** add account deletion UI in settings ([ea938f5](https://github.com/Jbuxofplenty/coral_clash/commit/ea938f5c6eb7457b3e782e0f118c97ac62ca81db))
+* **client:** add App Tracking Transparency for iOS ([981007a](https://github.com/Jbuxofplenty/coral_clash/commit/981007a0b87884f15fb532a1b19e039632c6816a))
+* **client:** add Apple Sign-In to address App Store Guideline 4.8 ([cd26fa6](https://github.com/Jbuxofplenty/coral_clash/commit/cd26fa65a9129570cc83a296f8e3694b37cf6c60))
+* **client:** add Firestore-based feature flags system ([6987003](https://github.com/Jbuxofplenty/coral_clash/commit/69870038ef82ac2b56fc123b484f3977364a2923))
+* **client:** add keyboard awareness to login and input screens ([a3f142e](https://github.com/Jbuxofplenty/coral_clash/commit/a3f142eba874326007684cd1f70d0505f86a3ba7))
+* **client:** configure AdMob test devices and improve error handling ([1e6dc4d](https://github.com/Jbuxofplenty/coral_clash/commit/1e6dc4d5714701cd9a706d5dae9d88a351e88c88))
+* **client:** implement three-mode ads system with internal user protection ([ac9ef03](https://github.com/Jbuxofplenty/coral_clash/commit/ac9ef036f1873bf5948a6bbadacbdb4692854df0))
+* **client:** improve keyboard handling in report issue screen ([c5f71ad](https://github.com/Jbuxofplenty/coral_clash/commit/c5f71ad89a3e18446037cec2e91e912c61849231))
+* **server:** implement account deletion endpoint ([499980d](https://github.com/Jbuxofplenty/coral_clash/commit/499980db769fc5eab920171ee181f1a73200e111))
+
+
+### BREAKING CHANGES
+
+* **client:** EXPO_PUBLIC_ENABLE_ADS replaced with EXPO_PUBLIC_ADS_MODE
+
 # [1.7.0](https://github.com/Jbuxofplenty/coral_clash/compare/v1.6.1...v1.7.0) (2025-11-08)
 
 
