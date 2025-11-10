@@ -123,30 +123,16 @@ platform :ios do
   lane :release do
     build
     
-    # Setup App Store Connect API Key if provided
-    api_key = nil
-    if ENV["APP_STORE_CONNECT_API_KEY_PATH"]
-      api_key = app_store_connect_api_key(
-        key_id: ENV["APP_STORE_CONNECT_API_KEY_KEY_ID"],
-        issuer_id: ENV["APP_STORE_CONNECT_API_KEY_ISSUER_ID"],
-        key_filepath: ENV["APP_STORE_CONNECT_API_KEY_PATH"]
-      )
-    end
-    
     # Upload to App Store
-    upload_params = {
+    # Note: upload_to_app_store will automatically use APP_STORE_CONNECT_API_KEY_* env vars
+    upload_to_app_store(
       skip_metadata: true,
       skip_screenshots: true,
       submit_for_review: false,
       automatic_release: false,
       force: true,
       precheck_include_in_app_purchases: false
-    }
-    
-    # Only add api_key if it's set (avoids conflict with api_key_path)
-    upload_params[:api_key] = api_key if api_key
-    
-    upload_to_app_store(upload_params)
+    )
   end
 
   desc "Build Debug version with symbols for crash analysis"
