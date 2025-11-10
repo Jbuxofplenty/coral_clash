@@ -105,12 +105,28 @@ echo "========================================"
 echo ""
 
 # Check if App Store Connect API JSON key exists
-# First check environment variable, then fall back to searching fastlane/ directory
-if [ -n "$APP_STORE_CONNECT_API_KEY_JSON_PATH" ]; then
+# Priority: .env.fastlane > environment variable > auto-discovery
+if [ -f ".env.fastlane" ]; then
+    # Load from .env.fastlane if it exists
+    ENV_API_KEY_PATH=$(grep "^APP_STORE_CONNECT_API_KEY_JSON_PATH=" .env.fastlane | cut -d'=' -f2 | tr -d ' "' | tr -d "'")
+    if [ -n "$ENV_API_KEY_PATH" ]; then
+        API_KEY_JSON="$ENV_API_KEY_PATH"
+        echo "📌 Using API key from .env.fastlane: $API_KEY_JSON"
+    fi
+fi
+
+# Fall back to environment variable if not set from .env.fastlane
+if [ -z "$API_KEY_JSON" ] && [ -n "$APP_STORE_CONNECT_API_KEY_JSON_PATH" ]; then
     API_KEY_JSON="$APP_STORE_CONNECT_API_KEY_JSON_PATH"
     echo "📌 Using API key from APP_STORE_CONNECT_API_KEY_JSON_PATH env var"
-else
+fi
+
+# Fall back to auto-discovery if still not set
+if [ -z "$API_KEY_JSON" ]; then
     API_KEY_JSON=$(ls fastlane/*.json 2>/dev/null | head -n 1)
+    if [ -n "$API_KEY_JSON" ]; then
+        echo "📌 Auto-discovered API key: $API_KEY_JSON"
+    fi
 fi
 
 if [ -z "$API_KEY_JSON" ] || [ ! -f "$API_KEY_JSON" ]; then
@@ -209,11 +225,15 @@ echo "  1. Update .env.preview or .env.production locally"
 echo "  2. Run this script again: ./scripts/setup-github-secrets.sh"
 echo ""
 echo "For iOS deployment:"
-echo "  Option 1: Set environment variable"
+echo "  Option 1: Add to .env.fastlane (recommended)"
+echo "    APP_STORE_CONNECT_API_KEY_JSON_PATH=fastlane/KEYID.json"
+echo "    ./scripts/setup-github-secrets.sh"
+echo ""
+echo "  Option 2: Set environment variable"
 echo "    export APP_STORE_CONNECT_API_KEY_JSON_PATH=/path/to/your/key.json"
 echo "    ./scripts/setup-github-secrets.sh"
 echo ""
-echo "  Option 2: Place JSON in fastlane/ directory"
+echo "  Option 3: Auto-discovery (place JSON in fastlane/)"
 echo "    Place key JSON in fastlane/ (e.g., fastlane/KEYID.json)"
 echo "    ./scripts/setup-github-secrets.sh"
 echo ""
