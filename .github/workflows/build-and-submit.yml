@@ -87,12 +87,11 @@ jobs:
 
       - name: Setup App Store Connect API Key
         run: |
-          mkdir -p ~/.appstoreconnect/private_keys
-          # Use echo -e to interpret escape sequences (\n) in the key content
-          echo -e "${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}" > ~/.appstoreconnect/private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}.p8
-          echo "APP_STORE_CONNECT_API_KEY_PATH=$HOME/.appstoreconnect/private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}.p8" >> $GITHUB_ENV
-          echo "APP_STORE_CONNECT_API_KEY_KEY_ID=${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}" >> $GITHUB_ENV
-          echo "APP_STORE_CONNECT_API_KEY_ISSUER_ID=${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}" >> $GITHUB_ENV
+          mkdir -p ~/.appstoreconnect
+          # Write the JSON key file
+          echo '${{ secrets.APP_STORE_CONNECT_API_KEY_JSON }}' > ~/.appstoreconnect/api_key.json
+          echo "APP_STORE_CONNECT_API_KEY_PATH=$HOME/.appstoreconnect/api_key.json" >> $GITHUB_ENV
+          echo "✅ App Store Connect API Key configured"
 
       - name: Restore Firebase Service Files
         run: |

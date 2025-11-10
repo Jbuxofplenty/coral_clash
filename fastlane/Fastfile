@@ -29,9 +29,8 @@ platform :ios do
     # Setup App Store Connect API Key if provided
     api_key = nil
     if ENV["APP_STORE_CONNECT_API_KEY_PATH"]
+      # JSON file format contains all necessary info
       api_key = app_store_connect_api_key(
-        key_id: ENV["APP_STORE_CONNECT_API_KEY_KEY_ID"],
-        issuer_id: ENV["APP_STORE_CONNECT_API_KEY_ISSUER_ID"],
         key_filepath: ENV["APP_STORE_CONNECT_API_KEY_PATH"]
       )
     end
@@ -98,9 +97,8 @@ platform :ios do
     # Setup App Store Connect API Key if provided
     api_key = nil
     if ENV["APP_STORE_CONNECT_API_KEY_PATH"]
+      # JSON file format contains all necessary info
       api_key = app_store_connect_api_key(
-        key_id: ENV["APP_STORE_CONNECT_API_KEY_KEY_ID"],
-        issuer_id: ENV["APP_STORE_CONNECT_API_KEY_ISSUER_ID"],
         key_filepath: ENV["APP_STORE_CONNECT_API_KEY_PATH"]
       )
     end
