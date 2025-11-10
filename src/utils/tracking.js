@@ -62,12 +62,21 @@ export const shouldUseTestAds = (user = null) => {
 
 /**
  * Request tracking permission from the user
+ * Only requests if ads are actually enabled (not in disabled mode)
  * This should be called after the user has had a chance to experience your app
  * and understand why you're requesting tracking permission
  *
+ * @param {Object} user - The user object (optional, for checking if ads are enabled)
  * @returns {Promise<boolean>} Whether tracking permission was granted
  */
-export const requestTrackingPermission = async () => {
+export const requestTrackingPermission = async (user = null) => {
+    // Only request if ads are enabled (no point asking for tracking if no ads)
+    const adsEnabled = shouldEnableAds(user);
+    if (!adsEnabled) {
+        console.log('🚫 Skipping ATT request - ads are not enabled');
+        return false;
+    }
+
     // Only request on iOS 14+
     if (Platform.OS !== 'ios') {
         return true;
@@ -87,6 +96,8 @@ export const requestTrackingPermission = async () => {
         }
 
         // Request permission
+        const adsMode = getAdsMode();
+        console.log('📱 Requesting ATT permission (ads mode:', adsMode, ')');
         const { status: newStatus } = await TrackingTransparency.requestTrackingPermissionsAsync();
 
         return newStatus === 'granted';
@@ -98,14 +109,16 @@ export const requestTrackingPermission = async () => {
 
 /**
  * Check if tracking is allowed
+ * Only relevant if ads are enabled - returns false if ads disabled
  * This checks both the system permission and ads settings
  *
  * @param {Object} user - The user object (optional)
  * @returns {Promise<boolean>} Whether tracking is allowed
  */
 export const isTrackingAllowed = async (user = null) => {
-    // Check if ads are enabled (env + internal user check)
-    if (!shouldEnableAds(user)) {
+    // No tracking needed if ads are disabled
+    const adsEnabled = shouldEnableAds(user);
+    if (!adsEnabled) {
         return false;
     }
 
@@ -125,11 +138,17 @@ export const isTrackingAllowed = async (user = null) => {
 
 /**
  * Get the current tracking permission status
+ * Note: Only relevant if ads are enabled
  *
  * @returns {Promise<string>} The current tracking permission status
- * Possible values: 'undetermined', 'denied', 'granted', 'restricted'
+ * Possible values: 'undetermined', 'denied', 'granted', 'restricted', 'not-applicable', 'disabled'
  */
-export const getTrackingStatus = async () => {
+export const getTrackingStatus = async (user = null) => {
+    const adsEnabled = shouldEnableAds(user);
+    if (!adsEnabled) {
+        return 'disabled';
+    }
+
     if (Platform.OS !== 'ios') {
         return 'not-applicable';
     }
