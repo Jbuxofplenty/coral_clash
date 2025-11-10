@@ -1269,10 +1269,77 @@ export class CoralClash {
                     attackerInCheck = true;
                 }
 
+                // Protection rule for attacking whale: Check if our new position is vulnerable
+                // to the opponent's whale. The opponent can only capture if BOTH of our squares
+                // are unprotected by our own pieces (non-whale).
+                // IMPORTANT: Skip this check if we're capturing the opponent whale - it won't exist to counter-attack!
+                let attackerVulnerableToWhale = false;
+                if (!attackerInCheck && move.captured !== WHALE) {
+                    // Check if opponent's whale can reach either of our squares
+                    // We need to avoid infinite recursion, so we DON'T call _canWhaleLegallyAttack
+                    // Instead, we check if opponent whale's pseudo-legal moves can reach our squares
+                    const [oppWhaleFirst, oppWhaleSecond] = this._kings[them];
+                    if (oppWhaleFirst !== -1) {
+                        // Generate opponent whale's pseudo-legal moves
+                        const oppMoves: InternalMove[] = [];
+                        this._generateWhaleMoves(
+                            oppMoves,
+                            oppWhaleFirst,
+                            oppWhaleSecond,
+                            them,
+                            whaleColor,
+                            true,
+                        );
+
+                        // Check if any opponent whale move can attack our position
+                        const canOppWhaleAttack = oppMoves.some(
+                            (m) =>
+                                m.to === firstSquare ||
+                                m.whaleOtherSquare === firstSquare ||
+                                m.to === secondSquare ||
+                                m.whaleOtherSquare === secondSquare,
+                        );
+
+                        if (canOppWhaleAttack) {
+                            // Opponent whale can reach our position
+                            // Check if BOTH our squares are unprotected (protection rule)
+                            const firstProtected = this._attacked(whaleColor, firstSquare);
+                            const secondProtected =
+                                secondSquare !== -1 && this._attacked(whaleColor, secondSquare);
+
+                            // If BOTH squares are unprotected, we're vulnerable
+                            if (!firstProtected && !secondProtected) {
+                                attackerVulnerableToWhale = true;
+                            }
+                        }
+                    }
+                }
+
+                // Protection rule: If we're attacking the opponent's whale position,
+                // check if BOTH of the opponent's whale squares are unprotected.
+                // If either square is protected by a friendly piece (non-whale),
+                // the whale cannot be legally captured.
+                let opponentProtected = false;
+                const [opponentWhaleFirst, opponentWhaleSecond] = this._kings[them];
+                if (
+                    (targetSquare === opponentWhaleFirst || targetSquare === opponentWhaleSecond) &&
+                    opponentWhaleFirst !== -1
+                ) {
+                    // Check if either of opponent's whale squares is protected by their pieces
+                    const firstSquareProtected = this._attacked(them, opponentWhaleFirst);
+                    const secondSquareProtected =
+                        opponentWhaleSecond !== -1 && this._attacked(them, opponentWhaleSecond);
+
+                    // If at least one square is protected, opponent whale is safe
+                    if (firstSquareProtected || secondSquareProtected) {
+                        opponentProtected = true;
+                    }
+                }
+
                 this._undoMove();
                 this._validationDepth--;
 
-                if (!attackerInCheck) {
+                if (!attackerInCheck && !opponentProtected && !attackerVulnerableToWhale) {
                     // Found a legal move that attacks the target square
                     // Cache this positive result with current generation
                     this._whaleAttackResultCache.set(resultCacheKey, {
@@ -1322,22 +1389,40 @@ export class CoralClash {
     }
 
     private _isKingAttacked(color: Color) {
-        // Whale occupies 2 squares - it's in check if EITHER square is attacked
+        // Whale occupies 2 squares - check for attacks from both regular pieces and opposing whale
         const [firstSquare, secondSquare] = this._kings[color];
 
         if (firstSquare === -1) return false;
 
         const attackingColor = swapColor(color);
 
-        // Check if first square is attacked by regular pieces
+        // Check if first square is attacked by regular pieces (non-whale)
         if (this._attacked(attackingColor, firstSquare)) return true;
 
-        // Check if second square is attacked by regular pieces
+        // Check if second square is attacked by regular pieces (non-whale)
         if (secondSquare !== -1 && this._attacked(attackingColor, secondSquare)) return true;
 
-        // Also check if attacked by enemy whale (validates proper whale moves)
-        if (this._whaleAttacked(attackingColor, firstSquare)) return true;
-        if (secondSquare !== -1 && this._whaleAttacked(attackingColor, secondSquare)) return true;
+        // Check if attacked by enemy whale
+        // IMPORTANT: A whale can only threaten/capture the opposing whale if:
+        // The opposing whale can attack at least one whale square AND would have a legal move
+        // that results in occupying or capturing at that whale's position.
+        //
+        // Protection rule: If a whale square is protected by a friendly piece (non-whale),
+        // and the opposing whale would need to occupy BOTH squares to complete the capture,
+        // then check if BOTH squares are protected. If either is protected, no check from whale.
+        //
+        // However, if the opposing whale can make a LEGAL move that attacks either square
+        // (meaning the move wouldn't leave the attacker in check), then it's check.
+
+        const firstSquareAttackedByWhale = this._whaleAttacked(attackingColor, firstSquare);
+        const secondSquareAttackedByWhale =
+            secondSquare !== -1 && this._whaleAttacked(attackingColor, secondSquare);
+
+        // If opposing whale can legally attack either square, it's check
+        // The _whaleAttacked (via _canWhaleLegallyAttack) already ensures the attack is legal
+        if (firstSquareAttackedByWhale || secondSquareAttackedByWhale) {
+            return true;
+        }
 
         return false;
     }
@@ -1666,12 +1751,18 @@ export class CoralClash {
             return this._board[square].color === color;
         }
 
-        // Check if square is the second square of a whale
-        if (this._kings.w[1] === square && this._kings.w[0] !== EMPTY) {
+        // Check if square is occupied by a whale (either first or second square)
+        if (
+            (this._kings.w[0] === square || this._kings.w[1] === square) &&
+            this._kings.w[0] !== EMPTY
+        ) {
             if (color === undefined) return true;
             return color === WHITE;
         }
-        if (this._kings.b[1] === square && this._kings.b[0] !== EMPTY) {
+        if (
+            (this._kings.b[0] === square || this._kings.b[1] === square) &&
+            this._kings.b[0] !== EMPTY
+        ) {
             if (color === undefined) return true;
             return color === BLACK;
         }

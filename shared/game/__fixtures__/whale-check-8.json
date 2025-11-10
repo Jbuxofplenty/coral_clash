@@ -2,7 +2,7 @@
     "schemaVersion": "1.2.0",
     "exportedAt": "2025-11-04T07:15:47.452Z",
     "state": {
-        "fen": "ft3t2/2ch4/2o4H/T7/3C4/5O2/CO6/F3T2C b - - 4 28 a8h,b8h,f8g,c7h,c6h,a5g,d4g,f3h,a2h,b2g,a1h,e1h,h1g f8b,c7b,a6b,d6b,e6b,f6b,a5b,d5w,e5w,c4w,d4b,c3w,d3w,e3w,c2w,d2w,e1w,h1w 7,9 h6h5,d7e7",
+        "fen": "ft3t2/2ch4/2o4H/T7/3C4/5O2/CO6/F3T3 b - - 4 28 a8h,b8h,f8g,c7h,c6h,a5g,d4g,f3h,a2h,b2g,a1h,e1h f8b,c7b,a6b,d6b,e6b,f6b,a5b,d5w,e5w,c4w,d4b,c3w,d3w,e3w,c2w,d2w,e1w 7,9 h6h5,d7e7",
         "board": [
             [
                 {
@@ -158,12 +158,7 @@
                 },
                 null,
                 null,
-                {
-                    "square": "h1",
-                    "type": "c",
-                    "color": "w",
-                    "role": "gatherer"
-                }
+                null
             ]
         ],
         "history": [

@@ -7,7 +7,7 @@ import whaleCheck from '../__fixtures__/whale-check.json';
 import { CoralClash, applyFixture } from '../index';
 
 describe('Square Control and Attack Detection', () => {
-    test('white whale at b4,c4 can attack e4 (but cannot move there safely)', () => {
+    test('white whale at b4,c4 can move to d4,e4 (protected by white pufferfish at a1)', () => {
         const game = new CoralClash();
         applyFixture(game, whaleCheck);
 
@@ -17,17 +17,18 @@ describe('Square Control and Attack Detection', () => {
         expect(whalePos.b).toEqual(['e3', 'e2']); // Black whale vertical at e3,e2
 
         // White whale CAN physically attack e4 (via parallel slide b4,c4 -> d4,e4)
-        // Note: This doesn't mean white can SAFELY move there (would be in check)
         expect(game.isAttacked('e4', 'w')).toBe(true);
 
-        // Verify that the move d4,e4 is NOT in the legal moves (would leave white in check)
+        // The move d4,e4 IS legal because d4 is protected by white pufferfish at a1
+        // Protection rule: black whale can only capture if BOTH squares are unprotected
+        // Since d4 is protected, black whale cannot threaten white at d4,e4
         const legalMoves = game.moves({ verbose: true, color: 'w', piece: 'h' });
         const movesToE4 = legalMoves.filter(
             (m: any) =>
                 (m.to === 'e4' && m.whaleSecondSquare === 'd4') ||
                 (m.to === 'd4' && m.whaleSecondSquare === 'e4'),
         );
-        expect(movesToE4.length).toBe(0); // Move is illegal (would be in check)
+        expect(movesToE4.length).toBeGreaterThan(0); // Move is legal (d4 protected)
     });
 
     test('white whale at b4,c4 can attack adjacent squares', () => {
