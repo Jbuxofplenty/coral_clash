@@ -31,6 +31,7 @@ import {
     useVersion,
 } from './src/contexts';
 import Screens from './src/navigation/Screens';
+import { getAdsMode } from './src/utils/tracking';
 
 // Ignore expo-notifications warnings in development (keychain access issues in Expo Go)
 // Also ignore Galio Input deprecation warnings (third-party library issue)
@@ -87,21 +88,25 @@ export default function App() {
     useEffect(() => {
         async function prepare() {
             try {
-                // Initialize Google Mobile Ads SDK
-                const adapterStatuses = await mobileAds().initialize();
-                console.log('📱 Mobile Ads SDK initialized:', adapterStatuses);
+                // Configure AdMob request settings before initialization
+                const adsMode = getAdsMode();
+                console.log('📱 Ads Mode:', adsMode);
 
-                // Set request configuration
-                // In development, register test devices to show test ads
-                // In production, this will be skipped so real ads are served
-                if (__DEV__) {
-                    await mobileAds().setRequestConfiguration({
-                        // Test device IDs - add your device ID here during development
+                const requestConfig = {
+                    ...(__DEV__ && {
                         testDeviceIdentifiers: [
                             '08EA2881-FF28-4E64-AE72-35CEEF26E8C9', // Josiah's test device
                             'EMULATOR',
                         ],
-                    });
+                    }),
+                };
+                await mobileAds().setRequestConfiguration(requestConfig);
+
+                // Initialize Google Mobile Ads SDK with configuration
+                const adapterStatuses = await mobileAds().initialize();
+
+                console.log('📱 Mobile Ads SDK initialized:', adapterStatuses);
+                if (__DEV__) {
                     console.log('📱 AdMob configured for test devices');
                 }
 

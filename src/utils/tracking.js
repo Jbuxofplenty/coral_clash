@@ -2,21 +2,62 @@ import * as TrackingTransparency from 'expo-tracking-transparency';
 import { Platform } from 'react-native';
 
 /**
+ * Get the current ads mode from environment
+ * @returns {'enabled' | 'test' | 'disabled'} The ads mode
+ */
+export const getAdsMode = () => {
+    const mode = process.env.EXPO_PUBLIC_ADS_MODE || 'disabled';
+    if (['enabled', 'test', 'disabled'].includes(mode)) {
+        return mode;
+    }
+    return 'disabled';
+};
+
+/**
  * Check if ads are enabled for a given user
  * Shared logic with useAds hook for consistency
  *
  * @param {Object} user - The user object (optional)
- * @returns {boolean} Whether ads are enabled
+ * @returns {boolean} Whether ads are enabled (either real or test)
  */
 export const shouldEnableAds = (user = null) => {
-    // Check environment variable - ads must be explicitly enabled
-    const envEnabled = process.env.EXPO_PUBLIC_ENABLE_ADS === 'true';
+    // Get ads mode - 'enabled', 'test', or 'disabled'
+    const adsMode = getAdsMode();
 
-    // Check if user is NOT an internal user (internal users should never see ads)
-    const userIsNotInternal = user?.internalUser !== true;
+    // If disabled, no ads for anyone
+    if (adsMode === 'disabled') {
+        return false;
+    }
 
-    // Ads are enabled if env is true AND user is not internal
-    return envEnabled && userIsNotInternal;
+    // If test mode, show test ads to everyone (including internal users for QA)
+    if (adsMode === 'test') {
+        return true;
+    }
+
+    // If enabled mode, only show real ads to non-internal users
+    // Internal users should see test ads instead (handled by shouldUseTestAds)
+    return user?.internalUser !== true;
+};
+
+/**
+ * Check if we should use test ads
+ * @param {Object} user - The user object (optional)
+ * @returns {boolean} Whether to use test ad unit IDs
+ */
+export const shouldUseTestAds = (user = null) => {
+    const adsMode = getAdsMode();
+
+    // Always use test ads in 'test' mode
+    if (adsMode === 'test') {
+        return true;
+    }
+
+    // In 'enabled' mode, internal users get test ads (for QA/safety)
+    if (adsMode === 'enabled' && user?.internalUser === true) {
+        return true;
+    }
+
+    return false;
 };
 
 /**
