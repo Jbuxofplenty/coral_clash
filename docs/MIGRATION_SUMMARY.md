@@ -61,16 +61,14 @@ This migration removes EAS (Expo Application Services) as a build dependency and
 
 ## 🔐 Required GitHub Secrets
 
-You need to add **11 secrets** to your GitHub repository:
+You need to add **9 secrets** to your GitHub repository:
 
-### iOS (6 secrets)
+### iOS (4 secrets)
 
-1. `APP_STORE_CONNECT_API_KEY_ID`
-2. `APP_STORE_CONNECT_ISSUER_ID`
-3. `APP_STORE_CONNECT_API_KEY_CONTENT`
-4. `APPLE_ID`
-5. `MATCH_PASSWORD`
-6. `MATCH_GIT_BASIC_AUTHORIZATION`
+1. `APP_STORE_CONNECT_API_KEY_JSON`
+2. `APPLE_ID`
+3. `MATCH_PASSWORD`
+4. `MATCH_GIT_BASIC_AUTHORIZATION`
 
 ### Android (5 secrets)
 

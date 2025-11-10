@@ -266,9 +266,7 @@ Add all required secrets to GitHub (Settings → Secrets and variables → Actio
 
 #### iOS Secrets
 
-- `APP_STORE_CONNECT_API_KEY_ID` - Key ID from App Store Connect
-- `APP_STORE_CONNECT_ISSUER_ID` - Issuer ID from App Store Connect
-- `APP_STORE_CONNECT_API_KEY_CONTENT` - Full contents of `.p8` file
+- `APP_STORE_CONNECT_API_KEY_JSON` - JSON file with key_id, issuer_id, and key
 - `APPLE_ID` - Your Apple ID email
 - `MATCH_PASSWORD` - Password you set for Match
 - `MATCH_GIT_BASIC_AUTHORIZATION` - Base64 encoded GitHub credentials

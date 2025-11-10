@@ -65,13 +65,11 @@ Go to **Secrets** tab (next to Variables)
 
 Click "New repository secret" for each:
 
-### iOS Secrets (6 secrets)
+### iOS Secrets (4 secrets)
 
 | Secret Name                         | Description               | How to Get                           |
 | ----------------------------------- | ------------------------- | ------------------------------------ |
-| `APP_STORE_CONNECT_API_KEY_ID`      | API Key ID                | App Store Connect → Keys → Key ID    |
-| `APP_STORE_CONNECT_ISSUER_ID`       | Issuer ID                 | App Store Connect → Keys → Issuer ID |
-| `APP_STORE_CONNECT_API_KEY_CONTENT` | .p8 key content           | Contents of downloaded .p8 file      |
+| `APP_STORE_CONNECT_API_KEY_JSON`    | API Key JSON file         | JSON with key_id, issuer_id, and key |
 | `APPLE_ID`                          | Your Apple ID email       | your.email@apple.com                 |
 | `MATCH_PASSWORD`                    | Fastlane Match password   | Your chosen password                 |
 | `MATCH_GIT_BASIC_AUTHORIZATION`     | Git auth for certificates | base64 of `username:token`           |

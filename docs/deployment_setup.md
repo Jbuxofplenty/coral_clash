@@ -162,16 +162,14 @@ base64 -i release.keystore | tr -d '\n' > keystore_base64.txt
 
 Go to your repository → **Settings → Secrets and variables → Actions**
 
-Add these **11 secrets**:
+Add these **9 secrets**:
 
-#### iOS (6 secrets)
+#### iOS (4 secrets)
 
-1. `APP_STORE_CONNECT_API_KEY_ID` - Key ID from App Store Connect
-2. `APP_STORE_CONNECT_ISSUER_ID` - Issuer ID from App Store Connect
-3. `APP_STORE_CONNECT_API_KEY_CONTENT` - Full contents of `.p8` file
-4. `APPLE_ID` - Your Apple ID email
-5. `MATCH_PASSWORD` - Password you set for Match
-6. `MATCH_GIT_BASIC_AUTHORIZATION` - Base64 encoded GitHub credentials
+1. `APP_STORE_CONNECT_API_KEY_JSON` - JSON file with key_id, issuer_id, and key
+2. `APPLE_ID` - Your Apple ID email
+3. `MATCH_PASSWORD` - Password you set for Match
+4. `MATCH_GIT_BASIC_AUTHORIZATION` - Base64 encoded GitHub credentials
 
 #### Android (5 secrets)
 
