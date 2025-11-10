@@ -224,6 +224,19 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
+      - name: Generate Changelog from Commits
+        id: changelog
+        run: |
+          echo "📝 Generating changelog from conventional commits..."
+          
+          # Fetch all tags and history for comparison
+          git fetch --prune --unshallow --tags 2>/dev/null || git fetch --prune --tags || true
+          
+          # Run changelog generator
+          bash .github/scripts/generate-changelog.sh android ${{ inputs.profile }}
+          
+          echo "✅ Changelog generated successfully"
+
       - name: Restore Firebase Service Files
         run: |
           echo "📄 Restoring Firebase service files..."
@@ -298,6 +311,8 @@ jobs:
           # App Configuration (from GitHub Variables)
           ANDROID_PACKAGE_NAME: ${{ vars.ANDROID_PACKAGE_NAME }}
           ANDROID_PROJECT_DIR: ${{ vars.ANDROID_PROJECT_DIR }}
+          # Release Notes (Priority: Manual Override > Auto-generated > Fallback)
+          CHANGELOG: ${{ vars.ANDROID_CHANGELOG_PREVIEW || steps.changelog.outputs.changelog || 'Bug fixes and performance improvements for internal testing' }}
         run: bundle exec fastlane android beta
 
       - name: Build and Submit to Production (Production)
@@ -312,6 +327,8 @@ jobs:
           # App Configuration (from GitHub Variables)
           ANDROID_PACKAGE_NAME: ${{ vars.ANDROID_PACKAGE_NAME }}
           ANDROID_PROJECT_DIR: ${{ vars.ANDROID_PROJECT_DIR }}
+          # Release Notes (Priority: Manual Override > Auto-generated > Fallback)
+          CHANGELOG: ${{ vars.ANDROID_CHANGELOG_PRODUCTION || steps.changelog.outputs.changelog || 'Bug fixes and performance improvements' }}
         run: bundle exec fastlane android release
 
       - name: Upload Android build artifacts

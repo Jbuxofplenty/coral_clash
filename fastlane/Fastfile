@@ -244,6 +244,9 @@ platform :android do
   lane :beta do
     build(track: "internal")
     
+    # Get changelog from environment or use default
+    changelog = ENV["CHANGELOG"] || "Bug fixes and performance improvements"
+    
     # Upload to Play Store Internal Testing track
     upload_to_play_store(
       package_name: ANDROID_PACKAGE_NAME,
@@ -252,13 +255,20 @@ platform :android do
       skip_upload_metadata: true,
       skip_upload_images: true,
       skip_upload_screenshots: true,
-      json_key: ENV["GOOGLE_PLAY_JSON_KEY_PATH"]
+      json_key: ENV["GOOGLE_PLAY_JSON_KEY_PATH"],
+      version_name: ENV["VERSION_NAME"],  # Optional: Override version name for release
+      changelog: changelog  # Release notes for this version
     )
+    
+    UI.success("✅ Uploaded to Internal Testing with changelog: #{changelog}")
   end
 
   desc "Upload to Play Store Production"
   lane :release do
     build(track: "production")
+    
+    # Get changelog from environment or use default
+    changelog = ENV["CHANGELOG"] || "Bug fixes and performance improvements"
     
     # Upload to Play Store Production track
     upload_to_play_store(
@@ -268,9 +278,13 @@ platform :android do
       skip_upload_metadata: true,
       skip_upload_images: true,
       skip_upload_screenshots: true,
-      release_status: "draft",
-      json_key: ENV["GOOGLE_PLAY_JSON_KEY_PATH"]
+      release_status: "draft",  # Creates draft release that can be reviewed before publishing
+      json_key: ENV["GOOGLE_PLAY_JSON_KEY_PATH"],
+      version_name: ENV["VERSION_NAME"],  # Optional: Override version name for release
+      changelog: changelog  # Release notes for this version
     )
+    
+    UI.success("✅ Uploaded to Production (draft) with changelog: #{changelog}")
   end
 end
 
