@@ -1272,8 +1272,9 @@ export class CoralClash {
                 // Protection rule for attacking whale: Check if our new position is vulnerable
                 // to the opponent's whale. The opponent can only capture if BOTH of our squares
                 // are unprotected by our own pieces (non-whale).
+                // IMPORTANT: Skip this check if we're capturing the opponent whale - it won't exist to counter-attack!
                 let attackerVulnerableToWhale = false;
-                if (!attackerInCheck) {
+                if (!attackerInCheck && move.captured !== WHALE) {
                     // Check if opponent's whale can reach either of our squares
                     // We need to avoid infinite recursion, so we DON'T call _canWhaleLegallyAttack
                     // Instead, we check if opponent whale's pseudo-legal moves can reach our squares
