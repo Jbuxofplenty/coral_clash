@@ -106,13 +106,17 @@ platform :ios do
     end
     
     # Upload to TestFlight
-    upload_to_testflight(
-      api_key: api_key,
+    upload_params = {
       skip_waiting_for_build_processing: true,
       skip_submission: true,
       distribute_external: false,
       changelog: ENV["CHANGELOG"] || "Bug fixes and performance improvements"
-    )
+    }
+    
+    # Only add api_key if it's set (avoids conflict with api_key_path)
+    upload_params[:api_key] = api_key if api_key
+    
+    upload_to_testflight(upload_params)
   end
 
   desc "Upload to App Store"
@@ -130,15 +134,19 @@ platform :ios do
     end
     
     # Upload to App Store
-    upload_to_app_store(
-      api_key: api_key,
+    upload_params = {
       skip_metadata: true,
       skip_screenshots: true,
       submit_for_review: false,
       automatic_release: false,
       force: true,
       precheck_include_in_app_purchases: false
-    )
+    }
+    
+    # Only add api_key if it's set (avoids conflict with api_key_path)
+    upload_params[:api_key] = api_key if api_key
+    
+    upload_to_app_store(upload_params)
   end
 
   desc "Build Debug version with symbols for crash analysis"
