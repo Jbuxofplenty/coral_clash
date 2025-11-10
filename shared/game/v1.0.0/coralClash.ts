@@ -1750,12 +1750,18 @@ export class CoralClash {
             return this._board[square].color === color;
         }
 
-        // Check if square is the second square of a whale
-        if (this._kings.w[1] === square && this._kings.w[0] !== EMPTY) {
+        // Check if square is occupied by a whale (either first or second square)
+        if (
+            (this._kings.w[0] === square || this._kings.w[1] === square) &&
+            this._kings.w[0] !== EMPTY
+        ) {
             if (color === undefined) return true;
             return color === WHITE;
         }
-        if (this._kings.b[1] === square && this._kings.b[0] !== EMPTY) {
+        if (
+            (this._kings.b[0] === square || this._kings.b[1] === square) &&
+            this._kings.b[0] !== EMPTY
+        ) {
             if (color === undefined) return true;
             return color === BLACK;
         }
