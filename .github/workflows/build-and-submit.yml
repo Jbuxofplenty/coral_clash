@@ -17,11 +17,8 @@ on:
         required: false
         type: string
     secrets:
-      APP_STORE_CONNECT_API_KEY_ID:
-        required: true
-      APP_STORE_CONNECT_ISSUER_ID:
-        required: true
-      APP_STORE_CONNECT_API_KEY_CONTENT:
+      # iOS Secrets
+      APP_STORE_CONNECT_API_KEY_JSON:
         required: true
       APPLE_ID:
         required: true
@@ -29,6 +26,17 @@ on:
         required: true
       MATCH_GIT_BASIC_AUTHORIZATION:
         required: true
+      # Firebase Secrets (for both platforms)
+      GOOGLE_SERVICES_JSON:
+        required: true
+      GOOGLE_SERVICE_INFO_PLIST:
+        required: true
+      # Environment Files
+      STAGING_ENV_FILE:
+        required: true
+      PRODUCTION_ENV_FILE:
+        required: true
+      # Android Secrets
       GOOGLE_PLAY_SERVICE_ACCOUNT_JSON:
         required: true
       ANDROID_KEYSTORE_BASE64:

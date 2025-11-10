@@ -84,6 +84,15 @@ service cloud.firestore {
             // Only Cloud Functions can write to matchmaking queue
             allow write: if false;
         }
+
+        // Feature flags
+        match /featureFlags/{flagId} {
+            // Anyone can read feature flags (needed for app initialization before auth)
+            allow read: if true;
+            
+            // Only admins can write (via Firebase Console)
+            allow write: if false;
+        }
     }
 }
 

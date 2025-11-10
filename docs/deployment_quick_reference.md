@@ -228,9 +228,7 @@ All secrets are added in: **Settings → Secrets and variables → Actions**
 
 ### iOS Secrets
 
-- `APP_STORE_CONNECT_API_KEY_ID`
-- `APP_STORE_CONNECT_ISSUER_ID`
-- `APP_STORE_CONNECT_API_KEY_CONTENT`
+- `APP_STORE_CONNECT_API_KEY_JSON`
 - `APPLE_ID`
 - `MATCH_PASSWORD`
 - `MATCH_GIT_BASIC_AUTHORIZATION`

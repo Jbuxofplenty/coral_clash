@@ -10,8 +10,8 @@ import { shouldUseTestAds } from '../utils/tracking';
 // - 'test': Uses Google's test ad units (TestIds.BANNER) for everyone
 // - 'enabled': Uses real ads for regular users, test ads for internal users
 // - 'disabled': No ads shown
-const getAdUnitId = (user) => {
-    const useTestAds = shouldUseTestAds(user);
+const getAdUnitId = async (user) => {
+    const useTestAds = await shouldUseTestAds(user);
 
     return Platform.select({
         ios: useTestAds ? TestIds.BANNER : 'ca-app-pub-8519782324189160/3016478947',
@@ -27,13 +27,36 @@ const getAdUnitId = (user) => {
  */
 export const BannerAd = () => {
     const { user } = useAuth();
-    const adsEnabled = useAds();
+    const { isEnabled: adsEnabled, loading: adsLoading } = useAds();
     const [adError, setAdError] = useState(false);
     const [failureCount, setFailureCount] = useState(0);
+    const [adUnitId, setAdUnitId] = useState(TestIds.BANNER);
+    const [isTestMode, setIsTestMode] = useState(true);
 
     // Get the appropriate ad unit ID based on current ads mode and user status
-    const adUnitId = getAdUnitId(user);
-    const isTestMode = shouldUseTestAds(user);
+    useEffect(() => {
+        let mounted = true;
+
+        const loadAdConfig = async () => {
+            try {
+                const unitId = await getAdUnitId(user);
+                const testMode = await shouldUseTestAds(user);
+                
+                if (mounted) {
+                    setAdUnitId(unitId);
+                    setIsTestMode(testMode);
+                }
+            } catch (error) {
+                console.error('Error loading ad config:', error);
+            }
+        };
+
+        loadAdConfig();
+
+        return () => {
+            mounted = false;
+        };
+    }, [user]);
 
     useEffect(() => {
         // Reset state when ads are toggled
@@ -44,21 +67,24 @@ export const BannerAd = () => {
     }, [adsEnabled]);
 
     useEffect(() => {
-        // Log ad configuration on mount
-        console.log('📱 BannerAd configuration:', {
-            platform: Platform.OS,
-            adUnitId,
-            adsMode: process.env.EXPO_PUBLIC_ADS_MODE,
-            isTestMode,
-            isInternalUser: user?.internalUser === true,
-            adsEnabled,
-        });
+        // Log ad configuration when ready
+        if (!adsLoading && adsEnabled) {
+            console.log('📱 BannerAd configuration:', {
+                platform: Platform.OS,
+                adUnitId,
+                isTestMode,
+                isInternalUser: user?.internalUser === true,
+                adsEnabled,
+            });
+        }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [adsLoading, adsEnabled]);
 
-    // Don't render anything if ads are disabled
-    if (!adsEnabled) {
-        console.log('🚫 Ads disabled via useAds hook');
+    // Don't render anything while loading or if ads are disabled
+    if (adsLoading || !adsEnabled) {
+        if (!adsEnabled && !adsLoading) {
+            console.log('🚫 Ads disabled via useAds hook');
+        }
         return null;
     }
 

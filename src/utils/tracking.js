@@ -1,28 +1,17 @@
 import * as TrackingTransparency from 'expo-tracking-transparency';
 import { Platform } from 'react-native';
-
-/**
- * Get the current ads mode from environment
- * @returns {'enabled' | 'test' | 'disabled'} The ads mode
- */
-export const getAdsMode = () => {
-    const mode = process.env.EXPO_PUBLIC_ADS_MODE || 'disabled';
-    if (['enabled', 'test', 'disabled'].includes(mode)) {
-        return mode;
-    }
-    return 'disabled';
-};
+import { getAdsMode } from './featureFlags';
 
 /**
  * Check if ads are enabled for a given user
  * Shared logic with useAds hook for consistency
  *
  * @param {Object} user - The user object (optional)
- * @returns {boolean} Whether ads are enabled (either real or test)
+ * @returns {Promise<boolean>} Whether ads are enabled (either real or test)
  */
-export const shouldEnableAds = (user = null) => {
+export const shouldEnableAds = async (user = null) => {
     // Get ads mode - 'enabled', 'test', or 'disabled'
-    const adsMode = getAdsMode();
+    const adsMode = await getAdsMode();
 
     // If disabled, no ads for anyone
     if (adsMode === 'disabled') {
@@ -42,10 +31,10 @@ export const shouldEnableAds = (user = null) => {
 /**
  * Check if we should use test ads
  * @param {Object} user - The user object (optional)
- * @returns {boolean} Whether to use test ad unit IDs
+ * @returns {Promise<boolean>} Whether to use test ad unit IDs
  */
-export const shouldUseTestAds = (user = null) => {
-    const adsMode = getAdsMode();
+export const shouldUseTestAds = async (user = null) => {
+    const adsMode = await getAdsMode();
 
     // Always use test ads in 'test' mode
     if (adsMode === 'test') {
@@ -71,7 +60,7 @@ export const shouldUseTestAds = (user = null) => {
  */
 export const requestTrackingPermission = async (user = null) => {
     // Only request if ads are enabled (no point asking for tracking if no ads)
-    const adsEnabled = shouldEnableAds(user);
+    const adsEnabled = await shouldEnableAds(user);
     if (!adsEnabled) {
         console.log('🚫 Skipping ATT request - ads are not enabled');
         return false;
@@ -96,7 +85,7 @@ export const requestTrackingPermission = async (user = null) => {
         }
 
         // Request permission
-        const adsMode = getAdsMode();
+        const adsMode = await getAdsMode();
         console.log('📱 Requesting ATT permission (ads mode:', adsMode, ')');
         const { status: newStatus } = await TrackingTransparency.requestTrackingPermissionsAsync();
 
@@ -117,7 +106,7 @@ export const requestTrackingPermission = async (user = null) => {
  */
 export const isTrackingAllowed = async (user = null) => {
     // No tracking needed if ads are disabled
-    const adsEnabled = shouldEnableAds(user);
+    const adsEnabled = await shouldEnableAds(user);
     if (!adsEnabled) {
         return false;
     }
@@ -144,7 +133,7 @@ export const isTrackingAllowed = async (user = null) => {
  * Possible values: 'undetermined', 'denied', 'granted', 'restricted', 'not-applicable', 'disabled'
  */
 export const getTrackingStatus = async (user = null) => {
-    const adsEnabled = shouldEnableAds(user);
+    const adsEnabled = await shouldEnableAds(user);
     if (!adsEnabled) {
         return 'disabled';
     }
