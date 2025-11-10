@@ -105,9 +105,15 @@ echo "========================================"
 echo ""
 
 # Check if App Store Connect API JSON key exists
-API_KEY_JSON=$(ls fastlane/*.json 2>/dev/null | head -n 1)
+# First check environment variable, then fall back to searching fastlane/ directory
+if [ -n "$APP_STORE_CONNECT_API_KEY_JSON_PATH" ]; then
+    API_KEY_JSON="$APP_STORE_CONNECT_API_KEY_JSON_PATH"
+    echo "📌 Using API key from APP_STORE_CONNECT_API_KEY_JSON_PATH env var"
+else
+    API_KEY_JSON=$(ls fastlane/*.json 2>/dev/null | head -n 1)
+fi
 
-if [ -z "$API_KEY_JSON" ]; then
+if [ -z "$API_KEY_JSON" ] || [ ! -f "$API_KEY_JSON" ]; then
     echo "⚠️  Warning: App Store Connect API Key JSON file not found in fastlane/"
     echo "   iOS builds will fail without this key"
     echo "   Download from: https://appstoreconnect.apple.com/access/api"
@@ -203,7 +209,11 @@ echo "  1. Update .env.preview or .env.production locally"
 echo "  2. Run this script again: ./scripts/setup-github-secrets.sh"
 echo ""
 echo "For iOS deployment:"
-echo "  1. Place your App Store Connect API key JSON in fastlane/ directory"
-echo "     (e.g., fastlane/KEYID.json with key_id, issuer_id, key fields)"
-echo "  2. Run this script to upload the key"
+echo "  Option 1: Set environment variable"
+echo "    export APP_STORE_CONNECT_API_KEY_JSON_PATH=/path/to/your/key.json"
+echo "    ./scripts/setup-github-secrets.sh"
+echo ""
+echo "  Option 2: Place JSON in fastlane/ directory"
+echo "    Place key JSON in fastlane/ (e.g., fastlane/KEYID.json)"
+echo "    ./scripts/setup-github-secrets.sh"
 echo ""
