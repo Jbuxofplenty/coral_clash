@@ -11,8 +11,8 @@ const EmptyBoard = ({ size, boardFlipped = false }) => {
     const displayRanks = boardFlipped ? [...RANKS].reverse() : RANKS;
 
     // Calculate responsive font size for coordinate labels
-    // Scale proportionally with square size, capped at reasonable max
-    const coordinateFontSize = Math.min(squareSize * 0.08, 18);
+    // Scale proportionally with square size, with min of 10 and max of 18
+    const coordinateFontSize = Math.max(10, Math.min(squareSize * 0.18, 18));
 
     return (
         <Block
