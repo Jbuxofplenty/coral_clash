@@ -54,6 +54,9 @@ jobs:
     # Only run if a new version was actually released
     if: needs.release-shared.outputs.released == 'true'
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # For pushing commits
+      packages: read   # For downloading from GitHub Packages
     
     steps:
       - name: Checkout code
