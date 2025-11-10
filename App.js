@@ -20,7 +20,6 @@ import mobileAds from 'react-native-google-mobile-ads';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import VersionWarningBanner from './src/components/VersionWarningBanner';
 import { materialTheme } from './src/constants/';
-import { getAdsMode } from './src/utils/tracking';
 import {
     AlertProvider,
     AuthProvider,
@@ -32,6 +31,7 @@ import {
     useVersion,
 } from './src/contexts';
 import Screens from './src/navigation/Screens';
+import { getAdsMode } from './src/utils/tracking';
 
 // Ignore expo-notifications warnings in development (keychain access issues in Expo Go)
 // Also ignore Galio Input deprecation warnings (third-party library issue)
@@ -91,7 +91,7 @@ export default function App() {
                 // Configure AdMob request settings before initialization
                 const adsMode = getAdsMode();
                 console.log('📱 Ads Mode:', adsMode);
-                
+
                 const requestConfig = {
                     ...(__DEV__ && {
                         testDeviceIdentifiers: [
