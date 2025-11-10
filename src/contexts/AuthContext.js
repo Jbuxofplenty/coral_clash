@@ -128,7 +128,7 @@ export const AuthProvider = ({ children }) => {
                 // Small delay to let UI settle after login
                 setTimeout(async () => {
                     try {
-                        await requestTrackingPermission();
+                        await requestTrackingPermission(user);
                     } catch (error) {
                         console.error('Error requesting tracking permission:', error);
                     }
