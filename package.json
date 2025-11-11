@@ -34,9 +34,9 @@
         "web": "npx http-server public -p 8080 -o",
         "prepare": "husky",
         "retag:v1.0.0": "git tag -d v1.0.0 && git push origin :refs/tags/v1.0.0 && git tag v1.0.0 && git push origin v1.0.0",
-        "tag:patch": "npm version patch --no-git-tag-version && git tag v$(node -p \"require('./package.json').version\") && git push origin v$(node -p \"require('./package.json').version\")",
-        "tag:minor": "npm version minor --no-git-tag-version && git tag v$(node -p \"require('./package.json').version\") && git push origin v$(node -p \"require('./package.json').version\")",
-        "tag:major": "npm version major --no-git-tag-version && git tag v$(node -p \"require('./package.json').version\") && git push origin v$(node -p \"require('./package.json').version\")"
+        "tag:patch": "npm version patch --no-git-tag-version && git add package.json && git commit -m \"chore(release): bump version to v$(node -p \\\"require('./package.json').version\\\")\" && git tag v$(node -p \"require('./package.json').version\") && git push origin main --tags",
+        "tag:minor": "npm version minor --no-git-tag-version && git add package.json && git commit -m \"chore(release): bump version to v$(node -p \\\"require('./package.json').version\\\")\" && git tag v$(node -p \"require('./package.json').version\") && git push origin main --tags",
+        "tag:major": "npm version major --no-git-tag-version && git add package.json && git commit -m \"chore(release): bump version to v$(node -p \\\"require('./package.json').version\\\")\" && git tag v$(node -p \"require('./package.json').version\") && git push origin main --tags"
     },
     "jest": {
         "preset": "jest-expo",
