@@ -1,0 +1,107 @@
+{
+  "schemaVersion": "1.2.0",
+  "exportedAt": "2025-11-11T22:06:53.000Z",
+  "state": {
+    "fen": "ft1t1t1f/coc2c2/4h2o/D1o1H3/C1C5/1OO3tC/5CO1/FTT2TTF w - - 0 19 a8h,b8h,d8g,f8g,h8g,a7g,b7h,c7h,f7g,h6g,a5h,c5h,a4h,c4g,b3g,c3g,g3h,h3g,f2h,g2h,a1h,b1h,c1g,f1g,g1h,h1g d8b,a7b,c7b,a6b,h6b,h5w,c4w,b3w,c3w,d3w,e3w,g3w 10,12 e5f5,e6f6",
+    "turn": "w",
+    "whalePositions": {
+      "w": [
+        "e5",
+        "f5"
+      ],
+      "b": [
+        "e6",
+        "f6"
+      ]
+    },
+    "coral": [
+      {
+        "square": "d8",
+        "color": "b"
+      },
+      {
+        "square": "a7",
+        "color": "b"
+      },
+      {
+        "square": "c7",
+        "color": "b"
+      },
+      {
+        "square": "a6",
+        "color": "b"
+      },
+      {
+        "square": "h6",
+        "color": "b"
+      },
+      {
+        "square": "h5",
+        "color": "w"
+      },
+      {
+        "square": "c4",
+        "color": "w"
+      },
+      {
+        "square": "b3",
+        "color": "w"
+      },
+      {
+        "square": "c3",
+        "color": "w"
+      },
+      {
+        "square": "d3",
+        "color": "w"
+      },
+      {
+        "square": "e3",
+        "color": "w"
+      },
+      {
+        "square": "g3",
+        "color": "w"
+      }
+    ],
+    "coralRemaining": {
+      "w": 10,
+      "b": 12
+    },
+    "pieceRoles": {
+      "a8": "hunter",
+      "b8": "hunter",
+      "d8": "gatherer",
+      "f8": "gatherer",
+      "h8": "gatherer",
+      "a7": "gatherer",
+      "b7": "hunter",
+      "c7": "hunter",
+      "f7": "gatherer",
+      "h6": "gatherer",
+      "a5": "hunter",
+      "c5": "hunter",
+      "a4": "hunter",
+      "c4": "gatherer",
+      "b3": "gatherer",
+      "c3": "gatherer",
+      "g3": "hunter",
+      "h3": "gatherer",
+      "f2": "hunter",
+      "g2": "hunter",
+      "a1": "hunter",
+      "b1": "hunter",
+      "c1": "gatherer",
+      "f1": "gatherer",
+      "g1": "hunter",
+      "h1": "gatherer"
+    },
+    "pgn": "[SetUp \"1\"]\n[FEN \"ftth1ttf/cocddcoc/3oo3/8/8/3OO3/COCDDCOC/FTTH1TTF w - - 0 1 a8h,b8h,c8g,f8g,g8h,h8g,a7g,b7h,c7h,d7g,e7h,f7g,g7g,h7h,d6h,e6g,d3g,e3h,a2h,b2g,c2g,d2h,e2g,f2h,g2h,h2g,a1h,b1h,c1g,f1g,g1h,h1g c7b,d6b,e6b,d3w,e3w 15,14 d1e1,d8e8\"]\n\n1. Dh5* Dg5 2. Da5 Da4 3. a3 Of5* 4. axa4 Oc5 5. Oc4* He6~d6,e6 6. Ob3* a6* 7. c3* h6 8. c4 h7 9. Oc3 a7* 10. Of4 Dxf4 11. h3 Dg5 12. Dxg5* h6 13. Hd3 g6 14. Dg3* Hef6 15. Hd5 Tcd8* 16. Hexf5~f5 g5~ 17. Hfxg5 Oh6* 18. Hfe5 Txg3",
+    "isCheck": true,
+    "isCheckmate": false,
+    "isGameOver": false,
+    "isCoralVictory": null,
+    "isDraw": false,
+    "resigned": null
+  }
+}
