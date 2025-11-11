@@ -5,7 +5,7 @@ module.exports = {
         'scope-enum': [
             2,
             'always',
-            ['shared', 'client', 'server', 'ci', 'docs', 'deps', 'config'],
+            ['shared', 'client', 'server', 'ci', 'docs', 'deps', 'config', 'web'],
         ],
         'scope-empty': [2, 'never'], // Scope is required
         'type-enum': [
@@ -31,4 +31,3 @@ module.exports = {
         'header-max-length': [2, 'always', 100],
     },
 };
-
