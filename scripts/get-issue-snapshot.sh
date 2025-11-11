@@ -1,9 +1,13 @@
 #!/bin/bash
 
 # Script to fetch game snapshot from Firestore based on latest GitHub issue
-# Usage: ./scripts/get-issue-snapshot.sh
+# Usage: ./scripts/get-issue-snapshot.sh [fixture-name]
+# Example: ./scripts/get-issue-snapshot.sh whale-check-14
 
 set -e
+
+# Get fixture name from command line argument
+FIXTURE_NAME="${1:-}"
 
 # Colors for output
 RED='\033[0;31m'
@@ -92,14 +96,29 @@ fi
 if echo "$SNAPSHOT" | jq empty 2>/dev/null; then
     echo -e "${GREEN}Successfully fetched game snapshot!${NC}"
     
+    # Wrap the snapshot in the correct format with schemaVersion and exportedAt
+    CURRENT_TIME=$(date -u +"%Y-%m-%dT%H:%M:%S.000Z")
+    FORMATTED_SNAPSHOT=$(echo "$SNAPSHOT" | jq --arg timestamp "$CURRENT_TIME" '{
+        schemaVersion: "1.2.0",
+        exportedAt: $timestamp,
+        state: .
+    }')
+    
     # Copy to clipboard (macOS)
-    echo "$SNAPSHOT" | pbcopy
+    echo "$FORMATTED_SNAPSHOT" | pbcopy
     echo -e "${GREEN}Game snapshot copied to clipboard!${NC}"
     
-    # Also show a preview
+    # If fixture name provided, save to file
+    if [ -n "$FIXTURE_NAME" ]; then
+        FIXTURE_PATH="/Users/josiah.buxton/Documents/personal/coral_clash/shared/game/__fixtures__/${FIXTURE_NAME}.json"
+        echo "$FORMATTED_SNAPSHOT" > "$FIXTURE_PATH"
+        echo -e "${GREEN}Saved to: ${FIXTURE_PATH}${NC}"
+    fi
+    
+    # Show a preview
     echo ""
     echo "Preview (first 10 lines):"
-    echo "$SNAPSHOT" | head -n 10
+    echo "$FORMATTED_SNAPSHOT" | head -n 10
 else
     echo -e "${RED}Error: Failed to fetch valid game snapshot${NC}"
     echo "$SNAPSHOT"
