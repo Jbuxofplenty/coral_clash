@@ -32,7 +32,11 @@
         "test": "node ./node_modules/jest/bin/jest.js --watchAll",
         "test:ci": "node ./node_modules/jest/bin/jest.js --watchAll=false --ci --passWithNoTests",
         "web": "npx http-server public -p 8080 -o",
-        "prepare": "husky"
+        "prepare": "husky",
+        "retag:v1.0.0": "git tag -d v1.0.0 && git push origin :refs/tags/v1.0.0 && git tag v1.0.0 && git push origin v1.0.0",
+        "tag:patch": "npm version patch --no-git-tag-version && git tag v$(node -p \"require('./package.json').version\") && git push origin v$(node -p \"require('./package.json').version\")",
+        "tag:minor": "npm version minor --no-git-tag-version && git tag v$(node -p \"require('./package.json').version\") && git push origin v$(node -p \"require('./package.json').version\")",
+        "tag:major": "npm version major --no-git-tag-version && git tag v$(node -p \"require('./package.json').version\") && git push origin v$(node -p \"require('./package.json').version\")"
     },
     "jest": {
         "preset": "jest-expo",
