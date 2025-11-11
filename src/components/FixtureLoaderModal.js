@@ -35,7 +35,9 @@ const FIXTURES = [
     { name: 'whale-check-11', label: '🐋 Whale Check #11' },
     { name: 'whale-check-12', label: '🐋 Whale Check #12 (Capture Move)' },
     { name: 'whale-check-13', label: '🐋 Whale Check #13 (Protected Whale)' },
+    { name: 'whale-check-14', label: '🐋 Whale Check #14' },
     { name: 'whale-attack', label: '🐋 Whale Attack (UI Bug)' },
+    { name: 'awesome-game-state', label: '⭐ Awesome Game State' },
 ];
 
 const FixtureLoaderModal = ({ visible, onClose, onSelectFixture }) => {

@@ -2030,39 +2030,44 @@ const BaseCoralClashBoard = ({
                                     </TouchableOpacity>
                                 )}
 
-                                {/* Flip Board */}
-                                <TouchableOpacity
-                                    style={[
-                                        styles.menuItem,
-                                        { borderBottomColor: colors.BORDER_COLOR },
-                                    ]}
-                                    onPress={handleFlipBoard}
-                                    activeOpacity={0.7}
-                                >
-                                    <Icon
-                                        name='swap-vert'
-                                        family='MaterialIcons'
-                                        size={28}
-                                        color='#4caf50'
-                                    />
-                                    <View style={styles.menuItemText}>
-                                        <Text
-                                            style={[styles.menuItemTitle, { color: colors.TEXT }]}
-                                        >
-                                            Flip Board
-                                        </Text>
-                                        <Text
-                                            style={[
-                                                styles.menuItemSubtitle,
-                                                { color: colors.TEXT_SECONDARY },
-                                            ]}
-                                        >
-                                            {isBoardFlipped
-                                                ? 'Currently showing black on bottom'
-                                                : 'Currently showing white on bottom'}
-                                        </Text>
-                                    </View>
-                                </TouchableOpacity>
+                                {/* Flip Board - Hidden for Pass and Play (board auto-flips after each move) */}
+                                {opponentType !== 'passandplay' && (
+                                    <TouchableOpacity
+                                        style={[
+                                            styles.menuItem,
+                                            { borderBottomColor: colors.BORDER_COLOR },
+                                        ]}
+                                        onPress={handleFlipBoard}
+                                        activeOpacity={0.7}
+                                    >
+                                        <Icon
+                                            name='swap-vert'
+                                            family='MaterialIcons'
+                                            size={28}
+                                            color='#4caf50'
+                                        />
+                                        <View style={styles.menuItemText}>
+                                            <Text
+                                                style={[
+                                                    styles.menuItemTitle,
+                                                    { color: colors.TEXT },
+                                                ]}
+                                            >
+                                                Flip Board
+                                            </Text>
+                                            <Text
+                                                style={[
+                                                    styles.menuItemSubtitle,
+                                                    { color: colors.TEXT_SECONDARY },
+                                                ]}
+                                            >
+                                                {isBoardFlipped
+                                                    ? 'Currently showing black on bottom'
+                                                    : 'Currently showing white on bottom'}
+                                            </Text>
+                                        </View>
+                                    </TouchableOpacity>
+                                )}
 
                                 {/* Report Bug */}
                                 <TouchableOpacity

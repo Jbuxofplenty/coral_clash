@@ -3,6 +3,7 @@
  * Centralized exports for all game state fixtures
  */
 
+import awesomeGameState from './awesome-game-state.json';
 import checkNonTurn from './check-non-turn.json';
 import checkPinned2 from './check-pinned-2.json';
 import checkPinned from './check-pinned.json';
@@ -18,6 +19,7 @@ import whaleCheck10 from './whale-check-10.json';
 import whaleCheck11 from './whale-check-11.json';
 import whaleCheck12 from './whale-check-12.json';
 import whaleCheck13 from './whale-check-13.json';
+import whaleCheck14 from './whale-check-14.json';
 import whaleCheck2 from './whale-check-2.json';
 import whaleCheck3 from './whale-check-3.json';
 import whaleCheck4 from './whale-check-4.json';
@@ -39,6 +41,7 @@ import whaleRotation from './whale-rotation.json';
 
 // Export as named exports
 export {
+    awesomeGameState,
     checkNonTurn,
     checkPinned,
     checkPinned2,
@@ -55,6 +58,7 @@ export {
     whaleCheck11,
     whaleCheck12,
     whaleCheck13,
+    whaleCheck14,
     whaleCheck2,
     whaleCheck3,
     whaleCheck4,
@@ -76,6 +80,7 @@ export {
 
 // Export fixtures map for dynamic loading (like in FixtureLoaderModal)
 export const FIXTURES = {
+    'awesome-game-state': awesomeGameState,
     'whale-rotation': whaleRotation,
     'whale-rotation-2': whaleRotation2,
     'whale-rotation-4': whaleRotation4,
@@ -108,5 +113,6 @@ export const FIXTURES = {
     'whale-check-11': whaleCheck11,
     'whale-check-12': whaleCheck12,
     'whale-check-13': whaleCheck13,
+    'whale-check-14': whaleCheck14,
     'whale-attack': whaleAttack,
 };
