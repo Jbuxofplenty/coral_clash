@@ -1,0 +1,102 @@
+{
+  "fen": "ftt2ttf/1oc2coc/c2h4/Ddo2oD1/2C5/C1OH3C/5CO1/FTT2TTF b - - 2 11 a8h,b8h,c8g,f8g,g8h,h8g,b7h,c7h,f7g,g7g,h7h,a6g,a5h,b5g,c5h,f5g,g5g,c4g,a3h,c3g,h3g,f2h,g2h,a1h,b1h,c1g,f1g,g1h,h1g c7b,a6b,b5b,f5b,g5w,h5w,c4w,c3w,d3w,e3w,h3w 10,13 d3e3,d6e6",
+  "turn": "b",
+  "whalePositions": {
+    "w": [
+      "d3",
+      "e3"
+    ],
+    "b": [
+      "d6",
+      "e6"
+    ]
+  },
+  "coral": [
+    {
+      "square": "c7",
+      "color": "b"
+    },
+    {
+      "square": "a6",
+      "color": "b"
+    },
+    {
+      "square": "b5",
+      "color": "b"
+    },
+    {
+      "square": "f5",
+      "color": "b"
+    },
+    {
+      "square": "g5",
+      "color": "w"
+    },
+    {
+      "square": "h5",
+      "color": "w"
+    },
+    {
+      "square": "c4",
+      "color": "w"
+    },
+    {
+      "square": "c3",
+      "color": "w"
+    },
+    {
+      "square": "d3",
+      "color": "w"
+    },
+    {
+      "square": "e3",
+      "color": "w"
+    },
+    {
+      "square": "h3",
+      "color": "w"
+    }
+  ],
+  "coralRemaining": {
+    "w": 10,
+    "b": 13
+  },
+  "pieceRoles": {
+    "a8": "hunter",
+    "b8": "hunter",
+    "c8": "gatherer",
+    "f8": "gatherer",
+    "g8": "hunter",
+    "h8": "gatherer",
+    "b7": "hunter",
+    "c7": "hunter",
+    "f7": "gatherer",
+    "g7": "gatherer",
+    "h7": "hunter",
+    "a6": "gatherer",
+    "a5": "hunter",
+    "b5": "gatherer",
+    "c5": "hunter",
+    "f5": "gatherer",
+    "g5": "gatherer",
+    "c4": "gatherer",
+    "a3": "hunter",
+    "c3": "gatherer",
+    "h3": "gatherer",
+    "f2": "hunter",
+    "g2": "hunter",
+    "a1": "hunter",
+    "b1": "hunter",
+    "c1": "gatherer",
+    "f1": "gatherer",
+    "g1": "hunter",
+    "h1": "gatherer"
+  },
+  "pgn": "[SetUp \"1\"]\n[FEN \"ftth1ttf/cocddcoc/3oo3/8/8/3OO3/COCDDCOC/FTTH1TTF w - - 0 1 a8h,b8h,c8g,f8g,g8h,h8g,a7g,b7h,c7h,d7g,e7h,f7g,g7g,h7h,d6h,e6g,d3g,e3h,a2h,b2g,c2g,d2h,e2g,f2h,g2h,h2g,a1h,b1h,c1g,f1g,g1h,h1g c7b,d6b,e6b,d3w,e3w 15,14 d1e1,d8e8\"]\n\n1. Dh5* Of5* 2. Da5 Oc5 3. h3* Db5* 4. a3 Dg5 5. c3* Hd6~d6,e6 6. Of4 a6* 7. Oe5 Hdxe5 8. c4* H6d5 9. Oc3 Hxd3 10. Dxg5* Hd6 11. Hd3",
+  "isCheck": false,
+  "isCheckmate": false,
+  "isGameOver": false,
+  "isCoralVictory": null,
+  "isDraw": false,
+  "resigned": null
+}

@@ -18,6 +18,7 @@ import whaleCheck10 from './whale-check-10.json';
 import whaleCheck11 from './whale-check-11.json';
 import whaleCheck12 from './whale-check-12.json';
 import whaleCheck13 from './whale-check-13.json';
+import whaleCheck14 from './whale-check-14.json';
 import whaleCheck2 from './whale-check-2.json';
 import whaleCheck3 from './whale-check-3.json';
 import whaleCheck4 from './whale-check-4.json';
@@ -55,6 +56,7 @@ export {
     whaleCheck11,
     whaleCheck12,
     whaleCheck13,
+    whaleCheck14,
     whaleCheck2,
     whaleCheck3,
     whaleCheck4,
@@ -108,5 +110,6 @@ export const FIXTURES = {
     'whale-check-11': whaleCheck11,
     'whale-check-12': whaleCheck12,
     'whale-check-13': whaleCheck13,
+    'whale-check-14': whaleCheck14,
     'whale-attack': whaleAttack,
 };
