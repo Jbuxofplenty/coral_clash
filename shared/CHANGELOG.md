@@ -1,3 +1,20 @@
+# [2.1.0](https://github.com/Jbuxofplenty/coral_clash/compare/v2.0.0...v2.1.0) (2025-11-12)
+
+
+### Bug Fixes
+
+* **ci:** add Android keystore and signing secrets to setup script ([3eb1aeb](https://github.com/Jbuxofplenty/coral_clash/commit/3eb1aeb3c453a40df401f92a6e9fab82eac638ba))
+* **client:** enable ads for all users in enabled mode ([eae2608](https://github.com/Jbuxofplenty/coral_clash/commit/eae26086a06722a7e6dc4228fb59b92cc026bdde))
+* **client:** hide flip board menu in pass and play mode ([1eba707](https://github.com/Jbuxofplenty/coral_clash/commit/1eba707097e8707713206e72668b12ba58e6790b))
+* **shared:** correct whale-check-14 fixture format and enhance snapshot script ([9bb4191](https://github.com/Jbuxofplenty/coral_clash/commit/9bb4191dab5d446f4e203d0df885f452082562c2))
+* **web:** add app-ads.txt ([273a2dd](https://github.com/Jbuxofplenty/coral_clash/commit/273a2dd7e74725b7fc63af36b5fea1129c0225ee))
+
+
+### Features
+
+* **docs:** add app store links to landing page ([2c98ee4](https://github.com/Jbuxofplenty/coral_clash/commit/2c98ee4a9d761bfcd69b4d60338932b1c45f2b37))
+* **shared:** add whale-check-14 fixture and issue snapshot script ([1e05509](https://github.com/Jbuxofplenty/coral_clash/commit/1e05509738bb1566dfe856d2b9c2f6a317a990b4)), closes [#12](https://github.com/Jbuxofplenty/coral_clash/issues/12)
+
 # [2.0.0](https://github.com/Jbuxofplenty/coral_clash/compare/v1.7.0...v2.0.0) (2025-11-10)
 
 
