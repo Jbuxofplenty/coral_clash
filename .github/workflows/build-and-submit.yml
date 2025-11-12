@@ -284,7 +284,7 @@ jobs:
 
       - name: Setup Google Play Service Account
         run: |
-          echo '${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}' > google-play-key.json
+          echo "${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}" | base64 --decode > google-play-key.json
           echo "GOOGLE_PLAY_JSON_KEY_PATH=${{ github.workspace }}/google-play-key.json" >> $GITHUB_ENV
 
       - name: Bundle JavaScript with Expo
