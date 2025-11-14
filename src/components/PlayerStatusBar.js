@@ -44,6 +44,7 @@ export default function PlayerStatusBar({
                 styles.container,
                 {
                     backgroundColor: 'transparent',
+                    borderWidth: isActive ? 2 : 0,
                     borderColor: isActive ? colors.PRIMARY : 'transparent',
                 },
                 isCompact && styles.containerCompact,
@@ -152,7 +153,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingHorizontal: 12,
         paddingVertical: 8,
-        borderWidth: 2,
         borderRadius: 0,
     },
     containerCompact: {
