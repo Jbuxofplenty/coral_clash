@@ -5,27 +5,25 @@ import {
     createGameSnapshot,
     restoreGameFromSnapshot,
 } from '@jbuxofplenty/coral-clash';
-import { useNavigation } from '@react-navigation/native';
-import { Icon } from 'galio-framework';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
     Animated,
     Clipboard,
     Dimensions,
-    Modal,
     Platform,
     StyleSheet,
-    Text,
     TouchableOpacity,
     View,
     useWindowDimensions,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAlert, useAuth, useGamePreferences, useTheme } from '../contexts';
 import { CoralClashProvider } from '../contexts/CoralClashContext';
 import { useCoralClash, useDevFeatures, useFirebaseFunctions, useGameActions } from '../hooks';
 import AnimatedPiece from './AnimatedPiece';
 import Coral from './Coral';
 import EmptyBoard from './EmptyBoard';
+import GameMenuModal from './GameMenuModal';
 import GameStatusBanner from './GameStatusBanner';
 import Moves from './Moves';
 import Pieces from './Pieces';
@@ -73,8 +71,8 @@ const BaseCoralClashBoard = ({
     effectiveBoardFlip = null,
     notificationStatus = null,
 }) => {
-    const navigation = useNavigation();
     const { width, height } = useWindowDimensions();
+    const _insets = useSafeAreaInsets(); // Reserved for future safe area handling if needed
     const { colors } = useTheme();
     const { isBoardFlipped: contextBoardFlipped, toggleBoardFlip } = useGamePreferences();
     const { user } = useAuth();
@@ -1824,379 +1822,183 @@ const BaseCoralClashBoard = ({
     return (
         <CoralClashProvider value={coralClash}>
             <View style={styles.container}>
-                <View style={styles.contentWrapper}>
-                    {/* Top Player Status Bar */}
-                    <View style={[styles.topPlayerBar, { width: boardSize }]}>
-                        <PlayerStatusBar
-                            playerName={topPlayerData.name}
-                            avatarKey={topPlayerData.avatarKey}
-                            isComputer={topPlayerData.isComputer}
-                            isActive={isTopPlayerActive}
-                            color={topPlayerColor}
-                            coralRemaining={coralClash.getCoralRemaining(topPlayerColor)}
-                            coralUnderControl={coralClash.getCoralAreaControl(topPlayerColor)}
-                            timeRemaining={topPlayerTime}
-                        />
-                    </View>
+                <View style={styles.gameAndControlsWrapper}>
+                    <View style={styles.contentWrapper}>
+                        {/* Top Player Status Bar */}
+                        <View style={[styles.topPlayerBar, { width: boardSize }]}>
+                            <PlayerStatusBar
+                                playerName={topPlayerData.name}
+                                avatarKey={topPlayerData.avatarKey}
+                                isComputer={topPlayerData.isComputer}
+                                isActive={isTopPlayerActive}
+                                color={topPlayerColor}
+                                coralRemaining={coralClash.getCoralRemaining(topPlayerColor)}
+                                coralUnderControl={coralClash.getCoralAreaControl(topPlayerColor)}
+                                timeRemaining={topPlayerTime}
+                            />
+                        </View>
 
-                    <View style={[styles.spacer, isCompact && styles.spacerCompact]} />
+                        <View style={[styles.spacer, isCompact && styles.spacerCompact]} />
 
-                    {/* Game Board */}
-                    <View style={{ position: 'relative', alignSelf: 'center' }}>
-                        <EmptyBoard size={boardSize} boardFlipped={isBoardFlipped} />
-                        {/* Transparent overlay to capture clicks on all squares - rendered first so pieces/moves can intercept */}
-                        <TouchableOpacity
+                        {/* Game Board */}
+                        <View
                             style={{
-                                position: 'absolute',
+                                position: 'relative',
+                                alignSelf: 'center',
                                 width: boardSize,
                                 height: boardSize,
-                                top: 0,
-                                left: 0,
                             }}
-                            activeOpacity={1}
-                            onPress={(event) => {
-                                // Calculate which square was clicked based on coordinates
-                                const { locationX, locationY } = event.nativeEvent;
-                                const cellSize = boardSize / 8;
-                                const col = Math.floor(locationX / cellSize);
-                                const row = Math.floor((boardSize - locationY) / cellSize);
+                        >
+                            <EmptyBoard size={boardSize} boardFlipped={isBoardFlipped} />
+                            {/* Transparent overlay to capture clicks on all squares - rendered first so pieces/moves can intercept */}
+                            <TouchableOpacity
+                                style={{
+                                    position: 'absolute',
+                                    width: boardSize,
+                                    height: boardSize,
+                                    top: 0,
+                                    left: 0,
+                                }}
+                                activeOpacity={1}
+                                onPress={(event) => {
+                                    // Calculate which square was clicked based on coordinates
+                                    const { locationX, locationY } = event.nativeEvent;
+                                    const cellSize = boardSize / 8;
+                                    const col = Math.floor(locationX / cellSize);
+                                    const row = Math.floor((boardSize - locationY) / cellSize);
 
-                                // Convert to chess notation
-                                const file = String.fromCharCode(
-                                    'a'.charCodeAt(0) + (isBoardFlipped ? 7 - col : col),
-                                );
-                                const rank = (isBoardFlipped ? 8 - row : row + 1).toString();
-                                const square = `${file}${rank}`;
+                                    // Convert to chess notation
+                                    const file = String.fromCharCode(
+                                        'a'.charCodeAt(0) + (isBoardFlipped ? 7 - col : col),
+                                    );
+                                    const rank = (isBoardFlipped ? 8 - row : row + 1).toString();
+                                    const square = `${file}${rank}`;
 
-                                handleSelectPiece(square);
-                            }}
-                        />
-                        <Coral
-                            coralClash={isViewingHistory ? historicalCoralClash : null}
-                            size={boardSize}
-                            boardFlipped={isBoardFlipped}
-                            userColor={userColor}
-                            updateTrigger={updateCounter}
-                            removedCoral={removedCoral}
-                            placedCoral={placedCoral}
-                        />
-                        <Pieces
-                            board={
-                                isViewingHistory && historicalBoard
-                                    ? historicalBoard
-                                    : coralClash.board()
-                            }
-                            onSelectPiece={handleSelectPiece}
-                            size={boardSize}
-                            userColor={userColor}
-                            boardFlipped={isBoardFlipped}
-                            isProcessing={isGameActionProcessing}
-                            animatingSquare={animatingMove?.to}
-                            capturedPiece={capturedPiece}
-                        />
-                        <Moves
-                            visibleMoves={visibleMoves}
-                            onSelectMove={handleSelectMove}
-                            size={boardSize}
-                            isEnemyMoves={isViewingEnemyMoves}
-                            boardFlipped={isBoardFlipped}
-                            isPlayerTurn={isPlayerTurn}
-                            isProcessing={isGameActionProcessing}
-                        />
-                        {/* Animated piece layer */}
-                        {animatingMove && animatingPiece && animatingPiece.type !== WHALE && (
-                            <AnimatedPiece
-                                move={animatingMove}
-                                piece={animatingPiece}
+                                    handleSelectPiece(square);
+                                }}
+                            />
+                            <Coral
+                                coralClash={isViewingHistory ? historicalCoralClash : null}
                                 size={boardSize}
                                 boardFlipped={isBoardFlipped}
                                 userColor={userColor}
-                                onComplete={() => {
-                                    setAnimatingMove(null);
-                                    setAnimatingPiece(null);
-                                    setCapturedPiece(null);
-                                    setRemovedCoral([]);
-                                    setPlacedCoral([]);
-                                    forceUpdate((n) => n + 1);
-                                }}
+                                updateTrigger={updateCounter}
+                                removedCoral={removedCoral}
+                                placedCoral={placedCoral}
                             />
+                            <Pieces
+                                board={
+                                    isViewingHistory && historicalBoard
+                                        ? historicalBoard
+                                        : coralClash.board()
+                                }
+                                onSelectPiece={handleSelectPiece}
+                                size={boardSize}
+                                userColor={userColor}
+                                boardFlipped={isBoardFlipped}
+                                isProcessing={isGameActionProcessing}
+                                animatingSquare={animatingMove?.to}
+                                capturedPiece={capturedPiece}
+                            />
+                            <Moves
+                                visibleMoves={visibleMoves}
+                                onSelectMove={handleSelectMove}
+                                size={boardSize}
+                                isEnemyMoves={isViewingEnemyMoves}
+                                boardFlipped={isBoardFlipped}
+                                isPlayerTurn={isPlayerTurn}
+                                isProcessing={isGameActionProcessing}
+                            />
+                            {/* Animated piece layer */}
+                            {animatingMove && animatingPiece && animatingPiece.type !== WHALE && (
+                                <AnimatedPiece
+                                    move={animatingMove}
+                                    piece={animatingPiece}
+                                    size={boardSize}
+                                    boardFlipped={isBoardFlipped}
+                                    userColor={userColor}
+                                    onComplete={() => {
+                                        setAnimatingMove(null);
+                                        setAnimatingPiece(null);
+                                        setCapturedPiece(null);
+                                        setRemovedCoral([]);
+                                        setPlacedCoral([]);
+                                        forceUpdate((n) => n + 1);
+                                    }}
+                                />
+                            )}
+                        </View>
+
+                        <View style={[styles.spacer, isCompact && styles.spacerCompact]} />
+
+                        {/* Bottom Player Status Bar */}
+                        <View style={[styles.bottomPlayerBar, { width: boardSize }]}>
+                            <PlayerStatusBar
+                                playerName={bottomPlayerData.name}
+                                avatarKey={bottomPlayerData.avatarKey}
+                                isComputer={bottomPlayerData.isComputer}
+                                isActive={isBottomPlayerActive}
+                                color={bottomPlayerColor}
+                                coralRemaining={coralClash.getCoralRemaining(bottomPlayerColor)}
+                                coralUnderControl={coralClash.getCoralAreaControl(
+                                    bottomPlayerColor,
+                                )}
+                                timeRemaining={bottomPlayerTime}
+                            />
+                        </View>
+
+                        {/* Banner Display - Priority-based system ensures only one banner shows at a time */}
+                        {/* Priority: notificationStatus > gameRequest > historyViewing > turnNotification > gameStatus */}
+                        {activeBanner?.content && (
+                            <View style={{ width: boardSize, alignSelf: 'center' }}>
+                                {activeBanner.content}
+                            </View>
                         )}
                     </View>
 
-                    <View style={[styles.spacer, isCompact && styles.spacerCompact]} />
-
-                    {/* Bottom Player Status Bar */}
-                    <View style={[styles.bottomPlayerBar, { width: boardSize }]}>
-                        <PlayerStatusBar
-                            playerName={bottomPlayerData.name}
-                            avatarKey={bottomPlayerData.avatarKey}
-                            isComputer={bottomPlayerData.isComputer}
-                            isActive={isBottomPlayerActive}
-                            color={bottomPlayerColor}
-                            coralRemaining={coralClash.getCoralRemaining(bottomPlayerColor)}
-                            coralUnderControl={coralClash.getCoralAreaControl(bottomPlayerColor)}
-                            timeRemaining={bottomPlayerTime}
-                        />
-                    </View>
-
-                    {/* Banner Display - Priority-based system ensures only one banner shows at a time */}
-                    {/* Priority: notificationStatus > gameRequest > historyViewing > turnNotification > gameStatus */}
-                    {activeBanner?.content && (
-                        <View style={{ width: boardSize, alignSelf: 'center' }}>
-                            {activeBanner.content}
+                    {/* Control Bar */}
+                    {renderControls && (
+                        <View style={styles.controlBarContainer}>
+                            {renderControls({
+                                openMenu,
+                                canUndo,
+                                handleUndo,
+                                clearVisibleMoves,
+                                colors,
+                                // History navigation
+                                canGoBack,
+                                canGoForward,
+                                handleHistoryBack,
+                                handleHistoryForward,
+                                isViewingHistory,
+                                // Game instance for conditional rendering
+                                coralClash,
+                                // Game data for server-side status checks
+                                gameData,
+                            })}
                         </View>
                     )}
                 </View>
 
-                {/* Control Bar */}
-                {renderControls &&
-                    renderControls({
-                        openMenu,
-                        canUndo,
-                        handleUndo,
-                        clearVisibleMoves,
-                        colors,
-                        // History navigation
-                        canGoBack,
-                        canGoForward,
-                        handleHistoryBack,
-                        handleHistoryForward,
-                        isViewingHistory,
-                        // Game instance for conditional rendering
-                        coralClash,
-                        // Game data for server-side status checks
-                        gameData,
-                    })}
-
                 {/* Bottom Drawer Menu */}
-                <Modal
+                <GameMenuModal
                     visible={menuVisible}
-                    transparent
-                    animationType='fade'
-                    onRequestClose={closeMenu}
-                >
-                    <TouchableOpacity
-                        style={styles.modalOverlay}
-                        activeOpacity={1}
-                        onPress={closeMenu}
-                    >
-                        <Animated.View
-                            style={[
-                                styles.drawerContainer,
-                                {
-                                    backgroundColor: colors.CARD_BACKGROUND,
-                                    transform: [{ translateY }],
-                                },
-                            ]}
-                            onStartShouldSetResponder={() => true}
-                        >
-                            <View style={styles.drawerHandle} />
-
-                            <View style={styles.menuItems}>
-                                {/* Save Game State - Only show when dev features are enabled */}
-                                {DEV_FEATURES_ENABLED && (
-                                    <TouchableOpacity
-                                        style={[
-                                            styles.menuItem,
-                                            { borderBottomColor: colors.BORDER_COLOR },
-                                        ]}
-                                        onPress={handleExportState}
-                                        activeOpacity={0.7}
-                                    >
-                                        <Icon
-                                            name='save'
-                                            family='MaterialIcons'
-                                            size={28}
-                                            color={colors.PRIMARY}
-                                        />
-                                        <View style={styles.menuItemText}>
-                                            <Text
-                                                style={[
-                                                    styles.menuItemTitle,
-                                                    { color: colors.TEXT },
-                                                ]}
-                                            >
-                                                Save Game State
-                                            </Text>
-                                            <Text
-                                                style={[
-                                                    styles.menuItemSubtitle,
-                                                    { color: colors.TEXT_SECONDARY },
-                                                ]}
-                                            >
-                                                Export current game position
-                                            </Text>
-                                        </View>
-                                    </TouchableOpacity>
-                                )}
-
-                                {/* Flip Board - Hidden for Pass and Play (board auto-flips after each move) */}
-                                {opponentType !== 'passandplay' && (
-                                    <TouchableOpacity
-                                        style={[
-                                            styles.menuItem,
-                                            { borderBottomColor: colors.BORDER_COLOR },
-                                        ]}
-                                        onPress={handleFlipBoard}
-                                        activeOpacity={0.7}
-                                    >
-                                        <Icon
-                                            name='swap-vert'
-                                            family='MaterialIcons'
-                                            size={28}
-                                            color='#4caf50'
-                                        />
-                                        <View style={styles.menuItemText}>
-                                            <Text
-                                                style={[
-                                                    styles.menuItemTitle,
-                                                    { color: colors.TEXT },
-                                                ]}
-                                            >
-                                                Flip Board
-                                            </Text>
-                                            <Text
-                                                style={[
-                                                    styles.menuItemSubtitle,
-                                                    { color: colors.TEXT_SECONDARY },
-                                                ]}
-                                            >
-                                                {isBoardFlipped
-                                                    ? 'Currently showing black on bottom'
-                                                    : 'Currently showing white on bottom'}
-                                            </Text>
-                                        </View>
-                                    </TouchableOpacity>
-                                )}
-
-                                {/* Report Bug */}
-                                <TouchableOpacity
-                                    style={[
-                                        styles.menuItem,
-                                        { borderBottomColor: colors.BORDER_COLOR },
-                                    ]}
-                                    onPress={() => {
-                                        closeMenu();
-                                        // Create game snapshot to include with bug report
-                                        const snapshot = createGameSnapshot(coralClash);
-                                        navigation.navigate('Report Issue', {
-                                            gameSnapshot: snapshot,
-                                        });
-                                    }}
-                                    activeOpacity={0.7}
-                                >
-                                    <Icon
-                                        name='bug-report'
-                                        family='MaterialIcons'
-                                        size={28}
-                                        color='#ff9800'
-                                    />
-                                    <View style={styles.menuItemText}>
-                                        <Text
-                                            style={[styles.menuItemTitle, { color: colors.TEXT }]}
-                                        >
-                                            Report Bug
-                                        </Text>
-                                        <Text
-                                            style={[
-                                                styles.menuItemSubtitle,
-                                                { color: colors.TEXT_SECONDARY },
-                                            ]}
-                                        >
-                                            Include current game state
-                                        </Text>
-                                    </View>
-                                </TouchableOpacity>
-
-                                {/* Custom menu items from subclasses */}
-                                {renderMenuItems &&
-                                    renderMenuItems({
-                                        closeMenu,
-                                        coralClash,
-                                        colors,
-                                        styles,
-                                        gameData,
-                                    })}
-
-                                {/* Resign */}
-                                <TouchableOpacity
-                                    style={[
-                                        styles.menuItem,
-                                        {
-                                            opacity:
-                                                coralClash.isGameOver() || isGameActionProcessing
-                                                    ? 0.5
-                                                    : 1,
-                                        },
-                                    ]}
-                                    onPress={handleResign}
-                                    disabled={coralClash.isGameOver() || isGameActionProcessing}
-                                    activeOpacity={0.7}
-                                >
-                                    <Icon
-                                        name='flag'
-                                        family='MaterialIcons'
-                                        size={28}
-                                        color={
-                                            coralClash.isGameOver() || isGameActionProcessing
-                                                ? colors.MUTED
-                                                : '#d32f2f'
-                                        }
-                                    />
-                                    <View style={styles.menuItemText}>
-                                        <Text
-                                            style={[
-                                                styles.menuItemTitle,
-                                                {
-                                                    color:
-                                                        coralClash.isGameOver() ||
-                                                        isGameActionProcessing
-                                                            ? colors.MUTED
-                                                            : colors.TEXT,
-                                                },
-                                            ]}
-                                        >
-                                            {isGameActionProcessing
-                                                ? 'Resigning...'
-                                                : 'Resign Game'}
-                                        </Text>
-                                        <Text
-                                            style={[
-                                                styles.menuItemSubtitle,
-                                                { color: colors.TEXT_SECONDARY },
-                                            ]}
-                                        >
-                                            {isGameActionProcessing
-                                                ? 'Please wait...'
-                                                : coralClash.isGameOver()
-                                                  ? 'Game already ended'
-                                                  : 'Forfeit the current game'}
-                                        </Text>
-                                    </View>
-                                </TouchableOpacity>
-                            </View>
-
-                            {/* Cancel Button */}
-                            <TouchableOpacity
-                                style={[
-                                    styles.cancelButton,
-                                    { borderTopColor: colors.BORDER_COLOR },
-                                ]}
-                                onPress={closeMenu}
-                                activeOpacity={0.7}
-                            >
-                                <Text
-                                    style={[
-                                        styles.cancelButtonText,
-                                        { color: colors.TEXT_SECONDARY },
-                                    ]}
-                                >
-                                    Cancel
-                                </Text>
-                            </TouchableOpacity>
-                        </Animated.View>
-                    </TouchableOpacity>
-                </Modal>
+                    slideAnim={slideAnim}
+                    translateY={translateY}
+                    onClose={closeMenu}
+                    DEV_FEATURES_ENABLED={DEV_FEATURES_ENABLED}
+                    onExportState={handleExportState}
+                    opponentType={opponentType}
+                    onFlipBoard={handleFlipBoard}
+                    isBoardFlipped={isBoardFlipped}
+                    coralClash={coralClash}
+                    renderMenuItems={renderMenuItems}
+                    onResign={handleResign}
+                    isGameActionProcessing={isGameActionProcessing}
+                    colors={colors}
+                    baseStyles={styles}
+                    gameData={gameData}
+                />
             </View>
         </CoralClashProvider>
     );
@@ -2207,17 +2009,27 @@ const styles = StyleSheet.create({
         flex: 1,
         width: '100%',
     },
+    gameAndControlsWrapper: {
+        flex: 1,
+        width: '100%',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+    },
     contentWrapper: {
+        flex: 1,
         width: '100%',
         alignItems: 'center',
-        paddingBottom: 100, // Ensure content stays above the absolutely positioned control bar
+        minHeight: 0, // Allow flex shrinking
+        flexShrink: 1, // Allow shrinking when space is constrained
     },
     topPlayerBar: {
         paddingTop: 8,
         alignSelf: 'center',
+        borderWidth: 0,
     },
     bottomPlayerBar: {
         alignSelf: 'center',
+        borderWidth: 0,
     },
     spacer: {
         height: 12,
@@ -2225,80 +2037,32 @@ const styles = StyleSheet.create({
     spacerCompact: {
         height: 6,
     },
+    controlBarContainer: {
+        width: '100%',
+        flexShrink: 0, // Prevent footer from shrinking
+        flexGrow: 0, // Don't grow beyond content
+        minHeight: 56, // controlButton minHeight (56px)
+        paddingBottom: 10,
+    },
     // eslint-disable-next-line react-native/no-unused-styles -- Used by child components
     controlBar: {
-        position: 'absolute',
-        marginBottom: 20,
-        bottom: 100,
-        left: 0,
-        right: 0,
         width: '100%',
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
         paddingHorizontal: 24,
-        paddingVertical: 12,
+        paddingTop: 0,
+        paddingBottom: 0,
         backgroundColor: 'transparent',
+        // Height will be determined by button minHeight + control bar padding
     },
     // eslint-disable-next-line react-native/no-unused-styles -- Used by child components
     controlButton: {
-        padding: 12,
+        padding: 6,
         backgroundColor: 'transparent',
-    },
-    modalOverlay: {
-        flex: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        justifyContent: 'flex-end',
-    },
-    drawerContainer: {
-        borderTopLeftRadius: 20,
-        borderTopRightRadius: 20,
-        paddingBottom: 34,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: -2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 10,
-        elevation: 10,
-    },
-    drawerHandle: {
-        width: 40,
-        height: 4,
-        backgroundColor: '#CCCCCC',
-        borderRadius: 2,
-        alignSelf: 'center',
-        marginTop: 12,
-        marginBottom: 20,
-    },
-    menuItems: {
-        paddingHorizontal: 20,
-    },
-    menuItem: {
-        flexDirection: 'row',
+        minHeight: 56, // Icon (44px) + padding top (12px) + padding bottom (12px) = 68px
+        justifyContent: 'center',
         alignItems: 'center',
-        paddingVertical: 16,
-        borderBottomWidth: 1,
-    },
-    menuItemText: {
-        flex: 1,
-        marginLeft: 16,
-    },
-    menuItemTitle: {
-        fontSize: 18,
-        fontWeight: '600',
-        marginBottom: 4,
-    },
-    menuItemSubtitle: {
-        fontSize: 14,
-    },
-    cancelButton: {
-        paddingVertical: 16,
-        alignItems: 'center',
-        borderTopWidth: 1,
-        marginTop: 8,
-    },
-    cancelButtonText: {
-        fontSize: 16,
-        fontWeight: '600',
     },
 });
 
