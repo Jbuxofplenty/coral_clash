@@ -2042,7 +2042,7 @@ const styles = StyleSheet.create({
         flexShrink: 0, // Prevent footer from shrinking
         flexGrow: 0, // Don't grow beyond content
         minHeight: 56, // controlButton minHeight (56px)
-        paddingBottom: 10,
+        paddingBottom: 20,
     },
     // eslint-disable-next-line react-native/no-unused-styles -- Used by child components
     controlBar: {

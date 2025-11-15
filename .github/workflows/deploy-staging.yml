@@ -32,8 +32,62 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  cancel-pending-approvals:
+    name: Cancel Pending Approvals
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write  # Required to cancel workflow runs
+    steps:
+      - name: Cancel pending staging deployments waiting for approval
+        run: |
+          echo "🔍 Checking for pending staging deployments waiting for approval..."
+          
+          # Get workflow ID for "Deploy to Staging (TestFlight/Internal Testing)"
+          WORKFLOW_ID=$(gh api repos/${{ github.repository }}/actions/workflows/deploy-staging.yml --jq '.id')
+          echo "📋 Workflow ID: $WORKFLOW_ID"
+          
+          # Get all workflow runs for this workflow that are waiting or in progress
+          CURRENT_RUN_ID=${{ github.run_id }}
+          echo "🆔 Current run ID: $CURRENT_RUN_ID"
+          
+          # Get all waiting/in-progress runs and filter out current run
+          gh api repos/${{ github.repository }}/actions/workflows/$WORKFLOW_ID/runs \
+            --jq '.workflow_runs[] | select(.status == "waiting" or .status == "in_progress") | "\(.id)|\(.status)"' | \
+          while IFS='|' read -r RUN_ID RUN_STATUS; do
+            if [ -z "$RUN_ID" ] || [ "$RUN_ID" == "$CURRENT_RUN_ID" ]; then
+              continue
+            fi
+            
+            echo "🔍 Checking run $RUN_ID (status: $RUN_STATUS)..."
+            
+            # Check if this run has pending deployments
+            PENDING_DEPLOYMENTS=$(gh api repos/${{ github.repository }}/actions/runs/$RUN_ID/pending_deployments 2>/dev/null || echo "[]")
+            DEPLOYMENT_COUNT=$(echo "$PENDING_DEPLOYMENTS" | jq 'length')
+            
+            if [ "$DEPLOYMENT_COUNT" -gt 0 ]; then
+              echo "🚫 Found pending workflow run $RUN_ID waiting for approval - canceling..."
+              
+              # Reject pending deployments first
+              ENV_IDS=$(echo "$PENDING_DEPLOYMENTS" | jq -s '[.[].environment.id]')
+              if [ -n "$ENV_IDS" ] && [ "$ENV_IDS" != "[]" ]; then
+                echo "{\"environment_ids\":$ENV_IDS,\"state\":\"rejected\",\"comment\":\"Auto-canceled by new deployment\"}" | \
+                  gh api repos/${{ github.repository }}/actions/runs/$RUN_ID/pending_deployments -X POST --input - || true
+              fi
+              
+              # Cancel the workflow run
+              gh run cancel $RUN_ID || echo "⚠️  Could not cancel run $RUN_ID (may already be canceled)"
+            elif [ "$RUN_STATUS" == "waiting" ]; then
+              # Waiting but no pending deployments - cancel it
+              echo "🚫 Found waiting workflow run $RUN_ID - canceling..."
+              gh run cancel $RUN_ID || echo "⚠️  Could not cancel run $RUN_ID (may already be canceled)"
+            fi
+          done
+          
+          echo "✅ Cleanup complete"
+
   test:
     name: Run Tests
+    needs: cancel-pending-approvals
     uses: ./.github/workflows/test.yml
   
   release-shared:
