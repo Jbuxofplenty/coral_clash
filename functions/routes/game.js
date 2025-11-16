@@ -8,6 +8,8 @@ import {
 } from '@jbuxofplenty/coral-clash';
 import { HttpsError, onCall, onRequest } from 'firebase-functions/v2/https';
 import { admin } from '../init.js';
+import { SEARCH_DEPTH } from '../utils/aiConfig.js';
+import { findBestMove } from '../utils/aiEvaluation.js';
 import { getAppCheckConfig } from '../utils/appCheckConfig.js';
 import { getGameResult, validateMove } from '../utils/gameValidator.js';
 import { validateClientVersion } from '../utils/gameVersion.js';
@@ -738,8 +740,6 @@ async function makeComputerMoveHelper(gameId, gameData = null) {
     // Get current game state (includes coral data)
     const currentGameState = gameData.gameState || { fen: gameData.fen };
 
-    // For now, we'll use simple random move selection
-    // In the future, this could be enhanced with difficulty levels
     const game = new CoralClash();
 
     // Restore full game state including coral
@@ -751,8 +751,71 @@ async function makeComputerMoveHelper(gameId, gameData = null) {
         throw new Error('No legal moves available for computer');
     }
 
-    // Select random move
-    const selectedMove = moves[Math.floor(Math.random() * moves.length)];
+    // Get difficulty level (default to 'random' if not set)
+    const difficulty = gameData.difficulty || 'random';
+
+    // Select move based on difficulty
+    let selectedMove;
+
+    switch (difficulty) {
+        case 'random': {
+            // Random move selection
+            selectedMove = moves[Math.floor(Math.random() * moves.length)];
+            break;
+        }
+        case 'easy': {
+            // Easy mode: Use alpha-beta pruning with shallow depth
+            const depth = SEARCH_DEPTH.easy;
+            // Computer plays as black (opponent)
+            const computerColor = 'b';
+            const result = findBestMove(currentGameState, depth, computerColor);
+
+            if (result.move) {
+                selectedMove = result.move;
+            } else {
+                // Fallback to random if no move found
+                console.warn('AI search found no move, falling back to random');
+                selectedMove = moves[Math.floor(Math.random() * moves.length)];
+            }
+            break;
+        }
+        case 'medium': {
+            // Medium mode: Future implementation with higher depth
+            // For now, fallback to easy
+            const depth = SEARCH_DEPTH.medium || SEARCH_DEPTH.easy;
+            const computerColor = 'b';
+            const result = findBestMove(currentGameState, depth, computerColor);
+
+            if (result.move) {
+                selectedMove = result.move;
+            } else {
+                console.warn('AI search found no move, falling back to random');
+                selectedMove = moves[Math.floor(Math.random() * moves.length)];
+            }
+            break;
+        }
+        case 'hard': {
+            // Hard mode: Future implementation with even higher depth
+            // For now, fallback to easy
+            const depth = SEARCH_DEPTH.hard || SEARCH_DEPTH.easy;
+            const computerColor = 'b';
+            const result = findBestMove(currentGameState, depth, computerColor);
+
+            if (result.move) {
+                selectedMove = result.move;
+            } else {
+                console.warn('AI search found no move, falling back to random');
+                selectedMove = moves[Math.floor(Math.random() * moves.length)];
+            }
+            break;
+        }
+        default: {
+            // Unknown difficulty, default to random
+            console.warn(`Unknown difficulty level: ${difficulty}, defaulting to random`);
+            selectedMove = moves[Math.floor(Math.random() * moves.length)];
+            break;
+        }
+    }
 
     // Make the move
     const moveResult = game.move({
