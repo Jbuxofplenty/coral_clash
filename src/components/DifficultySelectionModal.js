@@ -28,21 +28,20 @@ const DIFFICULTY_LEVELS = [
         icon: 'star-outline',
         iconFamily: 'ionicon',
     },
-    // Future difficulty levels can be added here:
-    // {
-    //     value: 'medium',
-    //     name: 'Medium',
-    //     description: 'Computer uses advanced strategy',
-    //     icon: 'star-half',
-    //     iconFamily: 'ionicon',
-    // },
-    // {
-    //     value: 'hard',
-    //     name: 'Hard',
-    //     description: 'Computer uses expert strategy',
-    //     icon: 'star',
-    //     iconFamily: 'ionicon',
-    // },
+    {
+        value: 'medium',
+        name: 'Medium',
+        description: 'Computer uses advanced strategy',
+        icon: 'star-half',
+        iconFamily: 'ionicon',
+    },
+    {
+        value: 'hard',
+        name: 'Hard',
+        description: 'Computer uses expert strategy',
+        icon: 'star',
+        iconFamily: 'ionicon',
+    },
 ];
 
 /**

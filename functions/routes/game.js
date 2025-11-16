@@ -8,8 +8,8 @@ import {
 } from '@jbuxofplenty/coral-clash';
 import { HttpsError, onCall, onRequest } from 'firebase-functions/v2/https';
 import { admin } from '../init.js';
-import { SEARCH_DEPTH } from '../utils/aiConfig.js';
-import { findBestMove } from '../utils/aiEvaluation.js';
+import { SEARCH_DEPTH, TIME_CONTROL } from '../utils/aiConfig.js';
+import { findBestMoveIterativeDeepening } from '../utils/aiEvaluation.js';
 import { getAppCheckConfig } from '../utils/appCheckConfig.js';
 import { getGameResult, validateMove } from '../utils/gameValidator.js';
 import { validateClientVersion } from '../utils/gameVersion.js';
@@ -196,16 +196,17 @@ export const createGame = onCall(getAppCheckConfig(), async (request) => {
 export { createGameHandler };
 
 /**
- * Create a new game against the computer
- * POST /api/game/createComputer
+ * Handler function for creating a computer game
+ * @param {Object} request - Request object with data and auth
+ * @returns {Promise<Object>} Game creation result
  */
-export const createComputerGame = onCall(getAppCheckConfig(), async (request) => {
+export async function createComputerGameHandler(request) {
     const { data, auth } = request;
-    try {
-        if (!auth) {
-            throw new HttpsError('unauthenticated', 'User must be authenticated');
-        }
+    if (!auth) {
+        throw new HttpsError('unauthenticated', 'User must be authenticated');
+    }
 
+    try {
         const { timeControl, difficulty, clientVersion } = data;
         const userId = auth.uid;
 
@@ -257,6 +258,25 @@ export const createComputerGame = onCall(getAppCheckConfig(), async (request) =>
         };
     } catch (error) {
         console.error('Error creating computer game:', error);
+        if (error instanceof HttpsError) {
+            throw error;
+        }
+        throw new HttpsError('internal', error.message);
+    }
+}
+
+/**
+ * Create a new game against the computer
+ * POST /api/game/createComputer
+ */
+export const createComputerGame = onCall(getAppCheckConfig(), async (request) => {
+    try {
+        return await createComputerGameHandler(request);
+    } catch (error) {
+        console.error('Error creating computer game:', error);
+        if (error instanceof HttpsError) {
+            throw error;
+        }
         throw new HttpsError('internal', error.message);
     }
 });
@@ -728,7 +748,7 @@ export const makeComputerMove = onCall(getAppCheckConfig(), async (request) => {
  * @param {Object} gameData - Game data (optional, will fetch if not provided)
  * @returns {Promise<Object>} Computer move result
  */
-async function makeComputerMoveHelper(gameId, gameData = null) {
+export async function makeComputerMoveHelper(gameId, gameData = null) {
     if (!gameData) {
         const gameDoc = await db.collection('games').doc(gameId).get();
         if (!gameDoc.exists) {
@@ -764,14 +784,19 @@ async function makeComputerMoveHelper(gameId, gameData = null) {
             break;
         }
         case 'easy': {
-            // Easy mode: Use alpha-beta pruning with shallow depth
-            const depth = SEARCH_DEPTH.easy;
-            // Computer plays as black (opponent)
+            // Easy mode: Use iterative deepening with time control
+            const maxDepth = SEARCH_DEPTH.easy;
             const computerColor = 'b';
-            const result = findBestMove(currentGameState, depth, computerColor);
+            const result = findBestMoveIterativeDeepening(
+                currentGameState,
+                maxDepth,
+                computerColor,
+                TIME_CONTROL.maxTimeMs,
+            );
 
             if (result.move) {
                 selectedMove = result.move;
+                console.log(`AI (easy) found move at depth ${result.depth}, evaluated ${result.nodesEvaluated} nodes in ${result.elapsedMs}ms`);
             } else {
                 // Fallback to random if no move found
                 console.warn('AI search found no move, falling back to random');
@@ -780,14 +805,19 @@ async function makeComputerMoveHelper(gameId, gameData = null) {
             break;
         }
         case 'medium': {
-            // Medium mode: Future implementation with higher depth
-            // For now, fallback to easy
-            const depth = SEARCH_DEPTH.medium || SEARCH_DEPTH.easy;
+            // Medium mode: Use iterative deepening with time control
+            const maxDepth = SEARCH_DEPTH.medium;
             const computerColor = 'b';
-            const result = findBestMove(currentGameState, depth, computerColor);
+            const result = findBestMoveIterativeDeepening(
+                currentGameState,
+                maxDepth,
+                computerColor,
+                TIME_CONTROL.maxTimeMs,
+            );
 
             if (result.move) {
                 selectedMove = result.move;
+                console.log(`AI (medium) found move at depth ${result.depth}, evaluated ${result.nodesEvaluated} nodes in ${result.elapsedMs}ms`);
             } else {
                 console.warn('AI search found no move, falling back to random');
                 selectedMove = moves[Math.floor(Math.random() * moves.length)];
@@ -795,14 +825,19 @@ async function makeComputerMoveHelper(gameId, gameData = null) {
             break;
         }
         case 'hard': {
-            // Hard mode: Future implementation with even higher depth
-            // For now, fallback to easy
-            const depth = SEARCH_DEPTH.hard || SEARCH_DEPTH.easy;
+            // Hard mode: Use iterative deepening with time control
+            const maxDepth = SEARCH_DEPTH.hard;
             const computerColor = 'b';
-            const result = findBestMove(currentGameState, depth, computerColor);
+            const result = findBestMoveIterativeDeepening(
+                currentGameState,
+                maxDepth,
+                computerColor,
+                TIME_CONTROL.maxTimeMs,
+            );
 
             if (result.move) {
                 selectedMove = result.move;
+                console.log(`AI (hard) found move at depth ${result.depth}, evaluated ${result.nodesEvaluated} nodes in ${result.elapsedMs}ms`);
             } else {
                 console.warn('AI search found no move, falling back to random');
                 selectedMove = moves[Math.floor(Math.random() * moves.length)];

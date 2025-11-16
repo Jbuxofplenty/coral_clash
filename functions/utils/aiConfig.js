@@ -1,6 +1,6 @@
 /**
  * AI Configuration for Coral Clash Computer Opponent
- * 
+ *
  * This file contains all evaluation parameters for the AI difficulty system.
  * Tune these values to adjust AI behavior and create new difficulty modes.
  */
@@ -16,23 +16,23 @@ const PIECE_VALUES = {
     },
     dolphin: {
         gatherer: 950, // Higher: Max mobility + Coral placement is premium utility
-        hunter: 900,   // High mobility + Coral removal utility
+        hunter: 900, // High mobility + Coral removal utility
     },
     turtle: {
         gatherer: 550, // Higher: Excellent straight-line mobility + Coral placement
-        hunter: 500,   // Good mobility + Coral removal utility
+        hunter: 500, // Good mobility + Coral removal utility
     },
     pufferfish: {
         gatherer: 350, // Higher: Diagonal mobility + Coral placement utility
-        hunter: 300,   // Diagonal movement + Coral removal utility
+        hunter: 300, // Diagonal movement + Coral removal utility
     },
     octopus: {
         gatherer: 175, // Higher: Basic mobility, but Coral placement on front lines is critical
-        hunter: 150,   // Lowest mobility, focused on localized Coral denial
+        hunter: 150, // Lowest mobility, focused on localized Coral denial
     },
     crab: {
         gatherer: 125, // Higher: Basic mobility, focused on localized Coral placement
-        hunter: 100,   // Lowest mobility, focused on localized Coral denial
+        hunter: 100, // Lowest mobility, focused on localized Coral denial
     },
 };
 
@@ -134,11 +134,11 @@ const MOBILITY = {
  */
 const GAME_ENDING = {
     checkmate: {
-        win: 100000,   // Very high positive for winning by checkmate
+        win: 100000, // Very high positive for winning by checkmate
         loss: -100000, // Very high negative for losing by checkmate
     },
     coralVictory: {
-        win: 50000,   // Positive for winning by coral area control
+        win: 50000, // Positive for winning by coral area control
         loss: -50000, // Negative for losing by coral area control
     },
     stalemate: {
@@ -151,10 +151,20 @@ const GAME_ENDING = {
  * Higher depth = stronger play but slower computation
  */
 const SEARCH_DEPTH = {
-    random: 0,  // No search, just random moves
-    easy: 3,    // 3 plies deep
-    medium: 5,  // Future: 5 plies deep
-    hard: 7,    // Future: 7 plies deep
+    random: 0, // No search, just random moves
+    easy: 3, // 3 plies deep
+    medium: 5, // 5 plies deep
+    hard: 7, // 7 plies deep
+};
+
+/**
+ * Time control settings for AI moves
+ * Maximum time (in milliseconds) the AI can spend thinking before making a move
+ */
+const TIME_CONTROL = {
+    maxTimeMs: 5000, // Maximum 5 seconds per move
+    minTimeMs: 100, // Minimum time to spend (ensures at least some thinking)
+    progressIntervalMs: 200, // Report progress every N milliseconds
 };
 
 /**
@@ -165,42 +175,42 @@ const SEARCH_DEPTH = {
  */
 export function getPieceValue(pieceSymbol, role) {
     const pieceKey = pieceSymbol.toLowerCase();
-    
+
     if (pieceKey === 'h') {
         return PIECE_VALUES.whale.value;
     }
-    
+
     const pieceMap = {
-        'd': 'dolphin',
-        't': 'turtle',
-        'f': 'pufferfish',
-        'o': 'octopus',
-        'c': 'crab',
+        d: 'dolphin',
+        t: 'turtle',
+        f: 'pufferfish',
+        o: 'octopus',
+        c: 'crab',
     };
-    
+
     const pieceName = pieceMap[pieceKey];
     if (!pieceName) {
         return 0;
     }
-    
+
     if (role === 'gatherer') {
         return PIECE_VALUES[pieceName].gatherer;
     } else if (role === 'hunter') {
         return PIECE_VALUES[pieceName].hunter;
     }
-    
+
     // Default to hunter if role not specified
     return PIECE_VALUES[pieceName].hunter;
 }
 
 export {
+    CORAL_EVALUATION,
+    GAME_ENDING,
+    MOBILITY,
     PIECE_VALUES,
     POSITIONAL_BONUSES,
-    WHALE_SAFETY,
-    CORAL_EVALUATION,
-    TACTICAL_BONUSES,
-    MOBILITY,
-    GAME_ENDING,
     SEARCH_DEPTH,
+    TACTICAL_BONUSES,
+    TIME_CONTROL,
+    WHALE_SAFETY,
 };
-

@@ -26,6 +26,30 @@ jest.mock('../utils/notifications.js', () => ({
 
 jest.mock('@google-cloud/tasks');
 
+jest.mock('../utils/aiEvaluation.js', () => ({
+    findBestMove: jest.fn(),
+    findBestMoveIterativeDeepening: jest.fn(),
+}));
+
+jest.mock('../utils/helpers.js', () => ({
+    formatDisplayName: jest.fn((name, discriminator) => `${name}#${discriminator}`),
+    increment: jest.fn((value) => `increment(${value})`),
+    initializeGameState: jest.fn(() => ({
+        fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+        turn: 'w',
+        coralRemaining: { w: 15, b: 14 },
+    })),
+    serverTimestamp: jest.fn(() => 'MOCK_TIMESTAMP'),
+}));
+
+jest.mock('@jbuxofplenty/coral-clash', () => ({
+    CoralClash: jest.fn(),
+    GAME_VERSION: '1.0.0',
+    createGameSnapshot: jest.fn(),
+    restoreGameFromSnapshot: jest.fn(),
+    calculateUndoMoveCount: jest.fn(),
+}));
+
 import * as gameRoutes from '../routes/game.js';
 
 describe('Game Creation Functions', () => {
@@ -357,8 +381,306 @@ describe('Game Creation Functions', () => {
                     'Unable to determine currentTurn, missing player ID fields',
                 );
 
-                consoleWarnSpy.mockRestore();
-            });
+            consoleWarnSpy.mockRestore();
         });
     });
+
+    describe('createComputerGame', () => {
+        const creatorId = 'creator-user-123';
+
+        beforeEach(() => {
+            // Mock game engine for initialization
+            const { CoralClash } = require('@jbuxofplenty/coral-clash');
+            CoralClash.mockImplementation(() => ({
+                fen: jest.fn(() => 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'),
+            }));
+        });
+
+        it('should create a computer game with random difficulty', async () => {
+            mocks.mockAdd.mockResolvedValue({ id: 'computer-game-random' });
+
+            const result = await gameRoutes.createComputerGameHandler({
+                data: {
+                    timeControl: { type: 'unlimited' },
+                    difficulty: 'random',
+                },
+                auth: { uid: creatorId },
+            });
+
+            expect(result.success).toBe(true);
+            expect(result.gameId).toBe('computer-game-random');
+
+            // Verify game document was created with correct difficulty
+            expect(mocks.mockAdd).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    difficulty: 'random',
+                    opponentId: 'computer',
+                    opponentType: 'computer',
+                    creatorId: creatorId,
+                    status: 'active',
+                }),
+            );
+        });
+
+        it('should create a computer game with easy difficulty', async () => {
+            mocks.mockAdd.mockResolvedValue({ id: 'computer-game-easy' });
+
+            const result = await gameRoutes.createComputerGameHandler({
+                data: {
+                    timeControl: { type: 'unlimited' },
+                    difficulty: 'easy',
+                },
+                auth: { uid: creatorId },
+            });
+
+            expect(result.success).toBe(true);
+            expect(result.gameId).toBe('computer-game-easy');
+
+            // Verify game document was created with correct difficulty
+            expect(mocks.mockAdd).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    difficulty: 'easy',
+                    opponentId: 'computer',
+                    opponentType: 'computer',
+                }),
+            );
+        });
+
+        it('should create a computer game with medium difficulty', async () => {
+            mocks.mockAdd.mockResolvedValue({ id: 'computer-game-medium' });
+
+            const result = await gameRoutes.createComputerGameHandler({
+                data: {
+                    timeControl: { type: 'unlimited' },
+                    difficulty: 'medium',
+                },
+                auth: { uid: creatorId },
+            });
+
+            expect(result.success).toBe(true);
+            expect(result.gameId).toBe('computer-game-medium');
+
+            // Verify game document was created with correct difficulty
+            expect(mocks.mockAdd).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    difficulty: 'medium',
+                    opponentId: 'computer',
+                    opponentType: 'computer',
+                }),
+            );
+        });
+
+        it('should create a computer game with hard difficulty', async () => {
+            mocks.mockAdd.mockResolvedValue({ id: 'computer-game-hard' });
+
+            const result = await gameRoutes.createComputerGameHandler({
+                data: {
+                    timeControl: { type: 'unlimited' },
+                    difficulty: 'hard',
+                },
+                auth: { uid: creatorId },
+            });
+
+            expect(result.success).toBe(true);
+            expect(result.gameId).toBe('computer-game-hard');
+
+            // Verify game document was created with correct difficulty
+            expect(mocks.mockAdd).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    difficulty: 'hard',
+                    opponentId: 'computer',
+                    opponentType: 'computer',
+                }),
+            );
+        });
+
+        it('should default to random difficulty when difficulty is not provided', async () => {
+            mocks.mockAdd.mockResolvedValue({ id: 'computer-game-default' });
+
+            const result = await gameRoutes.createComputerGameHandler({
+                data: {
+                    timeControl: { type: 'unlimited' },
+                },
+                auth: { uid: creatorId },
+            });
+
+            expect(result.success).toBe(true);
+            expect(result.gameId).toBe('computer-game-default');
+
+            // Verify game document defaults to random difficulty
+            expect(mocks.mockAdd).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    difficulty: 'random',
+                }),
+            );
+        });
+
+        it('should throw error if user is not authenticated', async () => {
+            await expect(
+                gameRoutes.createComputerGameHandler({
+                    data: {
+                        timeControl: { type: 'unlimited' },
+                        difficulty: 'easy',
+                    },
+                    auth: null,
+                }),
+            ).rejects.toThrow('User must be authenticated');
+        });
+    });
+
+    describe('makeComputerMove - Difficulty Handling', () => {
+        const gameId = 'test-computer-game';
+        const userId = 'user-123';
+
+        beforeEach(() => {
+            const { CoralClash, restoreGameFromSnapshot, createGameSnapshot } = require('@jbuxofplenty/coral-clash');
+            const { findBestMove, findBestMoveIterativeDeepening } = require('../utils/aiEvaluation.js');
+
+            // Mock game instance
+            const mockGame = {
+                moves: jest.fn(() => [
+                    { from: 'e7', to: 'e6', verbose: true },
+                    { from: 'd7', to: 'd6', verbose: true },
+                ]),
+                move: jest.fn(() => ({})),
+                fen: jest.fn(() => 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'),
+                isGameOver: jest.fn(() => false),
+                turn: jest.fn(() => 'b'),
+                undo: jest.fn(),
+            };
+
+            CoralClash.mockImplementation(() => mockGame);
+            restoreGameFromSnapshot.mockImplementation(() => {});
+            createGameSnapshot.mockReturnValue({
+                fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+            });
+
+            // Mock findBestMove to return a move
+            findBestMove.mockReturnValue({
+                move: { from: 'e7', to: 'e6' },
+                score: 100,
+                nodesEvaluated: 50,
+            });
+
+            // Mock findBestMoveIterativeDeepening to return a move
+            findBestMoveIterativeDeepening.mockReturnValue({
+                move: { from: 'e7', to: 'e6' },
+                score: 100,
+                nodesEvaluated: 50,
+                depth: 3,
+                elapsedMs: 500,
+            });
+
+            // Mock game document update
+            mocks.mockDoc.mockReturnValue({
+                update: jest.fn(() => Promise.resolve()),
+            });
+            mocks.mockCollection.mockReturnValue({
+                doc: mocks.mockDoc,
+            });
+        });
+
+        it('should use easy difficulty (depth 3) for easy mode', async () => {
+            const { findBestMoveIterativeDeepening } = require('../utils/aiEvaluation.js');
+            const { SEARCH_DEPTH } = require('../utils/aiConfig.js');
+            findBestMoveIterativeDeepening.mockClear();
+
+            // Test the helper directly with gameData
+            await gameRoutes.makeComputerMoveHelper(gameId, {
+                creatorId: userId,
+                opponentId: 'computer',
+                opponentType: 'computer',
+                difficulty: 'easy',
+                status: 'active',
+                currentTurn: 'computer',
+                gameState: {
+                    fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+                },
+            });
+
+            // Verify findBestMoveIterativeDeepening was called with easy depth (3)
+            expect(findBestMoveIterativeDeepening).toHaveBeenCalledWith(
+                expect.any(Object),
+                SEARCH_DEPTH.easy, // Should be 3
+                'b',
+                expect.any(Number), // maxTimeMs
+            );
+        });
+
+        it('should use medium difficulty (depth 5) for medium mode', async () => {
+            const { findBestMoveIterativeDeepening } = require('../utils/aiEvaluation.js');
+            const { SEARCH_DEPTH } = require('../utils/aiConfig.js');
+            findBestMoveIterativeDeepening.mockClear();
+
+            // Test the helper directly with gameData
+            await gameRoutes.makeComputerMoveHelper(gameId, {
+                creatorId: userId,
+                opponentId: 'computer',
+                opponentType: 'computer',
+                difficulty: 'medium',
+                status: 'active',
+                currentTurn: 'computer',
+                gameState: {
+                    fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+                },
+            });
+
+            // Verify findBestMoveIterativeDeepening was called with medium depth (5)
+            expect(findBestMoveIterativeDeepening).toHaveBeenCalledWith(
+                expect.any(Object),
+                SEARCH_DEPTH.medium, // Should be 5
+                'b',
+                expect.any(Number), // maxTimeMs
+            );
+        });
+
+        it('should use hard difficulty (depth 7) for hard mode', async () => {
+            const { findBestMoveIterativeDeepening } = require('../utils/aiEvaluation.js');
+            const { SEARCH_DEPTH } = require('../utils/aiConfig.js');
+            findBestMoveIterativeDeepening.mockClear();
+
+            // Test the helper directly with gameData
+            await gameRoutes.makeComputerMoveHelper(gameId, {
+                creatorId: userId,
+                opponentId: 'computer',
+                opponentType: 'computer',
+                difficulty: 'hard',
+                status: 'active',
+                currentTurn: 'computer',
+                gameState: {
+                    fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+                },
+            });
+
+            // Verify findBestMoveIterativeDeepening was called with hard depth (7)
+            expect(findBestMoveIterativeDeepening).toHaveBeenCalledWith(
+                expect.any(Object),
+                SEARCH_DEPTH.hard, // Should be 7
+                'b',
+                expect.any(Number), // maxTimeMs
+            );
+        });
+
+        it('should use random moves for random difficulty', async () => {
+            const { findBestMoveIterativeDeepening } = require('../utils/aiEvaluation.js');
+            findBestMoveIterativeDeepening.mockClear();
+
+            // Test the helper directly with gameData
+            await gameRoutes.makeComputerMoveHelper(gameId, {
+                creatorId: userId,
+                opponentId: 'computer',
+                opponentType: 'computer',
+                difficulty: 'random',
+                status: 'active',
+                currentTurn: 'computer',
+                gameState: {
+                    fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+                },
+            });
+
+            // Verify findBestMoveIterativeDeepening was NOT called for random difficulty
+            expect(findBestMoveIterativeDeepening).not.toHaveBeenCalled();
+        });
+    });
+});
 });

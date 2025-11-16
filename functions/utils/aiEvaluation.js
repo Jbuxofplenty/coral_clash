@@ -12,6 +12,7 @@ import {
     MOBILITY,
     GAME_ENDING,
     getPieceValue,
+    TIME_CONTROL,
 } from './aiConfig.js';
 
 /**
@@ -305,17 +306,31 @@ function evaluatePosition(gameState, playerColor) {
 }
 
 /**
- * Alpha-beta pruning search algorithm
+ * Alpha-beta pruning search algorithm with time control
  * @param {Object} gameState - Current game state
  * @param {number} depth - Search depth (plies)
  * @param {number} alpha - Best value for maximizing player
  * @param {number} beta - Best value for minimizing player
  * @param {boolean} maximizingPlayer - True if maximizing player's turn
  * @param {string} playerColor - Color we're playing for ('w' or 'b')
- * @returns {Object} { score: number, move: Object|null, nodesEvaluated: number }
+ * @param {Object} timeControl - Time control object with startTime and maxTimeMs
+ * @returns {Object} { score: number, move: Object|null, nodesEvaluated: number, timedOut: boolean }
  */
-function alphaBeta(gameState, depth, alpha, beta, maximizingPlayer, playerColor) {
+function alphaBeta(gameState, depth, alpha, beta, maximizingPlayer, playerColor, timeControl = null) {
     let nodesEvaluated = 1;
+    
+    // Check time control
+    if (timeControl) {
+        const elapsed = Date.now() - timeControl.startTime;
+        if (elapsed >= timeControl.maxTimeMs) {
+            return {
+                score: 0, // Neutral score when timed out
+                move: null,
+                nodesEvaluated: 1,
+                timedOut: true,
+            };
+        }
+    }
     
     const game = new CoralClash();
     restoreGameFromSnapshot(game, gameState);
@@ -377,9 +392,20 @@ function alphaBeta(gameState, depth, alpha, beta, maximizingPlayer, playerColor)
             beta,
             !maximizingPlayer,
             playerColor,
+            timeControl,
         );
         
         nodesEvaluated += result.nodesEvaluated;
+        
+        // If timed out, propagate timeout
+        if (result.timedOut) {
+            return {
+                score: bestScore,
+                move: bestMove,
+                nodesEvaluated,
+                timedOut: true,
+            };
+        }
         
         const moveScore = result.score;
         
@@ -413,6 +439,7 @@ function alphaBeta(gameState, depth, alpha, beta, maximizingPlayer, playerColor)
         score: bestScore,
         move: bestMove,
         nodesEvaluated,
+        timedOut: false,
     };
 }
 
@@ -421,9 +448,10 @@ function alphaBeta(gameState, depth, alpha, beta, maximizingPlayer, playerColor)
  * @param {Object} gameState - Current game state
  * @param {number} depth - Search depth (plies)
  * @param {string} playerColor - Color we're playing for ('w' or 'b')
- * @returns {Object} { move: Object, score: number, nodesEvaluated: number }
+ * @param {Object} timeControl - Optional time control object with startTime and maxTimeMs
+ * @returns {Object} { move: Object, score: number, nodesEvaluated: number, timedOut: boolean }
  */
-function findBestMove(gameState, depth, playerColor) {
+function findBestMove(gameState, depth, playerColor, timeControl = null) {
     const game = new CoralClash();
     restoreGameFromSnapshot(game, gameState);
     
@@ -432,8 +460,92 @@ function findBestMove(gameState, depth, playerColor) {
     const currentTurn = game.turn();
     const maximizingPlayer = currentTurn === playerColor;
     
-    return alphaBeta(gameState, depth, -Infinity, Infinity, maximizingPlayer, playerColor);
+    return alphaBeta(gameState, depth, -Infinity, Infinity, maximizingPlayer, playerColor, timeControl);
 }
 
-export { evaluatePosition, alphaBeta, findBestMove };
+/**
+ * Find best move using iterative deepening with time control
+ * @param {Object} gameState - Current game state
+ * @param {number} maxDepth - Maximum depth to search to
+ * @param {string} playerColor - Color we're playing for ('w' or 'b')
+ * @param {number} maxTimeMs - Maximum time to spend in milliseconds
+ * @param {Function} progressCallback - Optional callback for progress updates (depth, nodesEvaluated, elapsedMs)
+ * @returns {Object} { move: Object, score: number, nodesEvaluated: number, depth: number, elapsedMs: number }
+ */
+function findBestMoveIterativeDeepening(gameState, maxDepth, playerColor, maxTimeMs = TIME_CONTROL.maxTimeMs, progressCallback = null) {
+    const startTime = Date.now();
+    let bestMove = null;
+    let bestScore = -Infinity;
+    let totalNodesEvaluated = 0;
+    let bestDepth = 1;
+    
+    const timeControl = {
+        startTime,
+        maxTimeMs,
+    };
+    
+    // Iterative deepening: start with depth 1 and increase until time runs out or max depth reached
+    for (let depth = 1; depth <= maxDepth; depth++) {
+        const result = findBestMove(gameState, depth, playerColor, timeControl);
+        
+        const elapsed = Date.now() - startTime;
+        
+        totalNodesEvaluated += result.nodesEvaluated;
+        
+        // If timed out, use the best result from previous depth (if any)
+        if (result.timedOut) {
+            // If we have a best move from previous depth, use it
+            if (bestMove) {
+                break;
+            }
+            // If depth 1 timed out and we have no previous result, fall through to fallback
+            break;
+        }
+        
+        // Update best move if we found one
+        if (result.move) {
+            bestMove = result.move;
+            bestScore = result.score;
+            bestDepth = depth;
+        }
+        
+        // Report progress
+        if (progressCallback) {
+            progressCallback(depth, result.nodesEvaluated, elapsed, bestMove !== null);
+        }
+        
+        // Check if we've exceeded time limit
+        if (elapsed >= maxTimeMs) {
+            break;
+        }
+        
+        // If we reached a terminal position (checkmate, etc.), no need to go deeper
+        if (Math.abs(result.score) > 90000) {
+            // Found a winning/losing position
+            break;
+        }
+    }
+    
+    const totalElapsed = Date.now() - startTime;
+    
+    // If no move found (shouldn't happen), return first legal move as fallback
+    if (!bestMove) {
+        const game = new CoralClash();
+        restoreGameFromSnapshot(game, gameState);
+        const moves = game.moves({ verbose: true });
+        if (moves.length > 0) {
+            bestMove = moves[0];
+        }
+    }
+    
+    return {
+        move: bestMove,
+        score: bestScore,
+        nodesEvaluated: totalNodesEvaluated,
+        depth: bestDepth,
+        elapsedMs: totalElapsed,
+    };
+}
+
+export { evaluatePosition, alphaBeta, findBestMove, findBestMoveIterativeDeepening };
 
