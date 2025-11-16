@@ -1,14 +1,12 @@
 import { useFocusEffect } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useCallback, useEffect, useState } from 'react';
-import { Dimensions, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
 
 import ComputerCoralClashBoard from '../components/ComputerCoralClashBoard';
 import PassAndPlayCoralClashBoard from '../components/PassAndPlayCoralClashBoard';
 import PvPCoralClashBoard from '../components/PvPCoralClashBoard';
 import { useNotifications, useTheme } from '../contexts';
-
-const { width, height } = Dimensions.get('screen');
 
 export default function Game({ route }) {
     const { colors } = useTheme();
@@ -115,7 +113,7 @@ export default function Game({ route }) {
 
 const styles = StyleSheet.create({
     game: {
-        width: width,
-        height: height,
+        flex: 1,
+        width: '100%',
     },
 });
