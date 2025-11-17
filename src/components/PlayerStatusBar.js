@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { useTheme } from '../contexts';
 import Avatar from './Avatar';
 
@@ -14,6 +14,7 @@ import Avatar from './Avatar';
  * @param {string} props.color - Player's color ('w' or 'b')
  * @param {number} props.coralRemaining - Number of coral pieces remaining for this player
  * @param {number} props.coralUnderControl - Number of coral pieces under control (not occupied by opponent)
+ * @param {boolean} props.isThinking - Whether the computer is currently thinking (calculating move)
  */
 export default function PlayerStatusBar({
     playerName = 'Player',
@@ -24,6 +25,7 @@ export default function PlayerStatusBar({
     color = 'w',
     coralRemaining,
     coralUnderControl,
+    isThinking = false,
 }) {
     const { colors } = useTheme();
     const { height } = useWindowDimensions();
@@ -58,16 +60,32 @@ export default function PlayerStatusBar({
             />
 
             <View style={styles.info}>
-                <Text
-                    style={[
-                        styles.playerName,
-                        { color: 'white' },
-                        isCompact && styles.playerNameCompact,
-                    ]}
-                    numberOfLines={1}
-                >
-                    {isComputer ? 'Computer' : playerName}
-                </Text>
+                <View style={styles.nameRow}>
+                    <Text
+                        style={[
+                            styles.playerName,
+                            { color: 'white' },
+                            isCompact && styles.playerNameCompact,
+                        ]}
+                        numberOfLines={1}
+                    >
+                        {isComputer ? 'Computer' : playerName}
+                    </Text>
+                    {isThinking && isComputer && (
+                        <View style={styles.thinkingIndicator}>
+                            <ActivityIndicator size="small" color="#4ADE80" />
+                            <Text
+                                style={[
+                                    styles.thinkingText,
+                                    { color: '#4ADE80' },
+                                    isCompact && styles.thinkingTextCompact,
+                                ]}
+                            >
+                                Thinking...
+                            </Text>
+                        </View>
+                    )}
+                </View>
                 <View style={styles.statsRow}>
                     {timeRemaining !== undefined && timeRemaining !== null && (
                         <Text
@@ -164,12 +182,30 @@ const styles = StyleSheet.create({
         marginLeft: 12,
         justifyContent: 'center',
     },
+    nameRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+    },
     playerName: {
         fontSize: 16,
         fontWeight: '600',
     },
     playerNameCompact: {
         fontSize: 13,
+    },
+    thinkingIndicator: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 4,
+    },
+    thinkingText: {
+        fontSize: 12,
+        fontWeight: '500',
+        fontStyle: 'italic',
+    },
+    thinkingTextCompact: {
+        fontSize: 10,
     },
     statsRow: {
         flexDirection: 'row',

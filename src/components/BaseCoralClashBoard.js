@@ -52,6 +52,7 @@ const GAME_STATE_VERSION = '1.2.0';
  * - onResign: Optional callback after successful resign (for cleanup like storage)
  * - userColor: Color the current user is playing as ('w' or 'b', null for both/spectator)
  * - effectiveBoardFlip: Override for board flip (for PvP games where user plays as black)
+ * - isComputerThinking: Whether the computer is currently thinking (for computer games)
  */
 const BaseCoralClashBoard = ({
     fixture,
@@ -70,6 +71,7 @@ const BaseCoralClashBoard = ({
     userColor = null,
     effectiveBoardFlip = null,
     notificationStatus = null,
+    isComputerThinking = false,
 }) => {
     const { width, height } = useWindowDimensions();
     const _insets = useSafeAreaInsets(); // Reserved for future safe area handling if needed
@@ -1835,6 +1837,11 @@ const BaseCoralClashBoard = ({
                                 coralRemaining={coralClash.getCoralRemaining(topPlayerColor)}
                                 coralUnderControl={coralClash.getCoralAreaControl(topPlayerColor)}
                                 timeRemaining={topPlayerTime}
+                                isThinking={
+                                    isComputerThinking &&
+                                    topPlayerData.isComputer &&
+                                    isTopPlayerActive
+                                }
                             />
                         </View>
 
@@ -1944,6 +1951,11 @@ const BaseCoralClashBoard = ({
                                     bottomPlayerColor,
                                 )}
                                 timeRemaining={bottomPlayerTime}
+                                isThinking={
+                                    isComputerThinking &&
+                                    bottomPlayerData.isComputer &&
+                                    isBottomPlayerActive
+                                }
                             />
                         </View>
 

@@ -1,4 +1,5 @@
-import React, { createContext, useCallback, useContext, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { getVersionWarningEnabled } from '../utils/featureFlags';
 
 const VersionContext = createContext();
 
@@ -12,6 +13,19 @@ export const VersionProvider = ({ children }) => {
         serverVersion: null,
         clientVersion: null,
     });
+    const [versionWarningEnabled, setVersionWarningEnabled] = useState(false); // Default to disabled (hidden)
+
+    // Initialize version warning feature flag on mount
+    useEffect(() => {
+        getVersionWarningEnabled()
+            .then((enabled) => {
+                setVersionWarningEnabled(enabled);
+            })
+            .catch((error) => {
+                console.warn('[VersionContext] Failed to load version warning feature flag, defaulting to disabled (hidden):', error);
+                setVersionWarningEnabled(false);
+            });
+    }, []);
 
     /**
      * Check version compatibility from server response
@@ -19,6 +33,12 @@ export const VersionProvider = ({ children }) => {
      */
     const checkVersion = useCallback((versionCheck) => {
         if (!versionCheck) return;
+
+        // Only show warning if feature flag is enabled
+        if (!versionWarningEnabled) {
+            console.log('[VersionContext] Version warning banner is disabled via feature flag');
+            return;
+        }
 
         if (versionCheck.requiresUpdate) {
             console.warn('[VersionContext] Client version outdated:', {
@@ -32,7 +52,7 @@ export const VersionProvider = ({ children }) => {
                 clientVersion: versionCheck.clientVersion,
             });
         }
-    }, []);
+    }, [versionWarningEnabled]);
 
     /**
      * Dismiss version warning

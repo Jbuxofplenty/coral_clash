@@ -1,9 +1,10 @@
 import { db, doc, getDoc } from '../config/firebase';
 
 /**
- * @typedef {'ads'} FeatureFlagName
+ * @typedef {'ads' | 'versionWarning'} FeatureFlagName
  * Available feature flags:
  * - 'ads': Controls ads mode ('enabled' | 'test' | 'disabled')
+ * - 'versionWarning': Controls version warning banner visibility ('enabled' | 'disabled')
  */
 
 /**
@@ -127,3 +128,31 @@ export const initializeAdsMode = async () => {
     return mode;
 };
 
+/**
+ * Get the version warning banner feature flag from Firestore with fallback to environment
+ * @returns {Promise<boolean>} The version warning banner state (true = enabled, false = disabled)
+ */
+export const getVersionWarningEnabled = async () => {
+    // Convert env var string to boolean (env vars are always strings)
+    // Default to false (hidden) if cannot get from server
+    const envFallbackStr = process.env.EXPO_PUBLIC_VERSION_WARNING_ENABLED || 'false';
+    const validatedFallback = envFallbackStr === 'true' || envFallbackStr === '1';
+
+    return getFeatureFlag('versionWarning', {
+        documentId: 'versionWarning',
+        field: 'enabled',
+        validValues: [true, false],
+        fallback: validatedFallback,
+        cacheTTL: Infinity, // Cache for entire app session
+    });
+};
+
+/**
+ * Initialize version warning banner feature flag on app startup
+ * Call this once during app initialization to pre-fetch and cache the version warning state
+ * @returns {Promise<boolean>} The version warning banner state (true = enabled, false = disabled)
+ */
+export const initializeVersionWarning = async () => {
+    const enabled = await getVersionWarningEnabled();
+    return enabled;
+};

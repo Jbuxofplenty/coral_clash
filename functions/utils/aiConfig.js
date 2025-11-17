@@ -1,0 +1,216 @@
+/**
+ * AI Configuration for Coral Clash Computer Opponent
+ *
+ * This file contains all evaluation parameters for the AI difficulty system.
+ * Tune these values to adjust AI behavior and create new difficulty modes.
+ */
+
+/**
+ * Piece values for material evaluation
+ * Higher values indicate more valuable pieces
+ */
+const PIECE_VALUES = {
+    whale: {
+        // Whale is the king - win condition piece
+        value: 10000,
+    },
+    dolphin: {
+        gatherer: 950, // Higher: Max mobility + Coral placement is premium utility
+        hunter: 900, // High mobility + Coral removal utility
+    },
+    turtle: {
+        gatherer: 550, // Higher: Excellent straight-line mobility + Coral placement
+        hunter: 500, // Good mobility + Coral removal utility
+    },
+    pufferfish: {
+        gatherer: 350, // Higher: Diagonal mobility + Coral placement utility
+        hunter: 300, // Diagonal movement + Coral removal utility
+    },
+    octopus: {
+        gatherer: 175, // Higher: Basic mobility, but Coral placement on front lines is critical
+        hunter: 150, // Lowest mobility, focused on localized Coral denial
+    },
+    crab: {
+        gatherer: 125, // Higher: Basic mobility, focused on localized Coral placement
+        hunter: 100, // Lowest mobility, focused on localized Coral denial
+    },
+};
+
+/**
+ * Positional bonuses
+ * Rewards for good piece placement
+ */
+const POSITIONAL_BONUSES = {
+    centerSquares: {
+        squares: ['d4', 'd5', 'e4', 'e5'],
+        points: 5, // Points per piece on center squares
+    },
+    extendedCenter: {
+        // c3-c6, d3-d6, e3-e6, f3-f6
+        ranks: [3, 4, 5, 6],
+        files: ['c', 'd', 'e', 'f'],
+        points: 2, // Points per piece in extended center
+    },
+    opponentHalf: {
+        points: 10, // Points per piece in opponent's half (ranks 1-4 for white, ranks 5-8 for black)
+    },
+    nearOpponentWhale: {
+        points: 15, // Points per piece near opponent's whale (within 2 squares)
+    },
+    gathererNearEmptySquare: {
+        points: 3, // Points for gatherer pieces near empty squares (potential coral placement)
+    },
+    hunterNearOpponentCoral: {
+        points: 5, // Points for hunter pieces near opponent's coral (potential removal)
+    },
+};
+
+/**
+ * Whale (king) safety evaluation
+ * Penalizes exposed whale and rewards protection
+ */
+const WHALE_SAFETY = {
+    inCheck: {
+        penalty: -500, // Penalty when whale is in check
+    },
+    attacked: {
+        penalty: -100, // Penalty when whale is attacked (not in check)
+    },
+    defenders: {
+        points: 5, // Points per piece defending the whale
+    },
+    mobility: {
+        points: 2, // Points per available whale move
+    },
+};
+
+/**
+ * Coral control and placement evaluation
+ * Rewards coral control which is a win condition
+ */
+const CORAL_EVALUATION = {
+    areaControl: {
+        points: 100, // Points per coral controlled (coral of your color not occupied by opponent)
+    },
+    placed: {
+        points: 15, // Points per coral placed by gatherer effect
+    },
+    removed: {
+        points: 25, // Points per coral removed from opponent (hunter effect)
+    },
+    blockingOpponent: {
+        points: 5, // Points per coral blocking opponent piece movement
+    },
+};
+
+/**
+ * Tactical bonuses
+ * Rewards for tactical moves
+ */
+const TACTICAL_BONUSES = {
+    check: {
+        points: 50, // Points for putting opponent in check
+    },
+    checkmate: {
+        points: 100000, // Massive bonus for checkmate (should be very high)
+    },
+    coralVictory: {
+        points: 50000, // Bonus for coral area control victory
+    },
+    // Piece capture value is determined by PIECE_VALUES above
+};
+
+/**
+ * Piece mobility evaluation
+ * Rewards having more legal moves available
+ */
+const MOBILITY = {
+    pointsPerMove: 1, // Points per legal move available (for all pieces)
+};
+
+/**
+ * Game-ending conditions
+ * Evaluation for terminal game states
+ */
+const GAME_ENDING = {
+    checkmate: {
+        win: 100000, // Very high positive for winning by checkmate
+        loss: -100000, // Very high negative for losing by checkmate
+    },
+    coralVictory: {
+        win: 50000, // Positive for winning by coral area control
+        loss: -50000, // Negative for losing by coral area control
+    },
+    stalemate: {
+        points: 0, // Usually 0 or small negative
+    },
+};
+
+/**
+ * Alpha-beta search parameters for different difficulty levels
+ * Higher depth = stronger play but slower computation
+ */
+const SEARCH_DEPTH = {
+    random: 0, // No search, just random moves
+    easy: 3, // 3 plies deep
+    medium: 5, // 5 plies deep
+    hard: 7, // 7 plies deep
+};
+
+/**
+ * Time control settings for AI moves
+ * Maximum time (in milliseconds) the AI can spend thinking before making a move
+ */
+const TIME_CONTROL = {
+    maxTimeMs: 5000, // Maximum 5 seconds per move
+    minTimeMs: 100, // Minimum time to spend (ensures at least some thinking)
+    progressIntervalMs: 200, // Report progress every N milliseconds
+};
+
+/**
+ * Helper function to get piece value
+ * @param {string} pieceSymbol - Piece symbol (h, d, t, f, o, c)
+ * @param {string|null} role - Piece role ('hunter', 'gatherer', or null for whale)
+ * @returns {number} Piece value
+ */
+export function getPieceValue(pieceSymbol, role) {
+    const pieceKey = pieceSymbol.toLowerCase();
+
+    if (pieceKey === 'h') {
+        return PIECE_VALUES.whale.value;
+    }
+
+    const pieceMap = {
+        d: 'dolphin',
+        t: 'turtle',
+        f: 'pufferfish',
+        o: 'octopus',
+        c: 'crab',
+    };
+
+    const pieceName = pieceMap[pieceKey];
+    if (!pieceName) {
+        return 0;
+    }
+
+    if (role === 'gatherer') {
+        return PIECE_VALUES[pieceName].gatherer;
+    } else if (role === 'hunter') {
+        return PIECE_VALUES[pieceName].hunter;
+    }
+
+    // Default to hunter if role not specified
+    return PIECE_VALUES[pieceName].hunter;
+}
+
+export {
+    CORAL_EVALUATION,
+    GAME_ENDING,
+    MOBILITY,
+    PIECE_VALUES,
+    POSITIONAL_BONUSES,
+    SEARCH_DEPTH,
+    TACTICAL_BONUSES,
+    TIME_CONTROL,
+    WHALE_SAFETY,
+};
