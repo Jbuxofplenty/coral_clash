@@ -1,5 +1,5 @@
 import { Icon } from 'galio-framework';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import { useAlert, useAuth, useGamePreferences } from '../contexts';
 import { useFirebaseFunctions } from '../hooks';
@@ -42,14 +42,6 @@ const ComputerCoralClashBoard = ({ fixture, gameId, gameState, notificationStatu
     // Track when computer is thinking
     const [isComputerThinking, setIsComputerThinking] = useState(false);
 
-    // Monitor gameState changes to detect when computer move completes
-    useEffect(() => {
-        // If gameState changes and it's the user's turn (white), computer finished thinking
-        if (gameState?.turn === 'w' && isComputerThinking) {
-            setIsComputerThinking(false);
-        }
-    }, [gameState?.turn, isComputerThinking]);
-
     // Computer-specific: Handle move completion
     const handleMoveComplete = async (result, _move) => {
         // If it's a computer game and computer's turn, trigger computer move
@@ -60,7 +52,7 @@ const ComputerCoralClashBoard = ({ fixture, gameId, gameState, notificationStatu
         ) {
             // Set thinking state to true
             setIsComputerThinking(true);
-            
+
             // Trigger computer move (Firestore listener will apply it automatically)
             try {
                 await makeComputerMoveAPI({ gameId });

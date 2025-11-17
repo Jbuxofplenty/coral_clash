@@ -8,7 +8,7 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import { useTheme } from '../contexts';
+import { useTheme } from '../contexts/ThemeContext';
 import Icon from './Icon';
 
 const { width } = Dimensions.get('window');
@@ -69,9 +69,7 @@ export default function DifficultySelectionModal({ visible, onSelect, onCancel }
                     onStartShouldSetResponder={() => true}
                 >
                     {/* Title */}
-                    <Text style={[styles.title, { color: colors.TEXT }]}>
-                        Choose AI Difficulty
-                    </Text>
+                    <Text style={[styles.title, { color: colors.TEXT }]}>Choose AI Difficulty</Text>
                     <Text style={[styles.subtitle, { color: colors.TEXT_SECONDARY }]}>
                         Select the difficulty level for the computer opponent
                     </Text>

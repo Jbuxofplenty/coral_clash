@@ -1837,7 +1837,11 @@ const BaseCoralClashBoard = ({
                                 coralRemaining={coralClash.getCoralRemaining(topPlayerColor)}
                                 coralUnderControl={coralClash.getCoralAreaControl(topPlayerColor)}
                                 timeRemaining={topPlayerTime}
-                                isThinking={isComputerThinking && topPlayerData.isComputer}
+                                isThinking={
+                                    isComputerThinking &&
+                                    topPlayerData.isComputer &&
+                                    isTopPlayerActive
+                                }
                             />
                         </View>
 
@@ -1947,7 +1951,11 @@ const BaseCoralClashBoard = ({
                                     bottomPlayerColor,
                                 )}
                                 timeRemaining={bottomPlayerTime}
-                                isThinking={isComputerThinking && bottomPlayerData.isComputer}
+                                isThinking={
+                                    isComputerThinking &&
+                                    bottomPlayerData.isComputer &&
+                                    isBottomPlayerActive
+                                }
                             />
                         </View>
 

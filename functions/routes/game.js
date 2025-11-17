@@ -771,6 +771,10 @@ export async function makeComputerMoveHelper(gameId, gameData = null) {
         throw new Error('No legal moves available for computer');
     }
 
+    // Track time for computer move calculation
+    const moveStartTime = Date.now();
+    let moveCalculationTimeMs = 0;
+
     // Get difficulty level (default to 'random' if not set)
     const difficulty = gameData.difficulty || 'random';
 
@@ -781,6 +785,7 @@ export async function makeComputerMoveHelper(gameId, gameData = null) {
         case 'random': {
             // Random move selection
             selectedMove = moves[Math.floor(Math.random() * moves.length)];
+            moveCalculationTimeMs = Date.now() - moveStartTime;
             break;
         }
         case 'easy': {
@@ -796,11 +801,15 @@ export async function makeComputerMoveHelper(gameId, gameData = null) {
 
             if (result.move) {
                 selectedMove = result.move;
-                console.log(`AI (easy) found move at depth ${result.depth}, evaluated ${result.nodesEvaluated} nodes in ${result.elapsedMs}ms`);
+                moveCalculationTimeMs = result.elapsedMs || Date.now() - moveStartTime;
+                console.log(
+                    `AI (easy) found move at depth ${result.depth}, evaluated ${result.nodesEvaluated} nodes in ${moveCalculationTimeMs}ms`,
+                );
             } else {
                 // Fallback to random if no move found
                 console.warn('AI search found no move, falling back to random');
                 selectedMove = moves[Math.floor(Math.random() * moves.length)];
+                moveCalculationTimeMs = Date.now() - moveStartTime;
             }
             break;
         }
@@ -817,10 +826,14 @@ export async function makeComputerMoveHelper(gameId, gameData = null) {
 
             if (result.move) {
                 selectedMove = result.move;
-                console.log(`AI (medium) found move at depth ${result.depth}, evaluated ${result.nodesEvaluated} nodes in ${result.elapsedMs}ms`);
+                moveCalculationTimeMs = result.elapsedMs || Date.now() - moveStartTime;
+                console.log(
+                    `AI (medium) found move at depth ${result.depth}, evaluated ${result.nodesEvaluated} nodes in ${moveCalculationTimeMs}ms`,
+                );
             } else {
                 console.warn('AI search found no move, falling back to random');
                 selectedMove = moves[Math.floor(Math.random() * moves.length)];
+                moveCalculationTimeMs = Date.now() - moveStartTime;
             }
             break;
         }
@@ -837,10 +850,14 @@ export async function makeComputerMoveHelper(gameId, gameData = null) {
 
             if (result.move) {
                 selectedMove = result.move;
-                console.log(`AI (hard) found move at depth ${result.depth}, evaluated ${result.nodesEvaluated} nodes in ${result.elapsedMs}ms`);
+                moveCalculationTimeMs = result.elapsedMs || Date.now() - moveStartTime;
+                console.log(
+                    `AI (hard) found move at depth ${result.depth}, evaluated ${result.nodesEvaluated} nodes in ${moveCalculationTimeMs}ms`,
+                );
             } else {
                 console.warn('AI search found no move, falling back to random');
                 selectedMove = moves[Math.floor(Math.random() * moves.length)];
+                moveCalculationTimeMs = Date.now() - moveStartTime;
             }
             break;
         }
@@ -848,6 +865,7 @@ export async function makeComputerMoveHelper(gameId, gameData = null) {
             // Unknown difficulty, default to random
             console.warn(`Unknown difficulty level: ${difficulty}, defaulting to random`);
             selectedMove = moves[Math.floor(Math.random() * moves.length)];
+            moveCalculationTimeMs = Date.now() - moveStartTime;
             break;
         }
     }
@@ -888,8 +906,48 @@ export async function makeComputerMoveHelper(gameId, gameData = null) {
     // Toggle turn back to player
     const nextTurn = gameData.creatorId;
 
+    // Handle time tracking if enabled
+    let updatedTimeRemaining = gameData.timeRemaining;
+    let computerTimeExpired = false;
+
+    if (gameData.timeControl?.totalSeconds && gameData.timeRemaining) {
+        // Get computer's current time
+        const computerTime = gameData.timeRemaining.computer || gameData.timeControl.totalSeconds;
+
+        // Decrement computer's time by the calculation time (in seconds)
+        // The computer's clock runs while it calculates the move
+        const calculationTimeSeconds = Math.floor(moveCalculationTimeMs / 1000);
+        const newComputerTime = Math.max(0, computerTime - calculationTimeSeconds);
+
+        updatedTimeRemaining = {
+            ...gameData.timeRemaining,
+            computer: newComputerTime,
+        };
+
+        // Check if computer ran out of time
+        if (newComputerTime <= 0) {
+            computerTimeExpired = true;
+        }
+    }
+
     // Check if game is over (use full game state, not just FEN)
-    const gameResult = getGameResult(validation.gameState);
+    let gameResult = getGameResult(validation.gameState);
+
+    // Override game result if computer ran out of time
+    if (computerTimeExpired) {
+        // Update game state to mark computer as resigned (black player)
+        validation.gameState = {
+            ...validation.gameState,
+            resigned: 'b', // Computer is always black
+        };
+
+        gameResult = {
+            isOver: true,
+            result: 'win', // Human player wins
+            reason: 'timeout',
+            winner: gameData.creatorId,
+        };
+    }
 
     // Update game with computer move
     const updateData = {
@@ -900,17 +958,23 @@ export async function makeComputerMoveHelper(gameId, gameData = null) {
         updatedAt: serverTimestamp(),
     };
 
+    // Update time tracking if enabled
+    if (gameData.timeControl?.totalSeconds) {
+        updateData.timeRemaining = updatedTimeRemaining;
+        updateData.lastMoveTime = serverTimestamp();
+    }
+
+    // Cancel old timeout task before creating new one (if game continues) or clearing (if game over)
+    if (gameData.pendingTimeoutTask) {
+        await cancelPendingTimeoutTask(gameId, gameData.pendingTimeoutTask);
+    }
+
     if (gameResult.isOver) {
         updateData.status = 'completed';
         updateData.result = gameResult.result;
         updateData.resultReason = gameResult.reason;
         updateData.winner = gameResult.winner || null;
         updateData.pendingTimeoutTask = null; // Clear task reference
-
-        // Cancel pending timeout task
-        if (gameData.pendingTimeoutTask) {
-            await cancelPendingTimeoutTask(gameId, gameData.pendingTimeoutTask);
-        }
 
         // Update player stats
         if (gameResult.winner) {
@@ -957,6 +1021,17 @@ export async function makeComputerMoveHelper(gameId, gameData = null) {
             createdAt: serverTimestamp(),
         });
     } else {
+        // Create new timeout task for human player (if game continues and time control enabled)
+        if (gameData.timeControl?.totalSeconds && updatedTimeRemaining && nextTurn) {
+            const humanPlayerTime = updatedTimeRemaining[nextTurn];
+            if (humanPlayerTime && humanPlayerTime > 0) {
+                const taskName = await createTimeoutTask(gameId, humanPlayerTime);
+                if (taskName) {
+                    updateData.pendingTimeoutTask = taskName;
+                }
+            }
+        }
+
         // Notify player that opponent made a move
         await sendOpponentMoveNotification(
             gameData.creatorId,
