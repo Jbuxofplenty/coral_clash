@@ -13,6 +13,7 @@ import {
     SignUpPromptCard,
     TimeControlModal,
 } from '../components/';
+import DifficultySelectionModal from '../components/DifficultySelectionModal';
 import FixtureLoaderModal from '../components/FixtureLoaderModal';
 import { collection, db, onSnapshot, query, where } from '../config/firebase';
 import { useAlert, useAuth, useTheme } from '../contexts';
@@ -31,9 +32,11 @@ export default function Home({ navigation }) {
     const [gameHistory, setGameHistory] = useState([]);
     const [historyLoading, setHistoryLoading] = useState(true);
     const [timeControlModalVisible, setTimeControlModalVisible] = useState(false);
+    const [difficultyModalVisible, setDifficultyModalVisible] = useState(false);
     const [pendingGameAction, setPendingGameAction] = useState(null); // 'computer', 'matchmaking', or 'friend'
     const [creatingGame, setCreatingGame] = useState(false); // Track when a game is being created
     const [selectedFriend, setSelectedFriend] = useState(null); // Store selected friend for game invite
+    const [pendingTimeControl, setPendingTimeControl] = useState(null); // Store time control while showing difficulty modal
 
     // Wrap callbacks in useCallback to prevent infinite re-renders
     const handleGameAccepted = useCallback(
@@ -408,29 +411,19 @@ export default function Home({ navigation }) {
 
     const handleTimeControlSelect = async (timeControl) => {
         setTimeControlModalVisible(false);
+
+        // For computer games, show difficulty selection after time control
+        if (pendingGameAction === 'computer') {
+            setPendingTimeControl(timeControl);
+            setDifficultyModalVisible(true);
+            return;
+        }
+
+        // For other game types, proceed with game creation
         setCreatingGame(true);
 
         try {
-            if (pendingGameAction === 'computer') {
-                const result = await startComputerGame(timeControl);
-                if (result.success) {
-                    navigation.navigate('Game', {
-                        gameId: result.gameId || null,
-                        opponentType: 'computer',
-                    });
-                } else {
-                    // Fallback to offline mode if online game creation fails
-                    console.log('Online computer game failed, starting offline mode');
-                    showAlert(
-                        'Offline Mode',
-                        'Unable to connect to server. Starting offline computer game.',
-                    );
-                    navigation.navigate('Game', {
-                        gameId: null, // null gameId = offline mode
-                        opponentType: 'computer',
-                    });
-                }
-            } else if (pendingGameAction === 'matchmaking') {
+            if (pendingGameAction === 'matchmaking') {
                 const result = await startSearching(timeControl);
                 if (result && !result.success && result.error) {
                     showAlert('Cannot Join Matchmaking', result.error);
@@ -487,6 +480,52 @@ export default function Home({ navigation }) {
         setTimeControlModalVisible(false);
         setPendingGameAction(null);
         setSelectedFriend(null);
+    };
+
+    const handleDifficultySelect = async (difficulty) => {
+        setDifficultyModalVisible(false);
+        setCreatingGame(true);
+
+        try {
+            // Start computer game with both timeControl and difficulty
+            const result = await startComputerGame(pendingTimeControl, difficulty);
+            if (result.success) {
+                navigation.navigate('Game', {
+                    gameId: result.gameId || null,
+                    opponentType: 'computer',
+                });
+            } else {
+                // Fallback to offline mode if online game creation fails
+                console.log('Online computer game failed, starting offline mode');
+                showAlert(
+                    'Offline Mode',
+                    'Unable to connect to server. Starting offline computer game.',
+                );
+                navigation.navigate('Game', {
+                    gameId: null, // null gameId = offline mode
+                    opponentType: 'computer',
+                });
+            }
+        } catch (error) {
+            console.error('Error starting computer game:', error);
+            showAlert('Error', error.message || 'Failed to start computer game');
+            // Fallback to offline mode on error
+            navigation.navigate('Game', {
+                gameId: null,
+                opponentType: 'computer',
+            });
+        } finally {
+            setCreatingGame(false);
+            setPendingTimeControl(null);
+            setPendingGameAction(null);
+        }
+    };
+
+    const handleDifficultyCancel = () => {
+        setDifficultyModalVisible(false);
+        setPendingTimeControl(null);
+        // Optionally go back to time control selection
+        // setTimeControlModalVisible(true);
     };
 
     const handleOpenFixtureLoader = () => {
@@ -625,6 +664,12 @@ export default function Home({ navigation }) {
                 visible={timeControlModalVisible}
                 onSelect={handleTimeControlSelect}
                 onCancel={handleTimeControlCancel}
+            />
+
+            <DifficultySelectionModal
+                visible={difficultyModalVisible}
+                onSelect={handleDifficultySelect}
+                onCancel={handleDifficultyCancel}
             />
         </LinearGradient>
     );

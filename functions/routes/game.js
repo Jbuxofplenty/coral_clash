@@ -8,6 +8,8 @@ import {
 } from '@jbuxofplenty/coral-clash';
 import { HttpsError, onCall, onRequest } from 'firebase-functions/v2/https';
 import { admin } from '../init.js';
+import { SEARCH_DEPTH, TIME_CONTROL } from '../utils/aiConfig.js';
+import { findBestMoveIterativeDeepening } from '../utils/aiEvaluation.js';
 import { getAppCheckConfig } from '../utils/appCheckConfig.js';
 import { getGameResult, validateMove } from '../utils/gameValidator.js';
 import { validateClientVersion } from '../utils/gameVersion.js';
@@ -194,16 +196,17 @@ export const createGame = onCall(getAppCheckConfig(), async (request) => {
 export { createGameHandler };
 
 /**
- * Create a new game against the computer
- * POST /api/game/createComputer
+ * Handler function for creating a computer game
+ * @param {Object} request - Request object with data and auth
+ * @returns {Promise<Object>} Game creation result
  */
-export const createComputerGame = onCall(getAppCheckConfig(), async (request) => {
+export async function createComputerGameHandler(request) {
     const { data, auth } = request;
-    try {
-        if (!auth) {
-            throw new HttpsError('unauthenticated', 'User must be authenticated');
-        }
+    if (!auth) {
+        throw new HttpsError('unauthenticated', 'User must be authenticated');
+    }
 
+    try {
         const { timeControl, difficulty, clientVersion } = data;
         const userId = auth.uid;
 
@@ -255,6 +258,25 @@ export const createComputerGame = onCall(getAppCheckConfig(), async (request) =>
         };
     } catch (error) {
         console.error('Error creating computer game:', error);
+        if (error instanceof HttpsError) {
+            throw error;
+        }
+        throw new HttpsError('internal', error.message);
+    }
+}
+
+/**
+ * Create a new game against the computer
+ * POST /api/game/createComputer
+ */
+export const createComputerGame = onCall(getAppCheckConfig(), async (request) => {
+    try {
+        return await createComputerGameHandler(request);
+    } catch (error) {
+        console.error('Error creating computer game:', error);
+        if (error instanceof HttpsError) {
+            throw error;
+        }
         throw new HttpsError('internal', error.message);
     }
 });
@@ -726,7 +748,7 @@ export const makeComputerMove = onCall(getAppCheckConfig(), async (request) => {
  * @param {Object} gameData - Game data (optional, will fetch if not provided)
  * @returns {Promise<Object>} Computer move result
  */
-async function makeComputerMoveHelper(gameId, gameData = null) {
+export async function makeComputerMoveHelper(gameId, gameData = null) {
     if (!gameData) {
         const gameDoc = await db.collection('games').doc(gameId).get();
         if (!gameDoc.exists) {
@@ -738,8 +760,6 @@ async function makeComputerMoveHelper(gameId, gameData = null) {
     // Get current game state (includes coral data)
     const currentGameState = gameData.gameState || { fen: gameData.fen };
 
-    // For now, we'll use simple random move selection
-    // In the future, this could be enhanced with difficulty levels
     const game = new CoralClash();
 
     // Restore full game state including coral
@@ -751,8 +771,104 @@ async function makeComputerMoveHelper(gameId, gameData = null) {
         throw new Error('No legal moves available for computer');
     }
 
-    // Select random move
-    const selectedMove = moves[Math.floor(Math.random() * moves.length)];
+    // Track time for computer move calculation
+    const moveStartTime = Date.now();
+    let moveCalculationTimeMs = 0;
+
+    // Get difficulty level (default to 'random' if not set)
+    const difficulty = gameData.difficulty || 'random';
+
+    // Select move based on difficulty
+    let selectedMove;
+
+    switch (difficulty) {
+        case 'random': {
+            // Random move selection
+            selectedMove = moves[Math.floor(Math.random() * moves.length)];
+            moveCalculationTimeMs = Date.now() - moveStartTime;
+            break;
+        }
+        case 'easy': {
+            // Easy mode: Use iterative deepening with time control
+            const maxDepth = SEARCH_DEPTH.easy;
+            const computerColor = 'b';
+            const result = findBestMoveIterativeDeepening(
+                currentGameState,
+                maxDepth,
+                computerColor,
+                TIME_CONTROL.maxTimeMs,
+            );
+
+            if (result.move) {
+                selectedMove = result.move;
+                moveCalculationTimeMs = result.elapsedMs || Date.now() - moveStartTime;
+                console.log(
+                    `AI (easy) found move at depth ${result.depth}, evaluated ${result.nodesEvaluated} nodes in ${moveCalculationTimeMs}ms`,
+                );
+            } else {
+                // Fallback to random if no move found
+                console.warn('AI search found no move, falling back to random');
+                selectedMove = moves[Math.floor(Math.random() * moves.length)];
+                moveCalculationTimeMs = Date.now() - moveStartTime;
+            }
+            break;
+        }
+        case 'medium': {
+            // Medium mode: Use iterative deepening with time control
+            const maxDepth = SEARCH_DEPTH.medium;
+            const computerColor = 'b';
+            const result = findBestMoveIterativeDeepening(
+                currentGameState,
+                maxDepth,
+                computerColor,
+                TIME_CONTROL.maxTimeMs,
+            );
+
+            if (result.move) {
+                selectedMove = result.move;
+                moveCalculationTimeMs = result.elapsedMs || Date.now() - moveStartTime;
+                console.log(
+                    `AI (medium) found move at depth ${result.depth}, evaluated ${result.nodesEvaluated} nodes in ${moveCalculationTimeMs}ms`,
+                );
+            } else {
+                console.warn('AI search found no move, falling back to random');
+                selectedMove = moves[Math.floor(Math.random() * moves.length)];
+                moveCalculationTimeMs = Date.now() - moveStartTime;
+            }
+            break;
+        }
+        case 'hard': {
+            // Hard mode: Use iterative deepening with time control
+            const maxDepth = SEARCH_DEPTH.hard;
+            const computerColor = 'b';
+            const result = findBestMoveIterativeDeepening(
+                currentGameState,
+                maxDepth,
+                computerColor,
+                TIME_CONTROL.maxTimeMs,
+            );
+
+            if (result.move) {
+                selectedMove = result.move;
+                moveCalculationTimeMs = result.elapsedMs || Date.now() - moveStartTime;
+                console.log(
+                    `AI (hard) found move at depth ${result.depth}, evaluated ${result.nodesEvaluated} nodes in ${moveCalculationTimeMs}ms`,
+                );
+            } else {
+                console.warn('AI search found no move, falling back to random');
+                selectedMove = moves[Math.floor(Math.random() * moves.length)];
+                moveCalculationTimeMs = Date.now() - moveStartTime;
+            }
+            break;
+        }
+        default: {
+            // Unknown difficulty, default to random
+            console.warn(`Unknown difficulty level: ${difficulty}, defaulting to random`);
+            selectedMove = moves[Math.floor(Math.random() * moves.length)];
+            moveCalculationTimeMs = Date.now() - moveStartTime;
+            break;
+        }
+    }
 
     // Make the move
     const moveResult = game.move({
@@ -790,8 +906,48 @@ async function makeComputerMoveHelper(gameId, gameData = null) {
     // Toggle turn back to player
     const nextTurn = gameData.creatorId;
 
+    // Handle time tracking if enabled
+    let updatedTimeRemaining = gameData.timeRemaining;
+    let computerTimeExpired = false;
+
+    if (gameData.timeControl?.totalSeconds && gameData.timeRemaining) {
+        // Get computer's current time
+        const computerTime = gameData.timeRemaining.computer || gameData.timeControl.totalSeconds;
+
+        // Decrement computer's time by the calculation time (in seconds)
+        // The computer's clock runs while it calculates the move
+        const calculationTimeSeconds = Math.floor(moveCalculationTimeMs / 1000);
+        const newComputerTime = Math.max(0, computerTime - calculationTimeSeconds);
+
+        updatedTimeRemaining = {
+            ...gameData.timeRemaining,
+            computer: newComputerTime,
+        };
+
+        // Check if computer ran out of time
+        if (newComputerTime <= 0) {
+            computerTimeExpired = true;
+        }
+    }
+
     // Check if game is over (use full game state, not just FEN)
-    const gameResult = getGameResult(validation.gameState);
+    let gameResult = getGameResult(validation.gameState);
+
+    // Override game result if computer ran out of time
+    if (computerTimeExpired) {
+        // Update game state to mark computer as resigned (black player)
+        validation.gameState = {
+            ...validation.gameState,
+            resigned: 'b', // Computer is always black
+        };
+
+        gameResult = {
+            isOver: true,
+            result: 'win', // Human player wins
+            reason: 'timeout',
+            winner: gameData.creatorId,
+        };
+    }
 
     // Update game with computer move
     const updateData = {
@@ -802,17 +958,23 @@ async function makeComputerMoveHelper(gameId, gameData = null) {
         updatedAt: serverTimestamp(),
     };
 
+    // Update time tracking if enabled
+    if (gameData.timeControl?.totalSeconds) {
+        updateData.timeRemaining = updatedTimeRemaining;
+        updateData.lastMoveTime = serverTimestamp();
+    }
+
+    // Cancel old timeout task before creating new one (if game continues) or clearing (if game over)
+    if (gameData.pendingTimeoutTask) {
+        await cancelPendingTimeoutTask(gameId, gameData.pendingTimeoutTask);
+    }
+
     if (gameResult.isOver) {
         updateData.status = 'completed';
         updateData.result = gameResult.result;
         updateData.resultReason = gameResult.reason;
         updateData.winner = gameResult.winner || null;
         updateData.pendingTimeoutTask = null; // Clear task reference
-
-        // Cancel pending timeout task
-        if (gameData.pendingTimeoutTask) {
-            await cancelPendingTimeoutTask(gameId, gameData.pendingTimeoutTask);
-        }
 
         // Update player stats
         if (gameResult.winner) {
@@ -859,6 +1021,17 @@ async function makeComputerMoveHelper(gameId, gameData = null) {
             createdAt: serverTimestamp(),
         });
     } else {
+        // Create new timeout task for human player (if game continues and time control enabled)
+        if (gameData.timeControl?.totalSeconds && updatedTimeRemaining && nextTurn) {
+            const humanPlayerTime = updatedTimeRemaining[nextTurn];
+            if (humanPlayerTime && humanPlayerTime > 0) {
+                const taskName = await createTimeoutTask(gameId, humanPlayerTime);
+                if (taskName) {
+                    updateData.pendingTimeoutTask = taskName;
+                }
+            }
+        }
+
         // Notify player that opponent made a move
         await sendOpponentMoveNotification(
             gameData.creatorId,

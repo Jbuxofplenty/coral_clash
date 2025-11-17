@@ -118,5 +118,6 @@
         "react-dom": "19.1.0",
         "react-refresh": "^0.18.0",
         "typescript": "~5.9.3"
-    }
+    },
+    "packageManager": "yarn@1.22.22+sha1.ac34549e6aa8e7ead463a7407e1c7390f61a6610"
 }

@@ -1,5 +1,5 @@
 import { Icon } from 'galio-framework';
-import React from 'react';
+import React, { useState } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import { useAlert, useAuth, useGamePreferences } from '../contexts';
 import { useFirebaseFunctions } from '../hooks';
@@ -39,6 +39,9 @@ const ComputerCoralClashBoard = ({ fixture, gameId, gameState, notificationStatu
         requestUndo,
     } = useFirebaseFunctions();
 
+    // Track when computer is thinking
+    const [isComputerThinking, setIsComputerThinking] = useState(false);
+
     // Computer-specific: Handle move completion
     const handleMoveComplete = async (result, _move) => {
         // If it's a computer game and computer's turn, trigger computer move
@@ -47,11 +50,16 @@ const ComputerCoralClashBoard = ({ fixture, gameId, gameState, notificationStatu
             result.gameState?.turn === 'b' &&
             !result.gameOver
         ) {
+            // Set thinking state to true
+            setIsComputerThinking(true);
+
             // Trigger computer move (Firestore listener will apply it automatically)
             try {
                 await makeComputerMoveAPI({ gameId });
+                // Note: isComputerThinking will be set to false when gameState updates
             } catch (error) {
                 console.error('Error making computer move:', error);
+                setIsComputerThinking(false); // Reset on error
             }
         }
     };
@@ -262,6 +270,7 @@ const ComputerCoralClashBoard = ({ fixture, gameId, gameState, notificationStatu
             onUndo={handleUndo}
             userColor='w' // User always plays as white in computer games
             notificationStatus={notificationStatus}
+            isComputerThinking={isComputerThinking}
         />
     );
 };
