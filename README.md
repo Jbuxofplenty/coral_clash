@@ -259,6 +259,34 @@ firebase emulators:start
 - **Strict type checking** enabled for game logic
 - **Mixed codebase**: TypeScript for core game, JavaScript for UI
 
+### Native Development Builds
+
+For testing on physical iOS devices with native modules or when you need a development build (instead of Expo Go):
+
+```bash
+npx expo prebuild --platform ios --clean && npx expo run:ios --device
+```
+
+**When to use this command:**
+
+- Testing on a physical iOS device with native modules that don't work in Expo Go
+- After making changes to native configuration (app.json, plugins, or native code)
+- When experiencing iOS build issues and need a clean rebuild of native directories
+- Testing push notifications or other native features that require a development build
+- Debugging native module integration issues
+
+**Note:** This command will:
+
+1. Clean and regenerate the `ios/` directory (removes existing native code)
+2. Build and install the app on a connected physical iOS device
+3. Requires Xcode and a connected iOS device via USB
+
+**Alternative for Android:**
+
+```bash
+npx expo prebuild --platform android --clean && npx expo run:android --device
+```
+
 ### Development Features
 
 - **Hot Reload** - Changes update instantly during development
@@ -443,9 +471,20 @@ cd functions && rm -rf node_modules && yarn install
 **iOS build issues:**
 
 ```bash
+# Clean and regenerate native iOS directories
+npx expo prebuild --platform ios --clean && npx expo run:ios --device
+
+# Or if you just need to reinstall pods:
 cd ios
 pod install
 cd ..
+```
+
+**Android build issues:**
+
+```bash
+# Clean and regenerate native Android directories
+npx expo prebuild --platform android --clean && npx expo run:android --device
 ```
 
 **Firebase emulator issues:**
