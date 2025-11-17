@@ -261,15 +261,15 @@ firebase emulators:start
 
 ### Native Development Builds
 
-For testing on physical iOS devices with native modules or when you need a development build (instead of Expo Go):
+For testing with native modules or when you need a development build (instead of Expo Go):
 
 ```bash
-npx expo prebuild --platform ios --clean && npx expo run:ios --device
+npx expo prebuild --platform ios --clean && npx expo run:ios
 ```
 
 **When to use this command:**
 
-- Testing on a physical iOS device with native modules that don't work in Expo Go
+- Testing native modules that don't work in Expo Go
 - After making changes to native configuration (app.json, plugins, or native code)
 - When experiencing iOS build issues and need a clean rebuild of native directories
 - Testing push notifications or other native features that require a development build
@@ -278,13 +278,13 @@ npx expo prebuild --platform ios --clean && npx expo run:ios --device
 **Note:** This command will:
 
 1. Clean and regenerate the `ios/` directory (removes existing native code)
-2. Build and install the app on a connected physical iOS device
-3. Requires Xcode and a connected iOS device via USB
+2. Build and run the app on the iOS Simulator
+3. Requires Xcode
 
 **Alternative for Android:**
 
 ```bash
-npx expo prebuild --platform android --clean && npx expo run:android --device
+npx expo prebuild --platform android --clean && npx expo run:android
 ```
 
 ### Development Features
@@ -472,7 +472,7 @@ cd functions && rm -rf node_modules && yarn install
 
 ```bash
 # Clean and regenerate native iOS directories
-npx expo prebuild --platform ios --clean && npx expo run:ios --device
+npx expo prebuild --platform ios --clean && npx expo run:ios
 
 # Or if you just need to reinstall pods:
 cd ios
@@ -484,7 +484,7 @@ cd ..
 
 ```bash
 # Clean and regenerate native Android directories
-npx expo prebuild --platform android --clean && npx expo run:android --device
+npx expo prebuild --platform android --clean && npx expo run:android
 ```
 
 **Firebase emulator issues:**
