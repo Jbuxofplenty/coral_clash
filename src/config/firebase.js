@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getAnalytics } from 'firebase/analytics';
 import { initializeApp } from 'firebase/app';
 import { CustomProvider, initializeAppCheck } from 'firebase/app-check';
 import {
@@ -94,6 +95,27 @@ const db = getFirestore(app);
 // Initialize Functions
 const functions = getFunctions(app);
 
+// Initialize Analytics
+// Note: Firebase Analytics works best on web, but may work on React Native with proper configuration
+let analytics = null;
+try {
+    // Check if Analytics is supported on this platform
+    if (Platform.OS === 'web') {
+        analytics = getAnalytics(app);
+    } else {
+        // For React Native, try to initialize if supported
+        // This requires measurementId to be configured in firebaseConfig
+        if (firebaseConfig.measurementId) {
+            analytics = getAnalytics(app);
+        } else {
+            console.log('Analytics: Disabled (measurementId not configured)');
+        }
+    }
+} catch (error) {
+    console.warn('Analytics initialization failed:', error);
+    // Analytics will remain null, but app will continue to work
+}
+
 // Connect to emulators in development
 if (USE_EMULATOR) {
     // Determine the emulator host dynamically:
@@ -126,4 +148,4 @@ if (USE_EMULATOR) {
     console.log(`🔧 Connected to Firebase Emulators at ${EMULATOR_HOST}`);
 }
 
-export { app, auth, collection, db, doc, functions, getDoc, onSnapshot, query, where };
+export { analytics, app, auth, collection, db, doc, functions, getDoc, onSnapshot, query, where };
