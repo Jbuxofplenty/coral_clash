@@ -470,18 +470,22 @@ const BaseCoralClashBoard = ({
                     } catch (error) {
                         console.error('Error making computer move:', error);
                         // Fallback to random move on error
-                        const moves = coralClash.moves({ verbose: true });
-                        if (moves.length > 0) {
-                            const randomMove = moves[Math.floor(Math.random() * moves.length)];
-                            coralClash.move({
-                                from: randomMove.from,
-                                to: randomMove.to,
-                                promotion: randomMove.promotion,
-                                coralPlaced: randomMove.coralPlaced,
-                                coralRemoved: randomMove.coralRemoved,
-                                coralRemovedSquares: randomMove.coralRemovedSquares,
-                            });
-                            forceUpdate((n) => n + 1);
+                        try {
+                            const moves = coralClash.moves({ verbose: true });
+                            if (moves.length > 0) {
+                                const randomMove = moves[Math.floor(Math.random() * moves.length)];
+                                coralClash.move({
+                                    from: randomMove.from,
+                                    to: randomMove.to,
+                                    promotion: randomMove.promotion,
+                                    coralPlaced: randomMove.coralPlaced,
+                                    coralRemoved: randomMove.coralRemoved,
+                                    coralRemovedSquares: randomMove.coralRemovedSquares,
+                                });
+                                forceUpdate((n) => n + 1);
+                            }
+                        } catch (fallbackError) {
+                            console.error('Fallback move also failed:', fallbackError);
                         }
                     } finally {
                         setLocalIsComputerThinking(false);
