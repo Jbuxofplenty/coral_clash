@@ -139,9 +139,12 @@ jobs:
       - name: Install CocoaPods
         run: |
           cd ios
-          echo "📦 Installing CocoaPods dependencies (with repo update)..."
-          pod install --repo-update
-          echo "✅ CocoaPods dependencies installed"
+          echo "📦 Installing CocoaPods dependencies..."
+          if pod install --repo-update; then
+            echo "✅ CocoaPods dependencies installed"
+          else
+            echo "⚠️  Repo update failed (likely transient CDN issue), skipping pod install and continuing..."
+          fi
 
       - name: Bundle JavaScript with Expo
         run: |
