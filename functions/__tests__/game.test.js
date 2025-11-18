@@ -27,14 +27,24 @@ jest.mock('../utils/notifications.js', () => ({
 jest.mock('@google-cloud/tasks');
 
 // Mock AI functions from shared package
-jest.mock('@jbuxofplenty/coral-clash', () => {
-    const actual = jest.requireActual('@jbuxofplenty/coral-clash');
-    return {
-        ...actual,
-        findBestMove: jest.fn(),
-        findBestMoveIterativeDeepening: jest.fn(),
-    };
-});
+jest.mock('@jbuxofplenty/coral-clash', () => ({
+    CoralClash: jest.fn(),
+    GAME_VERSION: '1.0.0',
+    createGameSnapshot: jest.fn(),
+    restoreGameFromSnapshot: jest.fn(),
+    calculateUndoMoveCount: jest.fn(),
+    findBestMove: jest.fn(),
+    findBestMoveIterativeDeepening: jest.fn(),
+    SEARCH_DEPTH: {
+        random: 0,
+        easy: 3,
+        medium: 5,
+        hard: 7,
+    },
+    TIME_CONTROL: {
+        maxTimeMs: 5000,
+    },
+}));
 
 jest.mock('../utils/helpers.js', () => ({
     formatDisplayName: jest.fn((name, discriminator) => `${name}#${discriminator}`),
@@ -45,14 +55,6 @@ jest.mock('../utils/helpers.js', () => ({
         coralRemaining: { w: 15, b: 14 },
     })),
     serverTimestamp: jest.fn(() => 'MOCK_TIMESTAMP'),
-}));
-
-jest.mock('@jbuxofplenty/coral-clash', () => ({
-    CoralClash: jest.fn(),
-    GAME_VERSION: '1.0.0',
-    createGameSnapshot: jest.fn(),
-    restoreGameFromSnapshot: jest.fn(),
-    calculateUndoMoveCount: jest.fn(),
 }));
 
 import * as gameRoutes from '../routes/game.js';
