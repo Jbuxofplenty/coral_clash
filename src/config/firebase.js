@@ -1,5 +1,10 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getAnalytics } from 'firebase/analytics';
+import {
+    getAnalytics,
+    setAnalyticsCollectionEnabled,
+    setConsent,
+} from '@react-native-firebase/analytics';
+import { getApp } from '@react-native-firebase/app';
 import { initializeApp } from 'firebase/app';
 import { CustomProvider, initializeAppCheck } from 'firebase/app-check';
 import {
@@ -95,26 +100,42 @@ const db = getFirestore(app);
 // Initialize Functions
 const functions = getFunctions(app);
 
-// Initialize Analytics
-// Note: Firebase Analytics works best on web, but may work on React Native with proper configuration
-let analytics = null;
+// Initialize Analytics for iOS/Android
+// Uses @react-native-firebase/analytics (native module)
+// The native module reads from GoogleService-Info.plist (iOS) and google-services.json (Android)
+// Reference: https://rnfirebase.io/analytics/usage
+// Using modular API: getApp() -> getAnalytics() -> standalone functions
+let analyticsInstance = null;
 try {
-    // Check if Analytics is supported on this platform
-    if (Platform.OS === 'web') {
-        analytics = getAnalytics(app);
-    } else {
-        // For React Native, try to initialize if supported
-        // This requires measurementId to be configured in firebaseConfig
-        if (firebaseConfig.measurementId) {
-            analytics = getAnalytics(app);
-        } else {
-            console.log('Analytics: Disabled (measurementId not configured)');
-        }
+    // Get the React Native Firebase app instance using modular API
+    const rnfbApp = getApp();
+
+    // Get analytics instance using modular API getAnalytics()
+    // This replaces the deprecated rnfbFirebase.analytics() namespaced API
+    analyticsInstance = getAnalytics(rnfbApp);
+    console.log(`✅ Analytics initialized for ${Platform.OS} platform (native)`);
+
+    // Enable analytics collection in development using modular API
+    // setAnalyticsCollectionEnabled() takes analytics instance as first parameter
+    if (__DEV__) {
+        setAnalyticsCollectionEnabled(analyticsInstance, true).catch((err) => {
+            console.warn('⚠️ Could not enable analytics collection:', err.message);
+        });
+        console.log('🔍 Analytics collection enabled (use Xcode/ADB to enable DebugView)');
     }
 } catch (error) {
-    console.warn('Analytics initialization failed:', error);
+    console.warn('❌ Analytics initialization failed:', error.message);
     // Analytics will remain null, but app will continue to work
 }
+
+// Helper function to set consent using modular API standalone function
+const setAnalyticsConsent = async (consentSettings) => {
+    if (analyticsInstance) {
+        // setConsent() takes analytics instance as first parameter
+        return setConsent(analyticsInstance, consentSettings);
+    }
+    throw new Error('Analytics not initialized');
+};
 
 // Connect to emulators in development
 if (USE_EMULATOR) {
@@ -148,4 +169,17 @@ if (USE_EMULATOR) {
     console.log(`🔧 Connected to Firebase Emulators at ${EMULATOR_HOST}`);
 }
 
-export { analytics, app, auth, collection, db, doc, functions, getDoc, onSnapshot, query, where };
+export {
+    analyticsInstance as analytics,
+    app,
+    auth,
+    collection,
+    db,
+    doc,
+    functions,
+    getDoc,
+    onSnapshot,
+    query,
+    setAnalyticsConsent as setConsent,
+    where,
+};

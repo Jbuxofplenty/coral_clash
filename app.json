@@ -105,7 +105,9 @@
                     "iosAppId": "ca-app-pub-8519782324189160~8486752889",
                     "userTrackingUsageDescription": "This identifier will be used to deliver personalized ads to you."
                 }
-            ]
+            ],
+            "@react-native-firebase/app",
+            "./plugins/with-modular-headers.js"
         ],
         "android": {
             "googleServicesFile": "./google-services.json",

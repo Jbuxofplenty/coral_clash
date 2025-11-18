@@ -15,7 +15,7 @@ import {
 import { doc, getDoc, onSnapshot, setDoc } from 'firebase/firestore';
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { Platform } from 'react-native';
-import { auth, db } from '../config/firebase';
+import { analytics, auth, db, setConsent } from '../config/firebase';
 import { requestTrackingPermission } from '../utils/tracking';
 
 const AuthContext = createContext({});
@@ -117,10 +117,10 @@ export const AuthProvider = ({ children }) => {
         };
     }, []);
 
-    // Request App Tracking Transparency permission after user logs in
+    // Request App Tracking Transparency permission and set Firebase Analytics consent after user logs in
     // This runs once per app session when user authenticates
     useEffect(() => {
-        const requestATT = async () => {
+        const requestATTAndSetConsent = async () => {
             // Only request once per app session, and only when user is authenticated
             if (user && !loading && !hasRequestedATT.current) {
                 hasRequestedATT.current = true;
@@ -128,14 +128,36 @@ export const AuthProvider = ({ children }) => {
                 // Small delay to let UI settle after login
                 setTimeout(async () => {
                     try {
-                        await requestTrackingPermission(user);
+                        // Request ATT permission (iOS) or check if tracking is allowed
+                        const trackingGranted = await requestTrackingPermission(user);
+
+                        // Set Firebase Analytics consent based on user's tracking permission
+                        // Reference: https://rnfirebase.io/analytics/usage
+                        if (analytics) {
+                            try {
+                                await setConsent({
+                                    analytics_storage: trackingGranted,
+                                    ad_storage: trackingGranted,
+                                    ad_user_data: trackingGranted,
+                                    ad_personalization: trackingGranted,
+                                });
+                                console.log(
+                                    `✅ Firebase Analytics consent set: ${trackingGranted ? 'granted' : 'denied'}`,
+                                );
+                            } catch (consentError) {
+                                console.warn(
+                                    '⚠️ Could not set Analytics consent:',
+                                    consentError.message,
+                                );
+                            }
+                        }
                     } catch (error) {
                         console.error('Error requesting tracking permission:', error);
                     }
                 }, 1000);
             }
         };
-        requestATT();
+        requestATTAndSetConsent();
     }, [user, loading]);
 
     const signUp = async (email, password, displayName) => {
