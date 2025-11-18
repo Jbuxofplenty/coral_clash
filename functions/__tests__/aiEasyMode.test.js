@@ -1,5 +1,9 @@
-import { CoralClash, createGameSnapshot } from '@jbuxofplenty/coral-clash';
-import { findBestMove, evaluatePosition } from '../utils/aiEvaluation.js';
+import {
+    CoralClash,
+    createGameSnapshot,
+    findBestMove,
+    evaluatePosition,
+} from '@jbuxofplenty/coral-clash';
 
 /**
  * AI Easy Mode Comprehensive Tests
