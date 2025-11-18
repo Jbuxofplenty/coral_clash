@@ -6,18 +6,18 @@
  * both client-side (for offline AI) and server-side (for online games)
  */
 
-import type { Color, PieceSymbol, PieceRole, Square } from './coralClash.js';
-import { CoralClash } from './coralClash.js';
-import { restoreGameFromSnapshot, createGameSnapshot } from './gameState.js';
 import {
-    POSITIONAL_BONUSES,
-    WHALE_SAFETY,
     CORAL_EVALUATION,
-    MOBILITY,
     GAME_ENDING,
-    getPieceValue,
+    MOBILITY,
+    POSITIONAL_BONUSES,
     TIME_CONTROL,
+    WHALE_SAFETY,
+    getPieceValue,
 } from './aiConfig.js';
+import type { Color, PieceRole, PieceSymbol, Square } from './coralClash.js';
+import { CoralClash } from './coralClash.js';
+import { createGameSnapshot, restoreGameFromSnapshot } from './gameState.js';
 
 /**
  * Game state snapshot type (matches what createGameSnapshot returns)
@@ -54,6 +54,25 @@ export interface AlphaBetaResult {
     move: any | null;
     nodesEvaluated: number;
     timedOut: boolean;
+}
+
+/**
+ * Safely restore game from snapshot with backwards compatibility
+ * Returns null if restore fails (e.g., old format), ensuring fallback to random moves
+ */
+function safeRestoreGame(gameState: GameStateSnapshot): CoralClash | null {
+    if (!gameState || !gameState.fen || typeof gameState.fen !== 'string') {
+        return null;
+    }
+
+    try {
+        const game = new CoralClash();
+        restoreGameFromSnapshot(game, gameState);
+        return game;
+    } catch {
+        // Old format or invalid state - return null for fallback to random
+        return null;
+    }
 }
 
 /**
@@ -195,8 +214,10 @@ function getPieces(game: CoralClash, color: Color): PieceInfo[] {
  * @returns Evaluation score
  */
 export function evaluatePosition(gameState: GameStateSnapshot, playerColor: Color): number {
-    const game = new CoralClash();
-    restoreGameFromSnapshot(game, gameState);
+    const game = safeRestoreGame(gameState);
+    if (!game) {
+        return 0; // Neutral score for backwards compatibility
+    }
 
     const opponentColor: Color = playerColor === 'w' ? 'b' : 'w';
 
@@ -401,8 +422,15 @@ export function alphaBeta(
         }
     }
 
-    const game = new CoralClash();
-    restoreGameFromSnapshot(game, gameState);
+    const game = safeRestoreGame(gameState);
+    if (!game) {
+        return {
+            score: 0,
+            move: null,
+            nodesEvaluated: 1,
+            timedOut: false,
+        };
+    }
 
     // Terminal node: check game-ending conditions or depth limit
     if (depth === 0 || game.isGameOver()) {
@@ -527,15 +555,30 @@ export function findBestMove(
     playerColor: Color,
     timeControl: TimeControl | null = null,
 ): AlphaBetaResult {
-    const game = new CoralClash();
-    restoreGameFromSnapshot(game, gameState);
+    const game = safeRestoreGame(gameState);
+    if (!game) {
+        return {
+            score: 0,
+            move: null,
+            nodesEvaluated: 1,
+            timedOut: false,
+        };
+    }
 
     // Determine if we're maximizing (our turn) or minimizing (opponent's turn)
     // Since we're always evaluating for playerColor, we check whose turn it is
     const currentTurn = game.turn();
     const maximizingPlayer = currentTurn === playerColor;
 
-    return alphaBeta(gameState, depth, -Infinity, Infinity, maximizingPlayer, playerColor, timeControl);
+    return alphaBeta(
+        gameState,
+        depth,
+        -Infinity,
+        Infinity,
+        maximizingPlayer,
+        playerColor,
+        timeControl,
+    );
 }
 
 /**
@@ -564,6 +607,17 @@ export function findBestMoveIterativeDeepening(
     maxTimeMs: number = TIME_CONTROL.maxTimeMs,
     progressCallback: ProgressCallback | null = null,
 ): IterativeDeepeningResult {
+    const game = safeRestoreGame(gameState);
+    if (!game) {
+        return {
+            move: null,
+            score: 0,
+            nodesEvaluated: 0,
+            depth: 0,
+            elapsedMs: 0,
+        };
+    }
+
     const startTime = Date.now();
     let bestMove: any = null;
     let bestScore = -Infinity;
@@ -620,21 +674,22 @@ export function findBestMoveIterativeDeepening(
     const totalElapsed = Date.now() - startTime;
 
     // If no move found (shouldn't happen), return first legal move as fallback
+    // This ensures backwards compatibility - always returns a move if possible
     if (!bestMove) {
-        const game = new CoralClash();
-        restoreGameFromSnapshot(game, gameState);
-        const moves = game.moves({ verbose: true });
-        if (moves.length > 0) {
-            bestMove = moves[0];
+        const fallbackGame = safeRestoreGame(gameState);
+        if (fallbackGame) {
+            const moves = fallbackGame.moves({ verbose: true });
+            if (moves.length > 0) {
+                bestMove = moves[0];
+            }
         }
     }
 
     return {
-        move: bestMove,
+        move: bestMove, // May be null if no moves available or restore failed
         score: bestScore,
         nodesEvaluated: totalNodesEvaluated,
         depth: bestDepth,
         elapsedMs: totalElapsed,
     };
 }
-
