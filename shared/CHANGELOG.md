@@ -1,3 +1,44 @@
+# [2.2.0](https://github.com/Jbuxofplenty/coral_clash/compare/v2.1.0...v2.2.0) (2025-11-18)
+
+
+### Bug Fixes
+
+* **ci:** decode Google Play service account JSON in workflow ([fefbdf3](https://github.com/Jbuxofplenty/coral_clash/commit/fefbdf3506324be8f4a8a5aab7407177a9cc4d2f))
+* **ci:** decode Google Play service account JSON in workflow ([e7e942a](https://github.com/Jbuxofplenty/coral_clash/commit/e7e942a0755ba150b5867343527d0248a6ed0727))
+* **client:** bump version to 1.0.1 for TestFlight upload ([07b419b](https://github.com/Jbuxofplenty/coral_clash/commit/07b419b2ae742d6fa513851a217625f50df373ea))
+* **client:** improve game board layout and control bar positioning ([b1c1077](https://github.com/Jbuxofplenty/coral_clash/commit/b1c1077b3a3903a8c340444049ae60f5e620a18e))
+* **client:** increase control bar bottom padding to 20px ([4c2a25a](https://github.com/Jbuxofplenty/coral_clash/commit/4c2a25ac5249981382e0193fb06e022e617cb8ca))
+* **server:** merge duplicate jest mocks for AI functions in tests ([89f550b](https://github.com/Jbuxofplenty/coral_clash/commit/89f550bf7bf4835c7e2db790a864d1107949e67e))
+
+
+### Features
+
+* **client:** add AI difficulty improvements ([feea36e](https://github.com/Jbuxofplenty/coral_clash/commit/feea36ee2504d1590b3ee2d8cc563c55a3a214eb))
+* **client:** add Firebase Analytics with modular API and debug support ([cff6d2b](https://github.com/Jbuxofplenty/coral_clash/commit/cff6d2b72e7f3e20d48d531652b95daa6282e4d7))
+* **client:** add version warning banner feature flag ([2cf3aa4](https://github.com/Jbuxofplenty/coral_clash/commit/2cf3aa44606e76a6d5a122b3e4487cce61b3cd46))
+* **client:** initialize Firebase Analytics ([2c2e971](https://github.com/Jbuxofplenty/coral_clash/commit/2c2e971b93be799a3cf122436f168bdbc278b752))
+* **server:** add AI difficulty evaluation and selection ([26df735](https://github.com/Jbuxofplenty/coral_clash/commit/26df73527fb3451d0b846ba5d1d8b2bfc60a1f5f))
+* **server:** add AI tests ([89caef0](https://github.com/Jbuxofplenty/coral_clash/commit/89caef0d882ef5fbaaf94f873cf7f23729fc7b1b))
+* **server:** other difficulities, timeout for making a move, display progress to user ([18dccea](https://github.com/Jbuxofplenty/coral_clash/commit/18dccea07b11818719477e72da80975438dc3503))
+* **shared:** move AI evaluation to game engine package ([27e1d80](https://github.com/Jbuxofplenty/coral_clash/commit/27e1d80bf2649654e2ea902dd0e88513fcc2f35c))
+
+# [2.1.0](https://github.com/Jbuxofplenty/coral_clash/compare/v2.0.0...v2.1.0) (2025-11-12)
+
+
+### Bug Fixes
+
+* **ci:** add Android keystore and signing secrets to setup script ([3eb1aeb](https://github.com/Jbuxofplenty/coral_clash/commit/3eb1aeb3c453a40df401f92a6e9fab82eac638ba))
+* **client:** enable ads for all users in enabled mode ([eae2608](https://github.com/Jbuxofplenty/coral_clash/commit/eae26086a06722a7e6dc4228fb59b92cc026bdde))
+* **client:** hide flip board menu in pass and play mode ([1eba707](https://github.com/Jbuxofplenty/coral_clash/commit/1eba707097e8707713206e72668b12ba58e6790b))
+* **shared:** correct whale-check-14 fixture format and enhance snapshot script ([9bb4191](https://github.com/Jbuxofplenty/coral_clash/commit/9bb4191dab5d446f4e203d0df885f452082562c2))
+* **web:** add app-ads.txt ([273a2dd](https://github.com/Jbuxofplenty/coral_clash/commit/273a2dd7e74725b7fc63af36b5fea1129c0225ee))
+
+
+### Features
+
+* **docs:** add app store links to landing page ([2c98ee4](https://github.com/Jbuxofplenty/coral_clash/commit/2c98ee4a9d761bfcd69b4d60338932b1c45f2b37))
+* **shared:** add whale-check-14 fixture and issue snapshot script ([1e05509](https://github.com/Jbuxofplenty/coral_clash/commit/1e05509738bb1566dfe856d2b9c2f6a317a990b4)), closes [#12](https://github.com/Jbuxofplenty/coral_clash/issues/12)
+
 # [2.0.0](https://github.com/Jbuxofplenty/coral_clash/compare/v1.7.0...v2.0.0) (2025-11-10)
 
 
