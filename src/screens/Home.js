@@ -493,6 +493,7 @@ export default function Home({ navigation }) {
                 navigation.navigate('Game', {
                     gameId: result.gameId || null,
                     opponentType: 'computer',
+                    difficulty: difficulty,
                 });
             } else {
                 // Fallback to offline mode if online game creation fails
@@ -504,6 +505,7 @@ export default function Home({ navigation }) {
                 navigation.navigate('Game', {
                     gameId: null, // null gameId = offline mode
                     opponentType: 'computer',
+                    difficulty: difficulty,
                 });
             }
         } catch (error) {
@@ -513,6 +515,7 @@ export default function Home({ navigation }) {
             navigation.navigate('Game', {
                 gameId: null,
                 opponentType: 'computer',
+                difficulty: difficulty,
             });
         } finally {
             setCreatingGame(false);

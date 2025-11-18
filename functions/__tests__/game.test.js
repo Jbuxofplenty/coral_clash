@@ -26,10 +26,15 @@ jest.mock('../utils/notifications.js', () => ({
 
 jest.mock('@google-cloud/tasks');
 
-jest.mock('../utils/aiEvaluation.js', () => ({
-    findBestMove: jest.fn(),
-    findBestMoveIterativeDeepening: jest.fn(),
-}));
+// Mock AI functions from shared package
+jest.mock('@jbuxofplenty/coral-clash', () => {
+    const actual = jest.requireActual('@jbuxofplenty/coral-clash');
+    return {
+        ...actual,
+        findBestMove: jest.fn(),
+        findBestMoveIterativeDeepening: jest.fn(),
+    };
+});
 
 jest.mock('../utils/helpers.js', () => ({
     formatDisplayName: jest.fn((name, discriminator) => `${name}#${discriminator}`),
@@ -533,8 +538,13 @@ describe('Game Creation Functions', () => {
         const userId = 'user-123';
 
         beforeEach(() => {
-            const { CoralClash, restoreGameFromSnapshot, createGameSnapshot } = require('@jbuxofplenty/coral-clash');
-            const { findBestMove, findBestMoveIterativeDeepening } = require('../utils/aiEvaluation.js');
+            const {
+                CoralClash,
+                restoreGameFromSnapshot,
+                createGameSnapshot,
+                findBestMove,
+                findBestMoveIterativeDeepening,
+            } = require('@jbuxofplenty/coral-clash');
 
             // Mock game instance
             const mockGame = {
@@ -581,8 +591,7 @@ describe('Game Creation Functions', () => {
         });
 
         it('should use easy difficulty (depth 3) for easy mode', async () => {
-            const { findBestMoveIterativeDeepening } = require('../utils/aiEvaluation.js');
-            const { SEARCH_DEPTH } = require('../utils/aiConfig.js');
+            const { findBestMoveIterativeDeepening, SEARCH_DEPTH } = require('@jbuxofplenty/coral-clash');
             findBestMoveIterativeDeepening.mockClear();
 
             // Test the helper directly with gameData
@@ -608,8 +617,7 @@ describe('Game Creation Functions', () => {
         });
 
         it('should use medium difficulty (depth 5) for medium mode', async () => {
-            const { findBestMoveIterativeDeepening } = require('../utils/aiEvaluation.js');
-            const { SEARCH_DEPTH } = require('../utils/aiConfig.js');
+            const { findBestMoveIterativeDeepening, SEARCH_DEPTH } = require('@jbuxofplenty/coral-clash');
             findBestMoveIterativeDeepening.mockClear();
 
             // Test the helper directly with gameData
@@ -635,8 +643,7 @@ describe('Game Creation Functions', () => {
         });
 
         it('should use hard difficulty (depth 7) for hard mode', async () => {
-            const { findBestMoveIterativeDeepening } = require('../utils/aiEvaluation.js');
-            const { SEARCH_DEPTH } = require('../utils/aiConfig.js');
+            const { findBestMoveIterativeDeepening, SEARCH_DEPTH } = require('@jbuxofplenty/coral-clash');
             findBestMoveIterativeDeepening.mockClear();
 
             // Test the helper directly with gameData
@@ -662,7 +669,7 @@ describe('Game Creation Functions', () => {
         });
 
         it('should use random moves for random difficulty', async () => {
-            const { findBestMoveIterativeDeepening } = require('../utils/aiEvaluation.js');
+            const { findBestMoveIterativeDeepening } = require('@jbuxofplenty/coral-clash');
             findBestMoveIterativeDeepening.mockClear();
 
             // Test the helper directly with gameData

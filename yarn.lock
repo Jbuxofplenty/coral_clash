@@ -2502,6 +2502,20 @@
   dependencies:
     merge-options "^3.0.4"
 
+"@react-native-firebase/analytics@^23.5.0":
+  version "23.5.0"
+  resolved "https://registry.yarnpkg.com/@react-native-firebase/analytics/-/analytics-23.5.0.tgz#c79e1222d26d65a963d44df44e9572903e86a0f2"
+  integrity sha512-tLUVOB1dsrjFrh48OCMxS44MCn5OyOmE0Am1jPFoHsnDF1Rj61zXdn9POQjHAXPxsbZmZSP0opxIpdzfNULn7Q==
+  dependencies:
+    superstruct "^2.0.2"
+
+"@react-native-firebase/app@^23.5.0":
+  version "23.5.0"
+  resolved "https://registry.yarnpkg.com/@react-native-firebase/app/-/app-23.5.0.tgz#b84540b1822e510dfd3c3890e8ca10b2655759fe"
+  integrity sha512-TOlm6V6fbILwgFP37QZM9Y0nfAW6zqNGVIWlMlepQB6b/BzzFMrCl1FiyknqD5l7i1jgdFQrqX1WH6ZO4ePa/g==
+  dependencies:
+    firebase "12.4.0"
+
 "@react-native-google-signin/google-signin@^16.0.0":
   version "16.0.0"
   resolved "https://registry.yarnpkg.com/@react-native-google-signin/google-signin/-/google-signin-16.0.0.tgz#05af652e16f7dab745907db06edc74c007c0e670"
@@ -4930,6 +4944,14 @@ expo-asset@~12.0.9:
     "@expo/image-utils" "^0.8.7"
     expo-constants "~18.0.9"
 
+expo-build-properties@^1.0.9:
+  version "1.0.9"
+  resolved "https://registry.yarnpkg.com/expo-build-properties/-/expo-build-properties-1.0.9.tgz#71f0ce813a8431937a3db25a91f1bb4b1a6214ae"
+  integrity sha512-2icttCy3OPTk/GWIFt+vwA+0hup53jnmYb7JKRbvNvrrOrz+WblzpeoiaOleI2dYG/vjwpNO8to8qVyKhYJtrQ==
+  dependencies:
+    ajv "^8.11.0"
+    semver "^7.6.0"
+
 expo-constants@18.0.10, expo-constants@~18.0.10, expo-constants@~18.0.9:
   version "18.0.10"
   resolved "https://registry.yarnpkg.com/expo-constants/-/expo-constants-18.0.10.tgz#92d4490d51193fc94bd40590453ce9cab4faf6fb"
@@ -5248,7 +5270,7 @@ find-up@^7.0.0:
     path-exists "^5.0.0"
     unicorn-magic "^0.1.0"
 
-firebase@^12.4.0:
+firebase@12.4.0, firebase@^12.4.0:
   version "12.4.0"
   resolved "https://registry.yarnpkg.com/firebase/-/firebase-12.4.0.tgz#c9de52c23e707d90aa43343ab3ad1c1ce6b71301"
   integrity sha512-/chNgDQ6ppPPGOQO4jctxOa/5JeQxuhaxA7Y90K0I+n/wPfoO8mRveedhVUdo7ExLcWUivnnow/ouSLYSI5Icw==
@@ -9142,6 +9164,11 @@ sucrase@3.35.0:
     mz "^2.7.0"
     pirates "^4.0.1"
     ts-interface-checker "^0.1.9"
+
+superstruct@^2.0.2:
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/superstruct/-/superstruct-2.0.2.tgz#3f6d32fbdc11c357deff127d591a39b996300c54"
+  integrity sha512-uV+TFRZdXsqXTL2pRvujROjdZQ4RAlBUS5BTh9IGm+jTqQntYThciG/qu57Gs69yjnVUSqdxF9YLmSnpupBW9A==
 
 supports-color@^5.3.0:
   version "5.5.0"

@@ -29,7 +29,13 @@ const formatDisplayName = (displayName, discriminator) => {
  * - Automatic computer move after player moves
  * - Offline local computer AI
  */
-const ComputerCoralClashBoard = ({ fixture, gameId, gameState, notificationStatus }) => {
+const ComputerCoralClashBoard = ({
+    fixture,
+    gameId,
+    gameState,
+    notificationStatus,
+    difficulty = 'random',
+}) => {
     const { user } = useAuth();
     const { isBoardFlipped } = useGamePreferences();
     const { showAlert } = useAlert();
@@ -271,6 +277,7 @@ const ComputerCoralClashBoard = ({ fixture, gameId, gameState, notificationStatu
             userColor='w' // User always plays as white in computer games
             notificationStatus={notificationStatus}
             isComputerThinking={isComputerThinking}
+            difficulty={difficulty}
         />
     );
 };

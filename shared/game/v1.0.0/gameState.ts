@@ -413,11 +413,13 @@ export function createGameSnapshot(coralClash: any) {
     const pieceRoles: { [square: string]: 'hunter' | 'gatherer' } = {};
 
     // Extract role information for each piece
-    board.flat().forEach((cell: any) => {
-        if (cell && cell.role) {
-            pieceRoles[cell.square] = cell.role;
-        }
-    });
+    if (board && Array.isArray(board)) {
+        board.flat().forEach((cell: any) => {
+            if (cell && cell.role) {
+                pieceRoles[cell.square] = cell.role;
+            }
+        });
+    }
 
     // Get PGN for move history (includes initial FEN and all moves)
     // This is essential for undo functionality

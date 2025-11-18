@@ -5,6 +5,8 @@
  * Tune these values to adjust AI behavior and create new difficulty modes.
  */
 
+import type { PieceRole, PieceSymbol } from './coralClash.js';
+
 /**
  * Piece values for material evaluation
  * Higher values indicate more valuable pieces
@@ -42,13 +44,13 @@ const PIECE_VALUES = {
  */
 const POSITIONAL_BONUSES = {
     centerSquares: {
-        squares: ['d4', 'd5', 'e4', 'e5'],
+        squares: ['d4', 'd5', 'e4', 'e5'] as const,
         points: 5, // Points per piece on center squares
     },
     extendedCenter: {
         // c3-c6, d3-d6, e3-e6, f3-f6
-        ranks: [3, 4, 5, 6],
-        files: ['c', 'd', 'e', 'f'],
+        ranks: [3, 4, 5, 6] as const,
+        files: ['c', 'd', 'e', 'f'] as const,
         points: 2, // Points per piece in extended center
     },
     opponentHalf: {
@@ -169,18 +171,21 @@ const TIME_CONTROL = {
 
 /**
  * Helper function to get piece value
- * @param {string} pieceSymbol - Piece symbol (h, d, t, f, o, c)
- * @param {string|null} role - Piece role ('hunter', 'gatherer', or null for whale)
- * @returns {number} Piece value
+ * @param pieceSymbol - Piece symbol (h, d, t, f, o, c)
+ * @param role - Piece role ('hunter', 'gatherer', or null for whale)
+ * @returns Piece value
  */
-export function getPieceValue(pieceSymbol, role) {
-    const pieceKey = pieceSymbol.toLowerCase();
+export function getPieceValue(
+    pieceSymbol: PieceSymbol,
+    role: PieceRole | null | undefined,
+): number {
+    const pieceKey = pieceSymbol.toLowerCase() as PieceSymbol;
 
     if (pieceKey === 'h') {
         return PIECE_VALUES.whale.value;
     }
 
-    const pieceMap = {
+    const pieceMap: Record<string, 'dolphin' | 'turtle' | 'pufferfish' | 'octopus' | 'crab'> = {
         d: 'dolphin',
         t: 'turtle',
         f: 'pufferfish',
@@ -193,14 +198,17 @@ export function getPieceValue(pieceSymbol, role) {
         return 0;
     }
 
+    // TypeScript knows pieceName is not 'whale' at this point, so we can safely access gatherer/hunter
+    const pieceValue = PIECE_VALUES[pieceName] as { gatherer: number; hunter: number };
+
     if (role === 'gatherer') {
-        return PIECE_VALUES[pieceName].gatherer;
+        return pieceValue.gatherer;
     } else if (role === 'hunter') {
-        return PIECE_VALUES[pieceName].hunter;
+        return pieceValue.hunter;
     }
 
     // Default to hunter if role not specified
-    return PIECE_VALUES[pieceName].hunter;
+    return pieceValue.hunter;
 }
 
 export {

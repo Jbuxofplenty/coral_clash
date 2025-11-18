@@ -2,14 +2,15 @@ import { CloudTasksClient } from '@google-cloud/tasks';
 import {
     CoralClash,
     GAME_VERSION,
+    SEARCH_DEPTH,
+    TIME_CONTROL,
     calculateUndoMoveCount,
     createGameSnapshot,
+    findBestMoveIterativeDeepening,
     restoreGameFromSnapshot,
 } from '@jbuxofplenty/coral-clash';
 import { HttpsError, onCall, onRequest } from 'firebase-functions/v2/https';
 import { admin } from '../init.js';
-import { SEARCH_DEPTH, TIME_CONTROL } from '../utils/aiConfig.js';
-import { findBestMoveIterativeDeepening } from '../utils/aiEvaluation.js';
 import { getAppCheckConfig } from '../utils/appCheckConfig.js';
 import { getGameResult, validateMove } from '../utils/gameValidator.js';
 import { validateClientVersion } from '../utils/gameVersion.js';

@@ -1,8 +1,11 @@
 import {
     CoralClash,
+    SEARCH_DEPTH,
+    TIME_CONTROL,
     WHALE,
     applyFixture,
     createGameSnapshot,
+    findBestMoveIterativeDeepening,
     restoreGameFromSnapshot,
 } from '@jbuxofplenty/coral-clash';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -53,6 +56,7 @@ const GAME_STATE_VERSION = '1.2.0';
  * - userColor: Color the current user is playing as ('w' or 'b', null for both/spectator)
  * - effectiveBoardFlip: Override for board flip (for PvP games where user plays as black)
  * - isComputerThinking: Whether the computer is currently thinking (for computer games)
+ * - difficulty: AI difficulty level for offline computer games ('random', 'easy', 'medium', 'hard')
  */
 const BaseCoralClashBoard = ({
     fixture,
@@ -72,6 +76,7 @@ const BaseCoralClashBoard = ({
     effectiveBoardFlip = null,
     notificationStatus = null,
     isComputerThinking = false,
+    difficulty = 'random', // Default to random for offline games
 }) => {
     const { width, height } = useWindowDimensions();
     const _insets = useSafeAreaInsets(); // Reserved for future safe area handling if needed
@@ -104,6 +109,10 @@ const BaseCoralClashBoard = ({
     const [isViewingEnemyMoves, setIsViewingEnemyMoves] = useState(false);
     const [updateCounter, forceUpdate] = useState(0);
     const [turnNotification, setTurnNotification] = useState(null);
+    // Local thinking state for offline computer games
+    const [localIsComputerThinking, setLocalIsComputerThinking] = useState(false);
+    // Use prop if provided (for online games), otherwise use local state (for offline games)
+    const effectiveIsComputerThinking = isComputerThinking || localIsComputerThinking;
 
     // Animation state
     const [animatingMove, setAnimatingMove] = useState(null);
@@ -389,6 +398,7 @@ const BaseCoralClashBoard = ({
 
     // Handle offline computer moves (for offline games only)
     // Makes automatic black moves when it's black's turn in offline computer games
+    const computerMoveHistoryLength = coralClash.historyLength();
     useEffect(() => {
         // Only run for offline computer games
         if (gameId || opponentType !== 'computer') {
@@ -398,16 +408,105 @@ const BaseCoralClashBoard = ({
         // Only run if not loading a fixture, or if fixture is loaded
         if (!fixture || fixtureLoaded) {
             // Make black moves if it's black's turn
-            while (!coralClash.isGameOver() && coralClash.turn() === 'b') {
-                const moves = coralClash.moves();
-                const move = moves[Math.floor(Math.random() * moves.length)];
-                coralClash.move(move);
+            // Wait for any ongoing animations to complete before making computer move
+            if (
+                !coralClash.isGameOver() &&
+                coralClash.turn() === 'b' &&
+                !localIsComputerThinking &&
+                !animatingMove &&
+                !animatingPiece
+            ) {
+                // Set thinking state
+                setLocalIsComputerThinking(true);
+
+                // Use AI evaluation based on difficulty
+                const makeComputerMove = async () => {
+                    try {
+                        // Small delay to ensure thinking indicator is visible
+                        // This is especially important for random moves which are instant
+                        await new Promise((resolve) => setTimeout(resolve, 100));
+
+                        const currentGameState = createGameSnapshot(coralClash);
+                        const computerColor = 'b';
+
+                        let selectedMove;
+
+                        if (difficulty === 'random') {
+                            // Random move selection
+                            const moves = coralClash.moves({ verbose: true });
+                            selectedMove = moves[Math.floor(Math.random() * moves.length)];
+                        } else {
+                            // Use AI evaluation
+                            const maxDepth = SEARCH_DEPTH[difficulty] || SEARCH_DEPTH.easy;
+                            const result = findBestMoveIterativeDeepening(
+                                currentGameState,
+                                maxDepth,
+                                computerColor,
+                                TIME_CONTROL.maxTimeMs,
+                            );
+
+                            if (result.move) {
+                                selectedMove = result.move;
+                            } else {
+                                // Fallback to random if no move found
+                                const moves = coralClash.moves({ verbose: true });
+                                selectedMove = moves[Math.floor(Math.random() * moves.length)];
+                            }
+                        }
+
+                        // Apply the move
+                        if (selectedMove) {
+                            coralClash.move({
+                                from: selectedMove.from,
+                                to: selectedMove.to,
+                                promotion: selectedMove.promotion,
+                                coralPlaced: selectedMove.coralPlaced,
+                                coralRemoved: selectedMove.coralRemoved,
+                                coralRemovedSquares: selectedMove.coralRemovedSquares,
+                            });
+                            // Force re-render to show the updated board
+                            forceUpdate((n) => n + 1);
+                        }
+                    } catch (error) {
+                        console.error('Error making computer move:', error);
+                        // Fallback to random move on error
+                        try {
+                            const moves = coralClash.moves({ verbose: true });
+                            if (moves.length > 0) {
+                                const randomMove = moves[Math.floor(Math.random() * moves.length)];
+                                coralClash.move({
+                                    from: randomMove.from,
+                                    to: randomMove.to,
+                                    promotion: randomMove.promotion,
+                                    coralPlaced: randomMove.coralPlaced,
+                                    coralRemoved: randomMove.coralRemoved,
+                                    coralRemovedSquares: randomMove.coralRemovedSquares,
+                                });
+                                forceUpdate((n) => n + 1);
+                            }
+                        } catch (fallbackError) {
+                            console.error('Fallback move also failed:', fallbackError);
+                        }
+                    } finally {
+                        setLocalIsComputerThinking(false);
+                    }
+                };
+
+                makeComputerMove();
             }
-            // Force re-render to show the updated board
-            forceUpdate((n) => n + 1);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [coralClash.historyLength(), fixture, fixtureLoaded, gameId, opponentType, coralClash]);
+    }, [
+        computerMoveHistoryLength,
+        fixture,
+        fixtureLoaded,
+        gameId,
+        opponentType,
+        difficulty,
+        localIsComputerThinking,
+        animatingMove, // Wait for animations to complete before making computer move
+        animatingPiece, // Also check animatingPiece to ensure animation is fully complete
+    ]);
 
     // Clear selection state when board is flipped
     useEffect(() => {
@@ -1838,7 +1937,7 @@ const BaseCoralClashBoard = ({
                                 coralUnderControl={coralClash.getCoralAreaControl(topPlayerColor)}
                                 timeRemaining={topPlayerTime}
                                 isThinking={
-                                    isComputerThinking &&
+                                    effectiveIsComputerThinking &&
                                     topPlayerData.isComputer &&
                                     isTopPlayerActive
                                 }
@@ -1931,6 +2030,11 @@ const BaseCoralClashBoard = ({
                                         setRemovedCoral([]);
                                         setPlacedCoral([]);
                                         forceUpdate((n) => n + 1);
+                                        // Small delay to ensure state updates before computer move triggers
+                                        // This prevents race conditions where computer move starts before animation state clears
+                                        setTimeout(() => {
+                                            forceUpdate((n) => n + 1);
+                                        }, 50);
                                     }}
                                 />
                             )}
@@ -1952,7 +2056,7 @@ const BaseCoralClashBoard = ({
                                 )}
                                 timeRemaining={bottomPlayerTime}
                                 isThinking={
-                                    isComputerThinking &&
+                                    effectiveIsComputerThinking &&
                                     bottomPlayerData.isComputer &&
                                     isBottomPlayerActive
                                 }

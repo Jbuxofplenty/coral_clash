@@ -195,7 +195,9 @@ const styles = StyleSheet.create({
     },
     optionText: {
         flex: 1,
+        flexShrink: 1,
         marginLeft: 16,
+        marginRight: 18,
     },
     optionName: {
         fontSize: 18,
@@ -216,4 +218,3 @@ const styles = StyleSheet.create({
         fontWeight: '600',
     },
 });
-
