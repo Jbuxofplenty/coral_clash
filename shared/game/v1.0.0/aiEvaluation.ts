@@ -624,6 +624,20 @@ export function findBestMoveIterativeDeepening(
     let totalNodesEvaluated = 0;
     let bestDepth = 1;
 
+    // Get initial legal moves as fallback - ensures we always have a move to return
+    const initialMoves = game.moves({ verbose: true });
+    if (initialMoves.length === 0) {
+        return {
+            move: null,
+            score: 0,
+            nodesEvaluated: 0,
+            depth: 0,
+            elapsedMs: Date.now() - startTime,
+        };
+    }
+    // Set first move as initial fallback
+    let fallbackMove = initialMoves[0];
+
     const timeControl: TimeControl = {
         startTime,
         maxTimeMs,
@@ -631,10 +645,19 @@ export function findBestMoveIterativeDeepening(
 
     // Iterative deepening: start with depth 1 and increase until time runs out or max depth reached
     for (let depth = 1; depth <= maxDepth; depth++) {
+        // Check timeout before starting this depth
+        const elapsed = Date.now() - startTime;
+        if (elapsed >= maxTimeMs) {
+            // Time's up - use best move found so far, or fallback
+            if (!bestMove) {
+                bestMove = fallbackMove;
+            }
+            break;
+        }
+
         const result = findBestMove(gameState, depth, playerColor, timeControl);
 
-        const elapsed = Date.now() - startTime;
-
+        const elapsedAfter = Date.now() - startTime;
         totalNodesEvaluated += result.nodesEvaluated;
 
         // If timed out, use the best result from previous depth (if any)
@@ -643,7 +666,8 @@ export function findBestMoveIterativeDeepening(
             if (bestMove) {
                 break;
             }
-            // If depth 1 timed out and we have no previous result, fall through to fallback
+            // If depth 1 timed out and we have no previous result, use fallback
+            bestMove = fallbackMove;
             break;
         }
 
@@ -656,11 +680,15 @@ export function findBestMoveIterativeDeepening(
 
         // Report progress
         if (progressCallback) {
-            progressCallback(depth, result.nodesEvaluated, elapsed, bestMove !== null);
+            progressCallback(depth, result.nodesEvaluated, elapsedAfter, bestMove !== null);
         }
 
-        // Check if we've exceeded time limit
-        if (elapsed >= maxTimeMs) {
+        // Check if we've exceeded time limit (double-check after search)
+        if (elapsedAfter >= maxTimeMs) {
+            // Ensure we have a move before breaking
+            if (!bestMove) {
+                bestMove = fallbackMove;
+            }
             break;
         }
 
@@ -673,21 +701,14 @@ export function findBestMoveIterativeDeepening(
 
     const totalElapsed = Date.now() - startTime;
 
-    // If no move found (shouldn't happen), return first legal move as fallback
-    // This ensures backwards compatibility - always returns a move if possible
+    // Final fallback: ensure we always return a move if legal moves exist
     if (!bestMove) {
-        const fallbackGame = safeRestoreGame(gameState);
-        if (fallbackGame) {
-            const moves = fallbackGame.moves({ verbose: true });
-            if (moves.length > 0) {
-                bestMove = moves[0];
-            }
-        }
+        bestMove = fallbackMove;
     }
 
     return {
-        move: bestMove, // May be null if no moves available or restore failed
-        score: bestScore,
+        move: bestMove, // Should never be null if legal moves exist
+        score: bestScore === -Infinity ? 0 : bestScore,
         nodesEvaluated: totalNodesEvaluated,
         depth: bestDepth,
         elapsedMs: totalElapsed,
