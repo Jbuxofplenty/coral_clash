@@ -1,3 +1,10 @@
+## [2.2.1](https://github.com/Jbuxofplenty/coral_clash/compare/v2.2.0...v2.2.1) (2025-11-18)
+
+
+### Bug Fixes
+
+* **shared:** ensure AI always returns a move within timeout ([b2c6535](https://github.com/Jbuxofplenty/coral_clash/commit/b2c653570c11872ebc52884446b432a578ed4a49))
+
 # [2.2.0](https://github.com/Jbuxofplenty/coral_clash/compare/v2.1.0...v2.2.0) (2025-11-18)
 
 
