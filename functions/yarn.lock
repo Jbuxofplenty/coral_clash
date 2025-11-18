@@ -1128,10 +1128,10 @@
   resolved "https://registry.npmjs.org/@istanbuljs/schema/-/schema-0.1.3.tgz"
   integrity sha512-ZXRY4jNvVgSVQ8DL3LTcakaAtXwTVUxE81hslsyD2AtoXW/wVob10HkOJ1X/pAlcI7D+2YoZKg5do8G/w6RYgA==
 
-"@jbuxofplenty/coral-clash@^2.2.0":
-  version "2.2.0"
-  resolved "https://npm.pkg.github.com/download/@jbuxofplenty/coral-clash/2.2.0/982833c770059431ce5e73dfd27c5903805ee94f#982833c770059431ce5e73dfd27c5903805ee94f"
-  integrity sha512-VsQ9cB7DjCzOIrxtD114nLNSJdbDb/SoUtCNMudTOE1fcLa6bdW5ex5xg0Zh5GkolKK1o3khamMVqWtmzV9Kkg==
+"@jbuxofplenty/coral-clash@^2.2.1":
+  version "2.2.1"
+  resolved "https://npm.pkg.github.com/download/@jbuxofplenty/coral-clash/2.2.1/c854596821827a301d0d504ecd89a914f8f35408#c854596821827a301d0d504ecd89a914f8f35408"
+  integrity sha512-aSpvZ405VmwVx+Vubs/SBacJX978gb4xZ6NPs4/dqIz/AzX3ZFa0eLP/0NfUWY63s11UjoSwR8QzcLmk2GgaQA==
 
 "@jest/console@^29.7.0":
   version "29.7.0"
