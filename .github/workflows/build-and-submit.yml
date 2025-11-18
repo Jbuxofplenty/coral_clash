@@ -141,9 +141,11 @@ jobs:
           cd ios
           echo "📦 Installing CocoaPods dependencies..."
           if pod install --repo-update; then
-            echo "✅ CocoaPods dependencies installed"
+            echo "✅ CocoaPods dependencies installed with repo update"
           else
-            echo "⚠️  Repo update failed (likely transient CDN issue), skipping pod install and continuing..."
+            echo "⚠️  Repo update failed (likely transient CDN issue), installing with cached specs..."
+            pod install
+            echo "✅ CocoaPods dependencies installed"
           fi
 
       - name: Bundle JavaScript with Expo
