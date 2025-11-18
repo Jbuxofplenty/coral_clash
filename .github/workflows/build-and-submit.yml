@@ -136,14 +136,33 @@ jobs:
           npx expo prebuild --platform ios --clean
           echo "✅ Expo prebuild complete"
 
+      - name: Configure CocoaPods to use Git Repo
+        run: |
+          cd ios
+          echo "🔧 Configuring CocoaPods to use git-based specs repo instead of CDN..."
+          
+          # Replace CDN source with git source in Podfile if it exists
+          if grep -q "source 'https://cdn.cocoapods.org/'" Podfile 2>/dev/null; then
+            sed -i '' "s|source 'https://cdn.cocoapods.org/'|source 'https://github.com/CocoaPods/Specs.git'|g" Podfile
+            echo "✅ Replaced CDN source with git source in Podfile"
+          elif ! grep -q "source 'https://github.com/CocoaPods/Specs.git'" Podfile 2>/dev/null && ! grep -q "^source" Podfile 2>/dev/null; then
+            # Add git source at the top if no source is specified
+            echo "source 'https://github.com/CocoaPods/Specs.git'" > Podfile.tmp
+            cat Podfile >> Podfile.tmp
+            mv Podfile.tmp Podfile
+            echo "✅ Added git source to Podfile"
+          fi
+
       - name: Install CocoaPods
         run: |
           cd ios
           echo "📦 Installing CocoaPods dependencies..."
+          
+          # Try with repo update first
           if pod install --repo-update; then
             echo "✅ CocoaPods dependencies installed with repo update"
           else
-            echo "⚠️  Repo update failed (likely transient CDN issue), installing with cached specs..."
+            echo "⚠️  Repo update failed (likely transient issue), installing with cached specs..."
             pod install
             echo "✅ CocoaPods dependencies installed"
           fi
