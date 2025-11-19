@@ -179,9 +179,23 @@ export const useNotificationHandlers = (navigationRef) => {
                         }
                         break;
 
+                    case 'friend_request':
                     case 'friend_accepted':
                         // Navigate to Friends screen
                         navigationRef.current.navigate('Friends');
+                        break;
+
+                    case 'game_request':
+                        // Navigate to the game request (could also go to Friends, but game is more direct)
+                        if (notificationData.data.gameId) {
+                            navigationRef.current.navigate('Game', {
+                                gameId: notificationData.data.gameId,
+                                isPvP: true,
+                            });
+                        } else {
+                            // Fallback to Friends if no gameId
+                            navigationRef.current.navigate('Friends');
+                        }
                         break;
 
                     case 'game_over':
