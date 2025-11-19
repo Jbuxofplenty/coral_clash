@@ -1,7 +1,7 @@
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import { doc, updateDoc } from 'firebase/firestore';
-import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { AppState, Platform } from 'react-native';
 import { db } from '../config/firebase';
 import { useAuth } from './AuthContext';
@@ -58,7 +58,7 @@ export const useNotifications = () => {
     return context;
 };
 
-export function NotificationProvider({ children }) {
+export function NotificationProvider({ children, navigationRef }) {
     const { user } = useAuth();
     const [expoPushToken, setExpoPushToken] = useState('');
     const [notification, setNotification] = useState(null);
@@ -67,6 +67,70 @@ export function NotificationProvider({ children }) {
     const notificationListener = useRef();
     const responseListener = useRef();
     const appState = useRef(AppState.currentState);
+
+    // Handle notification tap navigation
+    const handleNotificationTap = useCallback(
+        (notificationData) => {
+            const notificationType = notificationData.data?.type;
+
+            // Navigate based on notification type
+            if (navigationRef?.current) {
+                switch (notificationType) {
+                    case 'move_made':
+                    case 'game_accepted':
+                    case 'reset_approved':
+                    case 'reset_rejected':
+                    case 'reset_cancelled':
+                    case 'undo_approved':
+                    case 'undo_rejected':
+                    case 'undo_cancelled':
+                    case 'undo_requested':
+                    case 'reset_requested':
+                        // Navigate to the game
+                        if (notificationData.data?.gameId) {
+                            navigationRef.current.navigate('Game', {
+                                gameId: notificationData.data.gameId,
+                                isPvP: true,
+                            });
+                        }
+                        break;
+
+                    case 'friend_request':
+                    case 'friend_accepted':
+                        // Navigate to Friends screen
+                        navigationRef.current.navigate('Friends');
+                        break;
+
+                    case 'game_request':
+                        // Navigate to the game request (could also go to Friends, but game is more direct)
+                        if (notificationData.data?.gameId) {
+                            navigationRef.current.navigate('Game', {
+                                gameId: notificationData.data.gameId,
+                                isPvP: true,
+                            });
+                        } else {
+                            // Fallback to Friends if no gameId
+                            navigationRef.current.navigate('Friends');
+                        }
+                        break;
+
+                    case 'game_over':
+                        // Could navigate to game history or results
+                        if (notificationData.data?.gameId) {
+                            navigationRef.current.navigate('Game', {
+                                gameId: notificationData.data.gameId,
+                                isPvP: true,
+                            });
+                        }
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+        },
+        [navigationRef],
+    );
 
     // Keep shared ref in sync with state for notification handler
     useEffect(() => {
@@ -150,10 +214,9 @@ export function NotificationProvider({ children }) {
                 const data = response.notification.request.content.data;
 
                 // Handle navigation based on notification type
-                // Navigation is handled by the useNotificationHandlers hook
-                if (data?.type) {
-                    // Notification types: friend_request, game_request, game_accepted, etc.
-                    // The actual navigation logic is in useNotificationHandlers
+                if (data?.type && handleNotificationTap) {
+                    // Call the notification tap handler to navigate to the appropriate screen
+                    handleNotificationTap({ data });
                 }
             },
         );
@@ -175,7 +238,7 @@ export function NotificationProvider({ children }) {
             }
             subscription?.remove();
         };
-    }, [user?.uid]); // Only re-run when user ID changes, not when entire user object changes
+    }, [user?.uid, handleNotificationTap]); // Re-run when user ID or handler changes
 
     // Auto-dismiss move, undo, and reset request notifications when user navigates to that game
     useEffect(() => {

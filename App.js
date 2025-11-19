@@ -147,7 +147,7 @@ export default function App() {
                     <AlertProvider>
                         <VersionProvider>
                             <GamePreferencesProvider>
-                                <NotificationProvider>
+                                <NotificationProvider navigationRef={navigationRef}>
                                     <NavigationContainer
                                         ref={navigationRef}
                                         onReady={onLayoutRootView}
