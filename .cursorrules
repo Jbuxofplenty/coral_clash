@@ -44,6 +44,37 @@
 - Test changes thoroughly - version bumps trigger automatic deployment
 - Changes to `shared/game/` will trigger new package release
 
+## Backend API Changes (Firebase Functions)
+
+- Always make API schema changes backwards compatible (API released before client)
+- **Deployment Order**: Deploy API changes BEFORE client updates that depend on them
+  - This ensures old clients continue working while new clients can use new features
+  - Use feature flags or version checks to enable new functionality gradually
+- **Schema Evolution Patterns**:
+  - Add new fields as optional (never remove existing fields)
+  - Support multiple response formats based on client version when needed
+  - Use version parameters (`clientVersion`) to determine response format
+  - Deprecate fields by marking them optional and documenting removal timeline
+- **Error Handling**:
+  - Always use Firebase `HttpsError` with appropriate error codes (`unauthenticated`, `permission-denied`, `not-found`, `invalid-argument`, `already-exists`, `internal`)
+  - Provide clear, actionable error messages
+  - Never expose internal implementation details in error messages
+  - Log detailed errors server-side for debugging
+- **Input Validation**:
+  - Validate all inputs at the API boundary
+  - Use version validation (`validateClientVersion`) for game engine compatibility
+  - Validate required fields and data types before processing
+  - Return `invalid-argument` errors for validation failures
+- **Testing Requirements**:
+  - Write tests for all API endpoints (use handler functions separated from exports)
+  - Test backwards compatibility with old client versions
+  - Test error cases and edge cases
+  - Test authentication and authorization scenarios
+- **Documentation**:
+  - Document API changes in commit messages using `feat(server):` or `fix(server):` scope
+  - Update API documentation when adding new endpoints or changing schemas
+  - Document breaking changes explicitly (should be rare due to backwards compatibility)
+
 ## Git Operations
 
 - NEVER run `git commit/push` unless explicitly requested by the user
