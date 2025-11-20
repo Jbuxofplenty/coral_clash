@@ -4,6 +4,7 @@ import {
     setAnalyticsCollectionEnabled,
     setConsent,
 } from '@react-native-firebase/analytics';
+import analyticsModule from '@react-native-firebase/analytics';
 import { getApp } from '@react-native-firebase/app';
 import { initializeApp } from 'firebase/app';
 import { CustomProvider, initializeAppCheck } from 'firebase/app-check';
@@ -137,6 +138,84 @@ const setAnalyticsConsent = async (consentSettings) => {
     throw new Error('Analytics not initialized');
 };
 
+/**
+ * Initiate on-device conversion measurement for iOS Ads
+ * This helps measure conversions from iOS ad campaigns while maintaining user privacy
+ * Reference: https://firebase.google.com/docs/tutorials/ads-ios-on-device-measurement/step-3
+ *
+ * Should be called once per install, as close as possible to login
+ * Only works on iOS - Android support may be added in future
+ *
+ * @param {string} emailAddress - User's email address (will be hashed)
+ * @returns {Promise<void>}
+ */
+const initiateOnDeviceConversionMeasurement = async (emailAddress) => {
+    // Only supported on iOS currently
+    if (Platform.OS !== 'ios') {
+        return;
+    }
+
+    if (!analyticsInstance) {
+        console.warn('⚠️ Analytics not initialized - skipping on-device conversion measurement');
+        return;
+    }
+
+    if (!emailAddress || typeof emailAddress !== 'string') {
+        console.warn('⚠️ Invalid email address - skipping on-device conversion measurement');
+        return;
+    }
+
+    try {
+        // React Native Firebase Analytics exposes native methods
+        // Try accessing via the analytics instance first (if method is exposed on instance)
+        // Then try the module directly (native methods are often on the module)
+        let method = null;
+
+        // Check if method exists on analytics instance
+        if (
+            analyticsInstance &&
+            typeof analyticsInstance.initiateOnDeviceConversionMeasurementWithEmailAddress ===
+                'function'
+        ) {
+            method = analyticsInstance.initiateOnDeviceConversionMeasurementWithEmailAddress.bind(
+                analyticsInstance,
+            );
+        }
+        // Check if method exists on the module (React Native Firebase pattern)
+        else if (
+            analyticsModule &&
+            typeof analyticsModule.initiateOnDeviceConversionMeasurementWithEmailAddress ===
+                'function'
+        ) {
+            method = analyticsModule.initiateOnDeviceConversionMeasurementWithEmailAddress;
+        }
+        // Try camelCase version (React Native sometimes uses camelCase)
+        else if (
+            analyticsModule &&
+            typeof analyticsModule.initiateOnDeviceConversionMeasurementWithEmail === 'function'
+        ) {
+            method = analyticsModule.initiateOnDeviceConversionMeasurementWithEmail;
+        }
+
+        if (method) {
+            // Call with plain email - Firebase SDK handles hashing internally per Firebase docs
+            await method(emailAddress);
+            console.log('✅ On-device conversion measurement initiated');
+        } else {
+            // Method not available - this might mean:
+            // 1. React Native Firebase version doesn't support it yet
+            // 2. Native SDK needs to be updated
+            // 3. Method name differs
+            console.warn(
+                '⚠️ initiateOnDeviceConversionMeasurement method not available - ensure @react-native-firebase/analytics is up to date and native SDK supports iOS on-device conversion measurement',
+            );
+        }
+    } catch (error) {
+        // Silently handle errors - conversion measurement is non-critical
+        console.warn('⚠️ Failed to initiate on-device conversion measurement:', error.message);
+    }
+};
+
 // Connect to emulators in development
 if (USE_EMULATOR) {
     // Determine the emulator host dynamically:
@@ -178,6 +257,7 @@ export {
     doc,
     functions,
     getDoc,
+    initiateOnDeviceConversionMeasurement,
     onSnapshot,
     query,
     setAnalyticsConsent as setConsent,

@@ -15,7 +15,13 @@ import {
 import { doc, getDoc, onSnapshot, setDoc } from 'firebase/firestore';
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { Platform } from 'react-native';
-import { analytics, auth, db, setConsent } from '../config/firebase';
+import {
+    analytics,
+    auth,
+    db,
+    initiateOnDeviceConversionMeasurement,
+    setConsent,
+} from '../config/firebase';
 import { requestTrackingPermission } from '../utils/tracking';
 
 const AuthContext = createContext({});
@@ -148,6 +154,26 @@ export const AuthProvider = ({ children }) => {
                                 console.warn(
                                     '⚠️ Could not set Analytics consent:',
                                     consentError.message,
+                                );
+                            }
+                        }
+
+                        // Initiate on-device conversion measurement for iOS Ads
+                        // This helps measure conversions from iOS ad campaigns while maintaining user privacy
+                        // Should be called once per install, as close as possible to login
+                        // Reference: https://firebase.google.com/docs/tutorials/ads-ios-on-device-measurement/step-3
+                        if (user.email) {
+                            try {
+                                // Small delay between setting consent and initiating conversion measurement
+                                // Firebase recommends this if events happen immediately after registration
+                                setTimeout(async () => {
+                                    await initiateOnDeviceConversionMeasurement(user.email);
+                                }, 500);
+                            } catch (conversionError) {
+                                // Silently handle - conversion measurement is non-critical
+                                console.warn(
+                                    '⚠️ Could not initiate on-device conversion measurement:',
+                                    conversionError.message,
                                 );
                             }
                         }
