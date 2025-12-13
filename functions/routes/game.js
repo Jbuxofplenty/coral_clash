@@ -3,7 +3,7 @@ import {
     CoralClash,
     GAME_VERSION,
     SEARCH_DEPTH,
-    TIME_CONTROL,
+    getTimeControlForDifficulty,
     calculateUndoMoveCount,
     createGameSnapshot,
     findBestMoveIterativeDeepening,
@@ -779,13 +779,47 @@ export async function makeComputerMoveHelper(gameId, gameData = null) {
     // Get difficulty level (default to 'random' if not set)
     const difficulty = gameData.difficulty || 'random';
 
+    // Extract last computer move to prevent reversing moves
+    const moves_array = gameData.moves || [];
+    let lastComputerMove = null;
+    // Find the last move made by the computer
+    for (let i = moves_array.length - 1; i >= 0; i--) {
+        if (moves_array[i].playerId === 'computer' && moves_array[i].move) {
+            const lastMove = moves_array[i].move;
+            lastComputerMove = {
+                from: lastMove.from,
+                to: lastMove.to,
+                piece: lastMove.piece,
+            };
+            break;
+        }
+    }
+
     // Select move based on difficulty
     let selectedMove;
 
     switch (difficulty) {
         case 'random': {
-            // Random move selection
-            selectedMove = moves[Math.floor(Math.random() * moves.length)];
+            // Random move selection (still avoid reversing moves)
+            if (lastComputerMove) {
+                // Filter out reversing moves from random selection
+                const nonReversingMoves = moves.filter(
+                    (m) =>
+                        !(
+                            m.from === lastComputerMove.to &&
+                            m.to === lastComputerMove.from &&
+                            m.piece?.toLowerCase() === lastComputerMove.piece?.toLowerCase()
+                        ),
+                );
+                if (nonReversingMoves.length > 0) {
+                    selectedMove = nonReversingMoves[Math.floor(Math.random() * nonReversingMoves.length)];
+                } else {
+                    // If all moves are reversing (shouldn't happen), use random
+                    selectedMove = moves[Math.floor(Math.random() * moves.length)];
+                }
+            } else {
+                selectedMove = moves[Math.floor(Math.random() * moves.length)];
+            }
             moveCalculationTimeMs = Date.now() - moveStartTime;
             break;
         }
@@ -793,11 +827,14 @@ export async function makeComputerMoveHelper(gameId, gameData = null) {
             // Easy mode: Use iterative deepening with time control
             const maxDepth = SEARCH_DEPTH.easy;
             const computerColor = 'b';
+            const timeControl = getTimeControlForDifficulty('easy');
             const result = findBestMoveIterativeDeepening(
                 currentGameState,
                 maxDepth,
                 computerColor,
-                TIME_CONTROL.maxTimeMs,
+                timeControl.maxTimeMs,
+                null, // progressCallback
+                lastComputerMove,
             );
 
             if (result.move) {
@@ -818,11 +855,14 @@ export async function makeComputerMoveHelper(gameId, gameData = null) {
             // Medium mode: Use iterative deepening with time control
             const maxDepth = SEARCH_DEPTH.medium;
             const computerColor = 'b';
+            const timeControl = getTimeControlForDifficulty('medium');
             const result = findBestMoveIterativeDeepening(
                 currentGameState,
                 maxDepth,
                 computerColor,
-                TIME_CONTROL.maxTimeMs,
+                timeControl.maxTimeMs,
+                null, // progressCallback
+                lastComputerMove,
             );
 
             if (result.move) {
@@ -842,11 +882,14 @@ export async function makeComputerMoveHelper(gameId, gameData = null) {
             // Hard mode: Use iterative deepening with time control
             const maxDepth = SEARCH_DEPTH.hard;
             const computerColor = 'b';
+            const timeControl = getTimeControlForDifficulty('hard');
             const result = findBestMoveIterativeDeepening(
                 currentGameState,
                 maxDepth,
                 computerColor,
-                TIME_CONTROL.maxTimeMs,
+                timeControl.maxTimeMs,
+                null, // progressCallback
+                lastComputerMove,
             );
 
             if (result.move) {
@@ -863,9 +906,27 @@ export async function makeComputerMoveHelper(gameId, gameData = null) {
             break;
         }
         default: {
-            // Unknown difficulty, default to random
+            // Unknown difficulty, default to random (still avoid reversing moves)
             console.warn(`Unknown difficulty level: ${difficulty}, defaulting to random`);
-            selectedMove = moves[Math.floor(Math.random() * moves.length)];
+            if (lastComputerMove) {
+                // Filter out reversing moves from random selection
+                const nonReversingMoves = moves.filter(
+                    (m) =>
+                        !(
+                            m.from === lastComputerMove.to &&
+                            m.to === lastComputerMove.from &&
+                            m.piece?.toLowerCase() === lastComputerMove.piece?.toLowerCase()
+                        ),
+                );
+                if (nonReversingMoves.length > 0) {
+                    selectedMove = nonReversingMoves[Math.floor(Math.random() * nonReversingMoves.length)];
+                } else {
+                    // If all moves are reversing (shouldn't happen), use random
+                    selectedMove = moves[Math.floor(Math.random() * moves.length)];
+                }
+            } else {
+                selectedMove = moves[Math.floor(Math.random() * moves.length)];
+            }
             moveCalculationTimeMs = Date.now() - moveStartTime;
             break;
         }
@@ -896,8 +957,7 @@ export async function makeComputerMoveHelper(gameId, gameData = null) {
         throw new Error(`Computer move validation failed: ${validation.error}`);
     }
 
-    // Add computer move to moves array
-    const moves_array = gameData.moves || [];
+    // Add computer move to moves array (moves_array was already retrieved earlier)
     moves_array.push({
         playerId: 'computer',
         move: validation.result,
