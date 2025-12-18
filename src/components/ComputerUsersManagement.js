@@ -78,7 +78,8 @@ export default function ComputerUsersManagement() {
                             console.error('Error deleting computer users:', error);
                             showAlert(
                                 'Error',
-                                error.message || 'Failed to delete computer users. Please try again.',
+                                error.message ||
+                                    'Failed to delete computer users. Please try again.',
                             );
                         } finally {
                             setDeleting(false);
@@ -261,4 +262,3 @@ const styles = StyleSheet.create({
         fontWeight: '600',
     },
 });
-
