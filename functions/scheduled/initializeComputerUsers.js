@@ -1,4 +1,4 @@
-import { onCall } from 'firebase-functions/v2/https';
+import { HttpsError, onCall } from 'firebase-functions/v2/https';
 import { admin } from '../init.js';
 import { getAppCheckConfig } from '../utils/appCheckConfig.js';
 import { getAllComputerUsers } from '../utils/computerUsers.js';
@@ -9,10 +9,25 @@ const db = admin.firestore();
 /**
  * Callable function: Initialize computer users in Firestore
  * Creates/updates computer user documents and adds them to matchmaking queue
- * Run this once manually to set up computer users
+ * Only accessible to internal users
  */
-export const initializeComputerUsers = onCall(getAppCheckConfig(), async (_request) => {
+export const initializeComputerUsers = onCall(getAppCheckConfig(), async (request) => {
     try {
+        // Verify user is authenticated and is an internal user
+        if (!request.auth) {
+            throw new HttpsError('unauthenticated', 'User must be authenticated');
+        }
+
+        const requestingUserId = request.auth.uid;
+        const requestingUserDoc = await db.collection('users').doc(requestingUserId).get();
+
+        if (!requestingUserDoc.exists || !requestingUserDoc.data().internalUser) {
+            throw new HttpsError(
+                'permission-denied',
+                'Only internal users can initialize computer users',
+            );
+        }
+
         console.log('[InitializeComputerUsers] Starting computer user initialization');
         const computerUsers = getAllComputerUsers();
 

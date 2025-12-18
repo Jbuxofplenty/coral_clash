@@ -6,6 +6,7 @@ import { Dimensions, ScrollView, StyleSheet } from 'react-native';
 import {
     ActiveGamesCard,
     BannerAd,
+    ComputerUsersManagement,
     GameHistoryCard,
     GameModeCard,
     MatchmakingCard,
@@ -634,6 +635,9 @@ export default function Home({ navigation }) {
                         disabled={creatingGame || searching}
                     />
                 )}
+
+                {/* Computer Users Management - only visible to internal users */}
+                <ComputerUsersManagement />
 
                 {/* Active Games Card - show at bottom if there are no games */}
                 {activeGames.length === 0 && (
