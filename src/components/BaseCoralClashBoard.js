@@ -28,6 +28,7 @@ import Coral from './Coral';
 import EmptyBoard from './EmptyBoard';
 import GameMenuModal from './GameMenuModal';
 import GameStatusBanner from './GameStatusBanner';
+import LastMoveHighlight from './LastMoveHighlight';
 import Moves from './Moves';
 import Pieces from './Pieces';
 import PlayerStatusBar from './PlayerStatusBar';
@@ -113,6 +114,8 @@ const BaseCoralClashBoard = ({
     const [localIsComputerThinking, setLocalIsComputerThinking] = useState(false);
     // Use prop if provided (for online games), otherwise use local state (for offline games)
     const effectiveIsComputerThinking = isComputerThinking || localIsComputerThinking;
+    // Track last move for highlighting
+    const [lastMove, setLastMove] = useState(null);
 
     // Animation state
     const [animatingMove, setAnimatingMove] = useState(null);
@@ -170,6 +173,7 @@ const BaseCoralClashBoard = ({
                     setRemovedCoral([]);
                     setPlacedCoral([]);
                     lastAnimatedMoveRef.current = null;
+                    setLastMove(null);
                 }
                 // Check if moves were undone (history length decreased)
                 else if (
@@ -181,15 +185,20 @@ const BaseCoralClashBoard = ({
                     // receive the game state after the undo, without information about which
                     // move was undone
                     if (history.length > 0) {
-                        const lastMove = history[history.length - 1];
-                        const moveKey = `${lastMove.from}-${lastMove.to}-${history.length}`;
+                        const lastMoveInHistory = history[history.length - 1];
+                        const moveKey = `${lastMoveInHistory.from}-${lastMoveInHistory.to}-${history.length}`;
                         lastAnimatedMoveRef.current = moveKey;
+                        setLastMove(lastMoveInHistory);
                     } else {
                         lastAnimatedMoveRef.current = null;
+                        setLastMove(null);
                     }
                 } else if (history.length > 0) {
-                    const lastMove = history[history.length - 1];
-                    const moveKey = `${lastMove.from}-${lastMove.to}-${history.length}`;
+                    const lastMoveInHistory = history[history.length - 1];
+                    const moveKey = `${lastMoveInHistory.from}-${lastMoveInHistory.to}-${history.length}`;
+
+                    // Update last move highlight
+                    setLastMove(lastMoveInHistory);
 
                     // Only animate if this is a new move we haven't animated yet
                     if (lastAnimatedMoveRef.current !== moveKey) {
@@ -197,32 +206,34 @@ const BaseCoralClashBoard = ({
 
                         // Get the piece that was moved (before the move)
                         const piece = {
-                            type: lastMove.piece,
-                            color: lastMove.color,
-                            role: lastMove.role,
+                            type: lastMoveInHistory.piece,
+                            color: lastMoveInHistory.color,
+                            role: lastMoveInHistory.role,
                         };
 
                         // If there was a capture, save the captured piece data
-                        if (lastMove.captured) {
+                        if (lastMoveInHistory.captured) {
                             // Determine the square where the piece was captured
                             // For regular pieces, it's the 'to' square
                             // The captured piece color is opposite of the moving piece
-                            const capturedColor = lastMove.color === 'w' ? 'b' : 'w';
+                            const capturedColor = lastMoveInHistory.color === 'w' ? 'b' : 'w';
                             setCapturedPiece({
-                                type: lastMove.captured,
+                                type: lastMoveInHistory.captured,
                                 color: capturedColor,
-                                square: lastMove.to,
+                                square: lastMoveInHistory.to,
                             });
                         } else {
                             setCapturedPiece(null);
                         }
 
                         // If coral was removed, save the coral data for rendering during animation
-                        if (lastMove.coralRemoved) {
-                            const coralSquares = lastMove.coralRemovedSquares || [lastMove.to];
+                        if (lastMoveInHistory.coralRemoved) {
+                            const coralSquares = lastMoveInHistory.coralRemovedSquares || [
+                                lastMoveInHistory.to,
+                            ];
                             const removedCoralData = coralSquares.map((sq) => ({
                                 square: sq,
-                                color: lastMove.color === 'w' ? 'b' : 'w', // Opposite color's coral
+                                color: lastMoveInHistory.color === 'w' ? 'b' : 'w', // Opposite color's coral
                             }));
                             setRemovedCoral(removedCoralData);
                         } else {
@@ -230,15 +241,20 @@ const BaseCoralClashBoard = ({
                         }
 
                         // If coral was placed, hide it during animation (show after)
-                        if (lastMove.coralPlaced) {
-                            setPlacedCoral([{ square: lastMove.to, color: lastMove.color }]);
+                        if (lastMoveInHistory.coralPlaced) {
+                            setPlacedCoral([
+                                { square: lastMoveInHistory.to, color: lastMoveInHistory.color },
+                            ]);
                         } else {
                             setPlacedCoral([]);
                         }
 
                         setAnimatingPiece(piece);
-                        setAnimatingMove(lastMove);
+                        setAnimatingMove(lastMoveInHistory);
                     }
+                } else {
+                    // No moves in history - clear last move highlight
+                    setLastMove(null);
                 }
 
                 // Update previous history length
@@ -369,6 +385,13 @@ const BaseCoralClashBoard = ({
                 setGameStateLoaded(true);
                 // Clear visible moves when loading game state
                 clearVisibleMoves();
+                // Initialize last move highlight if there's history
+                const history = coralClash.history({ verbose: true });
+                if (history.length > 0) {
+                    setLastMove(history[history.length - 1]);
+                } else {
+                    setLastMove(null);
+                }
                 forceUpdate((n) => n + 1);
             } catch (error) {
                 console.error(`Failed to load game state on ${Platform.OS}:`, error);
@@ -385,6 +408,13 @@ const BaseCoralClashBoard = ({
                 setFixtureLoaded(true);
                 // Clear visible moves when loading fixture
                 clearVisibleMoves();
+                // Initialize last move highlight if there's history
+                const history = coralClash.history({ verbose: true });
+                if (history.length > 0) {
+                    setLastMove(history[history.length - 1]);
+                } else {
+                    setLastMove(null);
+                }
                 forceUpdate((n) => n + 1); // Force re-render to show coral and turn state
             } catch (error) {
                 console.error('Failed to load fixture:', error);
@@ -457,12 +487,16 @@ const BaseCoralClashBoard = ({
                                         !(
                                             m.from === lastComputerMove.to &&
                                             m.to === lastComputerMove.from &&
-                                            m.piece?.toLowerCase() === lastComputerMove.piece?.toLowerCase() &&
+                                            m.piece?.toLowerCase() ===
+                                                lastComputerMove.piece?.toLowerCase() &&
                                             m.color === lastComputerMove.color
                                         ),
                                 );
                                 if (nonReversingMoves.length > 0) {
-                                    selectedMove = nonReversingMoves[Math.floor(Math.random() * nonReversingMoves.length)];
+                                    selectedMove =
+                                        nonReversingMoves[
+                                            Math.floor(Math.random() * nonReversingMoves.length)
+                                        ];
                                 } else {
                                     // If all moves are reversing (shouldn't happen), use random
                                     selectedMove = moves[Math.floor(Math.random() * moves.length)];
@@ -1225,11 +1259,13 @@ const BaseCoralClashBoard = ({
             // This prevents handleStateUpdate from re-animating it
             const newHistory = coralClash.history({ verbose: true });
             if (newHistory.length > 0) {
-                const lastMove = newHistory[newHistory.length - 1];
-                const moveKey = `${lastMove.from}-${lastMove.to}-${newHistory.length}`;
+                const lastMoveInHistory = newHistory[newHistory.length - 1];
+                const moveKey = `${lastMoveInHistory.from}-${lastMoveInHistory.to}-${newHistory.length}`;
                 lastAnimatedMoveRef.current = moveKey;
+                setLastMove(lastMoveInHistory);
             } else {
                 lastAnimatedMoveRef.current = null;
+                setLastMove(null);
             }
 
             // Update history length ref to prevent animation trigger
@@ -1361,9 +1397,12 @@ const BaseCoralClashBoard = ({
         // Trigger animation for local moves
         const history = coralClash.history({ verbose: true });
         if (history.length > 0) {
-            const lastMove = history[history.length - 1];
-            const moveKey = `${lastMove.from}-${lastMove.to}-${history.length}`;
+            const lastMoveInHistory = history[history.length - 1];
+            const moveKey = `${lastMoveInHistory.from}-${lastMoveInHistory.to}-${history.length}`;
             lastAnimatedMoveRef.current = moveKey;
+
+            // Update last move highlight
+            setLastMove(lastMoveInHistory);
 
             setAnimatingPiece({
                 type: pieceBeforeMove.type,
@@ -1416,7 +1455,7 @@ const BaseCoralClashBoard = ({
                 setPlacedCoral([]);
             }
 
-            setAnimatingMove(lastMove);
+            setAnimatingMove(lastMoveInHistory);
         }
 
         setHistoryIndex(null);
@@ -2029,6 +2068,14 @@ const BaseCoralClashBoard = ({
                                 removedCoral={removedCoral}
                                 placedCoral={placedCoral}
                             />
+                            {/* Last move highlight - only show when not viewing history */}
+                            {!isViewingHistory && (
+                                <LastMoveHighlight
+                                    lastMove={lastMove}
+                                    size={boardSize}
+                                    boardFlipped={isBoardFlipped}
+                                />
+                            )}
                             <Pieces
                                 board={
                                     isViewingHistory && historicalBoard
