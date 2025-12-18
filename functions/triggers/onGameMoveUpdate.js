@@ -1,7 +1,9 @@
 import { CloudTasksClient } from '@google-cloud/tasks';
 import { onDocumentUpdated } from 'firebase-functions/v2/firestore';
 import { admin } from '../init.js';
+import { isComputerUser } from '../utils/computerUsers.js';
 import { increment, serverTimestamp } from '../utils/helpers.js';
+import { makeComputerMoveHelper } from '../routes/game.js';
 
 /**
  * Cancel pending timeout task for a game
@@ -84,8 +86,9 @@ async function checkAndHandleTimeExpiration(gameId, gameData) {
                 updatedAt: serverTimestamp(),
             });
 
-        // Update stats if not a computer game
-        if (gameData.opponentId !== 'computer') {
+        // Update stats if not a computer game (check both 'computer' and computer user IDs)
+        const isComputerGame = gameData.opponentId === 'computer' || gameData.opponentType === 'computer';
+        if (!isComputerGame) {
             // Winner gets a win
             await db
                 .collection('users')
@@ -126,7 +129,9 @@ async function checkAndHandleTimeExpiration(gameId, gameData) {
             });
         } else {
             // Computer game - only update user stats
-            const isUserWinner = winner !== 'computer';
+            // Check if winner is computer (could be 'computer' or computer user ID)
+            const computerId = gameData.opponentId;
+            const isUserWinner = winner !== computerId && winner !== 'computer';
             await db
                 .collection('users')
                 .doc(gameData.creatorId)
@@ -157,7 +162,26 @@ export const onGameMoveUpdate = onDocumentUpdated('games/{gameId}', async (event
         const beforeData = change.before.data();
         const afterData = change.after.data();
 
-        // Only proceed if lastMoveTime was updated and game has time control
+        // Check if it's a computer user's turn - handle this FIRST for games with or without time control
+        const currentTurn = afterData.currentTurn;
+        if (
+            currentTurn &&
+            isComputerUser(currentTurn) &&
+            afterData.opponentType === 'computer' &&
+            afterData.status === 'active'
+        ) {
+            console.log(`[onGameMoveUpdate] Computer user ${currentTurn} turn detected, making move automatically`);
+            try {
+                // Make computer move asynchronously (don't await to avoid blocking)
+                makeComputerMoveHelper(gameId, afterData).catch((error) => {
+                    console.error(`[onGameMoveUpdate] Error making computer move for ${currentTurn}:`, error);
+                });
+            } catch (error) {
+                console.error(`[onGameMoveUpdate] Error triggering computer move for ${currentTurn}:`, error);
+            }
+        }
+
+        // Only proceed with time control scheduling if game has time control
         if (
             !afterData.lastMoveTime ||
             !afterData.timeControl?.totalSeconds ||

@@ -429,12 +429,47 @@ const BaseCoralClashBoard = ({
                         const currentGameState = createGameSnapshot(coralClash);
                         const computerColor = 'b';
 
+                        // Extract last computer move to prevent reversing moves
+                        let lastComputerMove = null;
+                        const history = coralClash.history({ verbose: true });
+                        // Find the last move made by the computer (black)
+                        for (let i = history.length - 1; i >= 0; i--) {
+                            if (history[i].color === computerColor) {
+                                lastComputerMove = {
+                                    from: history[i].from,
+                                    to: history[i].to,
+                                    piece: history[i].piece,
+                                    color: history[i].color,
+                                };
+                                break;
+                            }
+                        }
+
                         let selectedMove;
 
                         if (difficulty === 'random') {
-                            // Random move selection
+                            // Random move selection (still avoid reversing moves)
                             const moves = coralClash.moves({ verbose: true });
-                            selectedMove = moves[Math.floor(Math.random() * moves.length)];
+                            if (lastComputerMove) {
+                                // Filter out reversing moves from random selection
+                                const nonReversingMoves = moves.filter(
+                                    (m) =>
+                                        !(
+                                            m.from === lastComputerMove.to &&
+                                            m.to === lastComputerMove.from &&
+                                            m.piece?.toLowerCase() === lastComputerMove.piece?.toLowerCase() &&
+                                            m.color === lastComputerMove.color
+                                        ),
+                                );
+                                if (nonReversingMoves.length > 0) {
+                                    selectedMove = nonReversingMoves[Math.floor(Math.random() * nonReversingMoves.length)];
+                                } else {
+                                    // If all moves are reversing (shouldn't happen), use random
+                                    selectedMove = moves[Math.floor(Math.random() * moves.length)];
+                                }
+                            } else {
+                                selectedMove = moves[Math.floor(Math.random() * moves.length)];
+                            }
                         } else {
                             // Use AI evaluation
                             const maxDepth = SEARCH_DEPTH[difficulty] || SEARCH_DEPTH.easy;
@@ -443,6 +478,8 @@ const BaseCoralClashBoard = ({
                                 maxDepth,
                                 computerColor,
                                 TIME_CONTROL.maxTimeMs,
+                                null, // progressCallback
+                                lastComputerMove, // Pass last computer move to prevent reversing
                             );
 
                             if (result.move) {

@@ -91,7 +91,6 @@ export default function Home({ navigation }) {
     // useMatchmaking hook for random matchmaking
     const {
         searching,
-        queueCount,
         loading: matchmakingLoading,
         startSearching,
         stopSearching,
@@ -598,7 +597,6 @@ export default function Home({ navigation }) {
                     <>
                         <MatchmakingCard
                             searching={searching}
-                            queueCount={queueCount}
                             loading={matchmakingLoading}
                             onStartSearch={handleStartMatchmaking}
                             onStopSearch={stopSearching}

@@ -376,6 +376,19 @@ export const useFirebaseFunctions = () => {
         }
     };
 
+    // ==================== Admin/Setup Functions ====================
+
+    const initializeComputerUsers = async () => {
+        try {
+            const callable = httpsCallable(functions, 'initializeComputerUsers');
+            const result = await callable({});
+            return result.data;
+        } catch (error) {
+            console.error('Error initializing computer users:', error);
+            throw error;
+        }
+    };
+
     return {
         // User Profile
         getPublicUserInfo,
@@ -413,6 +426,8 @@ export const useFirebaseFunctions = () => {
         getMatchmakingStatus,
         // Issues
         submitIssue,
+        // Admin/Setup
+        initializeComputerUsers,
     };
 };
 

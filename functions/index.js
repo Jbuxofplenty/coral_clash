@@ -13,12 +13,16 @@ import * as userProfile from './routes/userProfile.js';
 import * as userSettings from './routes/userSettings.js';
 
 // Import trigger modules
+import { onFriendRequestCreate } from './triggers/onFriendRequestCreate.js';
+import { onGameCreate } from './triggers/onGameCreate.js';
 import { onGameMoveUpdate } from './triggers/onGameMoveUpdate.js';
 import { onPlayerJoinQueue } from './triggers/onPlayerJoinQueue.js';
 import { onUserCreate } from './triggers/onUserCreate.js';
 
 // Import scheduled function modules
 import { cleanupStaleMatchmakingEntries } from './scheduled/cleanupStaleMatchmakingEntries.js';
+// Import initializeComputerUsers as a callable function (not scheduled)
+import { initializeComputerUsers } from './scheduled/initializeComputerUsers.js';
 
 // ==================== User Profile APIs ====================
 export const getPublicUserInfo = userProfile.getPublicUserInfo;
@@ -64,7 +68,10 @@ export const getMatchmakingStatus = matchmaking.getMatchmakingStatus;
 export const submitIssue = issues.submitIssue;
 
 // ==================== Firestore Triggers ====================
-export { onGameMoveUpdate, onPlayerJoinQueue, onUserCreate };
+export { onFriendRequestCreate, onGameCreate, onGameMoveUpdate, onPlayerJoinQueue, onUserCreate };
 
 // ==================== Scheduled Functions ====================
 export { cleanupStaleMatchmakingEntries };
+
+// ==================== Admin/Setup APIs ====================
+export { initializeComputerUsers };

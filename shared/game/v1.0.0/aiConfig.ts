@@ -96,11 +96,11 @@ const PIECE_SAFETY = {
     attackedMultiplier: 0.25, // 25% of piece value penalty when under attack
     // Extra penalty for hanging pieces (attacked but NOT defended)
     // For very valuable pieces (dolphin gatherer = 1800), this should be prohibitive
-    hangingMultiplier: 0.75, // 75% of piece value penalty when hanging (attacked, not defended)
+    hangingMultiplier: 1.5, // 150% of piece value penalty when hanging (attacked, not defended) - severe enough to prevent selection even at depth 1
     // Critical piece threshold - pieces above this value get even more severe penalties
     criticalPieceThreshold: 1500, // Dolphin gatherer (1800) is above this
     // Extra penalty multiplier for critical pieces that are hanging
-    criticalHangingMultiplier: 1.2, // 120% of piece value (more than the piece is worth!)
+    criticalHangingMultiplier: 1.5, // 150% of piece value (more than the piece is worth!)
     // Bonus for defended pieces (defenders present)
     defendedBonus: 0.05, // 5% of piece value bonus when defended
     // Points per defender of a valuable piece

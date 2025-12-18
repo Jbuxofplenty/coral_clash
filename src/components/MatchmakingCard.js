@@ -18,13 +18,12 @@ const isTablet = width >= 768;
  * MatchmakingCard - A card component for random matchmaking
  * @param {Object} props
  * @param {boolean} props.searching - Whether user is currently searching
- * @param {number} props.queueCount - Number of players in queue
  * @param {boolean} props.loading - Loading state
  * @param {Function} props.onStartSearch - Handler to start searching
  * @param {Function} props.onStopSearch - Handler to stop searching
  * @param {Object} props.style - Additional styles
  */
-function MatchmakingCard({ searching, queueCount, loading, onStartSearch, onStopSearch, style }) {
+function MatchmakingCard({ searching, loading, onStartSearch, onStopSearch, style }) {
     const { colors } = useTheme();
     const { showAlert } = useAlert();
     const [isProcessing, setIsProcessing] = useState(false);
@@ -92,8 +91,8 @@ function MatchmakingCard({ searching, queueCount, loading, onStartSearch, onStop
                         center
                     >
                         {searching
-                            ? `${queueCount} player${queueCount !== 1 ? 's' : ''} online · Tap to cancel`
-                            : `${queueCount} player${queueCount !== 1 ? 's' : ''} online · Tap to join queue`}
+                            ? 'Searching for opponent... · Tap to cancel'
+                            : 'Tap to join matchmaking queue'}
                     </Text>
                 </Block>
             </Block>

@@ -2512,12 +2512,23 @@ export class CoralClash {
             }
 
             if (candidates.length > 0) {
-                // If coral action specified, use it to disambiguate
-                if (candidates.length > 1 && 'coralPlaced' in move) {
+                // If coral action specified, use it to disambiguate (even if only one candidate)
+                if ('coralPlaced' in move) {
                     const exactMatch = candidates.find((m) => m.coralPlaced === move.coralPlaced);
                     // IMPORTANT: If user explicitly specified coral action, we MUST use exact match
                     // Falling back to candidates[0] would ignore user's choice
-                    moveObj = exactMatch || null;
+                    if (exactMatch) {
+                        moveObj = exactMatch;
+                    } else if (candidates.length === 1) {
+                        // Only one candidate - verify it matches the coral flag if specified
+                        if (candidates[0].coralPlaced === move.coralPlaced) {
+                            moveObj = candidates[0];
+                        } else {
+                            moveObj = null; // No match
+                        }
+                    } else {
+                        moveObj = null; // Multiple candidates but no exact match
+                    }
                 } else if (candidates.length > 1 && 'coralRemovedSquares' in move) {
                     // Whale-specific: match specific squares where coral is removed
                     // ALSO check whaleSecondSquare if this is a whale move!
@@ -2541,10 +2552,21 @@ export class CoralClash {
                     });
                     // IMPORTANT: If user explicitly specified coral removal, we MUST use exact match
                     moveObj = exactMatch || null;
-                } else if (candidates.length > 1 && 'coralRemoved' in move) {
+                } else if ('coralRemoved' in move) {
                     const exactMatch = candidates.find((m) => m.coralRemoved === move.coralRemoved);
                     // IMPORTANT: If user explicitly specified coral action, we MUST use exact match
-                    moveObj = exactMatch || null;
+                    if (exactMatch) {
+                        moveObj = exactMatch;
+                    } else if (candidates.length === 1) {
+                        // Only one candidate - verify it matches the coral flag if specified
+                        if (candidates[0].coralRemoved === move.coralRemoved) {
+                            moveObj = candidates[0];
+                        } else {
+                            moveObj = null; // No match
+                        }
+                    } else {
+                        moveObj = null; // Multiple candidates but no exact match
+                    }
                 }
                 // If whale move and whaleSecondSquare specified, use it to disambiguate
                 else if (
