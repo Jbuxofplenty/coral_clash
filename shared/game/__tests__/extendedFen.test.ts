@@ -152,7 +152,7 @@ describe('Extended FEN Format', () => {
 
             // Make some moves to create interesting state
             game1.move({ from: 'd3', to: 'c4', coralPlaced: true });
-            game1.move({ from: 'd6', to: 'c5', coralRemoved: true });
+            game1.move({ from: 'd6', to: 'c5' });
 
             const fen = game1.fen();
 
