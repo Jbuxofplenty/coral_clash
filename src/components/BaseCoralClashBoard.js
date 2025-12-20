@@ -535,6 +535,11 @@ const BaseCoralClashBoard = ({
                                 coralRemoved: selectedMove.coralRemoved,
                                 coralRemovedSquares: selectedMove.coralRemovedSquares,
                             });
+                            // Update last move highlight for computer move
+                            const history = coralClash.history({ verbose: true });
+                            if (history.length > 0) {
+                                setLastMove(history[history.length - 1]);
+                            }
                             // Force re-render to show the updated board
                             forceUpdate((n) => n + 1);
                         }
@@ -553,6 +558,11 @@ const BaseCoralClashBoard = ({
                                     coralRemoved: randomMove.coralRemoved,
                                     coralRemovedSquares: randomMove.coralRemovedSquares,
                                 });
+                                // Update last move highlight for fallback move
+                                const history = coralClash.history({ verbose: true });
+                                if (history.length > 0) {
+                                    setLastMove(history[history.length - 1]);
+                                }
                                 forceUpdate((n) => n + 1);
                             }
                         } catch (fallbackError) {
