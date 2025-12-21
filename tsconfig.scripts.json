@@ -1,0 +1,21 @@
+{
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+        "module": "commonjs",
+        "target": "ES2020",
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
+        "resolveJsonModule": true,
+        "skipLibCheck": true,
+        "moduleResolution": "node"
+    },
+    "ts-node": {
+        "esm": false,
+        "compilerOptions": {
+            "module": "commonjs"
+        }
+    },
+    "include": ["scripts/**/*.ts", "shared/game/**/*.ts"],
+    "exclude": ["node_modules"]
+}
+

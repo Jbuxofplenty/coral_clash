@@ -19,8 +19,9 @@
         "access": "public"
     },
     "scripts": {
-        "build": "tsc",
+        "build": "tsc && npm run copy:evaluation-data",
         "build:watch": "tsc --watch",
+        "copy:evaluation-data": "mkdir -p dist/game/v1.0.0/evaluationData && cp -r game/v1.0.0/evaluationData/* dist/game/v1.0.0/evaluationData/ 2>/dev/null || true",
         "clean": "rm -rf dist game/**/*.js game/**/*.d.ts !game/__fixtures__/*.js",
         "test": "jest",
         "test:watch": "jest --watch"

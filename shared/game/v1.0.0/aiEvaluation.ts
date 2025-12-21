@@ -20,6 +20,7 @@ import {
 } from './aiConfig.js';
 import type { Color, PieceRole, PieceSymbol, Square } from './coralClash.js';
 import { CoralClash, SQUARES } from './coralClash.js';
+import type { EvaluationTable } from './evaluationTable.js';
 import { createGameSnapshot, restoreGameFromSnapshot } from './gameState.js';
 
 /**
@@ -47,11 +48,18 @@ class ZobristKeys {
     }
 
     /**
-     * Generate a random 32-bit integer (using 31 bits for safety in JavaScript)
+     * Generate a deterministic pseudo-random 32-bit integer using a seeded RNG
+     * This ensures consistent hashing across different runs
      */
+    private seed = 123456789; // Fixed seed for deterministic keys
+
     private randomKey(): number {
+        // Simple LCG (Linear Congruential Generator) for deterministic randomness
+        // Formula: (a * seed + c) mod m
+        // Using constants from Numerical Recipes
+        this.seed = (this.seed * 1664525 + 1013904223) >>> 0; // >>> 0 ensures unsigned 32-bit
         // Use 31 bits to stay within JavaScript's safe integer range
-        return Math.floor(Math.random() * 0x7fffffff);
+        return this.seed & 0x7fffffff;
     }
 
     /**
@@ -387,7 +395,7 @@ function hashString(str: string): number {
  * @param gameState - Current game state snapshot
  * @returns Position key (number)
  */
-function generatePositionKey(gameState: GameStateSnapshot): number {
+export function generatePositionKey(gameState: GameStateSnapshot): number {
     return computeZobristHash(gameState);
 }
 
@@ -533,6 +541,234 @@ export function isReversingMove(move: any, lastMove: LastMoveInfo | null): boole
 }
 
 /**
+ * Calculate defensive bonus for a move that protects threatened pieces
+ * This is calculated BEFORE making the move by simulating it on a copy of the game
+ * @param gameState - Current game state (before the move)
+ * @param move - Move to evaluate
+ * @param playerColor - Color of the player making the move
+ * @param threatenedPieces - Array of pieces that are currently threatened
+ * @returns Defensive bonus score (positive value)
+ */
+function calculateDefensiveBonus(
+    gameState: GameStateSnapshot,
+    move: any,
+    playerColor: Color,
+    threatenedPieces: Array<{
+        square: Square;
+        piece: PieceSymbol;
+        role: PieceRole | null;
+        value: number;
+    }>,
+): number {
+    if (threatenedPieces.length === 0) {
+        return 0;
+    }
+
+    // Simulate the move on a copy of the game to check if it protects threatened pieces
+    const testGame = safeRestoreGame(gameState);
+    if (!testGame) {
+        return 0;
+    }
+
+    // Make the move on the test game
+    let moveResult;
+    try {
+        moveResult = testGame.move({
+            from: move.from,
+            to: move.to,
+            promotion: move.promotion,
+            coralPlaced: move.coralPlaced,
+            coralRemoved: move.coralRemoved,
+            coralRemovedSquares: move.coralRemovedSquares,
+        });
+    } catch {
+        return 0; // Invalid move - no defensive bonus
+    }
+
+    if (!moveResult) {
+        return 0; // Move failed - no defensive bonus
+    }
+
+    const opponentColor: Color = playerColor === 'w' ? 'b' : 'w';
+    let totalDefenseBonus = 0;
+
+    // Check each threatened piece to see if this move protects it
+    for (const { square, piece, role, value } of threatenedPieces) {
+        let protectsPiece = false;
+
+        // Case 1: Move moves the threatened piece away
+        if (move.from === square) {
+            // Check if destination is safe (not threatened)
+            const destinationThreatened = testGame.isAttacked(move.to, opponentColor);
+
+            if (!destinationThreatened) {
+                // Destination is safe - this is protective
+                // But check if it's a bad trade (capturing less valuable piece)
+                if (move.captured) {
+                    const capturedValue = getPieceValue(
+                        move.captured,
+                        (move as any).capturedRole || null,
+                    );
+
+                    // Check if it's an equal trade (same piece type and role)
+                    const isEqualTrade =
+                        move.captured.toLowerCase() === piece.toLowerCase() &&
+                        ((move as any).capturedRole || null) === role;
+
+                    if (isEqualTrade) {
+                        // Equal trade is fine - consider it protective
+                        // Equal trades are acceptable and may even be good if we have material/coral advantage
+                        protectsPiece = true;
+                    } else if (value > capturedValue * 2) {
+                        // Bad trade (trading valuable piece for much less valuable piece)
+                        // This prevents moves like dolphin->crab from getting defensive bonus
+                        protectsPiece = false;
+                    } else {
+                        // Acceptable trade (similar value or slightly worse)
+                        protectsPiece = true;
+                    }
+                } else {
+                    // Not a capture and destination is safe - definitely protective
+                    protectsPiece = true;
+                }
+            }
+            // If destination is threatened, don't consider it protective (even for critical pieces)
+            // Moving to a threatened square doesn't protect the piece
+        }
+
+        // Case 2: Move defends the threatened piece (adds a defender)
+        // Only check if we're not moving the piece itself (already handled in Case 1)
+        if (!protectsPiece && move.from !== square) {
+            // Check if the piece is still at the same square (not moved)
+            const pieceAtSquare = testGame.get(square);
+            if (pieceAtSquare !== false) {
+                // Verify it's the same piece (same color, type, role)
+                const isSamePiece =
+                    pieceAtSquare.color === playerColor &&
+                    pieceAtSquare.type === piece &&
+                    (pieceAtSquare.role || null) === role;
+
+                if (isSamePiece) {
+                    // Get original game state to compare defense status
+                    const originalGame = safeRestoreGame(gameState);
+                    if (originalGame) {
+                        const wasDefended = originalGame.isAttacked(square, playerColor);
+                        const isNowDefended = testGame.isAttacked(square, playerColor);
+                        const stillThreatened = testGame.isAttacked(square, opponentColor);
+
+                        // If piece is now defended and wasn't before, or if it's no longer threatened
+                        // For critical pieces, also consider it protective if it's defended after the move
+                        // (even if it was already defended before - adding more defense is still good)
+                        if ((isNowDefended && !wasDefended) || !stillThreatened) {
+                            protectsPiece = true;
+                        } else if (value >= PIECE_SAFETY.criticalPieceThreshold && isNowDefended) {
+                            // For critical pieces, if the piece is defended after the move, consider it protective
+                            // This ensures moves that add defense are prioritized
+                            protectsPiece = true;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (protectsPiece) {
+            // Calculate bonus based on how the piece is protected
+            let defenseBonus = 0;
+
+            // Case 1: Moving threatened piece to safety (highest priority)
+            if (move.from === square) {
+                // Moving a threatened piece to a safe square is CRITICAL
+                // Give massive bonus to ensure these moves are always selected
+                // This is especially important when a valuable piece is threatened by a less valuable piece
+                defenseBonus = value * 5.0; // 500% of piece value for moving to safety
+
+                // Extra massive bonus for critical pieces
+                if (value >= PIECE_SAFETY.criticalPieceThreshold) {
+                    defenseBonus = value * 10.0; // 1000% of piece value (18000 for dolphin gatherer)
+                }
+
+                // Check if it's an equal trade (same piece type and role)
+                if (move.captured) {
+                    const capturedValue = getPieceValue(
+                        move.captured,
+                        (move as any).capturedRole || null,
+                    );
+                    const isEqualTrade =
+                        move.captured.toLowerCase() === piece.toLowerCase() &&
+                        ((move as any).capturedRole || null) === role;
+
+                    if (isEqualTrade) {
+                        // Equal trade is acceptable - give full defensive bonus
+                        // Check if we have material/coral advantage to potentially prioritize
+                        const originalGame = safeRestoreGame(gameState);
+                        if (originalGame) {
+                            // Count pieces for both sides
+                            const playerPieces = getPieces(originalGame, playerColor);
+                            const opponentPieces = getPieces(originalGame, opponentColor);
+
+                            // Count coral
+                            const playerCoral = originalGame.getCoralAreaControl(playerColor);
+                            const opponentCoral = originalGame.getCoralAreaControl(opponentColor);
+
+                            // If we have more pieces AND/OR more coral, equal trades are good
+                            if (
+                                playerPieces.length > opponentPieces.length ||
+                                playerCoral > opponentCoral
+                            ) {
+                                // We have advantage - equal trades are beneficial (simplifies position)
+                                defenseBonus *= 1.2; // 20% extra bonus for equal trades when ahead
+                            }
+                            // Otherwise, equal trade is still fine (neutral)
+                        }
+                    } else if (value > capturedValue * 2) {
+                        // Bad trade - reduce bonus significantly
+                        defenseBonus *= 0.1; // Only 10% of normal bonus for bad trades
+                    }
+                } else {
+                    // If it's a non-capture move to safety, give even more bonus
+                    // (this is the ideal case - move to safety without trading)
+                    defenseBonus *= 1.5; // 50% extra for non-capture moves to safety
+                }
+            } else {
+                // Case 2: Adding a defender (lower priority than moving to safety)
+                defenseBonus = value * 0.5; // 50% of piece value
+
+                // Extra bonus for critical pieces
+                if (value >= PIECE_SAFETY.criticalPieceThreshold) {
+                    defenseBonus = value * 2.0; // 200% of piece value for critical pieces
+                }
+            }
+
+            // Extra bonus if the piece was hanging (not defended) before the move
+            const originalGame = safeRestoreGame(gameState);
+            if (originalGame) {
+                const wasDefended = originalGame.isAttacked(square, playerColor);
+                if (!wasDefended) {
+                    defenseBonus *= 1.5; // 50% extra bonus for saving hanging pieces
+                }
+            }
+
+            // For critical pieces moving to safety, ensure minimum bonus to ALWAYS outweigh other considerations
+            if (value >= PIECE_SAFETY.criticalPieceThreshold && move.from === square) {
+                // Ensure minimum bonus of 50000 points for moving critical pieces to safety
+                // This should ALWAYS be selected over any other move
+                defenseBonus = Math.max(defenseBonus, 50000);
+            } else if (value >= PIECE_SAFETY.criticalPieceThreshold) {
+                // For defending critical pieces, ensure minimum bonus
+                defenseBonus = Math.max(defenseBonus, 10000);
+            }
+
+            totalDefenseBonus += defenseBonus;
+
+            // Only count the first protected piece to avoid double-counting
+            break;
+        }
+    }
+
+    return totalDefenseBonus;
+}
+
+/**
  * Get all pieces on the board with their positions
  * @param game - CoralClash instance
  * @param color - Color to evaluate ('w' or 'b')
@@ -570,9 +806,17 @@ function getPieces(game: CoralClash, color: Color): PieceInfo[] {
  * Positive score is good for the player, negative is bad
  * @param gameState - Full game state snapshot
  * @param playerColor - Color to evaluate for ('w' or 'b')
+ * @param evaluationTable - Optional pre-computed evaluation table for fast lookup
  * @returns Evaluation score
  */
-export function evaluatePosition(gameState: GameStateSnapshot, playerColor: Color): number {
+export function evaluatePosition(
+    gameState: GameStateSnapshot,
+    playerColor: Color,
+    _evaluationTable?: EvaluationTable | null, // Not used for scores anymore, kept for compatibility
+): number {
+    // Note: evaluationTable is no longer used for score caching
+    // It's now used for move storage in findBestMoveIterativeDeepening
+
     const game = safeRestoreGame(gameState);
     if (!game) {
         return 0; // Neutral score for backwards compatibility
@@ -825,6 +1069,8 @@ export function evaluatePosition(gameState: GameStateSnapshot, playerColor: Colo
  * @param timeControl - Time control object with startTime and maxTimeMs
  * @param lastMove - Last move made (for detecting reversing moves, only applies at root level)
  * @param transpositionTable - Optional transposition table for caching position evaluations
+ * @param evaluationTable - Optional pre-computed evaluation table for fast position lookup
+ * @param isRootLevel - Track if we're at root level
  * @returns { score: number, move: Object|null, nodesEvaluated: number, timedOut: boolean }
  */
 export function alphaBeta(
@@ -837,7 +1083,9 @@ export function alphaBeta(
     timeControl: TimeControl | null = null,
     lastMove: LastMoveInfo | null = null,
     transpositionTable: TranspositionTable | null = null,
+    evaluationTable: EvaluationTable | null = null,
     isRootLevel: boolean = false, // Track if we're at root level
+    rootGameState: GameStateSnapshot | null = null, // Original root game state for defensive bonus checks
 ): AlphaBetaResult {
     let nodesEvaluated = 1;
 
@@ -971,7 +1219,7 @@ export function alphaBeta(
             if (captures.length > 0 || hasHangingPiece) {
                 // Quiescence search: only search captures, limited depth to avoid infinite loops
                 const quiescenceDepth = 3; // Increased depth to see captures of hanging pieces
-                let bestScore = evaluatePosition(gameState, playerColor);
+                let bestScore = evaluatePosition(gameState, playerColor, evaluationTable);
                 const standPat = maximizingPlayer ? bestScore : -bestScore;
                 let nodesEvaluated = 1; // Start with 1 for the evaluation
 
@@ -1016,6 +1264,7 @@ export function alphaBeta(
                         timeControl,
                         null,
                         transpositionTable,
+                        evaluationTable,
                         false, // Not root level in quiescence
                     );
 
@@ -1054,7 +1303,7 @@ export function alphaBeta(
         }
 
         // No captures or game over - evaluate position normally
-        const score = evaluatePosition(gameState, playerColor);
+        const score = evaluatePosition(gameState, playerColor, evaluationTable);
         // Flip score if we're evaluating from opponent's perspective
         const finalScore = maximizingPlayer ? score : -score;
 
@@ -1101,7 +1350,7 @@ export function alphaBeta(
 
     if (moves.length === 0) {
         // No legal moves - terminal state
-        const score = evaluatePosition(gameState, playerColor);
+        const score = evaluatePosition(gameState, playerColor, evaluationTable);
         const finalScore = maximizingPlayer ? score : -score;
 
         // Store terminal node in transposition table (always EXACT score)
@@ -1119,6 +1368,39 @@ export function alphaBeta(
 
     let bestMove: any = null;
     let bestScore = maximizingPlayer ? -Infinity : Infinity;
+
+    // Pre-compute threatened pieces for defensive bonus calculation
+    // This is done once before the move loop to avoid repeated calculations
+    const threatenedPieces: Array<{
+        square: Square;
+        piece: PieceSymbol;
+        role: PieceRole | null;
+        value: number;
+    }> = [];
+
+    // Compute threatened pieces whenever we're evaluating moves for the player
+    // (when maximizingPlayer is true, it's the player's turn)
+    // We compute this at all depths to ensure defensive moves are evaluated correctly
+    if (maximizingPlayer) {
+        const playerPieces = getPieces(game, playerColor);
+        const opponentColor: Color = playerColor === 'w' ? 'b' : 'w';
+
+        for (const { square, piece, role } of playerPieces) {
+            if (piece.toLowerCase() === 'h') continue; // Skip whale (handled separately)
+
+            const pieceValue = getPieceValue(piece, role);
+            const isAttacked = game.isAttacked(square, opponentColor);
+            const isDefended = game.isAttacked(square, playerColor);
+
+            // Only consider pieces that are threatened but not defended (hanging or vulnerable)
+            // Critical pieces (dolphin gatherer = 1800) should be protected even if defended
+            if (isAttacked) {
+                if (!isDefended || pieceValue >= PIECE_SAFETY.criticalPieceThreshold) {
+                    threatenedPieces.push({ square, piece, role, value: pieceValue });
+                }
+            }
+        }
+    }
 
     // Sort moves for better pruning - prioritize captures and threatening moves
     // This helps alpha-beta pruning work more effectively
@@ -1162,8 +1444,27 @@ export function alphaBeta(
             }
         }
     }
+    // Create a set of threatened squares for quick lookup
+    const threatenedSquares = new Set(threatenedPieces.map((p) => p.square));
+
     const sortedMoves = [...moves].sort((a, b) => {
-        // Prioritize captures (especially of valuable pieces)
+        // HIGHEST PRIORITY: Moves FROM threatened squares (must move valuable pieces to safety)
+        const aFromThreatened = threatenedSquares.has(a.from);
+        const bFromThreatened = threatenedSquares.has(b.from);
+        if (aFromThreatened && !bFromThreatened) return -1;
+        if (!aFromThreatened && bFromThreatened) return 1;
+
+        // If both are from threatened squares, prioritize moves to safe squares
+        if (aFromThreatened && bFromThreatened) {
+            // Check if destinations are safe (not threatened by opponent)
+            const opponentColor: Color = playerColor === 'w' ? 'b' : 'w';
+            const aDestSafe = !game.isAttacked(a.to, opponentColor);
+            const bDestSafe = !game.isAttacked(b.to, opponentColor);
+            if (aDestSafe && !bDestSafe) return -1;
+            if (!aDestSafe && bDestSafe) return 1;
+        }
+
+        // SECOND PRIORITY: Prioritize captures (especially of valuable pieces)
         if (a.captured && !b.captured) return -1;
         if (!a.captured && b.captured) return 1;
         if (a.captured && b.captured) {
@@ -1205,6 +1506,49 @@ export function alphaBeta(
             capturingValue = getPieceValue(capturingPiece.type, capturingPiece.role);
         }
 
+        // Calculate defensive bonus BEFORE making the move
+        // This ensures we evaluate defensive moves correctly using the current game state
+        let defensiveBonus = 0;
+        if (threatenedPieces.length > 0 && maximizingPlayer) {
+            defensiveBonus = calculateDefensiveBonus(
+                gameState,
+                move,
+                playerColor,
+                threatenedPieces,
+            );
+            if (isRootLevel && defensiveBonus > 0) {
+                console.log(
+                    `[DEBUG] Defensive bonus calculated for move ${move.from}->${move.to}: ${defensiveBonus.toFixed(0)} points`,
+                );
+            }
+        } else if (isRootLevel && threatenedPieces.length > 0) {
+            console.log(
+                `[DEBUG] Skipping defensive bonus: maximizingPlayer=${maximizingPlayer}, threatenedPieces=${threatenedPieces.length}`,
+            );
+        } else if (isRootLevel && maximizingPlayer && threatenedPieces.length === 0) {
+            // Check if there should be threatened pieces but they weren't found
+            const playerPieces = getPieces(game, playerColor);
+            const opponentColor: Color = playerColor === 'w' ? 'b' : 'w';
+            const threatenedCount = playerPieces.filter((p) => {
+                if (p.piece.toLowerCase() === 'h') return false;
+                return game.isAttacked(p.square, opponentColor);
+            }).length;
+            if (threatenedCount > 0) {
+                console.log(
+                    `[DEBUG] WARNING: Found ${threatenedCount} threatened pieces but threatenedPieces array is empty!`,
+                );
+            }
+        }
+
+        // CRITICAL: Check if destination is threatened BEFORE making the move
+        // This prevents moving valuable pieces to threatened squares
+        const opponentColor = playerColor === 'w' ? 'b' : 'w';
+        const destinationThreatenedBeforeMove = game.isAttacked(move.to, opponentColor);
+        let movingToThreatenedSquare = false;
+        if (destinationThreatenedBeforeMove && capturingValue > 0) {
+            movingToThreatenedSquare = true;
+        }
+
         // Make the move
         let moveResult;
         try {
@@ -1233,15 +1577,17 @@ export function alphaBeta(
         // This prevents AI from moving valuable pieces to squares where less valuable pieces can capture them
         let hangingToLessValuablePiece = false;
         let attackerValue = 0;
-        if (isRootLevel && capturingPiece !== false && !move.captured) {
-            const opponentColor = playerColor === 'w' ? 'b' : 'w';
-            const destinationAttacked = game.isAttacked(move.to, opponentColor);
-            if (destinationAttacked) {
-                // Check what opponent pieces can attack the destination square
-                const opponentPieces = getPieces(game, opponentColor);
+
+        // If destination was threatened before move, check what can attack it
+        if (movingToThreatenedSquare && capturingPiece !== false) {
+            // Check what opponent pieces can attack the destination square (before the move)
+            // We need to check the original game state, not the state after the move
+            const originalGame = safeRestoreGame(gameState);
+            if (originalGame) {
+                const opponentPieces = getPieces(originalGame, opponentColor);
                 for (const { piece, role } of opponentPieces) {
                     if (piece.toLowerCase() === 'h') continue; // Skip whale
-                    // Check if this piece can attack the destination
+                    // Check if this piece can attack the destination square
                     // We check if the square is attacked by opponent color (which includes this piece)
                     // and if this piece is less valuable than our moving piece
                     const pieceValue = getPieceValue(piece, role);
@@ -1269,7 +1615,9 @@ export function alphaBeta(
             timeControl,
             null, // lastMove only matters at root level
             transpositionTable, // Pass transposition table to recursive calls
+            evaluationTable, // Pass evaluation table to recursive calls
             false, // Not root level in recursive calls
+            rootGameState || (isRootLevel ? gameState : null), // Pass original root state for defensive bonus checks
         );
 
         nodesEvaluated += result.nodesEvaluated;
@@ -1297,6 +1645,15 @@ export function alphaBeta(
             moveScore = -result.score;
         } else {
             moveScore = result.score;
+        }
+
+        // Log defensive bonus status after recursive call to verify it's preserved
+        // CRITICAL: defensiveBonus was calculated BEFORE the recursive call, so it should still be set
+        if (isRootLevel && move.from === 'a4' && move.to === 'a6') {
+            console.log(
+                `[DEBUG] After recursive call for ${move.from}->${move.to}: ` +
+                    `moveScore=${moveScore.toFixed(2)}, defensiveBonus=${defensiveBonus.toFixed(0)} (should be 50000)`,
+            );
         }
 
         // Apply reversing move penalty only at root level (when lastMove is provided and we're at maximum depth)
@@ -1392,6 +1749,89 @@ export function alphaBeta(
             }
         }
 
+        // Apply defensive move bonus to moveScore
+        // This bonus was calculated BEFORE making the move, so it correctly evaluates
+        // whether this move protects threatened pieces
+        // IMPORTANT: Apply this bonus at ALL levels, not just root level
+        // The defensive value of a move should be considered throughout the search tree
+
+        // DEBUG: Check if defensive bonus should be applied
+        // Log for ALL moves from a4, especially a4->a6
+        if (move.from === 'a4') {
+            console.log(
+                `[DEBUG] Checking defensive bonus for ${move.from}->${move.to}: ` +
+                    `defensiveBonus=${defensiveBonus}, moveScore=${moveScore.toFixed(2)}, isRootLevel=${isRootLevel}`,
+            );
+        }
+
+        if (defensiveBonus > 0) {
+            const scoreBeforeBonus = moveScore;
+            moveScore += defensiveBonus;
+            // Log for moves from threatened pieces (especially a4->a6)
+            if (move.from === 'a4' || (isRootLevel && defensiveBonus >= 50000)) {
+                console.log(
+                    `[DEBUG] ✅ Applying defensive bonus to move ${move.from}->${move.to}: ` +
+                        `score before=${scoreBeforeBonus.toFixed(2)}, bonus=+${defensiveBonus.toFixed(0)}, ` +
+                        `score after=${moveScore.toFixed(2)} (isRootLevel=${isRootLevel})`,
+                );
+            }
+        } else if (move.from === 'a4') {
+            console.log(
+                `[DEBUG] ❌ Defensive bonus NOT applied to ${move.from}->${move.to}: defensiveBonus=${defensiveBonus}`,
+            );
+        }
+
+        // CRITICAL: Apply severe penalty for moving valuable pieces to threatened squares
+        // This prevents moves like dolphin->threatened square (even if piece wasn't threatened before)
+        if (movingToThreatenedSquare && capturingValue > 0) {
+            // Calculate penalty based on piece value
+            // More valuable pieces get larger penalties
+            let threatenedSquarePenalty = capturingValue * 5.0; // 500% of piece value (increased from 300%)
+
+            // Extra severe penalty for critical pieces (dolphin gatherer = 1800)
+            if (capturingValue >= PIECE_SAFETY.criticalPieceThreshold) {
+                // For critical pieces, use a massive penalty to ensure these moves are NEVER selected
+                threatenedSquarePenalty = capturingValue * 10.0; // 1000% of piece value (18000 for dolphin gatherer)
+                // Ensure minimum penalty of 50000 points for critical pieces
+                threatenedSquarePenalty = Math.max(threatenedSquarePenalty, 50000);
+            } else if (capturingValue >= 500) {
+                // For valuable pieces (dolphin hunter = 900, turtle = 500-1000), use larger penalty
+                // Ensure minimum penalty of 10000 points for valuable pieces moving to threatened squares
+                threatenedSquarePenalty = Math.max(threatenedSquarePenalty, 10000);
+            }
+
+            // If it's a bad trade (hanging to less valuable piece), add extra penalty
+            if (hangingToLessValuablePiece && attackerValue > 0) {
+                const tradeLoss = capturingValue - attackerValue;
+                threatenedSquarePenalty += tradeLoss * 5; // Additional penalty for bad trades
+            }
+
+            // IMPORTANT: If we're moving away from a threat (defensive bonus > 0), reduce the penalty significantly
+            // This allows moving from one threatened square to another if it's still better than staying
+            // For example: dolphin at a4 (threatened) -> a6 (also threatened) is better than staying at a4
+            // The defensive bonus (50,000) should overcome the reduced penalty
+            if (defensiveBonus > 0) {
+                // Reduce penalty by 95% - still penalize but not as harshly
+                // This ensures defensive bonus (50,000) can still overcome the reduced penalty
+                threatenedSquarePenalty = threatenedSquarePenalty * 0.05; // Only 5% of original penalty
+                if (isRootLevel) {
+                    console.log(
+                        `[DEBUG] Reducing threatened square penalty for ${move.from}->${move.to} ` +
+                            `because moving away from threat (defensive bonus: ${defensiveBonus.toFixed(0)}, ` +
+                            `penalty reduced from ${(threatenedSquarePenalty / 0.05).toFixed(0)} to ${threatenedSquarePenalty.toFixed(0)})`,
+                    );
+                }
+            }
+
+            moveScore -= threatenedSquarePenalty;
+
+            if (isRootLevel) {
+                console.log(
+                    `[DEBUG] Applying threatened square penalty to move ${move.from}->${move.to}: -${threatenedSquarePenalty.toFixed(0)} points (piece value: ${capturingValue})`,
+                );
+            }
+        }
+
         // Undo move
         game.undo();
 
@@ -1451,6 +1891,7 @@ export function alphaBeta(
  * @param timeControl - Optional time control object with startTime and maxTimeMs
  * @param lastMove - Last move made (for detecting reversing moves)
  * @param transpositionTable - Optional transposition table for caching position evaluations
+ * @param evaluationTable - Optional pre-computed evaluation table for fast position lookup
  * @param aspirationAlpha - Optional alpha for aspiration window (narrower search window)
  * @param aspirationBeta - Optional beta for aspiration window (narrower search window)
  * @returns { move: Object, score: number, nodesEvaluated: number, timedOut: boolean, aspirationFailed: boolean }
@@ -1462,6 +1903,7 @@ export function findBestMove(
     timeControl: TimeControl | null = null,
     lastMove: LastMoveInfo | null = null,
     transpositionTable: TranspositionTable | null = null,
+    evaluationTable: EvaluationTable | null = null,
     aspirationAlpha: number | null = null,
     aspirationBeta: number | null = null,
 ): AlphaBetaResult & { aspirationFailed?: boolean } {
@@ -1495,7 +1937,9 @@ export function findBestMove(
         timeControl,
         lastMove,
         transpositionTable,
+        evaluationTable,
         true, // This is the root level
+        gameState, // Pass original root state for defensive bonus checks
     );
 
     // Check if aspiration window failed (score outside window)
@@ -1529,6 +1973,8 @@ export type ProgressCallback = (
  * @param maxTimeMs - Maximum time to spend in milliseconds
  * @param progressCallback - Optional callback for progress updates (depth, nodesEvaluated, elapsedMs)
  * @param lastMove - Last move made (for detecting reversing moves)
+ * @param evaluationTable - Optional pre-computed evaluation table for fast position lookup
+ * @param difficulty - Difficulty level ('easy', 'medium', 'hard') - determines which stored moves to use
  * @returns { move: Object, score: number, nodesEvaluated: number, depth: number, elapsedMs: number }
  */
 export function findBestMoveIterativeDeepening(
@@ -1538,6 +1984,8 @@ export function findBestMoveIterativeDeepening(
     maxTimeMs: number = TIME_CONTROL.maxTimeMs,
     progressCallback: ProgressCallback | null = null,
     lastMove: LastMoveInfo | null = null,
+    evaluationTable: EvaluationTable | null = null,
+    difficulty: 'easy' | 'medium' | 'hard' = 'hard',
 ): IterativeDeepeningResult {
     // Create transposition table for this search (shared across all depths)
     const transpositionTable = new TranspositionTable(100000);
@@ -1557,6 +2005,58 @@ export function findBestMoveIterativeDeepening(
     let bestScore = -Infinity;
     let totalNodesEvaluated = 0;
     let bestDepth = 1;
+
+    // Check evaluation table first for stored moves
+    if (evaluationTable) {
+        const positionKey = generatePositionKey(gameState);
+        const storedMoves = evaluationTable.getMoves(positionKey, difficulty);
+        if (storedMoves && storedMoves.length > 0) {
+            // Randomly select from available moves based on difficulty
+            const selectedMove = storedMoves[Math.floor(Math.random() * storedMoves.length)];
+
+            // Convert StoredMove to full Move object
+            // Verify the stored move is still legal in the current position
+            const legalMoves = game.moves({ verbose: true });
+            const matchingMove = legalMoves.find(
+                (m) =>
+                    m.from === selectedMove.from &&
+                    m.to === selectedMove.to &&
+                    m.promotion === selectedMove.promotion &&
+                    m.coralPlaced === selectedMove.coralPlaced &&
+                    m.coralRemoved === selectedMove.coralRemoved,
+            );
+
+            if (matchingMove) {
+                // Double-check the move is actually valid by trying to execute it
+                // (game.moves() can return pseudo-legal moves)
+                const validationGame = safeRestoreGame(gameState);
+                if (validationGame) {
+                    try {
+                        const testResult = validationGame.move({
+                            from: matchingMove.from,
+                            to: matchingMove.to,
+                            promotion: matchingMove.promotion,
+                            coralPlaced: matchingMove.coralPlaced,
+                            coralRemoved: matchingMove.coralRemoved,
+                            coralRemovedSquares: matchingMove.coralRemovedSquares,
+                        });
+                        if (testResult) {
+                            // Move is valid - return it
+                            return {
+                                move: matchingMove,
+                                score: 0, // Score not stored, use 0
+                                nodesEvaluated: 1, // Minimal evaluation
+                                depth: 0, // No search depth needed
+                                elapsedMs: Date.now() - startTime,
+                            };
+                        }
+                    } catch {
+                        // Move is invalid - fall through to normal search
+                    }
+                }
+            }
+        }
+    }
 
     // Get initial legal moves as fallback - ensures we always have a move to return
     const initialMoves = game.moves({ verbose: true });
@@ -1607,6 +2107,7 @@ export function findBestMoveIterativeDeepening(
                 timeControl,
                 lastMove,
                 transpositionTable,
+                evaluationTable,
                 aspirationAlpha,
                 aspirationBeta,
             );
@@ -1621,6 +2122,7 @@ export function findBestMoveIterativeDeepening(
                     timeControl,
                     lastMove,
                     transpositionTable,
+                    evaluationTable,
                 );
             }
         } else {
@@ -1632,6 +2134,7 @@ export function findBestMoveIterativeDeepening(
                 timeControl,
                 lastMove,
                 transpositionTable,
+                evaluationTable,
             );
         }
 

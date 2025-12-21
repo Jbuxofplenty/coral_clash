@@ -92,3 +92,6 @@ GoogleService-Info.plist
 .npmrc
 functions/.npmrc
 shared/.npmrc
+
+# Evaluation table generation cache
+.processed-games-cache.json

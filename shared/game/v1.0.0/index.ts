@@ -7,3 +7,5 @@ export * from './coralClash.js';
 export * from './gameState.js';
 export * from './aiConfig.js';
 export * from './aiEvaluation.js';
+export * from './evaluationTable.js';
+export * from './selfPlay.js';

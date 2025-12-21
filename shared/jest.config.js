@@ -8,6 +8,14 @@ module.exports = {
     moduleNameMapper: {
         '^(\\.{1,2}/.*)\\.js$': '$1',
     },
+    globals: {
+        'ts-jest': {
+            tsconfig: {
+                module: 'esnext',
+                moduleResolution: 'node',
+            },
+        },
+    },
     collectCoverageFrom: [
         'game/**/*.ts',
         '!game/**/*.test.ts',
