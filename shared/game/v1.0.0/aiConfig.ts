@@ -170,6 +170,41 @@ const TIME_CONTROL = {
 };
 
 /**
+ * Get time control settings for a specific difficulty level
+ * @param difficulty - Difficulty level ('easy', 'medium', 'hard')
+ * @returns Time control object with maxTimeMs, minTimeMs, and progressIntervalMs
+ */
+export function getTimeControlForDifficulty(
+    difficulty: 'easy' | 'medium' | 'hard',
+): {
+    maxTimeMs: number;
+    minTimeMs: number;
+    progressIntervalMs: number;
+} {
+    // Different time controls per difficulty
+    // Easier difficulties can use less time, harder difficulties use more time
+    const timeControls = {
+        easy: {
+            maxTimeMs: 2000, // 2 seconds for easy
+            minTimeMs: 100,
+            progressIntervalMs: 200,
+        },
+        medium: {
+            maxTimeMs: 5000, // 5 seconds for medium
+            minTimeMs: 100,
+            progressIntervalMs: 200,
+        },
+        hard: {
+            maxTimeMs: 10000, // 10 seconds for hard
+            minTimeMs: 100,
+            progressIntervalMs: 200,
+        },
+    };
+
+    return timeControls[difficulty];
+}
+
+/**
  * Helper function to get piece value
  * @param pieceSymbol - Piece symbol (h, d, t, f, o, c)
  * @param role - Piece role ('hunter', 'gatherer', or null for whale)

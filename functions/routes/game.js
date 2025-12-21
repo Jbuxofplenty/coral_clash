@@ -34,141 +34,6 @@ import {
     sendUndoRequestNotification,
 } from '../utils/notifications.js';
 
-// Cache for loaded evaluation table (single table for all difficulties)
-// Use undefined to distinguish between "not yet attempted" and "failed to load"
-let evaluationTableCache = undefined;
-
-/**
- * Load evaluation table (single table for all difficulties)
- * @returns {Promise<EvaluationTable|null>} Evaluation table or null if not available
- */
-async function loadEvaluationTable() {
-    // Check cache first
-    if (evaluationTableCache !== undefined) {
-        if (evaluationTableCache) {
-            const stats = evaluationTableCache.getStats();
-            console.log(
-                `[EVAL_TABLE] Using cached table: ${evaluationTableCache.size()} positions, ` +
-                    `cache stats: ${stats.hits} hits, ${stats.misses} misses, ` +
-                    `${stats.hitRate.toFixed(1)}% hit rate`,
-            );
-        } else {
-            console.log('[EVAL_TABLE] Table not available (cached null)');
-        }
-        return evaluationTableCache;
-    }
-
-    try {
-        // Dynamic import to avoid issues if module isn't available
-        const evalTableModule = await import(
-            '@jbuxofplenty/coral-clash/dist/game/v1.0.0/evaluationTable.js'
-        );
-        const { EvaluationTable, getEvaluationTablePath } = evalTableModule;
-
-        // Check if file exists before trying to load (for better error messages)
-        const fs = await import('fs');
-        const pathModule = await import('path');
-
-        // Try multiple possible locations for the evaluation table file
-        const possiblePaths = [];
-
-        // 1. Default path from getEvaluationTablePath()
-        const defaultPath = await getEvaluationTablePath();
-        possiblePaths.push(defaultPath);
-
-        // 2. Local development path (for emulator/local development)
-        const localDevPath = pathModule.join(
-            process.cwd(),
-            'shared',
-            'game',
-            'v1.0.0',
-            'evaluationData',
-            'moves.v3.bin',
-        );
-        possiblePaths.push(localDevPath);
-
-        // 3. Try to resolve module location and check there
-        let moduleDir = null;
-        try {
-            if (typeof require !== 'undefined') {
-                // CommonJS context
-                const moduleResolved = require.resolve(
-                    '@jbuxofplenty/coral-clash/dist/game/v1.0.0/evaluationTable.js',
-                );
-                moduleDir = pathModule.dirname(moduleResolved);
-            } else {
-                // ESM context - use createRequire
-                const { createRequire } = await import('module');
-                // Try to get a valid base URL for createRequire
-                let baseUrl;
-                if (typeof import.meta !== 'undefined' && import.meta.url) {
-                    baseUrl = import.meta.url;
-                } else {
-                    // Fallback: construct file URL from process.cwd()
-                    baseUrl = `file://${pathModule.join(process.cwd(), 'functions', 'routes', 'game.js')}`;
-                }
-                const requireFn = createRequire(baseUrl);
-                const moduleResolved = requireFn.resolve(
-                    '@jbuxofplenty/coral-clash/dist/game/v1.0.0/evaluationTable.js',
-                );
-                moduleDir = pathModule.dirname(moduleResolved);
-            }
-
-            if (moduleDir) {
-                const moduleEvalDataPath = pathModule.join(
-                    moduleDir,
-                    'evaluationData',
-                    'moves.v3.bin',
-                );
-                possiblePaths.push(moduleEvalDataPath);
-            }
-        } catch (resolveError) {
-            console.log(`[EVAL_TABLE] Could not resolve module path: ${resolveError.message}`);
-        }
-
-        // Find the first path that exists
-        let filePath = null;
-        for (const path of possiblePaths) {
-            console.log(`[EVAL_TABLE] Checking path: ${path}`);
-            if (fs.existsSync(path)) {
-                console.log(`[EVAL_TABLE] ✅ Found file at: ${path}`);
-                filePath = path;
-                break;
-            }
-        }
-
-        if (!filePath) {
-            console.log(`[EVAL_TABLE] ❌ File not found in any of the checked paths:`);
-            possiblePaths.forEach((p) => console.log(`[EVAL_TABLE]   - ${p}`));
-            throw new Error(
-                `Evaluation table file not found. Checked ${possiblePaths.length} locations. File may not be included in npm package.`,
-            );
-        }
-
-        const table = await EvaluationTable.load(filePath);
-
-        // Cache it
-        evaluationTableCache = table;
-        const stats = table.getStats();
-        console.log(
-            `[EVAL_TABLE] ✅ Successfully loaded evaluation table: ${table.size()} positions`,
-        );
-        console.log(
-            `[EVAL_TABLE] Cache stats: ${stats.hits} hits, ${stats.misses} misses, ` +
-                `${stats.hitRate.toFixed(1)}% hit rate`,
-        );
-        return table;
-    } catch (error) {
-        // Evaluation table not available or file doesn't exist - fall back to normal evaluation
-        console.log(`[EVAL_TABLE] ❌ Evaluation table not available: ${error.message}`);
-        if (error.stack) {
-            console.log(`[EVAL_TABLE] Error stack: ${error.stack}`);
-        }
-        evaluationTableCache = null; // Cache null to avoid repeated attempts
-        return null;
-    }
-}
-
 const db = admin.firestore();
 
 /**
@@ -1073,19 +938,6 @@ export async function makeComputerMoveHelper(gameId, gameData = null) {
             // Easy mode: Use iterative deepening with time control
             const maxDepth = SEARCH_DEPTH.easy;
             const timeControl = getTimeControlForDifficulty('easy');
-            const evaluationTable = await loadEvaluationTable();
-
-            // Log before search
-            const statsBefore = evaluationTable?.getStats() || {
-                hits: 0,
-                misses: 0,
-                totalLookups: 0,
-                hitRate: 0,
-            };
-            console.log(
-                `[EVAL_TABLE] [EASY] Starting move search - Table: ${evaluationTable ? evaluationTable.size() + ' positions' : 'none'}, ` +
-                    `Cache stats before: ${statsBefore.hits} hits, ${statsBefore.misses} misses`,
-            );
 
             const result = findBestMoveIterativeDeepening(
                 currentGameState,
@@ -1094,44 +946,16 @@ export async function makeComputerMoveHelper(gameId, gameData = null) {
                 timeControl.maxTimeMs,
                 null, // progressCallback
                 lastComputerMove,
-                evaluationTable,
+                null, // evaluationTable
                 'easy', // difficulty
             );
-
-            // Log after search
-            const statsAfter = evaluationTable?.getStats() || {
-                hits: 0,
-                misses: 0,
-                totalLookups: 0,
-                hitRate: 0,
-            };
-            const newHits = statsAfter.hits - statsBefore.hits;
-            const newMisses = statsAfter.misses - statsBefore.misses;
-            // Table hits return nodesEvaluated: 1 (not 0) - see aiEvaluation.ts line 1628
-            const wasTableHit =
-                result.nodesEvaluated <= 1 &&
-                result.depth === 0 &&
-                evaluationTable !== null &&
-                newHits > 0;
 
             if (result.move) {
                 selectedMove = result.move;
                 moveCalculationTimeMs = result.elapsedMs || Date.now() - moveStartTime;
-                console.log(
-                    `[EVAL_TABLE] [EASY] ✅ Move found: ${wasTableHit ? 'FROM TABLE' : 'COMPUTED'} ` +
-                        `(depth ${result.depth}, ${result.nodesEvaluated} nodes, ${moveCalculationTimeMs}ms)`,
-                );
-                if (evaluationTable) {
-                    console.log(
-                        `[EVAL_TABLE] [EASY] Cache: +${newHits} hits, +${newMisses} misses ` +
-                            `(total: ${statsAfter.hits} hits, ${statsAfter.misses} misses, ${statsAfter.hitRate.toFixed(1)}% hit rate)`,
-                    );
-                }
             } else {
                 // Fallback to random if no move found
-                console.warn(
-                    '[EVAL_TABLE] [EASY] ❌ AI search found no move, falling back to random',
-                );
+                console.warn('[EASY] AI search found no move, falling back to random');
                 selectedMove = moves[Math.floor(Math.random() * moves.length)];
                 moveCalculationTimeMs = Date.now() - moveStartTime;
             }
@@ -1141,19 +965,6 @@ export async function makeComputerMoveHelper(gameId, gameData = null) {
             // Medium mode: Use iterative deepening with time control
             const maxDepth = SEARCH_DEPTH.medium;
             const timeControl = getTimeControlForDifficulty('medium');
-            const evaluationTable = await loadEvaluationTable();
-
-            // Log before search
-            const statsBefore = evaluationTable?.getStats() || {
-                hits: 0,
-                misses: 0,
-                totalLookups: 0,
-                hitRate: 0,
-            };
-            console.log(
-                `[EVAL_TABLE] [MEDIUM] Starting move search - Table: ${evaluationTable ? evaluationTable.size() + ' positions' : 'none'}, ` +
-                    `Cache stats before: ${statsBefore.hits} hits, ${statsBefore.misses} misses`,
-            );
 
             const result = findBestMoveIterativeDeepening(
                 currentGameState,
@@ -1162,43 +973,15 @@ export async function makeComputerMoveHelper(gameId, gameData = null) {
                 timeControl.maxTimeMs,
                 null, // progressCallback
                 lastComputerMove,
-                evaluationTable,
+                null, // evaluationTable
                 'medium', // difficulty
             );
-
-            // Log after search
-            const statsAfter = evaluationTable?.getStats() || {
-                hits: 0,
-                misses: 0,
-                totalLookups: 0,
-                hitRate: 0,
-            };
-            const newHits = statsAfter.hits - statsBefore.hits;
-            const newMisses = statsAfter.misses - statsBefore.misses;
-            // Table hits return nodesEvaluated: 1 (not 0) - see aiEvaluation.ts line 1628
-            const wasTableHit =
-                result.nodesEvaluated <= 1 &&
-                result.depth === 0 &&
-                evaluationTable !== null &&
-                newHits > 0;
 
             if (result.move) {
                 selectedMove = result.move;
                 moveCalculationTimeMs = result.elapsedMs || Date.now() - moveStartTime;
-                console.log(
-                    `[EVAL_TABLE] [MEDIUM] ✅ Move found: ${wasTableHit ? 'FROM TABLE' : 'COMPUTED'} ` +
-                        `(depth ${result.depth}, ${result.nodesEvaluated} nodes, ${moveCalculationTimeMs}ms)`,
-                );
-                if (evaluationTable) {
-                    console.log(
-                        `[EVAL_TABLE] [MEDIUM] Cache: +${newHits} hits, +${newMisses} misses ` +
-                            `(total: ${statsAfter.hits} hits, ${statsAfter.misses} misses, ${statsAfter.hitRate.toFixed(1)}% hit rate)`,
-                    );
-                }
             } else {
-                console.warn(
-                    '[EVAL_TABLE] [MEDIUM] ❌ AI search found no move, falling back to random',
-                );
+                console.warn('[MEDIUM] AI search found no move, falling back to random');
                 selectedMove = moves[Math.floor(Math.random() * moves.length)];
                 moveCalculationTimeMs = Date.now() - moveStartTime;
             }
@@ -1208,19 +991,6 @@ export async function makeComputerMoveHelper(gameId, gameData = null) {
             // Hard mode: Use iterative deepening with time control
             const maxDepth = SEARCH_DEPTH.hard;
             const timeControl = getTimeControlForDifficulty('hard');
-            const evaluationTable = await loadEvaluationTable();
-
-            // Log before search
-            const statsBefore = evaluationTable?.getStats() || {
-                hits: 0,
-                misses: 0,
-                totalLookups: 0,
-                hitRate: 0,
-            };
-            console.log(
-                `[EVAL_TABLE] [HARD] Starting move search - Table: ${evaluationTable ? evaluationTable.size() + ' positions' : 'none'}, ` +
-                    `Cache stats before: ${statsBefore.hits} hits, ${statsBefore.misses} misses`,
-            );
 
             const result = findBestMoveIterativeDeepening(
                 currentGameState,
@@ -1229,43 +999,15 @@ export async function makeComputerMoveHelper(gameId, gameData = null) {
                 timeControl.maxTimeMs,
                 null, // progressCallback
                 lastComputerMove,
-                evaluationTable,
+                null, // evaluationTable
                 'hard', // difficulty
             );
-
-            // Log after search
-            const statsAfter = evaluationTable?.getStats() || {
-                hits: 0,
-                misses: 0,
-                totalLookups: 0,
-                hitRate: 0,
-            };
-            const newHits = statsAfter.hits - statsBefore.hits;
-            const newMisses = statsAfter.misses - statsBefore.misses;
-            // Table hits return nodesEvaluated: 1 (not 0) - see aiEvaluation.ts line 1628
-            const wasTableHit =
-                result.nodesEvaluated <= 1 &&
-                result.depth === 0 &&
-                evaluationTable !== null &&
-                newHits > 0;
 
             if (result.move) {
                 selectedMove = result.move;
                 moveCalculationTimeMs = result.elapsedMs || Date.now() - moveStartTime;
-                console.log(
-                    `[EVAL_TABLE] [HARD] ✅ Move found: ${wasTableHit ? 'FROM TABLE' : 'COMPUTED'} ` +
-                        `(depth ${result.depth}, ${result.nodesEvaluated} nodes, ${moveCalculationTimeMs}ms)`,
-                );
-                if (evaluationTable) {
-                    console.log(
-                        `[EVAL_TABLE] [HARD] Cache: +${newHits} hits, +${newMisses} misses ` +
-                            `(total: ${statsAfter.hits} hits, ${statsAfter.misses} misses, ${statsAfter.hitRate.toFixed(1)}% hit rate)`,
-                    );
-                }
             } else {
-                console.warn(
-                    '[EVAL_TABLE] [HARD] ❌ AI search found no move, falling back to random',
-                );
+                console.warn('[HARD] AI search found no move, falling back to random');
                 selectedMove = moves[Math.floor(Math.random() * moves.length)];
                 moveCalculationTimeMs = Date.now() - moveStartTime;
             }

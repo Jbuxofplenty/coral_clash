@@ -35,6 +35,26 @@ jest.mock('@jbuxofplenty/coral-clash', () => ({
     calculateUndoMoveCount: jest.fn(),
     findBestMove: jest.fn(),
     findBestMoveIterativeDeepening: jest.fn(),
+    getTimeControlForDifficulty: jest.fn((difficulty) => {
+        const timeControls = {
+            easy: {
+                maxTimeMs: 2000,
+                minTimeMs: 100,
+                progressIntervalMs: 200,
+            },
+            medium: {
+                maxTimeMs: 5000,
+                minTimeMs: 100,
+                progressIntervalMs: 200,
+            },
+            hard: {
+                maxTimeMs: 10000,
+                minTimeMs: 100,
+                progressIntervalMs: 200,
+            },
+        };
+        return timeControls[difficulty];
+    }),
     SEARCH_DEPTH: {
         random: 0,
         easy: 3,
@@ -615,6 +635,10 @@ describe('Game Creation Functions', () => {
                 SEARCH_DEPTH.easy, // Should be 3
                 'b',
                 expect.any(Number), // maxTimeMs
+                null, // progressCallback
+                null, // lastComputerMove
+                null, // evaluationTable
+                'easy', // difficulty
             );
         });
 
@@ -641,6 +665,10 @@ describe('Game Creation Functions', () => {
                 SEARCH_DEPTH.medium, // Should be 5
                 'b',
                 expect.any(Number), // maxTimeMs
+                null, // progressCallback
+                null, // lastComputerMove
+                null, // evaluationTable
+                'medium', // difficulty
             );
         });
 
@@ -667,6 +695,10 @@ describe('Game Creation Functions', () => {
                 SEARCH_DEPTH.hard, // Should be 7
                 'b',
                 expect.any(Number), // maxTimeMs
+                null, // progressCallback
+                null, // lastComputerMove
+                null, // evaluationTable
+                'hard', // difficulty
             );
         });
 
