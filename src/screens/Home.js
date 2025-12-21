@@ -6,6 +6,7 @@ import { Dimensions, ScrollView, StyleSheet } from 'react-native';
 import {
     ActiveGamesCard,
     BannerAd,
+    ComputerUsersManagement,
     GameHistoryCard,
     GameModeCard,
     MatchmakingCard,
@@ -91,7 +92,6 @@ export default function Home({ navigation }) {
     // useMatchmaking hook for random matchmaking
     const {
         searching,
-        queueCount,
         loading: matchmakingLoading,
         startSearching,
         stopSearching,
@@ -598,7 +598,6 @@ export default function Home({ navigation }) {
                     <>
                         <MatchmakingCard
                             searching={searching}
-                            queueCount={queueCount}
                             loading={matchmakingLoading}
                             onStartSearch={handleStartMatchmaking}
                             onStopSearch={stopSearching}
@@ -637,6 +636,9 @@ export default function Home({ navigation }) {
                     />
                 )}
 
+                {/* Computer Users Management - only visible to internal users */}
+                <ComputerUsersManagement />
+
                 {/* Active Games Card - show at bottom if there are no games */}
                 {activeGames.length === 0 && (
                     <ActiveGamesCard
@@ -673,6 +675,7 @@ export default function Home({ navigation }) {
                 visible={difficultyModalVisible}
                 onSelect={handleDifficultySelect}
                 onCancel={handleDifficultyCancel}
+                user={user}
             />
         </LinearGradient>
     );
