@@ -5,6 +5,7 @@ import './register.js';
 import './init.js';
 
 // Import route modules
+import * as computerUsers from './routes/computerUsers.js';
 import * as friends from './routes/friends.js';
 import * as game from './routes/game.js';
 import * as issues from './routes/issues.js';
@@ -21,9 +22,6 @@ import { onUserCreate } from './triggers/onUserCreate.js';
 
 // Import scheduled function modules
 import { cleanupStaleMatchmakingEntries } from './scheduled/cleanupStaleMatchmakingEntries.js';
-// Import initializeComputerUsers and deleteComputerUsers as callable functions (not scheduled)
-import { initializeComputerUsers } from './scheduled/initializeComputerUsers.js';
-import { deleteComputerUsers } from './scheduled/deleteComputerUsers.js';
 
 // ==================== User Profile APIs ====================
 export const getPublicUserInfo = userProfile.getPublicUserInfo;
@@ -68,11 +66,12 @@ export const getMatchmakingStatus = matchmaking.getMatchmakingStatus;
 // ==================== Issues APIs ====================
 export const submitIssue = issues.submitIssue;
 
+// ==================== Admin/Setup APIs ====================
+export const initializeComputerUsers = computerUsers.initializeComputerUsers;
+export const deleteComputerUsers = computerUsers.deleteComputerUsers;
+
 // ==================== Firestore Triggers ====================
 export { onFriendRequestCreate, onGameCreate, onGameMoveUpdate, onPlayerJoinQueue, onUserCreate };
 
 // ==================== Scheduled Functions ====================
 export { cleanupStaleMatchmakingEntries };
-
-// ==================== Admin/Setup APIs ====================
-export { initializeComputerUsers, deleteComputerUsers };
