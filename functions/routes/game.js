@@ -3,15 +3,16 @@ import {
     CoralClash,
     GAME_VERSION,
     SEARCH_DEPTH,
-    TIME_CONTROL,
     calculateUndoMoveCount,
     createGameSnapshot,
     findBestMoveIterativeDeepening,
+    getTimeControlForDifficulty,
     restoreGameFromSnapshot,
 } from '@jbuxofplenty/coral-clash';
 import { HttpsError, onCall, onRequest } from 'firebase-functions/v2/https';
 import { admin } from '../init.js';
 import { getAppCheckConfig } from '../utils/appCheckConfig.js';
+import { isComputerUser } from '../utils/computerUsers.js';
 import { getGameResult, validateMove } from '../utils/gameValidator.js';
 import { validateClientVersion } from '../utils/gameVersion.js';
 import {
@@ -32,6 +33,141 @@ import {
     sendUndoRejectedNotification,
     sendUndoRequestNotification,
 } from '../utils/notifications.js';
+
+// Cache for loaded evaluation table (single table for all difficulties)
+// Use undefined to distinguish between "not yet attempted" and "failed to load"
+let evaluationTableCache = undefined;
+
+/**
+ * Load evaluation table (single table for all difficulties)
+ * @returns {Promise<EvaluationTable|null>} Evaluation table or null if not available
+ */
+async function loadEvaluationTable() {
+    // Check cache first
+    if (evaluationTableCache !== undefined) {
+        if (evaluationTableCache) {
+            const stats = evaluationTableCache.getStats();
+            console.log(
+                `[EVAL_TABLE] Using cached table: ${evaluationTableCache.size()} positions, ` +
+                    `cache stats: ${stats.hits} hits, ${stats.misses} misses, ` +
+                    `${stats.hitRate.toFixed(1)}% hit rate`,
+            );
+        } else {
+            console.log('[EVAL_TABLE] Table not available (cached null)');
+        }
+        return evaluationTableCache;
+    }
+
+    try {
+        // Dynamic import to avoid issues if module isn't available
+        const evalTableModule = await import(
+            '@jbuxofplenty/coral-clash/dist/game/v1.0.0/evaluationTable.js'
+        );
+        const { EvaluationTable, getEvaluationTablePath } = evalTableModule;
+
+        // Check if file exists before trying to load (for better error messages)
+        const fs = await import('fs');
+        const pathModule = await import('path');
+
+        // Try multiple possible locations for the evaluation table file
+        const possiblePaths = [];
+
+        // 1. Default path from getEvaluationTablePath()
+        const defaultPath = await getEvaluationTablePath();
+        possiblePaths.push(defaultPath);
+
+        // 2. Local development path (for emulator/local development)
+        const localDevPath = pathModule.join(
+            process.cwd(),
+            'shared',
+            'game',
+            'v1.0.0',
+            'evaluationData',
+            'moves.v3.bin',
+        );
+        possiblePaths.push(localDevPath);
+
+        // 3. Try to resolve module location and check there
+        let moduleDir = null;
+        try {
+            if (typeof require !== 'undefined') {
+                // CommonJS context
+                const moduleResolved = require.resolve(
+                    '@jbuxofplenty/coral-clash/dist/game/v1.0.0/evaluationTable.js',
+                );
+                moduleDir = pathModule.dirname(moduleResolved);
+            } else {
+                // ESM context - use createRequire
+                const { createRequire } = await import('module');
+                // Try to get a valid base URL for createRequire
+                let baseUrl;
+                if (typeof import.meta !== 'undefined' && import.meta.url) {
+                    baseUrl = import.meta.url;
+                } else {
+                    // Fallback: construct file URL from process.cwd()
+                    baseUrl = `file://${pathModule.join(process.cwd(), 'functions', 'routes', 'game.js')}`;
+                }
+                const requireFn = createRequire(baseUrl);
+                const moduleResolved = requireFn.resolve(
+                    '@jbuxofplenty/coral-clash/dist/game/v1.0.0/evaluationTable.js',
+                );
+                moduleDir = pathModule.dirname(moduleResolved);
+            }
+
+            if (moduleDir) {
+                const moduleEvalDataPath = pathModule.join(
+                    moduleDir,
+                    'evaluationData',
+                    'moves.v3.bin',
+                );
+                possiblePaths.push(moduleEvalDataPath);
+            }
+        } catch (resolveError) {
+            console.log(`[EVAL_TABLE] Could not resolve module path: ${resolveError.message}`);
+        }
+
+        // Find the first path that exists
+        let filePath = null;
+        for (const path of possiblePaths) {
+            console.log(`[EVAL_TABLE] Checking path: ${path}`);
+            if (fs.existsSync(path)) {
+                console.log(`[EVAL_TABLE] ✅ Found file at: ${path}`);
+                filePath = path;
+                break;
+            }
+        }
+
+        if (!filePath) {
+            console.log(`[EVAL_TABLE] ❌ File not found in any of the checked paths:`);
+            possiblePaths.forEach((p) => console.log(`[EVAL_TABLE]   - ${p}`));
+            throw new Error(
+                `Evaluation table file not found. Checked ${possiblePaths.length} locations. File may not be included in npm package.`,
+            );
+        }
+
+        const table = await EvaluationTable.load(filePath);
+
+        // Cache it
+        evaluationTableCache = table;
+        const stats = table.getStats();
+        console.log(
+            `[EVAL_TABLE] ✅ Successfully loaded evaluation table: ${table.size()} positions`,
+        );
+        console.log(
+            `[EVAL_TABLE] Cache stats: ${stats.hits} hits, ${stats.misses} misses, ` +
+                `${stats.hitRate.toFixed(1)}% hit rate`,
+        );
+        return table;
+    } catch (error) {
+        // Evaluation table not available or file doesn't exist - fall back to normal evaluation
+        console.log(`[EVAL_TABLE] ❌ Evaluation table not available: ${error.message}`);
+        if (error.stack) {
+            console.log(`[EVAL_TABLE] Error stack: ${error.stack}`);
+        }
+        evaluationTableCache = null; // Cache null to avoid repeated attempts
+        return null;
+    }
+}
 
 const db = admin.firestore();
 
@@ -131,18 +267,25 @@ async function createGameHandler(request) {
         .get();
     const opponentSettings = opponentSettingsDoc.exists ? opponentSettingsDoc.data() : {};
 
+    // Check if opponent is a computer user - if so, auto-accept
+    const isOpponentComputer = isComputerUser(opponentId);
+    const opponentDifficulty = isOpponentComputer ? opponentData.difficulty : null;
+
     // Create game document with snapshot of player info
     const gameData = {
         creatorId,
         opponentId,
         whitePlayerId, // Randomly assigned
         blackPlayerId, // Randomly assigned
-        status: 'pending', // pending, active, completed, cancelled
+        status: isOpponentComputer ? 'active' : 'pending', // Auto-accept for computer users
         currentTurn: whitePlayerId, // White always starts
         timeControl: timeControl || { type: 'unlimited' },
         moves: [],
         gameState: initializeGameState(),
         version: GAME_VERSION, // Store game engine version
+        // Computer user specific fields
+        opponentType: isOpponentComputer ? 'computer' : 'pvp',
+        difficulty: opponentDifficulty, // Store difficulty if opponent is computer
         // Snapshot creator info at game creation
         creatorDisplayName: creatorName,
         creatorAvatarKey: creatorSettings.avatarKey || 'dolphin',
@@ -153,31 +296,80 @@ async function createGameHandler(request) {
         updatedAt: serverTimestamp(),
     };
 
+    // If time control is enabled and game is active, initialize time tracking
+    if (isOpponentComputer && gameData.timeControl?.totalSeconds) {
+        gameData.timeRemaining = {
+            [creatorId]: gameData.timeControl.totalSeconds,
+            [opponentId]: gameData.timeControl.totalSeconds,
+        };
+        gameData.lastMoveTime = serverTimestamp();
+    }
+
     const gameRef = await db.collection('games').add(gameData);
 
-    // Send notification to opponent
-    await db.collection('notifications').add({
-        userId: opponentId,
-        type: 'game_invite',
-        gameId: gameRef.id,
-        from: creatorId,
-        read: false,
-        createdAt: serverTimestamp(),
-    });
+    // If computer user, auto-accept (game already active)
+    if (isOpponentComputer) {
+        // Send notification to creator that game was accepted
+        await db.collection('notifications').add({
+            userId: creatorId,
+            type: 'game_accepted',
+            gameId: gameRef.id,
+            from: opponentId,
+            read: false,
+            createdAt: serverTimestamp(),
+        });
 
-    // Send push notification
-    sendGameRequestNotification(
-        opponentId,
-        creatorId,
-        creatorName,
-        gameRef.id,
-        creatorData.settings?.avatarKey || 'dolphin',
-    ).catch((error) => console.error('Error sending push notification:', error));
+        // If computer user is white (goes first), trigger their move immediately
+        // Wait a small delay to ensure game document is fully written
+        if (whitePlayerId === opponentId) {
+            console.log(
+                `[createGameHandler] Computer user ${opponentId} is white, triggering first move`,
+            );
+            // Small delay to ensure game document is written, then trigger move
+            setTimeout(async () => {
+                try {
+                    // Fetch fresh game data to ensure we have the latest
+                    const freshGameDoc = await db.collection('games').doc(gameRef.id).get();
+                    if (freshGameDoc.exists) {
+                        await makeComputerMoveHelper(gameRef.id, freshGameDoc.data());
+                    } else {
+                        console.error(
+                            `[createGameHandler] Game ${gameRef.id} not found when trying to make computer move`,
+                        );
+                    }
+                } catch (error) {
+                    console.error(
+                        `[createGameHandler] Error making computer move for ${opponentId}:`,
+                        error,
+                    );
+                }
+            }, 500); // 500ms delay
+        }
+    } else {
+        // Send notification to opponent
+        await db.collection('notifications').add({
+            userId: opponentId,
+            type: 'game_invite',
+            gameId: gameRef.id,
+            from: creatorId,
+            read: false,
+            createdAt: serverTimestamp(),
+        });
+
+        // Send push notification
+        sendGameRequestNotification(
+            opponentId,
+            creatorId,
+            creatorName,
+            gameRef.id,
+            creatorData.settings?.avatarKey || 'dolphin',
+        ).catch((error) => console.error('Error sending push notification:', error));
+    }
 
     return {
         success: true,
         gameId: gameRef.id,
-        message: 'Game created successfully',
+        message: isOpponentComputer ? 'Game started successfully' : 'Game created successfully',
         versionCheck,
     };
 }
@@ -309,8 +501,18 @@ export const respondToGameInvite = onCall(getAppCheckConfig(), async (request) =
 
         const gameData = gameDoc.data();
 
-        // Verify game is in pending status
-        if (gameData.status !== 'pending') {
+        // Check if recipient is a computer user - if so, auto-accept
+        const isRecipientComputer = isComputerUser(gameData.opponentId);
+        if (isRecipientComputer && gameData.status === 'pending') {
+            // Auto-accept for computer users
+            accept = true;
+            console.log(
+                `[respondToGameInvite] Auto-accepting game ${gameId} for computer user ${gameData.opponentId}`,
+            );
+        }
+
+        // Verify game is in pending status (unless auto-accepted)
+        if (gameData.status !== 'pending' && !isRecipientComputer) {
             throw new HttpsError('failed-precondition', 'Game is not in pending status');
         }
 
@@ -323,7 +525,8 @@ export const respondToGameInvite = onCall(getAppCheckConfig(), async (request) =
         }
 
         // Only recipient can accept (sender cannot accept their own request)
-        if (accept && !isRecipient) {
+        // Exception: Computer users auto-accept, but this is handled server-side
+        if (accept && !isRecipient && !isRecipientComputer) {
             throw new HttpsError(
                 'permission-denied',
                 'Only the recipient can accept a game invitation',
@@ -354,6 +557,9 @@ export const respondToGameInvite = onCall(getAppCheckConfig(), async (request) =
 
         // Update game status
         await db.collection('games').doc(gameId).update(updateData);
+
+        // Get updated game data for computer move check
+        const updatedGameData = { ...gameData, ...updateData };
 
         // If accepted, notify the creator and cancel other pending games
         if (accept) {
@@ -406,6 +612,33 @@ export const respondToGameInvite = onCall(getAppCheckConfig(), async (request) =
             sendGameAcceptedNotification(gameData.creatorId, userId, accepterName, gameId).catch(
                 (error) => console.error('Error sending push notification:', error),
             );
+
+            // If computer user accepted and is white (goes first), trigger their move immediately
+            // Wait a small delay to ensure game document update is fully written
+            if (isRecipientComputer && updatedGameData.whitePlayerId === userId) {
+                console.log(
+                    `[respondToGameInvite] Computer user ${userId} is white, triggering first move`,
+                );
+                // Small delay to ensure game document update is written, then trigger move
+                setTimeout(async () => {
+                    try {
+                        // Fetch fresh game data to ensure we have the latest
+                        const freshGameDoc = await db.collection('games').doc(gameId).get();
+                        if (freshGameDoc.exists) {
+                            await makeComputerMoveHelper(gameId, freshGameDoc.data());
+                        } else {
+                            console.error(
+                                `[respondToGameInvite] Game ${gameId} not found when trying to make computer move`,
+                            );
+                        }
+                    } catch (error) {
+                        console.error(
+                            `[respondToGameInvite] Error making computer move for ${userId}:`,
+                            error,
+                        );
+                    }
+                }, 500); // 500ms delay
+            }
         }
 
         // Determine the appropriate message
@@ -779,36 +1012,126 @@ export async function makeComputerMoveHelper(gameId, gameData = null) {
     // Get difficulty level (default to 'random' if not set)
     const difficulty = gameData.difficulty || 'random';
 
+    // Determine computer user ID (could be 'computer' for old games or a computer user ID)
+    const computerUserId = gameData.opponentType === 'computer' ? gameData.opponentId : 'computer';
+    const isComputerUserId = computerUserId !== 'computer';
+
+    // Determine computer's color (could be white or black)
+    const computerColor = gameData.whitePlayerId === computerUserId ? 'w' : 'b';
+
+    // Extract last computer move to prevent reversing moves
+    const moves_array = gameData.moves || [];
+    let lastComputerMove = null;
+    // Find the last move made by the computer (check both 'computer' and computer user IDs)
+    for (let i = moves_array.length - 1; i >= 0; i--) {
+        if (
+            (moves_array[i].playerId === 'computer' ||
+                moves_array[i].playerId === computerUserId) &&
+            moves_array[i].move
+        ) {
+            const lastMove = moves_array[i].move;
+            lastComputerMove = {
+                from: lastMove.from,
+                to: lastMove.to,
+                piece: lastMove.piece,
+                color: lastMove.color || computerColor, // Use detected computer color
+            };
+            break;
+        }
+    }
+
     // Select move based on difficulty
     let selectedMove;
 
     switch (difficulty) {
         case 'random': {
-            // Random move selection
-            selectedMove = moves[Math.floor(Math.random() * moves.length)];
+            // Random move selection (still avoid reversing moves)
+            if (lastComputerMove) {
+                // Filter out reversing moves from random selection
+                const nonReversingMoves = moves.filter(
+                    (m) =>
+                        !(
+                            m.from === lastComputerMove.to &&
+                            m.to === lastComputerMove.from &&
+                            m.piece?.toLowerCase() === lastComputerMove.piece?.toLowerCase()
+                        ),
+                );
+                if (nonReversingMoves.length > 0) {
+                    selectedMove =
+                        nonReversingMoves[Math.floor(Math.random() * nonReversingMoves.length)];
+                } else {
+                    // If all moves are reversing (shouldn't happen), use random
+                    selectedMove = moves[Math.floor(Math.random() * moves.length)];
+                }
+            } else {
+                selectedMove = moves[Math.floor(Math.random() * moves.length)];
+            }
             moveCalculationTimeMs = Date.now() - moveStartTime;
             break;
         }
         case 'easy': {
             // Easy mode: Use iterative deepening with time control
             const maxDepth = SEARCH_DEPTH.easy;
-            const computerColor = 'b';
+            const timeControl = getTimeControlForDifficulty('easy');
+            const evaluationTable = await loadEvaluationTable();
+
+            // Log before search
+            const statsBefore = evaluationTable?.getStats() || {
+                hits: 0,
+                misses: 0,
+                totalLookups: 0,
+                hitRate: 0,
+            };
+            console.log(
+                `[EVAL_TABLE] [EASY] Starting move search - Table: ${evaluationTable ? evaluationTable.size() + ' positions' : 'none'}, ` +
+                    `Cache stats before: ${statsBefore.hits} hits, ${statsBefore.misses} misses`,
+            );
+
             const result = findBestMoveIterativeDeepening(
                 currentGameState,
                 maxDepth,
                 computerColor,
-                TIME_CONTROL.maxTimeMs,
+                timeControl.maxTimeMs,
+                null, // progressCallback
+                lastComputerMove,
+                evaluationTable,
+                'easy', // difficulty
             );
+
+            // Log after search
+            const statsAfter = evaluationTable?.getStats() || {
+                hits: 0,
+                misses: 0,
+                totalLookups: 0,
+                hitRate: 0,
+            };
+            const newHits = statsAfter.hits - statsBefore.hits;
+            const newMisses = statsAfter.misses - statsBefore.misses;
+            // Table hits return nodesEvaluated: 1 (not 0) - see aiEvaluation.ts line 1628
+            const wasTableHit =
+                result.nodesEvaluated <= 1 &&
+                result.depth === 0 &&
+                evaluationTable !== null &&
+                newHits > 0;
 
             if (result.move) {
                 selectedMove = result.move;
                 moveCalculationTimeMs = result.elapsedMs || Date.now() - moveStartTime;
                 console.log(
-                    `AI (easy) found move at depth ${result.depth}, evaluated ${result.nodesEvaluated} nodes in ${moveCalculationTimeMs}ms`,
+                    `[EVAL_TABLE] [EASY] ✅ Move found: ${wasTableHit ? 'FROM TABLE' : 'COMPUTED'} ` +
+                        `(depth ${result.depth}, ${result.nodesEvaluated} nodes, ${moveCalculationTimeMs}ms)`,
                 );
+                if (evaluationTable) {
+                    console.log(
+                        `[EVAL_TABLE] [EASY] Cache: +${newHits} hits, +${newMisses} misses ` +
+                            `(total: ${statsAfter.hits} hits, ${statsAfter.misses} misses, ${statsAfter.hitRate.toFixed(1)}% hit rate)`,
+                    );
+                }
             } else {
                 // Fallback to random if no move found
-                console.warn('AI search found no move, falling back to random');
+                console.warn(
+                    '[EVAL_TABLE] [EASY] ❌ AI search found no move, falling back to random',
+                );
                 selectedMove = moves[Math.floor(Math.random() * moves.length)];
                 moveCalculationTimeMs = Date.now() - moveStartTime;
             }
@@ -817,22 +1140,65 @@ export async function makeComputerMoveHelper(gameId, gameData = null) {
         case 'medium': {
             // Medium mode: Use iterative deepening with time control
             const maxDepth = SEARCH_DEPTH.medium;
-            const computerColor = 'b';
+            const timeControl = getTimeControlForDifficulty('medium');
+            const evaluationTable = await loadEvaluationTable();
+
+            // Log before search
+            const statsBefore = evaluationTable?.getStats() || {
+                hits: 0,
+                misses: 0,
+                totalLookups: 0,
+                hitRate: 0,
+            };
+            console.log(
+                `[EVAL_TABLE] [MEDIUM] Starting move search - Table: ${evaluationTable ? evaluationTable.size() + ' positions' : 'none'}, ` +
+                    `Cache stats before: ${statsBefore.hits} hits, ${statsBefore.misses} misses`,
+            );
+
             const result = findBestMoveIterativeDeepening(
                 currentGameState,
                 maxDepth,
                 computerColor,
-                TIME_CONTROL.maxTimeMs,
+                timeControl.maxTimeMs,
+                null, // progressCallback
+                lastComputerMove,
+                evaluationTable,
+                'medium', // difficulty
             );
+
+            // Log after search
+            const statsAfter = evaluationTable?.getStats() || {
+                hits: 0,
+                misses: 0,
+                totalLookups: 0,
+                hitRate: 0,
+            };
+            const newHits = statsAfter.hits - statsBefore.hits;
+            const newMisses = statsAfter.misses - statsBefore.misses;
+            // Table hits return nodesEvaluated: 1 (not 0) - see aiEvaluation.ts line 1628
+            const wasTableHit =
+                result.nodesEvaluated <= 1 &&
+                result.depth === 0 &&
+                evaluationTable !== null &&
+                newHits > 0;
 
             if (result.move) {
                 selectedMove = result.move;
                 moveCalculationTimeMs = result.elapsedMs || Date.now() - moveStartTime;
                 console.log(
-                    `AI (medium) found move at depth ${result.depth}, evaluated ${result.nodesEvaluated} nodes in ${moveCalculationTimeMs}ms`,
+                    `[EVAL_TABLE] [MEDIUM] ✅ Move found: ${wasTableHit ? 'FROM TABLE' : 'COMPUTED'} ` +
+                        `(depth ${result.depth}, ${result.nodesEvaluated} nodes, ${moveCalculationTimeMs}ms)`,
                 );
+                if (evaluationTable) {
+                    console.log(
+                        `[EVAL_TABLE] [MEDIUM] Cache: +${newHits} hits, +${newMisses} misses ` +
+                            `(total: ${statsAfter.hits} hits, ${statsAfter.misses} misses, ${statsAfter.hitRate.toFixed(1)}% hit rate)`,
+                    );
+                }
             } else {
-                console.warn('AI search found no move, falling back to random');
+                console.warn(
+                    '[EVAL_TABLE] [MEDIUM] ❌ AI search found no move, falling back to random',
+                );
                 selectedMove = moves[Math.floor(Math.random() * moves.length)];
                 moveCalculationTimeMs = Date.now() - moveStartTime;
             }
@@ -841,31 +1207,93 @@ export async function makeComputerMoveHelper(gameId, gameData = null) {
         case 'hard': {
             // Hard mode: Use iterative deepening with time control
             const maxDepth = SEARCH_DEPTH.hard;
-            const computerColor = 'b';
+            const timeControl = getTimeControlForDifficulty('hard');
+            const evaluationTable = await loadEvaluationTable();
+
+            // Log before search
+            const statsBefore = evaluationTable?.getStats() || {
+                hits: 0,
+                misses: 0,
+                totalLookups: 0,
+                hitRate: 0,
+            };
+            console.log(
+                `[EVAL_TABLE] [HARD] Starting move search - Table: ${evaluationTable ? evaluationTable.size() + ' positions' : 'none'}, ` +
+                    `Cache stats before: ${statsBefore.hits} hits, ${statsBefore.misses} misses`,
+            );
+
             const result = findBestMoveIterativeDeepening(
                 currentGameState,
                 maxDepth,
                 computerColor,
-                TIME_CONTROL.maxTimeMs,
+                timeControl.maxTimeMs,
+                null, // progressCallback
+                lastComputerMove,
+                evaluationTable,
+                'hard', // difficulty
             );
+
+            // Log after search
+            const statsAfter = evaluationTable?.getStats() || {
+                hits: 0,
+                misses: 0,
+                totalLookups: 0,
+                hitRate: 0,
+            };
+            const newHits = statsAfter.hits - statsBefore.hits;
+            const newMisses = statsAfter.misses - statsBefore.misses;
+            // Table hits return nodesEvaluated: 1 (not 0) - see aiEvaluation.ts line 1628
+            const wasTableHit =
+                result.nodesEvaluated <= 1 &&
+                result.depth === 0 &&
+                evaluationTable !== null &&
+                newHits > 0;
 
             if (result.move) {
                 selectedMove = result.move;
                 moveCalculationTimeMs = result.elapsedMs || Date.now() - moveStartTime;
                 console.log(
-                    `AI (hard) found move at depth ${result.depth}, evaluated ${result.nodesEvaluated} nodes in ${moveCalculationTimeMs}ms`,
+                    `[EVAL_TABLE] [HARD] ✅ Move found: ${wasTableHit ? 'FROM TABLE' : 'COMPUTED'} ` +
+                        `(depth ${result.depth}, ${result.nodesEvaluated} nodes, ${moveCalculationTimeMs}ms)`,
                 );
+                if (evaluationTable) {
+                    console.log(
+                        `[EVAL_TABLE] [HARD] Cache: +${newHits} hits, +${newMisses} misses ` +
+                            `(total: ${statsAfter.hits} hits, ${statsAfter.misses} misses, ${statsAfter.hitRate.toFixed(1)}% hit rate)`,
+                    );
+                }
             } else {
-                console.warn('AI search found no move, falling back to random');
+                console.warn(
+                    '[EVAL_TABLE] [HARD] ❌ AI search found no move, falling back to random',
+                );
                 selectedMove = moves[Math.floor(Math.random() * moves.length)];
                 moveCalculationTimeMs = Date.now() - moveStartTime;
             }
             break;
         }
         default: {
-            // Unknown difficulty, default to random
+            // Unknown difficulty, default to random (still avoid reversing moves)
             console.warn(`Unknown difficulty level: ${difficulty}, defaulting to random`);
-            selectedMove = moves[Math.floor(Math.random() * moves.length)];
+            if (lastComputerMove) {
+                // Filter out reversing moves from random selection
+                const nonReversingMoves = moves.filter(
+                    (m) =>
+                        !(
+                            m.from === lastComputerMove.to &&
+                            m.to === lastComputerMove.from &&
+                            m.piece?.toLowerCase() === lastComputerMove.piece?.toLowerCase()
+                        ),
+                );
+                if (nonReversingMoves.length > 0) {
+                    selectedMove =
+                        nonReversingMoves[Math.floor(Math.random() * nonReversingMoves.length)];
+                } else {
+                    // If all moves are reversing (shouldn't happen), use random
+                    selectedMove = moves[Math.floor(Math.random() * moves.length)];
+                }
+            } else {
+                selectedMove = moves[Math.floor(Math.random() * moves.length)];
+            }
             moveCalculationTimeMs = Date.now() - moveStartTime;
             break;
         }
@@ -896,24 +1324,29 @@ export async function makeComputerMoveHelper(gameId, gameData = null) {
         throw new Error(`Computer move validation failed: ${validation.error}`);
     }
 
-    // Add computer move to moves array
-    const moves_array = gameData.moves || [];
+    // Add computer move to moves array (moves_array was already retrieved earlier)
+    // Use computer user ID if it's a computer user, otherwise use 'computer'
     moves_array.push({
-        playerId: 'computer',
+        playerId: computerUserId,
         move: validation.result,
         timestamp: new Date(),
     });
 
-    // Toggle turn back to player
-    const nextTurn = gameData.creatorId;
+    // Toggle turn to the other player (not the computer)
+    // Computer could be creator or opponent, so toggle accordingly
+    const nextTurn =
+        gameData.currentTurn === gameData.creatorId ? gameData.opponentId : gameData.creatorId;
 
     // Handle time tracking if enabled
     let updatedTimeRemaining = gameData.timeRemaining;
     let computerTimeExpired = false;
 
     if (gameData.timeControl?.totalSeconds && gameData.timeRemaining) {
-        // Get computer's current time
-        const computerTime = gameData.timeRemaining.computer || gameData.timeControl.totalSeconds;
+        // Get computer's current time (check both 'computer' key and computer user ID)
+        const computerTime =
+            gameData.timeRemaining[computerUserId] ||
+            gameData.timeRemaining.computer ||
+            gameData.timeControl.totalSeconds;
 
         // Decrement computer's time by the calculation time (in seconds)
         // The computer's clock runs while it calculates the move
@@ -922,8 +1355,13 @@ export async function makeComputerMoveHelper(gameId, gameData = null) {
 
         updatedTimeRemaining = {
             ...gameData.timeRemaining,
-            computer: newComputerTime,
+            [computerUserId]: newComputerTime,
         };
+
+        // Remove old 'computer' key if it exists and we're using a computer user ID
+        if (isComputerUserId && updatedTimeRemaining.computer !== undefined) {
+            delete updatedTimeRemaining.computer;
+        }
 
         // Check if computer ran out of time
         if (newComputerTime <= 0) {

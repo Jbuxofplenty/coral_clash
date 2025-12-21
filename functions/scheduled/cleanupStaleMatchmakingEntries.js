@@ -1,5 +1,6 @@
 import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { admin } from '../init.js';
+import { isComputerUser } from '../utils/computerUsers.js';
 
 const db = admin.firestore();
 
@@ -23,11 +24,28 @@ export const cleanupStaleMatchmakingEntries = onSchedule('every 10 minutes', asy
             return null;
         }
 
-        console.log(`[Cleanup] Removing ${staleEntries.size} stale matchmaking entries`);
+        // Filter out computer users - they should always stay in queue
+        const realUserEntries = staleEntries.docs.filter((doc) => !isComputerUser(doc.id));
+
+        if (realUserEntries.length === 0) {
+            console.log('[Cleanup] No stale real user entries found (computer users excluded)');
+            return null;
+        }
+
+        console.log(
+            `[Cleanup] Removing ${realUserEntries.length} stale matchmaking entries (excluding ${staleEntries.size - realUserEntries.length} computer users)`,
+        );
 
         const batch = db.batch();
-        staleEntries.docs.forEach((doc) => {
-            batch.delete(doc.ref);
+        realUserEntries.forEach((doc) => {
+            // Double-check: Never delete computer users (extra safety check)
+            if (!isComputerUser(doc.id)) {
+                batch.delete(doc.ref);
+            } else {
+                console.warn(
+                    `[Cleanup] Skipping computer user ${doc.id} - should never be deleted`,
+                );
+            }
         });
         await batch.commit();
 

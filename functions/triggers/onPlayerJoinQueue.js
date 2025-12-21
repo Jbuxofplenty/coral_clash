@@ -2,6 +2,8 @@ import { GAME_VERSION } from '@jbuxofplenty/coral-clash';
 import { onDocumentCreated } from 'firebase-functions/v2/firestore';
 import { admin } from '../init.js';
 import { formatDisplayName, initializeGameState, serverTimestamp } from '../utils/helpers.js';
+import { getRandomComputerUser, isComputerUser } from '../utils/computerUsers.js';
+import { makeComputerMoveHelper } from '../routes/game.js';
 
 /**
  * Helper function to try matching players
@@ -19,7 +21,12 @@ async function tryMatchPlayers(newUserId) {
         const newUserData = newUserDoc.data();
         const newUserTimeControlType = newUserData.timeControl?.type || 'unlimited';
 
-        // Get all players in queue with SAME time control preference
+        // Skip matching if the new user is a computer user (computer users don't initiate matches)
+        if (isComputerUser(newUserId)) {
+            return;
+        }
+
+        // First, try to match with real users (non-computer users)
         const queueSnapshot = await db
             .collection('matchmakingQueue')
             .where('status', '==', 'searching')
@@ -28,16 +35,27 @@ async function tryMatchPlayers(newUserId) {
             .limit(10) // Get up to 10 oldest waiting players
             .get();
 
-        if (queueSnapshot.empty) {
-            return;
-        }
-
-        // Find another player (not the current user)
+        // Find another real player (not the current user and not a computer user)
         let opponentDoc = null;
         for (const doc of queueSnapshot.docs) {
-            if (doc.id !== newUserId) {
+            if (doc.id !== newUserId && !isComputerUser(doc.id)) {
                 opponentDoc = doc;
                 break;
+            }
+        }
+
+        // If no real users available, match with a computer user
+        if (!opponentDoc) {
+            const computerUser = getRandomComputerUser(newUserTimeControlType);
+            if (computerUser) {
+                const computerQueueDoc = await db
+                    .collection('matchmakingQueue')
+                    .doc(computerUser.id)
+                    .get();
+
+                if (computerQueueDoc.exists && computerQueueDoc.data().status === 'searching') {
+                    opponentDoc = computerQueueDoc;
+                }
             }
         }
 
@@ -64,10 +82,19 @@ async function tryMatchPlayers(newUserId) {
         // Create the game
         await createMatchedGame(newUserId, opponentId);
 
-        // Remove both players from queue
+        // Remove real user from queue
+        // Computer users stay in queue (they're always available)
         const removeBatch = db.batch();
         removeBatch.delete(db.collection('matchmakingQueue').doc(newUserId));
-        removeBatch.delete(db.collection('matchmakingQueue').doc(opponentId));
+        if (!isComputerUser(opponentId)) {
+            // Only remove opponent if they're not a computer user
+            removeBatch.delete(db.collection('matchmakingQueue').doc(opponentId));
+        } else {
+            // Reset computer user's status back to searching so they can match again
+            removeBatch.update(db.collection('matchmakingQueue').doc(opponentId), {
+                status: 'searching',
+            });
+        }
         await removeBatch.commit();
     } catch (error) {
         console.error('Error in tryMatchPlayers:', error);
@@ -135,6 +162,10 @@ async function createMatchedGame(player1Id, player2Id) {
               }
             : null;
 
+        // Check if opponent is a computer user
+        const isOpponentComputer = isComputerUser(player2Id);
+        const opponentDifficulty = isOpponentComputer ? player2Data.difficulty : null;
+
         // Create game document (active immediately, no pending state for matchmaking)
         const gameData = {
             creatorId: player1Id,
@@ -150,6 +181,9 @@ async function createMatchedGame(player1Id, player2Id) {
             gameState: initializeGameState(),
             version: GAME_VERSION,
             matchmakingGame: true, // Mark as matchmaking game
+            // Computer user specific fields
+            opponentType: isOpponentComputer ? 'computer' : 'pvp',
+            difficulty: opponentDifficulty, // Store difficulty if opponent is computer
             // Snapshot player info at game creation
             creatorDisplayName: player1Name,
             creatorAvatarKey: player1Settings.avatarKey || 'dolphin',
@@ -173,16 +207,54 @@ async function createMatchedGame(player1Id, player2Id) {
             createdAt: serverTimestamp(),
         });
 
-        await db.collection('notifications').add({
-            userId: player2Id,
-            type: 'match_found',
-            gameId: gameRef.id,
-            opponentId: player1Id,
-            opponentName: player1Name,
-            opponentAvatarKey: player1Settings.avatarKey || 'dolphin',
-            read: false,
-            createdAt: serverTimestamp(),
-        });
+        // Only send notification to player2 if they're not a computer user
+        if (!isOpponentComputer) {
+            await db.collection('notifications').add({
+                userId: player2Id,
+                type: 'match_found',
+                gameId: gameRef.id,
+                opponentId: player1Id,
+                opponentName: player1Name,
+                opponentAvatarKey: player1Settings.avatarKey || 'dolphin',
+                read: false,
+                createdAt: serverTimestamp(),
+            });
+        }
+
+        // If computer user is white (goes first), trigger their move immediately
+        // Wait a small delay to ensure game document is fully written
+        if (isOpponentComputer && whitePlayerId === player2Id) {
+            console.log(`[createMatchedGame] Computer user ${player2Id} is white, triggering first move`);
+            // Small delay to ensure game document is written, then trigger move
+            setTimeout(async () => {
+                try {
+                    // Fetch fresh game data to ensure we have the latest
+                    const freshGameDoc = await db.collection('games').doc(gameRef.id).get();
+                    if (freshGameDoc.exists) {
+                        await makeComputerMoveHelper(gameRef.id, freshGameDoc.data());
+                    } else {
+                        console.error(`[createMatchedGame] Game ${gameRef.id} not found when trying to make computer move`);
+                    }
+                } catch (error) {
+                    console.error(`[createMatchedGame] Error making computer move for ${player2Id}:`, error);
+                }
+            }, 500); // 500ms delay
+        } else if (isOpponentComputer && whitePlayerId === player1Id && isComputerUser(player1Id)) {
+            // Handle case where player1 is also a computer user (shouldn't happen in matchmaking, but handle it)
+            console.log(`[createMatchedGame] Computer user ${player1Id} is white, triggering first move`);
+            setTimeout(async () => {
+                try {
+                    const freshGameDoc = await db.collection('games').doc(gameRef.id).get();
+                    if (freshGameDoc.exists) {
+                        await makeComputerMoveHelper(gameRef.id, freshGameDoc.data());
+                    } else {
+                        console.error(`[createMatchedGame] Game ${gameRef.id} not found when trying to make computer move`);
+                    }
+                } catch (error) {
+                    console.error(`[createMatchedGame] Error making computer move for ${player1Id}:`, error);
+                }
+            }, 500);
+        }
 
         return gameRef.id;
     } catch (error) {

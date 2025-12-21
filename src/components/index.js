@@ -1,6 +1,7 @@
 import ActiveGamesCard from './ActiveGamesCard';
 import Avatar from './Avatar';
 import BannerAd from './BannerAd';
+import ComputerUsersManagement from './ComputerUsersManagement';
 import GameHistoryCard from './GameHistoryCard';
 import GameModeCard from './GameModeCard';
 import GameStatusBanner from './GameStatusBanner';
@@ -19,6 +20,7 @@ export {
     ActiveGamesCard,
     Avatar,
     BannerAd,
+    ComputerUsersManagement,
     GameHistoryCard,
     GameModeCard,
     GameStatusBanner,

@@ -49,14 +49,24 @@ const DIFFICULTY_LEVELS = [
  * @param {boolean} visible - Whether modal is visible
  * @param {function} onSelect - Callback when difficulty is selected (difficulty)
  * @param {function} onCancel - Callback when modal is cancelled
+ * @param {object|null} user - Current user object (null if not logged in)
  */
-export default function DifficultySelectionModal({ visible, onSelect, onCancel }) {
+export default function DifficultySelectionModal({ visible, onSelect, onCancel, user }) {
     const { colors, isDarkMode } = useTheme();
 
     const modalBackgroundColor = isDarkMode ? '#2A2A2A' : colors.CARD_BACKGROUND;
 
     const handleSelect = (difficulty) => {
+        // Don't allow selection of premium difficulties if not logged in
+        if (!user && difficulty.value !== 'random') {
+            return;
+        }
         onSelect(difficulty.value);
+    };
+
+    const isDifficultyDisabled = (difficultyValue) => {
+        // Random is always available, others require login
+        return !user && difficultyValue !== 'random';
     };
 
     if (!visible) return null;
@@ -76,51 +86,85 @@ export default function DifficultySelectionModal({ visible, onSelect, onCancel }
 
                     {/* Difficulty Options */}
                     <View style={styles.optionsContainer}>
-                        {DIFFICULTY_LEVELS.map((difficulty, index) => (
-                            <TouchableOpacity
-                                key={difficulty.value}
-                                style={[
-                                    styles.optionButton,
-                                    {
-                                        backgroundColor: isDarkMode
-                                            ? 'rgba(255, 255, 255, 0.05)'
-                                            : 'rgba(0, 0, 0, 0.02)',
-                                        borderColor: colors.BORDER_COLOR,
-                                    },
-                                    index !== DIFFICULTY_LEVELS.length - 1 && styles.optionMargin,
-                                ]}
-                                onPress={() => handleSelect(difficulty)}
-                                activeOpacity={0.7}
-                            >
-                                <View style={styles.optionContent}>
-                                    <Icon
-                                        name={difficulty.icon}
-                                        family={difficulty.iconFamily}
-                                        size={32}
-                                        color={colors.PRIMARY}
-                                    />
-                                    <View style={styles.optionText}>
-                                        <Text style={[styles.optionName, { color: colors.TEXT }]}>
-                                            {difficulty.name}
-                                        </Text>
-                                        <Text
-                                            style={[
-                                                styles.optionDescription,
-                                                { color: colors.TEXT_SECONDARY },
-                                            ]}
-                                        >
-                                            {difficulty.description}
-                                        </Text>
+                        {DIFFICULTY_LEVELS.map((difficulty, index) => {
+                            const disabled = isDifficultyDisabled(difficulty.value);
+                            return (
+                                <TouchableOpacity
+                                    key={difficulty.value}
+                                    style={[
+                                        styles.optionButton,
+                                        {
+                                            backgroundColor: isDarkMode
+                                                ? 'rgba(255, 255, 255, 0.05)'
+                                                : 'rgba(0, 0, 0, 0.02)',
+                                            borderColor: colors.BORDER_COLOR,
+                                            opacity: disabled ? 0.5 : 1,
+                                        },
+                                        index !== DIFFICULTY_LEVELS.length - 1 && styles.optionMargin,
+                                    ]}
+                                    onPress={() => handleSelect(difficulty)}
+                                    activeOpacity={disabled ? 1 : 0.7}
+                                    disabled={disabled}
+                                >
+                                    <View style={styles.optionContent}>
+                                        <Icon
+                                            name={difficulty.icon}
+                                            family={difficulty.iconFamily}
+                                            size={32}
+                                            color={disabled ? colors.TEXT_SECONDARY : colors.PRIMARY}
+                                        />
+                                        <View style={styles.optionText}>
+                                            <View style={styles.optionNameRow}>
+                                                <Text
+                                                    style={[
+                                                        styles.optionName,
+                                                        {
+                                                            color: disabled
+                                                                ? colors.TEXT_SECONDARY
+                                                                : colors.TEXT,
+                                                        },
+                                                    ]}
+                                                >
+                                                    {difficulty.name}
+                                                </Text>
+                                                {disabled && (
+                                                    <View style={styles.lockBadge}>
+                                                        <Icon
+                                                            name='lock'
+                                                            family='font-awesome'
+                                                            size={12}
+                                                            color={colors.TEXT_SECONDARY}
+                                                        />
+                                                    </View>
+                                                )}
+                                            </View>
+                                            <Text
+                                                style={[
+                                                    styles.optionDescription,
+                                                    {
+                                                        color: disabled
+                                                            ? colors.TEXT_SECONDARY
+                                                            : colors.TEXT_SECONDARY,
+                                                    },
+                                                ]}
+                                            >
+                                                {disabled
+                                                    ? 'Create an account to access'
+                                                    : difficulty.description}
+                                            </Text>
+                                        </View>
+                                        {!disabled && (
+                                            <Icon
+                                                name='chevron-right'
+                                                family='font-awesome'
+                                                size={20}
+                                                color={colors.TEXT_SECONDARY}
+                                            />
+                                        )}
                                     </View>
-                                    <Icon
-                                        name='chevron-right'
-                                        family='font-awesome'
-                                        size={20}
-                                        color={colors.TEXT_SECONDARY}
-                                    />
-                                </View>
-                            </TouchableOpacity>
-                        ))}
+                                </TouchableOpacity>
+                            );
+                        })}
                     </View>
 
                     {/* Cancel Button */}
@@ -199,10 +243,21 @@ const styles = StyleSheet.create({
         marginLeft: 16,
         marginRight: 18,
     },
+    optionNameRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 4,
+    },
     optionName: {
         fontSize: 18,
         fontWeight: '600',
-        marginBottom: 4,
+    },
+    lockBadge: {
+        marginLeft: 8,
+        paddingHorizontal: 6,
+        paddingVertical: 2,
+        borderRadius: 4,
+        backgroundColor: 'rgba(0, 0, 0, 0.1)',
     },
     optionDescription: {
         fontSize: 14,
