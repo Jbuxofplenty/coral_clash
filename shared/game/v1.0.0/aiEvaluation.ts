@@ -10,17 +10,14 @@ import {
     ASPIRATION_WINDOW,
     CORAL_EVALUATION,
     GAME_ENDING,
-    MOBILITY,
     MOVE_PENALTIES,
-    PIECE_SAFETY,
     POSITIONAL_BONUSES,
     TIME_CONTROL,
-    WHALE_SAFETY,
-    getPieceValue,
+    getPieceValue
 } from './aiConfig.js';
 import type { Color, PieceRole, PieceSymbol, Square } from './coralClash.js';
-import { CoralClash, SQUARES } from './coralClash.js';
-import { createGameSnapshot, restoreGameFromSnapshot } from './gameState.js';
+import { CoralClash, Ox88, SQUARES, algebraic } from './coralClash.js';
+import { restoreGameFromSnapshot } from './gameState.js';
 
 /**
  * Zobrist hash keys for position hashing
@@ -128,7 +125,7 @@ const zobristKeys = new ZobristKeys();
 /**
  * Convert square notation (e.g., 'e4') to index (0-63)
  */
-function squareToIndex(square: Square): number {
+function _squareToIndex(square: Square): number {
     return SQUARES.indexOf(square);
 }
 
@@ -266,69 +263,37 @@ export class TranspositionTable {
  * @param gameState - Current game state snapshot
  * @returns Zobrist hash (number)
  */
-function computeZobristHash(gameState: GameStateSnapshot): number {
-    // Restore game to get board state
-    const game = safeRestoreGame(gameState);
-    if (!game) {
-        // Fallback to string hash if game restore fails
-        return hashString(generatePositionKeyString(gameState));
-    }
-
+function computeZobristHash(game: CoralClash): number {
     let hash = 0;
+    const board = game.getBoardOx88();
 
-    // Hash all pieces on the board
-    const board = game.board();
-    for (let rankIdx = 0; rankIdx < board.length; rankIdx++) {
-        const row = board[rankIdx];
-        if (!row) continue;
-
-        for (let fileIdx = 0; fileIdx < row.length; fileIdx++) {
-            const cell = row[fileIdx];
-            if (!cell || !cell.square) continue;
-
-            const squareIdx = squareToIndex(cell.square as Square);
-            if (squareIdx === -1) continue;
-
-            const piece = cell.type as PieceSymbol;
-            const color = cell.color as Color;
-            const role = (cell.role as PieceRole | null) || null;
-
-            // XOR in piece key
-            hash ^= zobristKeys.getPieceKey(piece, squareIdx, color, role);
+    // Hash all pieces on the board using 0x88 board directly
+    for (let i = 0; i < 120; i++) {
+        if (i & 0x88) { i += 7; continue; }
+        
+        const piece = board[i];
+        if (piece) {
+            const squareIdx = (i >> 4) * 8 + (i & 7); // Convert 0x88 index to 0-63
+            hash ^= zobristKeys.getPieceKey(
+                piece.type,
+                squareIdx,
+                piece.color,
+                piece.role || null
+            );
         }
     }
 
-    // Hash coral state
-    if (gameState.coral && Array.isArray(gameState.coral)) {
-        // Initialize all squares to "no coral"
-        const coralMap = new Map<number, Color | null>();
-        for (let i = 0; i < 64; i++) {
-            coralMap.set(i, null);
-        }
-
-        // Set coral from gameState
-        for (const coral of gameState.coral) {
-            const squareIdx = squareToIndex(coral.square as Square);
-            if (squareIdx !== -1) {
-                coralMap.set(squareIdx, coral.color as Color);
-            }
-        }
-
-        // Hash coral for all squares
-        for (let i = 0; i < 64; i++) {
-            const coralColor = coralMap.get(i) || null;
-            hash ^= zobristKeys.getCoralKey(i, coralColor);
-        }
-    } else {
-        // No coral data - hash all squares as "no coral"
-        for (let i = 0; i < 64; i++) {
-            hash ^= zobristKeys.getCoralKey(i, null);
-        }
+    // Hash coral state using 0x88 coral directly
+    const coral = game.getCoralOx88();
+    for (let i = 0; i < 120; i++) {
+        if (i & 0x88) { i += 7; continue; }
+        const c = coral[i];
+        const squareIdx = (i >> 4) * 8 + (i & 7);
+        hash ^= zobristKeys.getCoralKey(squareIdx, c);
     }
 
     // Hash turn to move
-    const turn = gameState.turn || 'w';
-    hash ^= zobristKeys.getTurnKey(turn as Color);
+    hash ^= zobristKeys.getTurnKey(game.turn());
 
     return hash;
 }
@@ -338,7 +303,7 @@ function computeZobristHash(gameState: GameStateSnapshot): number {
  * @param gameState - Current game state snapshot
  * @returns Position key string
  */
-function generatePositionKeyString(gameState: GameStateSnapshot): string {
+function _generatePositionKeyString(gameState: GameStateSnapshot): string {
     // Use FEN as base (includes board position and turn)
     let key = gameState.fen || '';
 
@@ -371,7 +336,7 @@ function generatePositionKeyString(gameState: GameStateSnapshot): string {
 /**
  * Simple string hash function (fallback)
  */
-function hashString(str: string): number {
+function _hashString(str: string): number {
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
         const char = str.charCodeAt(i);
@@ -387,8 +352,8 @@ function hashString(str: string): number {
  * @param gameState - Current game state snapshot
  * @returns Position key (number)
  */
-function generatePositionKey(gameState: GameStateSnapshot): number {
-    return computeZobristHash(gameState);
+function generatePositionKey(game: CoralClash): number {
+    return computeZobristHash(game);
 }
 
 /**
@@ -446,7 +411,7 @@ function squareToRankFile(square: Square): { rank: number; file: string } {
  * @param square - Square notation
  * @returns boolean
  */
-function isCenterSquare(square: Square): boolean {
+function _isCenterSquare(square: Square): boolean {
     return (POSITIONAL_BONUSES.centerSquares.squares as readonly Square[]).includes(square);
 }
 
@@ -455,7 +420,7 @@ function isCenterSquare(square: Square): boolean {
  * @param square - Square notation
  * @returns boolean
  */
-function isExtendedCenter(square: Square): boolean {
+function _isExtendedCenter(square: Square): boolean {
     const { rank, file } = squareToRankFile(square);
     return (
         (POSITIONAL_BONUSES.extendedCenter.ranks as readonly number[]).includes(rank) &&
@@ -469,7 +434,7 @@ function isExtendedCenter(square: Square): boolean {
  * @param color - Piece color ('w' or 'b')
  * @returns boolean
  */
-function isInOpponentHalf(square: Square, color: Color): boolean {
+function _isInOpponentHalf(square: Square, color: Color): boolean {
     const { rank } = squareToRankFile(square);
     if (color === 'w') {
         // White pieces in opponent's half are ranks 5-8
@@ -500,7 +465,7 @@ function manhattanDistance(square1: Square, square2: Square): number {
  * @param opponentWhaleSquares - Opponent whale positions (2 squares)
  * @returns boolean
  */
-function isNearOpponentWhale(square: Square, opponentWhaleSquares: string[] | null): boolean {
+function _isNearOpponentWhale(square: Square, opponentWhaleSquares: string[] | null): boolean {
     if (!opponentWhaleSquares || opponentWhaleSquares.length === 0) return false;
     return opponentWhaleSquares.some((whaleSquare) => {
         const distance = manhattanDistance(square, whaleSquare as Square);
@@ -520,9 +485,12 @@ export function isReversingMove(move: any, lastMove: LastMoveInfo | null): boole
         return false;
     }
 
-    // Check if this move moves the same piece from the last move's destination back to its origin
-    // This happens when: currentMove.from === lastMove.to && currentMove.to === lastMove.from && currentMove.piece === lastMove.piece
-    const squaresMatch = move.from === lastMove.to && move.to === lastMove.from;
+    const moveFrom = typeof move.from === 'number' ? move.from : Ox88[move.from as Square];
+    const moveTo = typeof move.to === 'number' ? move.to : Ox88[move.to as Square];
+    const lastMoveFrom = Ox88[lastMove.from as Square];
+    const lastMoveTo = Ox88[lastMove.to as Square];
+
+    const squaresMatch = moveFrom === lastMoveTo && moveTo === lastMoveFrom;
 
     const pieceTypesMatch = move.piece?.toLowerCase() === lastMove.piece?.toLowerCase();
 
@@ -538,27 +506,17 @@ export function isReversingMove(move: any, lastMove: LastMoveInfo | null): boole
  * @param color - Color to evaluate ('w' or 'b')
  * @returns Array of { square: string, piece: string, role: string|null }
  */
-function getPieces(game: CoralClash, color: Color): PieceInfo[] {
+function _getPieces(game: CoralClash, color: Color): PieceInfo[] {
     const pieces: PieceInfo[] = [];
-    const board = game.board();
 
-    // board() returns a 2D array: board[rank][file]
-    // rank 0 is rank 8, rank 7 is rank 1
-    for (let rankIdx = 0; rankIdx < board.length; rankIdx++) {
-        const row = board[rankIdx];
-
-        if (!row) continue;
-
-        for (let fileIdx = 0; fileIdx < row.length; fileIdx++) {
-            const cell = row[fileIdx];
-
-            if (cell && cell.color === color) {
-                pieces.push({
-                    square: cell.square as Square,
-                    piece: cell.type as PieceSymbol,
-                    role: (cell.role as PieceRole | null) || null,
-                });
-            }
+    for (const sq of SQUARES) {
+        const piece = game.get(sq);
+        if (piece && piece.color === color) {
+            pieces.push({
+                square: sq,
+                piece: piece.type,
+                role: piece.role || null,
+            });
         }
     }
 
@@ -572,246 +530,166 @@ function getPieces(game: CoralClash, color: Color): PieceInfo[] {
  * @param playerColor - Color to evaluate for ('w' or 'b')
  * @returns Evaluation score
  */
-export function evaluatePosition(gameState: GameStateSnapshot, playerColor: Color): number {
-    const game = safeRestoreGame(gameState);
-    if (!game) {
-        return 0; // Neutral score for backwards compatibility
-    }
-
+export function evaluatePosition(game: CoralClash, playerColor: Color): number {
     const opponentColor: Color = playerColor === 'w' ? 'b' : 'w';
 
     // Check game-ending conditions first
     if (game.isCheckmate()) {
         const winner = game.turn() === 'w' ? 'b' : 'w';
-        if (winner === playerColor) {
-            return GAME_ENDING.checkmate.win;
-        } else {
-            return GAME_ENDING.checkmate.loss;
-        }
+        return winner === playerColor ? GAME_ENDING.checkmate.win : GAME_ENDING.checkmate.loss;
     }
 
-    if (game.isStalemate()) {
-        return GAME_ENDING.stalemate.points;
-    }
+    if (game.isStalemate()) return GAME_ENDING.stalemate.points;
 
     const coralWinner = game.isCoralVictory();
     if (coralWinner) {
-        if (coralWinner === playerColor) {
-            return GAME_ENDING.coralVictory.win;
-        } else {
-            return GAME_ENDING.coralVictory.loss;
-        }
+        return coralWinner === playerColor ? GAME_ENDING.coralVictory.win : GAME_ENDING.coralVictory.loss;
     }
 
     let score = 0;
+    const board = game.getBoardOx88();
+    const kings = game.getWhalePositionsOx88();
+    const opponentWhalePositions = kings[opponentColor];
 
-    // Material evaluation
-    const playerPieces = getPieces(game, playerColor);
-    const opponentPieces = getPieces(game, opponentColor);
+    // High performance 0x88 board scan
+    for (let i = 0; i < 120; i++) {
+        if (i & 0x88) { i += 7; continue; }
 
-    // Add player piece values
-    for (const { piece, role } of playerPieces) {
-        score += getPieceValue(piece, role);
-    }
+        const piece = board[i];
+        if (!piece) continue;
 
-    // Subtract opponent piece values
-    for (const { piece, role } of opponentPieces) {
-        score -= getPieceValue(piece, role);
-    }
+        const isPlayer = piece.color === playerColor;
+        const color = piece.color;
+        const role = piece.role || null;
+        let pieceScore = getPieceValue(piece.type, role);
 
-    // Whale safety evaluation
-    // Check if player's whale is in check by temporarily switching turns
-    const currentTurn = game.turn();
-    const whalePositions = game.whalePositions();
-    const playerWhaleSquares = whalePositions[playerColor] || [];
+        // Positional bonuses
+        // Center squares in 0x88 are 0x33, 0x34, 0x43, 0x44 (algebraic d5, e5, d4, e4)
+        const isCenter = i === 0x33 || i === 0x34 || i === 0x43 || i === 0x44;
+        if (isCenter) {
+            pieceScore += POSITIONAL_BONUSES.centerSquares.points;
+        }
 
-    // Check if player's whale is attacked (in check)
-    let playerWhaleInCheck = false;
-    let playerWhaleAttacked = false;
-    let playerWhaleDefended = false;
-    if (playerWhaleSquares.length > 0) {
-        // Check if any whale square is attacked by opponent
-        for (const whaleSquare of playerWhaleSquares) {
-            if (whaleSquare) {
-                if (game.isAttacked(whaleSquare as Square, opponentColor)) {
-                    // Check if it's actually check (not just attack) - need to see if it's legal
-                    // For simplicity, if whale square is attacked and it's player's turn, consider it check
-                    // This is an approximation - full check requires checking if escape is possible
-                    if (currentTurn === playerColor) {
-                        playerWhaleInCheck = true;
-                    } else {
-                        playerWhaleAttacked = true;
-                    }
-                }
-                // Check if whale is defended
-                if (game.isAttacked(whaleSquare as Square, playerColor)) {
-                    playerWhaleDefended = true;
-                }
+        // isInOpponentHalf check using 0x88 rank
+        const rank = 8 - (i >> 4);
+        const inOpponentHalf = color === 'w' ? rank > 4 : rank < 5;
+        if (inOpponentHalf) {
+            pieceScore += POSITIONAL_BONUSES.opponentHalf.points;
+            if (role === 'gatherer') score += POSITIONAL_BONUSES.gathererNearEmptySquare.points;
+        }
+
+        // Quick near whale check
+        if (isPlayer && opponentWhalePositions) {
+            const dist1 = Math.abs((i >> 4) - (opponentWhalePositions[0] >> 4)) + Math.abs((i & 7) - (opponentWhalePositions[0] & 7));
+            const dist2 = Math.abs((i >> 4) - (opponentWhalePositions[1] >> 4)) + Math.abs((i & 7) - (opponentWhalePositions[1] & 7));
+            if (dist1 <= 2 || dist2 <= 2) {
+                pieceScore += POSITIONAL_BONUSES.nearOpponentWhale.points;
             }
         }
+
+        score += isPlayer ? pieceScore : -pieceScore;
     }
 
-    if (playerWhaleInCheck) {
-        score += WHALE_SAFETY.inCheck.penalty;
-    } else if (playerWhaleAttacked) {
-        score += WHALE_SAFETY.attacked.penalty;
-    }
-
-    // Whale defenders bonus (if not in check)
-    if (!playerWhaleInCheck && playerWhaleDefended) {
-        score += WHALE_SAFETY.defenders.points;
-    }
-
-    // Whale mobility - evaluate from player's perspective
-    // For whale mobility, we need to evaluate from the player's perspective
-    // If it's the player's turn, count their whale moves directly
-    if (currentTurn === playerColor && playerWhaleSquares.length > 0) {
-        const whaleMoves = game.moves({ piece: 'h', verbose: true });
-        score += whaleMoves.length * WHALE_SAFETY.mobility.points;
-    }
-    // Note: If it's not the player's turn, we can't directly evaluate their whale mobility
-    // This is an acceptable approximation for MVP - could be improved later
-
-    // Opponent whale safety (reverse)
-    const opponentWhaleSquares = whalePositions[opponentColor] || [];
-    let opponentWhaleInCheck = false;
-    if (opponentWhaleSquares.length > 0) {
-        for (const whaleSquare of opponentWhaleSquares) {
-            if (whaleSquare && game.isAttacked(whaleSquare as Square, playerColor)) {
-                if (currentTurn === opponentColor) {
-                    opponentWhaleInCheck = true;
-                    break;
-                }
-            }
-        }
-    }
-
-    if (opponentWhaleInCheck) {
-        score -= WHALE_SAFETY.inCheck.penalty; // Good for us
-    }
-
-    // Opponent whale mobility
-    if (currentTurn === opponentColor && opponentWhaleSquares.length > 0) {
-        const opponentWhaleMoves = game.moves({ piece: 'h', verbose: true }).length;
-        score -= opponentWhaleMoves * WHALE_SAFETY.mobility.points; // Less mobility is good for us
-    }
-
-    // Piece safety evaluation - check if valuable pieces are under attack and defended
-    // Skip whale (already handled above) and evaluate other pieces
-    for (const { square, piece, role } of playerPieces) {
-        // Skip whale - already evaluated
-        if (piece.toLowerCase() === 'h') continue;
-
-        const pieceValue = getPieceValue(piece, role);
-        const isAttacked = game.isAttacked(square, opponentColor);
-        const isDefended = game.isAttacked(square, playerColor); // Check if friendly pieces can defend
-
-        if (isAttacked) {
-            // Piece is under attack - penalize based on value
-            // More valuable pieces get larger penalties
-            if (isDefended) {
-                // Piece is attacked but defended - moderate penalty
-                // Defenders can recapture, so not as dangerous
-                const penalty = pieceValue * PIECE_SAFETY.attackedMultiplier;
-                score -= penalty;
-                // Small bonus for having defenders (reduces net penalty)
-                const defenseValue = pieceValue * PIECE_SAFETY.defendedBonus;
-                score += defenseValue;
-            } else {
-                // Piece is hanging (attacked but NOT defended) - MUCH larger penalty
-                // This is very dangerous - opponent can capture for free
-                let penalty = pieceValue * PIECE_SAFETY.hangingMultiplier;
-
-                // Extra severe penalty for critical pieces (like dolphin gatherer)
-                // These are so valuable that hanging them should be essentially game-losing
-                if (pieceValue >= PIECE_SAFETY.criticalPieceThreshold) {
-                    penalty = pieceValue * PIECE_SAFETY.criticalHangingMultiplier;
-                }
-
-                // Add fixed penalty on top to ensure hanging pieces are NEVER selected
-                // This compensates for search depth limitations and ensures safety
-                const fixedPenalty = 500; // Fixed penalty to make hanging pieces always bad
-                penalty += fixedPenalty;
-
-                score -= penalty;
-            }
-        } else if (isDefended) {
-            // Piece is not under attack but is defended - small bonus for safety
-            // This encourages keeping pieces defended as a preventive measure
-            const defenseValue = pieceValue * PIECE_SAFETY.defendedBonus * 0.5; // Smaller bonus when not attacked
-            score += defenseValue;
-        }
-    }
-
-    // Opponent piece safety (reverse) - reward when opponent's valuable pieces are under attack
-    for (const { square, piece, role } of opponentPieces) {
-        // Skip whale - already evaluated
-        if (piece.toLowerCase() === 'h') continue;
-
-        const pieceValue = getPieceValue(piece, role);
-        const isAttacked = game.isAttacked(square, playerColor);
-
-        if (isAttacked) {
-            // Opponent's piece is under attack - bonus for us
-            const bonus = pieceValue * PIECE_SAFETY.attackedMultiplier;
-            score += bonus;
-        }
-    }
-
-    // Coral area control evaluation
-    const playerCoralControl = game.getCoralAreaControl(playerColor);
-    const opponentCoralControl = game.getCoralAreaControl(opponentColor);
-
-    score += playerCoralControl * CORAL_EVALUATION.areaControl.points;
-    score -= opponentCoralControl * CORAL_EVALUATION.areaControl.points;
-
-    // Positional evaluation
-    const opponentWhalePositions = game.whalePositions()[opponentColor] || [];
-
-    for (const { square, role } of playerPieces) {
-        // Center control
-        if (isCenterSquare(square)) {
-            score += POSITIONAL_BONUSES.centerSquares.points;
-        } else if (isExtendedCenter(square)) {
-            score += POSITIONAL_BONUSES.extendedCenter.points;
-        }
-
-        // Opponent's half
-        if (isInOpponentHalf(square, playerColor)) {
-            score += POSITIONAL_BONUSES.opponentHalf.points;
-        }
-
-        // Near opponent whale
-        if (isNearOpponentWhale(square, opponentWhalePositions)) {
-            score += POSITIONAL_BONUSES.nearOpponentWhale.points;
-        }
-
-        // Gatherer/hunter specific bonuses
-        if (role === 'gatherer') {
-            // Check if near empty square (potential coral placement)
-            // Simplified: just give bonus for being in opponent's half
-            if (isInOpponentHalf(square, playerColor)) {
-                score += POSITIONAL_BONUSES.gathererNearEmptySquare.points;
-            }
-        } else if (role === 'hunter') {
-            // Check if near opponent coral
-            // This is expensive to compute exactly, so we approximate
-            // by giving bonus for being in opponent's half
-            if (isInOpponentHalf(square, playerColor)) {
-                score += POSITIONAL_BONUSES.hunterNearOpponentCoral.points;
-            }
-        }
-    }
-
-    // Mobility evaluation (total legal moves)
-    const playerMoves = game.moves({ verbose: true });
-    score += playerMoves.length * MOBILITY.pointsPerMove;
-
-    // Tactical: check detection
-    // If it's the player's turn and they're in check, that's already handled
-    // If we can put opponent in check, that's evaluated in move generation
+    // Simple coral count
+    const coralCounts = game.getCoralRemainingCounts();
+    score += (17 - coralCounts[playerColor]) * CORAL_EVALUATION.placed.points;
+    score -= (17 - coralCounts[opponentColor]) * CORAL_EVALUATION.placed.points;
 
     return score;
+}
+
+/**
+ * Quiescence search to avoid horizon effect
+ * Only searches capture moves and promotions to find quiet positions
+ * @param game - Current game instance
+ * @param alpha - Best value for maximizing player
+ * @param beta - Best value for minimizing player
+ * @param playerColor - Color we're playing for
+ * @param maxDepth - Maximum quiescence depth to prevent infinite loops
+ * @returns Score and nodes evaluated
+ */
+function quiescenceSearch(
+    game: CoralClash,
+    alpha: number,
+    beta: number,
+    playerColor: Color,
+    maxDepth: number = 10,
+): { score: number; nodesEvaluated: number } {
+    let nodesEvaluated = 1;
+
+    // Standing Pat: Evaluate current position
+    // This is the score if we make no more captures
+    const standPat = evaluatePosition(game, playerColor);
+
+    // Beta cutoff - current position is already too good for opponent
+    // Opponent won't allow this line, so we can prune
+    if (standPat >= beta) {
+        return { score: beta, nodesEvaluated };
+    }
+
+    // Update alpha if standing pat is better than current best
+    if (standPat > alpha) {
+        alpha = standPat;
+    }
+
+    // Depth limit to prevent excessive quiescence search
+    if (maxDepth <= 0) {
+        return { score: standPat, nodesEvaluated };
+    }
+
+    // Get only capture moves (ignore quiet moves in quiescence)
+    const allMoves = game.internalMoves();
+    const captureMoves = allMoves.filter((m) => m.captured);
+
+    // No captures available - return standing pat evaluation
+    if (captureMoves.length === 0) {
+        return { score: standPat, nodesEvaluated };
+    }
+
+    // MVV-LVA (Most Valuable Victim - Least Valuable Aggressor) ordering
+    // Prioritize high-value captures by low-value pieces
+    const sortedCaptures = captureMoves.sort((a, b) => {
+        const aVictimValue = getPieceValue(a.captured!, a.capturedRole || null);
+        const bVictimValue = getPieceValue(b.captured!, b.capturedRole || null);
+        const aAttackerValue = getPieceValue(a.piece, a.role || null);
+        const bAttackerValue = getPieceValue(b.piece, b.role || null);
+
+        // MVV-LVA: multiply victim by 100 to heavily prioritize victim value
+        // Then subtract attacker value to prefer low-value attackers
+        const aMvvLva = aVictimValue * 100 - aAttackerValue;
+        const bMvvLva = bVictimValue * 100 - bAttackerValue;
+        return bMvvLva - aMvvLva;
+    });
+
+    let bestScore = standPat;
+
+    for (const move of sortedCaptures) {
+        game.makeMove(move);
+
+        // Recursive quiescence search with negated alpha-beta window
+        // CRITICAL: Swap player perspective (negamax) by evaluating from opponent's view
+        const opponentColor = playerColor === 'w' ? 'b' : 'w';
+        const result = quiescenceSearch(game, -beta, -alpha, opponentColor, maxDepth - 1);
+        const score = -result.score; // Negate for opponent's perspective
+
+        game.undoInternal();
+
+        nodesEvaluated += result.nodesEvaluated;
+
+        // Beta cutoff
+        if (score >= beta) {
+            return { score: beta, nodesEvaluated };
+        }
+
+        if (score > bestScore) {
+            bestScore = score;
+            if (score > alpha) {
+                alpha = score;
+            }
+        }
+    }
+
+    return { score: bestScore, nodesEvaluated };
 }
 
 /**
@@ -828,7 +706,7 @@ export function evaluatePosition(gameState: GameStateSnapshot, playerColor: Colo
  * @returns { score: number, move: Object|null, nodesEvaluated: number, timedOut: boolean }
  */
 export function alphaBeta(
-    gameState: GameStateSnapshot,
+    game: CoralClash,
     depth: number,
     alpha: number,
     beta: number,
@@ -854,263 +732,61 @@ export function alphaBeta(
         }
     }
 
-    // Generate position key for transposition table lookup
-    const positionKey = generatePositionKey(gameState);
-    let originalAlpha = alpha;
-    let originalBeta = beta;
+    const originalAlpha = alpha;
+    const originalBeta = beta;
 
-    // Check transposition table if available
-    if (transpositionTable) {
+    // Generate position key for transposition table lookup (only for deeper searches)
+    // Allow disabling TT via environment variable for debugging
+    let positionKey = 0;
+    const useTT = transpositionTable && !process.env.DISABLE_TT;
+    if (depth > 1 && useTT) {
+        positionKey = generatePositionKey(game);
         const entry = transpositionTable.get(positionKey);
         if (entry && entry.depth >= depth) {
-            // We have a cached result at sufficient depth
-            let score = entry.score;
-
-            // Adjust score based on bound type and current alpha-beta window
             if (entry.bound === BoundType.EXACT) {
-                // Exact score - can use directly
                 return {
-                    score,
+                    score: entry.score,
                     move: entry.bestMove,
-                    nodesEvaluated: 1, // Cached, so minimal node evaluation
+                    nodesEvaluated: 1,
                     timedOut: false,
                 };
             } else if (entry.bound === BoundType.LOWER_BOUND) {
-                // Lower bound (beta cutoff occurred) - actual score is >= this value
-                // If lower bound >= beta, we can beta-cutoff
-                if (score >= beta) {
-                    return {
-                        score: score, // Return lower bound (beta cutoff)
-                        move: entry.bestMove,
-                        nodesEvaluated: 1,
-                        timedOut: false,
-                    };
-                }
-                // If lower bound > alpha, we can raise alpha
-                if (score > alpha) {
-                    alpha = score;
-                }
+                if (entry.score >= beta) return { score: entry.score, move: entry.bestMove, nodesEvaluated: 1, timedOut: false };
+                alpha = Math.max(alpha, entry.score);
             } else if (entry.bound === BoundType.UPPER_BOUND) {
-                // Upper bound (alpha cutoff occurred) - actual score is <= this value
-                // If upper bound <= alpha, we can alpha-cutoff
-                if (score <= alpha) {
-                    return {
-                        score: score, // Return upper bound (alpha cutoff)
-                        move: entry.bestMove,
-                        nodesEvaluated: 1,
-                        timedOut: false,
-                    };
-                }
-                // If upper bound < beta, we can lower beta
-                if (score < beta) {
-                    beta = score;
-                }
+                if (entry.score <= alpha) return { score: entry.score, move: entry.bestMove, nodesEvaluated: 1, timedOut: false };
+                beta = Math.min(beta, entry.score);
             }
         }
-    }
-
-    const game = safeRestoreGame(gameState);
-    if (!game) {
-        return {
-            score: 0,
-            move: null,
-            nodesEvaluated: 1,
-            timedOut: false,
-        };
     }
 
     // Terminal node: check game-ending conditions or depth limit
-    if (depth === 0 || game.isGameOver()) {
-        // Quiescence search: if depth is 0 and there are captures, continue searching
-        // This extends the search on tactical sequences (captures) to avoid horizon effect
-        if (depth === 0 && !game.isGameOver()) {
-            const allMoves = game.moves({ verbose: true });
-            const allCaptures = allMoves.filter((m) => m.captured);
-
-            // Validate captures - only keep moves that can actually be executed
-            const captures: any[] = [];
-            for (const capture of allCaptures) {
-                const validationGame = safeRestoreGame(gameState);
-                if (validationGame) {
-                    try {
-                        const moveResult = validationGame.move({
-                            from: capture.from,
-                            to: capture.to,
-                            promotion: capture.promotion,
-                            coralPlaced: capture.coralPlaced,
-                            coralRemoved: capture.coralRemoved,
-                            coralRemovedSquares: capture.coralRemovedSquares,
-                        });
-                        if (moveResult) {
-                            captures.push(capture);
-                        }
-                    } catch {
-                        // Invalid move - skip it
-                    }
-                }
-            }
-
-            // Also check for hanging pieces - if opponent has a hanging piece, extend search to see capture
-            const currentTurn = game.turn();
-            const opponentColor: Color = currentTurn === 'w' ? 'b' : 'w';
-            let hasHangingPiece = false;
-
-            // Check if opponent has any hanging pieces (attacked but not defended)
-            const opponentPieces = getPieces(game, opponentColor);
-            for (const { square, piece } of opponentPieces) {
-                if (piece.toLowerCase() === 'h') continue; // Skip whale
-                const isAttacked = game.isAttacked(square, currentTurn);
-                const isDefended = game.isAttacked(square, opponentColor);
-                if (isAttacked && !isDefended) {
-                    hasHangingPiece = true;
-                    break;
-                }
-            }
-
-            // If there are captures OR hanging pieces, do quiescence search
-            if (captures.length > 0 || hasHangingPiece) {
-                // Quiescence search: only search captures, limited depth to avoid infinite loops
-                const quiescenceDepth = 3; // Increased depth to see captures of hanging pieces
-                let bestScore = evaluatePosition(gameState, playerColor);
-                const standPat = maximizingPlayer ? bestScore : -bestScore;
-                let nodesEvaluated = 1; // Start with 1 for the evaluation
-
-                // Update alpha/beta with stand-pat score
-                if (maximizingPlayer) {
-                    if (standPat >= beta)
-                        return { score: standPat, move: null, nodesEvaluated: 1, timedOut: false };
-                    alpha = Math.max(alpha, standPat);
-                } else {
-                    if (standPat <= alpha)
-                        return { score: standPat, move: null, nodesEvaluated: 1, timedOut: false };
-                    beta = Math.min(beta, standPat);
-                }
-
-                // Search only captures in quiescence
-                for (const capture of captures) {
-                    let moveResult;
-                    try {
-                        moveResult = game.move({
-                            from: capture.from,
-                            to: capture.to,
-                            promotion: capture.promotion,
-                            coralPlaced: capture.coralPlaced,
-                            coralRemoved: capture.coralRemoved,
-                            coralRemovedSquares: capture.coralRemovedSquares,
-                        });
-                    } catch {
-                        // Invalid move - skip it (shouldn't happen since we validated moves, but handle gracefully)
-                        continue;
-                    }
-
-                    if (!moveResult) continue;
-
-                    const newGameState = createGameSnapshot(game);
-                    const result = alphaBeta(
-                        newGameState,
-                        quiescenceDepth - 1,
-                        alpha,
-                        beta,
-                        !maximizingPlayer,
-                        playerColor,
-                        timeControl,
-                        null,
-                        transpositionTable,
-                        false, // Not root level in quiescence
-                    );
-
-                    game.undo();
-
-                    nodesEvaluated += result.nodesEvaluated;
-
-                    if (result.timedOut) {
-                        return { score: standPat, move: null, nodesEvaluated, timedOut: true };
-                    }
-
-                    const captureScore = result.score;
-
-                    if (maximizingPlayer) {
-                        if (captureScore > bestScore) bestScore = captureScore;
-                        alpha = Math.max(alpha, bestScore);
-                        if (beta <= alpha) break;
-                    } else {
-                        if (captureScore < bestScore) bestScore = captureScore;
-                        beta = Math.min(beta, bestScore);
-                        if (beta <= alpha) break;
-                    }
-                }
-
-                const finalScore = maximizingPlayer ? bestScore : -bestScore;
-                if (transpositionTable) {
-                    transpositionTable.put(positionKey, depth, finalScore, BoundType.EXACT, null);
-                }
-                return {
-                    score: finalScore,
-                    move: null,
-                    nodesEvaluated,
-                    timedOut: false,
-                };
-            }
-        }
-
-        // No captures or game over - evaluate position normally
-        const score = evaluatePosition(gameState, playerColor);
-        // Flip score if we're evaluating from opponent's perspective
-        const finalScore = maximizingPlayer ? score : -score;
-
-        // Store terminal node in transposition table (always EXACT score)
-        if (transpositionTable) {
-            transpositionTable.put(positionKey, depth, finalScore, BoundType.EXACT, null);
-        }
-
+    if (game.isGameOver()) {
+        // Game over - immediate evaluation
         return {
-            score: finalScore,
+            score: evaluatePosition(game, playerColor),
             move: null,
             nodesEvaluated: 1,
             timedOut: false,
         };
     }
 
-    const allMoves = game.moves({ verbose: true });
-
-    // Filter out invalid moves - only keep moves that can actually be executed
-    // This prevents errors during search when game.moves() returns moves that can't be executed
-    const moves: any[] = [];
-    for (const move of allMoves) {
-        // Validate move by trying to execute it on a fresh game instance
-        const validationGame = safeRestoreGame(gameState);
-        if (validationGame) {
-            try {
-                const moveResult = validationGame.move({
-                    from: move.from,
-                    to: move.to,
-                    promotion: move.promotion,
-                    coralPlaced: move.coralPlaced,
-                    coralRemoved: move.coralRemoved,
-                    coralRemovedSquares: move.coralRemovedSquares,
-                });
-                if (moveResult) {
-                    moves.push(move);
-                }
-            } catch {
-                // Invalid move - skip it
-                // Don't log here to avoid spam, as this should be rare
-            }
-        }
+    if (depth === 0) {
+        // Quiescence search at leaf nodes to avoid horizon effect
+        const qResult = quiescenceSearch(game, alpha, beta, playerColor);
+        return {
+            score: qResult.score,
+            move: null,
+            nodesEvaluated: qResult.nodesEvaluated,
+            timedOut: false,
+        };
     }
 
+    const moves = game.internalMoves();
     if (moves.length === 0) {
-        // No legal moves - terminal state
-        const score = evaluatePosition(gameState, playerColor);
-        const finalScore = maximizingPlayer ? score : -score;
-
-        // Store terminal node in transposition table (always EXACT score)
-        if (transpositionTable) {
-            transpositionTable.put(positionKey, depth, finalScore, BoundType.EXACT, null);
-        }
-
+        const score = evaluatePosition(game, playerColor);
         return {
-            score: finalScore,
+            score: score,
             move: null,
             nodesEvaluated: 1,
             timedOut: false,
@@ -1120,319 +796,94 @@ export function alphaBeta(
     let bestMove: any = null;
     let bestScore = maximizingPlayer ? -Infinity : Infinity;
 
-    // Sort moves for better pruning - prioritize captures and threatening moves
-    // This helps alpha-beta pruning work more effectively
-    // We check threats for first 20 non-capture moves to avoid O(n²) cost
-    // This ensures threatening moves are prioritized even if they're not at the very beginning
-    const MAX_THREAT_CHECK = 20;
-    const threatScores = new Map<string, number>();
-    if (isRootLevel && moves.length > 0) {
-        // Check threats for first 20 non-capture moves
-        const nonCaptureMoves = moves.filter((m) => !m.captured);
-        const movesToCheck = nonCaptureMoves.slice(
-            0,
-            Math.min(MAX_THREAT_CHECK, nonCaptureMoves.length),
-        );
-        for (const move of movesToCheck) {
-            const tempGame = safeRestoreGame(gameState);
-            if (tempGame) {
-                const moveResult = tempGame.move({
-                    from: move.from,
-                    to: move.to,
-                    promotion: move.promotion,
-                    coralPlaced: move.coralPlaced,
-                    coralRemoved: move.coralRemoved,
-                    coralRemovedSquares: move.coralRemovedSquares,
-                });
-                if (moveResult) {
-                    const opponentColor = playerColor === 'w' ? 'b' : 'w';
-                    const opponentPieces = getPieces(tempGame, opponentColor);
-                    let maxThreatValue = 0;
-                    for (const { square, piece, role } of opponentPieces) {
-                        if (
-                            piece.toLowerCase() !== 'h' &&
-                            tempGame.isAttacked(square, playerColor)
-                        ) {
-                            const threatValue = getPieceValue(piece, role);
-                            maxThreatValue = Math.max(maxThreatValue, threatValue);
-                        }
-                    }
-                    threatScores.set(`${move.from}->${move.to}`, maxThreatValue);
-                }
-            }
-        }
-    }
-    const sortedMoves = [...moves].sort((a, b) => {
-        // Prioritize captures (especially of valuable pieces)
+    // MVV-LVA move ordering: prioritize high-value captures by low-value pieces
+    let sortedMoves = [...moves].sort((a, b) => {
+        // Captures vs non-captures
         if (a.captured && !b.captured) return -1;
         if (!a.captured && b.captured) return 1;
+
+        // Both captures - use MVV-LVA
         if (a.captured && b.captured) {
-            // Both are captures - prioritize capturing more valuable pieces
-            // Note: capturedRole might not be available in Move type, use null as fallback
-            const aValue = getPieceValue(a.captured, (a as any).capturedRole || null);
-            const bValue = getPieceValue(b.captured, (b as any).capturedRole || null);
-            return bValue - aValue; // Higher value first
-        }
-        // For non-captures, prioritize moves that threaten opponent pieces
-        // Moves that threaten valuable pieces should be evaluated first
-        const aThreat = threatScores.get(`${a.from}->${a.to}`) || 0;
-        const bThreat = threatScores.get(`${b.from}->${b.to}`) || 0;
-        if (aThreat > bThreat) return -1;
-        if (aThreat < bThreat) return 1;
+            const aVictimValue = getPieceValue(a.captured, a.capturedRole || null);
+            const bVictimValue = getPieceValue(b.captured, b.capturedRole || null);
+            const aAttackerValue = getPieceValue(a.piece, a.role || null);
+            const bAttackerValue = getPieceValue(b.piece, b.role || null);
 
-        // If both threaten equally, prioritize moves from pieces that are less valuable
-        // (e.g., crab threatening dolphin is better than dolphin threatening dolphin)
-        // This rewards good trade opportunities
-        if (aThreat > 0 && bThreat > 0) {
-            const aPiece = game.get(a.from);
-            const bPiece = game.get(b.from);
-            if (aPiece !== false && bPiece !== false) {
-                const aValue = getPieceValue(aPiece.type, aPiece.role);
-                const bValue = getPieceValue(bPiece.type, bPiece.role);
-                // Lower value piece threatening is better (good trade opportunity)
-                if (aValue < bValue) return -1;
-                if (aValue > bValue) return 1;
-            }
+            // MVV-LVA: prioritize high-value victims captured by low-value attackers
+            const aMvvLva = aVictimValue * 100 - aAttackerValue;
+            const bMvvLva = bVictimValue * 100 - bAttackerValue;
+            return bMvvLva - aMvvLva;
         }
 
+        // Both quiet moves - no specific ordering
         return 0;
     });
+    // NOTE: Aggressive pruning removed - search all legal moves to prevent blunders
+    // Previously limited to top 10-15 moves, which was cutting defensive moves
+
     for (const move of sortedMoves) {
-        // Get capturing piece info BEFORE making the move (for bad trade detection)
-        const capturingPiece = game.get(move.from);
-        let capturingValue = 0;
-        if (capturingPiece !== false) {
-            capturingValue = getPieceValue(capturingPiece.type, capturingPiece.role);
-        }
-
-        // Make the move
-        let moveResult;
         try {
-            moveResult = game.move({
-                from: move.from,
-                to: move.to,
-                promotion: move.promotion,
-                coralPlaced: move.coralPlaced,
-                coralRemoved: move.coralRemoved,
-                coralRemovedSquares: move.coralRemovedSquares,
-            });
-        } catch {
-            // Invalid move - skip it (shouldn't happen since we validated moves, but handle gracefully)
-            continue;
-        }
+            game.makeMove(move);
 
-        if (!moveResult) {
-            // Invalid move, skip
-            continue;
-        }
+            const result = alphaBeta(
+                game,
+                depth - 1,
+                alpha,
+                beta,
+                !maximizingPlayer,
+                playerColor,
+                timeControl,
+                null, 
+                transpositionTable,
+                false,
+            );
 
-        // Create new game state after move
-        const newGameState = createGameSnapshot(game);
+            game.undoInternal();
+            nodesEvaluated += result.nodesEvaluated;
 
-        // Check if moving piece is now hanging to a less valuable attacker
-        // This prevents AI from moving valuable pieces to squares where less valuable pieces can capture them
-        let hangingToLessValuablePiece = false;
-        let attackerValue = 0;
-        if (isRootLevel && capturingPiece !== false && !move.captured) {
-            const opponentColor = playerColor === 'w' ? 'b' : 'w';
-            const destinationAttacked = game.isAttacked(move.to, opponentColor);
-            if (destinationAttacked) {
-                // Check what opponent pieces can attack the destination square
-                const opponentPieces = getPieces(game, opponentColor);
-                for (const { piece, role } of opponentPieces) {
-                    if (piece.toLowerCase() === 'h') continue; // Skip whale
-                    // Check if this piece can attack the destination
-                    // We check if the square is attacked by opponent color (which includes this piece)
-                    // and if this piece is less valuable than our moving piece
-                    const pieceValue = getPieceValue(piece, role);
-                    if (pieceValue < capturingValue) {
-                        // This less valuable piece can potentially capture our piece
-                        // Check if it actually attacks the destination
-                        // We'll use a simple heuristic: if destination is attacked and this piece is nearby, assume it can attack
-                        // More precise: check if this piece's attack pattern includes the destination
-                        // For now, if destination is attacked and we have a less valuable attacker, penalize
-                        hangingToLessValuablePiece = true;
-                        attackerValue = Math.max(attackerValue, pieceValue);
-                    }
-                }
+            if (result.timedOut) {
+                return {
+                    score: bestScore,
+                    move: bestMove,
+                    nodesEvaluated,
+                    timedOut: true,
+                };
             }
-        }
 
-        // Recursively search (don't pass lastMove to recursive calls - only apply penalty at root)
-        const result = alphaBeta(
-            newGameState,
-            depth - 1,
-            alpha,
-            beta,
-            !maximizingPlayer,
-            playerColor,
-            timeControl,
-            null, // lastMove only matters at root level
-            transpositionTable, // Pass transposition table to recursive calls
-            false, // Not root level in recursive calls
-        );
+            let moveScore = result.score;
+            // Apply reversing move penalty at root level
+            if (isRootLevel && lastMove !== null && isReversingMove(move, lastMove)) {
+                moveScore += MOVE_PENALTIES.reversingMove;
+            }
 
-        nodesEvaluated += result.nodesEvaluated;
-
-        // If timed out, propagate timeout
-        if (result.timedOut) {
-            return {
-                score: bestScore,
-                move: bestMove,
-                nodesEvaluated,
-                timedOut: true,
-            };
-        }
-
-        // CRITICAL FIX: At root level, if we're maximizing and the recursive call was minimizing,
-        // the returned score is from the minimizing player's perspective (negative = good for them).
-        // We need to flip it back to our perspective (positive = good for us).
-        // The recursive call evaluates from playerColor perspective and flips for minimizing,
-        // so result.score = -evaluatePosition(playerColor) when minimizing.
-        // At root maximizing, we want: evaluatePosition(playerColor), so we flip: -result.score
-        let moveScore: number;
-        if (isRootLevel && maximizingPlayer) {
-            // Recursive call was minimizing, returned score is from their perspective (negative = good for them)
-            // Flip to our perspective: -result.score
-            moveScore = -result.score;
-        } else {
-            moveScore = result.score;
-        }
-
-        // Apply reversing move penalty only at root level (when lastMove is provided and we're at maximum depth)
-        // We detect root level by checking if lastMove is provided - it's only passed at the root
-        if (lastMove !== null && isReversingMove(move, lastMove)) {
-            moveScore += MOVE_PENALTIES.reversingMove;
-        }
-
-        // Apply capture bonus at root level to prioritize captures even at shallow depths
-        // This ensures captures are selected even when search depth is limited
-        if (isRootLevel && move.captured) {
-            const capturedValue = getPieceValue(move.captured, (move as any).capturedRole || null);
-
-            // Check if this is a bad trade (capturing piece is more valuable than captured piece)
-            // capturingPiece and capturingValue were already determined before making the move
-
-            // Penalize bad trades: if capturing piece is worth more than captured piece, apply penalty
-            // This prevents AI from trading valuable pieces for less valuable ones
-            if (capturingValue > capturedValue) {
-                const tradeLoss = capturingValue - capturedValue;
-                // Apply penalty equal to the trade loss (how much value we're losing)
-                moveScore -= tradeLoss;
+            if (maximizingPlayer) {
+                if (moveScore > bestScore) {
+                    bestScore = moveScore;
+                    bestMove = move;
+                }
+                alpha = Math.max(alpha, bestScore);
             } else {
-                // Good trade or equal trade - add bonus to prioritize captures
-                // Add a significant bonus for captures at root level to ensure they're prioritized
-                // This compensates for search depth limitations where captures might not be fully evaluated
-                // Use a larger bonus (50% of captured value) to ensure captures are always selected
-                const captureBonus = capturedValue * 0.5; // 50% bonus for captures at root level
-                moveScore += captureBonus;
-            }
-        }
-
-        // Apply penalty for moving valuable pieces to squares where less valuable pieces can capture them
-        // This prevents bad trades like turtle (500-1000) being captured by octopus (100-125)
-        if (isRootLevel && hangingToLessValuablePiece && capturingValue > 0) {
-            const tradeLoss = capturingValue - attackerValue;
-            // Apply severe penalty for bad trades - 5x the trade loss plus a fixed penalty
-            // This ensures bad trades are NEVER selected, even with threat bonuses
-            // For example: turtle (500) hanging to pufferfish (300) = 200 trade loss
-            // Penalty = 200 * 5 + 500 = 1500 points (more than the piece is worth!)
-            const hangingPenalty = tradeLoss * 5 + capturingValue; // 5x trade loss + full piece value
-            moveScore -= hangingPenalty;
-        }
-
-        // Apply threat bonus at root level to prioritize moves that threaten opponent pieces
-        // This ensures threatening moves are selected even when search depth is limited
-        // BUT: Don't apply threat bonus if the move leaves our piece hanging (bad trade)
-        if (
-            isRootLevel &&
-            !move.captured &&
-            capturingPiece !== false &&
-            !hangingToLessValuablePiece
-        ) {
-            // Check if this move threatens opponent pieces
-            const gameAfterMove = safeRestoreGame(newGameState);
-            if (gameAfterMove) {
-                const opponentColor = playerColor === 'w' ? 'b' : 'w';
-                const opponentPieces = getPieces(gameAfterMove, opponentColor);
-                for (const { square, piece, role } of opponentPieces) {
-                    if (
-                        piece.toLowerCase() !== 'h' &&
-                        gameAfterMove.isAttacked(square, playerColor)
-                    ) {
-                        const threatenedValue = getPieceValue(piece, role);
-                        const threateningValue = capturingValue;
-
-                        // Base threat bonus: 20% of threatened piece value
-                        let threatBonus = threatenedValue * 0.2;
-
-                        // Extra bonus when threatening valuable pieces with less valuable pieces
-                        // This rewards good trade opportunities (e.g., crab threatening dolphin)
-                        if (threateningValue < threatenedValue) {
-                            const valueDifference = threatenedValue - threateningValue;
-                            // Add bonus proportional to the value difference
-                            // For example: crab (100) threatening dolphin (1800) = 1700 difference
-                            // This makes threatening valuable pieces with cheap pieces highly attractive
-                            const tradeOpportunityBonus = valueDifference * 0.3; // 30% of value difference
-                            threatBonus += tradeOpportunityBonus;
-                        }
-
-                        // Extra bonus when the threatened piece is protected (defended)
-                        // This makes the threat even more valuable because opponent can't easily escape
-                        const isDefended = gameAfterMove.isAttacked(square, opponentColor);
-                        if (isDefended) {
-                            // Protected pieces are harder to move away, making the threat more valuable
-                            threatBonus += threatenedValue * 0.1; // Additional 10% bonus for protected pieces
-                        }
-
-                        moveScore += threatBonus;
-                        break; // Only count the first threatened piece to avoid double-counting
-                    }
+                if (moveScore < bestScore) {
+                    bestScore = moveScore;
+                    bestMove = move;
                 }
+                beta = Math.min(beta, bestScore);
             }
-        }
 
-        // Undo move
-        game.undo();
-
-        if (maximizingPlayer) {
-            if (moveScore > bestScore) {
-                bestScore = moveScore;
-                bestMove = move;
-            }
-            alpha = Math.max(alpha, bestScore);
             if (beta <= alpha) {
-                // Beta cutoff
                 break;
             }
-        } else {
-            if (moveScore < bestScore) {
-                bestScore = moveScore;
-                bestMove = move;
-            }
-            beta = Math.min(beta, bestScore);
-            if (beta <= alpha) {
-                // Alpha cutoff
-                break;
-            }
+        } catch {
+            continue;
         }
     }
 
-    // Store result in transposition table
-    if (transpositionTable) {
-        let bound: BoundType;
-        if (bestScore <= originalAlpha) {
-            // Score failed low - this is an upper bound
-            bound = BoundType.UPPER_BOUND;
-        } else if (bestScore >= originalBeta) {
-            // Score failed high - this is a lower bound (beta cutoff occurred)
-            bound = BoundType.LOWER_BOUND;
-        } else {
-            // Score is within window - this is an exact score
-            bound = BoundType.EXACT;
-        }
-
-        transpositionTable.put(positionKey, depth, bestScore, bound, bestMove);
+    // Store result in transposition table (if enabled)
+    if (depth > 1 && useTT) {
+        let bound = BoundType.EXACT;
+        if (bestScore <= originalAlpha) bound = BoundType.UPPER_BOUND;
+        else if (bestScore >= originalBeta) bound = BoundType.LOWER_BOUND;
+        transpositionTable!.put(positionKey, depth, bestScore, bound, bestMove);
     }
 
     return {
@@ -1456,7 +907,7 @@ export function alphaBeta(
  * @returns { move: Object, score: number, nodesEvaluated: number, timedOut: boolean, aspirationFailed: boolean }
  */
 export function findBestMove(
-    gameState: GameStateSnapshot,
+    game: CoralClash,
     depth: number,
     playerColor: Color,
     timeControl: TimeControl | null = null,
@@ -1465,19 +916,7 @@ export function findBestMove(
     aspirationAlpha: number | null = null,
     aspirationBeta: number | null = null,
 ): AlphaBetaResult & { aspirationFailed?: boolean } {
-    const game = safeRestoreGame(gameState);
-    if (!game) {
-        return {
-            score: 0,
-            move: null,
-            nodesEvaluated: 1,
-            timedOut: false,
-            aspirationFailed: false,
-        };
-    }
-
     // Determine if we're maximizing (our turn) or minimizing (opponent's turn)
-    // Since we're always evaluating for playerColor, we check whose turn it is
     const currentTurn = game.turn();
     const maximizingPlayer = currentTurn === playerColor;
 
@@ -1486,7 +925,7 @@ export function findBestMove(
     const beta = aspirationBeta !== null ? aspirationBeta : Infinity;
 
     const result = alphaBeta(
-        gameState,
+        game,
         depth,
         alpha,
         beta,
@@ -1499,7 +938,6 @@ export function findBestMove(
     );
 
     // Check if aspiration window failed (score outside window)
-    // This happens when score <= aspirationAlpha (failed low) or >= aspirationBeta (failed high)
     const aspirationFailed =
         aspirationAlpha !== null &&
         aspirationBeta !== null &&
@@ -1535,7 +973,7 @@ export function findBestMoveIterativeDeepening(
     gameState: GameStateSnapshot,
     maxDepth: number,
     playerColor: Color,
-    maxTimeMs: number = TIME_CONTROL.maxTimeMs,
+    maxTimeMs: number = TIME_CONTROL.easy.maxTimeMs,
     progressCallback: ProgressCallback | null = null,
     lastMove: LastMoveInfo | null = null,
 ): IterativeDeepeningResult {
@@ -1556,10 +994,10 @@ export function findBestMoveIterativeDeepening(
     let bestMove: any = null;
     let bestScore = -Infinity;
     let totalNodesEvaluated = 0;
-    let bestDepth = 1;
+    let bestDepth = 0;
 
-    // Get initial legal moves as fallback - ensures we always have a move to return
-    const initialMoves = game.moves({ verbose: true });
+    // Get initial legal moves as fallback
+    const initialMoves = game.internalMoves();
     if (initialMoves.length === 0) {
         return {
             move: null,
@@ -1569,7 +1007,6 @@ export function findBestMoveIterativeDeepening(
             elapsedMs: Date.now() - startTime,
         };
     }
-    // Set first move as initial fallback
     let fallbackMove = initialMoves[0];
 
     const timeControl: TimeControl = {
@@ -1577,31 +1014,24 @@ export function findBestMoveIterativeDeepening(
         maxTimeMs,
     };
 
-    // Iterative deepening: start with depth 1 and increase until time runs out or max depth reached
-    // Minimum depth 2 to ensure we see at least one full move pair (our move + opponent response)
+    // Iterative deepening
     const minDepth = Math.min(2, maxDepth);
     for (let depth = 1; depth <= maxDepth; depth++) {
-        // Check timeout before starting this depth
+        // Check timeout
         const elapsed = Date.now() - startTime;
-        // Don't stop early if we haven't reached minimum depth yet (unless we're out of time)
         if (elapsed >= maxTimeMs && depth >= minDepth) {
-            // Time's up - use best move found so far, or fallback
-            if (!bestMove) {
-                bestMove = fallbackMove;
-            }
+            if (!bestMove) bestMove = fallbackMove;
             break;
         }
 
-        // Use aspiration window if we have a previous score (depth > 1)
         let result: AlphaBetaResult & { aspirationFailed?: boolean };
 
         if (depth > 1 && bestScore !== -Infinity && bestScore !== Infinity && isFinite(bestScore)) {
-            // Try aspiration window: narrow window around previous score
             const aspirationAlpha = bestScore - ASPIRATION_WINDOW.initial;
             const aspirationBeta = bestScore + ASPIRATION_WINDOW.initial;
 
             result = findBestMove(
-                gameState,
+                game,
                 depth,
                 playerColor,
                 timeControl,
@@ -1611,11 +1041,9 @@ export function findBestMoveIterativeDeepening(
                 aspirationBeta,
             );
 
-            // Check if aspiration window failed (score outside window)
             if (result.aspirationFailed && !result.timedOut) {
-                // Aspiration window failed - re-search with full window
                 result = findBestMove(
-                    gameState,
+                    game,
                     depth,
                     playerColor,
                     timeControl,
@@ -1624,9 +1052,8 @@ export function findBestMoveIterativeDeepening(
                 );
             }
         } else {
-            // No previous score or first depth - use full window
             result = findBestMove(
-                gameState,
+                game,
                 depth,
                 playerColor,
                 timeControl,
@@ -1638,62 +1065,50 @@ export function findBestMoveIterativeDeepening(
         const elapsedAfter = Date.now() - startTime;
         totalNodesEvaluated += result.nodesEvaluated;
 
-        // If timed out, use the best result from previous depth (if any)
         if (result.timedOut) {
-            // If we have a best move from previous depth, use it
-            if (bestMove) {
-                break;
-            }
-            // If the current search found a move before timing out, use it
-            // This ensures we use the best move found even if search timed out
-            if (result.move) {
+            if (result.move && !bestMove) {
                 bestMove = result.move;
                 bestScore = result.score;
                 bestDepth = depth;
-                break;
             }
-            // If depth 1 timed out and we have no result, use fallback
-            bestMove = fallbackMove;
             break;
         }
 
-        // Update best move if we found one
         if (result.move) {
             bestMove = result.move;
             bestScore = result.score;
             bestDepth = depth;
         }
 
-        // Report progress
         if (progressCallback) {
             progressCallback(depth, result.nodesEvaluated, elapsedAfter, bestMove !== null);
         }
 
-        // Check if we've exceeded time limit (double-check after search)
         if (elapsedAfter >= maxTimeMs) {
-            // Ensure we have a move before breaking
-            if (!bestMove) {
-                bestMove = fallbackMove;
-            }
+            if (!bestMove) bestMove = fallbackMove;
             break;
         }
 
-        // If we reached a terminal position (checkmate, etc.), no need to go deeper
-        if (Math.abs(result.score) > 90000) {
-            // Found a winning/losing position
-            break;
-        }
+        if (Math.abs(result.score) > 90000) break;
     }
 
     const totalElapsed = Date.now() - startTime;
 
-    // Final fallback: ensure we always return a move if legal moves exist
-    if (!bestMove) {
-        bestMove = fallbackMove;
-    }
+    if (!bestMove) bestMove = fallbackMove;
+
+    // Convert InternalMove to pretty move format that game.move() expects
+    const prettyMove = {
+        from: algebraic(bestMove.from),
+        to: algebraic(bestMove.to),
+        promotion: bestMove.promotion,
+        whaleSecondSquare: bestMove.whaleOtherSquare !== undefined ? algebraic(bestMove.whaleOtherSquare) : undefined,
+        coralPlaced: bestMove.coralPlaced,
+        coralRemoved: bestMove.coralRemoved,
+        coralRemovedSquares: bestMove.coralRemovedSquares ? bestMove.coralRemovedSquares.map((sq: number) => algebraic(sq)) : undefined
+    };
 
     return {
-        move: bestMove, // Should never be null if legal moves exist
+        move: prettyMove,
         score: bestScore === -Infinity ? 0 : bestScore,
         nodesEvaluated: totalNodesEvaluated,
         depth: bestDepth,

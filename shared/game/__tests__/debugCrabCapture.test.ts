@@ -153,8 +153,7 @@ describe('Debug: Crab Not Capturing Dolphin at a5', () => {
                 }
 
                 // Evaluate position
-                const newGameState = createGameSnapshot(game);
-                const score = evaluatePosition(newGameState, 'b');
+                const score = evaluatePosition(game, 'b');
 
                 moveScores.push({
                     move: `${move.from}->${move.to}`,

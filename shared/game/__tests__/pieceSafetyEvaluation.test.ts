@@ -1,6 +1,6 @@
-import { CoralClash, createGameSnapshot } from '../index';
-import { evaluatePosition } from '../v1.0.0/aiEvaluation';
+import { CoralClash } from '../index';
 import { getPieceValue } from '../v1.0.0/aiConfig';
+import { evaluatePosition } from '../v1.0.0/aiEvaluation';
 
 describe('Piece Safety Evaluation', () => {
     let game: CoralClash;
@@ -20,8 +20,7 @@ describe('Piece Safety Evaluation', () => {
         game.put({ type: 'd', color: 'w', role: 'gatherer' }, 'e4');
         game.put({ type: 't', color: 'b', role: 'hunter' }, 'e6'); // Can attack e4
         
-        const gameState = createGameSnapshot(game);
-        const score = evaluatePosition(gameState, 'w');
+        const score = evaluatePosition(game, 'w');
         
         // Should have heavy penalty for hanging dolphin gatherer
         const dolphinValue = getPieceValue('d', 'gatherer');
@@ -43,8 +42,7 @@ describe('Piece Safety Evaluation', () => {
         game.put({ type: 't', color: 'b', role: 'hunter' }, 'e6'); // Can attack e4
         game.put({ type: 't', color: 'w', role: 'hunter' }, 'e2'); // Can defend e4
         
-        const gameState = createGameSnapshot(game);
-        const score = evaluatePosition(gameState, 'w');
+        const score = evaluatePosition(game, 'w');
         
         // Should have smaller penalty for defended piece
         const dolphinValue = getPieceValue('d', 'gatherer');
@@ -74,8 +72,7 @@ describe('Piece Safety Evaluation', () => {
             game.put({ type: testCase.piece, color: 'w', role: testCase.role }, 'e4');
             game.put({ type: 't', color: 'b', role: 'hunter' }, 'e6'); // Attacker
             
-            const gameState = createGameSnapshot(game);
-            const score = evaluatePosition(gameState, 'w');
+            const score = evaluatePosition(game, 'w');
             
             // Calculate expected penalty
             let expectedPenalty;

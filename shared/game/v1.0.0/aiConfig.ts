@@ -175,9 +175,9 @@ const GAME_ENDING = {
  */
 const SEARCH_DEPTH = {
     random: 0, // No search, just random moves
-    easy: 6, // 6 plies deep
-    medium: 10, // 10 plies deep
-    hard: 12, // 12 plies deep
+    easy: 6, // Allow up to 6 plies (will typically reach 3-4 in 30s)
+    medium: 10, // Allow up to 10 plies (will typically reach 5-6 in 45s)
+    hard: 12, // Allow up to 12 plies (will typically reach 6-7 in 60s)
 };
 
 /**
@@ -197,17 +197,17 @@ const ASPIRATION_WINDOW = {
  */
 const TIME_CONTROL = {
     easy: {
-        maxTimeMs: 2000, // 2 seconds for easy mode (faster decisions)
+        maxTimeMs: 30000, // 30 seconds (increased from 20s to account for quiescence search overhead)
         minTimeMs: 100,
         progressIntervalMs: 200,
     },
     medium: {
-        maxTimeMs: 5000, // 5 seconds for medium mode
+        maxTimeMs: 45000, // 45 seconds (increased from 30s)
         minTimeMs: 100,
         progressIntervalMs: 200,
     },
     hard: {
-        maxTimeMs: 10000, // 10 seconds for hard mode (more thorough analysis)
+        maxTimeMs: 60000, // 60 seconds (increased from 40s for more thorough analysis with quiescence)
         minTimeMs: 100,
         progressIntervalMs: 200,
     },
@@ -288,5 +288,6 @@ export {
     SEARCH_DEPTH,
     TACTICAL_BONUSES,
     TIME_CONTROL,
-    WHALE_SAFETY,
+    WHALE_SAFETY
 };
+
