@@ -1163,15 +1163,92 @@ export function findBestMoveIterativeDeepening(
     if (!bestMove) bestMove = fallbackMove;
 
     // Convert InternalMove to pretty move format that game.move() expects
-    const prettyMove = {
+    // Only include coral flags if they're explicitly set (not undefined)
+    const prettyMove: any = {
         from: algebraic(bestMove.from),
         to: algebraic(bestMove.to),
         promotion: bestMove.promotion,
-        whaleSecondSquare: bestMove.whaleOtherSquare !== undefined ? algebraic(bestMove.whaleOtherSquare) : undefined,
-        coralPlaced: bestMove.coralPlaced,
-        coralRemoved: bestMove.coralRemoved,
-        coralRemovedSquares: bestMove.coralRemovedSquares ? bestMove.coralRemovedSquares.map((sq: number) => algebraic(sq)) : undefined
     };
+    
+    if (bestMove.whaleOtherSquare !== undefined) {
+        prettyMove.whaleSecondSquare = algebraic(bestMove.whaleOtherSquare);
+    }
+    if (bestMove.coralPlaced !== undefined) {
+        prettyMove.coralPlaced = bestMove.coralPlaced;
+    }
+    if (bestMove.coralRemoved !== undefined) {
+        prettyMove.coralRemoved = bestMove.coralRemoved;
+    }
+    if (bestMove.coralRemovedSquares && bestMove.coralRemovedSquares.length > 0) {
+        prettyMove.coralRemovedSquares = bestMove.coralRemovedSquares.map((sq: number) => algebraic(sq));
+    }
+
+    // Validate that the move is actually valid in the current game state
+    // This ensures we never return an invalid move
+    const currentLegalMoves = game.moves({ verbose: true });
+    const isValidMove = currentLegalMoves.some((m: any) => {
+        if (m.from !== prettyMove.from || m.to !== prettyMove.to) return false;
+        if (m.promotion !== prettyMove.promotion) return false;
+        if (m.whaleSecondSquare !== prettyMove.whaleSecondSquare) return false;
+        
+        // Check coral flags match exactly (only if explicitly set in prettyMove)
+        if ('coralPlaced' in prettyMove && m.coralPlaced !== prettyMove.coralPlaced) return false;
+        if ('coralRemoved' in prettyMove && m.coralRemoved !== prettyMove.coralRemoved) return false;
+        if ('coralRemovedSquares' in prettyMove) {
+            const moveSquares = (m.coralRemovedSquares || []).sort().join(',');
+            const prettySquares = prettyMove.coralRemovedSquares.sort().join(',');
+            if (moveSquares !== prettySquares) return false;
+        }
+        
+        return true;
+    });
+
+    // If move is invalid, find a valid alternative
+    if (!isValidMove) {
+        // Try to find a move with the same from/to but different coral flags
+        const alternativeMove = currentLegalMoves.find((m: any) => 
+            m.from === prettyMove.from && m.to === prettyMove.to
+        );
+        
+        if (alternativeMove) {
+            // Use the alternative move (without coral flags if they don't match)
+            return {
+                move: {
+                    from: alternativeMove.from,
+                    to: alternativeMove.to,
+                    promotion: alternativeMove.promotion,
+                    whaleSecondSquare: alternativeMove.whaleSecondSquare,
+                    coralPlaced: alternativeMove.coralPlaced,
+                    coralRemoved: alternativeMove.coralRemoved,
+                    coralRemovedSquares: alternativeMove.coralRemovedSquares,
+                },
+                score: bestScore === -Infinity ? 0 : bestScore,
+                nodesEvaluated: totalNodesEvaluated,
+                depth: bestDepth,
+                elapsedMs: totalElapsed,
+            };
+        }
+        
+        // If no alternative found, fall back to first legal move
+        if (currentLegalMoves.length > 0) {
+            const fallback = currentLegalMoves[0];
+            return {
+                move: {
+                    from: fallback.from,
+                    to: fallback.to,
+                    promotion: fallback.promotion,
+                    whaleSecondSquare: fallback.whaleSecondSquare,
+                    coralPlaced: fallback.coralPlaced,
+                    coralRemoved: fallback.coralRemoved,
+                    coralRemovedSquares: fallback.coralRemovedSquares,
+                },
+                score: bestScore === -Infinity ? 0 : bestScore,
+                nodesEvaluated: totalNodesEvaluated,
+                depth: bestDepth,
+                elapsedMs: totalElapsed,
+            };
+        }
+    }
 
     return {
         move: prettyMove,
