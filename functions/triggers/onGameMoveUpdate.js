@@ -200,6 +200,16 @@ export const onGameMoveUpdate = onDocumentUpdated('games/{gameId}', async (event
             return null;
         }
 
+        // If pendingTimeoutTask is already set, makeMove already created it - skip to avoid duplicate updates
+        // This prevents the trigger from updating the game document unnecessarily, which would cause
+        // the trigger to fire again and potentially send duplicate notifications
+        if (afterData.pendingTimeoutTask) {
+            console.log(
+                `[onGameMoveUpdate] Timeout task already exists for game ${gameId}, skipping creation`,
+            );
+            return null;
+        }
+
         // Calculate when current player's time will expire
         const currentPlayerTime = afterData.timeRemaining[afterData.currentTurn];
 
@@ -218,6 +228,8 @@ export const onGameMoveUpdate = onDocumentUpdated('games/{gameId}', async (event
         }
 
         // Schedule a task to check expiration at the exact time
+        // NOTE: This should rarely execute since makeMove already creates the task
+        // This is a fallback for edge cases where makeMove didn't create the task
         const client = new CloudTasksClient();
 
         const project = process.env.GCLOUD_PROJECT || process.env.GCP_PROJECT;

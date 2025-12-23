@@ -658,8 +658,9 @@ export const makeMove = onCall(getAppCheckConfig(), async (request) => {
         }
 
         // Cancel old timeout task before creating new one
+        // Skip Firestore update - we'll include pendingTimeoutTask in the main update below
         if (gameData.pendingTimeoutTask) {
-            await cancelPendingTimeoutTask(gameId, gameData.pendingTimeoutTask);
+            await cancelPendingTimeoutTask(gameId, gameData.pendingTimeoutTask, true);
         }
 
         // Create new timeout task for next player (if game continues and time control enabled)
@@ -674,8 +675,17 @@ export const makeMove = onCall(getAppCheckConfig(), async (request) => {
                 const taskName = await createTimeoutTask(gameId, nextPlayerTime);
                 if (taskName) {
                     updateData.pendingTimeoutTask = taskName;
+                } else {
+                    // If task creation failed, clear pendingTimeoutTask
+                    updateData.pendingTimeoutTask = null;
                 }
+            } else {
+                // No time remaining, clear pendingTimeoutTask
+                updateData.pendingTimeoutTask = null;
             }
+        } else if (gameData.pendingTimeoutTask) {
+            // Game is over or no time control, clear pendingTimeoutTask
+            updateData.pendingTimeoutTask = null;
         }
 
         await db.collection('games').doc(gameId).update(updateData);
@@ -1254,8 +1264,11 @@ export async function makeComputerMoveHelper(gameId, gameData = null) {
  */
 /**
  * Cancel pending timeout task for a game
+ * @param {string} gameId - The game ID
+ * @param {string} taskName - The task name to cancel
+ * @param {boolean} skipFirestoreUpdate - If true, skip updating Firestore (caller will handle it)
  */
-async function cancelPendingTimeoutTask(gameId, taskName) {
+async function cancelPendingTimeoutTask(gameId, taskName, skipFirestoreUpdate = false) {
     // Skip in emulator
     if (process.env.FUNCTIONS_EMULATOR === 'true' || !taskName) {
         return;
@@ -1267,10 +1280,12 @@ async function cancelPendingTimeoutTask(gameId, taskName) {
         await client.deleteTask({ name: taskName });
         console.log(`Cancelled timeout task for game ${gameId}`);
 
-        // Clear the task name from Firestore
-        await db.collection('games').doc(gameId).update({
-            pendingTimeoutTask: null,
-        });
+        // Clear the task name from Firestore (unless caller will handle it)
+        if (!skipFirestoreUpdate) {
+            await db.collection('games').doc(gameId).update({
+                pendingTimeoutTask: null,
+            });
+        }
     } catch (error) {
         // Task might already be executed or not exist, which is fine
         console.log(`Could not cancel task for game ${gameId}:`, error.message);
@@ -2151,13 +2166,25 @@ export const getActiveGames = onCall(getAppCheckConfig(), async (request) => {
                     opponentType: 'computer',
                 });
             } else if (isComputerUser(gameData.opponentId)) {
-                // Mocked computer user - use their display name
-                const opponentDisplayName = gameData.opponentDisplayName || 'Computer';
+                // Mocked computer user - use their display name from game data or fetch it
+                let opponentDisplayName = gameData.opponentDisplayName;
+                let opponentAvatarKey = gameData.opponentAvatarKey;
+
+                if (!opponentDisplayName || !opponentAvatarKey) {
+                    // Fetch current data if snapshot doesn't exist
+                    const opponentDoc = await db.collection('users').doc(gameData.opponentId).get();
+                    const opponentData = opponentDoc.exists ? opponentDoc.data() : {};
+                    opponentDisplayName =
+                        formatDisplayName(opponentData.displayName, opponentData.discriminator) ||
+                        'Computer';
+                    opponentAvatarKey = opponentData.settings?.avatarKey || 'dolphin';
+                }
+
                 games.push({
                     id: doc.id,
                     ...gameData,
                     opponentDisplayName,
-                    opponentAvatarKey: gameData.opponentAvatarKey || 'computer',
+                    opponentAvatarKey,
                     opponentType: 'computer',
                 });
             } else {
@@ -2199,7 +2226,7 @@ export const getActiveGames = onCall(getAppCheckConfig(), async (request) => {
                 const creatorData = creatorDoc.exists ? creatorDoc.data() : {};
                 opponentDisplayName =
                     formatDisplayName(creatorData.displayName, creatorData.discriminator) ||
-                    'Opponent';
+                    (isComputerUser(gameData.creatorId) ? 'Computer' : 'Opponent');
                 opponentAvatarKey = creatorData.settings?.avatarKey || 'dolphin';
             }
 
@@ -2208,7 +2235,7 @@ export const getActiveGames = onCall(getAppCheckConfig(), async (request) => {
                 ...gameData,
                 opponentDisplayName,
                 opponentAvatarKey,
-                opponentType: 'pvp',
+                opponentType: isComputerUser(gameData.creatorId) ? 'computer' : 'pvp',
             });
         }
 
