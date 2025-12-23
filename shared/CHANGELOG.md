@@ -1,3 +1,21 @@
+# [2.3.0](https://github.com/Jbuxofplenty/coral_clash/compare/v2.2.1...v2.3.0) (2025-12-21)
+
+
+### Bug Fixes
+
+* **ci:** configure CocoaPods to use git repo instead of CDN ([20b56cc](https://github.com/Jbuxofplenty/coral_clash/commit/20b56cca9c8f082b879a2f461b9ed0b0d69960ba))
+* **ci:** ensure pod install always runs to create workspace ([fe27e32](https://github.com/Jbuxofplenty/coral_clash/commit/fe27e32b8186ecb5008e65325c8f0a7c71eca084))
+* **ci:** handle CocoaPods CDN failures gracefully ([69a7ef6](https://github.com/Jbuxofplenty/coral_clash/commit/69a7ef636d3e6ac482a74120e845d7bf2675d4ce))
+* **ci:** only switch to git repo if CDN fails ([3c390b7](https://github.com/Jbuxofplenty/coral_clash/commit/3c390b76f5e8f690442f3c49634045beda6f89a9))
+* **shared:** convert inject-version.js to ES module syntax ([8771b66](https://github.com/Jbuxofplenty/coral_clash/commit/8771b665e985232b91b102548f04d05660f234d2))
+
+
+### Features
+
+* **client:** add notification deep linking to navigate to events ([9680010](https://github.com/Jbuxofplenty/coral_clash/commit/96800103d254b95b48ef52779c1b1231d4180516))
+* **server:** computer AI matchmaking ([5dcb2c4](https://github.com/Jbuxofplenty/coral_clash/commit/5dcb2c4d11f4fb523e1e0e8335baf21adac54212))
+* **shared:** add getTimeControlForDifficulty function and remove evaluation table ([75d552e](https://github.com/Jbuxofplenty/coral_clash/commit/75d552e057bde152a78053f6d4e232b2f3b115db))
+
 ## [2.2.1](https://github.com/Jbuxofplenty/coral_clash/compare/v2.2.0...v2.2.1) (2025-11-18)
 
 

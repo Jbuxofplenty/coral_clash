@@ -5,6 +5,7 @@ import './register.js';
 import './init.js';
 
 // Import route modules
+import * as computerUsers from './routes/computerUsers.js';
 import * as friends from './routes/friends.js';
 import * as game from './routes/game.js';
 import * as issues from './routes/issues.js';
@@ -67,6 +68,10 @@ export const getMatchmakingStatus = matchmaking.getMatchmakingStatus;
 
 // ==================== Issues APIs ====================
 export const submitIssue = issues.submitIssue;
+
+// ==================== Admin/Setup APIs ====================
+export const initializeComputerUsers = computerUsers.initializeComputerUsers;
+export const deleteComputerUsers = computerUsers.deleteComputerUsers;
 
 // ==================== Firestore Triggers ====================
 export { onFriendRequestCreate, onGameCreate, onGameMoveUpdate, onPlayerJoinQueue, onUserCreate };

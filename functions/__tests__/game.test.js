@@ -35,6 +35,26 @@ jest.mock('@jbuxofplenty/coral-clash', () => ({
     calculateUndoMoveCount: jest.fn(),
     findBestMove: jest.fn(),
     findBestMoveIterativeDeepening: jest.fn(),
+    getTimeControlForDifficulty: jest.fn((difficulty) => {
+        const timeControls = {
+            easy: {
+                maxTimeMs: 2000,
+                minTimeMs: 100,
+                progressIntervalMs: 200,
+            },
+            medium: {
+                maxTimeMs: 5000,
+                minTimeMs: 100,
+                progressIntervalMs: 200,
+            },
+            hard: {
+                maxTimeMs: 10000,
+                minTimeMs: 100,
+                progressIntervalMs: 200,
+            },
+        };
+        return timeControls[difficulty];
+    }),
     SEARCH_DEPTH: {
         random: 0,
         easy: 3,
@@ -592,6 +612,95 @@ describe('Game Creation Functions', () => {
             });
         });
 
+        it('should use easy difficulty (depth 3) for easy mode', async () => {
+            const { findBestMoveIterativeDeepening, SEARCH_DEPTH } = require('@jbuxofplenty/coral-clash');
+            findBestMoveIterativeDeepening.mockClear();
+
+            // Test the helper directly with gameData
+            await gameRoutes.makeComputerMoveHelper(gameId, {
+                creatorId: userId,
+                opponentId: 'computer',
+                opponentType: 'computer',
+                difficulty: 'easy',
+                status: 'active',
+                currentTurn: 'computer',
+                gameState: {
+                    fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+                },
+            });
+
+            // Verify findBestMoveIterativeDeepening was called with easy depth (3)
+            expect(findBestMoveIterativeDeepening).toHaveBeenCalledWith(
+                expect.any(Object),
+                SEARCH_DEPTH.easy, // Should be 3
+                'b',
+                expect.any(Number), // maxTimeMs
+                null, // progressCallback
+                null, // lastComputerMove
+                null, // evaluationTable
+                'easy', // difficulty
+            );
+        });
+
+        it('should use medium difficulty (depth 5) for medium mode', async () => {
+            const { findBestMoveIterativeDeepening, SEARCH_DEPTH } = require('@jbuxofplenty/coral-clash');
+            findBestMoveIterativeDeepening.mockClear();
+
+            // Test the helper directly with gameData
+            await gameRoutes.makeComputerMoveHelper(gameId, {
+                creatorId: userId,
+                opponentId: 'computer',
+                opponentType: 'computer',
+                difficulty: 'medium',
+                status: 'active',
+                currentTurn: 'computer',
+                gameState: {
+                    fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+                },
+            });
+
+            // Verify findBestMoveIterativeDeepening was called with medium depth (5)
+            expect(findBestMoveIterativeDeepening).toHaveBeenCalledWith(
+                expect.any(Object),
+                SEARCH_DEPTH.medium, // Should be 5
+                'b',
+                expect.any(Number), // maxTimeMs
+                null, // progressCallback
+                null, // lastComputerMove
+                null, // evaluationTable
+                'medium', // difficulty
+            );
+        });
+
+        it('should use hard difficulty (depth 7) for hard mode', async () => {
+            const { findBestMoveIterativeDeepening, SEARCH_DEPTH } = require('@jbuxofplenty/coral-clash');
+            findBestMoveIterativeDeepening.mockClear();
+
+            // Test the helper directly with gameData
+            await gameRoutes.makeComputerMoveHelper(gameId, {
+                creatorId: userId,
+                opponentId: 'computer',
+                opponentType: 'computer',
+                difficulty: 'hard',
+                status: 'active',
+                currentTurn: 'computer',
+                gameState: {
+                    fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+                },
+            });
+
+            // Verify findBestMoveIterativeDeepening was called with hard depth (7)
+            expect(findBestMoveIterativeDeepening).toHaveBeenCalledWith(
+                expect.any(Object),
+                SEARCH_DEPTH.hard, // Should be 7
+                'b',
+                expect.any(Number), // maxTimeMs
+                null, // progressCallback
+                null, // lastComputerMove
+                null, // evaluationTable
+                'hard', // difficulty
+            );
+        });
 
         it('should use random moves for random difficulty', async () => {
             const { findBestMoveIterativeDeepening } = require('@jbuxofplenty/coral-clash');

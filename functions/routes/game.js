@@ -938,6 +938,7 @@ export async function makeComputerMoveHelper(gameId, gameData = null) {
             // Easy mode: Use iterative deepening with time control
             const maxDepth = SEARCH_DEPTH.easy;
             const timeControl = getTimeControlForDifficulty('easy');
+
             const result = findBestMoveIterativeDeepening(
                 currentGameState,
                 maxDepth,
@@ -945,17 +946,16 @@ export async function makeComputerMoveHelper(gameId, gameData = null) {
                 timeControl.maxTimeMs,
                 null, // progressCallback
                 lastComputerMove,
+                null, // evaluationTable
+                'easy', // difficulty
             );
 
             if (result.move) {
                 selectedMove = result.move;
                 moveCalculationTimeMs = result.elapsedMs || Date.now() - moveStartTime;
-                console.log(
-                    `AI (easy) found move at depth ${result.depth}, evaluated ${result.nodesEvaluated} nodes in ${moveCalculationTimeMs}ms`,
-                );
             } else {
                 // Fallback to random if no move found
-                console.warn('AI search found no move, falling back to random');
+                console.warn('[EASY] AI search found no move, falling back to random');
                 selectedMove = moves[Math.floor(Math.random() * moves.length)];
                 moveCalculationTimeMs = Date.now() - moveStartTime;
             }
@@ -965,6 +965,7 @@ export async function makeComputerMoveHelper(gameId, gameData = null) {
             // Medium mode: Use iterative deepening with time control
             const maxDepth = SEARCH_DEPTH.medium;
             const timeControl = getTimeControlForDifficulty('medium');
+
             const result = findBestMoveIterativeDeepening(
                 currentGameState,
                 maxDepth,
@@ -972,16 +973,15 @@ export async function makeComputerMoveHelper(gameId, gameData = null) {
                 timeControl.maxTimeMs,
                 null, // progressCallback
                 lastComputerMove,
+                null, // evaluationTable
+                'medium', // difficulty
             );
 
             if (result.move) {
                 selectedMove = result.move;
                 moveCalculationTimeMs = result.elapsedMs || Date.now() - moveStartTime;
-                console.log(
-                    `AI (medium) found move at depth ${result.depth}, evaluated ${result.nodesEvaluated} nodes in ${moveCalculationTimeMs}ms`,
-                );
             } else {
-                console.warn('AI search found no move, falling back to random');
+                console.warn('[MEDIUM] AI search found no move, falling back to random');
                 selectedMove = moves[Math.floor(Math.random() * moves.length)];
                 moveCalculationTimeMs = Date.now() - moveStartTime;
             }
@@ -991,6 +991,7 @@ export async function makeComputerMoveHelper(gameId, gameData = null) {
             // Hard mode: Use iterative deepening with time control
             const maxDepth = SEARCH_DEPTH.hard;
             const timeControl = getTimeControlForDifficulty('hard');
+
             const result = findBestMoveIterativeDeepening(
                 currentGameState,
                 maxDepth,
@@ -998,16 +999,15 @@ export async function makeComputerMoveHelper(gameId, gameData = null) {
                 timeControl.maxTimeMs,
                 null, // progressCallback
                 lastComputerMove,
+                null, // evaluationTable
+                'hard', // difficulty
             );
 
             if (result.move) {
                 selectedMove = result.move;
                 moveCalculationTimeMs = result.elapsedMs || Date.now() - moveStartTime;
-                console.log(
-                    `AI (hard) found move at depth ${result.depth}, evaluated ${result.nodesEvaluated} nodes in ${moveCalculationTimeMs}ms`,
-                );
             } else {
-                console.warn('AI search found no move, falling back to random');
+                console.warn('[HARD] AI search found no move, falling back to random');
                 selectedMove = moves[Math.floor(Math.random() * moves.length)];
                 moveCalculationTimeMs = Date.now() - moveStartTime;
             }

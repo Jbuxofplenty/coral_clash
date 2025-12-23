@@ -675,6 +675,7 @@ export default function Home({ navigation }) {
                 visible={difficultyModalVisible}
                 onSelect={handleDifficultySelect}
                 onCancel={handleDifficultyCancel}
+                user={user}
             />
         </LinearGradient>
     );
