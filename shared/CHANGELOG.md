@@ -1,3 +1,13 @@
+## [2.4.1](https://github.com/Jbuxofplenty/coral_clash/compare/v2.4.0...v2.4.1) (2025-12-23)
+
+
+### Bug Fixes
+
+* **client,server:** display computer user names and avatars correctly in game lists ([e0ebcf6](https://github.com/Jbuxofplenty/coral_clash/commit/e0ebcf670d70c00811284c43e3f8ca56cceb2a6d))
+* **client,server:** display computer user names instead of 'Computer' in game history and stats ([26f9b2b](https://github.com/Jbuxofplenty/coral_clash/commit/26f9b2b8f813b7eb3860f2d0e29e8813002312b3))
+* **server:** prevent duplicate game turn notifications for blitz/normal games ([d4eaeed](https://github.com/Jbuxofplenty/coral_clash/commit/d4eaeed1f82b17cbc5f396c55b845c7fd98b2ab7))
+* **shared:** restore AI time controls and depths ([a2fd504](https://github.com/Jbuxofplenty/coral_clash/commit/a2fd504424867c85c7516b97455717d4f684547f))
+
 # [2.4.0](https://github.com/Jbuxofplenty/coral_clash/compare/v2.3.0...v2.4.0) (2025-12-23)
 
 
