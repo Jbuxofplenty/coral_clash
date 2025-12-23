@@ -35,6 +35,7 @@ const ComputerCoralClashBoard = ({
     gameState,
     notificationStatus,
     difficulty = 'random',
+    opponentData, // For online computer games - contains displayName and avatarKey
 }) => {
     const { user } = useAuth();
     const { isBoardFlipped } = useGamePreferences();
@@ -253,12 +254,19 @@ const ComputerCoralClashBoard = ({
     // Format user's name with discriminator
     const userName = formatDisplayName(user?.displayName, user?.discriminator);
 
+    // Get computer opponent name and avatar from opponentData if available (online games)
+    // Otherwise use 'Computer' as fallback (offline games or legacy)
+    const computerName = opponentData?.displayName || 'Computer';
+    const computerAvatar = opponentData?.avatarKey || null;
+    // Only show computer icon for legacy 'computer' ID, not for computer users with actual IDs
+    const isLegacyComputer = !opponentData?.displayName || opponentData?.displayName === 'Computer';
+
     const topPlayer = isBoardFlipped
         ? { name: userName, avatarKey: user?.avatarKey, isComputer: false }
-        : { name: 'Computer', isComputer: true };
+        : { name: computerName, avatarKey: computerAvatar, isComputer: isLegacyComputer };
 
     const bottomPlayer = isBoardFlipped
-        ? { name: 'Computer', isComputer: true }
+        ? { name: computerName, avatarKey: computerAvatar, isComputer: isLegacyComputer }
         : { name: userName, avatarKey: user?.avatarKey, isComputer: false };
 
     return (

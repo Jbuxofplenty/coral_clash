@@ -291,7 +291,10 @@ const BaseCoralClashBoard = ({
                         if (isUsersTurn) {
                             message = 'Your turn';
                         } else if (opponentType === 'computer') {
-                            message = "Computer's turn";
+                            // For computer games, use the name from player data (e.g., "Alex #2847")
+                            // User is always bottom, so opponent is top
+                            const opponentName = topPlayerData?.name || 'Computer';
+                            message = `${opponentName}'s turn`;
                         } else {
                             // For PvP: Opponent is always topPlayerData (user is always bottom)
                             const opponentName = topPlayerData?.name || 'Opponent';
@@ -942,7 +945,9 @@ const BaseCoralClashBoard = ({
                 if (didUserWin) {
                     let opponentName = 'Opponent';
                     if (opponentType === 'computer') {
-                        opponentName = 'Computer';
+                        // For computer games, use the name from player data (e.g., "Alex #2847")
+                        // User is always bottom, so opponent is top
+                        opponentName = topPlayerData?.name || 'Computer';
                     } else if (userColor === 'w') {
                         opponentName = topPlayerData?.name || 'Opponent';
                     } else {
@@ -976,12 +981,15 @@ const BaseCoralClashBoard = ({
             // or whose color doesn't match userColor (for PvP games)
             let opponentName = 'Opponent';
             if (opponentType === 'computer') {
-                // For computer games, opponent is always "Computer" regardless of board flip
-                opponentName = 'Computer';
+                // For computer games, use the name from player data (e.g., "Alex #2847")
+                // User is always bottom, so opponent is top
+                opponentName = topPlayerData?.name || 'Computer';
             } else if (topPlayerData?.isComputer) {
-                opponentName = 'Computer';
+                // Use name from player data instead of hardcoding "Computer"
+                opponentName = topPlayerData?.name || 'Computer';
             } else if (bottomPlayerData?.isComputer) {
-                opponentName = 'Computer';
+                // Use name from player data instead of hardcoding "Computer"
+                opponentName = bottomPlayerData?.name || 'Computer';
             } else if (userColor === 'w') {
                 // For PvP: if user is white, opponent is black (on top when not flipped)
                 opponentName = topPlayerData?.name || 'Opponent';
@@ -1031,11 +1039,15 @@ const BaseCoralClashBoard = ({
                     // Determine opponent name - find the computer or the other player
                     let opponentName = 'Opponent';
                     if (opponentType === 'computer') {
-                        opponentName = 'Computer';
+                        // For computer games, use the name from player data (e.g., "Alex #2847")
+                        // User is always bottom, so opponent is top
+                        opponentName = topPlayerData?.name || 'Computer';
                     } else if (topPlayerData?.isComputer) {
-                        opponentName = 'Computer';
+                        // Use name from player data instead of hardcoding "Computer"
+                        opponentName = topPlayerData?.name || 'Computer';
                     } else if (bottomPlayerData?.isComputer) {
-                        opponentName = 'Computer';
+                        // Use name from player data instead of hardcoding "Computer"
+                        opponentName = bottomPlayerData?.name || 'Computer';
                     } else if (userColor === 'w') {
                         opponentName = topPlayerData?.name || 'Opponent';
                     } else {
@@ -1348,7 +1360,10 @@ const BaseCoralClashBoard = ({
             if (isUsersTurn) {
                 message = 'Your turn';
             } else if (opponentType === 'computer') {
-                message = "Computer's turn";
+                // For computer games, use the name from player data (e.g., "Alex #2847")
+                // User is always bottom, so opponent is top
+                const opponentName = topPlayerData?.name || 'Computer';
+                message = `${opponentName}'s turn`;
             } else {
                 // Get opponent name from player data
                 const opponentData = userColor === 'w' ? topPlayerData : bottomPlayerData;
