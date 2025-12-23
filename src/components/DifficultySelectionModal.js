@@ -1,4 +1,3 @@
-import React from 'react';
 import {
     Dimensions,
     Modal,
@@ -51,22 +50,22 @@ const DIFFICULTY_LEVELS = [
  * @param {function} onCancel - Callback when modal is cancelled
  * @param {object|null} user - Current user object (null if not logged in)
  */
-export default function DifficultySelectionModal({ visible, onSelect, onCancel, user }) {
+export default function DifficultySelectionModal({ visible, onSelect, onCancel, user, allowAll = false }) {
     const { colors, isDarkMode } = useTheme();
 
     const modalBackgroundColor = isDarkMode ? '#2A2A2A' : colors.CARD_BACKGROUND;
 
     const handleSelect = (difficulty) => {
-        // Don't allow selection of premium difficulties if not logged in
-        if (!user && difficulty.value !== 'random') {
+        // Don't allow selection of premium difficulties if not logged in, unless allowAll is true
+        if (!user && !allowAll && difficulty.value !== 'random') {
             return;
         }
         onSelect(difficulty.value);
     };
 
     const isDifficultyDisabled = (difficultyValue) => {
-        // Random is always available, others require login
-        return !user && difficultyValue !== 'random';
+        // Random is always available, others require login unless allowAll is true
+        return !user && !allowAll && difficultyValue !== 'random';
     };
 
     if (!visible) return null;

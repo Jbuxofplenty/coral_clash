@@ -1,6 +1,6 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { theme } from 'galio-framework';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Dimensions, ScrollView, StyleSheet } from 'react-native';
 
 import {
@@ -676,6 +676,7 @@ export default function Home({ navigation }) {
                 onSelect={handleDifficultySelect}
                 onCancel={handleDifficultyCancel}
                 user={user}
+                allowAll={enableDevFeatures}
             />
         </LinearGradient>
     );

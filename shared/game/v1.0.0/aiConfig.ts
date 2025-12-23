@@ -239,25 +239,7 @@ export function getTimeControlForDifficulty(
 } {
     // Different time controls per difficulty
     // Easier difficulties can use less time, harder difficulties use more time
-    const timeControls = {
-        easy: {
-            maxTimeMs: 2000, // 2 seconds for easy
-            minTimeMs: 100,
-            progressIntervalMs: 200,
-        },
-        medium: {
-            maxTimeMs: 5000, // 5 seconds for medium
-            minTimeMs: 100,
-            progressIntervalMs: 200,
-        },
-        hard: {
-            maxTimeMs: 10000, // 10 seconds for hard
-            minTimeMs: 100,
-            progressIntervalMs: 200,
-        },
-    };
-
-    return timeControls[difficulty];
+    return TIME_CONTROL[difficulty];
 }
 
 /**
