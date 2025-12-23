@@ -65,9 +65,23 @@ export default function Stats({ navigation: _navigation }) {
                     potentialOpponentId === 'computer'
                 ) {
                     // Computer opponent
-                    opponentId = 'computer';
-                    opponentName = 'Computer';
-                    opponentAvatar = 'computer';
+                    // Check if it's old 'computer' ID or new computer user ID
+                    if (potentialOpponentId === 'computer') {
+                        // Old computer games
+                        opponentId = 'computer';
+                        opponentName = 'Computer';
+                        opponentAvatar = 'computer';
+                    } else {
+                        // New computer users with actual IDs - use their display name from game data
+                        // Determine which display name to use based on whether user is creator or opponent
+                        opponentId = potentialOpponentId;
+                        // If user is creator, opponent is opponentId, so use opponentDisplayName
+                        // If user is opponent, opponent is creatorId, so use creatorDisplayName
+                        opponentName =
+                            game.opponentDisplayName || game.creatorDisplayName || 'Computer';
+                        opponentAvatar =
+                            game.opponentAvatarKey || game.creatorAvatarKey || 'dolphin';
+                    }
                     isComputer = true;
                 } else {
                     // PvP opponent
@@ -132,7 +146,8 @@ export default function Stats({ navigation: _navigation }) {
             });
 
             // Fetch current user data for each opponent to get latest avatars and names
-            // Skip deleted users (those already showing as "Anonymous")
+            // Skip deleted users (those already showing as "Anonymous") and old 'computer' ID
+            // But include computer user IDs so we can fetch their display names
             const opponentIds = Object.keys(stats).filter(
                 (id) => id !== 'computer' && stats[id].name !== 'Anonymous',
             );

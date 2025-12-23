@@ -143,10 +143,17 @@ export default function GameHistoryCard({
         // Check if this is a computer game
         const isComputer = opponentId === 'computer' || game.opponentType === 'computer';
 
+        // For computer games, use opponentDisplayName from game data if available
+        // This allows computer users to show their display names (e.g., "Alex", "Jordan")
+        // Fall back to 'Computer' only if no display name is available (old games)
+        const displayName = isComputer
+            ? game.opponentDisplayName || game.creatorDisplayName || 'Computer'
+            : game.opponentDisplayName || 'Opponent';
+
         return {
             id: opponentId,
-            avatarKey: game.opponentAvatarKey || 'dolphin',
-            displayName: isComputer ? 'Computer' : game.opponentDisplayName || 'Opponent',
+            avatarKey: game.opponentAvatarKey || game.creatorAvatarKey || 'dolphin',
+            displayName: displayName,
             isComputer: isComputer,
         };
     };

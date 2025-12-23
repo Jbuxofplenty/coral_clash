@@ -2000,15 +2000,45 @@ export const getGameHistory = onCall(getAppCheckConfig(), async (request) => {
         for (const doc of creatorGames.docs) {
             const gameData = doc.data();
 
-            // Handle computer opponent
-            if (gameData.opponentId === 'computer') {
-                games.push({
-                    id: doc.id,
-                    ...gameData,
-                    opponentDisplayName: 'Computer',
-                    opponentAvatarKey: 'computer',
-                    opponentType: 'computer',
-                });
+            // Handle computer opponent (both old 'computer' ID and new computer user IDs)
+            if (gameData.opponentId === 'computer' || isComputerUser(gameData.opponentId)) {
+                // For old 'computer' ID, use hardcoded values
+                if (gameData.opponentId === 'computer') {
+                    games.push({
+                        id: doc.id,
+                        ...gameData,
+                        opponentDisplayName: 'Computer',
+                        opponentAvatarKey: 'computer',
+                        opponentType: 'computer',
+                    });
+                } else {
+                    // For computer users with actual user IDs, fetch their display name
+                    let opponentDisplayName = gameData.opponentDisplayName;
+                    let opponentAvatarKey = gameData.opponentAvatarKey;
+
+                    if (!opponentDisplayName || !opponentAvatarKey) {
+                        // Fetch current data if snapshot doesn't exist
+                        const opponentDoc = await db
+                            .collection('users')
+                            .doc(gameData.opponentId)
+                            .get();
+                        const opponentData = opponentDoc.exists ? opponentDoc.data() : {};
+                        opponentDisplayName =
+                            formatDisplayName(
+                                opponentData.displayName,
+                                opponentData.discriminator,
+                            ) || 'Computer';
+                        opponentAvatarKey = opponentData.settings?.avatarKey || 'dolphin';
+                    }
+
+                    games.push({
+                        id: doc.id,
+                        ...gameData,
+                        opponentDisplayName,
+                        opponentAvatarKey,
+                        opponentType: 'computer',
+                    });
+                }
             } else {
                 // Use snapshot data if available, otherwise fetch current data
                 let opponentDisplayName = gameData.opponentDisplayName;
@@ -2033,7 +2063,8 @@ export const getGameHistory = onCall(getAppCheckConfig(), async (request) => {
             }
         }
 
-        // Process opponent games (computer games won't be here since opponentId is 'computer')
+        // Process opponent games
+        // Note: Computer games with old 'computer' ID won't be here, but computer users with actual IDs will be
         for (const doc of opponentGames.docs) {
             const gameData = doc.data();
 
@@ -2047,7 +2078,7 @@ export const getGameHistory = onCall(getAppCheckConfig(), async (request) => {
                 const creatorData = creatorDoc.exists ? creatorDoc.data() : {};
                 opponentDisplayName =
                     formatDisplayName(creatorData.displayName, creatorData.discriminator) ||
-                    'Opponent';
+                    (isComputerUser(gameData.creatorId) ? 'Computer' : 'Opponent');
                 opponentAvatarKey = creatorData.settings?.avatarKey || 'dolphin';
             }
 
@@ -2056,6 +2087,7 @@ export const getGameHistory = onCall(getAppCheckConfig(), async (request) => {
                 ...gameData,
                 opponentDisplayName,
                 opponentAvatarKey,
+                opponentType: isComputerUser(gameData.creatorId) ? 'computer' : undefined,
             });
         }
 
