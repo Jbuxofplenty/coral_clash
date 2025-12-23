@@ -11,6 +11,7 @@ import {
     CORAL_EVALUATION,
     GAME_ENDING,
     MOVE_PENALTIES,
+    PIECE_SAFETY,
     POSITIONAL_BONUSES,
     TIME_CONTROL,
     getPieceValue
@@ -530,7 +531,18 @@ function _getPieces(game: CoralClash, color: Color): PieceInfo[] {
  * @param playerColor - Color to evaluate for ('w' or 'b')
  * @returns Evaluation score
  */
-export function evaluatePosition(game: CoralClash, playerColor: Color): number {
+export function evaluatePosition(gameOrSnapshot: CoralClash | GameStateSnapshot, playerColor: Color): number {
+    let game: CoralClash;
+    
+    // Handle GameStateSnapshot for backwards compatibility
+    if (!(gameOrSnapshot instanceof CoralClash)) {
+        const restored = safeRestoreGame(gameOrSnapshot as GameStateSnapshot);
+        if (!restored) return 0;
+        game = restored;
+    } else {
+        game = gameOrSnapshot;
+    }
+
     const opponentColor: Color = playerColor === 'w' ? 'b' : 'w';
 
     // Check game-ending conditions first
@@ -549,7 +561,6 @@ export function evaluatePosition(game: CoralClash, playerColor: Color): number {
     let score = 0;
     const board = game.getBoardOx88();
     const kings = game.getWhalePositionsOx88();
-    const opponentWhalePositions = kings[opponentColor];
 
     // High performance 0x88 board scan
     for (let i = 0; i < 120; i++) {
@@ -558,10 +569,11 @@ export function evaluatePosition(game: CoralClash, playerColor: Color): number {
         const piece = board[i];
         if (!piece) continue;
 
-        const isPlayer = piece.color === playerColor;
         const color = piece.color;
+        const isPlayer = color === playerColor;
         const role = piece.role || null;
-        let pieceScore = getPieceValue(piece.type, role);
+        const materialValue = getPieceValue(piece.type, role);
+        let pieceScore = materialValue;
 
         // Positional bonuses
         // Center squares in 0x88 are 0x33, 0x34, 0x43, 0x44 (algebraic d5, e5, d4, e4)
@@ -575,15 +587,43 @@ export function evaluatePosition(game: CoralClash, playerColor: Color): number {
         const inOpponentHalf = color === 'w' ? rank > 4 : rank < 5;
         if (inOpponentHalf) {
             pieceScore += POSITIONAL_BONUSES.opponentHalf.points;
-            if (role === 'gatherer') score += POSITIONAL_BONUSES.gathererNearEmptySquare.points;
+            if (role === 'gatherer') score += isPlayer ? POSITIONAL_BONUSES.gathererNearEmptySquare.points : -POSITIONAL_BONUSES.gathererNearEmptySquare.points;
         }
 
+        // Piece safety evaluation - critical for preventing blunders
+        const them = color === 'w' ? 'b' : 'w';
+
         // Quick near whale check
-        if (isPlayer && opponentWhalePositions) {
-            const dist1 = Math.abs((i >> 4) - (opponentWhalePositions[0] >> 4)) + Math.abs((i & 7) - (opponentWhalePositions[0] & 7));
-            const dist2 = Math.abs((i >> 4) - (opponentWhalePositions[1] >> 4)) + Math.abs((i & 7) - (opponentWhalePositions[1] & 7));
+        const enemyWhalePositions = kings[them];
+        if (enemyWhalePositions) {
+            const dist1 = Math.abs((i >> 4) - (enemyWhalePositions[0] >> 4)) + Math.abs((i & 7) - (enemyWhalePositions[1] >> 4)) + Math.abs((i & 7) - (enemyWhalePositions[0] & 7));
+            const dist2 = Math.abs((i >> 4) - (enemyWhalePositions[1] >> 4)) + Math.abs((i & 7) - (enemyWhalePositions[1] & 7));
             if (dist1 <= 2 || dist2 <= 2) {
                 pieceScore += POSITIONAL_BONUSES.nearOpponentWhale.points;
+            }
+        }
+
+        const sqAlgebraic = algebraic(i);
+        const isAttacked = game.isAttacked(sqAlgebraic, them);
+        const isDefended = game.isAttacked(sqAlgebraic, color);
+
+        if (isAttacked) {
+            if (!isDefended) {
+                // Hanging piece penalty
+                const multiplier = materialValue >= PIECE_SAFETY.criticalPieceThreshold 
+                    ? PIECE_SAFETY.criticalHangingMultiplier 
+                    : PIECE_SAFETY.hangingMultiplier;
+                pieceScore -= materialValue * multiplier;
+            } else {
+                // Attacked but defended
+                pieceScore -= materialValue * PIECE_SAFETY.attackedMultiplier;
+            }
+        }
+        
+        if (isDefended) {
+            // WHALE pieces don't get defended bonus to keep evaluation stable (otherwise opening scores are too high)
+            if (piece.type !== 'h') {
+                pieceScore += materialValue * PIECE_SAFETY.defendedBonus;
             }
         }
 
@@ -907,7 +947,7 @@ export function alphaBeta(
  * @returns { move: Object, score: number, nodesEvaluated: number, timedOut: boolean, aspirationFailed: boolean }
  */
 export function findBestMove(
-    game: CoralClash,
+    gameOrSnapshot: CoralClash | GameStateSnapshot,
     depth: number,
     playerColor: Color,
     timeControl: TimeControl | null = null,
@@ -916,6 +956,19 @@ export function findBestMove(
     aspirationAlpha: number | null = null,
     aspirationBeta: number | null = null,
 ): AlphaBetaResult & { aspirationFailed?: boolean } {
+    let game: CoralClash;
+    
+    // Handle GameStateSnapshot for backwards compatibility
+    if (!(gameOrSnapshot instanceof CoralClash)) {
+        const restored = safeRestoreGame(gameOrSnapshot as GameStateSnapshot);
+        if (!restored) {
+            return { score: 0, move: null, nodesEvaluated: 0, timedOut: false, aspirationFailed: false };
+        }
+        game = restored;
+    } else {
+        game = gameOrSnapshot;
+    }
+
     // Determine if we're maximizing (our turn) or minimizing (opponent's turn)
     const currentTurn = game.turn();
     const maximizingPlayer = currentTurn === playerColor;
@@ -936,6 +989,19 @@ export function findBestMove(
         transpositionTable,
         true, // This is the root level
     );
+
+    // Convert InternalMove to pretty move format if called with a snapshot for backwards compatibility
+    if (!(gameOrSnapshot instanceof CoralClash) && result.move) {
+        result.move = {
+            from: algebraic(result.move.from),
+            to: algebraic(result.move.to),
+            promotion: result.move.promotion,
+            whaleSecondSquare: result.move.whaleOtherSquare !== undefined ? algebraic(result.move.whaleOtherSquare) : undefined,
+            coralPlaced: result.move.coralPlaced,
+            coralRemoved: result.move.coralRemoved,
+            coralRemovedSquares: result.move.coralRemovedSquares ? result.move.coralRemovedSquares.map((sq: number) => algebraic(sq)) : undefined
+        };
+    }
 
     // Check if aspiration window failed (score outside window)
     const aspirationFailed =
