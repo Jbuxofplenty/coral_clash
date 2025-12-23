@@ -12,7 +12,7 @@ import {
 import { HttpsError, onCall, onRequest } from 'firebase-functions/v2/https';
 import { admin } from '../init.js';
 import { getAppCheckConfig } from '../utils/appCheckConfig.js';
-import { isComputerUser } from '../utils/computerUsers.js';
+import { getComputerUserData, isComputerUser } from '../utils/computerUsers.js';
 import { getGameResult, validateMove } from '../utils/gameValidator.js';
 import { validateClientVersion } from '../utils/gameVersion.js';
 import {
@@ -1616,19 +1616,56 @@ export const resignGame = onCall(getAppCheckConfig(), async (request) => {
             await cancelPendingTimeoutTask(gameId, gameData.pendingTimeoutTask);
         }
 
+        // Prepare update data
+        const updateData = {
+            status: 'completed',
+            result: winner === gameData.creatorId ? 'creator_wins' : 'opponent_wins',
+            resultReason: 'resignation',
+            winner: winner,
+            gameState: updatedGameState,
+            pendingTimeoutTask: null,
+            updatedAt: serverTimestamp(),
+        };
+
+        // Ensure display names are set correctly for computer users
+        // This is important because real-time listeners read directly from the game document
+        // Check if opponent is a computer user
+        if (isComputerUser(gameData.opponentId)) {
+            // If opponentDisplayName is missing or set to 'Computer', fetch the real name
+            if (!gameData.opponentDisplayName || gameData.opponentDisplayName === 'Computer') {
+                const opponentDoc = await db.collection('users').doc(gameData.opponentId).get();
+                if (opponentDoc.exists) {
+                    const opponentData = opponentDoc.data();
+                    updateData.opponentDisplayName = formatDisplayName(
+                        opponentData.displayName,
+                        opponentData.discriminator,
+                    );
+                    if (opponentData.settings?.avatarKey) {
+                        updateData.opponentAvatarKey = opponentData.settings.avatarKey;
+                    }
+                }
+            }
+        }
+        // Check if creator is a computer user (when user is the opponent)
+        if (isComputerUser(gameData.creatorId)) {
+            // If creatorDisplayName is missing or set to 'Computer', fetch the real name
+            if (!gameData.creatorDisplayName || gameData.creatorDisplayName === 'Computer') {
+                const creatorDoc = await db.collection('users').doc(gameData.creatorId).get();
+                if (creatorDoc.exists) {
+                    const creatorData = creatorDoc.data();
+                    updateData.creatorDisplayName = formatDisplayName(
+                        creatorData.displayName,
+                        creatorData.discriminator,
+                    );
+                    if (creatorData.settings?.avatarKey) {
+                        updateData.creatorAvatarKey = creatorData.settings.avatarKey;
+                    }
+                }
+            }
+        }
+
         // Update game status
-        await db
-            .collection('games')
-            .doc(gameId)
-            .update({
-                status: 'completed',
-                result: winner === gameData.creatorId ? 'creator_wins' : 'opponent_wins',
-                resultReason: 'resignation',
-                winner: winner,
-                gameState: updatedGameState,
-                pendingTimeoutTask: null,
-                updatedAt: serverTimestamp(),
-            });
+        await db.collection('games').doc(gameId).update(updateData);
         console.log('[resignGame] Game document updated successfully');
 
         // Update stats for both players (skip if opponent is computer)
@@ -2027,24 +2064,37 @@ export const getGameHistory = onCall(getAppCheckConfig(), async (request) => {
                         opponentType: 'computer',
                     });
                 } else {
-                    // For computer users with actual user IDs, fetch their display name
-                    let opponentDisplayName = gameData.opponentDisplayName;
-                    let opponentAvatarKey = gameData.opponentAvatarKey;
-
-                    if (!opponentDisplayName || !opponentAvatarKey) {
-                        // Fetch current data if snapshot doesn't exist
-                        const opponentDoc = await db
-                            .collection('users')
-                            .doc(gameData.opponentId)
-                            .get();
-                        const opponentData = opponentDoc.exists ? opponentDoc.data() : {};
-                        opponentDisplayName =
-                            formatDisplayName(
-                                opponentData.displayName,
-                                opponentData.discriminator,
-                            ) || 'Computer';
-                        opponentAvatarKey = opponentData.settings?.avatarKey || 'dolphin';
+                    // For computer users with actual user IDs, always fetch their display name
+                    // This ensures we get the correct name even if game data has stale or incorrect values
+                    const opponentDoc = await db.collection('users').doc(gameData.opponentId).get();
+                    const opponentData = opponentDoc.exists ? opponentDoc.data() : {};
+                    // Never use 'Computer' as fallback for computer users - always fetch from user doc or use static data
+                    let opponentDisplayName = formatDisplayName(
+                        opponentData.displayName,
+                        opponentData.discriminator,
+                    );
+                    // If fetch failed, try static computer user data, then gameData (if not 'Computer')
+                    if (!opponentDisplayName) {
+                        const staticUserData = getComputerUserData(gameData.opponentId);
+                        if (staticUserData) {
+                            opponentDisplayName = formatDisplayName(
+                                staticUserData.displayName,
+                                staticUserData.discriminator,
+                            );
+                        } else if (
+                            gameData.opponentDisplayName &&
+                            gameData.opponentDisplayName !== 'Computer'
+                        ) {
+                            opponentDisplayName = gameData.opponentDisplayName;
+                        } else {
+                            opponentDisplayName = 'Unknown Computer';
+                        }
                     }
+                    const opponentAvatarKey =
+                        opponentData.settings?.avatarKey ||
+                        getComputerUserData(gameData.opponentId)?.avatarKey ||
+                        gameData.opponentAvatarKey ||
+                        'dolphin';
 
                     games.push({
                         id: doc.id,
@@ -2083,17 +2133,50 @@ export const getGameHistory = onCall(getAppCheckConfig(), async (request) => {
         for (const doc of opponentGames.docs) {
             const gameData = doc.data();
 
-            // Use snapshot data if available, otherwise fetch current data
+            // For computer users, always fetch their display name to ensure correctness
+            // For regular users, use snapshot data if available, otherwise fetch current data
             let opponentDisplayName = gameData.creatorDisplayName;
             let opponentAvatarKey = gameData.creatorAvatarKey;
 
-            if (!opponentDisplayName || !opponentAvatarKey) {
+            if (isComputerUser(gameData.creatorId)) {
+                // Always fetch for computer users to ensure correct display name
+                const creatorDoc = await db.collection('users').doc(gameData.creatorId).get();
+                const creatorData = creatorDoc.exists ? creatorDoc.data() : {};
+                // Never use 'Computer' as fallback for computer users - always fetch from user doc or use static data
+                let fetchedDisplayName = formatDisplayName(
+                    creatorData.displayName,
+                    creatorData.discriminator,
+                );
+                // If fetch failed, try static computer user data, then gameData (if not 'Computer')
+                if (!fetchedDisplayName) {
+                    const staticUserData = getComputerUserData(gameData.creatorId);
+                    if (staticUserData) {
+                        fetchedDisplayName = formatDisplayName(
+                            staticUserData.displayName,
+                            staticUserData.discriminator,
+                        );
+                    } else if (
+                        gameData.creatorDisplayName &&
+                        gameData.creatorDisplayName !== 'Computer'
+                    ) {
+                        fetchedDisplayName = gameData.creatorDisplayName;
+                    } else {
+                        fetchedDisplayName = 'Unknown Computer';
+                    }
+                }
+                opponentDisplayName = fetchedDisplayName;
+                opponentAvatarKey =
+                    creatorData.settings?.avatarKey ||
+                    getComputerUserData(gameData.creatorId)?.avatarKey ||
+                    gameData.creatorAvatarKey ||
+                    'dolphin';
+            } else if (!opponentDisplayName || !opponentAvatarKey) {
                 // Fallback: fetch current data if snapshot doesn't exist (old games)
                 const creatorDoc = await db.collection('users').doc(gameData.creatorId).get();
                 const creatorData = creatorDoc.exists ? creatorDoc.data() : {};
                 opponentDisplayName =
                     formatDisplayName(creatorData.displayName, creatorData.discriminator) ||
-                    (isComputerUser(gameData.creatorId) ? 'Computer' : 'Opponent');
+                    'Opponent';
                 opponentAvatarKey = creatorData.settings?.avatarKey || 'dolphin';
             }
 
@@ -2166,19 +2249,37 @@ export const getActiveGames = onCall(getAppCheckConfig(), async (request) => {
                     opponentType: 'computer',
                 });
             } else if (isComputerUser(gameData.opponentId)) {
-                // Mocked computer user - use their display name from game data or fetch it
-                let opponentDisplayName = gameData.opponentDisplayName;
-                let opponentAvatarKey = gameData.opponentAvatarKey;
-
-                if (!opponentDisplayName || !opponentAvatarKey) {
-                    // Fetch current data if snapshot doesn't exist
-                    const opponentDoc = await db.collection('users').doc(gameData.opponentId).get();
-                    const opponentData = opponentDoc.exists ? opponentDoc.data() : {};
-                    opponentDisplayName =
-                        formatDisplayName(opponentData.displayName, opponentData.discriminator) ||
-                        'Computer';
-                    opponentAvatarKey = opponentData.settings?.avatarKey || 'dolphin';
+                // Mocked computer user - always fetch their display name from user document
+                // This ensures we get the correct name even if game data has stale or incorrect values
+                const opponentDoc = await db.collection('users').doc(gameData.opponentId).get();
+                const opponentData = opponentDoc.exists ? opponentDoc.data() : {};
+                // Never use 'Computer' as fallback for computer users - always fetch from user doc or use static data
+                let opponentDisplayName = formatDisplayName(
+                    opponentData.displayName,
+                    opponentData.discriminator,
+                );
+                // If fetch failed, try static computer user data, then gameData (if not 'Computer')
+                if (!opponentDisplayName) {
+                    const staticUserData = getComputerUserData(gameData.opponentId);
+                    if (staticUserData) {
+                        opponentDisplayName = formatDisplayName(
+                            staticUserData.displayName,
+                            staticUserData.discriminator,
+                        );
+                    } else if (
+                        gameData.opponentDisplayName &&
+                        gameData.opponentDisplayName !== 'Computer'
+                    ) {
+                        opponentDisplayName = gameData.opponentDisplayName;
+                    } else {
+                        opponentDisplayName = 'Unknown Computer';
+                    }
                 }
+                const opponentAvatarKey =
+                    opponentData.settings?.avatarKey ||
+                    getComputerUserData(gameData.opponentId)?.avatarKey ||
+                    gameData.opponentAvatarKey ||
+                    'dolphin';
 
                 games.push({
                     id: doc.id,
@@ -2216,17 +2317,50 @@ export const getActiveGames = onCall(getAppCheckConfig(), async (request) => {
         for (const doc of opponentGames.docs) {
             const gameData = doc.data();
 
-            // Use snapshot data if available, otherwise fetch current data
+            // For computer users, always fetch their display name to ensure correctness
+            // For regular users, use snapshot data if available, otherwise fetch current data
             let opponentDisplayName = gameData.creatorDisplayName;
             let opponentAvatarKey = gameData.creatorAvatarKey;
 
-            if (!opponentDisplayName || !opponentAvatarKey) {
+            if (isComputerUser(gameData.creatorId)) {
+                // Always fetch for computer users to ensure correct display name
+                const creatorDoc = await db.collection('users').doc(gameData.creatorId).get();
+                const creatorData = creatorDoc.exists ? creatorDoc.data() : {};
+                // Never use 'Computer' as fallback for computer users - always fetch from user doc or use static data
+                let fetchedDisplayName = formatDisplayName(
+                    creatorData.displayName,
+                    creatorData.discriminator,
+                );
+                // If fetch failed, try static computer user data, then gameData (if not 'Computer')
+                if (!fetchedDisplayName) {
+                    const staticUserData = getComputerUserData(gameData.creatorId);
+                    if (staticUserData) {
+                        fetchedDisplayName = formatDisplayName(
+                            staticUserData.displayName,
+                            staticUserData.discriminator,
+                        );
+                    } else if (
+                        gameData.creatorDisplayName &&
+                        gameData.creatorDisplayName !== 'Computer'
+                    ) {
+                        fetchedDisplayName = gameData.creatorDisplayName;
+                    } else {
+                        fetchedDisplayName = 'Unknown Computer';
+                    }
+                }
+                opponentDisplayName = fetchedDisplayName;
+                opponentAvatarKey =
+                    creatorData.settings?.avatarKey ||
+                    getComputerUserData(gameData.creatorId)?.avatarKey ||
+                    gameData.creatorAvatarKey ||
+                    'dolphin';
+            } else if (!opponentDisplayName || !opponentAvatarKey) {
                 // Fallback: fetch current data if snapshot doesn't exist (old games)
                 const creatorDoc = await db.collection('users').doc(gameData.creatorId).get();
                 const creatorData = creatorDoc.exists ? creatorDoc.data() : {};
                 opponentDisplayName =
                     formatDisplayName(creatorData.displayName, creatorData.discriminator) ||
-                    (isComputerUser(gameData.creatorId) ? 'Computer' : 'Opponent');
+                    'Opponent';
                 opponentAvatarKey = creatorData.settings?.avatarKey || 'dolphin';
             }
 

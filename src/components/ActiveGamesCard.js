@@ -132,14 +132,25 @@ export default function ActiveGamesCard({
         const opponentId = game.creatorId === user.uid ? game.opponentId : game.creatorId;
 
         // Check if this is a computer game
-        const isComputer = opponentId === 'computer' || game.opponentType === 'computer';
+        const isLegacyComputer = opponentId === 'computer';
+        const isComputerGame = isLegacyComputer || game.opponentType === 'computer';
 
-        if (isComputer) {
+        if (isComputerGame) {
+            // For computer games, use display name from game data if available
+            // This allows computer users to show their display names (e.g., "Alex", "Jordan")
+            // Fall back to 'Computer' only if no display name is available (old games)
+            const displayName =
+                game.opponentDisplayName || game.creatorDisplayName || 'Computer';
+            const avatarKey =
+                game.opponentAvatarKey || game.creatorAvatarKey || (isLegacyComputer ? null : 'dolphin');
+
+            // For legacy computer games, show computer icon
+            // For computer users with actual IDs, show their avatar
             return {
-                id: 'computer',
-                avatarKey: null,
-                displayName: 'Computer',
-                isComputer: true,
+                id: isLegacyComputer ? 'computer' : opponentId,
+                avatarKey: avatarKey,
+                displayName: displayName,
+                isComputer: isLegacyComputer, // Only true for old 'computer' ID, false for computer users
             };
         }
 
