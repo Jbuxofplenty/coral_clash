@@ -1,3 +1,20 @@
+# [2.4.0](https://github.com/Jbuxofplenty/coral_clash/compare/v2.3.0...v2.4.0) (2025-12-23)
+
+
+### Bug Fixes
+
+* **server:** move computer user functions to routes and fix handler pattern ([8ad9bac](https://github.com/Jbuxofplenty/coral_clash/commit/8ad9bac69d8966f00232699fd7b95c8c79270fee))
+* **server:** use mocked display names for computer users in notifications ([6c3179c](https://github.com/Jbuxofplenty/coral_clash/commit/6c3179cdb08ca56f8bc7c6ef7808c402c5bdd629)), closes [Alex#2847](https://github.com/Alex/issues/2847)
+* **shared:** correct extendedFEN test to use valid move without coral removal ([8b62696](https://github.com/Jbuxofplenty/coral_clash/commit/8b62696c383c446c3dab389570617ccdf8a5e2e0))
+* **shared:** reduce AI performance test time to 5s and check depth 3+ ([0dac503](https://github.com/Jbuxofplenty/coral_clash/commit/0dac503013d9823efb7f5c12ff6abd35f49356ce))
+* **shared:** use correct time limit in AI performance test to reach depth 4+ ([9f1e6b1](https://github.com/Jbuxofplenty/coral_clash/commit/9f1e6b192b78162c1986c932fb41d4d05348087f))
+* **shared:** validate AI moves before returning to prevent invalid moves ([4137b8d](https://github.com/Jbuxofplenty/coral_clash/commit/4137b8db69c1141fc1e1062f1d21d15315968bda))
+
+
+### Features
+
+* **shared:** improve AI evaluation and add tactical tests ([14811e4](https://github.com/Jbuxofplenty/coral_clash/commit/14811e400cfa9ab17eb65201e1f13893ff6d3404))
+
 # [2.3.0](https://github.com/Jbuxofplenty/coral_clash/compare/v2.2.1...v2.3.0) (2025-12-21)
 
 
