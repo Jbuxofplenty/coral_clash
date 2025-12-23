@@ -138,7 +138,7 @@ export type Piece = {
     role?: PieceRole; // Hunter or Gatherer (Whale doesn't have a role)
 };
 
-type InternalMove = {
+export type InternalMove = {
     color: Color;
     from: number;
     to: number;
@@ -264,7 +264,7 @@ const BITS: Record<string, number> = {
 
 // prettier-ignore
 
-const Ox88: Record<Square, number> = {
+export const Ox88: Record<Square, number> = {
   a8:   0, b8:   1, c8:   2, d8:   3, e8:   4, f8:   5, g8:   6, h8:   7,
   a7:  16, b7:  17, c7:  18, d7:  19, e7:  20, f7:  21, g7:  22, h7:  23,
   a6:  32, b6:  33, c6:  34, d6:  35, e6:  36, f6:  37, g6:  38, h6:  39,
@@ -355,7 +355,7 @@ function isDigit(c: string): boolean {
 }
 
 // Converts a 0x88 square to algebraic notation.
-function algebraic(square: number): Square {
+export function algebraic(square: number): Square {
     const f = file(square);
     const r = rank(square);
     return ('abcdefgh'.substring(f, f + 1) + '87654321'.substring(r, r + 1)) as Square;
@@ -1742,6 +1742,18 @@ export class CoralClash {
     }
 
     /**
+     * Lightweight move generation for AI search
+     * Avoids expensive FEN and SAN computations
+     */
+    internalMoves({
+        square = undefined,
+        piece = undefined,
+        color = undefined,
+    }: { square?: Square; piece?: PieceSymbol; color?: Color } = {}): InternalMove[] {
+        return this._moves({ square, piece, color });
+    }
+
+    /**
      * Check if a square is occupied (including by whale's second square)
      */
     private _isSquareOccupied(square: number, color?: Color): boolean {
@@ -2512,12 +2524,23 @@ export class CoralClash {
             }
 
             if (candidates.length > 0) {
-                // If coral action specified, use it to disambiguate
-                if (candidates.length > 1 && 'coralPlaced' in move) {
+                // If coral action specified, use it to disambiguate (even if only one candidate)
+                if ('coralPlaced' in move) {
                     const exactMatch = candidates.find((m) => m.coralPlaced === move.coralPlaced);
                     // IMPORTANT: If user explicitly specified coral action, we MUST use exact match
                     // Falling back to candidates[0] would ignore user's choice
-                    moveObj = exactMatch || null;
+                    if (exactMatch) {
+                        moveObj = exactMatch;
+                    } else if (candidates.length === 1) {
+                        // Only one candidate - verify it matches the coral flag if specified
+                        if (candidates[0].coralPlaced === move.coralPlaced) {
+                            moveObj = candidates[0];
+                        } else {
+                            moveObj = null; // No match
+                        }
+                    } else {
+                        moveObj = null; // Multiple candidates but no exact match
+                    }
                 } else if (candidates.length > 1 && 'coralRemovedSquares' in move) {
                     // Whale-specific: match specific squares where coral is removed
                     // ALSO check whaleSecondSquare if this is a whale move!
@@ -2541,10 +2564,21 @@ export class CoralClash {
                     });
                     // IMPORTANT: If user explicitly specified coral removal, we MUST use exact match
                     moveObj = exactMatch || null;
-                } else if (candidates.length > 1 && 'coralRemoved' in move) {
+                } else if ('coralRemoved' in move) {
                     const exactMatch = candidates.find((m) => m.coralRemoved === move.coralRemoved);
                     // IMPORTANT: If user explicitly specified coral action, we MUST use exact match
-                    moveObj = exactMatch || null;
+                    if (exactMatch) {
+                        moveObj = exactMatch;
+                    } else if (candidates.length === 1) {
+                        // Only one candidate - verify it matches the coral flag if specified
+                        if (candidates[0].coralRemoved === move.coralRemoved) {
+                            moveObj = candidates[0];
+                        } else {
+                            moveObj = null; // No match
+                        }
+                    } else {
+                        moveObj = null; // Multiple candidates but no exact match
+                    }
                 }
                 // If whale move and whaleSecondSquare specified, use it to disambiguate
                 else if (
@@ -2594,6 +2628,14 @@ export class CoralClash {
         return prettyMove;
     }
 
+    /**
+     * Lightweight move execution for AI search
+     * Avoids expensive FEN and SAN computations
+     */
+    makeMove(move: InternalMove) {
+        this._makeMove(move);
+    }
+
     private _push(move: InternalMove) {
         // Save the role of the piece that's about to move (for proper undo)
         const movingPiece = this._board[move.from];
@@ -2614,6 +2656,27 @@ export class CoralClash {
             coralRemaining: { b: this._coralRemaining.b, w: this._coralRemaining.w },
             pieceRole: pieceRole, // Save piece role for undo
         });
+    }
+
+    /**
+     * Get raw 0x88 board representation for high-performance AI evaluation
+     */
+    getBoardOx88() {
+        return this._board;
+    }
+
+    /**
+     * Get raw 0x88 whale positions for high-performance AI evaluation
+     */
+    getWhalePositionsOx88() {
+        return this._kings;
+    }
+
+    /**
+     * Get raw 0x88 coral representation for high-performance AI evaluation
+     */
+    getCoralOx88() {
+        return this._coral;
     }
 
     private _makeMove(move: InternalMove) {
@@ -2819,6 +2882,14 @@ export class CoralClash {
         }
 
         this._turn = them;
+    }
+
+    /**
+     * Lightweight undo for AI search
+     * Avoids expensive FEN and SAN computations
+     */
+    undoInternal() {
+        return this._undoMove();
     }
 
     undo() {

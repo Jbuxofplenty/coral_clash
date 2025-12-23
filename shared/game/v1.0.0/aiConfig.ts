@@ -14,23 +14,23 @@ import type { PieceRole, PieceSymbol } from './coralClash.js';
 const PIECE_VALUES = {
     whale: {
         // Whale is the king - win condition piece
-        value: 10000,
+        value: 20000,
     },
     dolphin: {
-        gatherer: 950, // Higher: Max mobility + Coral placement is premium utility
+        gatherer: 1800, // Higher: Max mobility + Coral placement is premium utility
         hunter: 900, // High mobility + Coral removal utility
     },
     turtle: {
-        gatherer: 550, // Higher: Excellent straight-line mobility + Coral placement
+        gatherer: 1000, // Higher: Excellent straight-line mobility + Coral placement
         hunter: 500, // Good mobility + Coral removal utility
     },
     pufferfish: {
-        gatherer: 350, // Higher: Diagonal mobility + Coral placement utility
+        gatherer: 600, // Higher: Diagonal mobility + Coral placement utility
         hunter: 300, // Diagonal movement + Coral removal utility
     },
     octopus: {
-        gatherer: 175, // Higher: Basic mobility, but Coral placement on front lines is critical
-        hunter: 150, // Lowest mobility, focused on localized Coral denial
+        gatherer: 125, // Higher: Basic mobility, but Coral placement on front lines is critical
+        hunter: 100, // Lowest mobility, focused on localized Coral denial
     },
     crab: {
         gatherer: 125, // Higher: Basic mobility, focused on localized Coral placement
@@ -87,6 +87,27 @@ const WHALE_SAFETY = {
 };
 
 /**
+ * Piece safety evaluation
+ * Penalizes leaving valuable pieces under attack
+ */
+const PIECE_SAFETY = {
+    // Penalty multipliers based on piece value (applied to attacked pieces)
+    // More valuable pieces get larger penalties when under attack
+    attackedMultiplier: 0.25, // 25% of piece value penalty when under attack
+    // Extra penalty for hanging pieces (attacked but NOT defended)
+    // For very valuable pieces (dolphin gatherer = 1800), this should be prohibitive
+    hangingMultiplier: 1.5, // 150% of piece value penalty when hanging (attacked, not defended) - severe enough to prevent selection even at depth 1
+    // Critical piece threshold - pieces above this value get even more severe penalties
+    criticalPieceThreshold: 1500, // Dolphin gatherer (1800) is above this
+    // Extra penalty multiplier for critical pieces that are hanging
+    criticalHangingMultiplier: 1.5, // 150% of piece value (more than the piece is worth!)
+    // Bonus for defended pieces (defenders present)
+    defendedBonus: 0.05, // 5% of piece value bonus when defended
+    // Points per defender of a valuable piece
+    defendersPerPiece: 2, // Points per piece defending a valuable piece
+};
+
+/**
  * Coral control and placement evaluation
  * Rewards coral control which is a win condition
  */
@@ -117,7 +138,7 @@ const TACTICAL_BONUSES = {
         points: 100000, // Massive bonus for checkmate (should be very high)
     },
     coralVictory: {
-        points: 50000, // Bonus for coral area control victory
+        points: 100000, // Bonus for coral area control victory
     },
     // Piece capture value is determined by PIECE_VALUES above
 };
@@ -140,8 +161,8 @@ const GAME_ENDING = {
         loss: -100000, // Very high negative for losing by checkmate
     },
     coralVictory: {
-        win: 50000, // Positive for winning by coral area control
-        loss: -50000, // Negative for losing by coral area control
+        win: 100000, // Positive for winning by coral area control
+        loss: -100000, // Negative for losing by coral area control
     },
     stalemate: {
         points: 0, // Usually 0 or small negative
@@ -154,19 +175,54 @@ const GAME_ENDING = {
  */
 const SEARCH_DEPTH = {
     random: 0, // No search, just random moves
-    easy: 3, // 3 plies deep
-    medium: 5, // 5 plies deep
-    hard: 7, // 7 plies deep
+    easy: 6, // Allow up to 6 plies (will typically reach 3-4 in 30s)
+    medium: 10, // Allow up to 10 plies (will typically reach 5-6 in 45s)
+    hard: 12, // Allow up to 12 plies (will typically reach 6-7 in 60s)
+};
+
+/**
+ * Aspiration window settings for alpha-beta search
+ * Uses a narrower search window around the expected score for better pruning
+ * If search fails (score outside window), re-searches with full window
+ */
+const ASPIRATION_WINDOW = {
+    initial: 50, // Initial window size (centered around expected score)
+    // Window is expanded if search fails (score <= alpha or >= beta)
 };
 
 /**
  * Time control settings for AI moves
  * Maximum time (in milliseconds) the AI can spend thinking before making a move
+ * Different difficulties get different time limits - easier modes think faster
  */
 const TIME_CONTROL = {
-    maxTimeMs: 5000, // Maximum 5 seconds per move
-    minTimeMs: 100, // Minimum time to spend (ensures at least some thinking)
-    progressIntervalMs: 200, // Report progress every N milliseconds
+    easy: {
+        maxTimeMs: 30000, // 30 seconds (increased from 20s to account for quiescence search overhead)
+        minTimeMs: 100,
+        progressIntervalMs: 200,
+    },
+    medium: {
+        maxTimeMs: 45000, // 45 seconds (increased from 30s)
+        minTimeMs: 100,
+        progressIntervalMs: 200,
+    },
+    hard: {
+        maxTimeMs: 60000, // 60 seconds (increased from 40s for more thorough analysis with quiescence)
+        minTimeMs: 100,
+        progressIntervalMs: 200,
+    },
+    // Legacy default for backwards compatibility
+    maxTimeMs: 5000,
+    minTimeMs: 100,
+    progressIntervalMs: 200,
+};
+
+/**
+ * Penalties for undesirable moves
+ * These help prevent repetitive or poor play patterns
+ */
+const MOVE_PENALTIES = {
+    reversingMove: -200, // Strong penalty for moving a piece back to where it just came from
 };
 
 /**
@@ -247,13 +303,17 @@ export function getPieceValue(
 }
 
 export {
+    ASPIRATION_WINDOW,
     CORAL_EVALUATION,
     GAME_ENDING,
     MOBILITY,
+    MOVE_PENALTIES,
+    PIECE_SAFETY,
     PIECE_VALUES,
     POSITIONAL_BONUSES,
     SEARCH_DEPTH,
     TACTICAL_BONUSES,
     TIME_CONTROL,
-    WHALE_SAFETY,
+    WHALE_SAFETY
 };
+
