@@ -162,7 +162,50 @@ export const onGameMoveUpdate = onDocumentUpdated('games/{gameId}', async (event
         const beforeData = change.before.data();
         const afterData = change.after.data();
 
-        // Check if it's a computer user's turn - handle this FIRST for games with or without time control
+        // Check if lastMoveTime actually changed (a move was made)
+        // This check must happen FIRST to prevent computer moves from triggering on unrelated updates
+        const beforeTime = beforeData.lastMoveTime?.toDate?.()?.getTime() || 0;
+        const afterTime = afterData.lastMoveTime?.toDate?.()?.getTime() || 0;
+        const lastMoveTimeChanged = beforeTime !== afterTime;
+
+        // Only proceed with time control scheduling if game has time control
+        if (
+            !afterData.lastMoveTime ||
+            !afterData.timeControl?.totalSeconds ||
+            !afterData.timeRemaining ||
+            !afterData.currentTurn ||
+            afterData.status !== 'active'
+        ) {
+            // Even if time control isn't enabled, check for computer moves if lastMoveTime changed
+            if (lastMoveTimeChanged) {
+                const currentTurn = afterData.currentTurn;
+                if (
+                    currentTurn &&
+                    isComputerUser(currentTurn) &&
+                    afterData.opponentType === 'computer' &&
+                    afterData.status === 'active'
+                ) {
+                    console.log(`[onGameMoveUpdate] Computer user ${currentTurn} turn detected, making move automatically`);
+                    try {
+                        // Make computer move asynchronously (don't await to avoid blocking)
+                        makeComputerMoveHelper(gameId, afterData).catch((error) => {
+                            console.error(`[onGameMoveUpdate] Error making computer move for ${currentTurn}:`, error);
+                        });
+                    } catch (error) {
+                        console.error(`[onGameMoveUpdate] Error triggering computer move for ${currentTurn}:`, error);
+                    }
+                }
+            }
+            return null;
+        }
+
+        // If lastMoveTime didn't change, this update is not related to a move (e.g., just pendingTimeoutTask update)
+        // Skip computer move check and timeout scheduling
+        if (!lastMoveTimeChanged) {
+            return null;
+        }
+
+        // Check if it's a computer user's turn - only check when a move was actually made
         const currentTurn = afterData.currentTurn;
         if (
             currentTurn &&
@@ -179,25 +222,6 @@ export const onGameMoveUpdate = onDocumentUpdated('games/{gameId}', async (event
             } catch (error) {
                 console.error(`[onGameMoveUpdate] Error triggering computer move for ${currentTurn}:`, error);
             }
-        }
-
-        // Only proceed with time control scheduling if game has time control
-        if (
-            !afterData.lastMoveTime ||
-            !afterData.timeControl?.totalSeconds ||
-            !afterData.timeRemaining ||
-            !afterData.currentTurn ||
-            afterData.status !== 'active'
-        ) {
-            return null;
-        }
-
-        // Check if lastMoveTime actually changed (a move was made)
-        const beforeTime = beforeData.lastMoveTime?.toDate?.()?.getTime() || 0;
-        const afterTime = afterData.lastMoveTime?.toDate?.()?.getTime() || 0;
-
-        if (beforeTime === afterTime) {
-            return null;
         }
 
         // If pendingTimeoutTask is already set, makeMove already created it - skip to avoid duplicate updates
