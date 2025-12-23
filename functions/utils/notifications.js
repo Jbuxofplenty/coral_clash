@@ -1,4 +1,5 @@
 import { admin } from '../init.js';
+import { isComputerUser } from './computerUsers.js';
 
 /**
  * Send push notification to a user using Firebase Cloud Messaging
@@ -206,11 +207,22 @@ async function sendGameAcceptedNotification(recipientId, accepterId, accepterNam
  * @param {string} userId - User receiving the notification
  * @param {string} gameId - Game ID
  * @param {string} opponentId - Opponent's ID ('computer' or user ID)
- * @param {string} opponentName - Opponent's display name
+ * @param {string} opponentName - Opponent's display name (should be mocked name for computer users)
  */
 async function sendOpponentMoveNotification(userId, gameId, opponentId, opponentName) {
-    const isComputer = opponentId === 'computer';
-    const body = isComputer ? 'The computer made a move' : `${opponentName} made a move`;
+    // For legacy 'computer' games, say "Computer"
+    // For mocked computer users, use their display name (e.g., "Alex#2847")
+    const isLegacyComputer = opponentId === 'computer';
+    const isMockedComputerUser = isComputerUser(opponentId);
+
+    let body;
+    if (isLegacyComputer) {
+        body = 'The computer made a move';
+    } else if (isMockedComputerUser && opponentName) {
+        body = `${opponentName} made a move`;
+    } else {
+        body = `${opponentName || 'Opponent'} made a move`;
+    }
 
     return sendPushNotification(userId, {
         title: 'Your Turn',
@@ -219,8 +231,8 @@ async function sendOpponentMoveNotification(userId, gameId, opponentId, opponent
             type: 'move_made',
             gameId: gameId,
             from: opponentId,
-            fromName: opponentName,
-            isComputer: isComputer,
+            fromName: opponentName || (isLegacyComputer ? 'Computer' : null),
+            isComputer: isLegacyComputer || isMockedComputerUser,
         },
     });
 }
@@ -383,11 +395,40 @@ async function sendResetCancelledNotification(recipientId, cancellerId, cancelle
     });
 }
 
+/**
+ * Send match found notification (for matchmaking)
+ * @param {string} recipientId - User receiving the notification
+ * @param {string} opponentId - Opponent's ID
+ * @param {string} opponentName - Opponent's display name (or computer user's mocked name)
+ * @param {string} gameId - Game ID
+ * @param {string} avatarKey - Opponent's avatar key
+ */
+async function sendMatchFoundNotification(
+    recipientId,
+    opponentId,
+    opponentName,
+    gameId,
+    avatarKey,
+) {
+    return sendPushNotification(recipientId, {
+        title: 'Match Found',
+        body: `You've been matched with ${opponentName}`,
+        data: {
+            type: 'match_found',
+            opponentId: opponentId,
+            opponentName: opponentName,
+            gameId: gameId,
+            opponentAvatarKey: avatarKey || 'dolphin',
+        },
+    });
+}
+
 export {
     sendFriendAcceptedNotification,
     sendFriendRequestNotification,
     sendGameAcceptedNotification,
     sendGameRequestNotification,
+    sendMatchFoundNotification,
     sendOpponentMoveNotification,
     sendPushNotification,
     sendResetApprovedNotification,

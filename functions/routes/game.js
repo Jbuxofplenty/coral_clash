@@ -180,9 +180,17 @@ async function createGameHandler(request) {
             type: 'game_accepted',
             gameId: gameRef.id,
             from: opponentId,
+            fromName: opponentName, // Include computer user's mocked display name
+            opponentName: opponentName, // Also include for consistency
+            opponentAvatarKey: opponentSettings.avatarKey || 'dolphin',
             read: false,
             createdAt: serverTimestamp(),
         });
+
+        // Send push notification with computer user's display name
+        sendGameAcceptedNotification(creatorId, opponentId, opponentName, gameRef.id).catch(
+            (error) => console.error('Error sending push notification:', error),
+        );
 
         // If computer user is white (goes first), trigger their move immediately
         // Wait a small delay to ensure game document is fully written
@@ -1214,11 +1222,19 @@ export async function makeComputerMoveHelper(gameId, gameData = null) {
         }
 
         // Notify player that opponent made a move
+        // For legacy 'computer' games, use 'Computer'
+        // For mocked computer users, use their display name from game data
+        const isLegacyComputer = computerUserId === 'computer';
+        const computerDisplayName = isLegacyComputer
+            ? 'Computer'
+            : gameData.opponentDisplayName || 'Computer';
+        const computerIdForNotification = computerUserId;
+
         await sendOpponentMoveNotification(
             gameData.creatorId,
             gameId,
-            'computer',
-            'Computer',
+            computerIdForNotification,
+            computerDisplayName,
         ).catch((error) => console.error('Error sending opponent move notification:', error));
     }
 
@@ -2094,11 +2110,22 @@ export const getActiveGames = onCall(getAppCheckConfig(), async (request) => {
 
             // Handle computer opponent
             if (gameData.opponentId === 'computer') {
+                // Legacy computer game - always show 'Computer'
                 games.push({
                     id: doc.id,
                     ...gameData,
                     opponentDisplayName: 'Computer',
                     opponentAvatarKey: 'computer',
+                    opponentType: 'computer',
+                });
+            } else if (isComputerUser(gameData.opponentId)) {
+                // Mocked computer user - use their display name
+                const opponentDisplayName = gameData.opponentDisplayName || 'Computer';
+                games.push({
+                    id: doc.id,
+                    ...gameData,
+                    opponentDisplayName,
+                    opponentAvatarKey: gameData.opponentAvatarKey || 'computer',
                     opponentType: 'computer',
                 });
             } else {

@@ -4,6 +4,7 @@ import { admin } from '../init.js';
 import { formatDisplayName, initializeGameState, serverTimestamp } from '../utils/helpers.js';
 import { getRandomComputerUser, isComputerUser } from '../utils/computerUsers.js';
 import { makeComputerMoveHelper } from '../routes/game.js';
+import { sendMatchFoundNotification } from '../utils/notifications.js';
 
 /**
  * Helper function to try matching players
@@ -195,17 +196,26 @@ async function createMatchedGame(player1Id, player2Id) {
 
         const gameRef = await db.collection('games').add(gameData);
 
-        // Send notifications to both players
+        // Send notification to player1 (always a real user in matchmaking)
         await db.collection('notifications').add({
             userId: player1Id,
             type: 'match_found',
             gameId: gameRef.id,
             opponentId: player2Id,
-            opponentName: player2Name,
+            opponentName: player2Name, // This will be the computer user's mocked display name (e.g., "Alex#2847")
             opponentAvatarKey: player2Settings.avatarKey || 'dolphin',
             read: false,
             createdAt: serverTimestamp(),
         });
+
+        // Send push notification to player1
+        sendMatchFoundNotification(
+            player1Id,
+            player2Id,
+            player2Name,
+            gameRef.id,
+            player2Settings.avatarKey || 'dolphin',
+        ).catch((error) => console.error('Error sending match found push notification:', error));
 
         // Only send notification to player2 if they're not a computer user
         if (!isOpponentComputer) {
@@ -219,6 +229,15 @@ async function createMatchedGame(player1Id, player2Id) {
                 read: false,
                 createdAt: serverTimestamp(),
             });
+
+            // Send push notification to player2
+            sendMatchFoundNotification(
+                player2Id,
+                player1Id,
+                player1Name,
+                gameRef.id,
+                player1Settings.avatarKey || 'dolphin',
+            ).catch((error) => console.error('Error sending match found push notification:', error));
         }
 
         // If computer user is white (goes first), trigger their move immediately
