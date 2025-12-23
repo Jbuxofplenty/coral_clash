@@ -14,7 +14,7 @@ import {
     PIECE_SAFETY,
     POSITIONAL_BONUSES,
     TIME_CONTROL,
-    getPieceValue
+    getPieceValue,
 } from './aiConfig.js';
 import type { Color, PieceRole, PieceSymbol, Square } from './coralClash.js';
 import { CoralClash, Ox88, SQUARES, algebraic } from './coralClash.js';
@@ -270,24 +270,25 @@ function computeZobristHash(game: CoralClash): number {
 
     // Hash all pieces on the board using 0x88 board directly
     for (let i = 0; i < 120; i++) {
-        if (i & 0x88) { i += 7; continue; }
-        
+        if (i & 0x88) {
+            i += 7;
+            continue;
+        }
+
         const piece = board[i];
         if (piece) {
             const squareIdx = (i >> 4) * 8 + (i & 7); // Convert 0x88 index to 0-63
-            hash ^= zobristKeys.getPieceKey(
-                piece.type,
-                squareIdx,
-                piece.color,
-                piece.role || null
-            );
+            hash ^= zobristKeys.getPieceKey(piece.type, squareIdx, piece.color, piece.role || null);
         }
     }
 
     // Hash coral state using 0x88 coral directly
     const coral = game.getCoralOx88();
     for (let i = 0; i < 120; i++) {
-        if (i & 0x88) { i += 7; continue; }
+        if (i & 0x88) {
+            i += 7;
+            continue;
+        }
         const c = coral[i];
         const squareIdx = (i >> 4) * 8 + (i & 7);
         hash ^= zobristKeys.getCoralKey(squareIdx, c);
@@ -531,9 +532,12 @@ function _getPieces(game: CoralClash, color: Color): PieceInfo[] {
  * @param playerColor - Color to evaluate for ('w' or 'b')
  * @returns Evaluation score
  */
-export function evaluatePosition(gameOrSnapshot: CoralClash | GameStateSnapshot, playerColor: Color): number {
+export function evaluatePosition(
+    gameOrSnapshot: CoralClash | GameStateSnapshot,
+    playerColor: Color,
+): number {
     let game: CoralClash;
-    
+
     // Handle GameStateSnapshot for backwards compatibility
     if (!(gameOrSnapshot instanceof CoralClash)) {
         const restored = safeRestoreGame(gameOrSnapshot as GameStateSnapshot);
@@ -555,7 +559,9 @@ export function evaluatePosition(gameOrSnapshot: CoralClash | GameStateSnapshot,
 
     const coralWinner = game.isCoralVictory();
     if (coralWinner) {
-        return coralWinner === playerColor ? GAME_ENDING.coralVictory.win : GAME_ENDING.coralVictory.loss;
+        return coralWinner === playerColor
+            ? GAME_ENDING.coralVictory.win
+            : GAME_ENDING.coralVictory.loss;
     }
 
     let score = 0;
@@ -564,7 +570,10 @@ export function evaluatePosition(gameOrSnapshot: CoralClash | GameStateSnapshot,
 
     // High performance 0x88 board scan
     for (let i = 0; i < 120; i++) {
-        if (i & 0x88) { i += 7; continue; }
+        if (i & 0x88) {
+            i += 7;
+            continue;
+        }
 
         const piece = board[i];
         if (!piece) continue;
@@ -587,7 +596,10 @@ export function evaluatePosition(gameOrSnapshot: CoralClash | GameStateSnapshot,
         const inOpponentHalf = color === 'w' ? rank > 4 : rank < 5;
         if (inOpponentHalf) {
             pieceScore += POSITIONAL_BONUSES.opponentHalf.points;
-            if (role === 'gatherer') score += isPlayer ? POSITIONAL_BONUSES.gathererNearEmptySquare.points : -POSITIONAL_BONUSES.gathererNearEmptySquare.points;
+            if (role === 'gatherer')
+                score += isPlayer
+                    ? POSITIONAL_BONUSES.gathererNearEmptySquare.points
+                    : -POSITIONAL_BONUSES.gathererNearEmptySquare.points;
         }
 
         // Piece safety evaluation - critical for preventing blunders
@@ -596,8 +608,13 @@ export function evaluatePosition(gameOrSnapshot: CoralClash | GameStateSnapshot,
         // Quick near whale check
         const enemyWhalePositions = kings[them];
         if (enemyWhalePositions) {
-            const dist1 = Math.abs((i >> 4) - (enemyWhalePositions[0] >> 4)) + Math.abs((i & 7) - (enemyWhalePositions[1] >> 4)) + Math.abs((i & 7) - (enemyWhalePositions[0] & 7));
-            const dist2 = Math.abs((i >> 4) - (enemyWhalePositions[1] >> 4)) + Math.abs((i & 7) - (enemyWhalePositions[1] & 7));
+            const dist1 =
+                Math.abs((i >> 4) - (enemyWhalePositions[0] >> 4)) +
+                Math.abs((i & 7) - (enemyWhalePositions[1] >> 4)) +
+                Math.abs((i & 7) - (enemyWhalePositions[0] & 7));
+            const dist2 =
+                Math.abs((i >> 4) - (enemyWhalePositions[1] >> 4)) +
+                Math.abs((i & 7) - (enemyWhalePositions[1] & 7));
             if (dist1 <= 2 || dist2 <= 2) {
                 pieceScore += POSITIONAL_BONUSES.nearOpponentWhale.points;
             }
@@ -610,16 +627,17 @@ export function evaluatePosition(gameOrSnapshot: CoralClash | GameStateSnapshot,
         if (isAttacked) {
             if (!isDefended) {
                 // Hanging piece penalty
-                const multiplier = materialValue >= PIECE_SAFETY.criticalPieceThreshold 
-                    ? PIECE_SAFETY.criticalHangingMultiplier 
-                    : PIECE_SAFETY.hangingMultiplier;
+                const multiplier =
+                    materialValue >= PIECE_SAFETY.criticalPieceThreshold
+                        ? PIECE_SAFETY.criticalHangingMultiplier
+                        : PIECE_SAFETY.hangingMultiplier;
                 pieceScore -= materialValue * multiplier;
             } else {
                 // Attacked but defended
                 pieceScore -= materialValue * PIECE_SAFETY.attackedMultiplier;
             }
         }
-        
+
         if (isDefended) {
             // WHALE pieces don't get defended bonus to keep evaluation stable (otherwise opening scores are too high)
             if (piece.type !== 'h') {
@@ -791,10 +809,22 @@ export function alphaBeta(
                     timedOut: false,
                 };
             } else if (entry.bound === BoundType.LOWER_BOUND) {
-                if (entry.score >= beta) return { score: entry.score, move: entry.bestMove, nodesEvaluated: 1, timedOut: false };
+                if (entry.score >= beta)
+                    return {
+                        score: entry.score,
+                        move: entry.bestMove,
+                        nodesEvaluated: 1,
+                        timedOut: false,
+                    };
                 alpha = Math.max(alpha, entry.score);
             } else if (entry.bound === BoundType.UPPER_BOUND) {
-                if (entry.score <= alpha) return { score: entry.score, move: entry.bestMove, nodesEvaluated: 1, timedOut: false };
+                if (entry.score <= alpha)
+                    return {
+                        score: entry.score,
+                        move: entry.bestMove,
+                        nodesEvaluated: 1,
+                        timedOut: false,
+                    };
                 beta = Math.min(beta, entry.score);
             }
         }
@@ -873,7 +903,7 @@ export function alphaBeta(
                 !maximizingPlayer,
                 playerColor,
                 timeControl,
-                null, 
+                null,
                 transpositionTable,
                 false,
             );
@@ -957,12 +987,18 @@ export function findBestMove(
     aspirationBeta: number | null = null,
 ): AlphaBetaResult & { aspirationFailed?: boolean } {
     let game: CoralClash;
-    
+
     // Handle GameStateSnapshot for backwards compatibility
     if (!(gameOrSnapshot instanceof CoralClash)) {
         const restored = safeRestoreGame(gameOrSnapshot as GameStateSnapshot);
         if (!restored) {
-            return { score: 0, move: null, nodesEvaluated: 0, timedOut: false, aspirationFailed: false };
+            return {
+                score: 0,
+                move: null,
+                nodesEvaluated: 0,
+                timedOut: false,
+                aspirationFailed: false,
+            };
         }
         game = restored;
     } else {
@@ -996,10 +1032,15 @@ export function findBestMove(
             from: algebraic(result.move.from),
             to: algebraic(result.move.to),
             promotion: result.move.promotion,
-            whaleSecondSquare: result.move.whaleOtherSquare !== undefined ? algebraic(result.move.whaleOtherSquare) : undefined,
+            whaleSecondSquare:
+                result.move.whaleOtherSquare !== undefined
+                    ? algebraic(result.move.whaleOtherSquare)
+                    : undefined,
             coralPlaced: result.move.coralPlaced,
             coralRemoved: result.move.coralRemoved,
-            coralRemovedSquares: result.move.coralRemovedSquares ? result.move.coralRemovedSquares.map((sq: number) => algebraic(sq)) : undefined
+            coralRemovedSquares: result.move.coralRemovedSquares
+                ? result.move.coralRemovedSquares.map((sq: number) => algebraic(sq))
+                : undefined,
         };
     }
 
@@ -1167,11 +1208,121 @@ export function findBestMoveIterativeDeepening(
         from: algebraic(bestMove.from),
         to: algebraic(bestMove.to),
         promotion: bestMove.promotion,
-        whaleSecondSquare: bestMove.whaleOtherSquare !== undefined ? algebraic(bestMove.whaleOtherSquare) : undefined,
+        whaleSecondSquare:
+            bestMove.whaleOtherSquare !== undefined
+                ? algebraic(bestMove.whaleOtherSquare)
+                : undefined,
         coralPlaced: bestMove.coralPlaced,
         coralRemoved: bestMove.coralRemoved,
-        coralRemovedSquares: bestMove.coralRemovedSquares ? bestMove.coralRemovedSquares.map((sq: number) => algebraic(sq)) : undefined
+        coralRemovedSquares: bestMove.coralRemovedSquares
+            ? bestMove.coralRemovedSquares.map((sq: number) => algebraic(sq))
+            : undefined,
     };
+
+    // CRITICAL: Validate that the move is actually valid in the current game state
+    // The game state might have changed during search, or the move might have been from a different position
+    // We must ensure we only return moves that are currently legal
+    // Restore game state from snapshot to ensure we're validating against the correct state
+    const validationGame = safeRestoreGame(gameState);
+    if (!validationGame) {
+        // If we can't restore, fall back to first legal move from original game
+        const fallbackMoves = game.moves({ verbose: true });
+        if (fallbackMoves.length > 0) {
+            const fallback = fallbackMoves[0];
+            return {
+                move: {
+                    from: fallback.from,
+                    to: fallback.to,
+                    promotion: fallback.promotion,
+                    whaleSecondSquare: fallback.whaleSecondSquare,
+                    coralPlaced: fallback.coralPlaced,
+                    coralRemoved: fallback.coralRemoved,
+                    coralRemovedSquares: fallback.coralRemovedSquares,
+                },
+                score: bestScore === -Infinity ? 0 : bestScore,
+                nodesEvaluated: totalNodesEvaluated,
+                depth: bestDepth,
+                elapsedMs: totalElapsed,
+            };
+        }
+    }
+    const currentLegalMoves = validationGame!.moves({ verbose: true });
+    const isValidMove = currentLegalMoves.some((m: any) => {
+        if (m.from !== prettyMove.from || m.to !== prettyMove.to) return false;
+        if (m.promotion !== prettyMove.promotion) return false;
+        if (m.whaleSecondSquare !== prettyMove.whaleSecondSquare) return false;
+
+        // Check coral flags match exactly (only if explicitly set in prettyMove)
+        // Note: prettyMove always has these properties, so we check if they're not undefined
+        if (prettyMove.coralPlaced !== undefined && m.coralPlaced !== prettyMove.coralPlaced)
+            return false;
+        if (prettyMove.coralRemoved !== undefined && m.coralRemoved !== prettyMove.coralRemoved)
+            return false;
+        if (prettyMove.coralRemovedSquares && prettyMove.coralRemovedSquares.length > 0) {
+            const moveSquares = (m.coralRemovedSquares || []).sort().join(',');
+            const prettySquares = prettyMove.coralRemovedSquares.sort().join(',');
+            if (moveSquares !== prettySquares) return false;
+        }
+
+        return true;
+    });
+
+    // If move is invalid, find a valid alternative
+    if (!isValidMove) {
+        // Try to find a move with the same from/to but different coral flags
+        const alternativeMove = currentLegalMoves.find(
+            (m: any) => m.from === prettyMove.from && m.to === prettyMove.to,
+        );
+
+        if (alternativeMove) {
+            // Use the alternative move (with correct coral flags)
+            return {
+                move: {
+                    from: alternativeMove.from,
+                    to: alternativeMove.to,
+                    promotion: alternativeMove.promotion,
+                    whaleSecondSquare: alternativeMove.whaleSecondSquare,
+                    coralPlaced: alternativeMove.coralPlaced,
+                    coralRemoved: alternativeMove.coralRemoved,
+                    coralRemovedSquares: alternativeMove.coralRemovedSquares,
+                },
+                score: bestScore === -Infinity ? 0 : bestScore,
+                nodesEvaluated: totalNodesEvaluated,
+                depth: bestDepth,
+                elapsedMs: totalElapsed,
+            };
+        }
+
+        // If no alternative found with same from/to, fall back to first legal move
+        // This should never happen, but provides a safety net
+        if (currentLegalMoves.length > 0) {
+            const fallback = currentLegalMoves[0];
+            return {
+                move: {
+                    from: fallback.from,
+                    to: fallback.to,
+                    promotion: fallback.promotion,
+                    whaleSecondSquare: fallback.whaleSecondSquare,
+                    coralPlaced: fallback.coralPlaced,
+                    coralRemoved: fallback.coralRemoved,
+                    coralRemovedSquares: fallback.coralRemovedSquares,
+                },
+                score: bestScore === -Infinity ? 0 : bestScore,
+                nodesEvaluated: totalNodesEvaluated,
+                depth: bestDepth,
+                elapsedMs: totalElapsed,
+            };
+        } else {
+            // No legal moves available - this shouldn't happen, but return null move
+            return {
+                move: null,
+                score: bestScore === -Infinity ? 0 : bestScore,
+                nodesEvaluated: totalNodesEvaluated,
+                depth: bestDepth,
+                elapsedMs: totalElapsed,
+            };
+        }
+    }
 
     return {
         move: prettyMove,
