@@ -1,12 +1,18 @@
 import { onDocumentCreated } from 'firebase-functions/v2/firestore';
 import { admin } from '../init.js';
+import { getFunctionRegion } from '../utils/appCheckConfig.js';
 import { getDefaultSettings } from '../utils/helpers.js';
 
 /**
  * Automatically assign a unique discriminator to new users
  * Trigger on user document creation
  */
-export const onUserCreate = onDocumentCreated('users/{userId}', async (event) => {
+export const onUserCreate = onDocumentCreated(
+    {
+        document: 'users/{userId}',
+        region: getFunctionRegion(), // Match Firestore region for lower latency
+    },
+    async (event) => {
     try {
         const db = admin.firestore();
         const snap = event.data;
@@ -82,4 +88,5 @@ export const onUserCreate = onDocumentCreated('users/{userId}', async (event) =>
         console.error('Error assigning discriminator:', error);
         return null;
     }
-});
+    },
+);

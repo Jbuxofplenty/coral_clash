@@ -2,6 +2,7 @@ import { GAME_VERSION } from '@jbuxofplenty/coral-clash';
 import { onDocumentCreated } from 'firebase-functions/v2/firestore';
 import { admin } from '../init.js';
 import { makeComputerMoveHelper } from '../routes/game.js';
+import { getFunctionRegion } from '../utils/appCheckConfig.js';
 import { getRandomComputerUser, isComputerUser } from '../utils/computerUsers.js';
 import { formatDisplayName, initializeGameState, serverTimestamp } from '../utils/helpers.js';
 import { sendMatchFoundNotification } from '../utils/notifications.js';
@@ -162,30 +163,24 @@ export async function tryMatchPlayers(newUserId) {
             return;
         }
 
-        // Mark both as matched (optimistic lock)
-        // Use a transaction to ensure atomicity
-        const batch = db.batch();
-        batch.update(db.collection('matchmakingQueue').doc(newUserId), { status: 'matched' });
-        batch.update(db.collection('matchmakingQueue').doc(opponentId), { status: 'matched' });
-        await batch.commit();
-
-        // Create the game
+        // Create the game first (this is the critical path for user experience)
+        // Then clean up queue entries
         await createMatchedGame(newUserId, opponentId);
 
-        // Remove real user from queue
+        // Remove real user from queue and update opponent status in a single batch
         // Computer users stay in queue (they're always available)
-        const removeBatch = db.batch();
-        removeBatch.delete(db.collection('matchmakingQueue').doc(newUserId));
+        const cleanupBatch = db.batch();
+        cleanupBatch.delete(db.collection('matchmakingQueue').doc(newUserId));
         if (!isComputerUser(opponentId)) {
             // Only remove opponent if they're not a computer user
-            removeBatch.delete(db.collection('matchmakingQueue').doc(opponentId));
+            cleanupBatch.delete(db.collection('matchmakingQueue').doc(opponentId));
         } else {
             // Reset computer user's status back to searching so they can match again
-            removeBatch.update(db.collection('matchmakingQueue').doc(opponentId), {
+            cleanupBatch.update(db.collection('matchmakingQueue').doc(opponentId), {
                 status: 'searching',
             });
         }
-        await removeBatch.commit();
+        await cleanupBatch.commit();
     } catch (error) {
         console.error('Error in tryMatchPlayers:', error);
         // Don't throw - this is called asynchronously
@@ -203,9 +198,22 @@ async function createMatchedGame(player1Id, player2Id) {
         const whitePlayerId = randomizeColors ? player1Id : player2Id;
         const blackPlayerId = randomizeColors ? player2Id : player1Id;
 
-        // Get both players' data from users collection
-        const player1Doc = await db.collection('users').doc(player1Id).get();
-        const player2Doc = await db.collection('users').doc(player2Id).get();
+        // Parallelize all Firestore reads for better performance
+        const [
+            player1Doc,
+            player2Doc,
+            player1SettingsDoc,
+            player2SettingsDoc,
+            player1QueueDoc,
+            player2QueueDoc,
+        ] = await Promise.all([
+            db.collection('users').doc(player1Id).get(),
+            db.collection('users').doc(player2Id).get(),
+            db.collection('users').doc(player1Id).collection('settings').doc('preferences').get(),
+            db.collection('users').doc(player2Id).collection('settings').doc('preferences').get(),
+            db.collection('matchmakingQueue').doc(player1Id).get(),
+            db.collection('matchmakingQueue').doc(player2Id).get(),
+        ]);
 
         if (!player1Doc.exists || !player2Doc.exists) {
             throw new Error('One or both players not found');
@@ -213,32 +221,12 @@ async function createMatchedGame(player1Id, player2Id) {
 
         const player1Data = player1Doc.data();
         const player2Data = player2Doc.data();
-
-        // Get player 1's avatar from settings
-        const player1SettingsDoc = await db
-            .collection('users')
-            .doc(player1Id)
-            .collection('settings')
-            .doc('preferences')
-            .get();
         const player1Settings = player1SettingsDoc.exists ? player1SettingsDoc.data() : {};
-
-        // Get player 2's avatar from settings
-        const player2SettingsDoc = await db
-            .collection('users')
-            .doc(player2Id)
-            .collection('settings')
-            .doc('preferences')
-            .get();
         const player2Settings = player2SettingsDoc.exists ? player2SettingsDoc.data() : {};
 
         // Format display names
         const player1Name = formatDisplayName(player1Data.displayName, player1Data.discriminator);
         const player2Name = formatDisplayName(player2Data.displayName, player2Data.discriminator);
-
-        // Get players' queue data to retrieve time controls
-        const player1QueueDoc = await db.collection('matchmakingQueue').doc(player1Id).get();
-        const player2QueueDoc = await db.collection('matchmakingQueue').doc(player2Id).get();
 
         // Use player1's time control (they initiated the match), or default to unlimited
         const timeControl = (player1QueueDoc.exists && player1QueueDoc.data().timeControl) ||
@@ -284,51 +272,69 @@ async function createMatchedGame(player1Id, player2Id) {
         };
 
         const gameRef = await db.collection('games').add(gameData);
+        const gameId = gameRef.id;
 
-        // Send notification to player1 (always a real user in matchmaking)
-        await db.collection('notifications').add({
+        // Prepare notification data for player1
+        const player1NotificationData = {
             userId: player1Id,
             type: 'match_found',
-            gameId: gameRef.id,
+            gameId: gameId,
             opponentId: player2Id,
             opponentName: player2Name, // This will be the computer user's mocked display name (e.g., "Alex#2847")
             opponentAvatarKey: player2Settings.avatarKey || 'dolphin',
             read: false,
             createdAt: serverTimestamp(),
-        });
+        };
 
-        // Send push notification to player1
-        sendMatchFoundNotification(
+        // Parallelize notification operations for player1 (Firestore write + push notification)
+        // Firestore notification write is critical for frontend real-time listener
+        const player1NotificationPromise = db
+            .collection('notifications')
+            .add(player1NotificationData);
+        const player1PushPromise = sendMatchFoundNotification(
             player1Id,
             player2Id,
             player2Name,
-            gameRef.id,
+            gameId,
             player2Settings.avatarKey || 'dolphin',
         ).catch((error) => console.error('Error sending match found push notification:', error));
 
+        // Wait for player1 notification to be written (critical path)
+        await player1NotificationPromise;
+        // Push notification can happen async
+        player1PushPromise.catch(() => {}); // Already handled above
+
         // Only send notification to player2 if they're not a computer user
         if (!isOpponentComputer) {
-            await db.collection('notifications').add({
+            const player2NotificationData = {
                 userId: player2Id,
                 type: 'match_found',
-                gameId: gameRef.id,
+                gameId: gameId,
                 opponentId: player1Id,
                 opponentName: player1Name,
                 opponentAvatarKey: player1Settings.avatarKey || 'dolphin',
                 read: false,
                 createdAt: serverTimestamp(),
-            });
+            };
 
-            // Send push notification to player2
-            sendMatchFoundNotification(
+            // Parallelize notification operations for player2
+            const player2NotificationPromise = db
+                .collection('notifications')
+                .add(player2NotificationData);
+            const player2PushPromise = sendMatchFoundNotification(
                 player2Id,
                 player1Id,
                 player1Name,
-                gameRef.id,
+                gameId,
                 player1Settings.avatarKey || 'dolphin',
             ).catch((error) =>
                 console.error('Error sending match found push notification:', error),
             );
+
+            // Wait for player2 notification to be written
+            await player2NotificationPromise;
+            // Push notification can happen async
+            player2PushPromise.catch(() => {}); // Already handled above
         }
 
         // If computer user is white (goes first), trigger their move immediately
@@ -338,6 +344,7 @@ async function createMatchedGame(player1Id, player2Id) {
                 `[createMatchedGame] Computer user ${player2Id} is white, triggering first move`,
             );
             // Small delay to ensure game document is written, then trigger move
+            // Reduced delay for faster game start
             setTimeout(async () => {
                 try {
                     // Fetch fresh game data to ensure we have the latest
@@ -355,7 +362,7 @@ async function createMatchedGame(player1Id, player2Id) {
                         error,
                     );
                 }
-            }, 500); // 500ms delay
+            }, 200); // Reduced to 200ms for faster response
         } else if (isOpponentComputer && whitePlayerId === player1Id && isComputerUser(player1Id)) {
             // Handle case where player1 is also a computer user (shouldn't happen in matchmaking, but handle it)
             console.log(
@@ -377,10 +384,10 @@ async function createMatchedGame(player1Id, player2Id) {
                         error,
                     );
                 }
-            }, 500);
+            }, 200); // Reduced to 200ms for faster response
         }
 
-        return gameRef.id;
+        return gameId;
     } catch (error) {
         console.error('Error creating matched game:', error);
         throw error;
@@ -391,44 +398,46 @@ async function createMatchedGame(player1Id, player2Id) {
  * Firestore trigger: When a player joins the queue, try to match them
  * This provides real-time matching without polling
  */
-export const onPlayerJoinQueue = onDocumentCreated('matchmakingQueue/{userId}', async (event) => {
-    try {
-        const snap = event.data;
-        if (!snap) return;
+export const onPlayerJoinQueue = onDocumentCreated(
+    {
+        document: 'matchmakingQueue/{userId}',
+        region: getFunctionRegion(), // Match Firestore region for lower latency
+    },
+    async (event) => {
+        try {
+            const snap = event.data;
+            if (!snap) return;
 
-        const userId = event.params.userId;
-        const userData = snap.data();
+            const userId = event.params.userId;
+            const userData = snap.data();
 
-        // Only try matching if status is searching
-        if (userData.status !== 'searching') {
+            // Only try matching if status is searching
+            if (userData.status !== 'searching') {
+                return null;
+            }
+
+            // Try matching immediately - Firestore triggers fire after document is committed,
+            // so no delay is needed. The query will see all committed documents.
+            await tryMatchPlayers(userId);
+
+            // Retry after a short delay to catch users who join very close together
+            // This helps ensure that if User A joins and User B joins shortly after,
+            // User A will retry and find User B. Use a shorter delay for better UX.
+            setTimeout(async () => {
+                const userDoc = await admin
+                    .firestore()
+                    .collection('matchmakingQueue')
+                    .doc(userId)
+                    .get();
+                if (userDoc.exists && userDoc.data().status === 'searching') {
+                    await tryMatchPlayers(userId);
+                }
+            }, 500); // Reduced to 500ms for faster matching
+
+            return null;
+        } catch (error) {
+            console.error('Error in onPlayerJoinQueue trigger:', error);
             return null;
         }
-
-        // Wait a brief moment to avoid race conditions
-        // This delay helps ensure that if multiple users join simultaneously,
-        // they have time to be written to Firestore before we query
-        await new Promise((resolve) => setTimeout(resolve, 1000)); // Increased to 1 second
-
-        // Try matching immediately
-        await tryMatchPlayers(userId);
-
-        // Also retry after a short delay to catch users who join very close together
-        // This helps ensure that if User A joins and User B joins 500ms later,
-        // User A will retry and find User B
-        setTimeout(async () => {
-            const userDoc = await admin
-                .firestore()
-                .collection('matchmakingQueue')
-                .doc(userId)
-                .get();
-            if (userDoc.exists && userDoc.data().status === 'searching') {
-                await tryMatchPlayers(userId);
-            }
-        }, 2000); // Retry after 2 seconds
-
-        return null;
-    } catch (error) {
-        console.error('Error in onPlayerJoinQueue trigger:', error);
-        return null;
-    }
-});
+    },
+);

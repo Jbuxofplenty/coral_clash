@@ -2,6 +2,7 @@ import { onDocumentCreated } from 'firebase-functions/v2/firestore';
 import { admin } from '../init.js';
 import { isComputerUser } from '../utils/computerUsers.js';
 import { makeComputerMoveHelper } from '../routes/game.js';
+import { getFunctionRegion } from '../utils/appCheckConfig.js';
 
 const db = admin.firestore();
 
@@ -9,7 +10,12 @@ const db = admin.firestore();
  * Firestore trigger: When a game is created, check if computer user should make first move
  * This handles the case where computer user is white (goes first)
  */
-export const onGameCreate = onDocumentCreated('games/{gameId}', async (event) => {
+export const onGameCreate = onDocumentCreated(
+    {
+        document: 'games/{gameId}',
+        region: getFunctionRegion(), // Match Firestore region for lower latency
+    },
+    async (event) => {
     try {
         const snap = event.data;
         if (!snap) return;
@@ -61,5 +67,6 @@ export const onGameCreate = onDocumentCreated('games/{gameId}', async (event) =>
         // Don't throw - we don't want to fail game creation
         return null;
     }
-});
+    },
+);
 

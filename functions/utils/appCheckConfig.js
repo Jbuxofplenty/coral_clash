@@ -42,13 +42,21 @@ export const shouldEnforceAppCheck = () => {
 };
 
 /**
+ * Get the function region (defaults to us-central1 to match Firestore)
+ * This ensures functions and Firestore are in the same region for lower latency
+ */
+export const getFunctionRegion = () => process.env.FUNCTION_REGION || 'us-central1';
+
+/**
  * Get App Check configuration for onCall functions
  *
  * Returns an object with:
  * - consumeAppCheckToken: true (always consume to log usage)
  * - enforceAppCheck: based on ENFORCE_APP_CHECK env var
+ * - region: Function region (defaults to us-central1 to match Firestore)
  */
 export const getAppCheckConfig = () => ({
     consumeAppCheckToken: true, // Always consume to track usage
     enforceAppCheck: shouldEnforceAppCheck(), // Only block if env var is true
+    region: getFunctionRegion(), // Match Firestore region for lower latency
 });

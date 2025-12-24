@@ -1,6 +1,7 @@
 import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { admin } from '../init.js';
 import { isComputerUser } from '../utils/computerUsers.js';
+import { getFunctionRegion } from '../utils/appCheckConfig.js';
 
 const db = admin.firestore();
 
@@ -8,7 +9,12 @@ const db = admin.firestore();
  * Scheduled function: Clean up stale matchmaking entries
  * Remove entries older than 5 minutes
  */
-export const cleanupStaleMatchmakingEntries = onSchedule('every 10 minutes', async (_event) => {
+export const cleanupStaleMatchmakingEntries = onSchedule(
+    {
+        schedule: 'every 10 minutes',
+        region: getFunctionRegion(), // Match Firestore region for lower latency
+    },
+    async (_event) => {
     try {
         const twoMinutesAgo = admin.firestore.Timestamp.fromDate(
             new Date(Date.now() - 2 * 60 * 1000),
@@ -54,4 +60,5 @@ export const cleanupStaleMatchmakingEntries = onSchedule('every 10 minutes', asy
         console.error('Error cleaning up stale matchmaking entries:', error);
         return null;
     }
-});
+    },
+);

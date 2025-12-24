@@ -11,7 +11,7 @@ import {
 } from '@jbuxofplenty/coral-clash';
 import { HttpsError, onCall, onRequest } from 'firebase-functions/v2/https';
 import { admin } from '../init.js';
-import { getAppCheckConfig } from '../utils/appCheckConfig.js';
+import { getAppCheckConfig, getFunctionRegion } from '../utils/appCheckConfig.js';
 import { getComputerUserData, isComputerUser } from '../utils/computerUsers.js';
 import { getGameResult, validateMove } from '../utils/gameValidator.js';
 import { validateClientVersion } from '../utils/gameVersion.js';
@@ -199,6 +199,7 @@ async function createGameHandler(request) {
                 `[createGameHandler] Computer user ${opponentId} is white, triggering first move`,
             );
             // Small delay to ensure game document is written, then trigger move
+            // Reduced delay for faster game start
             setTimeout(async () => {
                 try {
                     // Fetch fresh game data to ensure we have the latest
@@ -216,7 +217,7 @@ async function createGameHandler(request) {
                         error,
                     );
                 }
-            }, 500); // 500ms delay
+            }, 200); // Reduced to 200ms for faster response
         }
     } else {
         // Send notification to opponent
@@ -493,6 +494,7 @@ export const respondToGameInvite = onCall(getAppCheckConfig(), async (request) =
                     `[respondToGameInvite] Computer user ${userId} is white, triggering first move`,
                 );
                 // Small delay to ensure game document update is written, then trigger move
+                // Reduced delay for faster game start
                 setTimeout(async () => {
                     try {
                         // Fetch fresh game data to ensure we have the latest
@@ -510,7 +512,7 @@ export const respondToGameInvite = onCall(getAppCheckConfig(), async (request) =
                             error,
                         );
                     }
-                }, 500); // 500ms delay
+                }, 200); // Reduced to 200ms for faster response
             }
         }
 
@@ -1518,39 +1520,44 @@ export const checkGameTime = onCall(getAppCheckConfig(), async (request) => {
  * HTTP endpoint for Cloud Tasks to check time expiration
  * This is called at the exact time when a player's time should expire
  */
-export const handleTimeExpiration = onRequest(async (req, res) => {
-    try {
-        // Verify this is a Cloud Tasks request (basic security)
-        const { gameId } = req.body;
+export const handleTimeExpiration = onRequest(
+    {
+        region: getFunctionRegion(), // Match Firestore region for lower latency
+    },
+    async (req, res) => {
+        try {
+            // Verify this is a Cloud Tasks request (basic security)
+            const { gameId } = req.body;
 
-        if (!gameId) {
-            res.status(400).send('Missing gameId');
-            return;
+            if (!gameId) {
+                res.status(400).send('Missing gameId');
+                return;
+            }
+
+            const gameDoc = await db.collection('games').doc(gameId).get();
+
+            if (!gameDoc.exists) {
+                res.status(404).send('Game not found');
+                return;
+            }
+
+            const gameData = gameDoc.data();
+
+            // Check and handle time expiration
+            const result = await checkAndHandleTimeExpiration(gameId, gameData);
+
+            res.status(200).json({
+                success: true,
+                timeExpired: result.timeExpired,
+                winner: result.winner || null,
+                loser: result.loser || null,
+            });
+        } catch (error) {
+            console.error('Error in handleTimeExpiration:', error);
+            res.status(500).send('Internal error');
         }
-
-        const gameDoc = await db.collection('games').doc(gameId).get();
-
-        if (!gameDoc.exists) {
-            res.status(404).send('Game not found');
-            return;
-        }
-
-        const gameData = gameDoc.data();
-
-        // Check and handle time expiration
-        const result = await checkAndHandleTimeExpiration(gameId, gameData);
-
-        res.status(200).json({
-            success: true,
-            timeExpired: result.timeExpired,
-            winner: result.winner || null,
-            loser: result.loser || null,
-        });
-    } catch (error) {
-        console.error('Error in handleTimeExpiration:', error);
-        res.status(500).send('Internal error');
-    }
-});
+    },
+);
 
 /**
  * Resign from a game

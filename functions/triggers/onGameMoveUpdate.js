@@ -2,6 +2,7 @@ import { CloudTasksClient } from '@google-cloud/tasks';
 import { onDocumentUpdated } from 'firebase-functions/v2/firestore';
 import { admin } from '../init.js';
 import { isComputerUser } from '../utils/computerUsers.js';
+import { getFunctionRegion } from '../utils/appCheckConfig.js';
 import { increment, serverTimestamp } from '../utils/helpers.js';
 import { makeComputerMoveHelper } from '../routes/game.js';
 
@@ -152,7 +153,12 @@ async function checkAndHandleTimeExpiration(gameId, gameData) {
  * Firestore trigger: Schedule time expiration check when lastMoveTime is updated
  * This ensures we check for timeout at the exact moment time runs out
  */
-export const onGameMoveUpdate = onDocumentUpdated('games/{gameId}', async (event) => {
+export const onGameMoveUpdate = onDocumentUpdated(
+    {
+        document: 'games/{gameId}',
+        region: getFunctionRegion(), // Match Firestore region for lower latency
+    },
+    async (event) => {
     try {
         const db = admin.firestore();
         const change = event.data;
@@ -300,4 +306,5 @@ export const onGameMoveUpdate = onDocumentUpdated('games/{gameId}', async (event
         // Don't throw - we don't want to fail the move because of scheduling issues
         return null;
     }
-});
+    },
+);

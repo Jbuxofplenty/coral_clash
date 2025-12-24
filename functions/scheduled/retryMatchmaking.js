@@ -1,6 +1,7 @@
 import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { admin } from '../init.js';
 import { isComputerUser } from '../utils/computerUsers.js';
+import { getFunctionRegion } from '../utils/appCheckConfig.js';
 import { tryMatchPlayers } from '../triggers/onPlayerJoinQueue.js';
 
 const db = admin.firestore();
@@ -11,7 +12,12 @@ const db = admin.firestore();
  * and attempts to match them with computer users if no real players are available
  * Note: Firebase Cloud Scheduler minimum interval is 1 minute
  */
-export const retryMatchmaking = onSchedule('every 1 minutes', async (_event) => {
+export const retryMatchmaking = onSchedule(
+    {
+        schedule: 'every 1 minutes',
+        region: getFunctionRegion(), // Match Firestore region for lower latency
+    },
+    async (_event) => {
     try {
         const now = admin.firestore.Timestamp.now();
 
@@ -73,5 +79,6 @@ export const retryMatchmaking = onSchedule('every 1 minutes', async (_event) => 
         console.error('Error retrying matchmaking:', error);
         return null;
     }
-});
+    },
+);
 

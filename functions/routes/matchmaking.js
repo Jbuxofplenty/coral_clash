@@ -152,6 +152,7 @@ async function updateMatchmakingHeartbeatHandler(request) {
         // Import tryMatchPlayers dynamically to avoid circular dependencies
         const { tryMatchPlayers } = await import('../triggers/onPlayerJoinQueue.js');
         // Trigger matching asynchronously (don't wait for it)
+        // This allows the heartbeat to return quickly while matching happens in background
         tryMatchPlayers(userId).catch((error) => {
             console.error(
                 `[updateMatchmakingHeartbeat] Error triggering match for ${userId}:`,

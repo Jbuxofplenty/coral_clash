@@ -1,6 +1,7 @@
 import { onDocumentCreated } from 'firebase-functions/v2/firestore';
 import { admin } from '../init.js';
 import { isComputerUser } from '../utils/computerUsers.js';
+import { getFunctionRegion } from '../utils/appCheckConfig.js';
 import { serverTimestamp } from '../utils/helpers.js';
 
 const db = admin.firestore();
@@ -10,7 +11,12 @@ const db = admin.firestore();
  * When a friend request is created and the recipient is a computer user,
  * automatically accept it
  */
-export const onFriendRequestCreate = onDocumentCreated('friendRequests/{requestId}', async (event) => {
+export const onFriendRequestCreate = onDocumentCreated(
+    {
+        document: 'friendRequests/{requestId}',
+        region: getFunctionRegion(), // Match Firestore region for lower latency
+    },
+    async (event) => {
     try {
         const snap = event.data;
         if (!snap) return;
@@ -61,5 +67,6 @@ export const onFriendRequestCreate = onDocumentCreated('friendRequests/{requestI
         // Don't throw - we don't want to fail the friend request creation
         return null;
     }
-});
+    },
+);
 
