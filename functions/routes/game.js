@@ -643,12 +643,12 @@ export const makeMove = onCall(getAppCheckConfig(), async (request) => {
             gameState: validation.gameState,
             fen: validation.newFen,
             updatedAt: serverTimestamp(),
+            lastMoveTime: serverTimestamp(), // Always update so triggers can detect moves (even without time control)
         };
 
         // Update time tracking if enabled
         if (gameData.timeControl?.totalSeconds) {
             updateData.timeRemaining = updatedTimeRemaining;
-            updateData.lastMoveTime = serverTimestamp();
         }
 
         if (gameResult.isOver) {
@@ -1157,12 +1157,12 @@ export async function makeComputerMoveHelper(gameId, gameData = null) {
         gameState: validation.gameState,
         fen: validation.newFen,
         updatedAt: serverTimestamp(),
+        lastMoveTime: serverTimestamp(), // Always update so triggers can detect moves (even without time control)
     };
 
     // Update time tracking if enabled
     if (gameData.timeControl?.totalSeconds) {
         updateData.timeRemaining = updatedTimeRemaining;
-        updateData.lastMoveTime = serverTimestamp();
     }
 
     // Cancel old timeout task before creating new one (if game continues) or clearing (if game over)
@@ -1233,7 +1233,7 @@ export async function makeComputerMoveHelper(gameId, gameData = null) {
             }
         }
 
-        // Notify player that opponent made a move
+        // Notify player that opponent made a move (non-blocking)
         // For legacy 'computer' games, use 'Computer'
         // For mocked computer users, use their display name from game data
         const isLegacyComputer = computerUserId === 'computer';
@@ -1242,7 +1242,8 @@ export async function makeComputerMoveHelper(gameId, gameData = null) {
             : gameData.opponentDisplayName || 'Computer';
         const computerIdForNotification = computerUserId;
 
-        await sendOpponentMoveNotification(
+        // Send notification asynchronously (don't await to avoid blocking)
+        sendOpponentMoveNotification(
             gameData.creatorId,
             gameId,
             computerIdForNotification,

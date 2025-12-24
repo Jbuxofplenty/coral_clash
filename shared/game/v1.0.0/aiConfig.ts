@@ -175,9 +175,9 @@ const GAME_ENDING = {
  */
 const SEARCH_DEPTH = {
     random: 0, // No search, just random moves
-    easy: 6, // Allow up to 6 plies (will typically reach 3-4 in 30s)
-    medium: 10, // Allow up to 10 plies (will typically reach 5-6 in 45s)
-    hard: 12, // Allow up to 12 plies (will typically reach 6-7 in 60s)
+    easy: 4, // Allow up to 4 plies (will typically reach 2-3 in 5s) - reduced for faster moves
+    medium: 6, // Allow up to 6 plies (will typically reach 3-4 in 10s) - reduced for faster moves
+    hard: 8, // Allow up to 8 plies (will typically reach 4-5 in 15s) - reduced for faster moves
 };
 
 /**
@@ -197,17 +197,17 @@ const ASPIRATION_WINDOW = {
  */
 const TIME_CONTROL = {
     easy: {
-        maxTimeMs: 30000, // 30 seconds (increased from 20s to account for quiescence search overhead)
+        maxTimeMs: 5000, // 5 seconds - fast enough for good moves, keeps UX responsive
         minTimeMs: 100,
         progressIntervalMs: 200,
     },
     medium: {
-        maxTimeMs: 45000, // 45 seconds (increased from 30s)
+        maxTimeMs: 10000, // 10 seconds - balanced between strength and speed
         minTimeMs: 100,
         progressIntervalMs: 200,
     },
     hard: {
-        maxTimeMs: 60000, // 60 seconds (increased from 40s for more thorough analysis with quiescence)
+        maxTimeMs: 15000, // 15 seconds - stronger play while still being responsive
         minTimeMs: 100,
         progressIntervalMs: 200,
     },
@@ -230,9 +230,7 @@ const MOVE_PENALTIES = {
  * @param difficulty - Difficulty level ('easy', 'medium', 'hard')
  * @returns Time control object with maxTimeMs, minTimeMs, and progressIntervalMs
  */
-export function getTimeControlForDifficulty(
-    difficulty: 'easy' | 'medium' | 'hard',
-): {
+export function getTimeControlForDifficulty(difficulty: 'easy' | 'medium' | 'hard'): {
     maxTimeMs: number;
     minTimeMs: number;
     progressIntervalMs: number;
@@ -296,6 +294,5 @@ export {
     SEARCH_DEPTH,
     TACTICAL_BONUSES,
     TIME_CONTROL,
-    WHALE_SAFETY
+    WHALE_SAFETY,
 };
-
