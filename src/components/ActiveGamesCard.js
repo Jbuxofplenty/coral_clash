@@ -35,11 +35,15 @@ export default function ActiveGamesCard({
             return;
         }
 
+        // Determine opponentId for proper board selection
+        const opponentId = game.creatorId === user.uid ? game.opponentId : game.creatorId;
+        
         navigation.navigate('Game', {
             gameId: game.id,
             gameState: game.gameState,
             opponentType: game.opponentType, // 'computer' or undefined for PvP
             opponentData: {
+                id: opponentId, // Include id to distinguish legacy computer ('computer') from pseudo-computer users
                 displayName: game.opponentDisplayName,
                 avatarKey: game.opponentAvatarKey,
             },

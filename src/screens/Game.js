@@ -70,15 +70,23 @@ export default function Game({ route }) {
     );
 
     // Select the appropriate board component
-    // Use ComputerCoralClashBoard for: computer games or offline games without opponentType
+    // Use ComputerCoralClashBoard for: legacy computer games (displayName === 'Computer' or missing) or offline games
     // Use PassAndPlayCoralClashBoard for: pass-and-play games
-    // Use PvPCoralClashBoard for: online PvP games
+    // Use PvPCoralClashBoard for: online PvP games and pseudo-computer users (have displayName like 'Alex', 'Jordan')
     let BoardComponent;
     if (opponentType === 'passandplay') {
         BoardComponent = PassAndPlayCoralClashBoard;
-    } else if (opponentType === 'computer' || !gameId) {
+    } else if (!gameId) {
+        // Offline game - always use ComputerCoralClashBoard
+        BoardComponent = ComputerCoralClashBoard;
+    } else if (
+        opponentType === 'computer' &&
+        (!opponentData?.displayName || opponentData.displayName === 'Computer')
+    ) {
+        // Legacy computer game (no displayName or displayName === 'Computer')
         BoardComponent = ComputerCoralClashBoard;
     } else {
+        // PvP game or pseudo-computer user (opponentType === 'computer' but has a displayName like 'Alex', 'Jordan')
         BoardComponent = PvPCoralClashBoard;
     }
 
