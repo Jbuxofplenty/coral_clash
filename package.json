@@ -77,7 +77,7 @@
         "expo-updates": "~29.0.12",
         "firebase": "^12.4.0",
         "galio-framework": "^0.9.5",
-        "react": "19.1.0",
+        "react": "19.1.2",
         "react-native": "0.81.5",
         "react-native-gesture-handler": "~2.28.0",
         "react-native-google-mobile-ads": "^16.0.0",
@@ -118,7 +118,7 @@
         "jest-expo": "~54.0.13",
         "lint-staged": "^16.2.6",
         "prettier": "^3.6.2",
-        "react-dom": "19.1.0",
+        "react-dom": "19.1.2",
         "react-refresh": "^0.18.0",
         "typescript": "~5.9.3"
     },
