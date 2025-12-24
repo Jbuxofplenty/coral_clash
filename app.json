@@ -1,141 +1,250 @@
 {
-    "expo": {
-        "name": "Coral Clash",
-        "description": "Coral Clash Board Game",
-        "slug": "coral-clash",
-        "scheme": "coralclash",
-        "platforms": ["ios", "android"],
-        "version": "1.0.2",
-        "orientation": "portrait",
-        "icon": "./src/assets/icons/app_icon.png",
-        "splash": {
-            "image": "./src/assets/images/splash.png",
-            "resizeMode": "contain",
-            "backgroundColor": "#2a5298"
-        },
-        "updates": {
-            "fallbackToCacheTimeout": 0,
-            "url": "https://u.expo.dev/416801e2-5620-4693-8729-161decbd0b5b"
-        },
-        "assetBundlePatterns": ["**/*"],
-        "ios": {
-            "googleServicesFile": "./GoogleService-Info.plist",
-            "supportsTablet": false,
-            "bundleIdentifier": "com.jbuxofplenty.coralclash",
-            "runtimeVersion": "1.0.2",
-            "appleTeamId": "FWV22U8U39",
-            "associatedDomains": ["webcredentials:coral-clash.firebaseapp.com"],
-            "usesAppleSignIn": true,
-            "infoPlist": {
-                "ITSAppUsesNonExemptEncryption": false,
-                "NSUserTrackingUsageDescription": "We use tracking to provide personalized ads and improve your gaming experience. Your privacy is important to us.",
-                "CFBundleURLTypes": [
-                    {
-                        "CFBundleURLSchemes": ["coralclash"]
-                    }
-                ],
-                "SKAdNetworkItems": [
-                    { "SKAdNetworkIdentifier": "cstr6suwn9.skadnetwork" },
-                    { "SKAdNetworkIdentifier": "4fzdc2evr5.skadnetwork" },
-                    { "SKAdNetworkIdentifier": "4pfyvq9l8r.skadnetwork" },
-                    { "SKAdNetworkIdentifier": "2fnua5tdw4.skadnetwork" },
-                    { "SKAdNetworkIdentifier": "ydx93a7ass.skadnetwork" },
-                    { "SKAdNetworkIdentifier": "5a6flpkh64.skadnetwork" },
-                    { "SKAdNetworkIdentifier": "p78axxw29g.skadnetwork" },
-                    { "SKAdNetworkIdentifier": "v72qych5uu.skadnetwork" },
-                    { "SKAdNetworkIdentifier": "ludvb6z3bs.skadnetwork" },
-                    { "SKAdNetworkIdentifier": "cp8zw746q7.skadnetwork" },
-                    { "SKAdNetworkIdentifier": "3sh42y64q3.skadnetwork" },
-                    { "SKAdNetworkIdentifier": "c6k4g5qg8m.skadnetwork" },
-                    { "SKAdNetworkIdentifier": "s39g8k73mm.skadnetwork" },
-                    { "SKAdNetworkIdentifier": "3qy4746246.skadnetwork" },
-                    { "SKAdNetworkIdentifier": "f38h382jlk.skadnetwork" },
-                    { "SKAdNetworkIdentifier": "hs6bdukanm.skadnetwork" },
-                    { "SKAdNetworkIdentifier": "v4nckx4at3.skadnetwork" },
-                    { "SKAdNetworkIdentifier": "wzmmz9fp6w.skadnetwork" },
-                    { "SKAdNetworkIdentifier": "yclnxrl5pm.skadnetwork" },
-                    { "SKAdNetworkIdentifier": "t38b2kh725.skadnetwork" },
-                    { "SKAdNetworkIdentifier": "7ug5zh24hu.skadnetwork" },
-                    { "SKAdNetworkIdentifier": "gta9lk7p23.skadnetwork" },
-                    { "SKAdNetworkIdentifier": "vutu7akeur.skadnetwork" },
-                    { "SKAdNetworkIdentifier": "y5ghdn5j9k.skadnetwork" },
-                    { "SKAdNetworkIdentifier": "n6fk4nfna4.skadnetwork" },
-                    { "SKAdNetworkIdentifier": "v9wttpbfk9.skadnetwork" },
-                    { "SKAdNetworkIdentifier": "n38lu8286q.skadnetwork" },
-                    { "SKAdNetworkIdentifier": "47vhws6wlr.skadnetwork" },
-                    { "SKAdNetworkIdentifier": "kbd757ywx3.skadnetwork" },
-                    { "SKAdNetworkIdentifier": "9t245vhmpl.skadnetwork" },
-                    { "SKAdNetworkIdentifier": "eh6m2bh4zr.skadnetwork" },
-                    { "SKAdNetworkIdentifier": "a2p9lx4jpn.skadnetwork" },
-                    { "SKAdNetworkIdentifier": "22mmun2rn5.skadnetwork" },
-                    { "SKAdNetworkIdentifier": "4468km3ulz.skadnetwork" },
-                    { "SKAdNetworkIdentifier": "2u9pt9hc89.skadnetwork" },
-                    { "SKAdNetworkIdentifier": "8s468mfl3y.skadnetwork" },
-                    { "SKAdNetworkIdentifier": "klf5c3l5u5.skadnetwork" },
-                    { "SKAdNetworkIdentifier": "ppxm28t8ap.skadnetwork" },
-                    { "SKAdNetworkIdentifier": "ecpz2srf59.skadnetwork" },
-                    { "SKAdNetworkIdentifier": "uw77j35x4d.skadnetwork" },
-                    { "SKAdNetworkIdentifier": "pwa73g5rt2.skadnetwork" },
-                    { "SKAdNetworkIdentifier": "mlmmfzh3r3.skadnetwork" },
-                    { "SKAdNetworkIdentifier": "578prtvx9j.skadnetwork" },
-                    { "SKAdNetworkIdentifier": "4dzt52r2t5.skadnetwork" },
-                    { "SKAdNetworkIdentifier": "e5fvkxwrpn.skadnetwork" },
-                    { "SKAdNetworkIdentifier": "8c4e2ghe7u.skadnetwork" },
-                    { "SKAdNetworkIdentifier": "zq492l623r.skadnetwork" },
-                    { "SKAdNetworkIdentifier": "3qcr597p9d.skadnetwork" }
-                ]
-            }
-        },
-        "plugins": [
-            "expo-font",
-            "@react-native-google-signin/google-signin",
-            "expo-apple-authentication",
-            "expo-tracking-transparency",
-            [
-                "expo-notifications",
-                {
-                    "icon": "./src/assets/icons/android_icon.png",
-                    "color": "#2a5298"
-                }
-            ],
-            [
-                "react-native-google-mobile-ads",
-                {
-                    "androidAppId": "ca-app-pub-8519782324189160~6327493409",
-                    "iosAppId": "ca-app-pub-8519782324189160~8486752889",
-                    "userTrackingUsageDescription": "This identifier will be used to deliver personalized ads to you."
-                }
-            ],
-            "@react-native-firebase/app",
-            "./plugins/with-modular-headers.js"
-        ],
-        "android": {
-            "googleServicesFile": "./google-services.json",
-            "package": "com.jbuxofplenty.coralclash",
-            "runtimeVersion": {
-                "policy": "appVersion"
-            },
-            "intentFilters": [
-                {
-                    "action": "VIEW",
-                    "autoVerify": true,
-                    "data": [
-                        {
-                            "scheme": "https",
-                            "host": "coral-clash.firebaseapp.com"
-                        },
-                        {
-                            "scheme": "coralclash"
-                        }
-                    ],
-                    "category": ["BROWSABLE", "DEFAULT"]
-                }
+  "expo": {
+    "name": "Coral Clash",
+    "description": "Coral Clash Board Game",
+    "slug": "coral-clash",
+    "scheme": "coralclash",
+    "platforms": [
+      "ios",
+      "android"
+    ],
+    "version": "1.0.2",
+    "orientation": "portrait",
+    "icon": "./src/assets/icons/app_icon.png",
+    "splash": {
+      "image": "./src/assets/images/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#2a5298"
+    },
+    "updates": {
+      "fallbackToCacheTimeout": 0,
+      "url": "https://u.expo.dev/416801e2-5620-4693-8729-161decbd0b5b"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "googleServicesFile": "./GoogleService-Info.plist",
+      "supportsTablet": false,
+      "bundleIdentifier": "com.jbuxofplenty.coralclash",
+      "runtimeVersion": "1.0.2",
+      "appleTeamId": "FWV22U8U39",
+      "associatedDomains": [
+        "webcredentials:coral-clash.firebaseapp.com"
+      ],
+      "usesAppleSignIn": true,
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSUserTrackingUsageDescription": "We use tracking to provide personalized ads and improve your gaming experience. Your privacy is important to us.",
+        "CFBundleURLTypes": [
+          {
+            "CFBundleURLSchemes": [
+              "coralclash"
             ]
-        },
-        "extra": {
-            "eas": {
-                "projectId": "416801e2-5620-4693-8729-161decbd0b5b"
-            }
+          }
+        ],
+        "SKAdNetworkItems": [
+          {
+            "SKAdNetworkIdentifier": "cstr6suwn9.skadnetwork"
+          },
+          {
+            "SKAdNetworkIdentifier": "4fzdc2evr5.skadnetwork"
+          },
+          {
+            "SKAdNetworkIdentifier": "4pfyvq9l8r.skadnetwork"
+          },
+          {
+            "SKAdNetworkIdentifier": "2fnua5tdw4.skadnetwork"
+          },
+          {
+            "SKAdNetworkIdentifier": "ydx93a7ass.skadnetwork"
+          },
+          {
+            "SKAdNetworkIdentifier": "5a6flpkh64.skadnetwork"
+          },
+          {
+            "SKAdNetworkIdentifier": "p78axxw29g.skadnetwork"
+          },
+          {
+            "SKAdNetworkIdentifier": "v72qych5uu.skadnetwork"
+          },
+          {
+            "SKAdNetworkIdentifier": "ludvb6z3bs.skadnetwork"
+          },
+          {
+            "SKAdNetworkIdentifier": "cp8zw746q7.skadnetwork"
+          },
+          {
+            "SKAdNetworkIdentifier": "3sh42y64q3.skadnetwork"
+          },
+          {
+            "SKAdNetworkIdentifier": "c6k4g5qg8m.skadnetwork"
+          },
+          {
+            "SKAdNetworkIdentifier": "s39g8k73mm.skadnetwork"
+          },
+          {
+            "SKAdNetworkIdentifier": "3qy4746246.skadnetwork"
+          },
+          {
+            "SKAdNetworkIdentifier": "f38h382jlk.skadnetwork"
+          },
+          {
+            "SKAdNetworkIdentifier": "hs6bdukanm.skadnetwork"
+          },
+          {
+            "SKAdNetworkIdentifier": "v4nckx4at3.skadnetwork"
+          },
+          {
+            "SKAdNetworkIdentifier": "wzmmz9fp6w.skadnetwork"
+          },
+          {
+            "SKAdNetworkIdentifier": "yclnxrl5pm.skadnetwork"
+          },
+          {
+            "SKAdNetworkIdentifier": "t38b2kh725.skadnetwork"
+          },
+          {
+            "SKAdNetworkIdentifier": "7ug5zh24hu.skadnetwork"
+          },
+          {
+            "SKAdNetworkIdentifier": "gta9lk7p23.skadnetwork"
+          },
+          {
+            "SKAdNetworkIdentifier": "vutu7akeur.skadnetwork"
+          },
+          {
+            "SKAdNetworkIdentifier": "y5ghdn5j9k.skadnetwork"
+          },
+          {
+            "SKAdNetworkIdentifier": "n6fk4nfna4.skadnetwork"
+          },
+          {
+            "SKAdNetworkIdentifier": "v9wttpbfk9.skadnetwork"
+          },
+          {
+            "SKAdNetworkIdentifier": "n38lu8286q.skadnetwork"
+          },
+          {
+            "SKAdNetworkIdentifier": "47vhws6wlr.skadnetwork"
+          },
+          {
+            "SKAdNetworkIdentifier": "kbd757ywx3.skadnetwork"
+          },
+          {
+            "SKAdNetworkIdentifier": "9t245vhmpl.skadnetwork"
+          },
+          {
+            "SKAdNetworkIdentifier": "eh6m2bh4zr.skadnetwork"
+          },
+          {
+            "SKAdNetworkIdentifier": "a2p9lx4jpn.skadnetwork"
+          },
+          {
+            "SKAdNetworkIdentifier": "22mmun2rn5.skadnetwork"
+          },
+          {
+            "SKAdNetworkIdentifier": "4468km3ulz.skadnetwork"
+          },
+          {
+            "SKAdNetworkIdentifier": "2u9pt9hc89.skadnetwork"
+          },
+          {
+            "SKAdNetworkIdentifier": "8s468mfl3y.skadnetwork"
+          },
+          {
+            "SKAdNetworkIdentifier": "klf5c3l5u5.skadnetwork"
+          },
+          {
+            "SKAdNetworkIdentifier": "ppxm28t8ap.skadnetwork"
+          },
+          {
+            "SKAdNetworkIdentifier": "ecpz2srf59.skadnetwork"
+          },
+          {
+            "SKAdNetworkIdentifier": "uw77j35x4d.skadnetwork"
+          },
+          {
+            "SKAdNetworkIdentifier": "pwa73g5rt2.skadnetwork"
+          },
+          {
+            "SKAdNetworkIdentifier": "mlmmfzh3r3.skadnetwork"
+          },
+          {
+            "SKAdNetworkIdentifier": "578prtvx9j.skadnetwork"
+          },
+          {
+            "SKAdNetworkIdentifier": "4dzt52r2t5.skadnetwork"
+          },
+          {
+            "SKAdNetworkIdentifier": "e5fvkxwrpn.skadnetwork"
+          },
+          {
+            "SKAdNetworkIdentifier": "8c4e2ghe7u.skadnetwork"
+          },
+          {
+            "SKAdNetworkIdentifier": "zq492l623r.skadnetwork"
+          },
+          {
+            "SKAdNetworkIdentifier": "3qcr597p9d.skadnetwork"
+          }
+        ]
+      }
+    },
+    "plugins": [
+      "expo-font",
+      "@react-native-google-signin/google-signin",
+      "expo-apple-authentication",
+      "expo-tracking-transparency",
+      [
+        "expo-notifications",
+        {
+          "icon": "./src/assets/icons/android_icon.png",
+          "color": "#2a5298"
         }
+      ],
+      [
+        "react-native-google-mobile-ads",
+        {
+          "androidAppId": "ca-app-pub-8519782324189160~6327493409",
+          "iosAppId": "ca-app-pub-8519782324189160~8486752889",
+          "userTrackingUsageDescription": "This identifier will be used to deliver personalized ads to you."
+        }
+      ],
+      "@react-native-firebase/app",
+      "./plugins/with-modular-headers.js",
+      "expo-asset"
+    ],
+    "android": {
+      "googleServicesFile": "./google-services.json",
+      "package": "com.jbuxofplenty.coralclash",
+      "runtimeVersion": {
+        "policy": "appVersion"
+      },
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "coral-clash.firebaseapp.com"
+            },
+            {
+              "scheme": "coralclash"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        }
+      ]
+    },
+    "extra": {
+      "eas": {
+        "projectId": "416801e2-5620-4693-8729-161decbd0b5b"
+      }
     }
+  }
 }
