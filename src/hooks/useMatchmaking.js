@@ -164,7 +164,7 @@ export const useMatchmaking = ({ onMatchFound } = {}) => {
         };
     }, [leaveMatchmaking]);
 
-    // Send periodic heartbeat while searching (every 30 seconds)
+    // Send periodic heartbeat while searching (every 20 seconds)
     useEffect(() => {
         if (!searching || !user || !user.uid) {
             return;
@@ -178,7 +178,7 @@ export const useMatchmaking = ({ onMatchFound } = {}) => {
             if (searchingRef.current) {
                 updateMatchmakingHeartbeat();
             }
-        }, 30000); // 30 seconds
+        }, 20000); // 20 seconds
 
         return () => {
             clearInterval(heartbeatInterval);

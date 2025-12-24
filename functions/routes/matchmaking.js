@@ -119,6 +119,7 @@ export { leaveMatchmakingHandler };
 /**
  * Handler for updating matchmaking heartbeat
  * Separated for testing purposes
+ * Also checks if user has been waiting 10+ seconds and triggers matching if needed
  */
 async function updateMatchmakingHeartbeatHandler(request) {
     const { data: _data, auth } = request;
@@ -137,10 +138,27 @@ async function updateMatchmakingHeartbeatHandler(request) {
         };
     }
 
+    const queueData = queueDoc.data();
+
     // Update last heartbeat
     await db.collection('matchmakingQueue').doc(userId).update({
         lastHeartbeat: serverTimestamp(),
     });
+
+    // Always try to match - tryMatchPlayers will handle the logic:
+    // - Match immediately with real users if available
+    // - Only match with computer users if user has waited 10+ seconds
+    if (queueData.status === 'searching') {
+        // Import tryMatchPlayers dynamically to avoid circular dependencies
+        const { tryMatchPlayers } = await import('../triggers/onPlayerJoinQueue.js');
+        // Trigger matching asynchronously (don't wait for it)
+        tryMatchPlayers(userId).catch((error) => {
+            console.error(
+                `[updateMatchmakingHeartbeat] Error triggering match for ${userId}:`,
+                error,
+            );
+        });
+    }
 
     return {
         success: true,

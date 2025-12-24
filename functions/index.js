@@ -22,6 +22,7 @@ import { onUserCreate } from './triggers/onUserCreate.js';
 
 // Import scheduled function modules
 import { cleanupStaleMatchmakingEntries } from './scheduled/cleanupStaleMatchmakingEntries.js';
+import { retryMatchmaking } from './scheduled/retryMatchmaking.js';
 
 // ==================== User Profile APIs ====================
 export const getPublicUserInfo = userProfile.getPublicUserInfo;
@@ -74,4 +75,4 @@ export const deleteComputerUsers = computerUsers.deleteComputerUsers;
 export { onFriendRequestCreate, onGameCreate, onGameMoveUpdate, onPlayerJoinQueue, onUserCreate };
 
 // ==================== Scheduled Functions ====================
-export { cleanupStaleMatchmakingEntries };
+export { cleanupStaleMatchmakingEntries, retryMatchmaking };
