@@ -694,17 +694,43 @@ export const makeMove = onCall(getAppCheckConfig(), async (request) => {
 
         // Notify opponent (if game continues and not computer)
         if (!gameResult.isOver && nextTurn && nextTurn !== 'computer') {
-            // Create notification document
-            await db.collection('notifications').add({
-                userId: nextTurn,
-                type: 'move_made',
-                gameId: gameId,
-                from: userId,
-                read: false,
-                createdAt: serverTimestamp(),
+            // Check if a notification already exists for this move to prevent duplicates
+            // Use existing index: userId + read + createdAt
+            // Check for recent notifications (within last 3 seconds) to catch race conditions
+            const recentNotificationsQuery = await db
+                .collection('notifications')
+                .where('userId', '==', nextTurn)
+                .where('read', '==', false)
+                .orderBy('createdAt', 'desc')
+                .limit(5)
+                .get();
+
+            // Check if there's already a move_made notification for this game from this user
+            const hasRecentNotification = recentNotificationsQuery.docs.some((doc) => {
+                const data = doc.data();
+                const isRecent =
+                    data.createdAt?.toDate && Date.now() - data.createdAt.toDate().getTime() < 3000;
+                return (
+                    isRecent &&
+                    data.type === 'move_made' &&
+                    data.gameId === gameId &&
+                    data.from === userId
+                );
             });
 
-            // Send push notification
+            if (!hasRecentNotification) {
+                // Create notification document
+                await db.collection('notifications').add({
+                    userId: nextTurn,
+                    type: 'move_made',
+                    gameId: gameId,
+                    from: userId,
+                    read: false,
+                    createdAt: serverTimestamp(),
+                });
+            }
+
+            // Send push notification (always send, as it's idempotent)
             const currentUserDoc = await db.collection('users').doc(userId).get();
             const currentUserData = currentUserDoc.data();
             const currentUserName = formatDisplayName(
