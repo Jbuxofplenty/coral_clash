@@ -64,7 +64,6 @@ export async function tryMatchPlayers(newUserId) {
                     .limit(100) // Increased to ensure we see all users
                     .get();
 
-
                 // Sort by joinedAt in memory
                 const sortedDocs = allSearching.docs.sort((a, b) => {
                     const aTime = a.data().joinedAt?.seconds || 0;
