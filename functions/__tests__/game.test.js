@@ -35,6 +35,7 @@ jest.mock('@jbuxofplenty/coral-clash', () => ({
     calculateUndoMoveCount: jest.fn(),
     findBestMove: jest.fn(),
     findBestMoveIterativeDeepening: jest.fn(),
+    calculateOptimalMoveTime: jest.fn(() => 3000),
     getTimeControlForDifficulty: jest.fn((difficulty) => {
         const timeControls = {
             easy: {
@@ -613,8 +614,9 @@ describe('Game Creation Functions', () => {
         });
 
         it('should use easy difficulty (depth 3) for easy mode', async () => {
-            const { findBestMoveIterativeDeepening, SEARCH_DEPTH } = require('@jbuxofplenty/coral-clash');
+            const { findBestMoveIterativeDeepening, SEARCH_DEPTH, calculateOptimalMoveTime } = require('@jbuxofplenty/coral-clash');
             findBestMoveIterativeDeepening.mockClear();
+            calculateOptimalMoveTime.mockClear();
 
             // Test the helper directly with gameData
             await gameRoutes.makeComputerMoveHelper(gameId, {
@@ -624,17 +626,20 @@ describe('Game Creation Functions', () => {
                 difficulty: 'easy',
                 status: 'active',
                 currentTurn: 'computer',
+                timeControl: { totalSeconds: 300 },
+                timeRemaining: { computer: 290 },
                 gameState: {
                     fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
                 },
             });
 
             // Verify findBestMoveIterativeDeepening was called with easy depth (3)
+            expect(calculateOptimalMoveTime).toHaveBeenCalledWith('easy', expect.anything());
             expect(findBestMoveIterativeDeepening).toHaveBeenCalledWith(
                 expect.any(Object),
                 SEARCH_DEPTH.easy, // Should be 3
                 'b',
-                expect.any(Number), // maxTimeMs
+                3000, // Should use the mocked return value of calculateOptimalMoveTime
                 null, // progressCallback
                 null, // lastComputerMove
                 null, // evaluationTable

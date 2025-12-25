@@ -3,11 +3,11 @@ import {
     CoralClash,
     GAME_VERSION,
     SEARCH_DEPTH,
+    calculateOptimalMoveTime,
     calculateUndoMoveCount,
     createGameSnapshot,
     findBestMoveIterativeDeepening,
-    getTimeControlForDifficulty,
-    restoreGameFromSnapshot,
+    restoreGameFromSnapshot
 } from '@jbuxofplenty/coral-clash';
 import { HttpsError, onCall, onRequest } from 'firebase-functions/v2/https';
 import { admin } from '../init.js';
@@ -954,6 +954,15 @@ export async function makeComputerMoveHelper(gameId, gameData = null) {
     // Select move based on difficulty
     let selectedMove;
 
+    // Calculate time remaining for computer
+    let timeRemainingMs;
+    if (gameData.timeControl?.totalSeconds && gameData.timeRemaining) {
+        const remainingSeconds = gameData.timeRemaining[computerUserId];
+        if (typeof remainingSeconds === 'number') {
+            timeRemainingMs = remainingSeconds * 1000;
+        }
+    }
+
     switch (difficulty) {
         case 'random': {
             // Random move selection (still avoid reversing moves)
@@ -983,13 +992,13 @@ export async function makeComputerMoveHelper(gameId, gameData = null) {
         case 'easy': {
             // Easy mode: Use iterative deepening with time control
             const maxDepth = SEARCH_DEPTH.easy;
-            const timeControl = getTimeControlForDifficulty('easy');
+            const maxTimeMs = calculateOptimalMoveTime('easy', timeRemainingMs);
 
             const result = findBestMoveIterativeDeepening(
                 currentGameState,
                 maxDepth,
                 computerColor,
-                timeControl.maxTimeMs,
+                maxTimeMs,
                 null, // progressCallback
                 lastComputerMove,
                 null, // evaluationTable
@@ -1010,13 +1019,13 @@ export async function makeComputerMoveHelper(gameId, gameData = null) {
         case 'medium': {
             // Medium mode: Use iterative deepening with time control
             const maxDepth = SEARCH_DEPTH.medium;
-            const timeControl = getTimeControlForDifficulty('medium');
+            const maxTimeMs = calculateOptimalMoveTime('medium', timeRemainingMs);
 
             const result = findBestMoveIterativeDeepening(
                 currentGameState,
                 maxDepth,
                 computerColor,
-                timeControl.maxTimeMs,
+                maxTimeMs,
                 null, // progressCallback
                 lastComputerMove,
                 null, // evaluationTable
@@ -1036,13 +1045,13 @@ export async function makeComputerMoveHelper(gameId, gameData = null) {
         case 'hard': {
             // Hard mode: Use iterative deepening with time control
             const maxDepth = SEARCH_DEPTH.hard;
-            const timeControl = getTimeControlForDifficulty('hard');
+            const maxTimeMs = calculateOptimalMoveTime('hard', timeRemainingMs);
 
             const result = findBestMoveIterativeDeepening(
                 currentGameState,
                 maxDepth,
                 computerColor,
-                timeControl.maxTimeMs,
+                maxTimeMs,
                 null, // progressCallback
                 lastComputerMove,
                 null, // evaluationTable

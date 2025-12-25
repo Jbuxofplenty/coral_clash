@@ -672,8 +672,21 @@ function quiescenceSearch(
     beta: number,
     playerColor: Color,
     maxDepth: number = 10,
-): { score: number; nodesEvaluated: number } {
+    timeControl: TimeControl | null = null,
+): { score: number; nodesEvaluated: number; timedOut: boolean } {
     let nodesEvaluated = 1;
+
+    // Check time control
+    if (timeControl) {
+        const elapsed = Date.now() - timeControl.startTime;
+        if (elapsed >= timeControl.maxTimeMs) {
+            return {
+                score: 0, // Neutral score when timed out
+                nodesEvaluated: 1,
+                timedOut: true,
+            };
+        }
+    }
 
     // Standing Pat: Evaluate current position
     // This is the score if we make no more captures
@@ -682,7 +695,7 @@ function quiescenceSearch(
     // Beta cutoff - current position is already too good for opponent
     // Opponent won't allow this line, so we can prune
     if (standPat >= beta) {
-        return { score: beta, nodesEvaluated };
+        return { score: beta, nodesEvaluated, timedOut: false };
     }
 
     // Update alpha if standing pat is better than current best
@@ -692,7 +705,7 @@ function quiescenceSearch(
 
     // Depth limit to prevent excessive quiescence search
     if (maxDepth <= 0) {
-        return { score: standPat, nodesEvaluated };
+        return { score: standPat, nodesEvaluated, timedOut: false };
     }
 
     // Get only capture moves (ignore quiet moves in quiescence)
@@ -701,7 +714,7 @@ function quiescenceSearch(
 
     // No captures available - return standing pat evaluation
     if (captureMoves.length === 0) {
-        return { score: standPat, nodesEvaluated };
+        return { score: standPat, nodesEvaluated, timedOut: false };
     }
 
     // MVV-LVA (Most Valuable Victim - Least Valuable Aggressor) ordering
@@ -727,16 +740,27 @@ function quiescenceSearch(
         // Recursive quiescence search with negated alpha-beta window
         // CRITICAL: Swap player perspective (negamax) by evaluating from opponent's view
         const opponentColor = playerColor === 'w' ? 'b' : 'w';
-        const result = quiescenceSearch(game, -beta, -alpha, opponentColor, maxDepth - 1);
+        const result = quiescenceSearch(
+            game,
+            -beta,
+            -alpha,
+            opponentColor,
+            maxDepth - 1,
+            timeControl,
+        );
         const score = -result.score; // Negate for opponent's perspective
 
         game.undoInternal();
 
         nodesEvaluated += result.nodesEvaluated;
 
+        if (result.timedOut) {
+            return { score: bestScore, nodesEvaluated, timedOut: true };
+        }
+
         // Beta cutoff
         if (score >= beta) {
-            return { score: beta, nodesEvaluated };
+            return { score: beta, nodesEvaluated, timedOut: false };
         }
 
         if (score > bestScore) {
@@ -747,7 +771,7 @@ function quiescenceSearch(
         }
     }
 
-    return { score: bestScore, nodesEvaluated };
+    return { score: bestScore, nodesEvaluated, timedOut: false };
 }
 
 /**
@@ -843,12 +867,12 @@ export function alphaBeta(
 
     if (depth === 0) {
         // Quiescence search at leaf nodes to avoid horizon effect
-        const qResult = quiescenceSearch(game, alpha, beta, playerColor);
+        const qResult = quiescenceSearch(game, alpha, beta, playerColor, 10, timeControl);
         return {
             score: qResult.score,
             move: null,
             nodesEvaluated: qResult.nodesEvaluated,
-            timedOut: false,
+            timedOut: qResult.timedOut,
         };
     }
 
@@ -939,6 +963,7 @@ export function alphaBeta(
                 }
                 beta = Math.min(beta, bestScore);
             }
+
 
             if (beta <= alpha) {
                 break;

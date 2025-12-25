@@ -77,4 +77,28 @@ describe('AI Tactical Correctness - Quiescence Search Fix', () => {
         // Should find a move
         expect(result.move).toBeDefined();
     });
+
+    it('should capture an unprotected piece (dolphin) on a full board', () => {
+        const game = new CoralClash();
+        // Use a position derived from default but with a specific blunder available
+        const fen = 'ftth1ttf/coc2coc/3oo3/4c3/4D3/3OO3/COCD1COC/FTTH1TTF b - - 0 1';
+        game.load(fen);
+        
+        const snapshot = createGameSnapshot(game);
+        
+        // Use a reasonable time limit that forces some search but allows depth
+        const result = findBestMoveIterativeDeepening(
+            snapshot,
+            4, // Depth 4 is standard for easy/medium
+            'b',
+            5000
+        );
+        
+        expect(result.move).toBeDefined();
+
+        // The capture e5 -> e4 is the winning move (gaining 1800 material for free)
+        expect(result.move.from).toBe('e5');
+        expect(result.move.to).toBe('e4');
+        // Capture is implied by move to occupied square
+    });
 });

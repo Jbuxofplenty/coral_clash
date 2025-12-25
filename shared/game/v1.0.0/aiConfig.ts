@@ -95,12 +95,12 @@ const PIECE_SAFETY = {
     // More valuable pieces get larger penalties when under attack
     attackedMultiplier: 0.25, // 25% of piece value penalty when under attack
     // Extra penalty for hanging pieces (attacked but NOT defended)
-    // For very valuable pieces (dolphin gatherer = 1800), this should be prohibitive
-    hangingMultiplier: 1.5, // 150% of piece value penalty when hanging (attacked, not defended) - severe enough to prevent selection even at depth 1
+    // We strictly use < 1.0 to avoid negative piece values which discourage capturing!
+    hangingMultiplier: 0.7, // 70% of piece value penalty when hanging (piece retains 30% value)
     // Critical piece threshold - pieces above this value get even more severe penalties
     criticalPieceThreshold: 1500, // Dolphin gatherer (1800) is above this
     // Extra penalty multiplier for critical pieces that are hanging
-    criticalHangingMultiplier: 1.5, // 150% of piece value (more than the piece is worth!)
+    criticalHangingMultiplier: 0.8, // 80% penalty (piece retains 20% value) - strongly discouraged but not "poisoned"
     // Bonus for defended pieces (defenders present)
     defendedBonus: 0.05, // 5% of piece value bonus when defended
     // Points per defender of a valuable piece
@@ -241,6 +241,41 @@ export function getTimeControlForDifficulty(difficulty: 'easy' | 'medium' | 'har
 }
 
 /**
+ * Calculate optimal move time based on difficulty and remaining game clock
+ * @param difficulty - Difficulty level
+ * @param timeRemainingMs - Remaining game time in milliseconds (optional)
+ * @returns Max time to spend on this move in milliseconds
+ */
+export function calculateOptimalMoveTime(
+    difficulty: 'easy' | 'medium' | 'hard',
+    timeRemainingMs?: number,
+): number {
+    const baseControl = getTimeControlForDifficulty(difficulty);
+
+    // If no time remaining specified (unlimited time game), use default max time
+    if (timeRemainingMs === undefined || timeRemainingMs === null) {
+        return baseControl.maxTimeMs;
+    }
+
+    // In time controlled games, manage time carefully
+    // Target spending about 1/20th of remaining time, but cap at the difficulty's max time
+    // This allows faster play in blitz while still thinking deep when time permits
+    const timeSlice = Math.floor(timeRemainingMs / 20);
+
+    // Ensure we don't return less than minTimeMs (unless we really have no time left)
+    const minTime = Math.min(baseControl.minTimeMs, timeRemainingMs);
+
+    // Dynamic max time: lesser of (1/20th of remaining) and (difficulty max limit)
+    // But at least minTime
+    let dynamicMaxTime = Math.min(timeSlice, baseControl.maxTimeMs);
+    dynamicMaxTime = Math.max(dynamicMaxTime, minTime);
+
+    // Hard safety cap: never try to use more time than we actually have
+    // Leave a small buffer (50ms) to account for network/processing overhead
+    return Math.min(dynamicMaxTime, Math.max(0, timeRemainingMs - 50));
+}
+
+/**
  * Helper function to get piece value
  * @param pieceSymbol - Piece symbol (h, d, t, f, o, c)
  * @param role - Piece role ('hunter', 'gatherer', or null for whale)
@@ -294,5 +329,6 @@ export {
     SEARCH_DEPTH,
     TACTICAL_BONUSES,
     TIME_CONTROL,
-    WHALE_SAFETY,
+    WHALE_SAFETY
 };
+

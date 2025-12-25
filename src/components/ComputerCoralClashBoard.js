@@ -1,5 +1,5 @@
 import { Icon } from 'galio-framework';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import { useAlert, useAuth, useGamePreferences } from '../contexts';
 import { useFirebaseFunctions } from '../hooks';
