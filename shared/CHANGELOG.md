@@ -1,3 +1,27 @@
+# [2.5.0](https://github.com/Jbuxofplenty/coral_clash/compare/v2.4.1...v2.5.0) (2025-12-26)
+
+
+### Bug Fixes
+
+* **client:** display computer user names in game board components ([4fb9bdc](https://github.com/Jbuxofplenty/coral_clash/commit/4fb9bdc8277758835352c269d83a13ca84d03295)), closes [#2847](https://github.com/Jbuxofplenty/coral_clash/issues/2847)
+* **client:** update React to 19.1.2 to patch CVE-2025-55182 ([57651cf](https://github.com/Jbuxofplenty/coral_clash/commit/57651cf0458d46ae795495d625f49cf9623bd987))
+* **client:** use PvP board for pseudo-computer users to fix color bug ([40570ae](https://github.com/Jbuxofplenty/coral_clash/commit/40570ae43fae2f7413370499f162ece6f15abeb9))
+* **server:** lint ([862b88b](https://github.com/Jbuxofplenty/coral_clash/commit/862b88be48e1b7790a51b57b3c42b515b8f32326))
+* **server:** prevent computer moves from triggering on non-move updates ([062a283](https://github.com/Jbuxofplenty/coral_clash/commit/062a2836abdbec7eeee22026c49d8706e5186be7))
+* **server:** prevent duplicate move notifications ([fd89619](https://github.com/Jbuxofplenty/coral_clash/commit/fd89619e0bb4e059b380af1b167922137d64d63e))
+* **shared:** time management, capture logic, and module resolution issues ([9fe6bc4](https://github.com/Jbuxofplenty/coral_clash/commit/9fe6bc4fe3adf5933d14345d3c4af2a1f2da0e16))
+
+
+### Features
+
+* **server:** add 10-second delay before computer matching in matchmaking ([cdebc45](https://github.com/Jbuxofplenty/coral_clash/commit/cdebc45ef9f0bc07c9e0ab9b1b97dc6a066a6bb6))
+
+
+### Performance Improvements
+
+* **server:** optimize matchmaking performance and function region configuration ([5fd950b](https://github.com/Jbuxofplenty/coral_clash/commit/5fd950b48fcece9843a015560e068b2821cc2d55))
+* **shared:** reduce AI time limits to 5s/10s/15s for faster moves ([7c222b5](https://github.com/Jbuxofplenty/coral_clash/commit/7c222b5d84158fd9bbe758a53e79878d6c04f99c))
+
 ## [2.4.1](https://github.com/Jbuxofplenty/coral_clash/compare/v2.4.0...v2.4.1) (2025-12-23)
 
 
