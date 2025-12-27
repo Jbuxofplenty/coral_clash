@@ -226,6 +226,21 @@ const MOVE_PENALTIES = {
 };
 
 /**
+ * Softmax selection parameters
+ * Controls how the AI selects between top moves
+ */
+const SOFTMAX_SELECTION = {
+    enabled: true,
+    temperature: {
+        easy: 40,    // Higher temperature = more randomness
+        medium: 25,  // Moderate temperature
+        hard: 10,    // Low temperature = mostly best move
+    },
+    // Only consider moves within this score difference of the best move
+    scoreWindow: 200, // 2 pawns/crabs worth
+};
+
+/**
  * Get time control settings for a specific difficulty level
  * @param difficulty - Difficulty level ('easy', 'medium', 'hard')
  * @returns Time control object with maxTimeMs, minTimeMs, and progressIntervalMs
@@ -327,6 +342,7 @@ export {
     PIECE_VALUES,
     POSITIONAL_BONUSES,
     SEARCH_DEPTH,
+    SOFTMAX_SELECTION,
     TACTICAL_BONUSES,
     TIME_CONTROL,
     WHALE_SAFETY

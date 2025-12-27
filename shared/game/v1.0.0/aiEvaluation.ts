@@ -7,14 +7,14 @@
  */
 
 import {
-    ASPIRATION_WINDOW,
     CORAL_EVALUATION,
     GAME_ENDING,
     MOVE_PENALTIES,
     PIECE_SAFETY,
     POSITIONAL_BONUSES,
+    SOFTMAX_SELECTION,
     TIME_CONTROL,
-    getPieceValue,
+    getPieceValue
 } from './aiConfig.js';
 import type { Color, PieceRole, PieceSymbol, Square } from './coralClash.js';
 import { CoralClash, Ox88, SQUARES, algebraic } from './coralClash.js';
@@ -1099,6 +1099,42 @@ export type ProgressCallback = (
  * @param maxTimeMs - Maximum time to spend in milliseconds
  * @param progressCallback - Optional callback for progress updates (depth, nodesEvaluated, elapsedMs)
  * @param lastMove - Last move made (for detecting reversing moves)
+/**
+ * Sort moves based on scores from previous iteration
+ * @param moves - List of moves to sort
+ * @param scores - List of scores from previous iteration
+ * @returns Sorted moves
+ */
+function sortMovesByScores(moves: any[], scores: { move: any; score: number }[]) {
+    if (!scores || scores.length === 0) return moves;
+    
+    // Create a map for fast lookup
+    // Keying by 'from-to' to identify moves
+    const scoreMap = new Map<string, number>();
+    for (const s of scores) {
+        // Simple key: from-to
+        const key = `${s.move.from}-${s.move.to}`;
+        scoreMap.set(key, s.score);
+    }
+
+    return [...moves].sort((a, b) => {
+        const keyA = `${a.from}-${a.to}`;
+        const keyB = `${b.from}-${b.to}`;
+        const scoreA = scoreMap.get(keyA) ?? -Infinity;
+        const scoreB = scoreMap.get(keyB) ?? -Infinity;
+        return scoreB - scoreA; // Descending order
+    });
+}
+
+/**
+ * Find best move using iterative deepening with time control
+ * @param gameState - Current game state
+ * @param maxDepth - Maximum depth to search to
+ * @param playerColor - Color we're playing for ('w' or 'b')
+ * @param maxTimeMs - Maximum time to spend in milliseconds
+ * @param progressCallback - Optional callback for progress updates (depth, nodesEvaluated, elapsedMs)
+ * @param lastMove - Last move made (for detecting reversing moves)
+ * @param difficulty - Difficulty level for time management and Softmax behavior
  * @returns { move: Object, score: number, nodesEvaluated: number, depth: number, elapsedMs: number }
  */
 export function findBestMoveIterativeDeepening(
@@ -1108,6 +1144,7 @@ export function findBestMoveIterativeDeepening(
     maxTimeMs: number = TIME_CONTROL.easy.maxTimeMs,
     progressCallback: ProgressCallback | null = null,
     lastMove: LastMoveInfo | null = null,
+    difficulty: 'easy' | 'medium' | 'hard' = 'medium', // Added difficulty param
 ): IterativeDeepeningResult {
     // Create transposition table for this search (shared across all depths)
     const transpositionTable = new TranspositionTable(100000);
@@ -1127,6 +1164,10 @@ export function findBestMoveIterativeDeepening(
     let bestScore = -Infinity;
     let totalNodesEvaluated = 0;
     let bestDepth = 0;
+    
+    // Store scores for all root moves from the last fully completed depth
+    // This allows us to apply Softmax selection on the final candidates
+    let rootMoveScores: { move: any, score: number }[] = [];
 
     // Get initial legal moves as fallback
     const initialMoves = game.internalMoves();
@@ -1156,75 +1197,127 @@ export function findBestMoveIterativeDeepening(
             break;
         }
 
-        let result: AlphaBetaResult & { aspirationFailed?: boolean };
+        // For Softmax Selection, we need scores for ALL root moves (or at least top candidates)
+        // Standard alpha-beta only gives us the best score (and bounds for others)
+        // So we run a specialized root search that collects exact scores
+        const iterScores: { move: any, score: number }[] = [];
+        let iterBestScore = -Infinity;
+        let iterBestMove: any = null;
+        let iterNodes = 0;
+        let iterTimedOut = false;
 
-        if (depth > 1 && bestScore !== -Infinity && bestScore !== Infinity && isFinite(bestScore)) {
-            const aspirationAlpha = bestScore - ASPIRATION_WINDOW.initial;
-            const aspirationBeta = bestScore + ASPIRATION_WINDOW.initial;
+        // Sort moves based on previous iteration to improve pruning efficiency
+        const movesToSearch = depth === 1 
+            ? initialMoves 
+            : sortMovesByScores(initialMoves, rootMoveScores);
 
-            result = findBestMove(
-                game,
-                depth,
-                playerColor,
-                timeControl,
-                lastMove,
-                transpositionTable,
-                aspirationAlpha,
-                aspirationBeta,
-            );
-
-            if (result.aspirationFailed && !result.timedOut) {
-                result = findBestMove(
-                    game,
-                    depth,
-                    playerColor,
-                    timeControl,
-                    lastMove,
-                    transpositionTable,
-                );
+        // ROOT SEARCH LOOP
+        // We iterate moves manually here instead of calling findBestMove which does it internally
+        // This gives us control to collect all scores for Softmax
+        for (const move of movesToSearch) {
+            // Check timeout between root moves
+            if (Date.now() - startTime >= maxTimeMs && depth >= minDepth) {
+                iterTimedOut = true;
+                break;
             }
-        } else {
-            result = findBestMove(
+
+            game.makeMove(move);
+
+            // Search children with regular alpha-beta
+            // We use a full window (-Inf, Inf) to get EXACT scores for Softmax
+            // This is more expensive but necessary for accurate probabilities
+            // Optimization: We could use a window around bestScore if we only care about top moves
+            const result = alphaBeta(
                 game,
-                depth,
+                depth - 1,
+                -Infinity, // Full window for exact scoring
+                Infinity,
+                playerColor !== game.turn(), // Next player turn
                 playerColor,
                 timeControl,
-                lastMove,
+                null,
                 transpositionTable,
+                false // Not root level (we are handling root)
             );
+
+            game.undoInternal();
+            iterNodes += result.nodesEvaluated;
+
+            if (result.timedOut) {
+                iterTimedOut = true;
+                break;
+            }
+
+            let moveScore = result.score;
+            // Apply reversing move penalty at root level
+            if (lastMove !== null && isReversingMove(move, lastMove)) {
+                moveScore += MOVE_PENALTIES.reversingMove;
+            }
+
+            iterScores.push({ move, score: moveScore });
+
+            if (moveScore > iterBestScore) {
+                iterBestScore = moveScore;
+                iterBestMove = move;
+            }
         }
 
-        const elapsedAfter = Date.now() - startTime;
-        totalNodesEvaluated += result.nodesEvaluated;
-
-        if (result.timedOut) {
-            if (result.move && !bestMove) {
-                bestMove = result.move;
-                bestScore = result.score;
-                bestDepth = depth;
+        if (iterTimedOut) {
+            // If timed out during root iteration, we might have partial results
+            // If we found a new best move in this partial search, maybe use it?
+            // Safer to stick with previous completed depth's best move
+            if (!bestMove) {
+                bestMove = iterBestMove || fallbackMove;
+                bestScore = iterBestScore;
             }
             break;
         }
 
-        if (result.move) {
-            bestMove = result.move;
-            bestScore = result.score;
-            bestDepth = depth;
-        }
+        // Depth completed successfully
+        rootMoveScores = iterScores;
+        bestMove = iterBestMove;
+        bestScore = iterBestScore;
+        bestDepth = depth;
+        totalNodesEvaluated += iterNodes;
 
         if (progressCallback) {
-            progressCallback(depth, result.nodesEvaluated, elapsedAfter, bestMove !== null);
+            progressCallback(depth, totalNodesEvaluated, Date.now() - startTime, bestMove !== null);
         }
 
-        if (elapsedAfter >= maxTimeMs) {
-            if (!bestMove) bestMove = fallbackMove;
-            break;
-        }
-
-        if (Math.abs(result.score) > 90000) break;
+        if (Math.abs(bestScore) > 90000) break; // Checkmate found
     }
 
     const totalElapsed = Date.now() - startTime;
+
+    // Softmax Selection Logic
+    // If enabled, pick a move probabilistically based on scores
+    if (SOFTMAX_SELECTION.enabled && rootMoveScores.length > 0) {
+        // Use difficulty-specific temperature
+        const temp = SOFTMAX_SELECTION.temperature[difficulty];
+        
+        // Filter moves that are close enough to the best score
+        const threshold = bestScore - SOFTMAX_SELECTION.scoreWindow;
+        const candidates = rootMoveScores.filter(s => s.score >= threshold);
+        
+        if (candidates.length > 1) {
+            // Calculate exponentials
+            // Shift scores by max score to avoid overflow (e^x / sum e^x == e^(x-c) / sum e^(x-c))
+            const maxScore = Math.max(...candidates.map(c => c.score));
+            const weights = candidates.map(c => Math.exp((c.score - maxScore) / temp));
+            const totalWeight = weights.reduce((a, b) => a + b, 0);
+            
+            // Random sampling
+            let random = Math.random() * totalWeight;
+            for (let i = 0; i < candidates.length; i++) {
+                random -= weights[i];
+                if (random <= 0) {
+                    bestMove = candidates[i].move;
+                    bestScore = candidates[i].score;
+                    break;
+                }
+            }
+        }
+    }
 
     if (!bestMove) bestMove = fallbackMove;
 
