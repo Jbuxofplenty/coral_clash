@@ -91,7 +91,11 @@ describe('AI Tactical Correctness - Quiescence Search Fix', () => {
             snapshot,
             4, // Depth 4 is standard for easy/medium
             'b',
-            5000
+            5000,
+            null, // No progress callback
+            null, // No last move
+            'medium', // Default difficulty
+            -1 // Negative seed = disable Softmax for deterministic best move
         );
         
         expect(result.move).toBeDefined();

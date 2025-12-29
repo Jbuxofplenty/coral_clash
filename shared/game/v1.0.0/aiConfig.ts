@@ -268,7 +268,7 @@ export function calculateOptimalMoveTime(
     const baseControl = getTimeControlForDifficulty(difficulty);
 
     // If no time remaining specified (unlimited time game), use default max time
-    if (timeRemainingMs === undefined || timeRemainingMs === null) {
+    if (timeRemainingMs === undefined || timeRemainingMs === null || !Number.isFinite(timeRemainingMs)) {
         return baseControl.maxTimeMs;
     }
 

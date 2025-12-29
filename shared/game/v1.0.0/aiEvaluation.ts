@@ -1135,6 +1135,7 @@ function sortMovesByScores(moves: any[], scores: { move: any; score: number }[])
  * @param progressCallback - Optional callback for progress updates (depth, nodesEvaluated, elapsedMs)
  * @param lastMove - Last move made (for detecting reversing moves)
  * @param difficulty - Difficulty level for time management and Softmax behavior
+ * @param randomSeed - Optional random seed for deterministic Softmax selection (for testing)
  * @returns { move: Object, score: number, nodesEvaluated: number, depth: number, elapsedMs: number }
  */
 export function findBestMoveIterativeDeepening(
@@ -1144,7 +1145,8 @@ export function findBestMoveIterativeDeepening(
     maxTimeMs: number = TIME_CONTROL.easy.maxTimeMs,
     progressCallback: ProgressCallback | null = null,
     lastMove: LastMoveInfo | null = null,
-    difficulty: 'easy' | 'medium' | 'hard' = 'medium', // Added difficulty param
+    difficulty: 'easy' | 'medium' | 'hard' = 'medium',
+    randomSeed?: number, // Optional seed for deterministic testing
 ): IterativeDeepeningResult {
     // Create transposition table for this search (shared across all depths)
     const transpositionTable = new TranspositionTable(100000);
@@ -1200,7 +1202,7 @@ export function findBestMoveIterativeDeepening(
         // For Softmax Selection, we need scores for ALL root moves (or at least top candidates)
         // Standard alpha-beta only gives us the best score (and bounds for others)
         // So we run a specialized root search that collects exact scores
-        const iterScores: { move: any, score: number }[] = [];
+        let iterScores: { move: any, score: number }[] = [];
         let iterBestScore = -Infinity;
         let iterBestMove: any = null;
         let iterNodes = 0;
@@ -1212,8 +1214,20 @@ export function findBestMoveIterativeDeepening(
             : sortMovesByScores(initialMoves, rootMoveScores);
 
         // ROOT SEARCH LOOP
-        // We iterate moves manually here instead of calling findBestMove which does it internally
-        // This gives us control to collect all scores for Softmax
+        // When Softmax is enabled: Use narrower window for performance
+        // When Softmax is disabled: Use full window for deterministic best move (original behavior)
+        
+        // Determine if we're using Softmax pruning
+        const useSoftmaxPruning = SOFTMAX_SELECTION.enabled && (randomSeed === undefined || randomSeed >= 0);
+        
+        let alpha = -Infinity;
+        
+        if (useSoftmaxPruning && depth > 1 && bestScore !== -Infinity) {
+            // Use narrower window to prune moves outside Softmax selection range
+            // This improves performance by avoiding deep search of irrelevant moves
+            alpha = bestScore - SOFTMAX_SELECTION.scoreWindow - 500;
+        }
+        
         for (const move of movesToSearch) {
             // Check timeout between root moves
             if (Date.now() - startTime >= maxTimeMs && depth >= minDepth) {
@@ -1223,22 +1237,37 @@ export function findBestMoveIterativeDeepening(
 
             game.makeMove(move);
 
-            // Search children with regular alpha-beta
-            // We use a full window (-Inf, Inf) to get EXACT scores for Softmax
-            // This is more expensive but necessary for accurate probabilities
-            // Optimization: We could use a window around bestScore if we only care about top moves
-            const result = alphaBeta(
-                game,
-                depth - 1,
-                -Infinity, // Full window for exact scoring
-                Infinity,
-                playerColor !== game.turn(), // Next player turn
-                playerColor,
-                timeControl,
-                null,
-                transpositionTable,
-                false // Not root level (we are handling root)
-            );
+            // Choose alpha-beta window based on whether Softmax pruning is enabled
+            let result;
+            if (useSoftmaxPruning) {
+                // Narrow window for Softmax - prune moves outside selection range
+                result = alphaBeta(
+                    game,
+                    depth - 1,
+                    -Infinity,
+                    -alpha,
+                    playerColor !== game.turn(),
+                    playerColor,
+                    timeControl,
+                    null,
+                    transpositionTable,
+                    false
+                );
+            } else {
+                // Full window when Softmax disabled - get exact scores (original behavior)
+                result = alphaBeta(
+                    game,
+                    depth - 1,
+                    -Infinity,
+                    Infinity,
+                    playerColor !== game.turn(),
+                    playerColor,
+                    timeControl,
+                    null,
+                    transpositionTable,
+                    false
+                );
+            }
 
             game.undoInternal();
             iterNodes += result.nodesEvaluated;
@@ -1248,7 +1277,8 @@ export function findBestMoveIterativeDeepening(
                 break;
             }
 
-            let moveScore = result.score;
+            let moveScore = -result.score;
+            
             // Apply reversing move penalty at root level
             if (lastMove !== null && isReversingMove(move, lastMove)) {
                 moveScore += MOVE_PENALTIES.reversingMove;
@@ -1291,7 +1321,9 @@ export function findBestMoveIterativeDeepening(
 
     // Softmax Selection Logic
     // If enabled, pick a move probabilistically based on scores
-    if (SOFTMAX_SELECTION.enabled && rootMoveScores.length > 0) {
+    // Disable if randomSeed is negative (for deterministic testing)
+    const softmaxEnabled = SOFTMAX_SELECTION.enabled && (randomSeed === undefined || randomSeed >= 0);
+    if (softmaxEnabled && rootMoveScores.length > 0) {
         // Use difficulty-specific temperature
         const temp = SOFTMAX_SELECTION.temperature[difficulty];
         
@@ -1306,8 +1338,20 @@ export function findBestMoveIterativeDeepening(
             const weights = candidates.map(c => Math.exp((c.score - maxScore) / temp));
             const totalWeight = weights.reduce((a, b) => a + b, 0);
             
-            // Random sampling
-            let random = Math.random() * totalWeight;
+            // Random sampling (use seed if provided for deterministic testing)
+            let randomValue: number;
+            if (randomSeed !== undefined) {
+                // Simple seeded random: mulberry32 algorithm
+                let seed = randomSeed;
+                seed = (seed + 0x6D2B79F5) | 0;
+                let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+                t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+                randomValue = ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+            } else {
+                randomValue = Math.random();
+            }
+            
+            let random = randomValue * totalWeight;
             for (let i = 0; i < candidates.length; i++) {
                 random -= weights[i];
                 if (random <= 0) {
