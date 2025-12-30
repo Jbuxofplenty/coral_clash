@@ -1184,9 +1184,17 @@ export function findBestMoveIterativeDeepening(
     }
     let fallbackMove = initialMoves[0];
 
+    // Defensive check: Ensure maxTimeMs is a valid positive number
+    // If NaN, infinite, or non-positive, fallback to the default max time for the difficulty
+    let safeMaxTimeMs = maxTimeMs;
+    if (!Number.isFinite(safeMaxTimeMs) || safeMaxTimeMs <= 0) {
+        safeMaxTimeMs = TIME_CONTROL[difficulty]?.maxTimeMs || TIME_CONTROL.easy.maxTimeMs;
+        // console.warn(`[AI] Invalid maxTimeMs (${maxTimeMs}) detected, using default: ${safeMaxTimeMs}ms`);
+    }
+
     const timeControl: TimeControl = {
         startTime,
-        maxTimeMs,
+        maxTimeMs: safeMaxTimeMs,
     };
 
     // Iterative deepening
