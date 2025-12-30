@@ -1246,7 +1246,7 @@ export function findBestMoveIterativeDeepening(
                     depth - 1,
                     -Infinity,
                     -alpha,
-                    playerColor !== game.turn(),
+                    playerColor === game.turn(),
                     playerColor,
                     timeControl,
                     null,
@@ -1260,7 +1260,7 @@ export function findBestMoveIterativeDeepening(
                     depth - 1,
                     -Infinity,
                     Infinity,
-                    playerColor !== game.turn(),
+                    playerColor === game.turn(),
                     playerColor,
                     timeControl,
                     null,
@@ -1277,7 +1277,7 @@ export function findBestMoveIterativeDeepening(
                 break;
             }
 
-            let moveScore = -result.score;
+            let moveScore = result.score;
             
             // Apply reversing move penalty at root level
             if (lastMove !== null && isReversingMove(move, lastMove)) {
