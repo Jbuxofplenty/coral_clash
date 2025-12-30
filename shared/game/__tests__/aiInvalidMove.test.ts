@@ -53,6 +53,10 @@ describe('AI Invalid Move Bug', () => {
             20, // maxDepth
             'b', // black's turn
             10000, // 10 seconds for hard difficulty
+            null,
+            null,
+            'hard',
+            1
         );
 
         console.log('AI returned move:', result.move);

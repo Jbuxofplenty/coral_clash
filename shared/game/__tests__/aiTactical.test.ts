@@ -21,6 +21,10 @@ describe('AI Tactical Correctness - Quiescence Search Fix', () => {
             3, // Depth 3 should be enough to see simple tactics
             'w', // White to move first
             3000,
+            null,
+            null,
+            'medium',
+            1
         );
         
         console.log('White move:', blackMove.move);
@@ -38,6 +42,10 @@ describe('AI Tactical Correctness - Quiescence Search Fix', () => {
             3,
             'b',
             3000,
+            null,
+            null,
+            'medium',
+            1
         );
         
         console.log('Black move:', whiteMove.move);
@@ -65,6 +73,10 @@ describe('AI Tactical Correctness - Quiescence Search Fix', () => {
             10, // Max depth (won't reach this, but sets ceiling)
             'w',
             5000, // 5 seconds
+            null,
+            null,
+            'medium',
+            1
         );
         
         console.log(`Reached depth: ${result.depth}`);

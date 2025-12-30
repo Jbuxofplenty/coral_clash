@@ -18,6 +18,10 @@ describe('AI Performance', () => {
             20, // maxDepth - allow it to go deep if fast enough
             'w', // player color
             maxTimeMs,
+            null,
+            null,
+            'easy',
+            1
         );
 
         console.log(`Reached depth: ${result.depth}`);
