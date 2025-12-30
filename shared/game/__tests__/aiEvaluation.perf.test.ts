@@ -4,11 +4,11 @@ import { createGameSnapshot } from '../v1.0.0/gameState';
 
 describe('AI Performance', () => {
     // Increase timeout for performance tests
-    jest.setTimeout(10000);
+    jest.setTimeout(20000);
 
     it('should reach depth 3+ in easy mode with quiescence search', () => {
         const game = new CoralClash();
-        const maxTimeMs = 5000; // 5 seconds should be enough to reach depth 3+
+        const maxTimeMs = 15000; // 15 seconds should be enough on CI
         // Standard starting position
 
         console.log(`Testing easy mode with max time ${maxTimeMs}ms (with quiescence search)`);

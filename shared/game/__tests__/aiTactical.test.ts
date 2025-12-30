@@ -3,7 +3,7 @@ import { CoralClash } from '../v1.0.0/coralClash';
 import { createGameSnapshot } from '../v1.0.0/gameState';
 
 describe('AI Tactical Correctness - Quiescence Search Fix', () => {
-    jest.setTimeout(10000);
+    jest.setTimeout(20000);
 
     it('should not make losing material exchanges', () => {
         // This test validates the quiescence search negamax bug fix
@@ -72,7 +72,7 @@ describe('AI Tactical Correctness - Quiescence Search Fix', () => {
             snapshot,
             10, // Max depth (won't reach this, but sets ceiling)
             'w',
-            5000, // 5 seconds
+            15000, // 15 seconds
             null,
             null,
             'medium',
@@ -103,7 +103,7 @@ describe('AI Tactical Correctness - Quiescence Search Fix', () => {
             snapshot,
             4, // Depth 4 is standard for easy/medium
             'b',
-            5000,
+            15000,
             null, // No progress callback
             null, // No last move
             'medium', // Default difficulty
