@@ -429,5 +429,71 @@ describe('tryMatchPlayers - Computer User Matching Delay (10 seconds)', () => {
         // Verify game was created at exactly 10 seconds
         expect(mocks.mockAdd).toHaveBeenCalled();
     });
+
+    it('should NOT create game if user is removed from queue during process (race condition)', async () => {
+        const nowSeconds = baseTime;
+        const opponentUserId = 'user-456';
+
+        // Mock Timestamp.now()
+        mockNowTimestamp = { seconds: nowSeconds };
+        mockTimestampNow.mockReturnValue(mockNowTimestamp);
+
+        // 1. Initial user queue check
+        mocks.mockGet.mockResolvedValueOnce({
+            exists: true,
+            data: () => ({
+                userId: realUserId,
+                timeControl: { type: 'unlimited' },
+                status: 'searching',
+            }),
+        });
+
+        // 2. Queue query (finds opponent)
+        mocks.mockGet.mockResolvedValueOnce({
+            empty: false,
+            docs: [
+                {
+                    id: opponentUserId,
+                    data: () => ({
+                        userId: opponentUserId,
+                        timeControl: { type: 'unlimited' },
+                        status: 'searching',
+                    }),
+                },
+            ],
+        });
+
+        // 3. Pre-create check: Player 1 (Exists)
+        mocks.mockGet.mockResolvedValueOnce({ exists: true });
+        // 4. Pre-create check: Player 2 (Exists)
+        mocks.mockGet.mockResolvedValueOnce({ exists: true });
+
+        // 5. Inside createMatchedGame: Promise.all
+        // Order: P1 User(ok), P2 User(ok), P1 Settings(ok), P2 Settings(ok), P1 Queue(MISSING!), P2 Queue(ok)
+        
+        // P1 User Doc
+        mocks.mockGet.mockResolvedValueOnce({
+            exists: true,
+            data: () => ({ displayName: 'P1', discriminator: '0000' })
+        });
+        // P2 User Doc
+        mocks.mockGet.mockResolvedValueOnce({
+            exists: true,
+            data: () => ({ displayName: 'P2', discriminator: '1111' })
+        });
+        // P1 Settings
+        mocks.mockGet.mockResolvedValueOnce({ exists: false });
+        // P2 Settings
+        mocks.mockGet.mockResolvedValueOnce({ exists: false });
+        // P1 Queue Doc -> RETURNS FALSE (Simulating race condition deletion)
+        mocks.mockGet.mockResolvedValueOnce({ exists: false });
+        // P2 Queue Doc
+        mocks.mockGet.mockResolvedValueOnce({ exists: true, data: () => ({ timeControl: {} }) });
+
+        await tryMatchPlayers(realUserId);
+
+        // Verify NO game was created
+        expect(mocks.mockAdd).not.toHaveBeenCalled();
+    });
 });
 

@@ -165,7 +165,12 @@ export async function tryMatchPlayers(newUserId) {
 
         // Create the game first (this is the critical path for user experience)
         // Then clean up queue entries
-        await createMatchedGame(newUserId, opponentId);
+        const gameId = await createMatchedGame(newUserId, opponentId);
+        
+        if (!gameId) {
+            // Match aborted due to race condition (user no longer in queue)
+            return;
+        }
 
         // Remove real user from queue and update opponent status in a single batch
         // Computer users stay in queue (they're always available)
@@ -205,7 +210,7 @@ async function createMatchedGame(player1Id, player2Id) {
             player1SettingsDoc,
             player2SettingsDoc,
             player1QueueDoc,
-            player2QueueDoc,
+            _player2QueueDoc,
         ] = await Promise.all([
             db.collection('users').doc(player1Id).get(),
             db.collection('users').doc(player2Id).get(),
@@ -219,6 +224,13 @@ async function createMatchedGame(player1Id, player2Id) {
             throw new Error('One or both players not found');
         }
 
+        // Race condition check: Ensure player1 (who initiated the match or is being matched) 
+        // is still in the queue. If not, they might have been matched by another process.
+        if (!player1QueueDoc.exists) {
+            console.warn(`[createMatchedGame] Player 1 ${player1Id} no longer in queue, aborting match (race condition guard)`);
+            return null;
+        }
+
         const player1Data = player1Doc.data();
         const player2Data = player2Doc.data();
         const player1Settings = player1SettingsDoc.exists ? player1SettingsDoc.data() : {};
@@ -229,8 +241,8 @@ async function createMatchedGame(player1Id, player2Id) {
         const player2Name = formatDisplayName(player2Data.displayName, player2Data.discriminator);
 
         // Use player1's time control (they initiated the match), or default to unlimited
-        const timeControl = (player1QueueDoc.exists && player1QueueDoc.data().timeControl) ||
-            (player2QueueDoc.exists && player2QueueDoc.data().timeControl) || { type: 'unlimited' };
+        // We strictly use player1QueueDoc because we verified it exists above
+        const timeControl = player1QueueDoc.data().timeControl || { type: 'unlimited' };
 
         // Initialize time remaining if time control has a limit
         const timeRemaining = timeControl.totalSeconds

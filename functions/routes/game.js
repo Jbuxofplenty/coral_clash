@@ -1120,6 +1120,24 @@ export async function makeComputerMoveHelper(gameId, gameData = null) {
         }
     }
 
+    // Freshness check: Ensure game is still active before applying the move
+    // This prevents race conditions where the user resigns (completion) during the bot's calculation
+    const freshGameDoc = await db.collection('games').doc(gameId).get();
+    if (freshGameDoc.exists) {
+        const freshData = freshGameDoc.data();
+        if (freshData.status !== 'active') {
+             console.log(`[makeComputerMove] Game ${gameId} status is now ${freshData.status}, aborting computer move`);
+             return {
+                 aborted: true,
+                 message: 'Game no longer active'
+             };
+        }
+    } else {
+        // Game document disappeared?
+         console.warn(`[makeComputerMove] Game ${gameId} not found during freshness check`);
+         return { aborted: true, message: 'Game not found' };
+    }
+
     // Make the move
     const moveResult = game.move({
         from: selectedMove.from,

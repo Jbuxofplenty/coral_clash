@@ -604,9 +604,10 @@ describe('Game Creation Functions', () => {
                 elapsedMs: 500,
             });
 
-            // Mock game document update
+            // Mock game document update and get (for freshness check)
             mocks.mockDoc.mockReturnValue({
                 update: jest.fn(() => Promise.resolve()),
+                get: mocks.mockGet,
             });
             mocks.mockCollection.mockReturnValue({
                 doc: mocks.mockDoc,
@@ -617,6 +618,12 @@ describe('Game Creation Functions', () => {
             const { findBestMoveIterativeDeepening, SEARCH_DEPTH, calculateOptimalMoveTime } = require('@jbuxofplenty/coral-clash');
             findBestMoveIterativeDeepening.mockClear();
             calculateOptimalMoveTime.mockClear();
+
+            // Mock freshness check to return active game
+            mocks.mockGet.mockResolvedValueOnce({
+                exists: true,
+                data: () => ({ status: 'active' }),
+            });
 
             // Test the helper directly with gameData
             await gameRoutes.makeComputerMoveHelper(gameId, {
@@ -651,6 +658,12 @@ describe('Game Creation Functions', () => {
             const { findBestMoveIterativeDeepening, SEARCH_DEPTH } = require('@jbuxofplenty/coral-clash');
             findBestMoveIterativeDeepening.mockClear();
 
+            // Mock freshness check to return active game
+            mocks.mockGet.mockResolvedValueOnce({
+                exists: true,
+                data: () => ({ status: 'active' }),
+            });
+
             // Test the helper directly with gameData
             await gameRoutes.makeComputerMoveHelper(gameId, {
                 creatorId: userId,
@@ -680,6 +693,12 @@ describe('Game Creation Functions', () => {
         it('should use hard difficulty (depth 7) for hard mode', async () => {
             const { findBestMoveIterativeDeepening, SEARCH_DEPTH } = require('@jbuxofplenty/coral-clash');
             findBestMoveIterativeDeepening.mockClear();
+
+            // Mock freshness check to return active game
+            mocks.mockGet.mockResolvedValueOnce({
+                exists: true,
+                data: () => ({ status: 'active' }),
+            });
 
             // Test the helper directly with gameData
             await gameRoutes.makeComputerMoveHelper(gameId, {
@@ -711,6 +730,12 @@ describe('Game Creation Functions', () => {
             const { findBestMoveIterativeDeepening } = require('@jbuxofplenty/coral-clash');
             findBestMoveIterativeDeepening.mockClear();
 
+            // Mock freshness check to return active game
+            mocks.mockGet.mockResolvedValueOnce({
+                exists: true,
+                data: () => ({ status: 'active' }),
+            });
+
             // Test the helper directly with gameData
             await gameRoutes.makeComputerMoveHelper(gameId, {
                 creatorId: userId,
@@ -726,6 +751,49 @@ describe('Game Creation Functions', () => {
 
             // Verify findBestMoveIterativeDeepening was NOT called for random difficulty
             expect(findBestMoveIterativeDeepening).not.toHaveBeenCalled();
+        });
+        it('should abort move if game status changes to completed during calculation (freshness check)', async () => {
+            const { findBestMoveIterativeDeepening } = require('@jbuxofplenty/coral-clash');
+            
+            // Mock findBestMoveIterativeDeepening to return a move
+            findBestMoveIterativeDeepening.mockReturnValue({
+                move: { from: 'e7', to: 'e6' },
+                score: 100,
+                nodesEvaluated: 50,
+                depth: 3,
+                elapsedMs: 500,
+            });
+
+            // Mock get() to return active game FIRST (implicitly via gameData argument or if fetched inside), 
+            // but return COMPLETED game when the freshness check calls it.
+            // Since we pass gameData to the helper, the helper skips the first fetch.
+            // So the NEXT fetch inside helper is the freshness check.
+            mocks.mockGet.mockResolvedValueOnce({
+                exists: true,
+                data: () => ({
+                    status: 'completed', // Simulator: User resigned
+                    result: 'creator_wins',
+                }),
+            });
+
+            const result = await gameRoutes.makeComputerMoveHelper(gameId, {
+                creatorId: userId,
+                opponentId: 'computer',
+                opponentType: 'computer',
+                difficulty: 'easy',
+                status: 'active', // Passed as active initially
+                currentTurn: 'computer',
+                gameState: {
+                    fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+                },
+            });
+
+            // Verify result indicates aborted
+            expect(result.aborted).toBe(true);
+            expect(result.message).toBe('Game no longer active');
+            
+            // Verify NO update was called
+            expect(mocks.mockDoc().update).not.toHaveBeenCalled();
         });
     });
 });
