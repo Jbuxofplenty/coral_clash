@@ -12,7 +12,7 @@
  */
 
 // Current game engine version (automatically updated by semantic-release during build)
-export const GAME_VERSION = '2.4.1';
+export const GAME_VERSION = '2.5.0';
 
 // Export current version (v1.0.0) as default for easy imports
 // All game logic imports should come from versioned folders

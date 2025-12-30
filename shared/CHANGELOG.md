@@ -1,3 +1,16 @@
+# [2.6.0](https://github.com/Jbuxofplenty/coral_clash/compare/v2.5.0...v2.6.0) (2025-12-30)
+
+
+### Bug Fixes
+
+* **shared:** fix logic inversion in iterative deepening ([c3a3447](https://github.com/Jbuxofplenty/coral_clash/commit/c3a34476975fc1643f90e4b3be15d051704a2a44))
+* **shared:** resolve AI time limit hang in blitz mode and add robust guards ([b946548](https://github.com/Jbuxofplenty/coral_clash/commit/b946548f9333d2cd105c228a923862e8be6c82f7))
+
+
+### Features
+
+* **shared:** implement Softmax Root Selection and add tests ([59a11b4](https://github.com/Jbuxofplenty/coral_clash/commit/59a11b40bbbff0f4bfe1ff4b950b15dabd77c098))
+
 # [2.5.0](https://github.com/Jbuxofplenty/coral_clash/compare/v2.4.1...v2.5.0) (2025-12-26)
 
 

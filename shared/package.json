@@ -1,6 +1,6 @@
 {
     "name": "@jbuxofplenty/coral-clash",
-    "version": "2.5.0",
+    "version": "2.6.0",
     "type": "module",
     "description": "Shared game logic for Coral Clash",
     "main": "index.js",
