@@ -1,3 +1,11 @@
+## [2.6.1](https://github.com/Jbuxofplenty/coral_clash/compare/v2.6.0...v2.6.1) (2025-12-30)
+
+
+### Bug Fixes
+
+* **server:** bot matchmaking race condition and notifications after resignation ([cb8b839](https://github.com/Jbuxofplenty/coral_clash/commit/cb8b839ded862a1c397817a62e18cd756af0cbd8))
+* **shared:** add defensive NaN check for AI time limits to prevent freezes ([2251eee](https://github.com/Jbuxofplenty/coral_clash/commit/2251eeeb667bcf167bbdb6955796d00cbeb3ee64))
+
 # [2.6.0](https://github.com/Jbuxofplenty/coral_clash/compare/v2.5.0...v2.6.0) (2025-12-30)
 
 
