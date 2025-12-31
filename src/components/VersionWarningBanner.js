@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import {
     Animated,
     Dimensions,
@@ -10,6 +10,7 @@ import {
     View,
 } from 'react-native';
 import { moderateScale, verticalScale } from 'react-native-size-matters';
+import i18n from '../i18n';
 
 const { width } = Dimensions.get('screen');
 const isTablet = width >= 768;
@@ -97,14 +98,14 @@ export const VersionWarningBanner = ({ visible, onDismiss }) => {
                     <Text style={styles.icon}>⚠️</Text>
                 </View>
                 <View style={styles.content}>
-                    <Text style={styles.title}>Update Available</Text>
+                    <Text style={styles.title}>{i18n.t('comp.version.title')}</Text>
                     <Text style={styles.message}>
-                        Please update to the latest version for the best experience.
+                        {i18n.t('comp.version.message')}
                     </Text>
                 </View>
                 <View style={styles.buttonContainer}>
                     <TouchableOpacity style={styles.updateButton} onPress={openAppStore}>
-                        <Text style={styles.updateButtonText}>Update</Text>
+                        <Text style={styles.updateButtonText}>{i18n.t('comp.version.update')}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.dismissButton} onPress={handleDismiss}>
                         <Text style={styles.dismissButtonText}>✕</Text>

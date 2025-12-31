@@ -1,12 +1,13 @@
 import { useFocusEffect } from '@react-navigation/native';
 import { Block, Text, theme } from 'galio-framework';
-import React, { useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Dimensions, ScrollView, StyleSheet, View } from 'react-native';
 import { moderateScale, scale } from 'react-native-size-matters';
 
 import { Avatar, Icon, LoadingScreen } from '../components';
 import { useAuth, useTheme } from '../contexts';
 import { useFirebaseFunctions } from '../hooks';
+import i18n from '../i18n';
 
 const { width } = Dimensions.get('screen');
 
@@ -69,7 +70,8 @@ export default function Stats({ navigation: _navigation }) {
                     if (potentialOpponentId === 'computer') {
                         // Old computer games
                         opponentId = 'computer';
-                        opponentName = 'Computer';
+                        opponentId = 'computer';
+                        opponentName = i18n.t('common.computer');
                         opponentAvatar = 'computer';
                     } else {
                         // New computer users with actual IDs - use their display name from game data
@@ -78,7 +80,7 @@ export default function Stats({ navigation: _navigation }) {
                         // If user is creator, opponent is opponentId, so use opponentDisplayName
                         // If user is opponent, opponent is creatorId, so use creatorDisplayName
                         opponentName =
-                            game.opponentDisplayName || game.creatorDisplayName || 'Computer';
+                            game.opponentDisplayName || game.creatorDisplayName || i18n.t('common.computer');
                         opponentAvatar =
                             game.opponentAvatarKey || game.creatorAvatarKey || 'dolphin';
                     }
@@ -86,8 +88,9 @@ export default function Stats({ navigation: _navigation }) {
                 } else {
                     // PvP opponent
                     opponentId = potentialOpponentId;
+                    opponentId = potentialOpponentId;
                     opponentName =
-                        game.opponentDisplayName || game.opponentName || 'Unknown Player';
+                        game.opponentDisplayName || game.opponentName || i18n.t('common.unknown');
                     opponentAvatar = game.opponentAvatarKey || 'dolphin';
                 }
 
@@ -326,7 +329,7 @@ export default function Stats({ navigation: _navigation }) {
                             {winRate}%
                         </Text>
                         <Text size={moderateScale(11)} color={colors.TEXT_SECONDARY}>
-                            Win Rate
+                            {i18n.t('stats.winRate')}
                         </Text>
                     </Block>
                 </Block>
@@ -355,7 +358,7 @@ export default function Stats({ navigation: _navigation }) {
                         color={colors.TEXT}
                         style={{ marginBottom: 16, paddingHorizontal: 4 }}
                     >
-                        Overall Statistics
+                        {i18n.t('stats.overall')}
                     </Text>
 
                     {/* Large Games Played Card */}
@@ -401,7 +404,7 @@ export default function Stats({ navigation: _navigation }) {
                                 {overallStats.gamesPlayed}
                             </Text>
                             <Text size={moderateScale(18)} color={colors.TEXT_SECONDARY}>
-                                Games Played
+                                {i18n.t('stats.gamesPlayed')}
                             </Text>
                         </Block>
                     </Block>
@@ -409,13 +412,13 @@ export default function Stats({ navigation: _navigation }) {
                     {/* Stats Grid */}
                     <Block row style={styles.statsGrid}>
                         {renderStatCard(
-                            'Wins',
+                            i18n.t('stats.wins'),
                             overallStats.gamesWon,
                             'check-circle',
                             colors.SUCCESS,
                         )}
                         {renderStatCard(
-                            'Losses',
+                            i18n.t('stats.losses'),
                             overallStats.gamesLost,
                             'times-circle',
                             colors.ERROR,
@@ -424,12 +427,12 @@ export default function Stats({ navigation: _navigation }) {
 
                     <Block row style={[styles.statsGrid, { marginBottom: theme.SIZES.BASE * 2 }]}>
                         {renderStatCard(
-                            'Draws',
+                            i18n.t('stats.draws'),
                             overallStats.gamesDraw,
                             'minus-circle',
                             colors.INFO,
                         )}
-                        {renderStatCard('Win Rate', `${overallWinRate}%`, 'trophy', colors.WARNING)}
+                        {renderStatCard(i18n.t('stats.winRate'), `${overallWinRate}%`, 'trophy', colors.WARNING)}
                     </Block>
                 </Block>
 
@@ -443,7 +446,7 @@ export default function Stats({ navigation: _navigation }) {
                             style={{ marginBottom: 16, paddingHorizontal: 4 }}
                         >
                             <Text size={moderateScale(22)} bold color={colors.TEXT}>
-                                Matchup Statistics
+                                {i18n.t('stats.matchups')}
                             </Text>
                         </Block>
                         <Text
@@ -451,7 +454,7 @@ export default function Stats({ navigation: _navigation }) {
                             color={colors.TEXT_SECONDARY}
                             style={{ marginBottom: 12, paddingHorizontal: 4 }}
                         >
-                            Win rates against each opponent (PvP & Computer)
+                            {i18n.t('stats.matchupsDesc')}
                         </Text>
                         <Block>
                             {sortedOpponents
@@ -500,7 +503,7 @@ export default function Stats({ navigation: _navigation }) {
                             color={colors.TEXT}
                             style={{ marginBottom: 8 }}
                         >
-                            No Games Yet
+                            {i18n.t('stats.noGames')}
                         </Text>
                         <Text
                             size={moderateScale(14)}
@@ -508,7 +511,7 @@ export default function Stats({ navigation: _navigation }) {
                             center
                             style={{ maxWidth: 240 }}
                         >
-                            Start playing games to see your statistics here!
+                            {i18n.t('stats.startPlaying')}
                         </Text>
                     </Block>
                 )}

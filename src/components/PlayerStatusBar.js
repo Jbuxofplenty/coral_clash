@@ -1,6 +1,6 @@
-import React from 'react';
 import { ActivityIndicator, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { useTheme } from '../contexts';
+import i18n from '../i18n';
 import Avatar from './Avatar';
 
 /**
@@ -17,7 +17,7 @@ import Avatar from './Avatar';
  * @param {boolean} props.isThinking - Whether the computer is currently thinking (calculating move)
  */
 export default function PlayerStatusBar({
-    playerName = 'Player',
+    playerName,
     avatarKey,
     isComputer = false,
     timeRemaining,
@@ -69,7 +69,9 @@ export default function PlayerStatusBar({
                         ]}
                         numberOfLines={1}
                     >
-                        {isComputer ? 'Computer' : playerName}
+                        {isComputer
+                            ? i18n.t('comp.statusBar.computer')
+                            : playerName || i18n.t('comp.statusBar.player')}
                     </Text>
                     {isThinking && isComputer && (
                         <View style={styles.thinkingIndicator}>
@@ -81,7 +83,7 @@ export default function PlayerStatusBar({
                                     isCompact && styles.thinkingTextCompact,
                                 ]}
                             >
-                                Thinking...
+                                {i18n.t('comp.statusBar.thinking')}
                             </Text>
                         </View>
                     )}
@@ -110,7 +112,7 @@ export default function PlayerStatusBar({
                                             isCompact && styles.coralLabelCompact,
                                         ]}
                                     >
-                                        Remaining
+                                        {i18n.t('comp.statusBar.remaining')}
                                     </Text>
                                     <Text
                                         style={[
@@ -132,7 +134,7 @@ export default function PlayerStatusBar({
                                             isCompact && styles.coralLabelCompact,
                                         ]}
                                     >
-                                        Under Control
+                                        {i18n.t('comp.statusBar.control')}
                                     </Text>
                                     <Text
                                         style={[

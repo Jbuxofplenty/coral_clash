@@ -1,5 +1,5 @@
 import { Block, Text, theme } from 'galio-framework';
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
     ActivityIndicator,
     Dimensions,
@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { moderateScale } from 'react-native-size-matters';
 import { useTheme } from '../contexts';
+import i18n from '../i18n';
 import { deletePassAndPlayGame, getPassAndPlayGames } from '../utils/passAndPlayStorage';
 import Avatar from './Avatar';
 import Icon from './Icon';
@@ -180,7 +181,7 @@ export default function PlayWithFriendCard({
                                     },
                                 ]}
                             >
-                                Play with Friend
+                                {i18n.t('comp.playFriend.title')}
                             </Text>
                             <Text
                                 style={[
@@ -190,7 +191,7 @@ export default function PlayWithFriendCard({
                                     },
                                 ]}
                             >
-                                Invite a friend to play
+                                {i18n.t('comp.playFriend.inviteDesc')}
                             </Text>
                         </Block>
                     </Block>
@@ -239,7 +240,7 @@ export default function PlayWithFriendCard({
                                     },
                                 ]}
                             >
-                                Play with Friend
+                                {i18n.t('comp.playFriend.title')}
                             </Text>
                             <TouchableOpacity onPress={handleCloseOptionsModal}>
                                 <Icon
@@ -288,7 +289,7 @@ export default function PlayWithFriendCard({
                                             },
                                         ]}
                                     >
-                                        Invite Friend
+                                        {i18n.t('comp.playFriend.invite')}
                                     </Text>
                                     <Text
                                         style={[
@@ -298,7 +299,7 @@ export default function PlayWithFriendCard({
                                             },
                                         ]}
                                     >
-                                        Send a game invitation to a friend
+                                        {i18n.t('comp.playFriend.inviteDesc')}
                                     </Text>
                                 </Block>
                                 <Icon
@@ -344,7 +345,7 @@ export default function PlayWithFriendCard({
                                             },
                                         ]}
                                     >
-                                        Pass & Play
+                                        {i18n.t('comp.playFriend.passPlay')}
                                     </Text>
                                     <Text
                                         style={[
@@ -354,7 +355,7 @@ export default function PlayWithFriendCard({
                                             },
                                         ]}
                                     >
-                                        Play locally on this device
+                                        {i18n.t('comp.playFriend.passPlayDesc')}
                                     </Text>
                                 </Block>
                                 <Icon
@@ -405,7 +406,7 @@ export default function PlayWithFriendCard({
                                     },
                                 ]}
                             >
-                                Select a Friend
+                                {i18n.t('comp.playFriend.select')}
                             </Text>
                             <TouchableOpacity onPress={handleCloseFriendModal}>
                                 <Icon
@@ -444,7 +445,7 @@ export default function PlayWithFriendCard({
                                             color: colors.TEXT,
                                         },
                                     ]}
-                                    placeholder='Search friends...'
+                                    placeholder={i18n.t('comp.playFriend.search')}
                                     placeholderTextColor={colors.TEXT_SECONDARY}
                                     value={searchQuery}
                                     onChangeText={setSearchQuery}
@@ -488,8 +489,8 @@ export default function PlayWithFriendCard({
                                         ]}
                                     >
                                         {searchQuery
-                                            ? 'No friends found'
-                                            : 'No friends yet. Add friends to play!'}
+                                            ? i18n.t('comp.playFriend.notFound')
+                                            : i18n.t('comp.playFriend.noFriends')}
                                     </Text>
                                 </Block>
                             ) : (
@@ -570,7 +571,7 @@ export default function PlayWithFriendCard({
                                     },
                                 ]}
                             >
-                                Pass & Play Games
+                                {i18n.t('comp.playFriend.passPlayList')}
                             </Text>
                             <TouchableOpacity onPress={handleClosePassAndPlayModal}>
                                 <Icon
@@ -622,7 +623,7 @@ export default function PlayWithFriendCard({
                                         },
                                     ]}
                                 >
-                                    Start New Game
+                                    {i18n.t('comp.playFriend.newGame')}
                                 </Text>
                                 <Icon
                                     name='chevron-right'
@@ -647,7 +648,7 @@ export default function PlayWithFriendCard({
                                             },
                                         ]}
                                     >
-                                        No active games
+                                        {i18n.t('home.noActiveGames')}
                                     </Text>
                                 </Block>
                             ) : (
@@ -679,7 +680,7 @@ export default function PlayWithFriendCard({
                                                     },
                                                 ]}
                                             >
-                                                vs Guest 1
+                                                vs {i18n.t('comp.playFriend.guest')} 1
                                             </Text>
                                             <Text
                                                 style={[

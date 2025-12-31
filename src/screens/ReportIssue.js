@@ -1,6 +1,6 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { Block, Icon, Text } from 'galio-framework';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
     ActivityIndicator,
     Keyboard,
@@ -14,6 +14,7 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 
 import { useAlert, useAuth, useTheme } from '../contexts';
 import { useFirebaseFunctions } from '../hooks';
+import i18n from '../i18n';
 
 export default function ReportIssue({ navigation, route }) {
     const { user } = useAuth();
@@ -34,22 +35,22 @@ export default function ReportIssue({ navigation, route }) {
 
         // Validate inputs
         if (!subject.trim()) {
-            showAlert('Missing Information', 'Please enter a subject for your issue.');
+            showAlert(i18n.t('issue.missingInfo'), i18n.t('issue.missingSubject'));
             return;
         }
 
         if (subject.trim().length < 3) {
-            showAlert('Invalid Subject', 'Subject must be at least 3 characters long.');
+            showAlert(i18n.t('issue.invalidSubject'), i18n.t('issue.invalidSubjectLen'));
             return;
         }
 
         if (!description.trim()) {
-            showAlert('Missing Information', 'Please enter a description for your issue.');
+            showAlert(i18n.t('issue.missingInfo'), i18n.t('issue.missingDesc'));
             return;
         }
 
         if (description.trim().length < 10) {
-            showAlert('Invalid Description', 'Description must be at least 10 characters long.');
+            showAlert(i18n.t('issue.invalidDescription'), i18n.t('issue.invalidDescLen'));
             return;
         }
 
@@ -64,11 +65,11 @@ export default function ReportIssue({ navigation, route }) {
 
             if (result.success) {
                 showAlert(
-                    'Issue Submitted',
-                    `Thank you for your feedback! Your issue has been submitted${result.githubIssueNumber ? ` (#${result.githubIssueNumber})` : ''}.`,
+                    i18n.t('issue.submitted'),
+                    i18n.t('issue.submittedDesc') + (result.githubIssueNumber ? ` (#${result.githubIssueNumber})` : '') + '.',
                     [
                         {
-                            text: 'OK',
+                            text: i18n.t('common.ok'),
                             onPress: () => navigation.goBack(),
                         },
                     ],
@@ -77,8 +78,8 @@ export default function ReportIssue({ navigation, route }) {
         } catch (error) {
             console.error('Error submitting issue:', error);
             showAlert(
-                'Submission Failed',
-                'Failed to submit your issue. Please check your connection and try again.',
+                i18n.t('issue.failed'),
+                i18n.t('issue.failedDesc'),
             );
         } finally {
             setSubmitting(false);
@@ -122,12 +123,12 @@ export default function ReportIssue({ navigation, route }) {
                                 </View>
                                 <View style={styles.infoBannerContent}>
                                     <Text size={16} bold color={colors.TEXT} style={{ marginBottom: 4 }}>
-                                        {gameSnapshot ? 'Bug Report' : 'Feedback & Issues'}
+                                        {gameSnapshot ? i18n.t('issue.bugReport') : i18n.t('issue.feedback')}
                                     </Text>
                                     <Text size={14} color={colors.TEXT_SECONDARY}>
                                         {gameSnapshot
-                                            ? 'Report a bug with the current game state. The game position will be included in your report.'
-                                            : 'Submit feedback or report an issue. We appreciate your input!'}
+                                            ? i18n.t('issue.bugDesc')
+                                            : i18n.t('issue.feedbackDesc')}
                                     </Text>
                                 </View>
                             </View>
@@ -135,7 +136,7 @@ export default function ReportIssue({ navigation, route }) {
                     {/* Subject Input */}
                     <Block style={styles.section}>
                         <Text size={16} bold color={colors.TEXT} style={styles.label}>
-                            Subject
+                            {i18n.t('issue.subject')}
                         </Text>
                         <TextInput
                             style={[
@@ -146,7 +147,7 @@ export default function ReportIssue({ navigation, route }) {
                                     borderColor: colors.BORDER_COLOR,
                                 },
                             ]}
-                            placeholder='Brief summary of the issue'
+                            placeholder={i18n.t('issue.subjectPlaceholder')}
                             placeholderTextColor={colors.TEXT_SECONDARY}
                             value={subject}
                             onChangeText={setSubject}
@@ -167,7 +168,7 @@ export default function ReportIssue({ navigation, route }) {
                     {/* Description Input */}
                     <Block style={styles.section}>
                         <Text size={16} bold color={colors.TEXT} style={styles.label}>
-                            Description
+                            {i18n.t('issue.description')}
                         </Text>
                         <TextInput
                             style={[
@@ -179,7 +180,7 @@ export default function ReportIssue({ navigation, route }) {
                                     borderColor: colors.BORDER_COLOR,
                                 },
                             ]}
-                            placeholder='Detailed description of the issue or feedback...'
+                            placeholder={i18n.t('issue.descriptionPlaceholder')}
                             placeholderTextColor={colors.TEXT_SECONDARY}
                             value={description}
                             onChangeText={setDescription}
@@ -210,11 +211,11 @@ export default function ReportIssue({ navigation, route }) {
                                 ]}
                             >
                                 <Text size={14} color={colors.TEXT}>
-                                    ✓ Game state will be included
+                                    ✓ {i18n.t('issue.gameStateIncluded')}
                                 </Text>
                                 <Text size={12} color={colors.TEXT_SECONDARY} style={{ marginTop: 4 }}>
-                                    Turn: {gameSnapshot.turn === 'w' ? 'White' : 'Black'}
-                                    {gameSnapshot.isGameOver && ' • Game Over'}
+                                    {i18n.t('common.turn')}: {gameSnapshot.turn === 'w' ? i18n.t('common.white') : i18n.t('common.black')}
+                                    {gameSnapshot.isGameOver && ` • ${i18n.t('common.gameOver')}`}
                                 </Text>
                             </Block>
                         </Block>
@@ -237,7 +238,7 @@ export default function ReportIssue({ navigation, route }) {
                                 <ActivityIndicator size='small' color='#fff' />
                             ) : (
                                 <Text bold size={16} color='#fff'>
-                                    Submit Issue
+                                    {i18n.t('issue.submit')}
                                 </Text>
                             )}
                         </TouchableOpacity>
@@ -247,7 +248,7 @@ export default function ReportIssue({ navigation, route }) {
                             {!user && (
                                 <Block style={styles.section}>
                                     <Text size={12} color={colors.TEXT_SECONDARY} center>
-                                        Note: You're submitting anonymously. Log in to track your issues.
+                                        {i18n.t('issue.genericNote')}
                                     </Text>
                                 </Block>
                             )}

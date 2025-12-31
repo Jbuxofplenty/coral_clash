@@ -1,11 +1,12 @@
 import { Block, Text, theme } from 'galio-framework';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Alert, Image, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
 
 import { LoadingScreen } from '../components';
 import { DEFAULT_AVATARS, getRandomAvatarKey } from '../constants/avatars';
 import { useAlert, useAuth, useTheme } from '../contexts';
 import { useFirebaseFunctions } from '../hooks';
+import i18n from '../i18n';
 
 export default function Settings({ navigation: _navigation }) {
     const { user, refreshUserData, logOut } = useAuth();
@@ -55,7 +56,7 @@ export default function Settings({ navigation: _navigation }) {
             await refreshUserData();
         } catch (error) {
             console.error('Error saving avatar:', error);
-            showAlert('Error', 'Failed to save avatar selection');
+            showAlert(i18n.t('common.error'), i18n.t('settings.avatarError'));
             // Revert on error
             setSettings(settings);
         } finally {
@@ -64,10 +65,10 @@ export default function Settings({ navigation: _navigation }) {
     };
 
     const handleResetSettings = () => {
-        showAlert('Reset Settings', 'Are you sure you want to reset all settings to defaults?', [
-            { text: 'Cancel', style: 'cancel' },
+        showAlert(i18n.t('settings.reset'), i18n.t('settings.resetConfirm'), [
+            { text: i18n.t('common.cancel'), style: 'cancel' },
             {
-                text: 'Reset',
+                text: i18n.t('settings.reset'),
                 style: 'destructive',
                 onPress: async () => {
                     try {
@@ -84,7 +85,7 @@ export default function Settings({ navigation: _navigation }) {
                         await refreshUserData();
                     } catch (error) {
                         console.error('Error resetting settings:', error);
-                        showAlert('Error', 'Failed to reset settings');
+                        showAlert(i18n.t('common.error'), i18n.t('settings.resetError'));
                     } finally {
                         setSaving(false);
                     }
@@ -96,17 +97,12 @@ export default function Settings({ navigation: _navigation }) {
     const handleDeleteAccount = () => {
         // First confirmation - explain consequences
         showAlert(
-            'Delete Account',
-            'This action is permanent and cannot be undone.\n\n' +
-                '• All your personal data will be removed\n' +
-                '• Your games will continue but you will appear as "Anonymous"\n' +
-                '• Your friends and friend requests will be removed\n' +
-                '• Active games will be forfeited\n\n' +
-                'Are you sure you want to continue?',
+            i18n.t('settings.delete'),
+            i18n.t('settings.deleteConfirm'),
             [
-                { text: 'Cancel', style: 'cancel' },
+                { text: i18n.t('common.cancel'), style: 'cancel' },
                 {
-                    text: 'Continue',
+                    text: i18n.t('common.continue'),
                     style: 'destructive',
                     onPress: () => {
                         // Second confirmation - require typing DELETE
@@ -119,12 +115,12 @@ export default function Settings({ navigation: _navigation }) {
 
     const showDeleteConfirmation = () => {
         Alert.prompt(
-            'Confirm Account Deletion',
-            'To confirm, please type DELETE (all caps) below:',
+            i18n.t('settings.deletePromptTitle'),
+            i18n.t('settings.deletePrompt'),
             [
-                { text: 'Cancel', style: 'cancel' },
+                { text: i18n.t('common.cancel'), style: 'cancel' },
                 {
-                    text: 'Delete Account',
+                    text: i18n.t('settings.delete'),
                     style: 'destructive',
                     onPress: (text) => {
                         if (text === 'DELETE') {
@@ -132,8 +128,8 @@ export default function Settings({ navigation: _navigation }) {
                             performAccountDeletion();
                         } else {
                             showAlert(
-                                'Incorrect Confirmation',
-                                'You must type DELETE exactly to confirm account deletion.',
+                                i18n.t('settings.incorrectDeleteTitle'),
+                                i18n.t('settings.incorrectDelete'),
                             );
                         }
                     },
@@ -160,11 +156,11 @@ export default function Settings({ navigation: _navigation }) {
 
             // Show success message, then logout when dismissed
             showAlert(
-                'Account Deleted',
-                'Your account has been successfully deleted. You will now be logged out.',
+                i18n.t('settings.deleteSuccessTitle'),
+                i18n.t('settings.deleteSuccess'),
                 [
                     {
-                        text: 'OK',
+                        text: i18n.t('common.ok'),
                         onPress: async () => {
                             // Log out after user acknowledges (AuthProvider handles navigation)
                             await logOut();
@@ -179,13 +175,13 @@ export default function Settings({ navigation: _navigation }) {
             // Determine error message
             const errorMessage =
                 error.message === 'Request timeout'
-                    ? 'The request timed out. Please check your connection and try again.'
-                    : 'Failed to delete account. Please try again or contact support if the problem persists.';
+                    ? i18n.t('settings.timeoutError')
+                    : i18n.t('settings.deleteFail');
 
-            showAlert('Deletion Failed', errorMessage, [
-                { text: 'Cancel', style: 'cancel' },
+            showAlert(i18n.t('settings.deleteFailTitle'), errorMessage, [
+                { text: i18n.t('common.cancel'), style: 'cancel' },
                 {
-                    text: 'Retry',
+                    text: i18n.t('common.retry'),
                     onPress: () => handleDeleteAccount(),
                 },
             ]);
@@ -207,7 +203,7 @@ export default function Settings({ navigation: _navigation }) {
             await refreshUserData();
         } catch (error) {
             console.error('Error saving theme:', error);
-            showAlert('Error', 'Failed to save theme preference');
+            showAlert(i18n.t('common.error'), i18n.t('settings.themeError'));
             // Revert on error
             setSettings(settings);
             setThemePreference(settings.theme);
@@ -223,7 +219,7 @@ export default function Settings({ navigation: _navigation }) {
     if (!settings) {
         return (
             <Block flex center middle style={{ backgroundColor: colors.BACKGROUND }}>
-                <Text color={colors.TEXT}>Failed to load settings</Text>
+                <Text color={colors.TEXT}>{i18n.t('settings.loadError')}</Text>
             </Block>
         );
     }
@@ -234,11 +230,11 @@ export default function Settings({ navigation: _navigation }) {
                 {/* User Info */}
                 <Block style={styles.section}>
                     <Text h5 bold color={colors.TEXT}>
-                        Account
+                        {i18n.t('settings.account')}
                     </Text>
                     <Block style={[styles.card, { backgroundColor: colors.CARD_BACKGROUND }]}>
                         <Text size={16} bold color={colors.TEXT}>
-                            {user?.displayName || 'User'}
+                            {user?.displayName || i18n.t('common.user')}
                         </Text>
                         <Text size={14} color={colors.TEXT_SECONDARY} style={{ marginTop: 4 }}>
                             {user?.email}
@@ -249,11 +245,11 @@ export default function Settings({ navigation: _navigation }) {
                 {/* Avatar Selection */}
                 <Block style={styles.section}>
                     <Text h5 bold color={colors.TEXT}>
-                        Profile Avatar
+                        {i18n.t('settings.profileAvatar')}
                     </Text>
                     <Block style={[styles.card, { backgroundColor: colors.CARD_BACKGROUND }]}>
                         <Text size={14} color={colors.TEXT_SECONDARY} style={{ marginBottom: 16 }}>
-                            Choose your ocean-themed avatar
+                            {i18n.t('settings.chooseAvatar')}
                         </Text>
                         <Block row style={styles.avatarGrid}>
                             {Object.keys(DEFAULT_AVATARS).map((avatarKey) => (
@@ -272,26 +268,26 @@ export default function Settings({ navigation: _navigation }) {
                 {/* Theme Settings */}
                 <Block style={styles.section}>
                     <Text h5 bold color={colors.TEXT}>
-                        Appearance
+                        {i18n.t('settings.appearance')}
                     </Text>
                     <Block style={[styles.card, { backgroundColor: colors.CARD_BACKGROUND }]}>
                         <ThemeOption
-                            label='Light'
-                            description='Always use light theme'
+                            label={i18n.t('settings.light')}
+                            description={i18n.t('settings.lightDesc')}
                             selected={settings.theme === 'light'}
                             onSelect={() => updateTheme('light')}
                             colors={colors}
                         />
                         <ThemeOption
-                            label='Dark'
-                            description='Always use dark theme'
+                            label={i18n.t('settings.dark')}
+                            description={i18n.t('settings.darkDesc')}
                             selected={settings.theme === 'dark'}
                             onSelect={() => updateTheme('dark')}
                             colors={colors}
                         />
                         <ThemeOption
-                            label='Auto'
-                            description='Match system theme'
+                            label={i18n.t('settings.auto')}
+                            description={i18n.t('settings.autoDesc')}
                             selected={settings.theme === 'auto'}
                             onSelect={() => updateTheme('auto')}
                             colors={colors}
@@ -308,7 +304,7 @@ export default function Settings({ navigation: _navigation }) {
                         disabled={saving || deleting}
                     >
                         <Text size={14} color={colors.PRIMARY} center style={{ fontWeight: '600' }}>
-                            Reset to Defaults
+                            {i18n.t('settings.reset')}
                         </Text>
                     </TouchableOpacity>
                 </Block>
@@ -316,11 +312,11 @@ export default function Settings({ navigation: _navigation }) {
                 {/* Danger Zone */}
                 <Block style={styles.section}>
                     <Text h5 bold color={colors.TEXT} style={{ marginBottom: 8 }}>
-                        Danger Zone
+                        {i18n.t('settings.dangerZone')}
                     </Text>
                     <Block style={[styles.card, { backgroundColor: colors.CARD_BACKGROUND }]}>
                         <Text size={14} color={colors.TEXT_SECONDARY} style={{ marginBottom: 16 }}>
-                            Once you delete your account, there is no going back. Please be certain.
+                            {i18n.t('settings.deleteWarning')}
                         </Text>
                         <TouchableOpacity
                             style={[
@@ -336,7 +332,7 @@ export default function Settings({ navigation: _navigation }) {
                                 color='#fff'
                                 style={{ textAlign: 'center' }}
                             >
-                                {deleting ? 'Deleting Account...' : 'Delete Account'}
+                                {deleting ? i18n.t('settings.deleting') : i18n.t('settings.delete')}
                             </Text>
                         </TouchableOpacity>
                     </Block>

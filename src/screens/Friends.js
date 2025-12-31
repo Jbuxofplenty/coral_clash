@@ -1,5 +1,5 @@
 import { Block, Text, theme } from 'galio-framework';
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
     ActivityIndicator,
     Dimensions,
@@ -17,6 +17,7 @@ import { moderateScale, verticalScale } from 'react-native-size-matters';
 import { Avatar, Icon, LoadingScreen, TimeControlModal } from '../components';
 import { useTheme } from '../contexts';
 import { useFriends, useGame, useUserSearch } from '../hooks';
+import i18n from '../i18n';
 
 const { width: screenWidth } = Dimensions.get('window');
 const isTablet = screenWidth >= 768;
@@ -112,7 +113,7 @@ export default function Friends({ navigation: _navigation }) {
     };
 
     const renderFriendItem = (friend) => {
-        const displayName = friend.displayName || 'User';
+        const displayName = friend.displayName || i18n.t('common.user');
         const isRemoving = removingFriendId === friend.id;
         const isSendingGame = sendingGameToFriendId === friend.id;
         const isDisabled = isRemoving || sendingGameRequest;
@@ -258,14 +259,15 @@ export default function Friends({ navigation: _navigation }) {
                             bold
                             color={colors.TEXT}
                             style={{ marginBottom: 16 }}
+                            
                         >
-                            Add Friend
+                            {i18n.t('friends.add')}
                         </Text>
                         <Block>
                             <Block row middle>
                                 <Block flex style={{ marginRight: 12 }}>
                                     <TextInput
-                                        placeholder='Search by username'
+                                        placeholder={i18n.t('friends.searchPlaceholder')}
                                         placeholderTextColor={colors.PLACEHOLDER}
                                         value={searchQuery}
                                         onChangeText={handleSearch}
@@ -314,7 +316,7 @@ export default function Friends({ navigation: _navigation }) {
                                                 color={colors.TEXT_SECONDARY}
                                                 center
                                             >
-                                                No users found
+                                                {i18n.t('friends.noUsers')}
                                             </Text>
                                         </Block>
                                     ) : (
@@ -364,7 +366,7 @@ export default function Friends({ navigation: _navigation }) {
                                                                 color={colors.WARNING}
                                                                 style={{ marginLeft: 8 }}
                                                             >
-                                                                Pending
+                                                                {i18n.t('friends.pending')}
                                                             </Text>
                                                         ) : isThisUserSending ? (
                                                             <ActivityIndicator
@@ -399,11 +401,11 @@ export default function Friends({ navigation: _navigation }) {
                                 color={colors.TEXT}
                                 style={{ marginBottom: 12, paddingHorizontal: 4 }}
                             >
-                                Incoming Requests ({incomingRequests.length})
+                                {i18n.t('friends.incoming', { count: incomingRequests.length })}
                             </Text>
                             <Block style={styles.friendsList}>
                                 {incomingRequests.map((request) => {
-                                    const displayName = request.displayName || 'User';
+                                    const displayName = request.displayName || i18n.t('common.user');
                                     const isProcessing =
                                         acceptingRequestId === request.requestId ||
                                         decliningRequestId === request.requestId;
@@ -545,11 +547,11 @@ export default function Friends({ navigation: _navigation }) {
                                 color={colors.TEXT}
                                 style={{ marginBottom: 12, paddingHorizontal: 4 }}
                             >
-                                Sent Requests ({outgoingRequests.length})
+                                {i18n.t('friends.outgoing', { count: outgoingRequests.length })}
                             </Text>
                             <Block style={styles.friendsList}>
                                 {outgoingRequests.map((request) => {
-                                    const displayName = request.displayName || 'User';
+                                    const displayName = request.displayName || i18n.t('common.user');
                                     const isCanceling = decliningRequestId === request.requestId;
                                     return (
                                         <Block
@@ -638,7 +640,7 @@ export default function Friends({ navigation: _navigation }) {
                             color={colors.TEXT}
                             style={{ marginBottom: 12, paddingHorizontal: 4 }}
                         >
-                            My Friends ({sortedFriends.length})
+                            {i18n.t('friends.myFriends', { count: sortedFriends.length })}
                         </Text>
                         {sortedFriends.length === 0 ? (
                             <Block
@@ -676,7 +678,7 @@ export default function Friends({ navigation: _navigation }) {
                                     color={colors.TEXT}
                                     style={{ marginBottom: 8 }}
                                 >
-                                    No Friends Yet
+                                    {i18n.t('friends.emptyTitle')}
                                 </Text>
                                 <Text
                                     size={responsiveScale(14, 1.2)}
@@ -684,7 +686,7 @@ export default function Friends({ navigation: _navigation }) {
                                     center
                                     style={{ maxWidth: 240 }}
                                 >
-                                    Add friends by username above to start playing together!
+                                    {i18n.t('friends.emptyDesc')}
                                 </Text>
                             </Block>
                         ) : (

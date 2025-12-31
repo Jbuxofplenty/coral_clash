@@ -213,7 +213,8 @@
       ],
       "@react-native-firebase/app",
       "./plugins/with-modular-headers.js",
-      "expo-asset"
+      "expo-asset",
+      "expo-localization"
     ],
     "android": {
       "googleServicesFile": "./google-services.json",

@@ -3,8 +3,8 @@ import { Header, Icon } from '../components';
 
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { createStackNavigator } from '@react-navigation/stack';
-import React from 'react';
 import { useAlert, useAuth, useTheme } from '../contexts';
+import i18n from '../i18n';
 import Friends from '../screens/Friends';
 import GameScreen from '../screens/Game';
 import HomeScreen from '../screens/Home';
@@ -29,7 +29,7 @@ function HomeStack(_props) {
                 component={HomeScreen}
                 options={{
                     header: ({ navigation, scene }) => (
-                        <Header title='Home' navigation={navigation} scene={scene} />
+                        <Header title={i18n.t('screens.home')} navigation={navigation} scene={scene} />
                     ),
                 }}
             />
@@ -38,7 +38,7 @@ function HomeStack(_props) {
                 component={GameScreen}
                 options={{
                     header: ({ navigation, scene }) => (
-                        <Header title='Game' navigation={navigation} scene={scene} back />
+                        <Header title={i18n.t('screens.game')} navigation={navigation} scene={scene} back />
                     ),
                 }}
             />
@@ -47,7 +47,7 @@ function HomeStack(_props) {
                 component={ScenarioBoard}
                 options={{
                     header: ({ navigation, scene }) => (
-                        <Header title='Tutorial' navigation={navigation} scene={scene} back />
+                        <Header title={i18n.t('screens.tutorial')} navigation={navigation} scene={scene} back />
                     ),
                 }}
             />
@@ -63,7 +63,7 @@ function HowToPlayStack(_props) {
                 component={HowToPlay}
                 options={{
                     header: ({ navigation, scene }) => (
-                        <Header title='How-To Play' navigation={navigation} scene={scene} />
+                        <Header title={i18n.t('screens.howToPlay')} navigation={navigation} scene={scene} />
                     ),
                 }}
             />
@@ -72,7 +72,7 @@ function HowToPlayStack(_props) {
                 component={ScenarioBoard}
                 options={{
                     header: ({ navigation, scene }) => (
-                        <Header title='Tutorial' navigation={navigation} scene={scene} back />
+                        <Header title={i18n.t('screens.tutorial')} navigation={navigation} scene={scene} back />
                     ),
                 }}
             />
@@ -140,6 +140,7 @@ export default function AppStack(_props) {
                         />
                     ),
                     headerShown: false,
+                    drawerLabel: i18n.t('screens.home'),
                 }}
             />
 
@@ -149,6 +150,7 @@ export default function AppStack(_props) {
                         name='Friends'
                         component={Friends}
                         options={{
+                            drawerLabel: i18n.t('screens.friends'),
                             drawerIcon: ({ _focused: _focused, color }) => (
                                 <Icon
                                     size={isCompact ? 20 : 24}
@@ -159,7 +161,7 @@ export default function AppStack(_props) {
                             ),
                             header: ({ navigation, scene }) => (
                                 <Header
-                                    title='Friends'
+                                    title={i18n.t('screens.friends')}
                                     navigation={navigation}
                                     scene={scene}
                                     user={user}
@@ -171,6 +173,7 @@ export default function AppStack(_props) {
                         name='Stats'
                         component={Stats}
                         options={{
+                            drawerLabel: i18n.t('screens.stats'),
                             drawerIcon: ({ _focused, color }) => (
                                 <Icon
                                     size={isCompact ? 20 : 24}
@@ -181,7 +184,7 @@ export default function AppStack(_props) {
                             ),
                             header: ({ navigation, scene }) => (
                                 <Header
-                                    title='Stats'
+                                    title={i18n.t('screens.stats')}
                                     navigation={navigation}
                                     scene={scene}
                                     user={user}
@@ -202,6 +205,7 @@ export default function AppStack(_props) {
                                 />
                             ),
                             headerShown: false,
+                            drawerLabel: i18n.t('screens.howToPlay'),
                         }}
                     />
                     <Drawer.Screen
@@ -218,12 +222,13 @@ export default function AppStack(_props) {
                             ),
                             header: ({ navigation, scene }) => (
                                 <Header
-                                    title='Report Issue'
+                                    title={i18n.t('screens.report')}
                                     navigation={navigation}
                                     scene={scene}
                                     user={user}
                                 />
                             ),
+                            drawerLabel: i18n.t('screens.report'),
                             drawerItemStyle: {
                                 marginTop: isCompact ? 12 : 16,
                             },
@@ -246,12 +251,13 @@ export default function AppStack(_props) {
                             },
                             header: ({ navigation, scene }) => (
                                 <Header
-                                    title='Settings'
+                                    title={i18n.t('screens.settings')}
                                     navigation={navigation}
                                     scene={scene}
                                     user={user}
                                 />
                             ),
+                            drawerLabel: i18n.t('screens.settings'),
                         }}
                     />
                     <Drawer.Screen
@@ -266,17 +272,18 @@ export default function AppStack(_props) {
                                     color={color}
                                 />
                             ),
+                            drawerLabel: i18n.t('screens.logout'),
                         }}
                         listeners={({ navigation }) => ({
                             drawerItemPress: (e) => {
                                 e.preventDefault();
-                                showAlert('Log Out', 'Are you sure you want to log out?', [
+                                showAlert(i18n.t('screens.logout'), i18n.t('menu.logoutConfirm'), [
                                     {
-                                        text: 'Cancel',
+                                        text: i18n.t('common.cancel'),
                                         style: 'cancel',
                                     },
                                     {
-                                        text: 'Log Out',
+                                        text: i18n.t('screens.logout'),
                                         style: 'destructive',
                                         onPress: async () => {
                                             try {
@@ -308,6 +315,7 @@ export default function AppStack(_props) {
                                 />
                             ),
                             headerShown: false,
+                            drawerLabel: i18n.t('screens.howToPlay'),
                         }}
                     />
                     <Drawer.Screen
@@ -324,11 +332,12 @@ export default function AppStack(_props) {
                             ),
                             header: ({ navigation, scene }) => (
                                 <Header
-                                    title='Report Issue'
+                                    title={i18n.t('screens.report')}
                                     navigation={navigation}
                                     scene={scene}
                                 />
                             ),
+                            drawerLabel: i18n.t('screens.report'),
                             drawerItemStyle: {
                                 marginTop: 'auto',
                             },
@@ -350,8 +359,9 @@ export default function AppStack(_props) {
                                 marginBottom: isCompact ? 10 : 20,
                             },
                             header: ({ navigation, scene }) => (
-                                <Header title='Log In' navigation={navigation} scene={scene} />
+                                <Header title={i18n.t('screens.login')} navigation={navigation} scene={scene} />
                             ),
+                            drawerLabel: i18n.t('screens.login'),
                         }}
                     />
                 </>

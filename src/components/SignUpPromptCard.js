@@ -1,8 +1,8 @@
 import { Block, Button, Text, theme } from 'galio-framework';
-import React from 'react';
 import { Dimensions, StyleSheet, View } from 'react-native';
 import { moderateScale, verticalScale } from 'react-native-size-matters';
 import { useTheme } from '../contexts';
+import i18n from '../i18n';
 import Icon from './Icon';
 
 const { width } = Dimensions.get('screen');
@@ -48,39 +48,39 @@ function SignUpPromptCard({ onPress, style }) {
                     style={[styles.title, { color: colors.TEXT }]}
                     center
                 >
-                    Unlock Full Features
+                    {i18n.t('home.signUpTitle')}
                 </Text>
                 <Text
                     size={moderateScale(15)}
                     style={[styles.description, { color: colors.TEXT_SECONDARY }]}
                     center
                 >
-                    Sign up for a free account to access:
+                    {i18n.t('home.signUpSubtitle')}
                 </Text>
                 <Block style={styles.featureList}>
                     <Text
                         size={isTablet ? moderateScale(10) : moderateScale(14)}
                         style={[styles.feature, { color: colors.TEXT_SECONDARY }]}
                     >
-                        {'\u2022'} Play with friends online
+                        {'\u2022'} {i18n.t('home.featureOnline')}
                     </Text>
                     <Text
                         size={isTablet ? moderateScale(10) : moderateScale(14)}
                         style={[styles.feature, { color: colors.TEXT_SECONDARY }]}
                     >
-                        {'\u2022'} Find random opponents via matchmaking
+                        {'\u2022'} {i18n.t('home.featureMatchmaking')}
                     </Text>
                     <Text
                         size={isTablet ? moderateScale(10) : moderateScale(14)}
                         style={[styles.feature, { color: colors.TEXT_SECONDARY }]}
                     >
-                        {'\u2022'} Track your game stats & history
+                        {'\u2022'} {i18n.t('home.featureStats')}
                     </Text>
                     <Text
                         size={isTablet ? moderateScale(10) : moderateScale(14)}
                         style={[styles.feature, { color: colors.TEXT_SECONDARY }]}
                     >
-                        {'\u2022'} Build your friend network
+                        {'\u2022'} {i18n.t('home.featureNetwork')}
                     </Text>
                 </Block>
                 <Block center style={styles.buttonContainer}>
@@ -90,7 +90,7 @@ function SignUpPromptCard({ onPress, style }) {
                             bold
                             color='white'
                         >
-                            Sign Up / Log In
+                            {i18n.t('home.signUpButton')}
                         </Text>
                     </Button>
                 </Block>

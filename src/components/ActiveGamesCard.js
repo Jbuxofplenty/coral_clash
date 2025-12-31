@@ -1,8 +1,9 @@
 import { Block, Text, theme } from 'galio-framework';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { ActivityIndicator, Dimensions, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { moderateScale, verticalScale } from 'react-native-size-matters';
 import { useAlert, useAuth, useTheme } from '../contexts';
+import i18n from '../i18n';
 import Avatar from './Avatar';
 import Icon from './Icon';
 
@@ -76,27 +77,34 @@ export default function ActiveGamesCard({
 
     const handleResignGame = async (gameId) => {
         // Show confirmation dialog before resigning
-        showAlert('Resign Game', 'Are you sure you want to resign? You will lose this game.', [
-            {
-                text: 'Cancel',
-                style: 'cancel',
-            },
-            {
-                text: 'Resign',
-                style: 'destructive',
-                onPress: async () => {
-                    try {
-                        setResigningGameId(gameId);
-                        await resignGame(gameId);
-                    } catch (error) {
-                        console.error('[ActiveGamesCard] Error resigning game:', error);
-                        showAlert('Error', 'Failed to resign game. Please try again.');
-                    } finally {
-                        setResigningGameId(null);
-                    }
+        showAlert(
+            i18n.t('comp.activeGames.resign'),
+            i18n.t('comp.activeGames.resignConfirm'),
+            [
+                {
+                    text: i18n.t('common.cancel'),
+                    style: 'cancel',
                 },
-            },
-        ]);
+                {
+                    text: i18n.t('comp.activeGames.resign'),
+                    style: 'destructive',
+                    onPress: async () => {
+                        try {
+                            setResigningGameId(gameId);
+                            await resignGame(gameId);
+                        } catch (error) {
+                            console.error('[ActiveGamesCard] Error resigning game:', error);
+                            showAlert(
+                                i18n.t('common.error'),
+                                i18n.t('comp.activeGames.resignFail')
+                            );
+                        } finally {
+                            setResigningGameId(null);
+                        }
+                    },
+                },
+            ]
+        );
     };
 
     const getGameStatus = (game) => {
@@ -116,13 +124,13 @@ export default function ActiveGamesCard({
 
         if (isMyTurn) {
             return {
-                text: 'Your turn',
+                text: i18n.t('comp.activeGames.yourTurn'),
                 icon: 'play-circle',
                 color: colors.SUCCESS,
             };
         } else {
             return {
-                text: "Opponent's turn",
+                text: i18n.t('comp.activeGames.oppTurn'),
                 icon: 'hourglass',
                 color: colors.TEXT_SECONDARY,
             };
@@ -144,7 +152,9 @@ export default function ActiveGamesCard({
             // This allows computer users to show their display names (e.g., "Alex", "Jordan")
             // Fall back to 'Computer' only if no display name is available (old games)
             const displayName =
-                game.opponentDisplayName || game.creatorDisplayName || 'Computer';
+                game.opponentDisplayName ||
+                game.creatorDisplayName ||
+                i18n.t('comp.statusBar.computer');
             const avatarKey =
                 game.opponentAvatarKey || game.creatorAvatarKey || (isLegacyComputer ? null : 'dolphin');
 
@@ -161,7 +171,7 @@ export default function ActiveGamesCard({
         return {
             id: opponentId,
             avatarKey: game.opponentAvatarKey || 'dolphin',
-            displayName: game.opponentDisplayName || 'Opponent',
+            displayName: game.opponentDisplayName || i18n.t('comp.history.unknown'), // 'Opponent' fallback or unknown
             isComputer: false,
         };
     };
@@ -174,25 +184,25 @@ export default function ActiveGamesCard({
                 return {
                     icon: 'bolt',
                     iconFamily: 'font-awesome',
-                    label: 'Blitz',
+                    label: i18n.t('comp.timeControl.blitz'),
                 };
             case 'normal':
                 return {
                     icon: 'clock-o',
                     iconFamily: 'font-awesome',
-                    label: 'Normal',
+                    label: i18n.t('comp.timeControl.normal'),
                 };
             case 'unlimited':
                 return {
                     icon: 'infinite',
                     iconFamily: 'ionicon',
-                    label: 'Unlimited',
+                    label: i18n.t('comp.timeControl.unlimited'),
                 };
             default:
                 return {
                     icon: 'clock-o',
                     iconFamily: 'font-awesome',
-                    label: 'Timed',
+                    label: i18n.t('comp.timeControl.timed'),
                 };
         }
     };
@@ -223,14 +233,15 @@ export default function ActiveGamesCard({
                             bold
                             style={[styles.title, { color: colors.TEXT }]}
                         >
-                            Active Games
+                            {i18n.t('home.activeGames')}
                         </Text>
                         <Text
                             size={isTablet ? moderateScale(10) : moderateScale(12)}
                             style={[styles.subtitle, { color: colors.TEXT_SECONDARY }]}
                         >
-                            {activeGames.length} {activeGames.length === 1 ? 'game' : 'games'} in
-                            progress
+                            {activeGames.length === 1
+                                ? i18n.t('home.gameInProgress', { count: activeGames.length })
+                                : i18n.t('home.gamesInProgress', { count: activeGames.length })}
                         </Text>
                     </Block>
                 </Block>
@@ -244,7 +255,7 @@ export default function ActiveGamesCard({
                             size={isTablet ? moderateScale(10) : moderateScale(14)}
                             style={[styles.loadingText, { color: colors.TEXT_SECONDARY }]}
                         >
-                            Loading games...
+                            {i18n.t('comp.activeGames.loading')}
                         </Text>
                     </Block>
                 ) : activeGames.length === 0 ? (
@@ -260,13 +271,13 @@ export default function ActiveGamesCard({
                             size={isTablet ? moderateScale(10) : moderateScale(14)}
                             style={[styles.emptyText, { color: colors.TEXT_SECONDARY }]}
                         >
-                            No active games
+                            {i18n.t('home.noActiveGames')}
                         </Text>
                         <Text
                             size={isTablet ? moderateScale(10) : moderateScale(12)}
                             style={[styles.emptySubtext, { color: colors.TEXT_SECONDARY }]}
                         >
-                            Start a game with a friend!
+                            {i18n.t('home.startPrompt')}
                         </Text>
                     </Block>
                 ) : (
@@ -329,7 +340,9 @@ export default function ActiveGamesCard({
                                                     numberOfLines={1}
                                                     ellipsizeMode='tail'
                                                 >
-                                                    vs {opponent.displayName}
+                                                    {i18n.t('comp.activeGames.vs', {
+                                                        name: opponent.displayName,
+                                                    })}
                                                 </Text>
                                             </Block>
                                             <Block

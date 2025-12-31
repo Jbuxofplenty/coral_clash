@@ -8,6 +8,7 @@ import {
     View,
 } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
+import i18n from '../i18n';
 import Icon from './Icon';
 
 const { width } = Dimensions.get('window');
@@ -78,15 +79,20 @@ export default function DifficultySelectionModal({ visible, onSelect, onCancel, 
                     onStartShouldSetResponder={() => true}
                 >
                     {/* Title */}
-                    <Text style={[styles.title, { color: colors.TEXT }]}>Choose AI Difficulty</Text>
+                    <Text style={[styles.title, { color: colors.TEXT }]}>
+                        {i18n.t('comp.difficulty.title')}
+                    </Text>
                     <Text style={[styles.subtitle, { color: colors.TEXT_SECONDARY }]}>
-                        Select the difficulty level for the computer opponent
+                        {i18n.t('comp.difficulty.subtitle')}
                     </Text>
 
                     {/* Difficulty Options */}
                     <View style={styles.optionsContainer}>
                         {DIFFICULTY_LEVELS.map((difficulty, index) => {
                             const disabled = isDifficultyDisabled(difficulty.value);
+                            const name = i18n.t(`comp.difficulty.${difficulty.value}`);
+                            const description = i18n.t(`comp.difficulty.${difficulty.value}Desc`);
+
                             return (
                                 <TouchableOpacity
                                     key={difficulty.value}
@@ -124,7 +130,7 @@ export default function DifficultySelectionModal({ visible, onSelect, onCancel, 
                                                         },
                                                     ]}
                                                 >
-                                                    {difficulty.name}
+                                                    {name}
                                                 </Text>
                                                 {disabled && (
                                                     <View style={styles.lockBadge}>
@@ -148,8 +154,8 @@ export default function DifficultySelectionModal({ visible, onSelect, onCancel, 
                                                 ]}
                                             >
                                                 {disabled
-                                                    ? 'Create an account to access'
-                                                    : difficulty.description}
+                                                    ? i18n.t('comp.difficulty.locked')
+                                                    : description}
                                             </Text>
                                         </View>
                                         {!disabled && (
@@ -173,7 +179,7 @@ export default function DifficultySelectionModal({ visible, onSelect, onCancel, 
                         activeOpacity={0.7}
                     >
                         <Text style={[styles.cancelButtonText, { color: colors.TEXT_SECONDARY }]}>
-                            Cancel
+                            {i18n.t('common.cancel')}
                         </Text>
                     </TouchableOpacity>
                 </View>

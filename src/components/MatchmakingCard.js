@@ -1,5 +1,5 @@
 import { Block, Text, theme } from 'galio-framework';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
     ActivityIndicator,
     Dimensions,
@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { moderateScale } from 'react-native-size-matters';
 import { useAlert, useTheme } from '../contexts';
+import i18n from '../i18n';
 import Icon from './Icon';
 
 const { width } = Dimensions.get('screen');
@@ -38,12 +39,12 @@ function MatchmakingCard({ searching, loading, onStartSearch, onStopSearch, styl
             } else {
                 const result = await onStartSearch();
                 if (result && !result.success && result.error) {
-                    showAlert('Cannot Join Matchmaking', result.error);
+                    showAlert(i18n.t('comp.matchmaking.errorTitle'), result.error);
                 }
             }
         } catch (error) {
             console.error('Error in matchmaking action:', error);
-            showAlert('Error', 'Something went wrong. Please try again.');
+            showAlert(i18n.t('common.error'), i18n.t('comp.matchmaking.genericError'));
         } finally {
             setIsProcessing(false);
         }
@@ -80,7 +81,9 @@ function MatchmakingCard({ searching, loading, onStartSearch, onStopSearch, styl
                         style={[styles.title, { color: textColor }]}
                         center
                     >
-                        {searching ? 'Searching for Opponent...' : 'Find Random Match'}
+                        {searching
+                            ? i18n.t('home.searching')
+                            : i18n.t('home.findMatch')}
                     </Text>
                     <Text
                         size={isTablet ? moderateScale(10) : moderateScale(14)}
@@ -91,8 +94,8 @@ function MatchmakingCard({ searching, loading, onStartSearch, onStopSearch, styl
                         center
                     >
                         {searching
-                            ? 'Searching for opponent... · Tap to cancel'
-                            : 'Tap to join matchmaking queue'}
+                            ? i18n.t('home.cancelSearch')
+                            : i18n.t('home.joinQueue')}
                     </Text>
                 </Block>
             </Block>

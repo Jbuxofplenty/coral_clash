@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
     ActivityIndicator,
     Dimensions,
@@ -10,6 +10,7 @@ import {
     View,
 } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
+import i18n from '../i18n';
 
 const { width } = Dimensions.get('window');
 
@@ -157,7 +158,7 @@ export default function ThemedAlert({
                                                     styles.buttonTextBold,
                                             ]}
                                         >
-                                            {button.text || 'OK'}
+                                            {button.text || i18n.t('common.ok')}
                                         </Text>
                                     )}
                                 </TouchableOpacity>

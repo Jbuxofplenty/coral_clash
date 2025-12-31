@@ -1,8 +1,8 @@
 import { Block, Text, theme } from 'galio-framework';
-import React from 'react';
 import { ActivityIndicator, Dimensions, StyleSheet, View } from 'react-native';
 import { moderateScale, verticalScale } from 'react-native-size-matters';
 import { useAuth, useTheme } from '../contexts';
+import i18n from '../i18n';
 import Avatar from './Avatar';
 import Icon from './Icon';
 
@@ -50,13 +50,13 @@ export default function GameHistoryCard({
             const diffDays = Math.floor(diffMs / 86400000);
 
             if (diffMins < 1) {
-                return 'Just now';
+                return i18n.t('comp.history.justNow');
             } else if (diffMins < 60) {
-                return `${diffMins}m ago`;
+                return i18n.t('comp.history.agoM', { count: diffMins });
             } else if (diffHours < 24) {
-                return `${diffHours}h ago`;
+                return i18n.t('comp.history.agoH', { count: diffHours });
             } else if (diffDays < 7) {
-                return `${diffDays}d ago`;
+                return i18n.t('comp.history.agoD', { count: diffDays });
             } else {
                 // Format as date
                 return date.toLocaleDateString('en-US', {
@@ -78,7 +78,7 @@ export default function GameHistoryCard({
 
         if (status === 'cancelled') {
             return {
-                text: 'Game cancelled',
+                text: i18n.t('comp.history.cancelled'),
                 icon: 'ban',
                 color: colors.ERROR,
             };
@@ -91,7 +91,7 @@ export default function GameHistoryCard({
 
             if (isDraw) {
                 return {
-                    text: 'Draw',
+                    text: i18n.t('comp.history.draw'),
                     icon: 'minus-circle',
                     color: colors.WARNING,
                 };
@@ -114,13 +114,13 @@ export default function GameHistoryCard({
 
             if (didWin) {
                 return {
-                    text: 'You won',
+                    text: i18n.t('comp.history.won'),
                     icon: 'trophy',
                     color: colors.SUCCESS,
                 };
             } else {
                 return {
-                    text: 'You lost',
+                    text: i18n.t('comp.history.lost'),
                     icon: 'times-circle',
                     color: colors.ERROR,
                 };
@@ -128,7 +128,7 @@ export default function GameHistoryCard({
         }
 
         return {
-            text: 'Unknown',
+            text: i18n.t('comp.history.unknown'),
             icon: 'question-circle',
             color: colors.TEXT_SECONDARY,
         };
@@ -148,8 +148,10 @@ export default function GameHistoryCard({
         // This allows computer users to show their display names (e.g., "Alex", "Jordan")
         // Fall back to 'Computer' only if no display name is available (old games)
         const displayName = isComputerGame
-            ? game.opponentDisplayName || game.creatorDisplayName || 'Computer'
-            : game.opponentDisplayName || 'Opponent';
+            ? game.opponentDisplayName ||
+              game.creatorDisplayName ||
+              i18n.t('comp.statusBar.computer')
+            : game.opponentDisplayName || i18n.t('comp.history.unknown');
 
         return {
             id: opponentId,
@@ -167,25 +169,25 @@ export default function GameHistoryCard({
                 return {
                     icon: 'bolt',
                     iconFamily: 'font-awesome',
-                    label: 'Blitz',
+                    label: i18n.t('comp.timeControl.blitz'),
                 };
             case 'normal':
                 return {
                     icon: 'clock-o',
                     iconFamily: 'font-awesome',
-                    label: 'Normal',
+                    label: i18n.t('comp.timeControl.normal'),
                 };
             case 'unlimited':
                 return {
                     icon: 'infinite',
                     iconFamily: 'ionicon',
-                    label: 'Unlimited',
+                    label: i18n.t('comp.timeControl.unlimited'),
                 };
             default:
                 return {
                     icon: 'clock-o',
                     iconFamily: 'font-awesome',
-                    label: 'Timed',
+                    label: i18n.t('comp.timeControl.timed'),
                 };
         }
     };
@@ -216,13 +218,13 @@ export default function GameHistoryCard({
                             bold
                             style={[styles.title, { color: colors.TEXT }]}
                         >
-                            Game History
+                            {i18n.t('home.gameHistory')}
                         </Text>
                         <Text
                             size={isTablet ? moderateScale(10) : moderateScale(12)}
                             style={[styles.subtitle, { color: colors.TEXT_SECONDARY }]}
                         >
-                            Recent games
+                            {i18n.t('home.recentGames')}
                         </Text>
                     </Block>
                 </Block>
@@ -236,7 +238,7 @@ export default function GameHistoryCard({
                             size={isTablet ? moderateScale(10) : moderateScale(14)}
                             style={[styles.loadingText, { color: colors.TEXT_SECONDARY }]}
                         >
-                            Loading history...
+                            {i18n.t('comp.history.loading')}
                         </Text>
                     </Block>
                 ) : gameHistory.length === 0 ? (
@@ -252,13 +254,13 @@ export default function GameHistoryCard({
                             size={isTablet ? moderateScale(10) : moderateScale(14)}
                             style={[styles.emptyText, { color: colors.TEXT_SECONDARY }]}
                         >
-                            No game history
+                            {i18n.t('home.noHistory')}
                         </Text>
                         <Text
                             size={isTablet ? moderateScale(10) : moderateScale(12)}
                             style={[styles.emptySubtext, { color: colors.TEXT_SECONDARY }]}
                         >
-                            Your completed games will appear here
+                            {i18n.t('home.historyPrompt')}
                         </Text>
                     </Block>
                 ) : (

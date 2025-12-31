@@ -15,6 +15,7 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 import { moderateScale, verticalScale } from 'react-native-size-matters';
 
 import { useAuth, useTheme } from '../contexts';
+import i18n from '../i18n';
 
 const { width, height } = Dimensions.get('screen');
 const isTablet = width >= 768;
@@ -71,7 +72,7 @@ function Login({ navigation }) {
 
     const handleSubmit = async () => {
         if (!email || !password) {
-            setError('Please fill in all fields');
+            setError(i18n.t('login.fillAll'));
             return;
         }
 
@@ -79,25 +80,23 @@ function Login({ navigation }) {
             const trimmedDisplayName = displayName?.trim();
 
             if (!trimmedDisplayName) {
-                setError('Username is required');
+                setError(i18n.t('login.usernameRequired'));
                 return;
             }
 
             if (trimmedDisplayName.length < 2) {
-                setError('Username must be at least 2 characters');
+                setError(i18n.t('login.usernameMin'));
                 return;
             }
 
             if (trimmedDisplayName.length > 30) {
-                setError('Username must be less than 30 characters');
+                setError(i18n.t('login.usernameMax'));
                 return;
             }
 
             // Check for valid characters (alphanumeric, spaces, underscores, hyphens)
             if (!/^[a-zA-Z0-9 _-]+$/.test(trimmedDisplayName)) {
-                setError(
-                    'Username can only contain letters, numbers, spaces, underscores, and hyphens',
-                );
+                setError(i18n.t('login.usernameChars'));
                 return;
             }
         }
@@ -114,7 +113,7 @@ function Login({ navigation }) {
             }
             // Navigation will be handled by auth state change
         } catch (err) {
-            setError(err.message || 'Authentication failed');
+            setError(err.message || i18n.t('login.authFailed'));
         } finally {
             setLoading(false);
         }
@@ -131,7 +130,7 @@ function Login({ navigation }) {
                 console.log('User cancelled Google Sign-In');
             }
         } catch (err) {
-            setError(err.message || 'Google sign-in failed');
+            setError(err.message || i18n.t('login.googleFailed'));
         } finally {
             setLoading(false);
         }
@@ -148,7 +147,7 @@ function Login({ navigation }) {
                 console.log('User cancelled Apple Sign-In');
             }
         } catch (err) {
-            setError(err.message || 'Apple sign-in failed');
+            setError(err.message || i18n.t('login.appleFailed'));
         } finally {
             setLoading(false);
         }
@@ -156,7 +155,7 @@ function Login({ navigation }) {
 
     const handleForgotPassword = async () => {
         if (!email) {
-            setError('Please enter your email address');
+            setError(i18n.t('login.emailRequired'));
             return;
         }
 
@@ -166,10 +165,10 @@ function Login({ navigation }) {
 
         try {
             await resetPassword(email);
-            setSuccessMessage('Password reset email sent! Check your inbox.');
+            setSuccessMessage(i18n.t('login.resetSent'));
             setShowForgotPassword(false);
         } catch (err) {
-            setError(err.message || 'Failed to send reset email');
+            setError(err.message || i18n.t('login.resetFailed'));
         } finally {
             setLoading(false);
         }
@@ -211,10 +210,10 @@ function Login({ navigation }) {
                             style={styles.title}
                         >
                             {showForgotPassword
-                                ? 'Reset Password'
+                                ? i18n.t('login.resetTitle')
                                 : isSignUp
-                                  ? 'Create Account'
-                                  : 'Welcome Back'}
+                                  ? i18n.t('login.createAccount')
+                                  : i18n.t('login.welcome')}
                         </Text>
                         <Block style={styles.subtitleContainer}>
                             <Text
@@ -223,10 +222,10 @@ function Login({ navigation }) {
                                 style={styles.subtitle}
                             >
                                 {showForgotPassword
-                                    ? 'Enter your email to receive a password reset link'
+                                    ? i18n.t('login.resetDesc')
                                     : isSignUp
-                                      ? 'Create an account to play online. Choose a unique username!'
-                                      : 'Sign in to play against the computer or challenge other players online'}
+                                      ? i18n.t('login.createDesc')
+                                      : i18n.t('login.signinDesc')}
                             </Text>
                         </Block>
 
@@ -282,8 +281,8 @@ function Login({ navigation }) {
                                                 style={styles.appleButtonText}
                                             >
                                                 {isSignUp
-                                                    ? 'Sign up with Apple'
-                                                    : 'Sign in with Apple'}
+                                                    ? i18n.t('login.appleSignup')
+                                                    : i18n.t('login.appleSignin')}
                                             </Text>
                                         </TouchableOpacity>
                                     )}
@@ -310,8 +309,8 @@ function Login({ navigation }) {
                                             style={styles.googleButtonText}
                                         >
                                             {isSignUp
-                                                ? 'Sign up with Google'
-                                                : 'Sign in with Google'}
+                                                ? i18n.t('login.googleSignup')
+                                                : i18n.t('login.googleSignin')}
                                         </Text>
                                     </TouchableOpacity>
 
@@ -327,7 +326,7 @@ function Login({ navigation }) {
                                             color={colors.TEXT_SECONDARY}
                                             style={styles.dividerText}
                                         >
-                                            OR
+                                            {i18n.t('login.or')}
                                         </Text>
                                         <View
                                             style={[
@@ -342,7 +341,7 @@ function Login({ navigation }) {
                             {!showForgotPassword && isSignUp && (
                                 <Input
                                     ref={displayNameRef}
-                                    placeholder='Username (required)'
+                                    placeholder={i18n.t('login.usernamePlaceholder')}
                                     value={displayName}
                                     onChangeText={setDisplayName}
                                     style={[
@@ -364,7 +363,7 @@ function Login({ navigation }) {
                             )}
                             <Input
                                 ref={emailRef}
-                                placeholder='Email'
+                                placeholder={i18n.t('login.emailPlaceholder')}
                                 value={email}
                                 onChangeText={setEmail}
                                 style={[
@@ -393,7 +392,7 @@ function Login({ navigation }) {
                             {!showForgotPassword && (
                                 <Input
                                     ref={passwordRef}
-                                    placeholder='Password'
+                                    placeholder={i18n.t('login.passwordPlaceholder')}
                                     value={password}
                                     onChangeText={setPassword}
                                     style={[
@@ -427,10 +426,10 @@ function Login({ navigation }) {
                                 ) : (
                                     <Text bold size={moderateScale(16)} color='#fff'>
                                         {showForgotPassword
-                                            ? 'Send Reset Link'
+                                            ? i18n.t('login.sendResetLink')
                                             : isSignUp
-                                              ? 'Sign Up'
-                                              : 'Sign In'}
+                                              ? i18n.t('login.signup')
+                                              : i18n.t('login.signin')}
                                     </Text>
                                 )}
                             </Button>
@@ -445,7 +444,7 @@ function Login({ navigation }) {
                                         color={colors.PRIMARY}
                                         center
                                     >
-                                        Forgot Password?
+                                        {i18n.t('login.forgotPassword')}
                                     </Text>
                                 </TouchableOpacity>
                             )}
@@ -460,10 +459,10 @@ function Login({ navigation }) {
                                     center
                                 >
                                     {showForgotPassword
-                                        ? 'Back to Sign In'
+                                        ? i18n.t('login.backToSignin')
                                         : isSignUp
-                                          ? 'Already have an account? Sign In'
-                                          : "Don't have an account? Sign Up"}
+                                          ? i18n.t('login.alreadyHaveAccount')
+                                          : i18n.t('login.dontHaveAccount')}
                                 </Text>
                             </TouchableOpacity>
                         </Block>

@@ -1,18 +1,18 @@
 import { DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Block, Text } from 'galio-framework';
-import React from 'react';
 import { StyleSheet, View, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Avatar } from '../components';
 import { useAuth, useTheme } from '../contexts';
+import i18n from '../i18n';
 
 // Re-export for backward compatibility
 export {
     AVATAR_KEYS,
     DEFAULT_AVATARS,
     DEFAULT_AVATAR_NAME,
-    getRandomAvatarKey,
+    getRandomAvatarKey
 } from '../constants/avatars';
 
 function CustomDrawerContent(props) {
@@ -27,7 +27,7 @@ function CustomDrawerContent(props) {
     // Format display name with discriminator
     const getDisplayName = () => {
         if (!user) return '';
-        const name = user.displayName || user.email || 'User';
+        const name = user.displayName || user.email || i18n.t('menu.user');
         if (user.discriminator) {
             return `${name} #${user.discriminator}`;
         }
@@ -79,7 +79,7 @@ function CustomDrawerContent(props) {
                         Coral Clash
                     </Text>
                     <Text size={isCompact ? 11 : 14} color='white' style={styles.subtitle}>
-                        Ocean Strategy Game
+                        {i18n.t('menu.subtitle')}
                     </Text>
                 </Block>
 

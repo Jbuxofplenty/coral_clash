@@ -1,10 +1,11 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { Block, Text, theme } from 'galio-framework';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Dimensions, ScrollView, StyleSheet, View } from 'react-native';
 import { moderateScale } from 'react-native-size-matters';
 import ExampleLink, { loadViewedExamples, markExampleViewed } from '../components/ExampleLink';
 import { useTheme } from '../contexts';
+import i18n from '../i18n';
 
 const { width, height } = Dimensions.get('screen');
 
@@ -38,39 +39,39 @@ export default function HowToPlay({ navigation }) {
             >
                 <Block style={[styles.card, { backgroundColor: colors.CARD_BACKGROUND }]}>
                     <Text h5 bold style={[styles.heading, { color: colors.PRIMARY }]}>
-                        Objective
+                        {i18n.t('howToPlay.objective')}
                     </Text>
                     <Text style={[styles.text, { color: colors.TEXT }]}>
-                        To win Coral Clash, complete one of these goals:
+                        {i18n.t('howToPlay.objectiveDesc')}
                     </Text>
                     <View style={styles.bulletSection}>
                         <Text style={[styles.bulletPoint, { color: colors.TEXT }]}>
                             •{' '}
                             <Text bold style={{ color: colors.TEXT }}>
-                                Checkmate
+                                {i18n.t('howToPlay.checkmate')}
                             </Text>{' '}
-                            your opponent's Whale (when the Whale is in{' '}
+                            {i18n.t('howToPlay.checkmateDesc')}
                             <Text bold style={{ color: colors.TEXT }}>
-                                check
+                                {i18n.t('howToPlay.check')}
                             </Text>{' '}
-                            and cannot escape)
+                            {i18n.t('howToPlay.checkmateDesc2')}
                         </Text>
                         <Text style={[styles.bulletPoint, { color: colors.TEXT }]}>
-                            • Control the{' '}
+                            • {i18n.t('howToPlay.control')}{' '}
                             <Text bold style={{ color: colors.TEXT }}>
-                                most area with Coral
+                                {i18n.t('howToPlay.mostArea')}
                             </Text>{' '}
-                            when:
+                            {i18n.t('howToPlay.when')}
                         </Text>
                         <View style={styles.subBulletSection}>
                             <Text style={[styles.subBullet, { color: colors.TEXT }]}>
-                                - A player has placed all their Coral
+                                - {i18n.t('howToPlay.condition1')}
                             </Text>
                             <Text style={[styles.subBullet, { color: colors.TEXT }]}>
-                                - A player only has their Whale remaining
+                                - {i18n.t('howToPlay.condition2')}
                             </Text>
                             <Text style={[styles.subBullet, { color: colors.TEXT }]}>
-                                - A Crab or Octopus reaches the opponent's back row
+                                - {i18n.t('howToPlay.condition3')}
                             </Text>
                         </View>
                     </View>
@@ -79,30 +80,29 @@ export default function HowToPlay({ navigation }) {
                         style={[styles.text, { color: colors.TEXT, marginTop: theme.SIZES.BASE }]}
                     >
                         <Text bold style={{ color: colors.TEXT }}>
-                            Area controlled by Coral:
+                            {i18n.t('howToPlay.areaControlled')}
                         </Text>{' '}
-                        Count the amount of coral of your color that is not occupied by one of your
-                        opponent's pieces.
+                        {i18n.t('howToPlay.areaControlledDesc')}
                     </Text>
 
                     <View style={styles.examplesContainer}>
                         <ExampleLink
                             scenarioId='checkmate'
-                            label='Checkmate Example'
+                            label={i18n.t('howToPlay.exCheckmate')}
                             navigation={navigation}
                             viewedExamples={viewedExamples}
                             onViewed={handleMarkViewed}
                         />
                         <ExampleLink
                             scenarioId='check'
-                            label='Check Example'
+                            label={i18n.t('howToPlay.exCheck')}
                             navigation={navigation}
                             viewedExamples={viewedExamples}
                             onViewed={handleMarkViewed}
                         />
                         <ExampleLink
                             scenarioId='coralVictory'
-                            label='Coral Victory Example'
+                            label={i18n.t('howToPlay.exCoralVictory')}
                             navigation={navigation}
                             viewedExamples={viewedExamples}
                             onViewed={handleMarkViewed}
@@ -112,50 +112,49 @@ export default function HowToPlay({ navigation }) {
 
                 <Block style={[styles.card, { backgroundColor: colors.CARD_BACKGROUND }]}>
                     <Text h5 bold style={[styles.heading, { color: colors.PRIMARY }]}>
-                        Game Setup
+                        {i18n.t('howToPlay.gameSetup')}
                     </Text>
                     <Text style={[styles.text, { color: colors.TEXT }]}>
-                        The board is an 8x8 grid with 64 squares. Each player has:
+                        {i18n.t('howToPlay.boardDesc')}
                     </Text>
                     <View style={styles.bulletSection}>
                         <Text style={[styles.bulletPoint, { color: colors.TEXT }]}>
-                            • 17 Coral pieces
+                            • {i18n.t('howToPlay.setupCoral')}
                         </Text>
                         <Text style={[styles.bulletPoint, { color: colors.TEXT }]}>
-                            • 17 units: 1 Whale, 2 Dolphins, 4 Turtles, 2 Pufferfish, 4 Crabs, and 4
-                            Octopuses
+                            • {i18n.t('howToPlay.setupUnits')}
                         </Text>
                     </View>
                     <Text style={[styles.text, { color: colors.TEXT }]}>
-                        Each piece type comes in two variants:
+                        {i18n.t('howToPlay.pieceTypes')}
                     </Text>
                     <View style={styles.bulletSection}>
                         <Text style={[styles.bulletPoint, { color: colors.TEXT }]}>
                             •{' '}
                             <Text bold style={{ color: colors.TEXT }}>
-                                Hunter
+                                {i18n.t('howToPlay.hunter')}
                             </Text>{' '}
-                            pieces (without four coral icons) can remove Coral
+                            {i18n.t('howToPlay.hunterDesc')}
                         </Text>
                         <Text style={[styles.bulletPoint, { color: colors.TEXT }]}>
                             •{' '}
                             <Text bold style={{ color: colors.TEXT }}>
-                                Gatherer
+                                {i18n.t('howToPlay.gatherer')}
                             </Text>{' '}
-                            pieces (with four coral icons) can place Coral
+                            {i18n.t('howToPlay.gathererDesc')}
                         </Text>
                     </View>
                     <View style={styles.examplesContainer}>
                         <ExampleLink
                             scenarioId='hunterEffect'
-                            label='Hunter Effect Example'
+                            label={i18n.t('howToPlay.exHunter')}
                             navigation={navigation}
                             viewedExamples={viewedExamples}
                             onViewed={handleMarkViewed}
                         />
                         <ExampleLink
                             scenarioId='gathererEffect'
-                            label='Gatherer Effect Example'
+                            label={i18n.t('howToPlay.exGatherer')}
                             navigation={navigation}
                             viewedExamples={viewedExamples}
                             onViewed={handleMarkViewed}
@@ -165,67 +164,67 @@ export default function HowToPlay({ navigation }) {
 
                 <Block style={[styles.card, { backgroundColor: colors.CARD_BACKGROUND }]}>
                     <Text h5 bold style={[styles.heading, { color: colors.PRIMARY }]}>
-                        Turn Overview
+                        {i18n.t('howToPlay.turnOverview')}
                     </Text>
                     <Text style={[styles.text, { color: colors.TEXT }]}>
-                        White goes first, then players alternate. On your turn:
+                        {i18n.t('howToPlay.turnDesc')}
                     </Text>
                     <View style={styles.bulletSection}>
                         <Text style={[styles.bulletPoint, { color: colors.TEXT }]}>
-                            1. Move one of your pieces
+                            {i18n.t('howToPlay.turnStep1')}
                         </Text>
                         <Text style={[styles.bulletPoint, { color: colors.TEXT }]}>
-                            2. Resolve any Capture, Hunter, or Gatherer effects
+                            {i18n.t('howToPlay.turnStep2')}
                         </Text>
                         <Text style={[styles.bulletPoint, { color: colors.TEXT }]}>
-                            3. Check if any objectives have been met
+                            {i18n.t('howToPlay.turnStep3')}
                         </Text>
                     </View>
                 </Block>
 
                 <Block style={[styles.card, { backgroundColor: colors.CARD_BACKGROUND }]}>
                     <Text h5 bold style={[styles.heading, { color: colors.PRIMARY }]}>
-                        How Pieces Move
+                        {i18n.t('howToPlay.piecesMovement')}
                     </Text>
 
                     <Text style={[styles.text, { color: colors.TEXT }]}>
                         <Text bold style={{ color: colors.TEXT }}>
-                            Important:
+                            {i18n.t('howToPlay.important')}
                         </Text>{' '}
-                        Pieces cannot move through other pieces - they must have a clear path.
+                        {i18n.t('howToPlay.importantDesc')}
                     </Text>
 
                     <Text style={[styles.text, { color: colors.TEXT }]}>
-                        Each piece type comes in two variants that interact with Coral differently:
+                        {i18n.t('howToPlay.movementDesc')}
                     </Text>
                     <View style={styles.bulletSection}>
                         <Text style={[styles.bulletPoint, { color: colors.TEXT }]}>
                             •{' '}
                             <Text bold style={{ color: colors.TEXT }}>
-                                Hunter pieces
+                                {i18n.t('howToPlay.hunterPieces')}
                             </Text>{' '}
-                            (without coral icons) get{' '}
+                            {i18n.t('howToPlay.hunterMove1')}{' '}
                             <Text bold style={{ color: colors.TEXT }}>
-                                STOPPED BY
+                                {i18n.t('howToPlay.stoppedBy')}
                             </Text>{' '}
-                            Coral - they cannot move through it
+                            {i18n.t('howToPlay.hunterMove2')}
                         </Text>
                         <Text style={[styles.bulletPoint, { color: colors.TEXT }]}>
                             •{' '}
                             <Text bold style={{ color: colors.TEXT }}>
-                                Gatherer pieces
+                                {i18n.t('howToPlay.gathererPieces')}
                             </Text>{' '}
-                            (with four coral icons) are more powerful - they can pass{' '}
+                            {i18n.t('howToPlay.gathererMove1')}{' '}
                             <Text bold style={{ color: colors.TEXT }}>
-                                THROUGH
+                                {i18n.t('howToPlay.through')}
                             </Text>{' '}
-                            Coral freely
+                            {i18n.t('howToPlay.gathererMove2')}
                         </Text>
                     </View>
 
                     <ExampleLink
                         scenarioId='coralMovementComparison'
-                        label='Coral Movement Example'
+                        label={i18n.t('howToPlay.exCoralMovement')}
                         navigation={navigation}
                         viewedExamples={viewedExamples}
                         onViewed={handleMarkViewed}
@@ -239,42 +238,32 @@ export default function HowToPlay({ navigation }) {
                             { color: colors.PRIMARY, marginTop: theme.SIZES.BASE * 2 },
                         ]}
                     >
-                        Individual Piece Movements
+                        {i18n.t('howToPlay.individualMovements')}
                     </Text>
 
                     <View style={styles.pieceSection}>
                         <Text style={[styles.pieceTitle, { color: colors.TEXT }]}>
                             🐋{' '}
                             <Text bold style={{ color: colors.TEXT }}>
-                                Whale
+                                {i18n.t('howToPlay.whale')}
                             </Text>
                         </Text>
                         <Text style={[styles.text, { color: colors.TEXT }]}>
-                            The Whale is your most important piece - if it's checkmated, you lose!
-                            The Whale occupies two squares and has two distinct movement options:
+                            {i18n.t('howToPlay.whaleDesc')}
                         </Text>
 
                         <View style={styles.subBulletSection}>
                             <Text style={[styles.subBullet, { color: colors.TEXT }]}>
                                 <Text bold style={{ color: colors.TEXT }}>
-                                    1. Sliding Move:
+                                    {i18n.t('howToPlay.slidingMove')}
                                 </Text>{' '}
-                                Move half of the piece any number of squares horizontally,
-                                vertically, or diagonally while maintaining its original
-                                orientation. The Whale follows Hunter movement rules - it is stopped
-                                by coral. However, there is one special exception (see below).
+                                {i18n.t('howToPlay.slidingMoveDesc')}
                             </Text>
                             <Text style={[styles.subBullet, { color: colors.TEXT }]}>
                                 <Text bold style={{ color: colors.TEXT }}>
-                                    2. Rotation Move:
+                                    {i18n.t('howToPlay.rotationMove')}
                                 </Text>{' '}
-                                Rotate half of the piece to an adjacent square (one square
-                                vertically or horizontally). When selecting a rotation, first tap
-                                the destination square (shown with a white circle). If there are
-                                multiple valid orientations, you'll then tap the orientation square
-                                (shown with a green circle). If there's only one valid orientation,
-                                the whale will automatically move without showing the orientation
-                                selection.
+                                {i18n.t('howToPlay.rotationMoveDesc')}
                             </Text>
                         </View>
 
@@ -285,29 +274,23 @@ export default function HowToPlay({ navigation }) {
                             ]}
                         >
                             <Text bold style={{ color: colors.TEXT }}>
-                                Check Rules:
+                                {i18n.t('howToPlay.checkRules')}
                             </Text>{' '}
-                            The Whale may never end its movement in check (where it could be
-                            captured), but it CAN move through threatened squares.
+                            {i18n.t('howToPlay.checkRulesDesc')}
                         </Text>
 
                         <Text style={[styles.text, { color: colors.TEXT }]}>
                             <Text bold style={{ color: colors.TEXT }}>
-                                Double Capture:
+                                {i18n.t('howToPlay.doubleCapture')}
                             </Text>{' '}
-                            The Whale can capture up to two enemy pieces in a single move - one with
-                            each half of its body!
+                            {i18n.t('howToPlay.doubleCaptureDesc')}
                         </Text>
 
                         <Text style={[styles.text, { color: colors.TEXT }]}>
                             <Text bold style={{ color: colors.TEXT }}>
-                                Double Coral Removal:
+                                {i18n.t('howToPlay.doubleCoralRemoval')}
                             </Text>{' '}
-                            When the Whale (acting as a Hunter) lands on coral, it can choose to
-                            remove one or both coral pieces. If both halves land on coral, you can
-                            remove both, just one, or neither. If only one half lands on new coral
-                            (while the other half is already on coral), you can choose to remove
-                            that one coral piece.
+                            {i18n.t('howToPlay.doubleCoralRemovalDesc')}
                         </Text>
 
                         <View
@@ -320,33 +303,31 @@ export default function HowToPlay({ navigation }) {
                             ]}
                         >
                             <Text style={[styles.specialCaseTitle, { color: colors.PRIMARY }]}>
-                                ⚠️ Special Movement Case
+                                {i18n.t('howToPlay.specialCase')}
                             </Text>
                             <Text style={[styles.text, { color: colors.TEXT, marginBottom: 0 }]}>
-                                If half of the Whale is already sitting on coral, that coral does
-                                NOT block the other half from moving through or onto the same coral
-                                square.
+                                {i18n.t('howToPlay.specialCaseDesc')}
                             </Text>
                         </View>
 
                         <View style={styles.examplesContainer}>
                             <ExampleLink
                                 scenarioId='whaleMovement'
-                                label='Basic Whale Movement'
+                                label={i18n.t('howToPlay.exWhale')}
                                 navigation={navigation}
                                 viewedExamples={viewedExamples}
                                 onViewed={handleMarkViewed}
                             />
                             <ExampleLink
                                 scenarioId='whaleRotation'
-                                label='Whale Rotation Example'
+                                label={i18n.t('howToPlay.exWhaleRotation')}
                                 navigation={navigation}
                                 viewedExamples={viewedExamples}
                                 onViewed={handleMarkViewed}
                             />
                             <ExampleLink
                                 scenarioId='whaleCoralException'
-                                label='Whale Moving Through Own Coral'
+                                label={i18n.t('howToPlay.exWhaleCoral')}
                                 navigation={navigation}
                                 viewedExamples={viewedExamples}
                                 onViewed={handleMarkViewed}
@@ -358,15 +339,15 @@ export default function HowToPlay({ navigation }) {
                         <Text style={[styles.pieceTitle, { color: colors.TEXT }]}>
                             🐬{' '}
                             <Text bold style={{ color: colors.TEXT }}>
-                                Dolphin
+                                {i18n.t('howToPlay.dolphin')}
                             </Text>
                         </Text>
                         <Text style={[styles.text, { color: colors.TEXT }]}>
-                            Moves any number of squares vertically, horizontally, or diagonally.
+                            {i18n.t('howToPlay.dolphinDesc')}
                         </Text>
                         <ExampleLink
                             scenarioId='dolphinMovement'
-                            label='Dolphin Movement Example'
+                            label={i18n.t('howToPlay.exDolphin')}
                             navigation={navigation}
                             viewedExamples={viewedExamples}
                             onViewed={handleMarkViewed}
@@ -377,15 +358,15 @@ export default function HowToPlay({ navigation }) {
                         <Text style={[styles.pieceTitle, { color: colors.TEXT }]}>
                             🐢{' '}
                             <Text bold style={{ color: colors.TEXT }}>
-                                Turtle
+                                {i18n.t('howToPlay.turtle')}
                             </Text>
                         </Text>
                         <Text style={[styles.text, { color: colors.TEXT }]}>
-                            Moves any number of squares vertically or horizontally.
+                            {i18n.t('howToPlay.turtleDesc')}
                         </Text>
                         <ExampleLink
                             scenarioId='turtleMovement'
-                            label='Turtle Movement Example'
+                            label={i18n.t('howToPlay.exTurtle')}
                             navigation={navigation}
                             viewedExamples={viewedExamples}
                             onViewed={handleMarkViewed}
@@ -396,15 +377,15 @@ export default function HowToPlay({ navigation }) {
                         <Text style={[styles.pieceTitle, { color: colors.TEXT }]}>
                             🐡{' '}
                             <Text bold style={{ color: colors.TEXT }}>
-                                Pufferfish
+                                {i18n.t('howToPlay.pufferfish')}
                             </Text>
                         </Text>
                         <Text style={[styles.text, { color: colors.TEXT }]}>
-                            Moves any number of squares diagonally.
+                            {i18n.t('howToPlay.pufferfishDesc')}
                         </Text>
                         <ExampleLink
                             scenarioId='pufferfishMovement'
-                            label='Pufferfish Movement Example'
+                            label={i18n.t('howToPlay.exPufferfish')}
                             navigation={navigation}
                             viewedExamples={viewedExamples}
                             onViewed={handleMarkViewed}

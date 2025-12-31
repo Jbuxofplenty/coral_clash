@@ -1,4 +1,3 @@
-import React from 'react';
 import {
     Dimensions,
     Modal,
@@ -9,6 +8,7 @@ import {
     View,
 } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
+import i18n from '../i18n';
 import Icon from './Icon';
 
 const { width } = Dimensions.get('window');
@@ -68,15 +68,20 @@ export default function TimeControlModal({ visible, onSelect, onCancel }) {
                     onStartShouldSetResponder={() => true}
                 >
                     {/* Title */}
-                    <Text style={[styles.title, { color: colors.TEXT }]}>Choose Time Control</Text>
+                    <Text style={[styles.title, { color: colors.TEXT }]}>
+                        {i18n.t('comp.timeControl.title')}
+                    </Text>
                     <Text style={[styles.subtitle, { color: colors.TEXT_SECONDARY }]}>
-                        Select the time limit for this game
+                        {i18n.t('comp.timeControl.subtitle')}
                     </Text>
 
                     {/* Time Control Options */}
                     <View style={styles.optionsContainer}>
-                        {TIME_CONTROLS.map((timeControl, index) => (
-                            <TouchableOpacity
+                        {TIME_CONTROLS.map((timeControl, index) => {
+                            const name = i18n.t(`comp.timeControl.${timeControl.type}`);
+                            const description = i18n.t(`comp.timeControl.${timeControl.type}Desc`);
+                            return (
+                                <TouchableOpacity
                                 key={timeControl.type}
                                 style={[
                                     styles.optionButton,
@@ -100,7 +105,7 @@ export default function TimeControlModal({ visible, onSelect, onCancel }) {
                                     />
                                     <View style={styles.optionText}>
                                         <Text style={[styles.optionName, { color: colors.TEXT }]}>
-                                            {timeControl.name}
+                                            {name}
                                         </Text>
                                         <Text
                                             style={[
@@ -108,7 +113,7 @@ export default function TimeControlModal({ visible, onSelect, onCancel }) {
                                                 { color: colors.TEXT_SECONDARY },
                                             ]}
                                         >
-                                            {timeControl.description}
+                                            {description}
                                         </Text>
                                     </View>
                                     <Icon
@@ -119,7 +124,8 @@ export default function TimeControlModal({ visible, onSelect, onCancel }) {
                                     />
                                 </View>
                             </TouchableOpacity>
-                        ))}
+                        );
+                    })}
                     </View>
 
                     {/* Cancel Button */}
@@ -129,7 +135,7 @@ export default function TimeControlModal({ visible, onSelect, onCancel }) {
                         activeOpacity={0.7}
                     >
                         <Text style={[styles.cancelButtonText, { color: colors.TEXT_SECONDARY }]}>
-                            Cancel
+                            {i18n.t('common.cancel')}
                         </Text>
                     </TouchableOpacity>
                 </View>
