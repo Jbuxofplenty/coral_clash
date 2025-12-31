@@ -174,8 +174,9 @@ export async function tryMatchPlayers(newUserId) {
 
         // Remove real user from queue and update opponent status in a single batch
         // Computer users stay in queue (they're always available)
+        // NOTE: Player 1 (newUserId) is already removed by the transaction in createMatchedGame
         const cleanupBatch = db.batch();
-        cleanupBatch.delete(db.collection('matchmakingQueue').doc(newUserId));
+        // cleanupBatch.delete(db.collection('matchmakingQueue').doc(newUserId)); // Handled in transaction
         if (!isComputerUser(opponentId)) {
             // Only remove opponent if they're not a computer user
             cleanupBatch.delete(db.collection('matchmakingQueue').doc(opponentId));
@@ -203,88 +204,134 @@ async function createMatchedGame(player1Id, player2Id) {
         const whitePlayerId = randomizeColors ? player1Id : player2Id;
         const blackPlayerId = randomizeColors ? player2Id : player1Id;
 
-        // Parallelize all Firestore reads for better performance
-        const [
-            player1Doc,
-            player2Doc,
-            player1SettingsDoc,
-            player2SettingsDoc,
-            player1QueueDoc,
-            _player2QueueDoc,
-        ] = await Promise.all([
-            db.collection('users').doc(player1Id).get(),
-            db.collection('users').doc(player2Id).get(),
-            db.collection('users').doc(player1Id).collection('settings').doc('preferences').get(),
-            db.collection('users').doc(player2Id).collection('settings').doc('preferences').get(),
-            db.collection('matchmakingQueue').doc(player1Id).get(),
-            db.collection('matchmakingQueue').doc(player2Id).get(),
-        ]);
+        // Use a transaction to atomically check queue presence, create game, and remove from queue
+        // This prevents race conditions where multiple processes match the same user
+        const transactionResult = await db.runTransaction(async (transaction) => {
+            const player1Ref = db.collection('users').doc(player1Id);
+            const player2Ref = db.collection('users').doc(player2Id);
+            const player1SettingsRef = player1Ref.collection('settings').doc('preferences');
+            const player2SettingsRef = player2Ref.collection('settings').doc('preferences');
+            const player1QueueRef = db.collection('matchmakingQueue').doc(player1Id);
+            const player2QueueRef = db.collection('matchmakingQueue').doc(player2Id);
 
-        if (!player1Doc.exists || !player2Doc.exists) {
-            throw new Error('One or both players not found');
-        }
+            // Read all documents efficiently
+            // Note: getAll is supported in Admin SDK transactions
+            const [
+                player1Doc,
+                player2Doc,
+                player1SettingsDoc,
+                player2SettingsDoc,
+                player1QueueDoc,
+                _player2QueueDoc,
+            ] = await transaction.getAll(
+                player1Ref,
+                player2Ref,
+                player1SettingsRef,
+                player2SettingsRef,
+                player1QueueRef,
+                player2QueueRef
+            );
 
-        // Race condition check: Ensure player1 (who initiated the match or is being matched) 
-        // is still in the queue. If not, they might have been matched by another process.
-        if (!player1QueueDoc.exists) {
-            console.warn(`[createMatchedGame] Player 1 ${player1Id} no longer in queue, aborting match (race condition guard)`);
+            if (!player1Doc.exists || !player2Doc.exists) {
+                throw new Error('One or both players not found');
+            }
+
+            // Race condition check: Ensure player1 (who initiated the match or is being matched) 
+            // is still in the queue. If not, they might have been matched by another process.
+            if (!player1QueueDoc.exists) {
+                // Abort transaction safely by returning null (will be result of runTransaction)
+                return null;
+            }
+
+            const player1Data = player1Doc.data();
+            const player2Data = player2Doc.data();
+            const player1Settings = player1SettingsDoc.exists ? player1SettingsDoc.data() : {};
+            const player2Settings = player2SettingsDoc.exists ? player2SettingsDoc.data() : {};
+
+            // Format display names
+            const player1Name = formatDisplayName(player1Data.displayName, player1Data.discriminator);
+            const player2Name = formatDisplayName(player2Data.displayName, player2Data.discriminator);
+
+            // Use player1's time control (they initiated the match), or default to unlimited
+            const timeControl = player1QueueDoc.data().timeControl || { type: 'unlimited' };
+
+            // Initialize time remaining if time control has a limit
+            const timeRemaining = timeControl.totalSeconds
+                ? {
+                      [player1Id]: timeControl.totalSeconds,
+                      [player2Id]: timeControl.totalSeconds,
+                  }
+                : null;
+
+            // Check if opponent is a computer user
+            const isOpponentComputer = isComputerUser(player2Id);
+            const opponentDifficulty = isOpponentComputer ? player2Data.difficulty : null;
+
+            // Create game document (active immediately, no pending state for matchmaking)
+            const gameRef = db.collection('games').doc(); // Auto-ID
+            const gameData = {
+                creatorId: player1Id,
+                opponentId: player2Id,
+                whitePlayerId,
+                blackPlayerId,
+                status: 'active', // Matchmaking games start immediately
+                currentTurn: whitePlayerId, // White always starts
+                timeControl,
+                timeRemaining,
+                lastMoveTime: serverTimestamp(),
+                moves: [],
+                gameState: initializeGameState(),
+                version: GAME_VERSION,
+                matchmakingGame: true, // Mark as matchmaking game
+                // Computer user specific fields
+                opponentType: isOpponentComputer ? 'computer' : 'pvp',
+                difficulty: opponentDifficulty, // Store difficulty if opponent is computer
+                // Snapshot player info at game creation
+                creatorDisplayName: player1Name,
+                creatorAvatarKey: player1Settings.avatarKey || 'dolphin',
+                opponentDisplayName: player2Name,
+                opponentAvatarKey: player2Settings.avatarKey || 'dolphin',
+                createdAt: serverTimestamp(),
+                updatedAt: serverTimestamp(),
+            };
+
+            // P1 Queue Cleanup + Game Creation in same transaction
+            transaction.delete(player1QueueRef);
+            transaction.set(gameRef, gameData);
+
+            // Return data needed for post-transaction notifications
+            return {
+                gameId: gameRef.id,
+                gameRef, // Pass ref if needed, though we have ID
+                result: 'success',
+                player1Id,
+                player2Id,
+                player1Name,
+                player2Name,
+                player1Settings,
+                player2Settings,
+                isOpponentComputer,
+                whitePlayerId,
+                blackPlayerId
+            };
+        });
+
+        // If transaction returned null, it was aborted due to race condition
+        if (!transactionResult) {
+            console.warn(`[createMatchedGame] Transaction aborted: Player 1 ${player1Id} no longer in queue (race condition avoided)`);
             return null;
         }
 
-        const player1Data = player1Doc.data();
-        const player2Data = player2Doc.data();
-        const player1Settings = player1SettingsDoc.exists ? player1SettingsDoc.data() : {};
-        const player2Settings = player2SettingsDoc.exists ? player2SettingsDoc.data() : {};
+        const { 
+            gameId, 
+            player1Name, 
+            player2Name, 
+            player1Settings, 
+            player2Settings, 
+            isOpponentComputer
+        } = transactionResult;
 
-        // Format display names
-        const player1Name = formatDisplayName(player1Data.displayName, player1Data.discriminator);
-        const player2Name = formatDisplayName(player2Data.displayName, player2Data.discriminator);
-
-        // Use player1's time control (they initiated the match), or default to unlimited
-        // We strictly use player1QueueDoc because we verified it exists above
-        const timeControl = player1QueueDoc.data().timeControl || { type: 'unlimited' };
-
-        // Initialize time remaining if time control has a limit
-        const timeRemaining = timeControl.totalSeconds
-            ? {
-                  [player1Id]: timeControl.totalSeconds,
-                  [player2Id]: timeControl.totalSeconds,
-              }
-            : null;
-
-        // Check if opponent is a computer user
-        const isOpponentComputer = isComputerUser(player2Id);
-        const opponentDifficulty = isOpponentComputer ? player2Data.difficulty : null;
-
-        // Create game document (active immediately, no pending state for matchmaking)
-        const gameData = {
-            creatorId: player1Id,
-            opponentId: player2Id,
-            whitePlayerId,
-            blackPlayerId,
-            status: 'active', // Matchmaking games start immediately
-            currentTurn: whitePlayerId, // White always starts
-            timeControl,
-            timeRemaining,
-            lastMoveTime: serverTimestamp(),
-            moves: [],
-            gameState: initializeGameState(),
-            version: GAME_VERSION,
-            matchmakingGame: true, // Mark as matchmaking game
-            // Computer user specific fields
-            opponentType: isOpponentComputer ? 'computer' : 'pvp',
-            difficulty: opponentDifficulty, // Store difficulty if opponent is computer
-            // Snapshot player info at game creation
-            creatorDisplayName: player1Name,
-            creatorAvatarKey: player1Settings.avatarKey || 'dolphin',
-            opponentDisplayName: player2Name,
-            opponentAvatarKey: player2Settings.avatarKey || 'dolphin',
-            createdAt: serverTimestamp(),
-            updatedAt: serverTimestamp(),
-        };
-
-        const gameRef = await db.collection('games').add(gameData);
-        const gameId = gameRef.id;
+        // --- Post-Transaction Side Effects (Notifications & Computer Moves) ---
 
         // Prepare notification data for player1
         const player1NotificationData = {
@@ -292,14 +339,13 @@ async function createMatchedGame(player1Id, player2Id) {
             type: 'match_found',
             gameId: gameId,
             opponentId: player2Id,
-            opponentName: player2Name, // This will be the computer user's mocked display name (e.g., "Alex#2847")
+            opponentName: player2Name,
             opponentAvatarKey: player2Settings.avatarKey || 'dolphin',
             read: false,
             createdAt: serverTimestamp(),
         };
 
         // Parallelize notification operations for player1 (Firestore write + push notification)
-        // Firestore notification write is critical for frontend real-time listener
         const player1NotificationPromise = db
             .collection('notifications')
             .add(player1NotificationData);
@@ -311,10 +357,10 @@ async function createMatchedGame(player1Id, player2Id) {
             player2Settings.avatarKey || 'dolphin',
         ).catch((error) => console.error('Error sending match found push notification:', error));
 
-        // Wait for player1 notification to be written (critical path)
+        // Wait for player1 notification to be written (critical path for UI)
         await player1NotificationPromise;
         // Push notification can happen async
-        player1PushPromise.catch(() => {}); // Already handled above
+        player1PushPromise.catch(() => {}); 
 
         // Only send notification to player2 if they're not a computer user
         if (!isOpponentComputer) {
@@ -329,7 +375,6 @@ async function createMatchedGame(player1Id, player2Id) {
                 createdAt: serverTimestamp(),
             };
 
-            // Parallelize notification operations for player2
             const player2NotificationPromise = db
                 .collection('notifications')
                 .add(player2NotificationData);
@@ -343,60 +388,44 @@ async function createMatchedGame(player1Id, player2Id) {
                 console.error('Error sending match found push notification:', error),
             );
 
-            // Wait for player2 notification to be written
             await player2NotificationPromise;
-            // Push notification can happen async
-            player2PushPromise.catch(() => {}); // Already handled above
+            player2PushPromise.catch(() => {});
         }
 
         // If computer user is white (goes first), trigger their move immediately
-        // Wait a small delay to ensure game document is fully written
         if (isOpponentComputer && whitePlayerId === player2Id) {
             console.log(
                 `[createMatchedGame] Computer user ${player2Id} is white, triggering first move`,
             );
-            // Small delay to ensure game document is written, then trigger move
-            // Reduced delay for faster game start
             setTimeout(async () => {
                 try {
-                    // Fetch fresh game data to ensure we have the latest
-                    const freshGameDoc = await db.collection('games').doc(gameRef.id).get();
+                    const freshGameDoc = await db.collection('games').doc(gameId).get();
                     if (freshGameDoc.exists) {
-                        await makeComputerMoveHelper(gameRef.id, freshGameDoc.data());
+                        await makeComputerMoveHelper(gameId, freshGameDoc.data());
                     } else {
-                        console.error(
-                            `[createMatchedGame] Game ${gameRef.id} not found when trying to make computer move`,
-                        );
+                        console.error(`[createMatchedGame] Game ${gameId} not found when trying to make computer move`);
                     }
                 } catch (error) {
-                    console.error(
-                        `[createMatchedGame] Error making computer move for ${player2Id}:`,
-                        error,
-                    );
+                    console.error(`[createMatchedGame] Error making computer move for ${player2Id}:`, error);
                 }
-            }, 200); // Reduced to 200ms for faster response
+            }, 200);
         } else if (isOpponentComputer && whitePlayerId === player1Id && isComputerUser(player1Id)) {
-            // Handle case where player1 is also a computer user (shouldn't happen in matchmaking, but handle it)
+            // Handle case where player1 is also a computer user
             console.log(
                 `[createMatchedGame] Computer user ${player1Id} is white, triggering first move`,
             );
             setTimeout(async () => {
                 try {
-                    const freshGameDoc = await db.collection('games').doc(gameRef.id).get();
+                    const freshGameDoc = await db.collection('games').doc(gameId).get();
                     if (freshGameDoc.exists) {
-                        await makeComputerMoveHelper(gameRef.id, freshGameDoc.data());
+                        await makeComputerMoveHelper(gameId, freshGameDoc.data());
                     } else {
-                        console.error(
-                            `[createMatchedGame] Game ${gameRef.id} not found when trying to make computer move`,
-                        );
+                        console.error(`[createMatchedGame] Game ${gameId} not found when trying to make computer move`);
                     }
                 } catch (error) {
-                    console.error(
-                        `[createMatchedGame] Error making computer move for ${player1Id}:`,
-                        error,
-                    );
+                    console.error(`[createMatchedGame] Error making computer move for ${player1Id}:`, error);
                 }
-            }, 200); // Reduced to 200ms for faster response
+            }, 200);
         }
 
         return gameId;

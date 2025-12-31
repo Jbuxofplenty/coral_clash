@@ -1,6 +1,8 @@
 import { cleanup, setupStandardMocks } from './testHelpers.js';
 
 const mocks = setupStandardMocks();
+mocks.mockRunTransaction = jest.fn();
+mocks.mockTransactionGetAll = jest.fn();
 
 jest.mock('../shared/dist/game/index.js');
 jest.mock('../utils/notifications.js', () => ({
@@ -30,6 +32,7 @@ jest.mock('firebase-admin', () => {
     const mockFirestoreFunc = jest.fn(() => ({
         collection: (...args) => mocks.mockCollection(...args),
         batch: (...args) => mocks.mockBatch(...args),
+        runTransaction: mocks.mockRunTransaction,
         FieldValue: {
             serverTimestamp: (...args) => mocks.mockServerTimestamp(...args),
             increment: (...args) => mocks.mockIncrement(...args),
@@ -99,6 +102,21 @@ describe('tryMatchPlayers - Computer User Matching Delay (10 seconds)', () => {
             commit: mockBatchCommit,
             delete: mockBatchDelete,
         });
+
+        // Mock transaction
+        mocks.mockRunTransaction.mockImplementation(async (callback) => {
+            const mockTransaction = {
+                getAll: mocks.mockTransactionGetAll,
+                get: mocks.mockGet,
+                set: jest.fn(), // We can spy on this if needed, or use a shared mock
+                delete: mocks.mockDelete, 
+                update: mocks.mockUpdate,
+            };
+            return callback(mockTransaction);
+        });
+        
+        // Default getAll behavior (empty array)
+        mocks.mockTransactionGetAll.mockResolvedValue([]);
 
         // Mock add for notifications and games
         mocks.mockAdd.mockResolvedValue({ id: 'game-123' });
@@ -194,42 +212,17 @@ describe('tryMatchPlayers - Computer User Matching Delay (10 seconds)', () => {
             }),
         });
 
-        // Mock user profiles for game creation
-        mocks.mockGet.mockResolvedValueOnce({
-            exists: true,
-            data: () => ({
-                displayName: 'TestUser',
-                discriminator: '1234',
-            }),
-        });
-        mocks.mockGet.mockResolvedValueOnce({
-            exists: true,
-            data: () => ({
-                displayName: 'Alex',
-                discriminator: '2847',
-                difficulty: 'easy',
-            }),
-        });
+        // Transaction Mocks for createMatchedGame
+        const p1User = { exists: true, data: () => ({ displayName: 'TestUser', discriminator: '1234' }) };
+        const p2User = { exists: true, data: () => ({ displayName: 'Alex', discriminator: '2847', difficulty: 'easy' }) };
+        const p1Settings = { exists: true, data: () => ({ avatarKey: 'dolphin' }) };
+        const p2Settings = { exists: true, data: () => ({ avatarKey: 'dolphin' }) };
+        const p1Queue = { exists: true, data: () => ({ timeControl: { type: 'unlimited' } }) };
+        const p2Queue = { exists: true, id: computerUserId, data: () => ({ status: 'searching' }) };
 
-        // Mock user settings
-        mocks.mockGet.mockResolvedValueOnce({
-            exists: true,
-            data: () => ({ avatarKey: 'dolphin' }),
-        });
-        mocks.mockGet.mockResolvedValueOnce({
-            exists: true,
-            data: () => ({ avatarKey: 'dolphin' }),
-        });
-
-        // Mock queue data for time control
-        mocks.mockGet.mockResolvedValueOnce({
-            exists: true,
-            data: () => ({ timeControl: { type: 'unlimited' } }),
-        });
-        mocks.mockGet.mockResolvedValueOnce({
-            exists: true,
-            data: () => ({ timeControl: { type: 'unlimited' } }),
-        });
+        mocks.mockTransactionGetAll.mockResolvedValueOnce([
+             p1User, p2User, p1Settings, p2Settings, p1Queue, p2Queue
+        ]);
 
         await tryMatchPlayers(realUserId);
 
@@ -291,41 +284,17 @@ describe('tryMatchPlayers - Computer User Matching Delay (10 seconds)', () => {
             }),
         });
 
-        // Mock user profiles for game creation
-        mocks.mockGet.mockResolvedValueOnce({
-            exists: true,
-            data: () => ({
-                displayName: 'TestUser',
-                discriminator: '1234',
-            }),
-        });
-        mocks.mockGet.mockResolvedValueOnce({
-            exists: true,
-            data: () => ({
-                displayName: 'OpponentUser',
-                discriminator: '5678',
-            }),
-        });
+        // Transaction Mocks for createMatchedGame
+        const p1User = { exists: true, data: () => ({ displayName: 'TestUser', discriminator: '1234' }) };
+        const p2User = { exists: true, data: () => ({ displayName: 'OpponentUser', discriminator: '5678' }) };
+        const p1Settings = { exists: true, data: () => ({ avatarKey: 'dolphin' }) };
+        const p2Settings = { exists: true, data: () => ({ avatarKey: 'whale' }) };
+        const p1Queue = { exists: true, data: () => ({ timeControl: { type: 'unlimited' } }) };
+        const p2Queue = { exists: true, data: () => ({ timeControl: { type: 'unlimited' } }) };
 
-        // Mock user settings
-        mocks.mockGet.mockResolvedValueOnce({
-            exists: true,
-            data: () => ({ avatarKey: 'dolphin' }),
-        });
-        mocks.mockGet.mockResolvedValueOnce({
-            exists: true,
-            data: () => ({ avatarKey: 'whale' }),
-        });
-
-        // Mock queue data for time control
-        mocks.mockGet.mockResolvedValueOnce({
-            exists: true,
-            data: () => ({ timeControl: { type: 'unlimited' } }),
-        });
-        mocks.mockGet.mockResolvedValueOnce({
-            exists: true,
-            data: () => ({ timeControl: { type: 'unlimited' } }),
-        });
+        mocks.mockTransactionGetAll.mockResolvedValueOnce([
+             p1User, p2User, p1Settings, p2Settings, p1Queue, p2Queue
+        ]);
 
         await tryMatchPlayers(realUserId);
 
@@ -387,42 +356,17 @@ describe('tryMatchPlayers - Computer User Matching Delay (10 seconds)', () => {
             }),
         });
 
-        // Mock user profiles for game creation
-        mocks.mockGet.mockResolvedValueOnce({
-            exists: true,
-            data: () => ({
-                displayName: 'TestUser',
-                discriminator: '1234',
-            }),
-        });
-        mocks.mockGet.mockResolvedValueOnce({
-            exists: true,
-            data: () => ({
-                displayName: 'Alex',
-                discriminator: '2847',
-                difficulty: 'easy',
-            }),
-        });
+        // Transaction Mocks for createMatchedGame
+        const p1User = { exists: true, data: () => ({ displayName: 'TestUser', discriminator: '1234' }) };
+        const p2User = { exists: true, data: () => ({ displayName: 'Alex', discriminator: '2847', difficulty: 'easy' }) };
+        const p1Settings = { exists: true, data: () => ({ avatarKey: 'dolphin' }) };
+        const p2Settings = { exists: true, data: () => ({ avatarKey: 'dolphin' }) };
+        const p1Queue = { exists: true, data: () => ({ timeControl: { type: 'unlimited' } }) };
+        const p2Queue = { exists: true, id: computerUserId, data: () => ({ status: 'searching' }) };
 
-        // Mock user settings
-        mocks.mockGet.mockResolvedValueOnce({
-            exists: true,
-            data: () => ({ avatarKey: 'dolphin' }),
-        });
-        mocks.mockGet.mockResolvedValueOnce({
-            exists: true,
-            data: () => ({ avatarKey: 'dolphin' }),
-        });
-
-        // Mock queue data for time control
-        mocks.mockGet.mockResolvedValueOnce({
-            exists: true,
-            data: () => ({ timeControl: { type: 'unlimited' } }),
-        });
-        mocks.mockGet.mockResolvedValueOnce({
-            exists: true,
-            data: () => ({ timeControl: { type: 'unlimited' } }),
-        });
+        mocks.mockTransactionGetAll.mockResolvedValueOnce([
+             p1User, p2User, p1Settings, p2Settings, p1Queue, p2Queue
+        ]);
 
         await tryMatchPlayers(realUserId);
 
@@ -438,7 +382,7 @@ describe('tryMatchPlayers - Computer User Matching Delay (10 seconds)', () => {
         mockNowTimestamp = { seconds: nowSeconds };
         mockTimestampNow.mockReturnValue(mockNowTimestamp);
 
-        // 1. Initial user queue check
+        // 1. Initial user queue check (outside transaction)
         mocks.mockGet.mockResolvedValueOnce({
             exists: true,
             data: () => ({
@@ -448,7 +392,7 @@ describe('tryMatchPlayers - Computer User Matching Delay (10 seconds)', () => {
             }),
         });
 
-        // 2. Queue query (finds opponent)
+        // 2. Queue query (finds opponent) - outside transaction
         mocks.mockGet.mockResolvedValueOnce({
             empty: false,
             docs: [
@@ -463,37 +407,35 @@ describe('tryMatchPlayers - Computer User Matching Delay (10 seconds)', () => {
             ],
         });
 
-        // 3. Pre-create check: Player 1 (Exists)
+        // 3. Pre-create check (in tryMatchPlayers)
         mocks.mockGet.mockResolvedValueOnce({ exists: true });
-        // 4. Pre-create check: Player 2 (Exists)
         mocks.mockGet.mockResolvedValueOnce({ exists: true });
 
-        // 5. Inside createMatchedGame: Promise.all
-        // Order: P1 User(ok), P2 User(ok), P1 Settings(ok), P2 Settings(ok), P1 Queue(MISSING!), P2 Queue(ok)
-        
-        // P1 User Doc
-        mocks.mockGet.mockResolvedValueOnce({
-            exists: true,
-            data: () => ({ displayName: 'P1', discriminator: '0000' })
-        });
-        // P2 User Doc
-        mocks.mockGet.mockResolvedValueOnce({
-            exists: true,
-            data: () => ({ displayName: 'P2', discriminator: '1111' })
-        });
-        // P1 Settings
-        mocks.mockGet.mockResolvedValueOnce({ exists: false });
-        // P2 Settings
-        mocks.mockGet.mockResolvedValueOnce({ exists: false });
-        // P1 Queue Doc -> RETURNS FALSE (Simulating race condition deletion)
-        mocks.mockGet.mockResolvedValueOnce({ exists: false });
-        // P2 Queue Doc
-        mocks.mockGet.mockResolvedValueOnce({ exists: true, data: () => ({ timeControl: {} }) });
+        // 4. Transaction getAll mocks
+        // Expected order: [P1 Doc, P2 Doc, P1 Settings, P2 Settings, P1 Queue, P2 Queue]
+        const mockP1Doc = { exists: true, data: () => ({ displayName: 'P1', discriminator: '0000' }) };
+        const mockP2Doc = { exists: true, data: () => ({ displayName: 'P2', discriminator: '1111' }) };
+        const mockP1Settings = { exists: true, data: () => ({ avatarKey: 'dolphin' }) };
+        const mockP2Settings = { exists: true, data: () => ({ avatarKey: 'whale' }) };
+        // P1 Queue MISSING (Race condition)
+        const mockP1Queue = { exists: false }; 
+        const mockP2Queue = { exists: true, data: () => ({ timeControl: {} }) };
+
+        mocks.mockTransactionGetAll.mockResolvedValueOnce([
+            mockP1Doc,
+            mockP2Doc,
+            mockP1Settings,
+            mockP2Settings,
+            mockP1Queue,
+            mockP2Queue
+        ]);
 
         await tryMatchPlayers(realUserId);
 
         // Verify NO game was created
         expect(mocks.mockAdd).not.toHaveBeenCalled();
+        // Verify transaction was attempted
+        expect(mocks.mockRunTransaction).toHaveBeenCalled();
     });
 });
 

@@ -735,6 +735,14 @@ function quiescenceSearch(
     let bestScore = standPat;
 
     for (const move of sortedCaptures) {
+        // Check time limit before processing each move
+        if (timeControl) {
+            const elapsed = Date.now() - timeControl.startTime;
+            if (elapsed >= timeControl.maxTimeMs) {
+                return { score: bestScore, nodesEvaluated, timedOut: true };
+            }
+        }
+
         game.makeMove(move);
 
         // Recursive quiescence search with negated alpha-beta window
@@ -916,6 +924,19 @@ export function alphaBeta(
     // Previously limited to top 10-15 moves, which was cutting defensive moves
 
     for (const move of sortedMoves) {
+        // Check time limit before processing each move
+        if (timeControl) {
+            const elapsed = Date.now() - timeControl.startTime;
+            if (elapsed >= timeControl.maxTimeMs) {
+                return {
+                    score: bestScore,
+                    move: bestMove,
+                    nodesEvaluated,
+                    timedOut: true,
+                };
+            }
+        }
+
         try {
             game.makeMove(move);
 
@@ -1182,7 +1203,7 @@ export function findBestMoveIterativeDeepening(
             elapsedMs: Date.now() - startTime,
         };
     }
-    let fallbackMove = initialMoves[0];
+    let fallbackMove = initialMoves[Math.floor(Math.random() * initialMoves.length)];
 
     // Defensive check: Ensure maxTimeMs is a valid positive number
     // If NaN, infinite, or non-positive, fallback to the default max time for the difficulty
@@ -1198,11 +1219,11 @@ export function findBestMoveIterativeDeepening(
     };
 
     // Iterative deepening
-    const minDepth = Math.min(2, maxDepth);
+
     for (let depth = 1; depth <= maxDepth; depth++) {
         // Check timeout
         const elapsed = Date.now() - startTime;
-        if (elapsed >= maxTimeMs && depth >= minDepth) {
+        if (elapsed >= maxTimeMs) {
             if (!bestMove) bestMove = fallbackMove;
             break;
         }
@@ -1238,7 +1259,7 @@ export function findBestMoveIterativeDeepening(
         
         for (const move of movesToSearch) {
             // Check timeout between root moves
-            if (Date.now() - startTime >= maxTimeMs && depth >= minDepth) {
+            if (Date.now() - startTime >= maxTimeMs) {
                 iterTimedOut = true;
                 break;
             }
@@ -1398,7 +1419,7 @@ export function findBestMoveIterativeDeepening(
         // If we can't restore, fall back to first legal move from original game
         const fallbackMoves = game.moves({ verbose: true });
         if (fallbackMoves.length > 0) {
-            const fallback = fallbackMoves[0];
+            const fallback = fallbackMoves[Math.floor(Math.random() * fallbackMoves.length)];
             return {
                 move: {
                     from: fallback.from,
@@ -1466,7 +1487,7 @@ export function findBestMoveIterativeDeepening(
         // If no alternative found with same from/to, fall back to first legal move
         // This should never happen, but provides a safety net
         if (currentLegalMoves.length > 0) {
-            const fallback = currentLegalMoves[0];
+            const fallback = currentLegalMoves[Math.floor(Math.random() * currentLegalMoves.length)];
             return {
                 move: {
                     from: fallback.from,
