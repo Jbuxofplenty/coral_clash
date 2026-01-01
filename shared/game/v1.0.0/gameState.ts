@@ -451,7 +451,11 @@ export function createGameSnapshot(coralClash: any) {
  * @param coralClash - The CoralClash instance
  * @param snapshot - The game snapshot from Firestore
  */
-export function restoreGameFromSnapshot(coralClash: any, snapshot: any): void {
+export function restoreGameFromSnapshot(
+    coralClash: any,
+    snapshot: any,
+    options: { skipValidation?: boolean; skipFenValidation?: boolean } = {},
+): void {
     // Strategy:
     // 1. If PGN available: Load PGN for move history, then fix any state from extended FEN
     // 2. If no PGN: Load extended FEN directly
@@ -461,7 +465,7 @@ export function restoreGameFromSnapshot(coralClash: any, snapshot: any): void {
 
     if (snapshot.pgn) {
         // Load PGN to get move history
-        coralClash.loadPgn(snapshot.pgn);
+        coralClash.loadPgn(snapshot.pgn, options);
 
         // PGN replay might not have correct whale positions, roles, or coral
         // Override with data from extended FEN
@@ -736,7 +740,7 @@ export function restoreGameFromSnapshot(coralClash: any, snapshot: any): void {
         }
     } else {
         // No PGN - just load extended FEN (loses move history but gets current state)
-        coralClash.load(snapshot.fen);
+        coralClash.load(snapshot.fen, options);
     }
 
     // Restore resignation status (not encoded in FEN or PGN)

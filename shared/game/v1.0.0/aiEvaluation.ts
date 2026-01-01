@@ -369,7 +369,7 @@ function safeRestoreGame(gameState: GameStateSnapshot): CoralClash | null {
 
     try {
         const game = new CoralClash();
-        restoreGameFromSnapshot(game, gameState);
+        restoreGameFromSnapshot(game, gameState, { skipFenValidation: true });
         return game;
     } catch {
         // Old format or invalid state - return null for fallback to random

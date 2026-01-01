@@ -476,13 +476,13 @@ export function validateFen(fen: string) {
         }
     }
 
-    // 11th criterion: are any crabs on the first or eighth rows?
-    if (Array.from(rows[0] + rows[7]).some((char) => char.toUpperCase() === 'C')) {
-        return {
-            ok: false,
-            error: 'Invalid FEN: some crabs are on the edge rows',
-        };
-    }
+    // 11th criterion: check removed - Crabs ARE allowed on edge rows in gameplay
+    // if (Array.from(rows[0] + rows[7]).some((char) => char.toUpperCase() === 'C')) {
+    //     return {
+    //         ok: false,
+    //         error: 'Invalid FEN: some crabs are on the edge rows',
+    //     };
+    // }
 
     return { ok: true };
 }
@@ -3196,12 +3196,21 @@ export class CoralClash {
 
     loadPgn(
         pgn: string,
-        { strict = false, newlineChar = '\r?\n' }: { strict?: boolean; newlineChar?: string } = {},
+        {
+            strict = false,
+            newlineChar = '\r?\n',
+            skipValidation = false,
+            skipFenValidation = false,
+        }: {
+            strict?: boolean;
+            newlineChar?: string;
+            skipValidation?: boolean;
+            skipFenValidation?: boolean;
+        } = {},
     ) {
         function mask(str: string): string {
             return str.replace(/\\/g, '\\');
         }
-
         function parsePgnHeader(header: string): { [key: string]: string } {
             const headerObj: Record<string, string> = {};
             const headers = header.split(new RegExp(mask(newlineChar)));
@@ -3273,7 +3282,7 @@ export class CoralClash {
          */
         if (!strict) {
             if (fen) {
-                this.load(fen, { preserveHeaders: true });
+                this.load(fen, { preserveHeaders: true, skipValidation, skipFenValidation });
             }
         } else {
             /*
@@ -3285,7 +3294,7 @@ export class CoralClash {
                     throw new Error('Invalid PGN: FEN tag must be supplied with SetUp tag');
                 }
                 // don't clear the headers when loading
-                this.load(headers['FEN'], { preserveHeaders: true });
+                this.load(headers['FEN'], { preserveHeaders: true, skipValidation, skipFenValidation });
             }
         }
 

@@ -987,136 +987,153 @@ export async function makeComputerMoveHelper(gameId, gameData = null) {
         }
     }
 
-    switch (difficulty) {
-        case 'random': {
-            // Random move selection (still avoid reversing moves)
-            if (lastComputerMove) {
-                // Filter out reversing moves from random selection
-                const nonReversingMoves = moves.filter(
-                    (m) =>
-                        !(
-                            m.from === lastComputerMove.to &&
-                            m.to === lastComputerMove.from &&
-                            m.piece?.toLowerCase() === lastComputerMove.piece?.toLowerCase()
-                        ),
-                );
-                if (nonReversingMoves.length > 0) {
-                    selectedMove =
-                        nonReversingMoves[Math.floor(Math.random() * nonReversingMoves.length)];
+    try {
+        switch (difficulty) {
+            case 'random': {
+                // Random move selection (still avoid reversing moves)
+                if (lastComputerMove) {
+                    // Filter out reversing moves from random selection
+                    const nonReversingMoves = moves.filter(
+                        (m) =>
+                            !(
+                                m.from === lastComputerMove.to &&
+                                m.to === lastComputerMove.from &&
+                                m.piece?.toLowerCase() === lastComputerMove.piece?.toLowerCase()
+                            ),
+                    );
+                    if (nonReversingMoves.length > 0) {
+                        selectedMove =
+                            nonReversingMoves[Math.floor(Math.random() * nonReversingMoves.length)];
+                    } else {
+                        // If all moves are reversing (shouldn't happen), use random
+                        selectedMove = moves[Math.floor(Math.random() * moves.length)];
+                    }
                 } else {
-                    // If all moves are reversing (shouldn't happen), use random
                     selectedMove = moves[Math.floor(Math.random() * moves.length)];
                 }
-            } else {
-                selectedMove = moves[Math.floor(Math.random() * moves.length)];
-            }
-            moveCalculationTimeMs = Date.now() - moveStartTime;
-            break;
-        }
-        case 'easy': {
-            // Easy mode: Use iterative deepening with time control
-            const maxDepth = SEARCH_DEPTH.easy;
-            const maxTimeMs = calculateOptimalMoveTime('easy', timeRemainingMs);
-
-            const result = findBestMoveIterativeDeepening(
-                currentGameState,
-                maxDepth,
-                computerColor,
-                maxTimeMs,
-                null, // progressCallback
-                lastComputerMove,
-                null, // evaluationTable
-                'easy', // difficulty
-            );
-
-            if (result.move) {
-                selectedMove = result.move;
-                moveCalculationTimeMs = result.elapsedMs || Date.now() - moveStartTime;
-            } else {
-                // Fallback to random if no move found
-                console.warn('[EASY] AI search found no move, falling back to random');
-                selectedMove = moves[Math.floor(Math.random() * moves.length)];
                 moveCalculationTimeMs = Date.now() - moveStartTime;
+                break;
             }
-            break;
-        }
-        case 'medium': {
-            // Medium mode: Use iterative deepening with time control
-            const maxDepth = SEARCH_DEPTH.medium;
-            const maxTimeMs = calculateOptimalMoveTime('medium', timeRemainingMs);
+            case 'easy': {
+                // Easy mode: Use iterative deepening with time control
+                const maxDepth = SEARCH_DEPTH.easy;
+                const maxTimeMs = calculateOptimalMoveTime('easy', timeRemainingMs);
 
-            const result = findBestMoveIterativeDeepening(
-                currentGameState,
-                maxDepth,
-                computerColor,
-                maxTimeMs,
-                null, // progressCallback
-                lastComputerMove,
-                null, // evaluationTable
-                'medium', // difficulty
-            );
-
-            if (result.move) {
-                selectedMove = result.move;
-                moveCalculationTimeMs = result.elapsedMs || Date.now() - moveStartTime;
-            } else {
-                console.warn('[MEDIUM] AI search found no move, falling back to random');
-                selectedMove = moves[Math.floor(Math.random() * moves.length)];
-                moveCalculationTimeMs = Date.now() - moveStartTime;
-            }
-            break;
-        }
-        case 'hard': {
-            // Hard mode: Use iterative deepening with time control
-            const maxDepth = SEARCH_DEPTH.hard;
-            const maxTimeMs = calculateOptimalMoveTime('hard', timeRemainingMs);
-
-            const result = findBestMoveIterativeDeepening(
-                currentGameState,
-                maxDepth,
-                computerColor,
-                maxTimeMs,
-                null, // progressCallback
-                lastComputerMove,
-                null, // evaluationTable
-                'hard', // difficulty
-            );
-
-            if (result.move) {
-                selectedMove = result.move;
-                moveCalculationTimeMs = result.elapsedMs || Date.now() - moveStartTime;
-            } else {
-                console.warn('[HARD] AI search found no move, falling back to random');
-                selectedMove = moves[Math.floor(Math.random() * moves.length)];
-                moveCalculationTimeMs = Date.now() - moveStartTime;
-            }
-            break;
-        }
-        default: {
-            // Unknown difficulty, default to random (still avoid reversing moves)
-            console.warn(`Unknown difficulty level: ${difficulty}, defaulting to random`);
-            if (lastComputerMove) {
-                // Filter out reversing moves from random selection
-                const nonReversingMoves = moves.filter(
-                    (m) =>
-                        !(
-                            m.from === lastComputerMove.to &&
-                            m.to === lastComputerMove.from &&
-                            m.piece?.toLowerCase() === lastComputerMove.piece?.toLowerCase()
-                        ),
+                const result = findBestMoveIterativeDeepening(
+                    currentGameState,
+                    maxDepth,
+                    computerColor,
+                    maxTimeMs,
+                    null, // progressCallback
+                    lastComputerMove,
+                    null, // evaluationTable
+                    'easy', // difficulty
                 );
-                if (nonReversingMoves.length > 0) {
-                    selectedMove =
-                        nonReversingMoves[Math.floor(Math.random() * nonReversingMoves.length)];
+
+                if (result.move) {
+                    selectedMove = result.move;
+                    moveCalculationTimeMs = result.elapsedMs || Date.now() - moveStartTime;
                 } else {
-                    // If all moves are reversing (shouldn't happen), use random
+                    // Fallback to random if no move found
+                    console.warn('[EASY] AI search found no move, falling back to random');
+                    selectedMove = moves[Math.floor(Math.random() * moves.length)];
+                    moveCalculationTimeMs = Date.now() - moveStartTime;
+                }
+                break;
+            }
+            case 'medium': {
+                // Medium mode: Use iterative deepening with time control
+                const maxDepth = SEARCH_DEPTH.medium;
+                const maxTimeMs = calculateOptimalMoveTime('medium', timeRemainingMs);
+
+                const result = findBestMoveIterativeDeepening(
+                    currentGameState,
+                    maxDepth,
+                    computerColor,
+                    maxTimeMs,
+                    null, // progressCallback
+                    lastComputerMove,
+                    null, // evaluationTable
+                    'medium', // difficulty
+                );
+
+                if (result.move) {
+                    selectedMove = result.move;
+                    moveCalculationTimeMs = result.elapsedMs || Date.now() - moveStartTime;
+                } else {
+                    console.warn('[MEDIUM] AI search found no move, falling back to random');
+                    selectedMove = moves[Math.floor(Math.random() * moves.length)];
+                    moveCalculationTimeMs = Date.now() - moveStartTime;
+                }
+                break;
+            }
+            case 'hard': {
+                // Hard mode: Use iterative deepening with time control
+                const maxDepth = SEARCH_DEPTH.hard;
+                const maxTimeMs = calculateOptimalMoveTime('hard', timeRemainingMs);
+
+                const result = findBestMoveIterativeDeepening(
+                    currentGameState,
+                    maxDepth,
+                    computerColor,
+                    maxTimeMs,
+                    null, // progressCallback
+                    lastComputerMove,
+                    null, // evaluationTable
+                    'hard', // difficulty
+                );
+
+                if (result.move) {
+                    selectedMove = result.move;
+                    moveCalculationTimeMs = result.elapsedMs || Date.now() - moveStartTime;
+                } else {
+                    console.warn('[HARD] AI search found no move, falling back to random');
+                    selectedMove = moves[Math.floor(Math.random() * moves.length)];
+                    moveCalculationTimeMs = Date.now() - moveStartTime;
+                }
+                break;
+            }
+            default: {
+                // Unknown difficulty, default to random (still avoid reversing moves)
+                console.warn(`Unknown difficulty level: ${difficulty}, defaulting to random`);
+                if (lastComputerMove) {
+                    // Filter out reversing moves from random selection
+                    const nonReversingMoves = moves.filter(
+                        (m) =>
+                            !(
+                                m.from === lastComputerMove.to &&
+                                m.to === lastComputerMove.from &&
+                                m.piece?.toLowerCase() === lastComputerMove.piece?.toLowerCase()
+                            ),
+                    );
+                    if (nonReversingMoves.length > 0) {
+                        selectedMove =
+                            nonReversingMoves[Math.floor(Math.random() * nonReversingMoves.length)];
+                    } else {
+                        // If all moves are reversing (shouldn't happen), use random
+                        selectedMove = moves[Math.floor(Math.random() * moves.length)];
+                    }
+                } else {
                     selectedMove = moves[Math.floor(Math.random() * moves.length)];
                 }
-            } else {
-                selectedMove = moves[Math.floor(Math.random() * moves.length)];
+                moveCalculationTimeMs = Date.now() - moveStartTime;
+                break;
             }
-            moveCalculationTimeMs = Date.now() - moveStartTime;
-            break;
+        }
+    } catch (error) {
+        console.error(`[AI ERROR] Logic failed for difficulty ${difficulty}:`, error);
+        // Fallback execution will handle the undefined selectedMove
+    }
+
+    // Final fallback: If logic failed (exception or no move found), pick random move
+    if (!selectedMove) {
+        console.warn(`[AI FALLBACK] No move selected (after error/timeout), forcing random move`);
+        try {
+             selectedMove = moves[Math.floor(Math.random() * moves.length)];
+             moveCalculationTimeMs = Date.now() - moveStartTime;
+        } catch (fallbackError) {
+             console.error(`[AI CRITICAL] Fallback random move also failed:`, fallbackError);
+             throw new Error('AI completely failed to generate a move');
         }
     }
 
