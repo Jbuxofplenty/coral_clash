@@ -1,3 +1,4 @@
+import { logEvent } from '@react-native-firebase/analytics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { theme } from 'galio-framework';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -16,7 +17,7 @@ import {
 } from '../components/';
 import DifficultySelectionModal from '../components/DifficultySelectionModal';
 import FixtureLoaderModal from '../components/FixtureLoaderModal';
-import { collection, db, onSnapshot, query, where } from '../config/firebase';
+import { analytics, collection, db, onSnapshot, query, where } from '../config/firebase';
 import { useAlert, useAuth, useTheme } from '../contexts';
 import { useDevFeatures, useFirebaseFunctions, useGame, useMatchmaking } from '../hooks';
 import { useFriends } from '../hooks/useFriends';
@@ -424,15 +425,35 @@ export default function Home({ navigation }) {
 
         try {
             if (pendingGameAction === 'matchmaking') {
+                // 1. Log event when user initiates a random match
+                if (analytics) {
+                    logEvent(analytics, 'initiate_match_random', {
+                        time_control: timeControl.type,
+                    });
+                }
+
                 const result = await startSearching(timeControl);
                 if (result && !result.success && result.error) {
                     showAlert('Cannot Join Matchmaking', result.error);
                 }
             } else if (pendingGameAction === 'friend' && selectedFriend) {
+                // 2. Log event when user initiates a match with a friend
+                if (analytics) {
+                    logEvent(analytics, 'initiate_match_friend', {
+                        time_control: timeControl.type,
+                    });
+                }
+
                 await sendGameRequest(selectedFriend.id, selectedFriend.name, timeControl);
                 // Game request sent successfully via useGame hook
                 setSelectedFriend(null);
             } else if (pendingGameAction === 'passandplay') {
+
+                if (analytics) {
+                    logEvent(analytics, 'initiate_match_passandplay', {
+                        time_control: timeControl.type,
+                    });
+                }
                 // Create and save pass-and-play game with initial state
                 const gameId = await savePassAndPlayGame({
                     opponentType: 'passandplay',
@@ -487,6 +508,14 @@ export default function Home({ navigation }) {
         setCreatingGame(true);
 
         try {
+            // 3. Log event when user initiates a match against a computer
+            if (analytics) {
+                logEvent(analytics, 'initiate_match_computer', {
+                    difficulty: difficulty,
+                    time_control: pendingTimeControl?.type,
+                });
+            }
+
             // Start computer game with both timeControl and difficulty
             const result = await startComputerGame(pendingTimeControl, difficulty);
             if (result.success) {
