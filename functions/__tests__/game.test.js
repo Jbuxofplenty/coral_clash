@@ -649,7 +649,6 @@ describe('Game Creation Functions', () => {
                 3000, // Should use the mocked return value of calculateOptimalMoveTime
                 null, // progressCallback
                 null, // lastComputerMove
-                null, // evaluationTable
                 'easy', // difficulty
             );
         });
@@ -685,7 +684,6 @@ describe('Game Creation Functions', () => {
                 expect.any(Number), // maxTimeMs
                 null, // progressCallback
                 null, // lastComputerMove
-                null, // evaluationTable
                 'medium', // difficulty
             );
         });
@@ -721,7 +719,6 @@ describe('Game Creation Functions', () => {
                 expect.any(Number), // maxTimeMs
                 null, // progressCallback
                 null, // lastComputerMove
-                null, // evaluationTable
                 'hard', // difficulty
             );
         });

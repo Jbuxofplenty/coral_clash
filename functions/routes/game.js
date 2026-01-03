@@ -1026,7 +1026,6 @@ export async function makeComputerMoveHelper(gameId, gameData = null) {
                     maxTimeMs,
                     null, // progressCallback
                     lastComputerMove,
-                    null, // evaluationTable
                     'easy', // difficulty
                 );
 
@@ -1053,7 +1052,6 @@ export async function makeComputerMoveHelper(gameId, gameData = null) {
                     maxTimeMs,
                     null, // progressCallback
                     lastComputerMove,
-                    null, // evaluationTable
                     'medium', // difficulty
                 );
 
@@ -1079,7 +1077,6 @@ export async function makeComputerMoveHelper(gameId, gameData = null) {
                     maxTimeMs,
                     null, // progressCallback
                     lastComputerMove,
-                    null, // evaluationTable
                     'hard', // difficulty
                 );
 
