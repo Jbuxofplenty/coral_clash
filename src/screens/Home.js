@@ -1,4 +1,3 @@
-import { logEvent } from '@react-native-firebase/analytics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { theme } from 'galio-framework';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -427,7 +426,7 @@ export default function Home({ navigation }) {
             if (pendingGameAction === 'matchmaking') {
                 // 1. Log event when user initiates a random match
                 if (analytics) {
-                    logEvent(analytics, 'initiate_match_random', {
+                    analytics.logEvent('initiate_match_random', {
                         time_control: timeControl.type,
                     });
                 }
@@ -439,7 +438,7 @@ export default function Home({ navigation }) {
             } else if (pendingGameAction === 'friend' && selectedFriend) {
                 // 2. Log event when user initiates a match with a friend
                 if (analytics) {
-                    logEvent(analytics, 'initiate_match_friend', {
+                    analytics.logEvent('initiate_match_friend', {
                         time_control: timeControl.type,
                     });
                 }
@@ -450,7 +449,7 @@ export default function Home({ navigation }) {
             } else if (pendingGameAction === 'passandplay') {
 
                 if (analytics) {
-                    logEvent(analytics, 'initiate_match_passandplay', {
+                    analytics.logEvent('initiate_match_passandplay', {
                         time_control: timeControl.type,
                     });
                 }
@@ -510,7 +509,7 @@ export default function Home({ navigation }) {
         try {
             // 3. Log event when user initiates a match against a computer
             if (analytics) {
-                logEvent(analytics, 'initiate_match_computer', {
+                analytics.logEvent('initiate_match_computer', {
                     difficulty: difficulty,
                     time_control: pendingTimeControl?.type,
                 });
