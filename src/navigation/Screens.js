@@ -1,9 +1,8 @@
-import { ActivityIndicator, Dimensions, useWindowDimensions, View } from 'react-native';
+import { ActivityIndicator, Dimensions, Linking, useWindowDimensions, View } from 'react-native';
 import { Header, Icon } from '../components';
 
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { createStackNavigator } from '@react-navigation/stack';
-import React from 'react';
 import { useAlert, useAuth, useTheme } from '../contexts';
 import Friends from '../screens/Friends';
 import GameScreen from '../screens/Game';
@@ -205,6 +204,28 @@ export default function AppStack(_props) {
                         }}
                     />
                     <Drawer.Screen
+                        name='Rules Video'
+                        component={View}
+                        options={{
+                            drawerIcon: ({ _focused, color }) => (
+                                <Icon
+                                    size={isCompact ? 20 : 24}
+                                    name='youtube-play'
+                                    family='font-awesome'
+                                    color={color}
+                                />
+                            ),
+                            headerShown: false,
+                        }}
+                        listeners={({ navigation }) => ({
+                            drawerItemPress: (e) => {
+                                e.preventDefault();
+                                Linking.openURL('https://youtu.be/AacHXQ6-dIA');
+                                navigation.closeDrawer();
+                            },
+                        })}
+                    />
+                    <Drawer.Screen
                         name='Report Issue'
                         component={ReportIssue}
                         options={{
@@ -309,6 +330,28 @@ export default function AppStack(_props) {
                             ),
                             headerShown: false,
                         }}
+                    />
+                    <Drawer.Screen
+                        name='Rules Video'
+                        component={View}
+                        options={{
+                            drawerIcon: ({ _focused, color }) => (
+                                <Icon
+                                    size={isCompact ? 20 : 24}
+                                    name='youtube-play'
+                                    family='font-awesome'
+                                    color={color}
+                                />
+                            ),
+                            headerShown: false,
+                        }}
+                        listeners={({ navigation }) => ({
+                            drawerItemPress: (e) => {
+                                e.preventDefault();
+                                Linking.openURL('https://youtu.be/AacHXQ6-dIA');
+                                navigation.closeDrawer();
+                            },
+                        })}
                     />
                     <Drawer.Screen
                         name='Report Issue'

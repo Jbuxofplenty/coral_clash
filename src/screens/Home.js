@@ -3,6 +3,8 @@ import { theme } from 'galio-framework';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Dimensions, ScrollView, StyleSheet } from 'react-native';
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Linking } from 'react-native';
 import {
     ActiveGamesCard,
     BannerAd,
@@ -118,6 +120,40 @@ export default function Home({ navigation }) {
             }
         };
         // Empty dependency array - only run cleanup on unmount
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    // Check for first launch
+    useEffect(() => {
+        const checkFirstLaunch = async () => {
+            try {
+                const hasLaunched = await AsyncStorage.getItem('has_seen_welcome_notification');
+                if (hasLaunched === null) {
+                    await AsyncStorage.setItem('has_seen_welcome_notification', 'true');
+                    showAlert(
+                        'Welcome to Coral Clash!',
+                        'Check out the Rules Video or How-To Play guide in the menu to get started!',
+                        [
+                            {
+                                text: 'Watch Video',
+                                onPress: () => Linking.openURL('https://youtu.be/AacHXQ6-dIA'),
+                            },
+                            {
+                                text: 'How-To Play',
+                                onPress: () => navigation.navigate('How-To Play'),
+                            },
+                            { text: 'OK' },
+                        ],
+                        true, // Vertical buttons
+                    );
+                }
+            } catch (error) {
+                console.error('Error checking first launch:', error);
+            }
+        };
+
+        checkFirstLaunch();
+        // Run only once on mount
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
@@ -449,9 +485,11 @@ export default function Home({ navigation }) {
             } else if (pendingGameAction === 'passandplay') {
 
                 if (analytics) {
+                    console.log('attempting to log initiate_match_passandplay')
                     analytics.logEvent('initiate_match_passandplay', {
                         time_control: timeControl.type,
                     });
+                    console.log('initiate_match_passandplay logged')
                 }
                 // Create and save pass-and-play game with initial state
                 const gameId = await savePassAndPlayGame({
@@ -508,7 +546,7 @@ export default function Home({ navigation }) {
 
         try {
             // 3. Log event when user initiates a match against a computer
-            if (analytics) {
+            if (analytics) {    
                 analytics.logEvent('initiate_match_computer', {
                     difficulty: difficulty,
                     time_control: pendingTimeControl?.type,
