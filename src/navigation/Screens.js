@@ -1,5 +1,6 @@
 import { ActivityIndicator, Dimensions, Linking, useWindowDimensions, View } from 'react-native';
 import { Header, Icon } from '../components';
+import { RULES_VIDEO_URL } from '../constants';
 
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -220,7 +221,7 @@ export default function AppStack(_props) {
                         listeners={({ navigation }) => ({
                             drawerItemPress: (e) => {
                                 e.preventDefault();
-                                Linking.openURL('https://youtu.be/AacHXQ6-dIA');
+                                Linking.openURL(RULES_VIDEO_URL);
                                 navigation.closeDrawer();
                             },
                         })}
@@ -348,7 +349,7 @@ export default function AppStack(_props) {
                         listeners={({ navigation }) => ({
                             drawerItemPress: (e) => {
                                 e.preventDefault();
-                                Linking.openURL('https://youtu.be/AacHXQ6-dIA');
+                                Linking.openURL(RULES_VIDEO_URL);
                                 navigation.closeDrawer();
                             },
                         })}

@@ -2,6 +2,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { theme } from 'galio-framework';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Dimensions, ScrollView, StyleSheet } from 'react-native';
+import { RULES_VIDEO_URL } from '../constants';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Linking } from 'react-native';
@@ -136,7 +137,7 @@ export default function Home({ navigation }) {
                         [
                             {
                                 text: 'Watch Video',
-                                onPress: () => Linking.openURL('https://youtu.be/AacHXQ6-dIA'),
+                                onPress: () => Linking.openURL(RULES_VIDEO_URL),
                             },
                             {
                                 text: 'How-To Play',
