@@ -1,13 +1,12 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {
+import analyticsModule, {
     getAnalytics,
     setAnalyticsCollectionEnabled,
     setConsent,
 } from '@react-native-firebase/analytics';
-import analyticsModule from '@react-native-firebase/analytics';
 import { getApp } from '@react-native-firebase/app';
+import * as Crypto from 'expo-crypto';
 import { initializeApp } from 'firebase/app';
-import { CustomProvider, initializeAppCheck } from 'firebase/app-check';
 import {
     connectAuthEmulator,
     getAuth,
@@ -26,6 +25,14 @@ import {
 } from 'firebase/firestore';
 import { connectFunctionsEmulator, getFunctions } from 'firebase/functions';
 import { Platform } from 'react-native';
+import 'react-native-get-random-values';
+
+// Polyfill crypto.randomUUID if not available (required by Firebase 12.4.0+)
+if (!global.crypto.randomUUID) {
+    global.crypto.randomUUID = () => {
+        return Crypto.randomUUID();
+    };
+}
 
 // Your web app's Firebase configuration
 // Note: In Expo, use EXPO_PUBLIC_ prefix for environment variables accessible in client code
@@ -261,5 +268,6 @@ export {
     onSnapshot,
     query,
     setAnalyticsConsent as setConsent,
-    where,
+    where
 };
+

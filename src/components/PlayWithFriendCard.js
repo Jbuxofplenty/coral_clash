@@ -1,16 +1,18 @@
 import { Block, Text, theme } from 'galio-framework';
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
     ActivityIndicator,
     Dimensions,
     Modal,
     ScrollView,
+    Share,
     StyleSheet,
     TextInput,
     TouchableOpacity,
-    View,
+    View
 } from 'react-native';
 import { moderateScale } from 'react-native-size-matters';
+import { ANDROID_STORE_URL, IOS_STORE_URL } from '../constants';
 import { useTheme } from '../contexts';
 import { deletePassAndPlayGame, getPassAndPlayGames } from '../utils/passAndPlayStorage';
 import Avatar from './Avatar';
@@ -76,6 +78,18 @@ export default function PlayWithFriendCard({
         setOptionsModalVisible(false);
         setFriendModalVisible(true);
         setSearchQuery(''); // Reset search when opening
+    };
+
+    const handleTextFriend = async () => {
+        try {
+            const message = `Let's play Coral Clash! 🦀\n\nDownload here:\niOS: ${IOS_STORE_URL}\nAndroid: ${ANDROID_STORE_URL}`;
+            await Share.share({
+                message,
+            });
+            setOptionsModalVisible(false);
+        } catch (error) {
+            console.error(error.message);
+        }
     };
 
     const handlePassAndPlay = async () => {
@@ -299,6 +313,62 @@ export default function PlayWithFriendCard({
                                         ]}
                                     >
                                         Send a game invitation to a friend
+                                    </Text>
+                                </Block>
+                                <Icon
+                                    name='chevron-right'
+                                    family='font-awesome'
+                                    size={16}
+                                    color={colors.TEXT_SECONDARY}
+                                />
+                            </TouchableOpacity>
+
+                            {/* Text Friend Option */}
+                            <TouchableOpacity
+                                onPress={handleTextFriend}
+                                style={[
+                                    styles.optionItem,
+                                    {
+                                        backgroundColor: colors.INPUT_BACKGROUND,
+                                        borderColor: colors.BORDER_COLOR,
+                                    },
+                                ]}
+                            >
+                                <Block
+                                    style={[
+                                        styles.optionIconContainer,
+                                        {
+                                            backgroundColor: colors.INFO + '15',
+                                        },
+                                    ]}
+                                >
+                                    <Icon
+                                        name='comment'
+                                        family='font-awesome'
+                                        size={24}
+                                        color={colors.INFO}
+                                    />
+                                </Block>
+                                <Block flex style={{ marginLeft: theme.SIZES.BASE }}>
+                                    <Text
+                                        style={[
+                                            styles.optionTitle,
+                                            {
+                                                color: colors.TEXT,
+                                            },
+                                        ]}
+                                    >
+                                        Text Invite
+                                    </Text>
+                                    <Text
+                                        style={[
+                                            styles.optionDescription,
+                                            {
+                                                color: colors.TEXT_SECONDARY,
+                                            },
+                                        ]}
+                                    >
+                                        Send invitations via text
                                     </Text>
                                 </Block>
                                 <Icon
