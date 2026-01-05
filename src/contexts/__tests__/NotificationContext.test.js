@@ -69,7 +69,7 @@ import { NotificationProvider } from '../NotificationContext';
 const ReactTestRenderer = require('react-test-renderer');
 const { act } = ReactTestRenderer;
 
-const getNotificationResponseCallback = (navigationRef) => {
+const getNotificationResponseCallback = async (navigationRef) => {
     // Clear previous calls
     Notifications.addNotificationResponseReceivedListener.mockClear();
 
@@ -82,12 +82,14 @@ const getNotificationResponseCallback = (navigationRef) => {
     };
 
     let callback = null;
-    act(() => {
+    await act(async () => {
         ReactTestRenderer.create(
             React.createElement(TestWrapper, {
                 navigationRef: navigationRef,
             }),
         );
+        // Wait for useEffect to fire setExpoPushToken
+        await Promise.resolve();
     });
 
     // Extract the callback from the mock
@@ -107,7 +109,7 @@ describe('NotificationContext - Notification Tap Navigation', () => {
     let mockNavigationRef;
     let responseListenerCallback;
 
-    beforeEach(() => {
+    beforeEach(async () => {
         jest.clearAllMocks();
 
         // Setup navigation ref mock
@@ -118,7 +120,7 @@ describe('NotificationContext - Notification Tap Navigation', () => {
         };
 
         // Get the response listener callback
-        responseListenerCallback = getNotificationResponseCallback(mockNavigationRef);
+        responseListenerCallback = await getNotificationResponseCallback(mockNavigationRef);
     });
 
     describe('Game-related notifications', () => {
@@ -339,11 +341,11 @@ describe('NotificationContext - Notification Tap Navigation', () => {
             expect(mockNavigationRef.current.navigate).not.toHaveBeenCalled();
         });
 
-        it('should not navigate when navigationRef is null', () => {
+        it('should not navigate when navigationRef is null', async () => {
             const nullNavigationRef = { current: null };
 
             // Get callback with null ref
-            const nullResponseCallback = getNotificationResponseCallback(nullNavigationRef);
+            const nullResponseCallback = await getNotificationResponseCallback(nullNavigationRef);
 
             const notificationResponse = {
                 notification: {
