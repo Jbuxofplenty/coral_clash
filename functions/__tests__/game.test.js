@@ -124,7 +124,12 @@ jest.doMock('worker_threads', () => ({
                 }, 10);
             }
         }),
+        once: jest.fn(),
+        removeListener: jest.fn(),
+        removeAllListeners: jest.fn(),
+        emit: jest.fn(),
         terminate: jest.fn(),
+        postMessage: jest.fn(),
     })),
     parentPort: {
         postMessage: jest.fn()

@@ -1,10 +1,10 @@
 import { CloudTasksClient } from '@google-cloud/tasks';
 import { onDocumentUpdated } from 'firebase-functions/v2/firestore';
 import { admin } from '../init.js';
-import { isComputerUser } from '../utils/computerUsers.js';
-import { getFunctionRegion } from '../utils/appCheckConfig.js';
-import { increment, serverTimestamp } from '../utils/helpers.js';
 import { makeComputerMoveHelper } from '../routes/game.js';
+import { getFunctionRegion } from '../utils/appCheckConfig.js';
+import { isComputerUser } from '../utils/computerUsers.js';
+import { increment, serverTimestamp } from '../utils/helpers.js';
 
 /**
  * Cancel pending timeout task for a game
@@ -193,12 +193,10 @@ export const onGameMoveUpdate = onDocumentUpdated(
                 ) {
                     console.log(`[onGameMoveUpdate] Computer user ${currentTurn} turn detected, making move automatically`);
                     try {
-                        // Make computer move asynchronously (don't await to avoid blocking)
-                        makeComputerMoveHelper(gameId, afterData).catch((error) => {
-                            console.error(`[onGameMoveUpdate] Error making computer move for ${currentTurn}:`, error);
-                        });
+                        // Make computer move and await result
+                        await makeComputerMoveHelper(gameId, afterData);
                     } catch (error) {
-                        console.error(`[onGameMoveUpdate] Error triggering computer move for ${currentTurn}:`, error);
+                        console.error(`[onGameMoveUpdate] Error making computer move for ${currentTurn}:`, error);
                     }
                 }
             }
@@ -221,12 +219,10 @@ export const onGameMoveUpdate = onDocumentUpdated(
         ) {
             console.log(`[onGameMoveUpdate] Computer user ${currentTurn} turn detected, making move automatically`);
             try {
-                // Make computer move asynchronously (don't await to avoid blocking)
-                makeComputerMoveHelper(gameId, afterData).catch((error) => {
-                    console.error(`[onGameMoveUpdate] Error making computer move for ${currentTurn}:`, error);
-                });
+                // Make computer move and await result
+                await makeComputerMoveHelper(gameId, afterData);
             } catch (error) {
-                console.error(`[onGameMoveUpdate] Error triggering computer move for ${currentTurn}:`, error);
+                console.error(`[onGameMoveUpdate] Error making computer move for ${currentTurn}:`, error);
             }
         }
 

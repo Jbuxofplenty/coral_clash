@@ -194,32 +194,11 @@ async function createGameHandler(request) {
             (error) => console.error('Error sending push notification:', error),
         );
 
-        // If computer user is white (goes first), trigger their move immediately
-        // Wait a small delay to ensure game document is fully written
+        // Computer move will be triggered by onGameCreate trigger if computer is white
         if (whitePlayerId === opponentId) {
             console.log(
-                `[createGameHandler] Computer user ${opponentId} is white, triggering first move`,
+                `[createGameHandler] Computer user ${opponentId} is white, first move will be triggered by onGameCreate`,
             );
-            // Small delay to ensure game document is written, then trigger move
-            // Reduced delay for faster game start
-            setTimeout(async () => {
-                try {
-                    // Fetch fresh game data to ensure we have the latest
-                    const freshGameDoc = await db.collection('games').doc(gameRef.id).get();
-                    if (freshGameDoc.exists) {
-                        await makeComputerMoveHelper(gameRef.id, freshGameDoc.data());
-                    } else {
-                        console.error(
-                            `[createGameHandler] Game ${gameRef.id} not found when trying to make computer move`,
-                        );
-                    }
-                } catch (error) {
-                    console.error(
-                        `[createGameHandler] Error making computer move for ${opponentId}:`,
-                        error,
-                    );
-                }
-            }, 200); // Reduced to 200ms for faster response
         }
     } else {
         // Send notification to opponent
@@ -489,32 +468,11 @@ export const respondToGameInvite = onCall(getAppCheckConfig(), async (request) =
                 (error) => console.error('Error sending push notification:', error),
             );
 
-            // If computer user accepted and is white (goes first), trigger their move immediately
-            // Wait a small delay to ensure game document update is fully written
+            // Computer move will be triggered by onGameCreate trigger if computer is white
             if (isRecipientComputer && updatedGameData.whitePlayerId === userId) {
                 console.log(
-                    `[respondToGameInvite] Computer user ${userId} is white, triggering first move`,
+                    `[respondToGameInvite] Computer user ${userId} is white, first move will be triggered by onGameCreate`,
                 );
-                // Small delay to ensure game document update is written, then trigger move
-                // Reduced delay for faster game start
-                setTimeout(async () => {
-                    try {
-                        // Fetch fresh game data to ensure we have the latest
-                        const freshGameDoc = await db.collection('games').doc(gameId).get();
-                        if (freshGameDoc.exists) {
-                            await makeComputerMoveHelper(gameId, freshGameDoc.data());
-                        } else {
-                            console.error(
-                                `[respondToGameInvite] Game ${gameId} not found when trying to make computer move`,
-                            );
-                        }
-                    } catch (error) {
-                        console.error(
-                            `[respondToGameInvite] Error making computer move for ${userId}:`,
-                            error,
-                        );
-                    }
-                }, 200); // Reduced to 200ms for faster response
             }
         }
 
@@ -1045,32 +1003,39 @@ export async function makeComputerMoveHelper(gameId, gameData = null) {
                             }
                         });
 
+                        // 1. Setup the hard timeout timer immediately
+                        const timeoutId = setTimeout(() => {
+                            cleanup();
+                            worker.terminate();
+                            reject(new Error('AI Worker Timed Out'));
+                        }, maxTimeMs + 500);
+
+                        // Helper to stop the timer and stop listening to the worker
+                        const cleanup = () => {
+                            clearTimeout(timeoutId);
+                            worker.removeAllListeners('message');
+                            worker.removeAllListeners('error');
+                            worker.removeAllListeners('exit');
+                        };
+
                         worker.on('message', (result) => {
+                            cleanup();
+                            worker.terminate(); // Kill the thread safely
                             resolve(result);
-                            worker.terminate(); // Clean up immediately
                         });
 
                         worker.on('error', (err) => {
+                            cleanup();
+                            worker.terminate(); // Kill the thread if it crashed
                             reject(err);
-                            worker.terminate();
                         });
 
                         worker.on('exit', (code) => {
+                            cleanup();
                             if (code !== 0) {
                                 reject(new Error(`Worker stopped with exit code ${code}`));
                             }
                         });
-
-                        // Hard timeout enforcement
-                        // Allow a small grace period (e.g. 500ms) over the maxTimeMs for thread overhead
-                        const timeoutId = setTimeout(() => {
-                            worker.terminate();
-                            reject(new Error('AI Worker Timed Out'));
-                        }, maxTimeMs + 500);
-                        
-                        // Clear timeout if worker completes successfully
-                        worker.on('message', () => clearTimeout(timeoutId));
-                        worker.on('error', () => clearTimeout(timeoutId));
                     });
                 };
 

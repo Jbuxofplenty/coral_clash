@@ -1,8 +1,8 @@
 import { onDocumentCreated } from 'firebase-functions/v2/firestore';
 import { admin } from '../init.js';
-import { isComputerUser } from '../utils/computerUsers.js';
 import { makeComputerMoveHelper } from '../routes/game.js';
 import { getFunctionRegion } from '../utils/appCheckConfig.js';
+import { isComputerUser } from '../utils/computerUsers.js';
 
 const db = admin.firestore();
 
@@ -33,32 +33,29 @@ export const onGameCreate = onDocumentCreated(
         // Check if it's a computer user's turn (they're white and go first)
         if (currentTurn && isComputerUser(currentTurn)) {
             console.log(`[onGameCreate] Computer user ${currentTurn} is white, triggering first move for game ${gameId}`);
-            // Small delay to ensure game document is fully written
-            setTimeout(async () => {
-                try {
-                    // Fetch fresh game data to ensure we have the latest
-                    const freshGameDoc = await db.collection('games').doc(gameId).get();
-                    if (freshGameDoc.exists) {
-                        const freshData = freshGameDoc.data();
-                        // Double-check it's still the computer's turn and game is active
-                        if (
-                            freshData.currentTurn === currentTurn &&
-                            freshData.status === 'active' &&
-                            freshData.opponentType === 'computer'
-                        ) {
-                            await makeComputerMoveHelper(gameId, freshData);
-                        } else {
-                            console.log(
-                                `[onGameCreate] Game ${gameId} state changed, skipping computer move`,
-                            );
-                        }
+            try {
+                // Fetch fresh game data to ensure we have the latest
+                const freshGameDoc = await db.collection('games').doc(gameId).get();
+                if (freshGameDoc.exists) {
+                    const freshData = freshGameDoc.data();
+                    // Double-check it's still the computer's turn and game is active
+                    if (
+                        freshData.currentTurn === currentTurn &&
+                        freshData.status === 'active' &&
+                        freshData.opponentType === 'computer'
+                    ) {
+                        await makeComputerMoveHelper(gameId, freshData);
                     } else {
-                        console.error(`[onGameCreate] Game ${gameId} not found when trying to make computer move`);
+                        console.log(
+                            `[onGameCreate] Game ${gameId} state changed, skipping computer move`,
+                        );
                     }
-                } catch (error) {
-                    console.error(`[onGameCreate] Error making computer move for ${currentTurn}:`, error);
+                } else {
+                    console.error(`[onGameCreate] Game ${gameId} not found when trying to make computer move`);
                 }
-            }, 1000); // 1 second delay to ensure document is written
+            } catch (error) {
+                console.error(`[onGameCreate] Error making computer move for ${currentTurn}:`, error);
+            }
         }
 
         return null;
