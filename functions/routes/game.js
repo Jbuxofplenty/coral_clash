@@ -6,10 +6,12 @@ import {
     calculateOptimalMoveTime,
     calculateUndoMoveCount,
     createGameSnapshot,
-    findBestMoveIterativeDeepening,
     restoreGameFromSnapshot
 } from '@jbuxofplenty/coral-clash';
 import { HttpsError, onCall, onRequest } from 'firebase-functions/v2/https';
+import { dirname, join } from 'path';
+import { fileURLToPath } from 'url';
+import { Worker } from 'worker_threads';
 import { admin } from '../init.js';
 import { getAppCheckConfig, getFunctionRegion } from '../utils/appCheckConfig.js';
 import { getComputerUserData, isComputerUser } from '../utils/computerUsers.js';
@@ -988,6 +990,12 @@ export async function makeComputerMoveHelper(gameId, gameData = null) {
     }
 
     try {
+        const difficultyConfig = {
+            'easy': SEARCH_DEPTH.easy,
+            'medium': SEARCH_DEPTH.medium,
+            'hard': SEARCH_DEPTH.hard
+        };
+        
         switch (difficulty) {
             case 'random': {
                 // Random move selection (still avoid reversing moves)
@@ -1014,79 +1022,72 @@ export async function makeComputerMoveHelper(gameId, gameData = null) {
                 moveCalculationTimeMs = Date.now() - moveStartTime;
                 break;
             }
-            case 'easy': {
-                // Easy mode: Use iterative deepening with time control
-                const maxDepth = SEARCH_DEPTH.easy;
-                const maxTimeMs = calculateOptimalMoveTime('easy', timeRemainingMs);
-
-                const result = findBestMoveIterativeDeepening(
-                    currentGameState,
-                    maxDepth,
-                    computerColor,
-                    maxTimeMs,
-                    null, // progressCallback
-                    lastComputerMove,
-                    'easy', // difficulty
-                );
-
-                if (result.move) {
-                    selectedMove = result.move;
-                    moveCalculationTimeMs = result.elapsedMs || Date.now() - moveStartTime;
-                } else {
-                    // Fallback to random if no move found
-                    console.warn('[EASY] AI search found no move, falling back to random');
-                    selectedMove = moves[Math.floor(Math.random() * moves.length)];
-                    moveCalculationTimeMs = Date.now() - moveStartTime;
-                }
-                break;
-            }
-            case 'medium': {
-                // Medium mode: Use iterative deepening with time control
-                const maxDepth = SEARCH_DEPTH.medium;
-                const maxTimeMs = calculateOptimalMoveTime('medium', timeRemainingMs);
-
-                const result = findBestMoveIterativeDeepening(
-                    currentGameState,
-                    maxDepth,
-                    computerColor,
-                    maxTimeMs,
-                    null, // progressCallback
-                    lastComputerMove,
-                    'medium', // difficulty
-                );
-
-                if (result.move) {
-                    selectedMove = result.move;
-                    moveCalculationTimeMs = result.elapsedMs || Date.now() - moveStartTime;
-                } else {
-                    console.warn('[MEDIUM] AI search found no move, falling back to random');
-                    selectedMove = moves[Math.floor(Math.random() * moves.length)];
-                    moveCalculationTimeMs = Date.now() - moveStartTime;
-                }
-                break;
-            }
+            case 'easy': 
+            case 'medium': 
             case 'hard': {
-                // Hard mode: Use iterative deepening with time control
-                const maxDepth = SEARCH_DEPTH.hard;
-                const maxTimeMs = calculateOptimalMoveTime('hard', timeRemainingMs);
+                const maxDepth = difficultyConfig[difficulty];
+                const maxTimeMs = calculateOptimalMoveTime(difficulty, timeRemainingMs);
+                
+                // Use a worker thread to enforce strict timeout
+                // This protects against bugs in the AI search that might cause infinite loops
+                const workerPath = join(dirname(fileURLToPath(import.meta.url)), '../utils/aiWorker.js');
+                
+                const runWorkerAsync = () => {
+                    return new Promise((resolve, reject) => {
+                        const worker = new Worker(workerPath, {
+                            workerData: {
+                                gameState: currentGameState,
+                                maxDepth,
+                                playerColor: computerColor,
+                                maxTimeMs,
+                                lastMove: lastComputerMove,
+                                difficulty
+                            }
+                        });
 
-                const result = findBestMoveIterativeDeepening(
-                    currentGameState,
-                    maxDepth,
-                    computerColor,
-                    maxTimeMs,
-                    null, // progressCallback
-                    lastComputerMove,
-                    'hard', // difficulty
-                );
+                        worker.on('message', (result) => {
+                            resolve(result);
+                            worker.terminate(); // Clean up immediately
+                        });
 
-                if (result.move) {
-                    selectedMove = result.move;
-                    moveCalculationTimeMs = result.elapsedMs || Date.now() - moveStartTime;
-                } else {
-                    console.warn('[HARD] AI search found no move, falling back to random');
-                    selectedMove = moves[Math.floor(Math.random() * moves.length)];
-                    moveCalculationTimeMs = Date.now() - moveStartTime;
+                        worker.on('error', (err) => {
+                            reject(err);
+                            worker.terminate();
+                        });
+
+                        worker.on('exit', (code) => {
+                            if (code !== 0) {
+                                reject(new Error(`Worker stopped with exit code ${code}`));
+                            }
+                        });
+
+                        // Hard timeout enforcement
+                        // Allow a small grace period (e.g. 500ms) over the maxTimeMs for thread overhead
+                        const timeoutId = setTimeout(() => {
+                            worker.terminate();
+                            reject(new Error('AI Worker Timed Out'));
+                        }, maxTimeMs + 500);
+                        
+                        // Clear timeout if worker completes successfully
+                        worker.on('message', () => clearTimeout(timeoutId));
+                        worker.on('error', () => clearTimeout(timeoutId));
+                    });
+                };
+
+                try {
+                    const result = await runWorkerAsync();
+                    
+                    if (result && result.move) {
+                        selectedMove = result.move;
+                        moveCalculationTimeMs = result.elapsedMs || Date.now() - moveStartTime;
+                    } else {
+                        console.warn(`[${difficulty.toUpperCase()}] AI Worker returned no move, falling back to random`);
+                        // Fallback will be handled below
+                    }
+                } catch (err) {
+                    console.error(`[${difficulty.toUpperCase()}] AI Worker failed or timed out:`, err);
+                    console.warn(`[${difficulty.toUpperCase()}] Falling back to random move due to worker failure`);
+                    // Fallback will be handled below
                 }
                 break;
             }
@@ -1130,7 +1131,7 @@ export async function makeComputerMoveHelper(gameId, gameData = null) {
              moveCalculationTimeMs = Date.now() - moveStartTime;
         } catch (fallbackError) {
              console.error(`[AI CRITICAL] Fallback random move also failed:`, fallbackError);
-             throw new Error('AI completely failed to generate a move');
+             selectedMove = moves[0];
         }
     }
 

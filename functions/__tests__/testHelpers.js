@@ -3,6 +3,7 @@
  * Provides reusable mock setup for firebase-admin and other common dependencies
  */
 
+import { jest } from '@jest/globals';
 import test from 'firebase-functions-test';
 
 // Initialize firebase-functions-test
