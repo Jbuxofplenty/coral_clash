@@ -7,10 +7,10 @@ const mocks = setupStandardMocks();
 // Define mocks using unstable_mockModule BEFORE importing the module under test
 
 // Mock game engine
-jest.unstable_mockModule('../shared/dist/game/index.js', () => ({}));
+jest.doMock('../shared/dist/game/index.js', () => ({}));
 
 // Mock firebase-admin
-jest.unstable_mockModule('firebase-admin', () => {
+jest.doMock('firebase-admin', () => {
     const mockAdmin = {
         initializeApp: jest.fn(),
         firestore: jest.fn(() => ({
@@ -31,7 +31,7 @@ jest.unstable_mockModule('firebase-admin', () => {
 });
 
 // Mock notifications
-jest.unstable_mockModule('../utils/notifications.js', () => ({
+jest.doMock('../utils/notifications.js', () => ({
     sendFriendAcceptedNotification: jest.fn(() => Promise.resolve()),
     sendFriendRequestNotification: jest.fn(() => Promise.resolve()),
     sendGameAcceptedNotification: jest.fn(() => Promise.resolve()),
@@ -50,7 +50,7 @@ jest.unstable_mockModule('../utils/notifications.js', () => ({
 
 
 // Mock google cloud tasks
-jest.unstable_mockModule('@google-cloud/tasks', () => ({
+jest.doMock('@google-cloud/tasks', () => ({
     CloudTasksClient: jest.fn().mockImplementation(() => ({
         createTask: jest.fn().mockResolvedValue([{ name: 'mock-task' }]),
     })),
@@ -58,7 +58,7 @@ jest.unstable_mockModule('@google-cloud/tasks', () => ({
 
 
 // Mock shared package
-jest.unstable_mockModule('@jbuxofplenty/coral-clash', () => ({
+jest.doMock('@jbuxofplenty/coral-clash', () => ({
     CoralClash: jest.fn(),
     GAME_VERSION: '1.0.0',
     createGameSnapshot: jest.fn(),
@@ -99,7 +99,7 @@ jest.unstable_mockModule('@jbuxofplenty/coral-clash', () => ({
 }));
 
 // Mock helpers
-jest.unstable_mockModule('../utils/helpers.js', () => ({
+jest.doMock('../utils/helpers.js', () => ({
     formatDisplayName: jest.fn((name, discriminator) => `${name}#${discriminator}`),
     increment: jest.fn((value) => `increment(${value})`),
     initializeGameState: jest.fn(() => ({
@@ -111,7 +111,7 @@ jest.unstable_mockModule('../utils/helpers.js', () => ({
 }));
 
 // Mock Worker threads for AI worker
-jest.unstable_mockModule('worker_threads', () => ({
+jest.doMock('worker_threads', () => ({
     Worker: jest.fn().mockImplementation(() => ({
         on: jest.fn((event, callback) => {
             if (event === 'message') {
@@ -131,11 +131,20 @@ jest.unstable_mockModule('worker_threads', () => ({
     }
 }));
 
+// Define variables to hold imported modules
+let gameRoutes;
+let CoralClashModule;
+
 // Import the module under test dynamically after mocks are set up
-const gameRoutes = await import('../routes/game.js');
-const CoralClashModule = await import('@jbuxofplenty/coral-clash');
+// DO NOT use top-level await here as it causes syntax errors in some Jest environments
 
 describe('Game Creation Functions', () => {
+    beforeAll(async () => {
+        gameRoutes = await import('../routes/game.js');
+        CoralClashModule = await import('@jbuxofplenty/coral-clash');
+    });
+
+
     beforeEach(() => {
         jest.clearAllMocks();
 
@@ -289,29 +298,30 @@ describe('Game Creation Functions', () => {
     });
 
     describe('determineCurrentTurn', () => {
-        const { determineCurrentTurn } = gameRoutes;
+        // Access gameRoutes.determineCurrentTurn inside tests because gameRoutes is initialized in beforeAll
+
 
         describe('Computer games', () => {
             it('should return creatorId when turn is white', () => {
                 const gameData = { creatorId: 'user-123', opponentId: 'computer' };
-                expect(determineCurrentTurn(gameData, 'w')).toBe('user-123');
+                expect(gameRoutes.determineCurrentTurn(gameData, 'w')).toBe('user-123');
             });
 
             it('should return "computer" when turn is black', () => {
                 const gameData = { creatorId: 'user-123', opponentId: 'computer' };
-                expect(determineCurrentTurn(gameData, 'b')).toBe('computer');
+                expect(gameRoutes.determineCurrentTurn(gameData, 'b')).toBe('computer');
             });
         });
 
         describe('PvP games', () => {
             it('should return whitePlayerId when turn is white', () => {
                 const gameData = { creatorId: 'user-123', opponentId: 'user-456', whitePlayerId: 'user-456', blackPlayerId: 'user-123' };
-                expect(determineCurrentTurn(gameData, 'w')).toBe('user-456');
+                expect(gameRoutes.determineCurrentTurn(gameData, 'w')).toBe('user-456');
             });
 
             it('should return blackPlayerId when turn is black', () => {
                 const gameData = { creatorId: 'user-123', opponentId: 'user-456', whitePlayerId: 'user-456', blackPlayerId: 'user-123' };
-                expect(determineCurrentTurn(gameData, 'b')).toBe('user-123');
+                expect(gameRoutes.determineCurrentTurn(gameData, 'b')).toBe('user-123');
             });
         });
 
@@ -319,7 +329,7 @@ describe('Game Creation Functions', () => {
             it('should return creatorId when turn is white and player IDs are missing', () => {
                 const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
                 const gameData = { creatorId: 'user-123', opponentId: 'user-456' };
-                expect(determineCurrentTurn(gameData, 'w')).toBe('user-123');
+                expect(gameRoutes.determineCurrentTurn(gameData, 'w')).toBe('user-123');
                 expect(consoleWarnSpy).toHaveBeenCalledWith('Unable to determine currentTurn, missing player ID fields');
                 consoleWarnSpy.mockRestore();
             });
@@ -327,7 +337,7 @@ describe('Game Creation Functions', () => {
             it('should return opponentId when turn is black and player IDs are missing', () => {
                 const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
                 const gameData = { creatorId: 'user-123', opponentId: 'user-456' };
-                expect(determineCurrentTurn(gameData, 'b')).toBe('user-456');
+                expect(gameRoutes.determineCurrentTurn(gameData, 'b')).toBe('user-456');
                 expect(consoleWarnSpy).toHaveBeenCalledWith('Unable to determine currentTurn, missing player ID fields');
                 consoleWarnSpy.mockRestore();
             });

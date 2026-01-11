@@ -875,7 +875,22 @@ export function alphaBeta(
 
     if (depth === 0) {
         // Quiescence search at leaf nodes to avoid horizon effect
-        const qResult = quiescenceSearch(game, alpha, beta, playerColor, 10, timeControl);
+        // Q-Search uses Negamax (always maximizing for the passed color)
+        // If it's the opponent's turn (minimizing), we must evaluate from opponent's perspective
+        // and negate the result to get the score relative to playerColor
+        let qResult;
+        if (maximizingPlayer) {
+            qResult = quiescenceSearch(game, alpha, beta, playerColor, 10, timeControl);
+        } else {
+            const opponentColor = playerColor === 'w' ? 'b' : 'w';
+            // Negamax: Pass swapped color and negated bounds (-beta as alpha, -alpha as beta)
+            const result = quiescenceSearch(game, -beta, -alpha, opponentColor, 10, timeControl);
+            qResult = {
+                ...result,
+                score: -result.score // Negate score to convert back to playerColor perspective
+            };
+        }
+        
         return {
             score: qResult.score,
             move: null,
@@ -1249,14 +1264,6 @@ export function findBestMoveIterativeDeepening(
         // Determine if we're using Softmax pruning
         const useSoftmaxPruning = SOFTMAX_SELECTION.enabled && (randomSeed === undefined || randomSeed >= 0);
         
-        let alpha = -Infinity;
-        
-        if (useSoftmaxPruning && depth > 1 && bestScore !== -Infinity) {
-            // Use narrower window to prune moves outside Softmax selection range
-            // This improves performance by avoiding deep search of irrelevant moves
-            alpha = bestScore - SOFTMAX_SELECTION.scoreWindow - 500;
-        }
-        
         for (const move of movesToSearch) {
             // Check timeout between root moves
             if (Date.now() - startTime >= maxTimeMs) {
@@ -1266,37 +1273,36 @@ export function findBestMoveIterativeDeepening(
 
             game.makeMove(move);
 
-            // Choose alpha-beta window based on whether Softmax pruning is enabled
-            let result;
+            let searchAlpha = -Infinity;
+            let searchBeta = Infinity;
+
             if (useSoftmaxPruning) {
-                // Narrow window for Softmax - prune moves outside selection range
-                result = alphaBeta(
-                    game,
-                    depth - 1,
-                    -Infinity,
-                    -alpha,
-                    playerColor === game.turn(),
-                    playerColor,
-                    timeControl,
-                    null,
-                    transpositionTable,
-                    false
-                );
-            } else {
-                // Full window when Softmax disabled - get exact scores (original behavior)
-                result = alphaBeta(
-                    game,
-                    depth - 1,
-                    -Infinity,
-                    Infinity,
-                    playerColor === game.turn(),
-                    playerColor,
-                    timeControl,
-                    null,
-                    transpositionTable,
-                    false
-                );
+                const windowSize = SOFTMAX_SELECTION.scoreWindow + 500;
+                if (playerColor === 'w') {
+                    // White (Maximizer): We only care about scores > (best - window)
+                    // If best is +500, we prune anything below +400.
+                    // This is a Lower Bound (Alpha).
+                    searchAlpha = bestScore - windowSize;
+                } else {
+                    // Black (Minimizer): We only care about scores < (best + window)
+                    // If best is -500, we prune anything above -400.
+                    // This is an Upper Bound (Beta).
+                    searchBeta = bestScore + windowSize;
+                }
             }
+
+            const result = alphaBeta(
+                game,
+                depth - 1,
+                searchAlpha,  // Pass the correct lower bound
+                searchBeta,   // Pass the correct upper bound
+                playerColor === game.turn(),
+                playerColor,
+                timeControl,
+                null,
+                transpositionTable,
+                false
+            );
 
             game.undoInternal();
             iterNodes += result.nodesEvaluated;
