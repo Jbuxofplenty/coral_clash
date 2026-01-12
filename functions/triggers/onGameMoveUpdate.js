@@ -1,7 +1,7 @@
 import { CloudTasksClient } from '@google-cloud/tasks';
 import { onDocumentUpdated } from 'firebase-functions/v2/firestore';
 import { admin } from '../init.js';
-import { makeComputerMoveHelper } from '../routes/game.js';
+import { forceRandomMove, makeComputerMoveHelper } from '../routes/game.js';
 import { getFunctionRegion } from '../utils/appCheckConfig.js';
 import { isComputerUser } from '../utils/computerUsers.js';
 import { increment, serverTimestamp } from '../utils/helpers.js';
@@ -199,6 +199,12 @@ export const onGameMoveUpdate = onDocumentUpdated(
                         await makeComputerMoveHelper(gameId, afterData);
                     } catch (error) {
                         console.error(`[onGameMoveUpdate] Error making computer move for ${currentTurn}:`, error);
+                        // Final safety net: Force a random move if AI logic fails completely
+                        try {
+                             await forceRandomMove(gameId);
+                        } catch (fatalError) {
+                             console.error('Fatal error in AI fallback:', fatalError);
+                        }
                     }
                 }
             }

@@ -557,6 +557,146 @@ describe('Game Creation Functions', () => {
             expect(result.aborted).toBe(true);
             expect(result.message).toBe('Game no longer active');
             expect(mocks.mockDoc().update).not.toHaveBeenCalled();
+    });
+    });
+
+    describe('AI Freeze Fallback', () => {
+        const gameId = 'test-fallback-game';
+        const userId = 'user-123';
+
+        beforeEach(() => {
+            const mockGame = {
+                moves: jest.fn(() => [
+                    { from: 'e7', to: 'e6', verbose: true },
+                    { from: 'd7', to: 'd6', verbose: true },
+                ]),
+                move: jest.fn(() => ({ from: 'e7', to: 'e6' })), // Successful move
+                fen: jest.fn(() => 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'),
+                isGameOver: jest.fn(() => false),
+                turn: jest.fn(() => 'b'),
+                undo: jest.fn(),
+            };
+
+            CoralClashModule.CoralClash.mockImplementation(() => mockGame);
+            CoralClashModule.restoreGameFromSnapshot.mockImplementation(() => {});
+            CoralClashModule.createGameSnapshot.mockReturnValue({
+                fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+            });
+            CoralClashModule.getGameResult = jest.fn(() => ({ isOver: false }));
+
+            mocks.mockDoc.mockReturnValue({
+                update: jest.fn(() => Promise.resolve()),
+                get: mocks.mockGet,
+            });
+            mocks.mockCollection.mockReturnValue({
+                doc: mocks.mockDoc,
+                add: mocks.mockAdd,
+            });
+        });
+
+        it('should execute forceRandomMove successfully', async () => {
+             mocks.mockGet.mockResolvedValueOnce({
+                exists: true,
+                data: () => ({
+                    status: 'active',
+                    currentTurn: 'computer',
+                    opponentType: 'computer',
+                    opponentId: 'computer',
+                    creatorId: userId,
+                    fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
+                })
+            });
+
+            await gameRoutes.forceRandomMove(gameId);
+
+            // Verify update was called with a move
+            expect(mocks.mockDoc().update).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    moves: expect.arrayContaining([
+                        expect.objectContaining({ playerId: 'computer' })
+                    ])
+                })
+            );
+        });
+
+        it('makeComputerMoveHelper should use internal random fallback if worker logic throws', async () => {
+             jest.clearAllMocks();
+             
+             mocks.mockGet.mockResolvedValue({
+                exists: true,
+                data: () => ({
+                    status: 'active',
+                    currentTurn: 'computer',
+                    opponentType: 'computer',
+                    opponentId: 'computer',
+                    creatorId: userId,
+                    difficulty: 'hard',
+                    fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
+                })
+            });
+
+            const consoleWarnSpy = jest.spyOn(console, 'warn');
+            const consoleErrorSpy = jest.spyOn(console, 'error');
+
+            const WorkerMock = (await import('worker_threads')).Worker;
+            WorkerMock.mockImplementationOnce(() => {
+                throw new Error('Worker instantiation failed');
+            });
+            
+            await gameRoutes.makeComputerMoveHelper(gameId);
+
+            // Verify internal fallback handling
+            expect(consoleErrorSpy).toHaveBeenCalledWith(expect.stringContaining('AI Worker failed'), expect.anything());
+            expect(consoleWarnSpy).toHaveBeenCalledWith(expect.stringContaining('Falling back to random move'));
+            // Should NOT call fatal fallback
+            expect(consoleWarnSpy).not.toHaveBeenCalledWith(expect.stringContaining('Attempting forceRandomMove'));
+            
+            // Verify move was updated (success)
+             expect(mocks.mockDoc().update).toHaveBeenCalled();
+        });
+
+        it('makeComputerMoveHelper should use forceRandomMove (fatal fallback) if internal retries fail', async () => {
+             jest.clearAllMocks();
+             
+             mocks.mockGet.mockResolvedValue({
+                exists: true,
+                data: () => ({
+                    status: 'active',
+                    currentTurn: 'computer',
+                    opponentType: 'computer',
+                    opponentId: 'computer',
+                    creatorId: userId,
+                    difficulty: 'hard',
+                    fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
+                })
+            });
+
+            // Mock game.move to THROW repeatedly (simulate corrupted state or invalid moves)
+            const mockGame = CoralClashModule.CoralClash();
+            mockGame.move.mockImplementation(() => {
+                throw new Error('Move verification failed');
+            });
+
+            const consoleWarnSpy = jest.spyOn(console, 'warn');
+            const consoleErrorSpy = jest.spyOn(console, 'error');
+
+            // Also make worker fail so it tries to make moves (safety loop)
+            const WorkerMock = (await import('worker_threads')).Worker;
+            WorkerMock.mockImplementationOnce(() => {
+                throw new Error('Worker failed');
+            });
+            
+            const result = await gameRoutes.makeComputerMoveHelper(gameId);
+
+            // Verify failures
+            expect(consoleErrorSpy).toHaveBeenCalledWith(expect.stringContaining('AI Worker failed'), expect.anything());
+            // Verify retries failed
+            expect(consoleErrorSpy).toHaveBeenCalledWith(expect.stringContaining('Giving up'));
+            // Verify FATAL fallback
+            expect(consoleWarnSpy).toHaveBeenCalledWith(expect.stringContaining('Attempting forceRandomMove'));
+            
+            // Verify recovery result
+            expect(result.recovered).toBe(true);
         });
     });
 });

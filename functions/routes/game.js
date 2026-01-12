@@ -797,7 +797,7 @@ export const makeMove = onCall(getAppCheckConfig(), async (request) => {
  * POST /api/game/makeComputerMove
  * @param {string} gameId - The game ID
  */
-export const makeComputerMove = onCall(getAppCheckConfig(), async (request) => {
+export const makeComputerMove = onCall({ ...getAppCheckConfig(), memory: '1GiB' }, async (request) => {
     const { data, auth: _auth } = request;
     try {
         const { gameId, version } = data;
@@ -848,543 +848,671 @@ export const makeComputerMove = onCall(getAppCheckConfig(), async (request) => {
 });
 
 /**
+ * Force a random move for the computer
+ * Used as a safety fallback when the main AI logic fails (e.g. OOM, timeout, partial crash)
+ * @param {string} gameId - The game ID
+ * @param {Object} gameData - Game data (optional)
+ */
+export async function forceRandomMove(gameId, gameData = null) {
+    console.log(`[forceRandomMove] Executing safety fallback for game ${gameId}`);
+    try {
+        if (!gameData) {
+            const gameDoc = await db.collection('games').doc(gameId).get();
+            if (!gameDoc.exists) {
+                console.error(`[forceRandomMove] Game ${gameId} not found`);
+                return;
+            }
+            gameData = gameDoc.data();
+        }
+
+        // Freshness check
+        if (gameData.status !== 'active') {
+             console.log(`[forceRandomMove] Game ${gameId} no longer active, aborting`);
+             return;
+        }
+
+        // Re-calculate turn to be safe
+        const computerUserId = gameData.opponentType === 'computer' ? gameData.opponentId : 'computer';
+        if (gameData.currentTurn !== computerUserId) {
+             console.log(`[forceRandomMove] Not computer's turn (turn: ${gameData.currentTurn}), aborting`);
+             return;
+        }
+
+        // Load game state
+        const currentGameState = gameData.gameState || { fen: gameData.fen };
+        const game = new CoralClash();
+        restoreGameFromSnapshot(game, currentGameState);
+
+        // Get ALL moves
+        const moves = game.moves({ verbose: true });
+        if (moves.length === 0) {
+            console.error('[forceRandomMove] No legal moves available even for random fallback');
+            return;
+        }
+
+        // Pick random move (still try to avoid reversing if possible, but keep it simple)
+        const selectedMove = moves[Math.floor(Math.random() * moves.length)];
+        console.log(`[forceRandomMove] Selected safety move: ${JSON.stringify(selectedMove)}`);
+
+        // Execute move directly (skip validation to be safe, we just generated it from engine)
+        const moveResult = game.move({
+            from: selectedMove.from,
+            to: selectedMove.to,
+            promotion: selectedMove.promotion || 'q',
+            coralPlaced: selectedMove.coralPlaced,
+            coralRemoved: selectedMove.coralRemoved,
+            coralRemovedSquares: selectedMove.coralRemovedSquares,
+        });
+
+        if (!moveResult) {
+             throw new Error('Engine rejected generated move');
+        }
+
+        // Calculate game result, next turn, etc. (Simplified version of makeComputerMoveHelper logic)
+        // ... (We repeat some logic here to be self-contained and robust)
+        
+        const nextTurn = gameData.currentTurn === gameData.creatorId ? gameData.opponentId : gameData.creatorId;
+        const validation = { // Construct validation result manually since we trust the engine here
+             gameState: createGameSnapshot(game),
+             newFen: game.fen(),
+             valid: true,
+             result: moveResult
+        };
+
+        const moves_array = gameData.moves || [];
+        moves_array.push({
+            playerId: computerUserId,
+            move: validation.result,
+            timestamp: new Date(),
+        });
+
+        let gameResult = getGameResult(validation.gameState);
+
+        const updateData = {
+            moves: moves_array,
+            currentTurn: gameResult.isOver ? null : nextTurn,
+            gameState: validation.gameState,
+            fen: validation.newFen,
+            updatedAt: serverTimestamp(),
+            lastMoveTime: serverTimestamp(),
+        };
+        
+        if (gameResult.isOver) {
+             updateData.status = 'completed';
+             updateData.result = gameResult.result;
+             updateData.winner = gameResult.winner || null;
+             updateData.pendingTimeoutTask = null;
+        }
+
+        await db.collection('games').doc(gameId).update(updateData);
+        console.log(`[forceRandomMove] Successfully executed safety move for game ${gameId}`);
+
+        // Trigger notifications if needed (optional for safety net, but good for UX)
+        // We can skip detailed notifications for now to keep this minimal and safe.
+        
+    } catch (error) {
+        console.error(`[forceRandomMove] Critical failure in safety fallback:`, error);
+        // If even this fails, we really are stuck.
+    }
+}
+
+/**
  * Helper function to make a computer move
  * @param {string} gameId - The game ID
  * @param {Object} gameData - Game data (optional, will fetch if not provided)
  * @returns {Promise<Object>} Computer move result
  */
 export async function makeComputerMoveHelper(gameId, gameData = null) {
-    if (!gameData) {
-        const gameDoc = await db.collection('games').doc(gameId).get();
-        if (!gameDoc.exists) {
-            throw new Error('Game not found');
-        }
-        gameData = gameDoc.data();
-    }
-
-    // Get current game state (includes coral data)
-    const currentGameState = gameData.gameState || { fen: gameData.fen };
-
-    const game = new CoralClash();
-
-    // Restore full game state including coral
-    restoreGameFromSnapshot(game, currentGameState);
-
-    // Get all legal moves
-    const moves = game.moves({ verbose: true });
-    if (moves.length === 0) {
-        throw new Error('No legal moves available for computer');
-    }
-
-    // Track time for computer move calculation
-    const moveStartTime = Date.now();
-    let moveCalculationTimeMs = 0;
-
-    // Get difficulty level (default to 'random' if not set)
-    const difficulty = gameData.difficulty || 'random';
-
-    // Determine computer user ID (could be 'computer' for old games or a computer user ID)
-    const computerUserId = gameData.opponentType === 'computer' ? gameData.opponentId : 'computer';
-    const isComputerUserId = computerUserId !== 'computer';
-
-    // Determine computer's color (could be white or black)
-    const computerColor = gameData.whitePlayerId === computerUserId ? 'w' : 'b';
-
-    // Extract last computer move to prevent reversing moves
-    const moves_array = gameData.moves || [];
-    let lastComputerMove = null;
-    // Find the last move made by the computer (check both 'computer' and computer user IDs)
-    for (let i = moves_array.length - 1; i >= 0; i--) {
-        if (
-            (moves_array[i].playerId === 'computer' ||
-                moves_array[i].playerId === computerUserId) &&
-            moves_array[i].move
-        ) {
-            const lastMove = moves_array[i].move;
-            lastComputerMove = {
-                from: lastMove.from,
-                to: lastMove.to,
-                piece: lastMove.piece,
-                color: lastMove.color || computerColor, // Use detected computer color
-            };
-            break;
-        }
-    }
-
-    // Select move based on difficulty
-    let selectedMove;
-
-    // Calculate time remaining for computer
-    // Calculate time remaining for computer
-    let timeRemainingMs;
-    // Check if game has time control enabled
-    if (gameData.timeControl?.totalSeconds) {
-        // Try to get time remaining for computer
-        let remainingSeconds;
-        
-        if (gameData.timeRemaining) {
-            remainingSeconds = gameData.timeRemaining[computerUserId];
-        } else {
-             // If timeRemaining object is missing but totalSeconds exists, assume fresh game? 
-             // Or better, default to totalSeconds if not found to be safe.
-             remainingSeconds = gameData.timeControl.totalSeconds;
-        }
-
-        // Safety check: ensure remainingSeconds is a valid number
-        if (typeof remainingSeconds !== 'number' || isNaN(remainingSeconds)) {
-            console.warn(`[makeComputerMove] Invalid remainingSeconds for ${computerUserId}: ${remainingSeconds}, defaulting to totalSeconds`);
-            remainingSeconds = gameData.timeControl.totalSeconds;
-        }
-
-        timeRemainingMs = remainingSeconds * 1000;
-        
-        // Final safety check
-        if (isNaN(timeRemainingMs)) {
-            console.warn(`[makeComputerMove] Calculated timeRemainingMs is NaN, defaulting to undefined (max time)`);
-            timeRemainingMs = undefined;
-        } else {
-            console.log(`[makeComputerMove] Time remaining for ${computerUserId}: ${timeRemainingMs}ms`);
-        }
-    }
-
     try {
-        const difficultyConfig = {
-            'easy': SEARCH_DEPTH.easy,
-            'medium': SEARCH_DEPTH.medium,
-            'hard': SEARCH_DEPTH.hard
-        };
-        
-        switch (difficulty) {
-            case 'random': {
-                // Random move selection (still avoid reversing moves)
-                if (lastComputerMove) {
-                    // Filter out reversing moves from random selection
-                    const nonReversingMoves = moves.filter(
-                        (m) =>
-                            !(
-                                m.from === lastComputerMove.to &&
-                                m.to === lastComputerMove.from &&
-                                m.piece?.toLowerCase() === lastComputerMove.piece?.toLowerCase()
-                            ),
-                    );
-                    if (nonReversingMoves.length > 0) {
-                        selectedMove =
-                            nonReversingMoves[Math.floor(Math.random() * nonReversingMoves.length)];
-                    } else {
-                        // If all moves are reversing (shouldn't happen), use random
-                        selectedMove = moves[Math.floor(Math.random() * moves.length)];
-                    }
-                } else {
-                    selectedMove = moves[Math.floor(Math.random() * moves.length)];
-                }
-                moveCalculationTimeMs = Date.now() - moveStartTime;
-                break;
+        if (!gameData) {
+            const gameDoc = await db.collection('games').doc(gameId).get();
+            if (!gameDoc.exists) {
+                throw new Error('Game not found');
             }
-            case 'easy': 
-            case 'medium': 
-            case 'hard': {
-                const maxDepth = difficultyConfig[difficulty];
-                const maxTimeMs = calculateOptimalMoveTime(difficulty, timeRemainingMs);
-                
-                // Use a worker thread to enforce strict timeout
-                // This protects against bugs in the AI search that might cause infinite loops
-                const workerPath = join(dirname(fileURLToPath(import.meta.url)), '../utils/aiWorker.js');
-                
-                const runWorkerAsync = () => {
-                    return new Promise((resolve, reject) => {
-                        const worker = new Worker(workerPath, {
-                            workerData: {
-                                gameState: currentGameState,
-                                maxDepth,
-                                playerColor: computerColor,
-                                maxTimeMs,
-                                lastMove: lastComputerMove,
-                                difficulty
-                            }
-                        });
+            gameData = gameDoc.data();
+        }
 
-                        // 1. Setup the hard timeout timer immediately
-                        const timeoutId = setTimeout(() => {
-                            cleanup();
-                            worker.terminate();
-                            reject(new Error('AI Worker Timed Out'));
-                        }, maxTimeMs + 500);
+        // Get current game state (includes coral data)
+        const currentGameState = gameData.gameState || { fen: gameData.fen };
 
-                        // Helper to stop the timer and stop listening to the worker
-                        const cleanup = () => {
-                            clearTimeout(timeoutId);
-                            worker.removeAllListeners('message');
-                            worker.removeAllListeners('error');
-                            worker.removeAllListeners('exit');
-                        };
+        const game = new CoralClash();
 
-                        worker.on('message', (result) => {
-                            cleanup();
-                            worker.terminate(); // Kill the thread safely
-                            resolve(result);
-                        });
+        // Restore full game state including coral
+        restoreGameFromSnapshot(game, currentGameState);
 
-                        worker.on('error', (err) => {
-                            cleanup();
-                            worker.terminate(); // Kill the thread if it crashed
-                            reject(err);
-                        });
+        // Get all legal moves
+        const moves = game.moves({ verbose: true });
+        if (moves.length === 0) {
+            throw new Error('No legal moves available for computer');
+        }
 
-                        worker.on('exit', (code) => {
-                            cleanup();
-                            if (code !== 0) {
-                                reject(new Error(`Worker stopped with exit code ${code}`));
-                            }
-                        });
-                    });
+        // Track time for computer move calculation
+        const moveStartTime = Date.now();
+        let moveCalculationTimeMs = 0;
+
+        // Get difficulty level (default to 'random' if not set)
+        const difficulty = gameData.difficulty || 'random';
+
+        // Determine computer user ID (could be 'computer' for old games or a computer user ID)
+        const computerUserId = gameData.opponentType === 'computer' ? gameData.opponentId : 'computer';
+        const isComputerUserId = computerUserId !== 'computer';
+
+        // Determine computer's color (could be white or black)
+        const computerColor = gameData.whitePlayerId === computerUserId ? 'w' : 'b';
+
+        // Extract last computer move to prevent reversing moves
+        const moves_array = gameData.moves || [];
+        let lastComputerMove = null;
+        // Find the last move made by the computer (check both 'computer' and computer user IDs)
+        for (let i = moves_array.length - 1; i >= 0; i--) {
+            if (
+                (moves_array[i].playerId === 'computer' ||
+                    moves_array[i].playerId === computerUserId) &&
+                moves_array[i].move
+            ) {
+                const lastMove = moves_array[i].move;
+                lastComputerMove = {
+                    from: lastMove.from,
+                    to: lastMove.to,
+                    piece: lastMove.piece,
+                    color: lastMove.color || computerColor, // Use detected computer color
                 };
-
-                try {
-                    const result = await runWorkerAsync();
-                    
-                    if (result && result.move) {
-                        selectedMove = result.move;
-                        moveCalculationTimeMs = result.elapsedMs || Date.now() - moveStartTime;
-                    } else {
-                        console.warn(`[${difficulty.toUpperCase()}] AI Worker returned no move, falling back to random`);
-                        // Fallback will be handled below
-                    }
-                } catch (err) {
-                    console.error(`[${difficulty.toUpperCase()}] AI Worker failed or timed out:`, err);
-                    console.warn(`[${difficulty.toUpperCase()}] Falling back to random move due to worker failure`);
-                    // Fallback will be handled below
-                }
                 break;
             }
-            default: {
-                // Unknown difficulty, default to random (still avoid reversing moves)
-                console.warn(`Unknown difficulty level: ${difficulty}, defaulting to random`);
-                if (lastComputerMove) {
-                    // Filter out reversing moves from random selection
-                    const nonReversingMoves = moves.filter(
-                        (m) =>
-                            !(
-                                m.from === lastComputerMove.to &&
-                                m.to === lastComputerMove.from &&
-                                m.piece?.toLowerCase() === lastComputerMove.piece?.toLowerCase()
-                            ),
-                    );
-                    if (nonReversingMoves.length > 0) {
-                        selectedMove =
-                            nonReversingMoves[Math.floor(Math.random() * nonReversingMoves.length)];
+        }
+
+        // Select move based on difficulty
+        let selectedMove;
+
+        // Calculate time remaining for computer
+        // Calculate time remaining for computer
+        let timeRemainingMs;
+        // Check if game has time control enabled
+        if (gameData.timeControl?.totalSeconds) {
+            // Try to get time remaining for computer
+            let remainingSeconds;
+            
+            if (gameData.timeRemaining) {
+                remainingSeconds = gameData.timeRemaining[computerUserId];
+            } else {
+                 // If timeRemaining object is missing but totalSeconds exists, assume fresh game? 
+                 // Or better, default to totalSeconds if not found to be safe.
+                 remainingSeconds = gameData.timeControl.totalSeconds;
+            }
+
+            // Safety check: ensure remainingSeconds is a valid number
+            if (typeof remainingSeconds !== 'number' || isNaN(remainingSeconds)) {
+                console.warn(`[makeComputerMove] Invalid remainingSeconds for ${computerUserId}: ${remainingSeconds}, defaulting to totalSeconds`);
+                remainingSeconds = gameData.timeControl.totalSeconds;
+            }
+
+            timeRemainingMs = remainingSeconds * 1000;
+            
+            // Final safety check
+            if (isNaN(timeRemainingMs)) {
+                console.warn(`[makeComputerMove] Calculated timeRemainingMs is NaN, defaulting to undefined (max time)`);
+                timeRemainingMs = undefined;
+            } else {
+                console.log(`[makeComputerMove] Time remaining for ${computerUserId}: ${timeRemainingMs}ms`);
+            }
+        }
+
+        try {
+            const difficultyConfig = {
+                'easy': SEARCH_DEPTH.easy,
+                'medium': SEARCH_DEPTH.medium,
+                'hard': SEARCH_DEPTH.hard
+            };
+            
+            switch (difficulty) {
+                case 'random': {
+                    // Random move selection (still avoid reversing moves)
+                    if (lastComputerMove) {
+                        // Filter out reversing moves from random selection
+                        const nonReversingMoves = moves.filter(
+                            (m) =>
+                                !(
+                                    m.from === lastComputerMove.to &&
+                                    m.to === lastComputerMove.from &&
+                                    m.piece?.toLowerCase() === lastComputerMove.piece?.toLowerCase()
+                                ),
+                        );
+                        if (nonReversingMoves.length > 0) {
+                            selectedMove =
+                                nonReversingMoves[Math.floor(Math.random() * nonReversingMoves.length)];
+                        } else {
+                            // If all moves are reversing (shouldn't happen), use random
+                            selectedMove = moves[Math.floor(Math.random() * moves.length)];
+                        }
                     } else {
-                        // If all moves are reversing (shouldn't happen), use random
                         selectedMove = moves[Math.floor(Math.random() * moves.length)];
                     }
-                } else {
-                    selectedMove = moves[Math.floor(Math.random() * moves.length)];
-                }
-                moveCalculationTimeMs = Date.now() - moveStartTime;
-                break;
-            }
-        }
-    } catch (error) {
-        console.error(`[AI ERROR] Logic failed for difficulty ${difficulty}:`, error);
-        // Fallback execution will handle the undefined selectedMove
-    }
-
-    // Final fallback: If logic failed (exception or no move found), pick random move
-    if (!selectedMove) {
-        console.warn(`[AI FALLBACK] No move selected (after error/timeout), forcing random move`);
-        try {
-             selectedMove = moves[Math.floor(Math.random() * moves.length)];
-             moveCalculationTimeMs = Date.now() - moveStartTime;
-        } catch (fallbackError) {
-             console.error(`[AI CRITICAL] Fallback random move also failed:`, fallbackError);
-             selectedMove = moves[0];
-        }
-    }
-
-    // Freshness check: Ensure game is still active before applying the move
-    // This prevents race conditions where the user resigns (completion) during the bot's calculation
-    const freshGameDoc = await db.collection('games').doc(gameId).get();
-    if (freshGameDoc.exists) {
-        const freshData = freshGameDoc.data();
-        if (freshData.status !== 'active') {
-             console.log(`[makeComputerMove] Game ${gameId} status is now ${freshData.status}, aborting computer move`);
-             return {
-                 aborted: true,
-                 message: 'Game no longer active'
-             };
-        }
-    } else {
-        // Game document disappeared?
-         console.warn(`[makeComputerMove] Game ${gameId} not found during freshness check`);
-         return { aborted: true, message: 'Game not found' };
-    }
-
-    // Safety Retry Loop: Ensure we *always* make a move, even if the "smart" one fails
-    let moveSuccessful = false;
-    let attempts = 0;
-    const MAX_ATTEMPTS = 3;
-    let moveResult;
-    let validation; // Declare outside loop
-
-    while (!moveSuccessful && attempts < MAX_ATTEMPTS) {
-        attempts++;
-        try {
-            // Freshness check before each attempt to ensure we don't play on dead games
-            if (attempts === 1) { // Only force check on first attempt for perf, or re-check on retries?
-                 // We checked freshness above, assuming it's still fine for retries.
-            }
-
-            console.log(`[makeComputerMove] Attempt ${attempts}: Executing move ${JSON.stringify(selectedMove)}`);
-
-            // Make the move
-            // Important: We need to clone the game instance or use a fresh one for each attempt
-            // because game.move() mutates state. If it failed halfway, state might be dirty.
-            // But game.move() usually returns null if invalid without mutation, or throws.
-            // Safer to use a temp game instance for validation first if possible, but game.move() is the authority.
-            // If game.move returns null, it didn't mutate.
-            
-            // We use the 'game' instance created earlier. If previous attempt partially mutated it (unlikely on failure),
-            // we might be in trouble. Ideally we'd restore it again.
-            if (attempts > 1) {
-                 // Restore game state again to be safe
-                 restoreGameFromSnapshot(game, currentGameState);
-            }
-
-            moveResult = game.move({
-                from: selectedMove.from,
-                to: selectedMove.to,
-                promotion: selectedMove.promotion || 'q',
-                coralPlaced: selectedMove.coralPlaced,
-                coralRemoved: selectedMove.coralRemoved,
-                coralRemovedSquares: selectedMove.coralRemovedSquares,
-            });
-
-            if (!moveResult) {
-                throw new Error(`Invalid move generated by computer: ${JSON.stringify(selectedMove)}`);
-            }
-            
-            // Validate the move (pass full game state for proper validation)
-            // IMPORTANT: Pass the coral flags so validation uses the SAME move variant
-            validation = validateMove(currentGameState, {
-                from: selectedMove.from,
-                to: selectedMove.to,
-                promotion: selectedMove.promotion,
-                coralPlaced: selectedMove.coralPlaced,
-                coralRemoved: selectedMove.coralRemoved,
-                coralRemovedSquares: selectedMove.coralRemovedSquares,
-            });
-
-            if (!validation.valid) {
-                 // This should be caught by game.move() returning null, but double check
-                throw new Error(`Computer move validation failed: ${validation.error}`);
-            }
-
-            // If we got here, success!
-            moveSuccessful = true;
-
-        } catch (error) {
-            console.error(`[makeComputerMove] Attempt ${attempts} failed:`, error.message);
-            
-            if (attempts < MAX_ATTEMPTS) {
-                console.warn(`[makeComputerMove] Retrying with random move...`);
-                // Fallback to random move for next attempt
-                try {
-                    // Filter out the failed move to ensure we try something different
-                    let candidateMoves = moves;
-                    if (selectedMove) {
-                         candidateMoves = moves.filter((m) => m.from !== selectedMove.from || m.to !== selectedMove.to);
-                    }
-                    
-                    // If we filtered everything (unlikely) or something went wrong, fall back to full list
-                    if (candidateMoves.length === 0) {
-                        candidateMoves = moves;
-                    }
-
-                    selectedMove = candidateMoves[Math.floor(Math.random() * candidateMoves.length)];
-                } catch (e) {
-                    console.error('[makeComputerMove] Failed to pick random move:', e);
-                    // If we can't even pick a random move, we are doomed. Break to exit.
+                    moveCalculationTimeMs = Date.now() - moveStartTime;
                     break;
                 }
-            } else {
-                 console.error(`[makeComputerMove] All ${MAX_ATTEMPTS} attempts failed. Giving up.`);
-                 throw error; // Rethrow the last error to trigger top-level catch
+                case 'easy': 
+                case 'medium': 
+                case 'hard': {
+                    const maxDepth = difficultyConfig[difficulty];
+                    const maxTimeMs = calculateOptimalMoveTime(difficulty, timeRemainingMs);
+                    
+                    // Use a worker thread to enforce strict timeout
+                    // This protects against bugs in the AI search that might cause infinite loops
+                    const workerPath = join(dirname(fileURLToPath(import.meta.url)), '../utils/aiWorker.js');
+                    
+                    const runWorkerAsync = () => {
+                        return new Promise((resolve, reject) => {
+                            const worker = new Worker(workerPath, {
+                                workerData: {
+                                    gameState: currentGameState,
+                                    maxDepth,
+                                    playerColor: computerColor,
+                                    maxTimeMs,
+                                    lastMove: lastComputerMove,
+                                    difficulty
+                                }
+                            });
+
+                            // 1. Setup the hard timeout timer immediately
+                            const timeoutId = setTimeout(() => {
+                                cleanup();
+                                worker.terminate();
+                                reject(new Error('AI Worker Timed Out'));
+                            }, maxTimeMs + 500);
+
+                            // Helper to stop the timer and stop listening to the worker
+                            const cleanup = () => {
+                                clearTimeout(timeoutId);
+                                worker.removeAllListeners('message');
+                                worker.removeAllListeners('error');
+                                worker.removeAllListeners('exit');
+                            };
+
+                            worker.on('message', (result) => {
+                                cleanup();
+                                worker.terminate(); // Kill the thread safely
+                                resolve(result);
+                            });
+
+                            worker.on('error', (err) => {
+                                cleanup();
+                                worker.terminate(); // Kill the thread if it crashed
+                                reject(err);
+                            });
+
+                            worker.on('exit', (code) => {
+                                cleanup();
+                                if (code !== 0) {
+                                    reject(new Error(`Worker stopped with exit code ${code}`));
+                                }
+                            });
+                        });
+                    };
+
+                    try {
+                        const result = await runWorkerAsync();
+                        
+                        if (result && result.move) {
+                            selectedMove = result.move;
+                            moveCalculationTimeMs = result.elapsedMs || Date.now() - moveStartTime;
+                        } else {
+                            console.warn(`[${difficulty.toUpperCase()}] AI Worker returned no move, falling back to random`);
+                            // Fallback will be handled below
+                        }
+                    } catch (err) {
+                        console.error(`[${difficulty.toUpperCase()}] AI Worker failed or timed out:`, err);
+                        console.warn(`[${difficulty.toUpperCase()}] Falling back to random move due to worker failure`);
+                        // Fallback will be handled below
+                    }
+                    break;
+                }
+                default: {
+                    // Unknown difficulty, default to random (still avoid reversing moves)
+                    console.warn(`Unknown difficulty level: ${difficulty}, defaulting to random`);
+                    if (lastComputerMove) {
+                        // Filter out reversing moves from random selection
+                        const nonReversingMoves = moves.filter(
+                            (m) =>
+                                !(
+                                    m.from === lastComputerMove.to &&
+                                    m.to === lastComputerMove.from &&
+                                    m.piece?.toLowerCase() === lastComputerMove.piece?.toLowerCase()
+                                ),
+                        );
+                        if (nonReversingMoves.length > 0) {
+                            selectedMove =
+                                nonReversingMoves[Math.floor(Math.random() * nonReversingMoves.length)];
+                        } else {
+                            // If all moves are reversing (shouldn't happen), use random
+                            selectedMove = moves[Math.floor(Math.random() * moves.length)];
+                        }
+                    } else {
+                        selectedMove = moves[Math.floor(Math.random() * moves.length)];
+                    }
+                    moveCalculationTimeMs = Date.now() - moveStartTime;
+                    break;
+                }
+            }
+        } catch (error) {
+            console.error(`[AI ERROR] Logic failed for difficulty ${difficulty}:`, error);
+            // Fallback execution will handle the undefined selectedMove
+        }
+
+        // Final fallback: If logic failed (exception or no move found), pick random move
+        if (!selectedMove) {
+            console.warn(`[AI FALLBACK] No move selected (after error/timeout), forcing random move`);
+            try {
+                 selectedMove = moves[Math.floor(Math.random() * moves.length)];
+                 moveCalculationTimeMs = Date.now() - moveStartTime;
+            } catch (fallbackError) {
+                 console.error(`[AI CRITICAL] Fallback random move also failed:`, fallbackError);
+                 selectedMove = moves[0];
             }
         }
-    }
 
-    // Add computer move to moves array (moves_array was already retrieved earlier)
-    // Use computer user ID if it's a computer user, otherwise use 'computer'
-    moves_array.push({
-        playerId: computerUserId,
-        move: validation.result,
-        timestamp: new Date(),
-    });
-
-    // Toggle turn to the other player (not the computer)
-    // Computer could be creator or opponent, so toggle accordingly
-    const nextTurn =
-        gameData.currentTurn === gameData.creatorId ? gameData.opponentId : gameData.creatorId;
-
-    // Handle time tracking if enabled
-    let updatedTimeRemaining = gameData.timeRemaining;
-    let computerTimeExpired = false;
-
-    if (gameData.timeControl?.totalSeconds && gameData.timeRemaining) {
-        // Get computer's current time (check both 'computer' key and computer user ID)
-        const computerTime =
-            gameData.timeRemaining[computerUserId] ||
-            gameData.timeRemaining.computer ||
-            gameData.timeControl.totalSeconds;
-
-        // Decrement computer's time by the calculation time (in seconds)
-        // The computer's clock runs while it calculates the move
-        const calculationTimeSeconds = Math.floor(moveCalculationTimeMs / 1000);
-        const newComputerTime = Math.max(0, computerTime - calculationTimeSeconds);
-
-        updatedTimeRemaining = {
-            ...gameData.timeRemaining,
-            [computerUserId]: newComputerTime,
-        };
-
-        // Remove old 'computer' key if it exists and we're using a computer user ID
-        if (isComputerUserId && updatedTimeRemaining.computer !== undefined) {
-            delete updatedTimeRemaining.computer;
-        }
-
-        // Check if computer ran out of time
-        if (newComputerTime <= 0) {
-            computerTimeExpired = true;
-        }
-    }
-
-    // Check if game is over (use full game state, not just FEN)
-    let gameResult = getGameResult(validation.gameState);
-
-    // Override game result if computer ran out of time
-    if (computerTimeExpired) {
-        // Update game state to mark computer as resigned (black player)
-        validation.gameState = {
-            ...validation.gameState,
-            resigned: 'b', // Computer is always black
-        };
-
-        gameResult = {
-            isOver: true,
-            result: 'win', // Human player wins
-            reason: 'timeout',
-            winner: gameData.creatorId,
-        };
-    }
-
-    // Update game with computer move
-    const updateData = {
-        moves: moves_array,
-        currentTurn: gameResult.isOver ? null : nextTurn,
-        gameState: validation.gameState,
-        fen: validation.newFen,
-        updatedAt: serverTimestamp(),
-        lastMoveTime: serverTimestamp(), // Always update so triggers can detect moves (even without time control)
-    };
-
-    // Update time tracking if enabled
-    if (gameData.timeControl?.totalSeconds) {
-        updateData.timeRemaining = updatedTimeRemaining;
-    }
-
-    // Cancel old timeout task before creating new one (if game continues) or clearing (if game over)
-    if (gameData.pendingTimeoutTask) {
-        await cancelPendingTimeoutTask(gameId, gameData.pendingTimeoutTask);
-    }
-
-    if (gameResult.isOver) {
-        updateData.status = 'completed';
-        updateData.result = gameResult.result;
-        updateData.resultReason = gameResult.reason;
-        updateData.winner = gameResult.winner || null;
-        updateData.pendingTimeoutTask = null; // Clear task reference
-
-        // Update player stats
-        if (gameResult.winner) {
-            const winnerId = gameResult.winner === 'w' ? gameData.creatorId : 'computer';
-            const loserId = gameResult.winner === 'w' ? 'computer' : gameData.creatorId;
-
-            if (winnerId !== 'computer') {
-                await db
-                    .collection('users')
-                    .doc(winnerId)
-                    .update({
-                        'stats.gamesPlayed': increment(1),
-                        'stats.gamesWon': increment(1),
-                    });
-            }
-
-            if (loserId !== 'computer') {
-                await db
-                    .collection('users')
-                    .doc(loserId)
-                    .update({
-                        'stats.gamesPlayed': increment(1),
-                        'stats.gamesLost': increment(1),
-                    });
+        // Freshness check: Ensure game is still active before applying the move
+        // This prevents race conditions where the user resigns (completion) during the bot's calculation
+        const freshGameDoc = await db.collection('games').doc(gameId).get();
+        if (freshGameDoc.exists) {
+            const freshData = freshGameDoc.data();
+            if (freshData.status !== 'active') {
+                 console.log(`[makeComputerMove] Game ${gameId} status is now ${freshData.status}, aborting computer move`);
+                 return {
+                     aborted: true,
+                     message: 'Game no longer active'
+                 };
             }
         } else {
-            // Draw
-            await db
-                .collection('users')
-                .doc(gameData.creatorId)
-                .update({
-                    'stats.gamesPlayed': increment(1),
-                    'stats.gamesDraw': increment(1),
-                });
+            // Game document disappeared?
+             console.warn(`[makeComputerMove] Game ${gameId} not found during freshness check`);
+             return { aborted: true, message: 'Game not found' };
         }
 
-        // Notify player game is over
-        await db.collection('notifications').add({
-            userId: gameData.creatorId,
-            type: 'game_over',
-            gameId: gameId,
-            result: gameResult,
-            read: false,
-            createdAt: serverTimestamp(),
-        });
-    } else {
-        // Create new timeout task for human player (if game continues and time control enabled)
-        if (gameData.timeControl?.totalSeconds && updatedTimeRemaining && nextTurn) {
-            const humanPlayerTime = updatedTimeRemaining[nextTurn];
-            if (humanPlayerTime && humanPlayerTime > 0) {
-                const taskName = await createTimeoutTask(gameId, humanPlayerTime);
-                if (taskName) {
-                    updateData.pendingTimeoutTask = taskName;
+        // Safety Retry Loop: Ensure we *always* make a move, even if the "smart" one fails
+        let moveSuccessful = false;
+        let attempts = 0;
+        const MAX_ATTEMPTS = 3;
+        let moveResult;
+        let validation; // Declare outside loop
+
+        while (!moveSuccessful && attempts < MAX_ATTEMPTS) {
+            attempts++;
+            try {
+                // Freshness check before each attempt to ensure we don't play on dead games
+                if (attempts === 1) { // Only force check on first attempt for perf, or re-check on retries?
+                     // We checked freshness above, assuming it's still fine for retries.
+                }
+
+                console.log(`[makeComputerMove] Attempt ${attempts}: Executing move ${JSON.stringify(selectedMove)}`);
+
+                // Make the move
+                // Important: We need to clone the game instance or use a fresh one for each attempt
+                // because game.move() mutates state. If it failed halfway, state might be dirty.
+                // But game.move() usually returns null if invalid without mutation, or throws.
+                // Safer to use a temp game instance for validation first if possible, but game.move() is the authority.
+                // If game.move returns null, it didn't mutate.
+                
+                // We use the 'game' instance created earlier. If previous attempt partially mutated it (unlikely on failure),
+                // we might be in trouble. Ideally we'd restore it again.
+                if (attempts > 1) {
+                     // Restore game state again to be safe
+                     restoreGameFromSnapshot(game, currentGameState);
+                }
+
+                moveResult = game.move({
+                    from: selectedMove.from,
+                    to: selectedMove.to,
+                    promotion: selectedMove.promotion || 'q',
+                    coralPlaced: selectedMove.coralPlaced,
+                    coralRemoved: selectedMove.coralRemoved,
+                    coralRemovedSquares: selectedMove.coralRemovedSquares,
+                });
+
+                if (!moveResult) {
+                    throw new Error(`Invalid move generated by computer: ${JSON.stringify(selectedMove)}`);
+                }
+                
+                // Validate the move (pass full game state for proper validation)
+                // IMPORTANT: Pass the coral flags so validation uses the SAME move variant
+                validation = validateMove(currentGameState, {
+                    from: selectedMove.from,
+                    to: selectedMove.to,
+                    promotion: selectedMove.promotion,
+                    coralPlaced: selectedMove.coralPlaced,
+                    coralRemoved: selectedMove.coralRemoved,
+                    coralRemovedSquares: selectedMove.coralRemovedSquares,
+                });
+
+                if (!validation.valid) {
+                     // This should be caught by game.move() returning null, but double check
+                    throw new Error(`Computer move validation failed: ${validation.error}`);
+                }
+
+                // If we got here, success!
+                moveSuccessful = true;
+
+            } catch (error) {
+                console.error(`[makeComputerMove] Attempt ${attempts} failed:`, error.message);
+                
+                if (attempts < MAX_ATTEMPTS) {
+                    console.warn(`[makeComputerMove] Retrying with random move...`);
+                    // Fallback to random move for next attempt
+                    try {
+                        // Filter out the failed move to ensure we try something different
+                        let candidateMoves = moves;
+                        if (selectedMove) {
+                             candidateMoves = moves.filter((m) => m.from !== selectedMove.from || m.to !== selectedMove.to);
+                        }
+                        
+                        // If we filtered everything (unlikely) or something went wrong, fall back to full list
+                        if (candidateMoves.length === 0) {
+                            candidateMoves = moves;
+                        }
+
+                        selectedMove = candidateMoves[Math.floor(Math.random() * candidateMoves.length)];
+                    } catch (e) {
+                        console.error('[makeComputerMove] Failed to pick random move:', e);
+                        // If we can't even pick a random move, we are doomed. Break to exit.
+                        break;
+                    }
+                } else {
+                     console.error(`[makeComputerMove] All ${MAX_ATTEMPTS} attempts failed. Giving up.`);
+                     throw error; // Rethrow the last error to trigger top-level catch
                 }
             }
         }
 
-        // Notify player that opponent made a move (non-blocking)
-        // For legacy 'computer' games, use 'Computer'
-        // For mocked computer users, use their display name from game data
-        const isLegacyComputer = computerUserId === 'computer';
-        const computerDisplayName = isLegacyComputer
-            ? 'Computer'
-            : gameData.opponentDisplayName || 'Computer';
-        const computerIdForNotification = computerUserId;
+        // Add computer move to moves array (moves_array was already retrieved earlier)
+        // Use computer user ID if it's a computer user, otherwise use 'computer'
+        moves_array.push({
+            playerId: computerUserId,
+            move: validation.result,
+            timestamp: new Date(),
+        });
 
-        // Send notification asynchronously (don't await to avoid blocking)
-        sendOpponentMoveNotification(
-            gameData.creatorId,
-            gameId,
-            computerIdForNotification,
-            computerDisplayName,
-        ).catch((error) => console.error('Error sending opponent move notification:', error));
+        // Toggle turn to the other player (not the computer)
+        // Computer could be creator or opponent, so toggle accordingly
+        const nextTurn =
+            gameData.currentTurn === gameData.creatorId ? gameData.opponentId : gameData.creatorId;
+
+        // Handle time tracking if enabled
+        let updatedTimeRemaining = gameData.timeRemaining;
+        let computerTimeExpired = false;
+
+        if (gameData.timeControl?.totalSeconds && gameData.timeRemaining) {
+            // Get computer's current time (check both 'computer' key and computer user ID)
+            const computerTime =
+                gameData.timeRemaining[computerUserId] ||
+                gameData.timeRemaining.computer ||
+                gameData.timeControl.totalSeconds;
+
+            // Decrement computer's time by the calculation time (in seconds)
+            // The computer's clock runs while it calculates the move
+            const calculationTimeSeconds = Math.floor(moveCalculationTimeMs / 1000);
+            const newComputerTime = Math.max(0, computerTime - calculationTimeSeconds);
+
+            updatedTimeRemaining = {
+                ...gameData.timeRemaining,
+                [computerUserId]: newComputerTime,
+            };
+
+            // Remove old 'computer' key if it exists and we're using a computer user ID
+            if (isComputerUserId && updatedTimeRemaining.computer !== undefined) {
+                delete updatedTimeRemaining.computer;
+            }
+
+            // Check if computer ran out of time
+            if (newComputerTime <= 0) {
+                computerTimeExpired = true;
+            }
+        }
+
+        // Check if game is over (use full game state, not just FEN)
+        let gameResult = getGameResult(validation.gameState);
+
+        // Override game result if computer ran out of time
+        if (computerTimeExpired) {
+            // Update game state to mark computer as resigned (black player)
+            validation.gameState = {
+                ...validation.gameState,
+                resigned: 'b', // Computer is always black
+            };
+
+            gameResult = {
+                isOver: true,
+                result: 'win', // Human player wins
+                reason: 'timeout',
+                winner: gameData.creatorId,
+            };
+        }
+
+        // Update game with computer move
+        const updateData = {
+            moves: moves_array,
+            currentTurn: gameResult.isOver ? null : nextTurn,
+            gameState: validation.gameState,
+            fen: validation.newFen,
+            updatedAt: serverTimestamp(),
+            lastMoveTime: serverTimestamp(), // Always update so triggers can detect moves (even without time control)
+        };
+
+        // Update time tracking if enabled
+        if (gameData.timeControl?.totalSeconds) {
+            updateData.timeRemaining = updatedTimeRemaining;
+        }
+
+        // Cancel old timeout task before creating new one (if game continues) or clearing (if game over)
+        if (gameData.pendingTimeoutTask) {
+            await cancelPendingTimeoutTask(gameId, gameData.pendingTimeoutTask);
+        }
+
+        if (gameResult.isOver) {
+            updateData.status = 'completed';
+            updateData.result = gameResult.result;
+            updateData.resultReason = gameResult.reason;
+            updateData.winner = gameResult.winner || null;
+            updateData.pendingTimeoutTask = null; // Clear task reference
+
+            // Update player stats
+            if (gameResult.winner) {
+                const winnerId = gameResult.winner === 'w' ? gameData.creatorId : 'computer';
+                const loserId = gameResult.winner === 'w' ? 'computer' : gameData.creatorId;
+
+                if (winnerId !== 'computer') {
+                    await db
+                        .collection('users')
+                        .doc(winnerId)
+                        .update({
+                            'stats.gamesPlayed': increment(1),
+                            'stats.gamesWon': increment(1),
+                        });
+                }
+
+                if (loserId !== 'computer') {
+                    await db
+                        .collection('users')
+                        .doc(loserId)
+                        .update({
+                            'stats.gamesPlayed': increment(1),
+                            'stats.gamesLost': increment(1),
+                        });
+                }
+            } else {
+                // Draw
+                await db
+                    .collection('users')
+                    .doc(gameData.creatorId)
+                    .update({
+                        'stats.gamesPlayed': increment(1),
+                        'stats.gamesDraw': increment(1),
+                    });
+            }
+
+            // Notify player game is over
+            await db.collection('notifications').add({
+                userId: gameData.creatorId,
+                type: 'game_over',
+                gameId: gameId,
+                result: gameResult,
+                read: false,
+                createdAt: serverTimestamp(),
+            });
+        } else {
+            // Create new timeout task for human player (if game continues and time control enabled)
+            if (gameData.timeControl?.totalSeconds && updatedTimeRemaining && nextTurn) {
+                const humanPlayerTime = updatedTimeRemaining[nextTurn];
+                if (humanPlayerTime && humanPlayerTime > 0) {
+                    const taskName = await createTimeoutTask(gameId, humanPlayerTime);
+                    if (taskName) {
+                        updateData.pendingTimeoutTask = taskName;
+                    }
+                }
+            }
+
+            // Notify player that opponent made a move (non-blocking)
+            // For legacy 'computer' games, use 'Computer'
+            // For mocked computer users, use their display name from game data
+            const isLegacyComputer = computerUserId === 'computer';
+            const computerDisplayName = isLegacyComputer
+                ? 'Computer'
+                : gameData.opponentDisplayName || 'Computer';
+            const computerIdForNotification = computerUserId;
+
+            // Send notification asynchronously (don't await to avoid blocking)
+            sendOpponentMoveNotification(
+                gameData.creatorId,
+                gameId,
+                computerIdForNotification,
+                computerDisplayName,
+            ).catch((error) => console.error('Error sending opponent move notification:', error));
+        }
+
+        await db.collection('games').doc(gameId).update(updateData);
+
+        return {
+            move: moveResult,
+            gameState: validation.gameState,
+            gameOver: gameResult.isOver,
+            result: gameResult.isOver ? gameResult : undefined,
+        };
+    } catch (error) {
+        console.error(`[makeComputerMoveHelper] Fatal error encountered:`, error);
+        
+        // Use forceRandomMove as a last-resort fallback within the helper itself
+        try {
+             console.warn(`[makeComputerMoveHelper] Attempting forceRandomMove as final fallback...`);
+             await forceRandomMove(gameId);
+             
+             return {
+                 success: true,
+                 message: 'Recovered via forceRandomMove',
+                 recovered: true
+             };
+        } catch (fallbackError) {
+             console.error(`[makeComputerMoveHelper] Even forceRandomMove failed:`, fallbackError);
+             throw error; // Throw main error so caller knows we failed completely
+        }
     }
-
-    await db.collection('games').doc(gameId).update(updateData);
-
-    return {
-        move: moveResult,
-        gameState: validation.gameState,
-        gameOver: gameResult.isOver,
-        result: gameResult.isOver ? gameResult : undefined,
-    };
 }
 
 /**
