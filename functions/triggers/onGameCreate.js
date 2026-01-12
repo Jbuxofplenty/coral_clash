@@ -14,6 +14,8 @@ export const onGameCreate = onDocumentCreated(
     {
         document: 'games/{gameId}',
         region: getFunctionRegion(), // Match Firestore region for lower latency
+        memory: '1GiB',
+        timeoutSeconds: 300,
     },
     async (event) => {
     try {

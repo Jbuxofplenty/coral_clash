@@ -1401,20 +1401,28 @@ export function findBestMoveIterativeDeepening(
     if (!bestMove) bestMove = fallbackMove;
 
     // Convert InternalMove to pretty move format that game.move() expects
-    const prettyMove = {
+    const prettyMove: any = {
         from: algebraic(bestMove.from),
         to: algebraic(bestMove.to),
-        promotion: bestMove.promotion,
-        whaleSecondSquare:
-            bestMove.whaleOtherSquare !== undefined
-                ? algebraic(bestMove.whaleOtherSquare)
-                : undefined,
-        coralPlaced: bestMove.coralPlaced,
-        coralRemoved: bestMove.coralRemoved,
-        coralRemovedSquares: bestMove.coralRemovedSquares
-            ? bestMove.coralRemovedSquares.map((sq: number) => algebraic(sq))
-            : undefined,
     };
+
+    if (bestMove.promotion) {
+        prettyMove.promotion = bestMove.promotion;
+    }
+    if (bestMove.whaleOtherSquare !== undefined) {
+        prettyMove.whaleSecondSquare = algebraic(bestMove.whaleOtherSquare);
+    }
+    if (bestMove.coralPlaced !== undefined) {
+        prettyMove.coralPlaced = bestMove.coralPlaced;
+    }
+    if (bestMove.coralRemoved !== undefined) {
+        prettyMove.coralRemoved = bestMove.coralRemoved;
+    }
+    if (bestMove.coralRemovedSquares) {
+        prettyMove.coralRemovedSquares = bestMove.coralRemovedSquares.map((sq: number) =>
+            algebraic(sq),
+        );
+    }
 
     // CRITICAL: Validate that the move is actually valid in the current game state
     // The game state might have changed during search, or the move might have been from a different position
