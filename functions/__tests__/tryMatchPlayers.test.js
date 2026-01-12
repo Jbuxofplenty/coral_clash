@@ -69,6 +69,7 @@ describe('tryMatchPlayers - Computer User Matching Delay (10 seconds)', () => {
     const baseTime = Math.floor(Date.now() / 1000); // Current time in seconds
 
     beforeEach(() => {
+        jest.useFakeTimers();
         jest.clearAllMocks();
         
         // Reset Timestamp.now() mock
@@ -120,6 +121,10 @@ describe('tryMatchPlayers - Computer User Matching Delay (10 seconds)', () => {
 
         // Mock add for notifications and games
         mocks.mockAdd.mockResolvedValue({ id: 'game-123' });
+    });
+
+    afterEach(() => {
+        jest.useRealTimers();
     });
 
     afterAll(() => {
