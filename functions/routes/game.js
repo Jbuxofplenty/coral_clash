@@ -1188,7 +1188,18 @@ export async function makeComputerMoveHelper(gameId, gameData = null) {
                 console.warn(`[makeComputerMove] Retrying with random move...`);
                 // Fallback to random move for next attempt
                 try {
-                    selectedMove = moves[Math.floor(Math.random() * moves.length)];
+                    // Filter out the failed move to ensure we try something different
+                    let candidateMoves = moves;
+                    if (selectedMove) {
+                         candidateMoves = moves.filter((m) => m.from !== selectedMove.from || m.to !== selectedMove.to);
+                    }
+                    
+                    // If we filtered everything (unlikely) or something went wrong, fall back to full list
+                    if (candidateMoves.length === 0) {
+                        candidateMoves = moves;
+                    }
+
+                    selectedMove = candidateMoves[Math.floor(Math.random() * candidateMoves.length)];
                 } catch (e) {
                     console.error('[makeComputerMove] Failed to pick random move:', e);
                     // If we can't even pick a random move, we are doomed. Break to exit.
