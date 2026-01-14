@@ -30,26 +30,33 @@ class ZobristKeys {
     // square: 0-63 (64 squares)
     // color: 0=white, 1=black
     // role: 0=none (whale), 1=hunter, 2=gatherer
-    private pieceKeys: Record<string, number[][][]> = {};
+    // Piece keys: [pieceType][square][color][role]
+    // pieceType: 'h' (whale), 'd' (dolphin), 't' (turtle), 'f' (pufferfish), 'o' (octopus), 'c' (crab)
+    // square: 0-63 (64 squares)
+    // color: 0=white, 1=black
+    // role: 0=none (whale), 1=hunter, 2=gatherer
+    private pieceKeys: Record<string, bigint[][][]> = {};
 
     // Coral keys: [square][color]
     // square: 0-63
     // color: 0=white, 1=black, 2=no coral
-    private coralKeys: number[][] = [];
+    private coralKeys: bigint[][] = [];
 
     // Turn key: 0=white, 1=black
-    private turnKey: number[] = [];
+    private turnKey: bigint[] = [];
 
     constructor() {
         this.initializeKeys();
     }
 
     /**
-     * Generate a random 32-bit integer (using 31 bits for safety in JavaScript)
+     * Generate a random 64-bit integer (using BigInt)
      */
-    private randomKey(): number {
-        // Use 31 bits to stay within JavaScript's safe integer range
-        return Math.floor(Math.random() * 0x7fffffff);
+    private randomKey(): bigint {
+        // Generate 64 bits of randomness using two 32-bit random numbers
+        const h = BigInt(Math.floor(Math.random() * 0xffffffff));
+        const l = BigInt(Math.floor(Math.random() * 0xffffffff));
+        return (h << 32n) | l;
     }
 
     /**
@@ -91,31 +98,31 @@ class ZobristKeys {
     /**
      * Get piece key for a piece at a square
      */
-    getPieceKey(piece: PieceSymbol, square: number, color: Color, role: PieceRole | null): number {
+    getPieceKey(piece: PieceSymbol, square: number, color: Color, role: PieceRole | null): bigint {
         const colorIdx = color === 'w' ? 0 : 1;
         const roleIdx = role === null ? 0 : role === 'hunter' ? 1 : 2;
         const pieceKeyArray = this.pieceKeys[piece];
         if (!pieceKeyArray || !pieceKeyArray[square] || !pieceKeyArray[square][colorIdx]) {
-            return 0; // Fallback if key not found
+            return 0n; // Fallback if key not found
         }
-        return pieceKeyArray[square][colorIdx][roleIdx] || 0;
+        return pieceKeyArray[square][colorIdx][roleIdx] || 0n;
     }
 
     /**
      * Get coral key for a square
      */
-    getCoralKey(square: number, coralColor: Color | null): number {
+    getCoralKey(square: number, coralColor: Color | null): bigint {
         const coralState = coralColor === 'w' ? 0 : coralColor === 'b' ? 1 : 2;
         if (!this.coralKeys[square]) {
-            return 0; // Fallback if key not found
+            return 0n; // Fallback if key not found
         }
-        return this.coralKeys[square][coralState] || 0;
+        return this.coralKeys[square][coralState] || 0n;
     }
 
     /**
      * Get turn key
      */
-    getTurnKey(color: Color): number {
+    getTurnKey(color: Color): bigint {
         return this.turnKey[color === 'w' ? 0 : 1];
     }
 }
@@ -194,7 +201,7 @@ export enum BoundType {
  * Transposition table entry
  */
 export interface TranspositionEntry {
-    key: number;
+    key: bigint;
     depth: number;
     score: number;
     bound: BoundType;
@@ -206,7 +213,7 @@ export interface TranspositionEntry {
  * Uses Zobrist hash keys (numbers) for fast lookups
  */
 export class TranspositionTable {
-    private table: Map<number, TranspositionEntry> = new Map();
+    private table: Map<bigint, TranspositionEntry> = new Map();
     private maxSize: number;
 
     constructor(maxSize: number = 100000) {
@@ -216,14 +223,14 @@ export class TranspositionTable {
     /**
      * Get entry from transposition table
      */
-    get(key: number): TranspositionEntry | null {
+    get(key: bigint): TranspositionEntry | null {
         return this.table.get(key) || null;
     }
 
     /**
      * Store entry in transposition table
      */
-    put(key: number, depth: number, score: number, bound: BoundType, bestMove: any | null): void {
+    put(key: bigint, depth: number, score: number, bound: BoundType, bestMove: any | null): void {
         // If table is full, remove oldest entries (simple strategy: clear if over limit)
         if (this.table.size >= this.maxSize) {
             // Remove 25% of entries to make room (simple clearing strategy)
@@ -264,8 +271,14 @@ export class TranspositionTable {
  * @param gameState - Current game state snapshot
  * @returns Zobrist hash (number)
  */
-function computeZobristHash(game: CoralClash): number {
-    let hash = 0;
+/**
+ * Compute Zobrist hash for a game position
+ * Uses XOR of all piece keys, coral keys, and turn key
+ * @param gameState - Current game state snapshot
+ * @returns Zobrist hash (bigint)
+ */
+function computeZobristHash(game: CoralClash): bigint {
+    let hash = 0n;
     const board = game.getBoardOx88();
 
     // Hash all pieces on the board using 0x88 board directly
@@ -336,14 +349,14 @@ function _generatePositionKeyString(gameState: GameStateSnapshot): string {
 }
 
 /**
- * Simple string hash function (fallback)
+ * Simple string hash function (fallback) - returns bigint
  */
-function _hashString(str: string): number {
-    let hash = 0;
+function _hashString(str: string): bigint {
+    let hash = 0n;
     for (let i = 0; i < str.length; i++) {
-        const char = str.charCodeAt(i);
-        hash = (hash << 5) - hash + char;
-        hash = hash & hash; // Convert to 32-bit integer
+        const char = BigInt(str.charCodeAt(i));
+        hash = (hash << 5n) - hash + char;
+        hash = hash & 0xffffffffffffffffn; // Keep within 64 bits
     }
     return hash;
 }
@@ -354,7 +367,13 @@ function _hashString(str: string): number {
  * @param gameState - Current game state snapshot
  * @returns Position key (number)
  */
-function generatePositionKey(game: CoralClash): number {
+/**
+ * Generate a position key for transposition table lookup
+ * Uses Zobrist hashing for fast computation
+ * @param gameState - Current game state snapshot
+ * @returns Position key (bigint)
+ */
+function generatePositionKey(game: CoralClash): bigint {
     return computeZobristHash(game);
 }
 
@@ -827,7 +846,7 @@ export function alphaBeta(
 
     // Generate position key for transposition table lookup (only for deeper searches)
     // Allow disabling TT via environment variable for debugging
-    let positionKey = 0;
+    let positionKey = 0n;
     const useTT = transpositionTable && !process.env.DISABLE_TT;
     if (depth > 1 && useTT) {
         positionKey = generatePositionKey(game);
