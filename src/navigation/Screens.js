@@ -1,6 +1,6 @@
 import { ActivityIndicator, Dimensions, Linking, useWindowDimensions, View } from 'react-native';
 import { Header, Icon } from '../components';
-import { RULES_VIDEO_URL } from '../constants';
+import { PHYSICAL_GAME_URL, RULES_VIDEO_URL } from '../constants';
 
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -227,6 +227,28 @@ export default function AppStack(_props) {
                         })}
                     />
                     <Drawer.Screen
+                        name='Physical Game'
+                        component={View}
+                        options={{
+                            drawerIcon: ({ _focused, color }) => (
+                                <Icon
+                                    size={isCompact ? 20 : 24}
+                                    name='shopping-cart'
+                                    family='font-awesome'
+                                    color={color}
+                                />
+                            ),
+                            headerShown: false,
+                        }}
+                        listeners={({ navigation }) => ({
+                            drawerItemPress: (e) => {
+                                e.preventDefault();
+                                Linking.openURL(PHYSICAL_GAME_URL);
+                                navigation.closeDrawer();
+                            },
+                        })}
+                    />
+                    <Drawer.Screen
                         name='Report Issue'
                         component={ReportIssue}
                         options={{
@@ -350,6 +372,28 @@ export default function AppStack(_props) {
                             drawerItemPress: (e) => {
                                 e.preventDefault();
                                 Linking.openURL(RULES_VIDEO_URL);
+                                navigation.closeDrawer();
+                            },
+                        })}
+                    />
+                    <Drawer.Screen
+                        name='Physical Game'
+                        component={View}
+                        options={{
+                            drawerIcon: ({ _focused, color }) => (
+                                <Icon
+                                    size={isCompact ? 20 : 24}
+                                    name='shopping-cart'
+                                    family='font-awesome'
+                                    color={color}
+                                />
+                            ),
+                            headerShown: false,
+                        }}
+                        listeners={({ navigation }) => ({
+                            drawerItemPress: (e) => {
+                                e.preventDefault();
+                                Linking.openURL(PHYSICAL_GAME_URL);
                                 navigation.closeDrawer();
                             },
                         })}
