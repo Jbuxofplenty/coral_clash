@@ -1,3 +1,35 @@
+# [2.7.0](https://github.com/Jbuxofplenty/coral_clash/compare/v2.6.1...v2.7.0) (2026-01-18)
+
+
+### Bug Fixes
+
+* **client:** correctly implement firebase analytics event logging ([db3913c](https://github.com/Jbuxofplenty/coral_clash/commit/db3913cb5bc9c0e95b4aaca6c4307fa57d1acfcd))
+* **server:** correct AI parameter order and improve fallback safety ([9c30bbb](https://github.com/Jbuxofplenty/coral_clash/commit/9c30bbb7bce02e59c9adb89ea02ddd3f0952fa7b))
+* **server:** escalate trigger resources to 1GiB and fix AI move construction ([3e93acd](https://github.com/Jbuxofplenty/coral_clash/commit/3e93acdbbc4d39276e29b566750f6ede5a233403))
+* **server:** filter out failed moves in AI recovery to ensure successful retry ([20e6e52](https://github.com/Jbuxofplenty/coral_clash/commit/20e6e524deb3b90f914583901f55435dd1d37145))
+* **server:** fix AI freeze by allowing Crabs on back rank and adding robust fallback ([62d62b1](https://github.com/Jbuxofplenty/coral_clash/commit/62d62b1533ea02ebc06cd3d631ca7d49ad353d8d))
+* **server:** implement AI safety retry loop to prevent game freezes ([2ea4089](https://github.com/Jbuxofplenty/coral_clash/commit/2ea4089fc63390ac2f035a10e1b011962d40f3bc))
+* **server:** improve AI move reliability and fix worker test mocks ([88e9ba1](https://github.com/Jbuxofplenty/coral_clash/commit/88e9ba16035a207aae503fa5052c49d4737639e6))
+* **server:** resolve AI freeze with memory increase and robust random fallback ([172519b](https://github.com/Jbuxofplenty/coral_clash/commit/172519b3e5742e61e1d3c87a2b426d58b5fb862b))
+* **server:** use transactions for matchmaking and improve AI time limits ([bdfc8b9](https://github.com/Jbuxofplenty/coral_clash/commit/bdfc8b94bbe2e9d5238f2de3113c104a99eb6a72))
+* **shared:** upgrade Zobrist hashing to 64-bit to prevent position collisions ([c01e5e5](https://github.com/Jbuxofplenty/coral_clash/commit/c01e5e56744a1c59136c0802bbff17247cec1de7))
+
+
+### Features
+
+* **client:** add analytics events for match initiation ([1c20de3](https://github.com/Jbuxofplenty/coral_clash/commit/1c20de302640da53861786c45ede30551162abbd))
+* **client:** add physical game link to drawer navigation ([8fa9c49](https://github.com/Jbuxofplenty/coral_clash/commit/8fa9c49be5e42b668a7dc94d96ae8e64f1bb84e3))
+* **client:** add text invite button and fix firebase crypto errors ([5c82348](https://github.com/Jbuxofplenty/coral_clash/commit/5c82348aacd1c9cffe7a3643ec3f9b8ca510544b))
+* **client:** implement first-time notification and rules video link ([11d9e44](https://github.com/Jbuxofplenty/coral_clash/commit/11d9e44b32960d98264661564e5b3d95ded36b2e))
+* **server:** implement AI Worker Threads for move timeouts ([24e85ea](https://github.com/Jbuxofplenty/coral_clash/commit/24e85ea3b3a62b018372f588d795bfabcdfb6d24))
+* **shared:** bump version number and create unit test that shows AI is bad ([129ff65](https://github.com/Jbuxofplenty/coral_clash/commit/129ff653bb19e880bdc1a348d0ad2f0215e5ab32))
+
+
+### Performance Improvements
+
+* **shared:** increase thinking time for hard test ([0dad41e](https://github.com/Jbuxofplenty/coral_clash/commit/0dad41e46506c5b56f62e307441f26de6e6ae855))
+* **shared:** optimize AI search and update iOS SDK version to 26.0 ([a24a3dc](https://github.com/Jbuxofplenty/coral_clash/commit/a24a3dcd5a0332cd029e14de1c2bf6866884f6ea))
+
 ## [2.6.1](https://github.com/Jbuxofplenty/coral_clash/compare/v2.6.0...v2.6.1) (2025-12-30)
 
 
