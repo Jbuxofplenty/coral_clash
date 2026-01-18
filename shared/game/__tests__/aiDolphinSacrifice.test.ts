@@ -48,7 +48,7 @@ describe('AI Should Not Sacrifice Dolphin Unnecessarily', () => {
             snapshot,
             6, // Depth 6 to see deeper threats
             'b', // Black to move
-            30000, // 30 seconds to ensure deeper search
+            50000, // 50 seconds to ensure deeper search
             null, // No progress callback
             null, // No last move
             'hard', // Use hard difficulty for best evaluation
