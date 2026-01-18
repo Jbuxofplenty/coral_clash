@@ -44,7 +44,10 @@
             "/node_modules/",
             "/functions/",
             "/shared/"
-        ]
+        ],
+        "moduleNameMapper": {
+            "^(\\.{1,2}/.*)\\.js$": "$1"
+        }
     },
     "lint-staged": {
         "*.{js,jsx,ts,tsx}": [

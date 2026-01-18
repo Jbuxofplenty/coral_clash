@@ -213,7 +213,15 @@
       ],
       "@react-native-firebase/app",
       "./plugins/with-modular-headers.js",
-      "expo-asset"
+      "expo-asset",
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "deploymentTarget": "15.1"
+          }
+        }
+      ]
     ],
     "android": {
       "googleServicesFile": "./google-services.json",

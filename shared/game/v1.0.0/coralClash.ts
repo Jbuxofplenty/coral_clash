@@ -715,6 +715,14 @@ export class CoralClash {
         makeUndoCycles: 0,
     };
 
+    // Piece lists for optimized attack checking
+    // Maps each color to a set of board squares (0x88 indices) containing pieces
+    // This allows iterating over ~16-30 pieces instead of all 128 squares
+    private _pieces: Record<Color, Set<number>> = {
+        w: new Set(),
+        b: new Set(),
+    };
+
     constructor(fen = DEFAULT_POSITION) {
         this.load(fen);
     }
@@ -761,6 +769,10 @@ export class CoralClash {
         this._whaleAttackMovesCache.clear();
         this._whaleAttackResultCache.clear();
         this._boardGeneration = 0;
+
+        // Clear piece lists
+        this._pieces.w.clear();
+        this._pieces.b.clear();
 
         /*
          * Delete the SetUp and FEN headers (if preserved), the board is empty and
@@ -1097,6 +1109,9 @@ export class CoralClash {
         const piece = { type: type as PieceSymbol, color: color as Color, role };
         this._board[sq] = piece;
 
+        // Add piece to piece list (only track first square for whales)
+        this._pieces[color].add(sq);
+
         if (type === WHALE) {
             // Whale spans 2 squares - initially placed horizontally in starting position
             const secondSq = sq + 1; // Second square starts one to the right (can change via rotation)
@@ -1111,13 +1126,20 @@ export class CoralClash {
 
     remove(square: Square) {
         const piece = this.get(square);
-        delete this._board[Ox88[square]];
+        const sq = Ox88[square];
+        delete this._board[sq];
+        
         if (piece && piece.type === WHALE) {
             // Remove whale from both squares
             const [first, second] = this._kings[piece.color];
             if (first !== EMPTY) delete this._board[first];
             if (second !== EMPTY) delete this._board[second];
             this._kings[piece.color] = [EMPTY, EMPTY];
+            // Remove from piece list (only stored at first square)
+            this._pieces[piece.color].delete(first);
+        } else if (piece) {
+            // Remove from piece list
+            this._pieces[piece.color].delete(sq);
         }
 
         this._updateSetup(this.fen());
@@ -1126,19 +1148,15 @@ export class CoralClash {
     }
 
     private _attacked(color: Color, square: number) {
-        for (let i = Ox88.a8; i <= Ox88.h1; i++) {
-            // did we run off the end of the board
-            if (i & 0x88) {
-                i += 7;
-                continue;
-            }
-
-            // if empty square or wrong color
-            if (this._board[i] === undefined || this._board[i].color !== color) {
-                continue;
-            }
-
+        // Iterate over pieces of the attacking color instead of all 128 squares
+        // This is approximately 4-8x faster as we only check ~16-30 pieces instead of 128 squares
+        for (const i of this._pieces[color]) {
             const piece = this._board[i];
+
+            // Piece should exist (sanity check)
+            if (!piece || piece.color !== color) {
+                continue;
+            }
 
             // Skip whale attacks - those are checked separately via _whaleAttacked
             // This prevents infinite recursion in legal whale attack validation
@@ -2788,8 +2806,14 @@ export class CoralClash {
                     move.captured = pieceAtFirst.type;
                     move.captureSquare = newFirst;
                     move.capturedRole = pieceAtFirst.role;
-                    delete this._board[newFirst];
                     capturedAtFirst = true;
+                    // Remove captured piece from piece list
+                    if (pieceAtFirst.type === WHALE) {
+                        this._pieces[them].delete(this._kings[them][0]);
+                    } else {
+                        this._pieces[them].delete(newFirst);
+                    }
+                    delete this._board[newFirst];
                 }
 
                 // Check newSecond - capture ANY enemy piece regardless of type
@@ -2810,6 +2834,12 @@ export class CoralClash {
                         move.captureSquare = newSecond;
                         move.capturedRole = pieceAtSecond.role;
                     }
+                    // Remove captured piece from piece list
+                    if (pieceAtSecond.type === WHALE) {
+                        this._pieces[them].delete(this._kings[them][0]);
+                    } else {
+                        this._pieces[them].delete(newSecond);
+                    }
                     delete this._board[newSecond];
                 }
             }
@@ -2818,6 +2848,10 @@ export class CoralClash {
 
             // Update whale positions
             this._kings[us] = [newFirst, newSecond];
+            
+            // Update piece list: whale moved from oldFirst to newFirst
+            this._pieces[us].delete(oldFirst);
+            this._pieces[us].add(newFirst);
         } else {
             // Normal piece move
             // IMPORTANT: Create a COPY to avoid reference issues
@@ -2828,6 +2862,10 @@ export class CoralClash {
                 this._board[move.to] = pieceToMove;
             }
             delete this._board[move.from];
+            
+            // Update piece list: piece moved from move.from to move.to
+            this._pieces[us].delete(move.from);
+            this._pieces[us].add(move.to);
         }
 
         // if pawn promotion, replace with new piece
@@ -2973,6 +3011,10 @@ export class CoralClash {
                 type: move.piece, // Fix type in case of promotion
                 role: old.pieceRole, // Restore original role (undefined for whales)
             };
+            
+            // Update piece list: whale moved back from currentFirst to oldFirst
+            this._pieces[us].delete(currentFirst);
+            this._pieces[us].add(oldFirst);
         } else {
             // Normal piece move
             // IMPORTANT: Create a COPY to avoid reference issues
@@ -2989,6 +3031,10 @@ export class CoralClash {
             }
 
             delete this._board[move.to];
+            
+            // Update piece list: piece moved back from move.to to move.from
+            this._pieces[us].delete(move.to);
+            this._pieces[us].add(move.from);
         }
 
         if (move.captured) {
@@ -3016,6 +3062,9 @@ export class CoralClash {
                 color: them,
                 role: move.capturedRole,
             };
+            
+            // Add restored piece back to piece list
+            this._pieces[them].add(restoreSquare);
         }
 
         // Restore second captured piece for whale double captures (parallel slide capturing two pieces)
@@ -3025,6 +3074,9 @@ export class CoralClash {
                 color: them,
                 role: move.capturedSecondRole,
             };
+            
+            // Add second captured piece back to piece list
+            this._pieces[them].add(move.capturedSecondSquare);
         }
 
         // No castling in Coral Clash

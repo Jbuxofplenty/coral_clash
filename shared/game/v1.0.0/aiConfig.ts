@@ -230,7 +230,7 @@ const MOVE_PENALTIES = {
  * Controls how the AI selects between top moves
  */
 const SOFTMAX_SELECTION = {
-    enabled: true,
+    enabled: false,
     temperature: {
         easy: 40,    // Higher temperature = more randomness
         medium: 25,  // Moderate temperature

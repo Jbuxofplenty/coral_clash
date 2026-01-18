@@ -929,11 +929,70 @@ export function alphaBeta(
         };
     }
 
+    // AGGRESSIVE EARLY GAME PRUNING
+    // In the opening (high piece count), drastically reduce branching by focusing on high-value pieces
+    // This allows deeper search by reducing nodes from ~40-50 per position to ~10-15
+    let movesToConsider = moves;
+    
+    // Count pieces to detect early game (more pieces = earlier in game)
+    const board = game.getBoardOx88();
+    let pieceCount = 0;
+    for (let i = 0; i < 120; i++) {
+        if (i & 0x88) {
+            i += 7;
+            continue;
+        }
+        if (board[i]) pieceCount++;
+    }
+    
+    // Early game: >= 24 pieces on board (out of 32 starting pieces)
+    // Middle game: 16-23 pieces
+    // Late game: < 16 pieces
+    const isEarlyGame = pieceCount >= 24;
+    const isMiddleGame = pieceCount >= 16 && pieceCount < 24;
+    
+    if (isEarlyGame || isMiddleGame) {
+        // Define high-value pieces: hunters (900), gatherers (850), whales (infinite)
+        const HIGH_VALUE_THRESHOLD = 800; // Dolphins and above
+        const MEDIUM_VALUE_THRESHOLD = 400; // Turtles and octopi
+        
+        // Separate moves by piece value
+        const highValueMoves = moves.filter(m => {
+            const pieceValue = getPieceValue(m.piece, m.role || null);
+            return pieceValue >= HIGH_VALUE_THRESHOLD || m.captured; // Always include captures
+        });
+        
+        const mediumValueMoves = moves.filter(m => {
+            const pieceValue = getPieceValue(m.piece, m.role || null);
+            return pieceValue >= MEDIUM_VALUE_THRESHOLD && pieceValue < HIGH_VALUE_THRESHOLD && !m.captured;
+        });
+        
+        // In early game: ONLY consider high-value pieces unless there are very few
+        if (isEarlyGame) {
+            if (highValueMoves.length >= 6) {
+                // Plenty of high-value moves - skip all low/medium value moves
+                movesToConsider = highValueMoves;
+            } else if (highValueMoves.length + mediumValueMoves.length >= 10) {
+                // Use high + medium value moves
+                movesToConsider = [...highValueMoves, ...mediumValueMoves];
+            }
+            // else: use all moves (fallback when very few high-value options)
+        } else if (isMiddleGame) {
+            // In middle game: prefer high-value, but allow some medium-value moves
+            if (highValueMoves.length >= 4) {
+                // Take all high-value moves + best few medium-value moves
+                const mediumToAdd = mediumValueMoves.slice(0, Math.min(6, mediumValueMoves.length));
+                movesToConsider = [...highValueMoves, ...mediumToAdd];
+            }
+            // else: use all moves
+        }
+    }
+
     let bestMove: any = null;
     let bestScore = maximizingPlayer ? -Infinity : Infinity;
 
     // MVV-LVA move ordering: prioritize high-value captures by low-value pieces
-    let sortedMoves = [...moves].sort((a, b) => {
+    let sortedMoves = [...movesToConsider].sort((a, b) => {
         // Captures vs non-captures
         if (a.captured && !b.captured) return -1;
         if (!a.captured && b.captured) return 1;

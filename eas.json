@@ -24,12 +24,18 @@
             "autoIncrement": true,
             "distribution": "store",
             "channel": "preview",
-            "node": "22.11.0"
+            "node": "22.11.0",
+            "ios": {
+                "image": "macos-sequoia-15.5-xcode-26.0"
+            }
         },
         "production": {
             "autoIncrement": true,
             "channel": "production",
-            "node": "22.11.0"
+            "node": "22.11.0",
+            "ios": {
+                "image": "macos-sequoia-15.5-xcode-26.0"
+            }
         }
     },
     "submit": {
