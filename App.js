@@ -18,6 +18,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Image, LogBox, StatusBar } from 'react-native';
 import mobileAds from 'react-native-google-mobile-ads';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import CustomSplashScreen from './src/components/CustomSplashScreen';
 import VersionWarningBanner from './src/components/VersionWarningBanner';
 import { materialTheme } from './src/constants/';
 import {
@@ -67,6 +68,37 @@ function AppContent({ navigationRef: _navigationRef }) {
     const { isDarkMode } = useTheme();
     const { versionWarning, dismissWarning } = useVersion();
 
+    const [showCustomSplash, setShowCustomSplash] = useState(() => {
+        try {
+            // Use Intl as a fallback to avoid native module rebuilds for expo-localization
+            const locale = Intl.NumberFormat().resolvedOptions().locale;
+            const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            
+            // Check if locale contains 'id' (e.g. 'id-ID') or timezone is in Indonesia
+            const isIndonesianLocale = locale && locale.toLowerCase().includes('id');
+            const isIndonesianTimeZone = timeZone && (
+                timeZone.includes('Jakarta') || 
+                timeZone.includes('Pontianak') || 
+                timeZone.includes('Makassar') || 
+                timeZone.includes('Jayapura')
+            );
+            
+            return isIndonesianLocale || isIndonesianTimeZone;
+        } catch (e) {
+            console.warn('Error getting locale for splash screen:', e);
+            return false;
+        }
+    });
+
+    useEffect(() => {
+        if (showCustomSplash) {
+            const timer = setTimeout(() => {
+                setShowCustomSplash(false);
+            }, 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [showCustomSplash]);
+
     return (
         <Block flex>
             <StatusBar
@@ -77,6 +109,7 @@ function AppContent({ navigationRef: _navigationRef }) {
             <Screens />
             {/* Version warning toast - overlays all screens */}
             <VersionWarningBanner visible={versionWarning.visible} onDismiss={dismissWarning} />
+            {showCustomSplash && <CustomSplashScreen />}
         </Block>
     );
 }
