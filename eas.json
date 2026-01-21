@@ -9,7 +9,8 @@
             "distribution": "internal",
             "channel": "development",
             "ios": {
-                "simulator": true
+                "simulator": true,
+                "image": "macos-sequoia-15.5-xcode-26.0"
             },
             "android": {
                 "buildType": "apk"
@@ -18,7 +19,10 @@
         "development-device": {
             "developmentClient": true,
             "distribution": "internal",
-            "channel": "development"
+            "channel": "development",
+            "ios": {
+                "image": "macos-sequoia-15.5-xcode-26.0"
+            }
         },
         "preview": {
             "autoIncrement": true,
