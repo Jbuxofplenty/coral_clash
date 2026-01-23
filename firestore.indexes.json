@@ -99,6 +99,20 @@
                     "order": "ASCENDING"
                 },
                 {
+                    "fieldPath": "expiresAt",
+                    "order": "ASCENDING"
+                }
+            ]
+        },
+        {
+            "collectionGroup": "correspondenceInvitations",
+            "queryScope": "COLLECTION",
+            "fields": [
+                {
+                    "fieldPath": "status",
+                    "order": "ASCENDING"
+                },
+                {
                     "fieldPath": "timeControl.type",
                     "order": "ASCENDING"
                 },

@@ -186,7 +186,8 @@ const styles = StyleSheet.create({
     optionButton: {
         borderRadius: 12,
         borderWidth: 1,
-        padding: 16,
+        paddingHorizontal: 12,
+        paddingVertical: 14,
     },
     optionMargin: {
         marginBottom: 12,
@@ -198,13 +199,13 @@ const styles = StyleSheet.create({
     optionText: {
         flex: 1,
         flexShrink: 1,
-        marginLeft: 16,
-        marginRight: 18,
+        marginLeft: 12,
+        marginRight: 8,
     },
     optionName: {
-        fontSize: 18,
+        fontSize: 17,
         fontWeight: '600',
-        marginBottom: 4,
+        marginBottom: 2,
     },
     optionDescription: {
         fontSize: 13,
