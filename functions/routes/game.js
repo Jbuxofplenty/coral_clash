@@ -8,6 +8,7 @@ import {
     createGameSnapshot,
     restoreGameFromSnapshot
 } from '@jbuxofplenty/coral-clash';
+import { region } from 'firebase-functions/v1';
 import { HttpsError, onCall, onRequest } from 'firebase-functions/v2/https';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
@@ -1818,8 +1819,13 @@ export const handleTimeExpiration = onRequest(
  * Resign from a game
  * POST /api/game/resign
  */
-export const resignGame = onCall(getAppCheckConfig(), async (request) => {
-    const { data, auth } = request;
+export const resignGame = region('us-central1').https.onCall(async (data, context) => {
+    // Check App Check
+    if (getAppCheckConfig().enforceAppCheck && !context.app) {
+        throw new HttpsError('failed-precondition', 'The function must be called from an App Check verified app.');
+    }
+
+    const auth = context.auth;
     try {
         console.log('[resignGame] Starting resignation process');
         if (!auth) {
@@ -1865,11 +1871,18 @@ export const resignGame = onCall(getAppCheckConfig(), async (request) => {
         console.log('[resignGame] Winner:', winner, 'Resigned color:', resignedColor);
 
         // Update the game state with resignation
-        const currentGameState = gameData.gameState || { fen: gameData.fen };
+        const currentGameState = gameData.gameState || { fen: gameData.fen || null };
         const updatedGameState = {
             ...currentGameState,
             resigned: resignedColor,
         };
+        
+        // Sanitize to remove undefined values which Firestore rejects
+        Object.keys(updatedGameState).forEach(key => {
+            if (updatedGameState[key] === undefined) {
+                updatedGameState[key] = null;
+            }
+        });
 
         console.log('[resignGame] Updating game document to completed status');
 
