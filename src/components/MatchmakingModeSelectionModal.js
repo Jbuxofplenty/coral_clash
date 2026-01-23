@@ -203,7 +203,7 @@ const styles = StyleSheet.create({
         marginRight: 8,
     },
     optionName: {
-        fontSize: 17,
+        fontSize: 16,
         fontWeight: '600',
         marginBottom: 2,
     },
