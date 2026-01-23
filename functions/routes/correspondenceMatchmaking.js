@@ -1,11 +1,22 @@
-import { HttpsError, onCall } from 'firebase-functions/v2/https';
+import { https, region } from 'firebase-functions/v1';
 import { admin } from '../init.js';
-import { getAppCheckConfig } from '../utils/appCheckConfig.js';
+import { shouldEnforceAppCheck } from '../utils/appCheckConfig.js';
 import { validateClientVersion } from '../utils/gameVersion.js';
 import { serverTimestamp } from '../utils/helpers.js';
 import { sendCorrespondenceMatchNotification } from '../utils/notifications.js';
 
 const db = admin.firestore();
+const HttpsError = https.HttpsError;
+
+/**
+ * Enforce App Check if enabled
+ * @param {functions.https.CallableContext} context 
+ */
+const enforceAppCheck = (context) => {
+    if (shouldEnforceAppCheck() && !context.app) {
+        throw new HttpsError('failed-precondition', 'The function must be called from an App Check verified app.');
+    }
+};
 
 /**
  * Handler for creating a correspondence invitation
@@ -63,9 +74,10 @@ async function createCorrespondenceInviteHandler(request) {
  * Create a correspondence invitation
  * POST /api/correspondence/create
  */
-export const createCorrespondenceInvite = onCall(getAppCheckConfig(), async (request) => {
+export const createCorrespondenceInvite = region('us-central1').https.onCall(async (data, context) => {
     try {
-        return await createCorrespondenceInviteHandler(request);
+        enforceAppCheck(context);
+        return await createCorrespondenceInviteHandler({ data, auth: context.auth });
     } catch (error) {
         console.error('Error creating correspondence invite:', error);
         if (error instanceof HttpsError) {
@@ -131,9 +143,10 @@ async function cancelCorrespondenceInviteHandler(request) {
  * Cancel a correspondence invitation
  * POST /api/correspondence/cancel
  */
-export const cancelCorrespondenceInvite = onCall(getAppCheckConfig(), async (request) => {
+export const cancelCorrespondenceInvite = region('us-central1').https.onCall(async (data, context) => {
     try {
-        return await cancelCorrespondenceInviteHandler(request);
+        enforceAppCheck(context);
+        return await cancelCorrespondenceInviteHandler({ data, auth: context.auth });
     } catch (error) {
         console.error('Error canceling correspondence invite:', error);
         if (error instanceof HttpsError) {
@@ -217,6 +230,7 @@ async function acceptCorrespondenceInviteHandler(request) {
         whitePlayerId: creatorIsWhite ? userId : inviteData.matchedUserId,
         blackPlayerId: creatorIsWhite ? inviteData.matchedUserId : userId,
         status: 'active',
+        currentTurn: creatorIsWhite ? userId : inviteData.matchedUserId,
         opponentType: 'pvp',
         timeControl: inviteData.timeControl,
         createdAt: serverTimestamp(),
@@ -254,9 +268,10 @@ async function acceptCorrespondenceInviteHandler(request) {
  * Accept a correspondence invitation
  * POST /api/correspondence/accept
  */
-export const acceptCorrespondenceInvite = onCall(getAppCheckConfig(), async (request) => {
+export const acceptCorrespondenceInvite = region('us-central1').https.onCall(async (data, context) => {
     try {
-        return await acceptCorrespondenceInviteHandler(request);
+        enforceAppCheck(context);
+        return await acceptCorrespondenceInviteHandler({ data, auth: context.auth });
     } catch (error) {
         console.error('Error accepting correspondence invite:', error);
         if (error instanceof HttpsError) {
@@ -337,9 +352,10 @@ async function declineCorrespondenceInviteHandler(request) {
  * Decline a correspondence invitation
  * POST /api/correspondence/decline
  */
-export const declineCorrespondenceInvite = onCall(getAppCheckConfig(), async (request) => {
+export const declineCorrespondenceInvite = region('us-central1').https.onCall(async (data, context) => {
     try {
-        return await declineCorrespondenceInviteHandler(request);
+        enforceAppCheck(context);
+        return await declineCorrespondenceInviteHandler({ data, auth: context.auth });
     } catch (error) {
         console.error('Error declining correspondence invite:', error);
         if (error instanceof HttpsError) {
@@ -466,9 +482,16 @@ async function findCorrespondenceMatchHandler(request) {
  * Find and match to a correspondence invitation
  * POST /api/correspondence/findMatch
  */
-export const findCorrespondenceMatch = onCall(getAppCheckConfig(), async (request) => {
+export const findCorrespondenceMatch = region('us-central1').https.onCall(async (data, context) => {
+    console.log('[findCorrespondenceMatch] Called');
+    console.log('[findCorrespondenceMatch] Data keys:', Object.keys(data || {}));
+    console.log('[findCorrespondenceMatch] Context keys:', Object.keys(context || {}));
+    console.log('[findCorrespondenceMatch] Auth presence:', !!context?.auth);
+    console.log('[findCorrespondenceMatch] Auth uid:', context?.auth?.uid);
+    console.log('[findCorrespondenceMatch] App presence:', !!context?.app);
     try {
-        return await findCorrespondenceMatchHandler(request);
+        enforceAppCheck(context);
+        return await findCorrespondenceMatchHandler({ data, auth: context.auth });
     } catch (error) {
         console.error('Error finding correspondence match:', error);
         if (error instanceof HttpsError) {
