@@ -584,7 +584,15 @@ export default function Home({ navigation }) {
             }
         } catch (error) {
             console.error(`Failed to start ${mode} matchmaking:`, error);
-            showAlert('Error', `Failed to start ${mode} matchmaking. Please try again.`);
+            console.error('Error details:', {
+                message: error.message,
+                code: error.code,
+                stack: error.stack,
+            });
+            showAlert(
+                'Error',
+                `Failed to start ${mode} matchmaking. ${error.message || 'Please try again.'}`,
+            );
         } finally {
             setCreatingGame(false);
             setPendingGameAction(null);

@@ -16,7 +16,7 @@ const MATCHMAKING_MODES = [
     {
         type: 'instant',
         name: 'Instant',
-        description: 'Find an opponent now. Matches you with online players or AI if no one is available.',
+        description: 'Find an opponent now. Matches you with online players.',
         icon: 'users',
         iconFamily: 'font-awesome',
     },
@@ -207,7 +207,7 @@ const styles = StyleSheet.create({
         marginBottom: 4,
     },
     optionDescription: {
-        fontSize: 14,
+        fontSize: 13,
     },
     cancelButton: {
         paddingVertical: 16,
