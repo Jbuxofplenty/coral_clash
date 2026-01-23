@@ -1,6 +1,6 @@
 {
     "name": "coral-clash",
-    "version": "1.0.7",
+    "version": "1.0.8",
     "description": "Coral Clash Board Game",
     "main": "node_modules/expo/AppEntry.js",
     "private": true,
