@@ -177,9 +177,9 @@ async function acceptCorrespondenceInviteHandler(request) {
         throw new HttpsError('failed-precondition', 'This invitation has expired');
     }
 
-    // Check if user is the matched user
-    if (inviteData.matchedUserId !== userId) {
-        throw new HttpsError('permission-denied', 'You are not matched to this invitation');
+    // Check if user is the invitation creator
+    if (inviteData.creatorId !== userId) {
+        throw new HttpsError('permission-denied', 'Only the invitation creator can accept a match');
     }
 
     // Check status
@@ -190,27 +190,32 @@ async function acceptCorrespondenceInviteHandler(request) {
         );
     }
 
-    // Get current user's data for game creation
+    // Get current user's data (Creator)
     const userDoc = await db.collection('users').doc(userId).get();
     if (!userDoc.exists) {
         throw new HttpsError('not-found', 'User profile not found');
     }
 
     const userData = userDoc.data();
+    
+    // Get matched user's data (for game creation)
+    const matchedUserDoc = await db.collection('users').doc(inviteData.matchedUserId).get();
+    const matchedUserData = matchedUserDoc.exists ? matchedUserDoc.data() : {};
+    const matchedUserName = matchedUserData.displayName || 'User';
 
     // Randomly assign colors
     const creatorIsWhite = Math.random() < 0.5;
 
     // Create the game
     const gameData = {
-        creatorId: inviteData.creatorId,
-        creatorDisplayName: inviteData.creatorDisplayName,
-        creatorAvatarKey: inviteData.creatorAvatarKey,
-        opponentId: userId,
-        opponentDisplayName: userData.displayName || 'User',
-        opponentAvatarKey: userData.settings?.avatarKey || 'dolphin',
-        whitePlayerId: creatorIsWhite ? inviteData.creatorId : userId,
-        blackPlayerId: creatorIsWhite ? userId : inviteData.creatorId,
+        creatorId: userId,
+        creatorDisplayName: userData.displayName || 'User',
+        creatorAvatarKey: userData.settings?.avatarKey || 'dolphin',
+        opponentId: inviteData.matchedUserId,
+        opponentDisplayName: matchedUserName,
+        opponentAvatarKey: matchedUserData.settings?.avatarKey || 'dolphin',
+        whitePlayerId: creatorIsWhite ? userId : inviteData.matchedUserId,
+        blackPlayerId: creatorIsWhite ? inviteData.matchedUserId : userId,
         status: 'active',
         opponentType: 'pvp',
         timeControl: inviteData.timeControl,
@@ -226,9 +231,9 @@ async function acceptCorrespondenceInviteHandler(request) {
         gameId: gameRef.id,
     });
 
-    // Notify creator that invitation was accepted
+    // Notify matched user that invitation was accepted
     await db.collection('notifications').add({
-        userId: inviteData.creatorId,
+        userId: inviteData.matchedUserId,
         type: 'correspondence_invite_accepted',
         gameId: gameRef.id,
         opponentId: userId,
@@ -287,9 +292,9 @@ async function declineCorrespondenceInviteHandler(request) {
 
     const inviteData = inviteDoc.data();
 
-    // Check if user is the matched user
-    if (inviteData.matchedUserId !== userId) {
-        throw new HttpsError('permission-denied', 'You are not matched to this invitation');
+    // Check if user is the invitation creator
+    if (inviteData.creatorId !== userId) {
+        throw new HttpsError('permission-denied', 'Only the invitation creator can decline a match');
     }
 
     // Check if invitation has expired
@@ -311,14 +316,16 @@ async function declineCorrespondenceInviteHandler(request) {
         });
     }
 
-    // Notify creator that invitation was declined
-    await db.collection('notifications').add({
-        userId: inviteData.creatorId,
-        type: 'correspondence_invite_declined',
-        declinedBy: userId,
-        read: false,
-        createdAt: serverTimestamp(),
-    });
+    // Notify matched user that match was declined
+    if (inviteData.matchedUserId) {
+        await db.collection('notifications').add({
+            userId: inviteData.matchedUserId,
+            type: 'correspondence_invite_declined',
+            declinedBy: userId,
+            read: false,
+            createdAt: serverTimestamp(),
+        });
+    }
 
     return {
         success: true,
