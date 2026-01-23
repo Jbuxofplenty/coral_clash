@@ -423,7 +423,36 @@ async function sendMatchFoundNotification(
     });
 }
 
+/**
+ * Send correspondence match notification (when someone matches to your invitation)
+ * @param {string} recipientId - User receiving the notification (invitation creator)
+ * @param {string} matchedUserId - User who matched to the invitation
+ * @param {string} matchedUserName - Name of the matched user
+ * @param {string} avatarKey - Avatar key of matched user
+ * @param {string} inviteId - Correspondence invitation ID
+ */
+async function sendCorrespondenceMatchNotification(
+    recipientId,
+    matchedUserId,
+    matchedUserName,
+    avatarKey,
+    inviteId,
+) {
+    return sendPushNotification(recipientId, {
+        title: 'Correspondence Match Found',
+        body: `${matchedUserName} wants to play with you. They have 24 hours to accept.`,
+        data: {
+            type: 'correspondence_match_found',
+            matchedUserId: matchedUserId,
+            matchedUserName: matchedUserName,
+            inviteId: inviteId,
+            avatarKey: avatarKey || 'dolphin',
+        },
+    });
+}
+
 export {
+    sendCorrespondenceMatchNotification,
     sendFriendAcceptedNotification,
     sendFriendRequestNotification,
     sendGameAcceptedNotification,
@@ -437,5 +466,6 @@ export {
     sendUndoApprovedNotification,
     sendUndoCancelledNotification,
     sendUndoRejectedNotification,
-    sendUndoRequestNotification,
+    sendUndoRequestNotification
 };
+

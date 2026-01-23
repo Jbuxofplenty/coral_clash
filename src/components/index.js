@@ -9,6 +9,7 @@ import Header from './Header';
 import Icon from './Icon';
 import LoadingScreen from './LoadingScreen';
 import MatchmakingCard from './MatchmakingCard';
+import MatchmakingModeSelectionModal from './MatchmakingModeSelectionModal';
 import PlayerStatusBar from './PlayerStatusBar';
 import PlayWithFriendCard from './PlayWithFriendCard';
 import Product from './Product';
@@ -28,10 +29,9 @@ export {
     Icon,
     LoadingScreen,
     MatchmakingCard,
-    PlayerStatusBar,
-    PlayWithFriendCard,
-    Product,
+    MatchmakingModeSelectionModal, PlayWithFriendCard, PlayerStatusBar, Product,
     SignUpPromptCard,
     TimeControlModal,
-    VersionWarningBanner,
+    VersionWarningBanner
 };
+

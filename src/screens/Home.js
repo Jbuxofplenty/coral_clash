@@ -13,6 +13,7 @@ import {
     GameHistoryCard,
     GameModeCard,
     MatchmakingCard,
+    MatchmakingModeSelectionModal,
     PlayWithFriendCard,
     SignUpPromptCard,
     TimeControlModal,
@@ -36,11 +37,12 @@ export default function Home({ navigation }) {
     const [gameHistory, setGameHistory] = useState([]);
     const [historyLoading, setHistoryLoading] = useState(true);
     const [timeControlModalVisible, setTimeControlModalVisible] = useState(false);
+    const [matchmakingModeModalVisible, setMatchmakingModeModalVisible] = useState(false);
     const [difficultyModalVisible, setDifficultyModalVisible] = useState(false);
     const [pendingGameAction, setPendingGameAction] = useState(null); // 'computer', 'matchmaking', or 'friend'
     const [creatingGame, setCreatingGame] = useState(false); // Track when a game is being created
     const [selectedFriend, setSelectedFriend] = useState(null); // Store selected friend for game invite
-    const [pendingTimeControl, setPendingTimeControl] = useState(null); // Store time control while showing difficulty modal
+    const [pendingTimeControl, setPendingTimeControl] = useState(null); // Store time control while showing difficulty modal or mode selection
 
     // Wrap callbacks in useCallback to prevent infinite re-renders
     const handleGameAccepted = useCallback(
@@ -102,7 +104,8 @@ export default function Home({ navigation }) {
         onMatchFound: handleMatchFound,
     });
 
-    const { getGameHistory, resignGame, getPublicUserInfo } = useFirebaseFunctions();
+    const { getGameHistory, resignGame, getPublicUserInfo, findCorrespondenceMatch } =
+        useFirebaseFunctions();
 
     // Use ref to track searching state for cleanup without triggering re-renders
     const searchingRef = useRef(searching);
@@ -456,23 +459,18 @@ export default function Home({ navigation }) {
             return;
         }
 
-        // For other game types, proceed with game creation
+        // For matchmaking, show mode selection modal
+        if (pendingGameAction === 'matchmaking') {
+            setPendingTimeControl(timeControl);
+            setMatchmakingModeModalVisible(true);
+            return;
+        }
+
+        // For other game types (friend invites), proceed with game creation
         setCreatingGame(true);
 
         try {
-            if (pendingGameAction === 'matchmaking') {
-                // 1. Log event when user initiates a random match
-                if (analytics) {
-                    analytics.logEvent('initiate_match_random', {
-                        time_control: timeControl.type,
-                    });
-                }
-
-                const result = await startSearching(timeControl);
-                if (result && !result.success && result.error) {
-                    showAlert('Cannot Join Matchmaking', result.error);
-                }
-            } else if (pendingGameAction === 'friend' && selectedFriend) {
+            if (pendingGameAction === 'friend' && selectedFriend) {
                 // 2. Log event when user initiates a match with a friend
                 if (analytics) {
                     analytics.logEvent('initiate_match_friend', {
@@ -484,13 +482,12 @@ export default function Home({ navigation }) {
                 // Game request sent successfully via useGame hook
                 setSelectedFriend(null);
             } else if (pendingGameAction === 'passandplay') {
-
                 if (analytics) {
-                    console.log('attempting to log initiate_match_passandplay')
+                    console.log('attempting to log initiate_match_passandplay');
                     analytics.logEvent('initiate_match_passandplay', {
                         time_control: timeControl.type,
                     });
-                    console.log('initiate_match_passandplay logged')
+                    console.log('initiate_match_passandplay logged');
                 }
                 // Create and save pass-and-play game with initial state
                 const gameId = await savePassAndPlayGame({
@@ -539,6 +536,67 @@ export default function Home({ navigation }) {
         setTimeControlModalVisible(false);
         setPendingGameAction(null);
         setSelectedFriend(null);
+        setPendingTimeControl(null);
+    };
+
+    const handleMatchmakingModeSelect = async (mode) => {
+        setMatchmakingModeModalVisible(false);
+        setCreatingGame(true);
+
+        try {
+            if (mode === 'instant') {
+                // Log event for instant match
+                if (analytics) {
+                    analytics.logEvent('initiate_match_instant', {
+                        time_control: pendingTimeControl?.type,
+                    });
+                }
+
+                const result = await startSearching(pendingTimeControl);
+                if (result && !result.success && result.error) {
+                    showAlert('Cannot Join Matchmaking', result.error);
+                }
+            } else if (mode === 'correspondence') {
+                // Log event for correspondence match
+                if (analytics) {
+                    analytics.logEvent('initiate_match_correspondence', {
+                        time_control: pendingTimeControl?.type,
+                    });
+                }
+
+                // Try to find an existing correspondence invitation to match with
+                const matchResult = await findCorrespondenceMatch(pendingTimeControl);
+
+                if (matchResult.success) {
+                    // Successfully matched to an existing invitation
+                    showAlert(
+                        'Correspondence Match Found!',
+                        `You've been matched with ${matchResult.creatorName}. They'll be notified and have 24 hours to accept.`,
+                    );
+                } else if (matchResult.noMatches) {
+                    // No available invitations - create one!
+                    // This happens automatically as a fallback in the Cloud Function
+                    showAlert(
+                        'Correspondence Invitation Created',
+                        'Your invitation has been created. When another player selects Correspondence mode, they may be matched to your invitation. You\'ll be notified when someone wants to play!',
+                    );
+                }
+            }
+        } catch (error) {
+            console.error(`Failed to start ${mode} matchmaking:`, error);
+            showAlert('Error', `Failed to start ${mode} matchmaking. Please try again.`);
+        } finally {
+            setCreatingGame(false);
+            setPendingGameAction(null);
+            setPendingTimeControl(null);
+        }
+    };
+
+    const handleMatchmakingModeCancel = () => {
+        setMatchmakingModeModalVisible(false);
+        setPendingTimeControl(null);
+        // Optionally go back to time control selection
+        // setTimeControlModalVisible(true);
     };
 
     const handleDifficultySelect = async (difficulty) => {
@@ -736,6 +794,13 @@ export default function Home({ navigation }) {
                 visible={timeControlModalVisible}
                 onSelect={handleTimeControlSelect}
                 onCancel={handleTimeControlCancel}
+            />
+
+            <MatchmakingModeSelectionModal
+                visible={matchmakingModeModalVisible}
+                onSelectMode={handleMatchmakingModeSelect}
+                onCancel={handleMatchmakingModeCancel}
+                timeControl={pendingTimeControl}
             />
 
             <DifficultySelectionModal

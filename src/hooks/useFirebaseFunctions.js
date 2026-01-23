@@ -363,6 +363,63 @@ export const useFirebaseFunctions = () => {
         }
     };
 
+    // ==================== Correspondence Matchmaking Functions ====================
+
+    const createCorrespondenceInvite = async (timeControl = null) => {
+        try {
+            const callable = httpsCallable(functions, 'createCorrespondenceInvite');
+            const result = await callable({ timeControl, clientVersion: GAME_VERSION });
+            return result.data;
+        } catch (error) {
+            console.error('Error creating correspondence invite:', error);
+            throw error;
+        }
+    };
+
+    const cancelCorrespondenceInvite = async (inviteId) => {
+        try {
+            const callable = httpsCallable(functions, 'cancelCorrespondenceInvite');
+            const result = await callable({ inviteId });
+            return result.data;
+        } catch (error) {
+            console.error('Error canceling correspondence invite:', error);
+            throw error;
+        }
+    };
+
+    const acceptCorrespondenceInvite = async (inviteId) => {
+        try {
+            const callable = httpsCallable(functions, 'acceptCorrespondenceInvite');
+            const result = await callable({ inviteId });
+            return result.data;
+        } catch (error) {
+            console.error('Error accepting correspondence invite:', error);
+            throw error;
+        }
+    };
+
+    const declineCorrespondenceInvite = async (inviteId) => {
+        try {
+            const callable = httpsCallable(functions, 'declineCorrespondenceInvite');
+            const result = await callable({ inviteId });
+            return result.data;
+        } catch (error) {
+            console.error('Error declining correspondence invite:', error);
+            throw error;
+        }
+    };
+
+    const findCorrespondenceMatch = async (timeControl = null) => {
+        try {
+            const callable = httpsCallable(functions, 'findCorrespondenceMatch');
+            const result = await callable({ timeControl });
+            return result.data;
+        } catch (error) {
+            console.error('Error finding correspondence match:', error);
+            throw error;
+        }
+    };
+
     // ==================== Issues Functions ====================
 
     const submitIssue = async ({ subject, description, gameSnapshot }) => {
@@ -435,6 +492,12 @@ export const useFirebaseFunctions = () => {
         leaveMatchmaking,
         updateMatchmakingHeartbeat,
         getMatchmakingStatus,
+        // Correspondence Matchmaking
+        createCorrespondenceInvite,
+        cancelCorrespondenceInvite,
+        acceptCorrespondenceInvite,
+        declineCorrespondenceInvite,
+        findCorrespondenceMatch,
         // Issues
         submitIssue,
         // Admin/Setup

@@ -6,6 +6,7 @@ import './init.js';
 
 // Import route modules
 import * as computerUsers from './routes/computerUsers.js';
+import * as correspondenceMatchmaking from './routes/correspondenceMatchmaking.js';
 import * as friends from './routes/friends.js';
 import * as game from './routes/game.js';
 import * as issues from './routes/issues.js';
@@ -21,6 +22,7 @@ import { onPlayerJoinQueue } from './triggers/onPlayerJoinQueue.js';
 import { onUserCreate } from './triggers/onUserCreate.js';
 
 // Import scheduled function modules
+import { cleanupExpiredCorrespondenceInvites } from './scheduled/cleanupExpiredCorrespondenceInvites.js';
 import { cleanupStaleMatchmakingEntries } from './scheduled/cleanupStaleMatchmakingEntries.js';
 import { retryMatchmaking } from './scheduled/retryMatchmaking.js';
 
@@ -64,6 +66,13 @@ export const leaveMatchmaking = matchmaking.leaveMatchmaking;
 export const updateMatchmakingHeartbeat = matchmaking.updateMatchmakingHeartbeat;
 export const getMatchmakingStatus = matchmaking.getMatchmakingStatus;
 
+// ==================== Correspondence Matchmaking APIs ====================
+export const createCorrespondenceInvite = correspondenceMatchmaking.createCorrespondenceInvite;
+export const cancelCorrespondenceInvite = correspondenceMatchmaking.cancelCorrespondenceInvite;
+export const acceptCorrespondenceInvite = correspondenceMatchmaking.acceptCorrespondenceInvite;
+export const declineCorrespondenceInvite = correspondenceMatchmaking.declineCorrespondenceInvite;
+export const findCorrespondenceMatch = correspondenceMatchmaking.findCorrespondenceMatch;
+
 // ==================== Issues APIs ====================
 export const submitIssue = issues.submitIssue;
 
@@ -75,4 +84,9 @@ export const deleteComputerUsers = computerUsers.deleteComputerUsers;
 export { onFriendRequestCreate, onGameCreate, onGameMoveUpdate, onPlayerJoinQueue, onUserCreate };
 
 // ==================== Scheduled Functions ====================
-export { cleanupStaleMatchmakingEntries, retryMatchmaking };
+    export {
+        cleanupExpiredCorrespondenceInvites,
+        cleanupStaleMatchmakingEntries,
+        retryMatchmaking
+    };
+
