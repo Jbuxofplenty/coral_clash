@@ -2,7 +2,7 @@ import { HttpsError, onCall } from 'firebase-functions/v2/https';
 import { admin } from '../init.js';
 import { getAppCheckConfig, shouldEnforceAppCheck } from '../utils/appCheckConfig.js';
 import { validateClientVersion } from '../utils/gameVersion.js';
-import { serverTimestamp } from '../utils/helpers.js';
+import { initializeGameState, serverTimestamp } from '../utils/helpers.js';
 import { sendCorrespondenceMatchNotification } from '../utils/notifications.js';
 
 const db = admin.firestore();
@@ -232,6 +232,8 @@ async function acceptCorrespondenceInviteHandler(request) {
         currentTurn: creatorIsWhite ? userId : inviteData.matchedUserId,
         opponentType: 'pvp',
         timeControl: inviteData.timeControl,
+        moves: [],
+        gameState: initializeGameState(),
         createdAt: serverTimestamp(),
         lastMoveAt: serverTimestamp(),
     };
