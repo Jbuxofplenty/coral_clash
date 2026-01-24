@@ -1,6 +1,8 @@
+import { GAME_VERSION } from '@jbuxofplenty/coral-clash';
 import { HttpsError, onCall } from 'firebase-functions/v2/https';
 import { admin } from '../init.js';
 import { getAppCheckConfig, shouldEnforceAppCheck } from '../utils/appCheckConfig.js';
+import { createTimeoutTask } from '../utils/gameTasks.js';
 import { validateClientVersion } from '../utils/gameVersion.js';
 import { initializeGameState, serverTimestamp } from '../utils/helpers.js';
 import { sendCorrespondenceMatchNotification } from '../utils/notifications.js';
@@ -234,11 +236,30 @@ async function acceptCorrespondenceInviteHandler(request) {
         timeControl: inviteData.timeControl,
         moves: [],
         gameState: initializeGameState(),
+        version: GAME_VERSION,
         createdAt: serverTimestamp(),
-        lastMoveAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+        lastMoveTime: serverTimestamp(),
     };
 
+    // If time control is enabled, initialize time tracking
+    if (gameData.timeControl?.totalSeconds) {
+        gameData.timeRemaining = {
+            [gameData.creatorId]: gameData.timeControl.totalSeconds,
+            [gameData.opponentId]: gameData.timeControl.totalSeconds,
+        };
+    }
+
     const gameRef = await db.collection('games').add(gameData);
+
+    // Create timeout task for user's first move if time control is enabled
+    // The first player is always whitePlayerId
+    if (gameData.timeControl?.totalSeconds) {
+        const taskName = await createTimeoutTask(gameRef.id, gameData.timeControl.totalSeconds);
+        if (taskName) {
+            await gameRef.update({ pendingTimeoutTask: taskName });
+        }
+    }
 
     // Update invitation status
     await db.collection('correspondenceInvitations').doc(inviteId).update({
