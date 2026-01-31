@@ -35,7 +35,7 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
     const { user } = useAuth();
     const { isBoardFlipped } = useGamePreferences();
     const { showAlert } = useAlert();
-    const { requestGameReset, requestUndo, respondToUndoRequest, respondToResetRequest } =
+    const { requestGameReset, requestUndo, respondToUndoRequest, respondToResetRequest, remindOpponent } =
         useFirebaseFunctions();
     const [userColor, setUserColor] = useState(null);
     const [_creatorId, setCreatorId] = useState(null);
@@ -44,6 +44,7 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
     const [resetRequestData, setResetRequestData] = useState(null);
     const [currentMoveCount, setCurrentMoveCount] = useState(0); // Track move count from Firestore
     const [liveOpponentData, setLiveOpponentData] = useState(opponentData); // Track live opponent data
+    const [lastReminderSent, setLastReminderSent] = useState(null); // Track when user last sent a reminder
 
     // Listen to game document for user color, requests, and opponent snapshot data
     useEffect(() => {
@@ -110,6 +111,13 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
                             displayName: opponentDisplayName,
                             avatarKey: opponentAvatarKey,
                         });
+                    }
+
+                    // Track last reminder sent timestamp for this user
+                    if (gameData.lastReminderSent && gameData.lastReminderSent[user.uid]) {
+                        setLastReminderSent(gameData.lastReminderSent[user.uid]);
+                    } else {
+                        setLastReminderSent(null);
                     }
                 }
             },
@@ -198,6 +206,19 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
         } catch (error) {
             console.error('Error canceling reset request:', error);
             showAlert('Error', 'Failed to cancel reset request. Please try again.');
+        }
+    };
+
+    // Handler for reminding opponent
+    const handleRemindOpponent = async () => {
+        try {
+            await remindOpponent({ gameId });
+            showAlert('Success', 'Reminder sent to your opponent.');
+        } catch (error) {
+            console.error('Error sending reminder:', error);
+            // Extract error message from Firebase error
+            const errorMessage = error.message || 'Failed to send reminder. Please try again.';
+            showAlert('Error', errorMessage);
         }
     };
 
@@ -365,6 +386,84 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
                         </Text>
                     </View>
                 </TouchableOpacity>
+
+                {/* Remind Opponent */}
+                {(() => {
+                    // Calculate if reminder can be sent
+                    const canSendReminder = !isGameOver && gameData?.currentTurn !== user?.uid;
+                    let isReminderDisabled = !canSendReminder;
+                    let reminderSubtitle = 'Remind opponent to take their turn';
+
+                    // Check 24-hour cooldown
+                    if (canSendReminder && lastReminderSent) {
+                        const now = Date.now();
+                        const lastReminderTime = lastReminderSent.toDate
+                            ? lastReminderSent.toDate().getTime()
+                            : lastReminderSent;
+                        const timeSinceLastReminder = now - lastReminderTime;
+                        const twentyFourHours = 24 * 60 * 60 * 1000;
+
+                        if (timeSinceLastReminder < twentyFourHours) {
+                            isReminderDisabled = true;
+                            const hoursRemaining = Math.ceil(
+                                (twentyFourHours - timeSinceLastReminder) / (60 * 60 * 1000),
+                            );
+                            reminderSubtitle = `Available in ${hoursRemaining} hour(s)`;
+                        }
+                    }
+
+                    if (isGameOver) {
+                        reminderSubtitle = 'Game already ended';
+                    } else if (gameData?.currentTurn === user?.uid) {
+                        reminderSubtitle = "It's your turn";
+                    }
+
+                    return (
+                        <TouchableOpacity
+                            style={[
+                                styles.menuItem,
+                                {
+                                    borderBottomColor: colors.BORDER_COLOR,
+                                    opacity: isReminderDisabled ? 0.5 : 1,
+                                },
+                            ]}
+                            onPress={() => {
+                                closeMenu();
+                                // Wait for menu animation to complete
+                                setTimeout(() => handleRemindOpponent(), 300);
+                            }}
+                            disabled={isReminderDisabled}
+                            activeOpacity={0.7}
+                        >
+                            <Icon
+                                name='notifications'
+                                family='MaterialIcons'
+                                size={28}
+                                color={isReminderDisabled ? colors.MUTED : '#2196f3'}
+                            />
+                            <View style={styles.menuItemText}>
+                                <Text
+                                    style={[
+                                        styles.menuItemTitle,
+                                        {
+                                            color: isReminderDisabled ? colors.MUTED : colors.TEXT,
+                                        },
+                                    ]}
+                                >
+                                    Remind Opponent
+                                </Text>
+                                <Text
+                                    style={[
+                                        styles.menuItemSubtitle,
+                                        { color: colors.TEXT_SECONDARY },
+                                    ]}
+                                >
+                                    {reminderSubtitle}
+                                </Text>
+                            </View>
+                        </TouchableOpacity>
+                    );
+                })()}
             </>
         );
     };

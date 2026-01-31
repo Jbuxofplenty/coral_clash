@@ -217,6 +217,17 @@ export const useFirebaseFunctions = () => {
         }
     };
 
+    const remindOpponent = async ({ gameId }) => {
+        try {
+            const callable = httpsCallable(functions, 'remindOpponent');
+            const result = await callable({ gameId });
+            return result.data;
+        } catch (error) {
+            console.error('Error sending reminder:', error);
+            throw error;
+        }
+    };
+
     const makeComputerMove = async ({ gameId }) => {
         try {
             const callable = httpsCallable(functions, 'makeComputerMove');
@@ -509,6 +520,7 @@ export const useFirebaseFunctions = () => {
         respondToResetRequest,
         requestUndo,
         respondToUndoRequest,
+        remindOpponent,
         getActiveGames,
         getGameHistory,
         // Friends

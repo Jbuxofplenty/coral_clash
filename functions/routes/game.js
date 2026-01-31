@@ -36,7 +36,7 @@ import {
     sendUndoApprovedNotification,
     sendUndoCancelledNotification,
     sendUndoRejectedNotification,
-    sendUndoRequestNotification,
+    sendUndoRequestNotification
 } from '../utils/notifications.js';
 
 const db = admin.firestore();
@@ -2885,3 +2885,96 @@ export const respondToUndoRequest = onCall(getAppCheckConfig(), async (request) 
         throw new HttpsError('internal', error.message);
     }
 });
+
+/**
+ * Remind opponent to take their turn
+ * POST /api/game/remindOpponent
+ * Can only be used once per 24 hours per player per game
+ */
+export const remindOpponent = onCall(getAppCheckConfig(), async (request) => {
+    const { data, auth } = request;
+    try {
+        if (!auth) {
+            throw new HttpsError('unauthenticated', 'User must be authenticated');
+        }
+
+        const { gameId } = data;
+        const userId = auth.uid;
+
+        // Get game document
+        const gameDoc = await db.collection('games').doc(gameId).get();
+
+        if (!gameDoc.exists) {
+            throw new HttpsError('not-found', 'Game not found');
+        }
+
+        const gameData = gameDoc.data();
+
+        // Verify user is a player in this game
+        if (gameData.creatorId !== userId && gameData.opponentId !== userId) {
+            throw new HttpsError('permission-denied', 'Not a player in this game');
+        }
+
+        // Check if game is still active
+        if (gameData.status !== 'active') {
+            throw new HttpsError('failed-precondition', 'Game is not active');
+        }
+
+        // Check if it's the opponent's turn (can't remind if it's your turn)
+        if (gameData.currentTurn === userId) {
+            throw new HttpsError('failed-precondition', "It's your turn, cannot remind opponent");
+        }
+
+        // Check 24-hour cooldown
+        const lastReminderSent = gameData.lastReminderSent || {};
+        const lastReminderTimestamp = lastReminderSent[userId];
+
+        if (lastReminderTimestamp) {
+            const now = Date.now();
+            const lastReminderTime = lastReminderTimestamp.toDate
+                ? lastReminderTimestamp.toDate().getTime()
+                : lastReminderTimestamp;
+            const timeSinceLastReminder = now - lastReminderTime;
+            const twentyFourHours = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+
+            if (timeSinceLastReminder < twentyFourHours) {
+                const hoursRemaining = Math.ceil((twentyFourHours - timeSinceLastReminder) / (60 * 60 * 1000));
+                throw new HttpsError(
+                    'failed-precondition',
+                    `You can send another reminder in ${hoursRemaining} hour(s)`,
+                );
+            }
+        }
+
+        // Update last reminder timestamp
+        await db.collection('games').doc(gameId).update({
+            [`lastReminderSent.${userId}`]: serverTimestamp(),
+            updatedAt: serverTimestamp(),
+        });
+
+        // Get opponent ID
+        const opponentId = gameData.creatorId === userId ? gameData.opponentId : gameData.creatorId;
+
+        // Get user info for notification
+        const userDoc = await db.collection('users').doc(userId).get();
+        const userData = userDoc.exists ? userDoc.data() : {};
+        const userName = formatDisplayName(userData.displayName, userData.discriminator);
+
+        // Send push notification to opponent
+        await sendOpponentReminderNotification(opponentId, userId, userName, gameId).catch(
+            (error) => console.error('Error sending reminder notification:', error),
+        );
+
+        return {
+            success: true,
+            message: 'Reminder sent successfully',
+        };
+    } catch (error) {
+        console.error('Error sending reminder:', error);
+        if (error instanceof HttpsError) {
+            throw error;
+        }
+        throw new HttpsError('internal', error.message);
+    }
+});
+
