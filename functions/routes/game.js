@@ -30,6 +30,7 @@ import {
     sendGameAcceptedNotification,
     sendGameRequestNotification,
     sendOpponentMoveNotification,
+    sendOpponentReminderNotification,
     sendResetApprovedNotification,
     sendResetCancelledNotification,
     sendResetRejectedNotification,
