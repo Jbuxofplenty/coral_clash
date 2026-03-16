@@ -17,14 +17,21 @@ export const useGame = (options = {}) => {
     const { user } = useAuth();
     const { showAlert } = useAlert();
     const { checkVersion } = useVersion();
-    const { createGame, createComputerGame, respondToGameInvite, getActiveGames } =
-        useFirebaseFunctions();
+    const {
+        createGame,
+        createComputerGame,
+        respondToGameInvite,
+        getActiveGames,
+        acceptCorrespondenceInvite,
+        declineCorrespondenceInvite,
+    } = useFirebaseFunctions();
     const [loading, setLoading] = useState(true);
     const [sendingGameRequest, setSendingGameRequest] = useState(false);
     const [activeGames, setActiveGames] = useState([]);
     const previousGamesRef = useRef([]); // Use ref to avoid triggering re-renders
+    const correspondenceInvitesRef = useRef([]); // Track correspondence invites separatel
 
-    // Set up real-time Firestore listeners for active games
+    // Set up real-time Firestore listeners for active games and correspondence invites
     useEffect(() => {
         if (!user || !user.uid) {
             setActiveGames([]);
@@ -50,6 +57,33 @@ export const useGame = (options = {}) => {
             where('status', 'in', ['active', 'pending']),
         );
 
+        // Listen to correspondence invites where user is creator (Incoming Acceptance)
+        const correspondenceCreatorQuery = query(
+            collection(db, 'correspondenceInvitations'),
+            where('creatorId', '==', user.uid),
+            where('status', '==', 'matched'),
+        );
+
+        // Listen to correspondence invites where user is matched (Outgoing Request)
+        const correspondenceMatchedQuery = query(
+            collection(db, 'correspondenceInvitations'),
+            where('matchedUserId', '==', user.uid),
+            where('status', '==', 'matched'),
+        );
+
+        const mergeAndSetGames = () => {
+            const currentGameList = [...previousGamesRef.current];
+            const currentCorrespondences = [...correspondenceInvitesRef.current];
+            const merged = [...currentGameList, ...currentCorrespondences];
+            // Sort by createdAt desc to show newest first
+            merged.sort((a, b) => {
+                const timeA = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
+                const timeB = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
+                return timeB - timeA;
+            });
+            setActiveGames(merged);
+        };
+
         const activeCreatorUnsubscribe = onSnapshot(
             activeCreatorQuery,
             async (snapshot) => {
@@ -59,8 +93,9 @@ export const useGame = (options = {}) => {
                     try {
                         const result = await getActiveGames();
                         const games = result.games || [];
-                        setActiveGames(games);
                         previousGamesRef.current = games;
+                        // Correspondence invites will be merged by their own listeners
+                        mergeAndSetGames();
                         setLoading(false);
                     } catch (error) {
                         console.error('[useGame] Error in initial load:', error);
@@ -169,8 +204,8 @@ export const useGame = (options = {}) => {
                 }
 
                 if (hasChanges) {
-                    setActiveGames(updatedGames);
                     previousGamesRef.current = updatedGames;
+                    mergeAndSetGames();
                 }
             },
             (error) => {
@@ -284,8 +319,8 @@ export const useGame = (options = {}) => {
                 }
 
                 if (hasChanges) {
-                    setActiveGames(updatedGames);
                     previousGamesRef.current = updatedGames;
+                    mergeAndSetGames();
 
                     // Call onGameAccepted for games that were just accepted
                     if (onGameAccepted && changesWithAcceptedGame.length > 0) {
@@ -301,10 +336,141 @@ export const useGame = (options = {}) => {
             },
         );
 
+        // Helper to process correspondence updates
+        const updateCorrespondenceList = async (snapshot, isCreator) => {
+            let hasChanges = false;
+            let currentList = [...correspondenceInvitesRef.current];
+
+            // Filter out existing ones of this type to replace/update them
+            // We use a property 'role' to distinguish source: 'creator' or 'matcher'
+            const role = isCreator ? 'creator' : 'matcher';
+            
+            // Note: We don't filter out all by role immediately, we process changes
+            // But to keep it simple with async fetching, we might just rebuild the list from snapshots
+            // However, that might be inefficient. Let's process changes.
+
+            for (const change of snapshot.docChanges()) {
+                const inviteId = change.doc.id;
+                const data = change.doc.data();
+                
+                // Identify index
+                const idx = currentList.findIndex(i => i.id === inviteId);
+
+                if (change.type === 'removed') {
+                    if (idx !== -1) {
+                        currentList.splice(idx, 1);
+                        hasChanges = true;
+                    }
+                    continue;
+                }
+
+                // Prepare Game Object structure
+                // Logic:
+                // If I am Creator (isCreator=true): 
+                //   I need to ACCEPT. Treat me as 'opponentId' (Recipient). 
+                //   Creator: MatchedUser. Opponent: Me.
+                // If I am Matcher (isCreator=false):
+                //   I am WAITING. Treat me as 'creatorId'.
+                //   Creator: Me. Opponent: OriginalCreator. (Or logic in ActiveGamesCard: creator has waiting spinner)
+                
+                // Let's refine for ActiveGamesCard compatibility:
+                // ActiveGamesCard sees: `isRecipient = game.opponentId === user.uid`
+                // Recipient sees: Accept/Decline buttons.
+                
+                // Case 1: I am Creator (Incoming Request). Need buttons.
+                // So I must receive `opponentId` == Me.
+                // So `creatorId` = Matched User, `opponentId` = Me.
+                
+                // Case 2: I am Matcher (Outgoing Request). Need Spinner.
+                // ActiveGamesCard: `acceptingGameId` logic relies on state.
+                // It shows spinner if `status == pending`.
+                // It shows buttons if `isRecipient` is true.
+                // So I must ensure `isRecipient` is FALSE.
+                // So `opponentId` != Me.
+                // `creatorId` = Me, `opponentId` = Original Creator.
+                
+                let gameObj = {
+                    id: inviteId,
+                    status: 'pending', // Always pending for ActiveGamesCard to show controls
+                    timeControl: data.timeControl,
+                    createdAt: data.createdAt,
+                    correspondenceRole: role,
+                    isCorrespondence: true, // Flag for handle functions
+                };
+
+                if (isCreator) {
+                    // I created invite, but now I must accept match.
+                    // Fake it so I am the recipient.
+                    gameObj.opponentId = user.uid; // Me
+                    gameObj.creatorId = data.matchedUserId; // The matched user
+                    
+                    // Display info: "vs Matched User"
+                    // Fetch profile if needed
+                    const matchedUserId = data.matchedUserId;
+                    // Invite doc does not store matched user display name.
+                    const userDoc = await getDoc(doc(db, 'users', matchedUserId));
+                    const userData = userDoc.exists() ? userDoc.data() : {};
+                    const displayName = userData.displayName || 'Player';
+                    const avatarKey = userData.settings?.avatarKey || 'dolphin';
+
+                    gameObj.opponentDisplayName = displayName; // This is actually the "creator" name in this swapped view
+                    gameObj.opponentAvatarKey = avatarKey;
+                    
+                    // ActiveGamesCard login: `opponent = getOpponentData(game)`
+                    // `getOpponentData`: `opponentId = game.creatorId === user.uid ? game.opponentId : game.creatorId;`
+                    // Here: `creatorId` != user.uid (it's matched user).
+                    // So `opponentId` = `game.creatorId` = matched user.
+                    // So it will display Matched User. Correct.
+                    
+                    // We need to store displayName in a way that `getOpponentData` finds it.
+                    // `game.creatorDisplayName` (since creator is opponent here)
+                    gameObj.creatorDisplayName = displayName;
+                    gameObj.creatorAvatarKey = avatarKey;
+
+                } else {
+                    // I am Matcher (Outgoing).
+                    // `creatorId` = Me. `opponentId` = Original Creator.
+                    gameObj.creatorId = user.uid;
+                    gameObj.opponentId = data.creatorId;
+                    
+                    // Display info: "vs Original Creator"
+                    // Invite data has this!
+                    gameObj.opponentDisplayName = data.creatorDisplayName || 'Player';
+                    gameObj.opponentAvatarKey = data.creatorAvatarKey || 'dolphin';
+                }
+
+                if (idx !== -1) {
+                    currentList[idx] = gameObj;
+                } else {
+                    currentList.push(gameObj);
+                }
+                hasChanges = true;
+            }
+
+            if (hasChanges) {
+                correspondenceInvitesRef.current = currentList;
+                mergeAndSetGames();
+            }
+        };
+
+        const correspondenceCreatorUnsubscribe = onSnapshot(
+            correspondenceCreatorQuery,
+            (snapshot) => updateCorrespondenceList(snapshot, true),
+            (error) => console.error('Error in correspondence creator listener:', error)
+        );
+
+        const correspondenceMatchedUnsubscribe = onSnapshot(
+            correspondenceMatchedQuery,
+            (snapshot) => updateCorrespondenceList(snapshot, false),
+            (error) => console.error('Error in correspondence matched listener:', error)
+        );
+
         // Cleanup on unmount
         return () => {
             activeCreatorUnsubscribe();
             activeOpponentUnsubscribe();
+            correspondenceCreatorUnsubscribe();
+            correspondenceMatchedUnsubscribe();
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user, onGameAccepted, onGameInvite]); // Include callbacks to ensure latest are used
@@ -413,7 +579,15 @@ export const useGame = (options = {}) => {
             try {
                 setLoading(true);
 
-                const result = await respondToGameInvite(gameId, true);
+                // Check if this is a correspondence game
+                const game = activeGames.find((g) => g.id === gameId);
+                let result;
+
+                if (game?.isCorrespondence) {
+                    result = await acceptCorrespondenceInvite(gameId);
+                } else {
+                    result = await respondToGameInvite(gameId, true);
+                }
 
                 // Call success callback if provided
                 if (onSuccess) {
@@ -429,7 +603,7 @@ export const useGame = (options = {}) => {
                 setLoading(false);
             }
         },
-        [respondToGameInvite, showAlert],
+        [activeGames, respondToGameInvite, acceptCorrespondenceInvite, showAlert],
     );
 
     /**
@@ -442,7 +616,15 @@ export const useGame = (options = {}) => {
             try {
                 setLoading(true);
 
-                const result = await respondToGameInvite(gameId, false);
+                // Check if this is a correspondence game
+                const game = activeGames.find((g) => g.id === gameId);
+                let result;
+
+                if (game?.isCorrespondence) {
+                    result = await declineCorrespondenceInvite(gameId);
+                } else {
+                    result = await respondToGameInvite(gameId, false);
+                }
 
                 return result;
             } catch (error) {
@@ -453,7 +635,7 @@ export const useGame = (options = {}) => {
                 setLoading(false);
             }
         },
-        [respondToGameInvite, showAlert],
+        [activeGames, respondToGameInvite, declineCorrespondenceInvite, showAlert],
     );
 
     /**
@@ -467,13 +649,24 @@ export const useGame = (options = {}) => {
             const result = await getActiveGames();
             const games = result.games || [];
 
-            setActiveGames(games);
+            // Merge with local correspondence invites
+            const currentCorrespondences = [...correspondenceInvitesRef.current];
+            const merged = [...games, ...currentCorrespondences];
+            merged.sort((a, b) => {
+                const timeA = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
+                const timeB = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
+                return timeB - timeA;
+            });
 
-            return games;
+            setActiveGames(merged);
+
+            return merged;
         } catch (error) {
             console.error('[useGame] Error loading active games:', error);
-            setActiveGames([]);
-            return [];
+            // Even on error, try to keep correspondence invites?
+            // Or just reset. Safe to reset.
+            setActiveGames([...correspondenceInvitesRef.current]);
+            return [...correspondenceInvitesRef.current];
         } finally {
             setLoading(false);
         }

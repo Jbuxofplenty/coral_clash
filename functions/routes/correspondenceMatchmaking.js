@@ -1,11 +1,23 @@
+import { GAME_VERSION } from '@jbuxofplenty/coral-clash';
 import { HttpsError, onCall } from 'firebase-functions/v2/https';
 import { admin } from '../init.js';
-import { getAppCheckConfig } from '../utils/appCheckConfig.js';
+import { getAppCheckConfig, shouldEnforceAppCheck } from '../utils/appCheckConfig.js';
+import { createTimeoutTask } from '../utils/gameTasks.js';
 import { validateClientVersion } from '../utils/gameVersion.js';
-import { serverTimestamp } from '../utils/helpers.js';
+import { initializeGameState, serverTimestamp } from '../utils/helpers.js';
 import { sendCorrespondenceMatchNotification } from '../utils/notifications.js';
 
 const db = admin.firestore();
+
+/**
+ * Enforce App Check if enabled
+ * @param {import('firebase-functions/v2/https').CallableRequest} request 
+ */
+const enforceAppCheck = (request) => {
+    if (shouldEnforceAppCheck() && !request.app) {
+        throw new HttpsError('failed-precondition', 'The function must be called from an App Check verified app.');
+    }
+};
 
 /**
  * Handler for creating a correspondence invitation
@@ -65,6 +77,7 @@ async function createCorrespondenceInviteHandler(request) {
  */
 export const createCorrespondenceInvite = onCall(getAppCheckConfig(), async (request) => {
     try {
+        enforceAppCheck(request);
         return await createCorrespondenceInviteHandler(request);
     } catch (error) {
         console.error('Error creating correspondence invite:', error);
@@ -133,6 +146,7 @@ async function cancelCorrespondenceInviteHandler(request) {
  */
 export const cancelCorrespondenceInvite = onCall(getAppCheckConfig(), async (request) => {
     try {
+        enforceAppCheck(request);
         return await cancelCorrespondenceInviteHandler(request);
     } catch (error) {
         console.error('Error canceling correspondence invite:', error);
@@ -177,9 +191,9 @@ async function acceptCorrespondenceInviteHandler(request) {
         throw new HttpsError('failed-precondition', 'This invitation has expired');
     }
 
-    // Check if user is the matched user
-    if (inviteData.matchedUserId !== userId) {
-        throw new HttpsError('permission-denied', 'You are not matched to this invitation');
+    // Check if user is the invitation creator
+    if (inviteData.creatorId !== userId) {
+        throw new HttpsError('permission-denied', 'Only the invitation creator can accept a match');
     }
 
     // Check status
@@ -190,35 +204,62 @@ async function acceptCorrespondenceInviteHandler(request) {
         );
     }
 
-    // Get current user's data for game creation
+    // Get current user's data (Creator)
     const userDoc = await db.collection('users').doc(userId).get();
     if (!userDoc.exists) {
         throw new HttpsError('not-found', 'User profile not found');
     }
 
     const userData = userDoc.data();
+    
+    // Get matched user's data (for game creation)
+    const matchedUserDoc = await db.collection('users').doc(inviteData.matchedUserId).get();
+    const matchedUserData = matchedUserDoc.exists ? matchedUserDoc.data() : {};
+    const matchedUserName = matchedUserData.displayName || 'User';
 
     // Randomly assign colors
     const creatorIsWhite = Math.random() < 0.5;
 
     // Create the game
     const gameData = {
-        creatorId: inviteData.creatorId,
-        creatorDisplayName: inviteData.creatorDisplayName,
-        creatorAvatarKey: inviteData.creatorAvatarKey,
-        opponentId: userId,
-        opponentDisplayName: userData.displayName || 'User',
-        opponentAvatarKey: userData.settings?.avatarKey || 'dolphin',
-        whitePlayerId: creatorIsWhite ? inviteData.creatorId : userId,
-        blackPlayerId: creatorIsWhite ? userId : inviteData.creatorId,
+        creatorId: userId,
+        creatorDisplayName: userData.displayName || 'User',
+        creatorAvatarKey: userData.settings?.avatarKey || 'dolphin',
+        opponentId: inviteData.matchedUserId,
+        opponentDisplayName: matchedUserName,
+        opponentAvatarKey: matchedUserData.settings?.avatarKey || 'dolphin',
+        whitePlayerId: creatorIsWhite ? userId : inviteData.matchedUserId,
+        blackPlayerId: creatorIsWhite ? inviteData.matchedUserId : userId,
         status: 'active',
+        currentTurn: creatorIsWhite ? userId : inviteData.matchedUserId,
         opponentType: 'pvp',
         timeControl: inviteData.timeControl,
+        moves: [],
+        gameState: initializeGameState(),
+        version: GAME_VERSION,
         createdAt: serverTimestamp(),
-        lastMoveAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+        lastMoveTime: serverTimestamp(),
     };
 
+    // If time control is enabled, initialize time tracking
+    if (gameData.timeControl?.totalSeconds) {
+        gameData.timeRemaining = {
+            [gameData.creatorId]: gameData.timeControl.totalSeconds,
+            [gameData.opponentId]: gameData.timeControl.totalSeconds,
+        };
+    }
+
     const gameRef = await db.collection('games').add(gameData);
+
+    // Create timeout task for user's first move if time control is enabled
+    // The first player is always whitePlayerId
+    if (gameData.timeControl?.totalSeconds) {
+        const taskName = await createTimeoutTask(gameRef.id, gameData.timeControl.totalSeconds);
+        if (taskName) {
+            await gameRef.update({ pendingTimeoutTask: taskName });
+        }
+    }
 
     // Update invitation status
     await db.collection('correspondenceInvitations').doc(inviteId).update({
@@ -226,9 +267,9 @@ async function acceptCorrespondenceInviteHandler(request) {
         gameId: gameRef.id,
     });
 
-    // Notify creator that invitation was accepted
+    // Notify matched user that invitation was accepted
     await db.collection('notifications').add({
-        userId: inviteData.creatorId,
+        userId: inviteData.matchedUserId,
         type: 'correspondence_invite_accepted',
         gameId: gameRef.id,
         opponentId: userId,
@@ -251,6 +292,7 @@ async function acceptCorrespondenceInviteHandler(request) {
  */
 export const acceptCorrespondenceInvite = onCall(getAppCheckConfig(), async (request) => {
     try {
+        enforceAppCheck(request);
         return await acceptCorrespondenceInviteHandler(request);
     } catch (error) {
         console.error('Error accepting correspondence invite:', error);
@@ -287,9 +329,9 @@ async function declineCorrespondenceInviteHandler(request) {
 
     const inviteData = inviteDoc.data();
 
-    // Check if user is the matched user
-    if (inviteData.matchedUserId !== userId) {
-        throw new HttpsError('permission-denied', 'You are not matched to this invitation');
+    // Check if user is the invitation creator
+    if (inviteData.creatorId !== userId) {
+        throw new HttpsError('permission-denied', 'Only the invitation creator can decline a match');
     }
 
     // Check if invitation has expired
@@ -311,14 +353,16 @@ async function declineCorrespondenceInviteHandler(request) {
         });
     }
 
-    // Notify creator that invitation was declined
-    await db.collection('notifications').add({
-        userId: inviteData.creatorId,
-        type: 'correspondence_invite_declined',
-        declinedBy: userId,
-        read: false,
-        createdAt: serverTimestamp(),
-    });
+    // Notify matched user that match was declined
+    if (inviteData.matchedUserId) {
+        await db.collection('notifications').add({
+            userId: inviteData.matchedUserId,
+            type: 'correspondence_invite_declined',
+            declinedBy: userId,
+            read: false,
+            createdAt: serverTimestamp(),
+        });
+    }
 
     return {
         success: true,
@@ -332,6 +376,7 @@ async function declineCorrespondenceInviteHandler(request) {
  */
 export const declineCorrespondenceInvite = onCall(getAppCheckConfig(), async (request) => {
     try {
+        enforceAppCheck(request);
         return await declineCorrespondenceInviteHandler(request);
     } catch (error) {
         console.error('Error declining correspondence invite:', error);
@@ -460,7 +505,13 @@ async function findCorrespondenceMatchHandler(request) {
  * POST /api/correspondence/findMatch
  */
 export const findCorrespondenceMatch = onCall(getAppCheckConfig(), async (request) => {
+    console.log('[findCorrespondenceMatch] Called');
+    console.log('[findCorrespondenceMatch] Data keys:', Object.keys(request.data || {}));
+    console.log('[findCorrespondenceMatch] Auth presence:', !!request.auth);
+    console.log('[findCorrespondenceMatch] Auth uid:', request.auth?.uid);
+    console.log('[findCorrespondenceMatch] App presence:', !!request.app);
     try {
+        enforceAppCheck(request);
         return await findCorrespondenceMatchHandler(request);
     } catch (error) {
         console.error('Error finding correspondence match:', error);

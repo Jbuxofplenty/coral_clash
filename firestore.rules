@@ -81,7 +81,17 @@ service cloud.firestore {
             // Users can read queue count (list all entries)
             allow list: if isAuthenticated();
             
-            // Only Cloud Functions can write to matchmaking queue
+            allow write: if false;
+        }
+
+        // Correspondence Invitations
+        match /correspondenceInvitations/{inviteId} {
+            // Users can read invites they participate in (creator or matched)
+            allow read: if isAuthenticated() && 
+                (resource.data.creatorId == request.auth.uid || 
+                 resource.data.matchedUserId == request.auth.uid);
+            
+            // Only Cloud Functions can write
             allow write: if false;
         }
 

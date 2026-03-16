@@ -451,6 +451,26 @@ async function sendCorrespondenceMatchNotification(
     });
 }
 
+/**
+ * Send opponent reminder notification
+ * @param {string} recipientId - User receiving the notification
+ * @param {string} senderId - User sending the reminder
+ * @param {string} senderName - Name of the sender
+ * @param {string} gameId - Game ID
+ */
+async function sendOpponentReminderNotification(recipientId, senderId, senderName, gameId) {
+    return sendPushNotification(recipientId, {
+        title: 'Your Turn',
+        body: `${senderName} is reminding you to take your turn`,
+        data: {
+            type: 'reminder',
+            from: senderId,
+            fromName: senderName,
+            gameId: gameId,
+        },
+    });
+}
+
 export {
     sendCorrespondenceMatchNotification,
     sendFriendAcceptedNotification,
@@ -459,6 +479,7 @@ export {
     sendGameRequestNotification,
     sendMatchFoundNotification,
     sendOpponentMoveNotification,
+    sendOpponentReminderNotification,
     sendPushNotification,
     sendResetApprovedNotification,
     sendResetCancelledNotification,

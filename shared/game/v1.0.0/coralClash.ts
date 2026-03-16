@@ -1445,13 +1445,17 @@ export class CoralClash {
         return false;
     }
 
-    isAttacked(square: Square, attackedBy: Color) {
-        const squareIndex = Ox88[square];
+    isAttackedOx88(squareIndex: number, attackedBy: Color) {
         // Check if attacked by regular pieces (excluding whales)
         if (this._attacked(attackedBy, squareIndex)) return true;
         // Also check if attacked by whale
         if (this._whaleAttacked(attackedBy, squareIndex)) return true;
         return false;
+    }
+
+    isAttacked(square: Square, attackedBy: Color) {
+        const squareIndex = Ox88[square];
+        return this.isAttackedOx88(squareIndex, attackedBy);
     }
 
     isCheck() {

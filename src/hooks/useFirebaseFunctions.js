@@ -217,6 +217,17 @@ export const useFirebaseFunctions = () => {
         }
     };
 
+    const remindOpponent = async ({ gameId }) => {
+        try {
+            const callable = httpsCallable(functions, 'remindOpponent');
+            const result = await callable({ gameId });
+            return result.data;
+        } catch (error) {
+            console.error('Error sending reminder:', error);
+            throw error;
+        }
+    };
+
     const makeComputerMove = async ({ gameId }) => {
         try {
             const callable = httpsCallable(functions, 'makeComputerMove');
@@ -367,6 +378,12 @@ export const useFirebaseFunctions = () => {
 
     const createCorrespondenceInvite = async (timeControl = null) => {
         try {
+            // Ensure auth token is ready
+            const currentUser = auth.currentUser;
+            if (currentUser) {
+                await currentUser.getIdToken(true);
+            }
+
             const callable = httpsCallable(functions, 'createCorrespondenceInvite');
             const result = await callable({ timeControl, clientVersion: GAME_VERSION });
             return result.data;
@@ -378,6 +395,12 @@ export const useFirebaseFunctions = () => {
 
     const cancelCorrespondenceInvite = async (inviteId) => {
         try {
+            // Ensure auth token is ready
+            const currentUser = auth.currentUser;
+            if (currentUser) {
+                await currentUser.getIdToken(true);
+            }
+
             const callable = httpsCallable(functions, 'cancelCorrespondenceInvite');
             const result = await callable({ inviteId });
             return result.data;
@@ -389,6 +412,12 @@ export const useFirebaseFunctions = () => {
 
     const acceptCorrespondenceInvite = async (inviteId) => {
         try {
+            // Ensure auth token is ready
+            const currentUser = auth.currentUser;
+            if (currentUser) {
+                await currentUser.getIdToken(true);
+            }
+
             const callable = httpsCallable(functions, 'acceptCorrespondenceInvite');
             const result = await callable({ inviteId });
             return result.data;
@@ -400,6 +429,12 @@ export const useFirebaseFunctions = () => {
 
     const declineCorrespondenceInvite = async (inviteId) => {
         try {
+            // Ensure auth token is ready
+            const currentUser = auth.currentUser;
+            if (currentUser) {
+                await currentUser.getIdToken(true);
+            }
+
             const callable = httpsCallable(functions, 'declineCorrespondenceInvite');
             const result = await callable({ inviteId });
             return result.data;
@@ -411,6 +446,12 @@ export const useFirebaseFunctions = () => {
 
     const findCorrespondenceMatch = async (timeControl = null) => {
         try {
+            // Ensure auth token is ready
+            const currentUser = auth.currentUser;
+            if (currentUser) {
+                await currentUser.getIdToken(true);
+            }
+
             const callable = httpsCallable(functions, 'findCorrespondenceMatch');
             const result = await callable({ timeControl });
             return result.data;
@@ -479,6 +520,7 @@ export const useFirebaseFunctions = () => {
         respondToResetRequest,
         requestUndo,
         respondToUndoRequest,
+        remindOpponent,
         getActiveGames,
         getGameHistory,
         // Friends

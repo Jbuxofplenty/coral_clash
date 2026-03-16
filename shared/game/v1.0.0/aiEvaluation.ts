@@ -629,7 +629,6 @@ export function evaluatePosition(
         if (enemyWhalePositions) {
             const dist1 =
                 Math.abs((i >> 4) - (enemyWhalePositions[0] >> 4)) +
-                Math.abs((i & 7) - (enemyWhalePositions[1] >> 4)) +
                 Math.abs((i & 7) - (enemyWhalePositions[0] & 7));
             const dist2 =
                 Math.abs((i >> 4) - (enemyWhalePositions[1] >> 4)) +
@@ -639,9 +638,8 @@ export function evaluatePosition(
             }
         }
 
-        const sqAlgebraic = algebraic(i);
-        const isAttacked = game.isAttacked(sqAlgebraic, them);
-        const isDefended = game.isAttacked(sqAlgebraic, color);
+        const isAttacked = game.isAttackedOx88(i, them);
+        const isDefended = game.isAttackedOx88(i, color);
 
         if (isAttacked) {
             if (!isDefended) {
@@ -824,7 +822,7 @@ export function alphaBeta(
     timeControl: TimeControl | null = null,
     lastMove: LastMoveInfo | null = null,
     transpositionTable: TranspositionTable | null = null,
-    isRootLevel: boolean = false, // Track if we're at root level
+    ply: number = 0, // Track the current depth from the root
 ): AlphaBetaResult {
     let nodesEvaluated = 1;
 
@@ -951,7 +949,8 @@ export function alphaBeta(
     const isEarlyGame = pieceCount >= 24;
     const isMiddleGame = pieceCount >= 16 && pieceCount < 24;
     
-    if (isEarlyGame || isMiddleGame) {
+    // Only apply pruning deep in the tree (ply >= 2) so first 2 moves of any line are fully examined
+    if (ply >= 2 && (isEarlyGame || isMiddleGame)) {
         // Define high-value pieces: hunters (900), gatherers (850), whales (infinite)
         const HIGH_VALUE_THRESHOLD = 800; // Dolphins and above
         const MEDIUM_VALUE_THRESHOLD = 400; // Turtles and octopi
@@ -1043,7 +1042,7 @@ export function alphaBeta(
                 timeControl,
                 null,
                 transpositionTable,
-                false,
+                ply + 1,
             );
 
             game.undoInternal();
@@ -1060,7 +1059,7 @@ export function alphaBeta(
 
             let moveScore = result.score;
             // Apply reversing move penalty at root level
-            if (isRootLevel && lastMove !== null && isReversingMove(move, lastMove)) {
+            if (ply === 0 && lastMove !== null && isReversingMove(move, lastMove)) {
                 moveScore += MOVE_PENALTIES.reversingMove;
             }
 
@@ -1162,7 +1161,7 @@ export function findBestMove(
         timeControl,
         lastMove,
         transpositionTable,
-        true, // This is the root level
+        0, // This is the root level
     );
 
     // Convert InternalMove to pretty move format if called with a snapshot for backwards compatibility
@@ -1379,7 +1378,7 @@ export function findBestMoveIterativeDeepening(
                 timeControl,
                 null,
                 transpositionTable,
-                false
+                1 // iter loops over root moves, so ply is 1 here
             );
 
             game.undoInternal();

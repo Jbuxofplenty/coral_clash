@@ -82,7 +82,7 @@ export default function PlayWithFriendCard({
 
     const handleTextFriend = async () => {
         try {
-            const message = `Let's play Coral Clash! 🦀\n\nDownload here:\niOS: ${IOS_STORE_URL}\nAndroid: ${ANDROID_STORE_URL}`;
+            const message = `Let's play Coral Clash! 🦀\n\nDownload here:\niOS: ${IOS_STORE_URL}\n\nAndroid: ${ANDROID_STORE_URL}`;
             await Share.share({
                 message,
             });

@@ -1,4 +1,4 @@
-import { CloudTasksClient } from '@google-cloud/tasks';
+
 import {
     CoralClash,
     GAME_VERSION,
@@ -8,6 +8,7 @@ import {
     createGameSnapshot,
     restoreGameFromSnapshot
 } from '@jbuxofplenty/coral-clash';
+import { region } from 'firebase-functions/v1';
 import { HttpsError, onCall, onRequest } from 'firebase-functions/v2/https';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
@@ -15,6 +16,8 @@ import { Worker } from 'worker_threads';
 import { admin } from '../init.js';
 import { getAppCheckConfig, getFunctionRegion } from '../utils/appCheckConfig.js';
 import { getComputerUserData, isComputerUser } from '../utils/computerUsers.js';
+import { cancelPendingTimeoutTask, createTimeoutTask } from '../utils/gameTasks.js';
+
 import { getGameResult, validateMove } from '../utils/gameValidator.js';
 import { validateClientVersion } from '../utils/gameVersion.js';
 import {
@@ -27,13 +30,14 @@ import {
     sendGameAcceptedNotification,
     sendGameRequestNotification,
     sendOpponentMoveNotification,
+    sendOpponentReminderNotification,
     sendResetApprovedNotification,
     sendResetCancelledNotification,
     sendResetRejectedNotification,
     sendUndoApprovedNotification,
     sendUndoCancelledNotification,
     sendUndoRejectedNotification,
-    sendUndoRequestNotification,
+    sendUndoRequestNotification
 } from '../utils/notifications.js';
 
 const db = admin.firestore();
@@ -1515,100 +1519,11 @@ export async function makeComputerMoveHelper(gameId, gameData = null) {
     }
 }
 
+
 /**
  * Check if current player's time has expired and end game if so
  * Called when loading a game to ensure time limits are enforced
  */
-/**
- * Cancel pending timeout task for a game
- * @param {string} gameId - The game ID
- * @param {string} taskName - The task name to cancel
- * @param {boolean} skipFirestoreUpdate - If true, skip updating Firestore (caller will handle it)
- */
-async function cancelPendingTimeoutTask(gameId, taskName, skipFirestoreUpdate = false) {
-    // Skip in emulator
-    if (process.env.FUNCTIONS_EMULATOR === 'true' || !taskName) {
-        return;
-    }
-
-    try {
-        const client = new CloudTasksClient();
-
-        await client.deleteTask({ name: taskName });
-        console.log(`Cancelled timeout task for game ${gameId}`);
-
-        // Clear the task name from Firestore (unless caller will handle it)
-        if (!skipFirestoreUpdate) {
-            await db.collection('games').doc(gameId).update({
-                pendingTimeoutTask: null,
-            });
-        }
-    } catch (error) {
-        // Task might already be executed or not exist, which is fine
-        console.log(`Could not cancel task for game ${gameId}:`, error.message);
-    }
-}
-
-/**
- * Create a Cloud Task to handle time expiration for the current player
- * @param {string} gameId - The game ID
- * @param {number} timeRemainingSeconds - Seconds remaining for the current player
- * @returns {Promise<string|null>} Task name or null if skipped
- */
-async function createTimeoutTask(gameId, timeRemainingSeconds) {
-    // Skip in emulator - timeouts won't work properly in local development
-    if (process.env.FUNCTIONS_EMULATOR === 'true') {
-        console.log(`[Emulator] Skipping timeout task creation for game ${gameId}`);
-        return null;
-    }
-
-    // Don't create task if time is unlimited or already expired
-    if (!timeRemainingSeconds || timeRemainingSeconds <= 0) {
-        return null;
-    }
-
-    try {
-        const client = new CloudTasksClient();
-        const project = process.env.GCLOUD_PROJECT;
-        const location = process.env.FUNCTION_REGION || 'us-central1';
-        const queue = 'game-timeouts'; // You'll need to create this queue in GCP
-
-        // Task should execute when time expires
-        const scheduleTime = new Date(Date.now() + timeRemainingSeconds * 1000);
-
-        const queuePath = client.queuePath(project, location, queue);
-
-        // Get the function URL - adjust based on your deployment
-        const functionUrl = `https://${location}-${project}.cloudfunctions.net/handleTimeExpiration`;
-
-        const task = {
-            httpRequest: {
-                httpMethod: 'POST',
-                url: functionUrl,
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: Buffer.from(JSON.stringify({ gameId })).toString('base64'),
-                oidcToken: {
-                    serviceAccountEmail: `${project}@appspot.gserviceaccount.com`,
-                },
-            },
-            scheduleTime: {
-                seconds: Math.floor(scheduleTime.getTime() / 1000),
-            },
-        };
-
-        const [response] = await client.createTask({ parent: queuePath, task });
-        console.log(`Created timeout task for game ${gameId}: ${response.name}`);
-
-        return response.name;
-    } catch (error) {
-        console.error(`Error creating timeout task for game ${gameId}:`, error);
-        // Don't fail the move if task creation fails
-        return null;
-    }
-}
-
 async function checkAndHandleTimeExpiration(gameId, gameData) {
     // Only check if game has time control and is active
     if (
@@ -1818,8 +1733,13 @@ export const handleTimeExpiration = onRequest(
  * Resign from a game
  * POST /api/game/resign
  */
-export const resignGame = onCall(getAppCheckConfig(), async (request) => {
-    const { data, auth } = request;
+export const resignGame = region('us-central1').https.onCall(async (data, context) => {
+    // Check App Check
+    if (getAppCheckConfig().enforceAppCheck && !context.app) {
+        throw new HttpsError('failed-precondition', 'The function must be called from an App Check verified app.');
+    }
+
+    const auth = context.auth;
     try {
         console.log('[resignGame] Starting resignation process');
         if (!auth) {
@@ -1865,11 +1785,18 @@ export const resignGame = onCall(getAppCheckConfig(), async (request) => {
         console.log('[resignGame] Winner:', winner, 'Resigned color:', resignedColor);
 
         // Update the game state with resignation
-        const currentGameState = gameData.gameState || { fen: gameData.fen };
+        const currentGameState = gameData.gameState || { fen: gameData.fen || null };
         const updatedGameState = {
             ...currentGameState,
             resigned: resignedColor,
         };
+        
+        // Sanitize to remove undefined values which Firestore rejects
+        Object.keys(updatedGameState).forEach(key => {
+            if (updatedGameState[key] === undefined) {
+                updatedGameState[key] = null;
+            }
+        });
 
         console.log('[resignGame] Updating game document to completed status');
 
@@ -2959,3 +2886,96 @@ export const respondToUndoRequest = onCall(getAppCheckConfig(), async (request) 
         throw new HttpsError('internal', error.message);
     }
 });
+
+/**
+ * Remind opponent to take their turn
+ * POST /api/game/remindOpponent
+ * Can only be used once per 24 hours per player per game
+ */
+export const remindOpponent = onCall(getAppCheckConfig(), async (request) => {
+    const { data, auth } = request;
+    try {
+        if (!auth) {
+            throw new HttpsError('unauthenticated', 'User must be authenticated');
+        }
+
+        const { gameId } = data;
+        const userId = auth.uid;
+
+        // Get game document
+        const gameDoc = await db.collection('games').doc(gameId).get();
+
+        if (!gameDoc.exists) {
+            throw new HttpsError('not-found', 'Game not found');
+        }
+
+        const gameData = gameDoc.data();
+
+        // Verify user is a player in this game
+        if (gameData.creatorId !== userId && gameData.opponentId !== userId) {
+            throw new HttpsError('permission-denied', 'Not a player in this game');
+        }
+
+        // Check if game is still active
+        if (gameData.status !== 'active') {
+            throw new HttpsError('failed-precondition', 'Game is not active');
+        }
+
+        // Check if it's the opponent's turn (can't remind if it's your turn)
+        if (gameData.currentTurn === userId) {
+            throw new HttpsError('failed-precondition', "It's your turn, cannot remind opponent");
+        }
+
+        // Check 24-hour cooldown
+        const lastReminderSent = gameData.lastReminderSent || {};
+        const lastReminderTimestamp = lastReminderSent[userId];
+
+        if (lastReminderTimestamp) {
+            const now = Date.now();
+            const lastReminderTime = lastReminderTimestamp.toDate
+                ? lastReminderTimestamp.toDate().getTime()
+                : lastReminderTimestamp;
+            const timeSinceLastReminder = now - lastReminderTime;
+            const twentyFourHours = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+
+            if (timeSinceLastReminder < twentyFourHours) {
+                const hoursRemaining = Math.ceil((twentyFourHours - timeSinceLastReminder) / (60 * 60 * 1000));
+                throw new HttpsError(
+                    'failed-precondition',
+                    `You can send another reminder in ${hoursRemaining} hour(s)`,
+                );
+            }
+        }
+
+        // Update last reminder timestamp
+        await db.collection('games').doc(gameId).update({
+            [`lastReminderSent.${userId}`]: serverTimestamp(),
+            updatedAt: serverTimestamp(),
+        });
+
+        // Get opponent ID
+        const opponentId = gameData.creatorId === userId ? gameData.opponentId : gameData.creatorId;
+
+        // Get user info for notification
+        const userDoc = await db.collection('users').doc(userId).get();
+        const userData = userDoc.exists ? userDoc.data() : {};
+        const userName = formatDisplayName(userData.displayName, userData.discriminator);
+
+        // Send push notification to opponent
+        await sendOpponentReminderNotification(opponentId, userId, userName, gameId).catch(
+            (error) => console.error('Error sending reminder notification:', error),
+        );
+
+        return {
+            success: true,
+            message: 'Reminder sent successfully',
+        };
+    } catch (error) {
+        console.error('Error sending reminder:', error);
+        if (error instanceof HttpsError) {
+            throw error;
+        }
+        throw new HttpsError('internal', error.message);
+    }
+});
+

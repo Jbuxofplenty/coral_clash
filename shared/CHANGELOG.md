@@ -1,3 +1,30 @@
+# [2.8.0](https://github.com/Jbuxofplenty/coral_clash/compare/v2.7.0...v2.8.0) (2026-03-16)
+
+
+### Bug Fixes
+
+* **ci:** use latest Xcode SDK version for iOS builds ([6f2ca05](https://github.com/Jbuxofplenty/coral_clash/commit/6f2ca05b6939a02b31c6e258ee24baa6681085fa))
+* **client:** add token refresh to correspondence functions ([28f0a64](https://github.com/Jbuxofplenty/coral_clash/commit/28f0a647b4bbf7caaefc7e492486d0078bff031d))
+* **server:** add missing import for remindOpponent notification ([266c0d2](https://github.com/Jbuxofplenty/coral_clash/commit/266c0d2aba7c95639be9c12533e990a5e0aaa54a))
+* **server:** Downgrade correspondence functions to v1 and add missing index ([03ba40f](https://github.com/Jbuxofplenty/coral_clash/commit/03ba40f186696ee2090f2b019f2759821d25f2d4))
+* **server:** Downgrade resignGame to v1 and sanitize undefined values ([72af10e](https://github.com/Jbuxofplenty/coral_clash/commit/72af10e52df75badb5150ea8b71cad5c91c7496d))
+* **server:** fix permission logic for accept/decline correspondence invites ([a90f4fd](https://github.com/Jbuxofplenty/coral_clash/commit/a90f4fd198e0af13637498971ec0932dddc1f28f))
+* **server:** implement full parity for correspondence games (timeouts, versioning) ([2dd1dee](https://github.com/Jbuxofplenty/coral_clash/commit/2dd1deeab02a0ae9306bdb13da7d98a3116df3de))
+* **server:** initialize game state in correspondence games ([79ec586](https://github.com/Jbuxofplenty/coral_clash/commit/79ec58663bae1dc4206bc0c8d1550c7c6e3a3a36))
+* **server:** regenerate functions yarn.lock to resolve EISDIR error ([2fcb75a](https://github.com/Jbuxofplenty/coral_clash/commit/2fcb75af97226517d6cb53f13186fca29afed023))
+* **shared:** reduce AI dolphin sacrifice test depth/timeout for CI ([56ff7c3](https://github.com/Jbuxofplenty/coral_clash/commit/56ff7c3774bd4cc9480cbbc8c2b8d044eccf62eb))
+
+
+### Features
+
+* **client:** add newline for invite friend ([f898794](https://github.com/Jbuxofplenty/coral_clash/commit/f8987942f2a2d7bbe4962fc819abec1999ea0c25))
+* **client:** add opponent reminder feature with 24-hour cooldown ([680bb8a](https://github.com/Jbuxofplenty/coral_clash/commit/680bb8a91955fab94bf268a748bae69c3a000237))
+* **client:** adjust matchmaking mode selection modal UI and improve error logging ([bbaabad](https://github.com/Jbuxofplenty/coral_clash/commit/bbaabadbcff497520f7f2ffc49f3bdfb5e3f49d7))
+* **client:** implement correspondence matchmaking with two-button flow and push notifications ([522d015](https://github.com/Jbuxofplenty/coral_clash/commit/522d01550e7d49b9552458c9d14b2ac2d9abf444))
+* **client:** show correspondence in smaller font ([09bac53](https://github.com/Jbuxofplenty/coral_clash/commit/09bac53dfcd0cacbb1fa1dcae16eedab3add652c))
+* **client:** show correspondence invites in active games list ([0f8db61](https://github.com/Jbuxofplenty/coral_clash/commit/0f8db61d1407474a392c597f25905620e3df2f43))
+* **shared:** optimize ai evaluation performance and refine prune logic ([1a7ed42](https://github.com/Jbuxofplenty/coral_clash/commit/1a7ed42184c82c1abfa25c065ec04b3d162dfed3))
+
 # [2.7.0](https://github.com/Jbuxofplenty/coral_clash/compare/v2.6.1...v2.7.0) (2026-01-21)
 
 

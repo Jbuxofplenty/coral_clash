@@ -1,6 +1,6 @@
 {
     "name": "coral-clash",
-    "version": "1.0.8",
+    "version": "1.0.9",
     "description": "Coral Clash Board Game",
     "main": "node_modules/expo/AppEntry.js",
     "private": true,
@@ -55,7 +55,7 @@
         ]
     },
     "dependencies": {
-        "@jbuxofplenty/coral-clash": "^2.7.0",
+        "@jbuxofplenty/coral-clash": "^2.8.0",
         "@react-native-async-storage/async-storage": "2.2.0",
         "@react-native-firebase/analytics": "^23.5.0",
         "@react-native-firebase/app": "^23.5.0",
