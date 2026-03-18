@@ -4,6 +4,7 @@ import { Block, Text } from 'galio-framework';
 import React from 'react';
 import { StyleSheet, View, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { Avatar } from '../components';
 import { useAuth, useTheme } from '../contexts';
 
@@ -17,6 +18,7 @@ export {
 
 function CustomDrawerContent(props) {
     const insets = useSafeAreaInsets();
+    const { t } = useTranslation();
     const { user } = useAuth();
     const { colors } = useTheme();
     const { height } = useWindowDimensions();
@@ -76,10 +78,10 @@ function CustomDrawerContent(props) {
                         color='white'
                         style={[styles.title, isCompact && styles.titleCompact]}
                     >
-                        Coral Clash
+                        {t('navigation.appTitle')}
                     </Text>
                     <Text size={isCompact ? 11 : 14} color='white' style={styles.subtitle}>
-                        Ocean Strategy Game
+                        {t('navigation.appSubtitle')}
                     </Text>
                 </Block>
 

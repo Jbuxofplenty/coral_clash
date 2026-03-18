@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { moderateScale, verticalScale } from 'react-native-size-matters';
+import { useTranslation } from 'react-i18next';
 
 import { Avatar, Icon, LoadingScreen, TimeControlModal } from '../components';
 import { useTheme } from '../contexts';
@@ -32,6 +33,7 @@ const responsiveScale = (size, maxScale = 1.3) => {
 };
 
 export default function Friends({ navigation: _navigation }) {
+    const { t } = useTranslation();
     const { colors, isDarkMode: _isDarkMode } = useTheme();
     const { sendGameRequest, sendingGameRequest } = useGame();
     const { height } = useWindowDimensions();
@@ -259,13 +261,13 @@ export default function Friends({ navigation: _navigation }) {
                             color={colors.TEXT}
                             style={{ marginBottom: 16 }}
                         >
-                            Add Friend
+                            {t('friends.addFriend')}
                         </Text>
                         <Block>
                             <Block row middle>
                                 <Block flex style={{ marginRight: 12 }}>
                                     <TextInput
-                                        placeholder='Search by username'
+                                        placeholder={t('friends.searchPlaceholder')}
                                         placeholderTextColor={colors.PLACEHOLDER}
                                         value={searchQuery}
                                         onChangeText={handleSearch}
@@ -314,7 +316,7 @@ export default function Friends({ navigation: _navigation }) {
                                                 color={colors.TEXT_SECONDARY}
                                                 center
                                             >
-                                                No users found
+                                                {t('friends.noUsersFound')}
                                             </Text>
                                         </Block>
                                     ) : (
@@ -364,7 +366,7 @@ export default function Friends({ navigation: _navigation }) {
                                                                 color={colors.WARNING}
                                                                 style={{ marginLeft: 8 }}
                                                             >
-                                                                Pending
+                                                                {t('friends.pending')}
                                                             </Text>
                                                         ) : isThisUserSending ? (
                                                             <ActivityIndicator
@@ -399,7 +401,7 @@ export default function Friends({ navigation: _navigation }) {
                                 color={colors.TEXT}
                                 style={{ marginBottom: 12, paddingHorizontal: 4 }}
                             >
-                                Incoming Requests ({incomingRequests.length})
+                                {t('friends.incomingRequests')} ({incomingRequests.length})
                             </Text>
                             <Block style={styles.friendsList}>
                                 {incomingRequests.map((request) => {
@@ -545,7 +547,7 @@ export default function Friends({ navigation: _navigation }) {
                                 color={colors.TEXT}
                                 style={{ marginBottom: 12, paddingHorizontal: 4 }}
                             >
-                                Sent Requests ({outgoingRequests.length})
+                                {t('friends.sentRequests')} ({outgoingRequests.length})
                             </Text>
                             <Block style={styles.friendsList}>
                                 {outgoingRequests.map((request) => {
@@ -638,7 +640,7 @@ export default function Friends({ navigation: _navigation }) {
                             color={colors.TEXT}
                             style={{ marginBottom: 12, paddingHorizontal: 4 }}
                         >
-                            My Friends ({sortedFriends.length})
+                            {t('friends.myFriends')} ({sortedFriends.length})
                         </Text>
                         {sortedFriends.length === 0 ? (
                             <Block
@@ -676,7 +678,7 @@ export default function Friends({ navigation: _navigation }) {
                                     color={colors.TEXT}
                                     style={{ marginBottom: 8 }}
                                 >
-                                    No Friends Yet
+                                    {t('friends.noFriendsYet')}
                                 </Text>
                                 <Text
                                     size={responsiveScale(14, 1.2)}
@@ -684,7 +686,7 @@ export default function Friends({ navigation: _navigation }) {
                                     center
                                     style={{ maxWidth: 240 }}
                                 >
-                                    Add friends by username above to start playing together!
+                                    {t('friends.noFriendsHint')}
                                 </Text>
                             </Block>
                         ) : (

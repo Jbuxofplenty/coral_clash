@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { collection, db, doc, getDoc, onSnapshot, query, where } from '../config/firebase';
 import { useAlert, useAuth, useVersion } from '../contexts';
 import { useFirebaseFunctions } from './useFirebaseFunctions';
@@ -14,6 +15,7 @@ import { useFirebaseFunctions } from './useFirebaseFunctions';
  */
 export const useGame = (options = {}) => {
     const { onGameAccepted, onGameInvite } = options;
+    const { t } = useTranslation();
     const { user } = useAuth();
     const { showAlert } = useAlert();
     const { checkVersion } = useVersion();
@@ -518,14 +520,14 @@ export const useGame = (options = {}) => {
                     );
                     throw error;
                 } else {
-                    showAlert('Error', error.message || 'Failed to send game request');
+                    showAlert(t('hooks.game.errorTitle'), error.message || t('hooks.game.errorLoadGame'));
                     throw error;
                 }
             } finally {
                 setSendingGameRequest(false);
             }
         },
-        [createGame, showAlert, checkVersion],
+        [createGame, showAlert, checkVersion, t],
     );
 
     /**
@@ -559,13 +561,13 @@ export const useGame = (options = {}) => {
                 return result;
             } catch (error) {
                 console.error('Error starting computer game:', error);
-                showAlert('Error', error.message || 'Failed to start computer game');
+                showAlert(t('hooks.game.errorTitle'), error.message || t('hooks.game.errorLoadGame'));
                 throw error;
             } finally {
                 setLoading(false);
             }
         },
-        [createComputerGame, user, showAlert, checkVersion],
+        [createComputerGame, user, showAlert, checkVersion, t],
     );
 
     /**
@@ -597,13 +599,13 @@ export const useGame = (options = {}) => {
                 return result;
             } catch (error) {
                 console.error('Error accepting game invite:', error);
-                showAlert('Error', 'Failed to accept game invitation');
+                showAlert(t('hooks.game.errorTitle'), t('hooks.game.errorLoadGame'));
                 throw error;
             } finally {
                 setLoading(false);
             }
         },
-        [activeGames, respondToGameInvite, acceptCorrespondenceInvite, showAlert],
+        [activeGames, respondToGameInvite, acceptCorrespondenceInvite, showAlert, t],
     );
 
     /**
@@ -629,13 +631,13 @@ export const useGame = (options = {}) => {
                 return result;
             } catch (error) {
                 console.error('Error declining game invite:', error);
-                showAlert('Error', 'Failed to decline game invitation');
+                showAlert(t('hooks.game.errorTitle'), t('hooks.game.errorLoadGame'));
                 throw error;
             } finally {
                 setLoading(false);
             }
         },
-        [activeGames, respondToGameInvite, declineCorrespondenceInvite, showAlert],
+        [activeGames, respondToGameInvite, declineCorrespondenceInvite, showAlert, t],
     );
 
     /**

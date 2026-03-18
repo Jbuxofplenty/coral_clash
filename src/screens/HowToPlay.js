@@ -3,6 +3,7 @@ import { Block, Text, theme } from 'galio-framework';
 import React, { useEffect, useState } from 'react';
 import { Dimensions, ScrollView, StyleSheet, View } from 'react-native';
 import { moderateScale } from 'react-native-size-matters';
+import { useTranslation } from 'react-i18next';
 import ExampleLink, { loadViewedExamples, markExampleViewed } from '../components/ExampleLink';
 import { useTheme } from '../contexts';
 
@@ -10,6 +11,7 @@ const { width, height } = Dimensions.get('screen');
 
 export default function HowToPlay({ navigation }) {
     const { colors } = useTheme();
+    const { t } = useTranslation();
     const [viewedExamples, setViewedExamples] = useState([]);
 
     useEffect(() => {
@@ -38,39 +40,39 @@ export default function HowToPlay({ navigation }) {
             >
                 <Block style={[styles.card, { backgroundColor: colors.CARD_BACKGROUND }]}>
                     <Text h5 bold style={[styles.heading, { color: colors.PRIMARY }]}>
-                        Objective
+                        {t('howToPlay.objective.title')}
                     </Text>
                     <Text style={[styles.text, { color: colors.TEXT }]}>
-                        To win Coral Clash, complete one of these goals:
+                        {t('howToPlay.objective.intro')}
                     </Text>
                     <View style={styles.bulletSection}>
                         <Text style={[styles.bulletPoint, { color: colors.TEXT }]}>
                             •{' '}
                             <Text bold style={{ color: colors.TEXT }}>
-                                Checkmate
+                                {t('howToPlay.objective.checkmate')}
                             </Text>{' '}
-                            your opponent's Whale (when the Whale is in{' '}
+                            {t('howToPlay.objective.checkmateDesc')}{' '}
                             <Text bold style={{ color: colors.TEXT }}>
-                                check
+                                {t('howToPlay.objective.check')}
                             </Text>{' '}
-                            and cannot escape)
+                            {t('howToPlay.objective.checkmateDescEnd')}
                         </Text>
                         <Text style={[styles.bulletPoint, { color: colors.TEXT }]}>
-                            • Control the{' '}
+                            • {t('howToPlay.objective.coralControlDesc')}{' '}
                             <Text bold style={{ color: colors.TEXT }}>
-                                most area with Coral
+                                {t('howToPlay.objective.coralControl')}
                             </Text>{' '}
-                            when:
+                            {t('howToPlay.objective.coralControlWhen')}
                         </Text>
                         <View style={styles.subBulletSection}>
                             <Text style={[styles.subBullet, { color: colors.TEXT }]}>
-                                - A player has placed all their Coral
+                                - {t('howToPlay.objective.coralPlaced')}
                             </Text>
                             <Text style={[styles.subBullet, { color: colors.TEXT }]}>
-                                - A player only has their Whale remaining
+                                - {t('howToPlay.objective.whaleRemaining')}
                             </Text>
                             <Text style={[styles.subBullet, { color: colors.TEXT }]}>
-                                - A Crab or Octopus reaches the opponent's back row
+                                - {t('howToPlay.objective.backRowReached')}
                             </Text>
                         </View>
                     </View>
@@ -79,30 +81,29 @@ export default function HowToPlay({ navigation }) {
                         style={[styles.text, { color: colors.TEXT, marginTop: theme.SIZES.BASE }]}
                     >
                         <Text bold style={{ color: colors.TEXT }}>
-                            Area controlled by Coral:
+                            {t('howToPlay.objective.areaControlled')}
                         </Text>{' '}
-                        Count the amount of coral of your color that is not occupied by one of your
-                        opponent's pieces.
+                        {t('howToPlay.objective.areaControlledDesc')}
                     </Text>
 
                     <View style={styles.examplesContainer}>
                         <ExampleLink
                             scenarioId='checkmate'
-                            label='Checkmate Example'
+                            label={t('howToPlay.objective.checkmateExample')}
                             navigation={navigation}
                             viewedExamples={viewedExamples}
                             onViewed={handleMarkViewed}
                         />
                         <ExampleLink
                             scenarioId='check'
-                            label='Check Example'
+                            label={t('howToPlay.objective.checkExample')}
                             navigation={navigation}
                             viewedExamples={viewedExamples}
                             onViewed={handleMarkViewed}
                         />
                         <ExampleLink
                             scenarioId='coralVictory'
-                            label='Coral Victory Example'
+                            label={t('howToPlay.objective.coralVictoryExample')}
                             navigation={navigation}
                             viewedExamples={viewedExamples}
                             onViewed={handleMarkViewed}
@@ -112,50 +113,49 @@ export default function HowToPlay({ navigation }) {
 
                 <Block style={[styles.card, { backgroundColor: colors.CARD_BACKGROUND }]}>
                     <Text h5 bold style={[styles.heading, { color: colors.PRIMARY }]}>
-                        Game Setup
+                        {t('howToPlay.setup.title')}
                     </Text>
                     <Text style={[styles.text, { color: colors.TEXT }]}>
-                        The board is an 8x8 grid with 64 squares. Each player has:
+                        {t('howToPlay.setup.boardDesc')}
                     </Text>
                     <View style={styles.bulletSection}>
                         <Text style={[styles.bulletPoint, { color: colors.TEXT }]}>
-                            • 17 Coral pieces
+                            • {t('howToPlay.setup.coralPieces')}
                         </Text>
                         <Text style={[styles.bulletPoint, { color: colors.TEXT }]}>
-                            • 17 units: 1 Whale, 2 Dolphins, 4 Turtles, 2 Pufferfish, 4 Crabs, and 4
-                            Octopuses
+                            • {t('howToPlay.setup.units')}
                         </Text>
                     </View>
                     <Text style={[styles.text, { color: colors.TEXT }]}>
-                        Each piece type comes in two variants:
+                        {t('howToPlay.setup.variants')}
                     </Text>
                     <View style={styles.bulletSection}>
                         <Text style={[styles.bulletPoint, { color: colors.TEXT }]}>
                             •{' '}
                             <Text bold style={{ color: colors.TEXT }}>
-                                Hunter
+                                {t('howToPlay.setup.hunter')}
                             </Text>{' '}
-                            pieces (without four coral icons) can remove Coral
+                            {t('howToPlay.setup.hunterDesc')}
                         </Text>
                         <Text style={[styles.bulletPoint, { color: colors.TEXT }]}>
                             •{' '}
                             <Text bold style={{ color: colors.TEXT }}>
-                                Gatherer
+                                {t('howToPlay.setup.gatherer')}
                             </Text>{' '}
-                            pieces (with four coral icons) can place Coral
+                            {t('howToPlay.setup.gathererDesc')}
                         </Text>
                     </View>
                     <View style={styles.examplesContainer}>
                         <ExampleLink
                             scenarioId='hunterEffect'
-                            label='Hunter Effect Example'
+                            label={t('howToPlay.setup.hunterExample')}
                             navigation={navigation}
                             viewedExamples={viewedExamples}
                             onViewed={handleMarkViewed}
                         />
                         <ExampleLink
                             scenarioId='gathererEffect'
-                            label='Gatherer Effect Example'
+                            label={t('howToPlay.setup.gathererExample')}
                             navigation={navigation}
                             viewedExamples={viewedExamples}
                             onViewed={handleMarkViewed}
@@ -165,67 +165,67 @@ export default function HowToPlay({ navigation }) {
 
                 <Block style={[styles.card, { backgroundColor: colors.CARD_BACKGROUND }]}>
                     <Text h5 bold style={[styles.heading, { color: colors.PRIMARY }]}>
-                        Turn Overview
+                        {t('howToPlay.turnOverview.title')}
                     </Text>
                     <Text style={[styles.text, { color: colors.TEXT }]}>
-                        White goes first, then players alternate. On your turn:
+                        {t('howToPlay.turnOverview.intro')}
                     </Text>
                     <View style={styles.bulletSection}>
                         <Text style={[styles.bulletPoint, { color: colors.TEXT }]}>
-                            1. Move one of your pieces
+                            1. {t('howToPlay.turnOverview.step1')}
                         </Text>
                         <Text style={[styles.bulletPoint, { color: colors.TEXT }]}>
-                            2. Resolve any Capture, Hunter, or Gatherer effects
+                            2. {t('howToPlay.turnOverview.step2')}
                         </Text>
                         <Text style={[styles.bulletPoint, { color: colors.TEXT }]}>
-                            3. Check if any objectives have been met
+                            3. {t('howToPlay.turnOverview.step3')}
                         </Text>
                     </View>
                 </Block>
 
                 <Block style={[styles.card, { backgroundColor: colors.CARD_BACKGROUND }]}>
                     <Text h5 bold style={[styles.heading, { color: colors.PRIMARY }]}>
-                        How Pieces Move
+                        {t('howToPlay.movement.title')}
                     </Text>
 
                     <Text style={[styles.text, { color: colors.TEXT }]}>
                         <Text bold style={{ color: colors.TEXT }}>
-                            Important:
+                            {t('howToPlay.movement.important')}
                         </Text>{' '}
-                        Pieces cannot move through other pieces - they must have a clear path.
+                        {t('howToPlay.movement.importantDesc')}
                     </Text>
 
                     <Text style={[styles.text, { color: colors.TEXT }]}>
-                        Each piece type comes in two variants that interact with Coral differently:
+                        {t('howToPlay.movement.variants')}
                     </Text>
                     <View style={styles.bulletSection}>
                         <Text style={[styles.bulletPoint, { color: colors.TEXT }]}>
                             •{' '}
                             <Text bold style={{ color: colors.TEXT }}>
-                                Hunter pieces
+                                {t('howToPlay.movement.hunterPieces')}
                             </Text>{' '}
-                            (without coral icons) get{' '}
+                            {t('howToPlay.movement.hunterMovement')}{' '}
                             <Text bold style={{ color: colors.TEXT }}>
-                                STOPPED BY
+                                {t('howToPlay.movement.stoppedBy')}
                             </Text>{' '}
-                            Coral - they cannot move through it
+                            {t('howToPlay.movement.hunterMovementDesc')}
                         </Text>
                         <Text style={[styles.bulletPoint, { color: colors.TEXT }]}>
                             •{' '}
                             <Text bold style={{ color: colors.TEXT }}>
-                                Gatherer pieces
+                                {t('howToPlay.movement.gathererPieces')}
                             </Text>{' '}
-                            (with four coral icons) are more powerful - they can pass{' '}
+                            {t('howToPlay.movement.gathererMovement')}{' '}
                             <Text bold style={{ color: colors.TEXT }}>
-                                THROUGH
+                                {t('howToPlay.movement.through')}
                             </Text>{' '}
-                            Coral freely
+                            {t('howToPlay.movement.gathererMovementDesc')}
                         </Text>
                     </View>
 
                     <ExampleLink
                         scenarioId='coralMovementComparison'
-                        label='Coral Movement Example'
+                        label={t('howToPlay.movement.coralMovementExample')}
                         navigation={navigation}
                         viewedExamples={viewedExamples}
                         onViewed={handleMarkViewed}
@@ -239,42 +239,32 @@ export default function HowToPlay({ navigation }) {
                             { color: colors.PRIMARY, marginTop: theme.SIZES.BASE * 2 },
                         ]}
                     >
-                        Individual Piece Movements
+                        {t('howToPlay.movement.individualMovements')}
                     </Text>
 
                     <View style={styles.pieceSection}>
                         <Text style={[styles.pieceTitle, { color: colors.TEXT }]}>
                             🐋{' '}
                             <Text bold style={{ color: colors.TEXT }}>
-                                Whale
+                                {t('howToPlay.pieces.whale.name')}
                             </Text>
                         </Text>
                         <Text style={[styles.text, { color: colors.TEXT }]}>
-                            The Whale is your most important piece - if it's checkmated, you lose!
-                            The Whale occupies two squares and has two distinct movement options:
+                            {t('howToPlay.pieces.whale.intro')}
                         </Text>
 
                         <View style={styles.subBulletSection}>
                             <Text style={[styles.subBullet, { color: colors.TEXT }]}>
                                 <Text bold style={{ color: colors.TEXT }}>
-                                    1. Sliding Move:
+                                    {t('howToPlay.pieces.whale.slidingMove')}
                                 </Text>{' '}
-                                Move half of the piece any number of squares horizontally,
-                                vertically, or diagonally while maintaining its original
-                                orientation. The Whale follows Hunter movement rules - it is stopped
-                                by coral. However, there is one special exception (see below).
+                                {t('howToPlay.pieces.whale.slidingMoveDesc')}
                             </Text>
                             <Text style={[styles.subBullet, { color: colors.TEXT }]}>
                                 <Text bold style={{ color: colors.TEXT }}>
-                                    2. Rotation Move:
+                                    {t('howToPlay.pieces.whale.rotationMove')}
                                 </Text>{' '}
-                                Rotate half of the piece to an adjacent square (one square
-                                vertically or horizontally). When selecting a rotation, first tap
-                                the destination square (shown with a white circle). If there are
-                                multiple valid orientations, you'll then tap the orientation square
-                                (shown with a green circle). If there's only one valid orientation,
-                                the whale will automatically move without showing the orientation
-                                selection.
+                                {t('howToPlay.pieces.whale.rotationMoveDesc')}
                             </Text>
                         </View>
 
@@ -285,29 +275,23 @@ export default function HowToPlay({ navigation }) {
                             ]}
                         >
                             <Text bold style={{ color: colors.TEXT }}>
-                                Check Rules:
+                                {t('howToPlay.pieces.whale.checkRules')}
                             </Text>{' '}
-                            The Whale may never end its movement in check (where it could be
-                            captured), but it CAN move through threatened squares.
+                            {t('howToPlay.pieces.whale.checkRulesDesc')}
                         </Text>
 
                         <Text style={[styles.text, { color: colors.TEXT }]}>
                             <Text bold style={{ color: colors.TEXT }}>
-                                Double Capture:
+                                {t('howToPlay.pieces.whale.doubleCapture')}
                             </Text>{' '}
-                            The Whale can capture up to two enemy pieces in a single move - one with
-                            each half of its body!
+                            {t('howToPlay.pieces.whale.doubleCaptureDesc')}
                         </Text>
 
                         <Text style={[styles.text, { color: colors.TEXT }]}>
                             <Text bold style={{ color: colors.TEXT }}>
-                                Double Coral Removal:
+                                {t('howToPlay.pieces.whale.doubleCoralRemoval')}
                             </Text>{' '}
-                            When the Whale (acting as a Hunter) lands on coral, it can choose to
-                            remove one or both coral pieces. If both halves land on coral, you can
-                            remove both, just one, or neither. If only one half lands on new coral
-                            (while the other half is already on coral), you can choose to remove
-                            that one coral piece.
+                            {t('howToPlay.pieces.whale.doubleCoralRemovalDesc')}
                         </Text>
 
                         <View
@@ -320,33 +304,31 @@ export default function HowToPlay({ navigation }) {
                             ]}
                         >
                             <Text style={[styles.specialCaseTitle, { color: colors.PRIMARY }]}>
-                                ⚠️ Special Movement Case
+                                {t('howToPlay.pieces.whale.specialCase')}
                             </Text>
                             <Text style={[styles.text, { color: colors.TEXT, marginBottom: 0 }]}>
-                                If half of the Whale is already sitting on coral, that coral does
-                                NOT block the other half from moving through or onto the same coral
-                                square.
+                                {t('howToPlay.pieces.whale.specialCaseDesc')}
                             </Text>
                         </View>
 
                         <View style={styles.examplesContainer}>
                             <ExampleLink
                                 scenarioId='whaleMovement'
-                                label='Basic Whale Movement'
+                                label={t('howToPlay.pieces.whale.basicMovement')}
                                 navigation={navigation}
                                 viewedExamples={viewedExamples}
                                 onViewed={handleMarkViewed}
                             />
                             <ExampleLink
                                 scenarioId='whaleRotation'
-                                label='Whale Rotation Example'
+                                label={t('howToPlay.pieces.whale.rotationExample')}
                                 navigation={navigation}
                                 viewedExamples={viewedExamples}
                                 onViewed={handleMarkViewed}
                             />
                             <ExampleLink
                                 scenarioId='whaleCoralException'
-                                label='Whale Moving Through Own Coral'
+                                label={t('howToPlay.pieces.whale.coralException')}
                                 navigation={navigation}
                                 viewedExamples={viewedExamples}
                                 onViewed={handleMarkViewed}
@@ -358,15 +340,15 @@ export default function HowToPlay({ navigation }) {
                         <Text style={[styles.pieceTitle, { color: colors.TEXT }]}>
                             🐬{' '}
                             <Text bold style={{ color: colors.TEXT }}>
-                                Dolphin
+                                {t('howToPlay.pieces.dolphin.name')}
                             </Text>
                         </Text>
                         <Text style={[styles.text, { color: colors.TEXT }]}>
-                            Moves any number of squares vertically, horizontally, or diagonally.
+                            {t('howToPlay.pieces.dolphin.movement')}
                         </Text>
                         <ExampleLink
                             scenarioId='dolphinMovement'
-                            label='Dolphin Movement Example'
+                            label={t('howToPlay.pieces.dolphin.example')}
                             navigation={navigation}
                             viewedExamples={viewedExamples}
                             onViewed={handleMarkViewed}
@@ -377,15 +359,15 @@ export default function HowToPlay({ navigation }) {
                         <Text style={[styles.pieceTitle, { color: colors.TEXT }]}>
                             🐢{' '}
                             <Text bold style={{ color: colors.TEXT }}>
-                                Turtle
+                                {t('howToPlay.pieces.turtle.name')}
                             </Text>
                         </Text>
                         <Text style={[styles.text, { color: colors.TEXT }]}>
-                            Moves any number of squares vertically or horizontally.
+                            {t('howToPlay.pieces.turtle.movement')}
                         </Text>
                         <ExampleLink
                             scenarioId='turtleMovement'
-                            label='Turtle Movement Example'
+                            label={t('howToPlay.pieces.turtle.example')}
                             navigation={navigation}
                             viewedExamples={viewedExamples}
                             onViewed={handleMarkViewed}
@@ -396,15 +378,15 @@ export default function HowToPlay({ navigation }) {
                         <Text style={[styles.pieceTitle, { color: colors.TEXT }]}>
                             🐡{' '}
                             <Text bold style={{ color: colors.TEXT }}>
-                                Pufferfish
+                                {t('howToPlay.pieces.pufferfish.name')}
                             </Text>
                         </Text>
                         <Text style={[styles.text, { color: colors.TEXT }]}>
-                            Moves any number of squares diagonally.
+                            {t('howToPlay.pieces.pufferfish.movement')}
                         </Text>
                         <ExampleLink
                             scenarioId='pufferfishMovement'
-                            label='Pufferfish Movement Example'
+                            label={t('howToPlay.pieces.pufferfish.example')}
                             navigation={navigation}
                             viewedExamples={viewedExamples}
                             onViewed={handleMarkViewed}
@@ -415,15 +397,15 @@ export default function HowToPlay({ navigation }) {
                         <Text style={[styles.pieceTitle, { color: colors.TEXT }]}>
                             🐙{' '}
                             <Text bold style={{ color: colors.TEXT }}>
-                                Octopus
+                                {t('howToPlay.pieces.octopus.name')}
                             </Text>
                         </Text>
                         <Text style={[styles.text, { color: colors.TEXT }]}>
-                            Moves one square diagonally.
+                            {t('howToPlay.pieces.octopus.movement')}
                         </Text>
                         <ExampleLink
                             scenarioId='octopusMovement'
-                            label='Octopus Movement Example'
+                            label={t('howToPlay.pieces.octopus.example')}
                             navigation={navigation}
                             viewedExamples={viewedExamples}
                             onViewed={handleMarkViewed}
@@ -434,15 +416,15 @@ export default function HowToPlay({ navigation }) {
                         <Text style={[styles.pieceTitle, { color: colors.TEXT }]}>
                             🦀{' '}
                             <Text bold style={{ color: colors.TEXT }}>
-                                Crab
+                                {t('howToPlay.pieces.crab.name')}
                             </Text>
                         </Text>
                         <Text style={[styles.text, { color: colors.TEXT }]}>
-                            Moves one square vertically or horizontally.
+                            {t('howToPlay.pieces.crab.movement')}
                         </Text>
                         <ExampleLink
                             scenarioId='crabMovement'
-                            label='Crab Movement Example'
+                            label={t('howToPlay.pieces.crab.example')}
                             navigation={navigation}
                             viewedExamples={viewedExamples}
                             onViewed={handleMarkViewed}
@@ -452,22 +434,21 @@ export default function HowToPlay({ navigation }) {
 
                 <Block style={[styles.card, { backgroundColor: colors.CARD_BACKGROUND }]}>
                     <Text h5 bold style={[styles.heading, { color: colors.PRIMARY }]}>
-                        Special Rules
+                        {t('howToPlay.specialRules.title')}
                     </Text>
 
                     <View style={styles.ruleSection}>
                         <Text style={[styles.ruleTitle, { color: colors.TEXT }]}>
                             <Text bold style={{ color: colors.TEXT }}>
-                                Capture
+                                {t('howToPlay.specialRules.capture.title')}
                             </Text>
                         </Text>
                         <Text style={[styles.text, { color: colors.TEXT }]}>
-                            Move to a square occupied by an enemy piece. Whales can capture two
-                            pieces in one move.
+                            {t('howToPlay.specialRules.capture.desc')}
                         </Text>
                         <ExampleLink
                             scenarioId='capture'
-                            label='Capture Example'
+                            label={t('howToPlay.specialRules.capture.example')}
                             navigation={navigation}
                             viewedExamples={viewedExamples}
                             onViewed={handleMarkViewed}
@@ -477,31 +458,31 @@ export default function HowToPlay({ navigation }) {
                     <View style={styles.ruleSection}>
                         <Text style={[styles.ruleTitle, { color: colors.TEXT }]}>
                             <Text bold style={{ color: colors.TEXT }}>
-                                Hunter Movement & Effect
+                                {t('howToPlay.specialRules.hunterEffect.title')}
                             </Text>
                         </Text>
                         <Text style={[styles.text, { color: colors.TEXT }]}>
-                            Hunter pieces (without coral icons) have two important behaviors:
+                            {t('howToPlay.specialRules.hunterEffect.desc')}
                         </Text>
                         <View style={styles.bulletSection}>
                             <Text style={[styles.bulletPoint, { color: colors.TEXT }]}>
                                 •{' '}
                                 <Text bold style={{ color: colors.TEXT }}>
-                                    Movement stops
+                                    {t('howToPlay.specialRules.hunterEffect.movementStops')}
                                 </Text>{' '}
-                                when landing on Coral
+                                {t('howToPlay.specialRules.hunterEffect.movementStopsDesc')}
                             </Text>
                             <Text style={[styles.bulletPoint, { color: colors.TEXT }]}>
                                 •{' '}
                                 <Text bold style={{ color: colors.TEXT }}>
-                                    Can remove
+                                    {t('howToPlay.specialRules.hunterEffect.canRemove')}
                                 </Text>{' '}
-                                that Coral from the board
+                                {t('howToPlay.specialRules.hunterEffect.canRemoveDesc')}
                             </Text>
                         </View>
                         <ExampleLink
                             scenarioId='hunterEffect'
-                            label='Hunter Effect Example'
+                            label={t('howToPlay.specialRules.hunterEffect.example')}
                             navigation={navigation}
                             viewedExamples={viewedExamples}
                             onViewed={handleMarkViewed}
@@ -511,16 +492,15 @@ export default function HowToPlay({ navigation }) {
                     <View style={styles.ruleSection}>
                         <Text style={[styles.ruleTitle, { color: colors.TEXT }]}>
                             <Text bold style={{ color: colors.TEXT }}>
-                                Gatherer Effect
+                                {t('howToPlay.specialRules.gathererEffect.title')}
                             </Text>
                         </Text>
                         <Text style={[styles.text, { color: colors.TEXT }]}>
-                            Gatherer pieces (with four coral icons) can place Coral on empty squares
-                            they move to.
+                            {t('howToPlay.specialRules.gathererEffect.desc')}
                         </Text>
                         <ExampleLink
                             scenarioId='gathererEffect'
-                            label='Gatherer Effect Example'
+                            label={t('howToPlay.specialRules.gathererEffect.example')}
                             navigation={navigation}
                             viewedExamples={viewedExamples}
                             onViewed={handleMarkViewed}
@@ -530,29 +510,29 @@ export default function HowToPlay({ navigation }) {
 
                 <Block style={[styles.card, { backgroundColor: colors.CARD_BACKGROUND }]}>
                     <Text h5 bold style={[styles.heading, { color: colors.PRIMARY }]}>
-                        Draw & Resignation
+                        {t('howToPlay.drawResignation.title')}
                     </Text>
                     <View style={styles.bulletSection}>
                         <Text style={[styles.bulletPoint, { color: colors.TEXT }]}>
                             •{' '}
                             <Text bold style={{ color: colors.TEXT }}>
-                                Stalemate:
+                                {t('howToPlay.drawResignation.stalemate')}
                             </Text>{' '}
-                            When a player has no legal moves and their Whale is not in check
+                            {t('howToPlay.drawResignation.stalemateDesc')}
                         </Text>
                         <Text style={[styles.bulletPoint, { color: colors.TEXT }]}>
                             •{' '}
                             <Text bold style={{ color: colors.TEXT }}>
-                                Threefold repetition:
+                                {t('howToPlay.drawResignation.threefoldRepetition')}
                             </Text>{' '}
-                            Same position occurs three times with the same player to move
+                            {t('howToPlay.drawResignation.threefoldRepetitionDesc')}
                         </Text>
                         <Text style={[styles.bulletPoint, { color: colors.TEXT }]}>
                             •{' '}
                             <Text bold style={{ color: colors.TEXT }}>
-                                Resignation:
+                                {t('howToPlay.drawResignation.resignation')}
                             </Text>{' '}
-                            A player may resign at any time
+                            {t('howToPlay.drawResignation.resignationDesc')}
                         </Text>
                     </View>
                 </Block>

@@ -7,37 +7,38 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../contexts/ThemeContext';
 import Icon from './Icon';
 
 const { width } = Dimensions.get('window');
 
-const DIFFICULTY_LEVELS = [
+const getDifficultyLevels = (t) => [
     {
         value: 'random',
-        name: 'Random',
-        description: 'Computer makes random moves',
+        name: t('game.difficulty.random'),
+        description: t('game.difficulty.randomDescription'),
         icon: 'shuffle',
         iconFamily: 'ionicon',
     },
     {
         value: 'easy',
-        name: 'Easy',
-        description: 'Computer uses basic strategy',
+        name: t('game.difficulty.easy'),
+        description: t('game.difficulty.easyDescription'),
         icon: 'star-outline',
         iconFamily: 'ionicon',
     },
     {
         value: 'medium',
-        name: 'Medium',
-        description: 'Computer uses advanced strategy',
+        name: t('game.difficulty.medium'),
+        description: t('game.difficulty.mediumDescription'),
         icon: 'star-half',
         iconFamily: 'ionicon',
     },
     {
         value: 'hard',
-        name: 'Hard',
-        description: 'Computer uses expert strategy',
+        name: t('game.difficulty.hard'),
+        description: t('game.difficulty.hardDescription'),
         icon: 'star',
         iconFamily: 'ionicon',
     },
@@ -51,8 +52,10 @@ const DIFFICULTY_LEVELS = [
  * @param {object|null} user - Current user object (null if not logged in)
  */
 export default function DifficultySelectionModal({ visible, onSelect, onCancel, user, allowAll = false }) {
+    const { t } = useTranslation();
     const { colors, isDarkMode } = useTheme();
 
+    const DIFFICULTY_LEVELS = getDifficultyLevels(t);
     const modalBackgroundColor = isDarkMode ? '#2A2A2A' : colors.CARD_BACKGROUND;
 
     const handleSelect = (difficulty) => {
@@ -78,9 +81,11 @@ export default function DifficultySelectionModal({ visible, onSelect, onCancel, 
                     onStartShouldSetResponder={() => true}
                 >
                     {/* Title */}
-                    <Text style={[styles.title, { color: colors.TEXT }]}>Choose AI Difficulty</Text>
+                    <Text style={[styles.title, { color: colors.TEXT }]}>
+                        {t('game.difficulty.title')}
+                    </Text>
                     <Text style={[styles.subtitle, { color: colors.TEXT_SECONDARY }]}>
-                        Select the difficulty level for the computer opponent
+                        {t('game.difficulty.subtitle')}
                     </Text>
 
                     {/* Difficulty Options */}
@@ -148,7 +153,7 @@ export default function DifficultySelectionModal({ visible, onSelect, onCancel, 
                                                 ]}
                                             >
                                                 {disabled
-                                                    ? 'Create an account to access'
+                                                    ? t('game.difficulty.createAccountToAccess')
                                                     : difficulty.description}
                                             </Text>
                                         </View>
@@ -173,7 +178,7 @@ export default function DifficultySelectionModal({ visible, onSelect, onCancel, 
                         activeOpacity={0.7}
                     >
                         <Text style={[styles.cancelButtonText, { color: colors.TEXT_SECONDARY }]}>
-                            Cancel
+                            {t('game.actions.cancel')}
                         </Text>
                     </TouchableOpacity>
                 </View>

@@ -2,6 +2,7 @@ import { createGameSnapshot } from '@jbuxofplenty/coral-clash';
 import { useNavigation } from '@react-navigation/native';
 import { Icon } from 'galio-framework';
 import { Animated, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 const GameMenuModal = ({
     visible,
@@ -21,6 +22,7 @@ const GameMenuModal = ({
     baseStyles,
     gameData,
 }) => {
+    const { t } = useTranslation();
     const navigation = useNavigation();
 
     return (
@@ -71,7 +73,7 @@ const GameMenuModal = ({
                                             { color: colors.TEXT },
                                         ]}
                                     >
-                                        Save Game State
+                                        {t('gameMenu.saveGameState')}
                                     </Text>
                                     <Text
                                         style={[
@@ -79,7 +81,7 @@ const GameMenuModal = ({
                                             { color: colors.TEXT_SECONDARY },
                                         ]}
                                     >
-                                        Export current game position
+                                        {t('gameMenu.exportPosition')}
                                     </Text>
                                 </View>
                             </TouchableOpacity>
@@ -108,7 +110,7 @@ const GameMenuModal = ({
                                             { color: colors.TEXT },
                                         ]}
                                     >
-                                        Flip Board
+                                        {t('gameMenu.flipBoard')}
                                     </Text>
                                     <Text
                                         style={[
@@ -117,8 +119,8 @@ const GameMenuModal = ({
                                         ]}
                                     >
                                         {isBoardFlipped
-                                            ? 'Currently showing black on bottom'
-                                            : 'Currently showing white on bottom'}
+                                            ? t('gameMenu.showingBlackBottom')
+                                            : t('gameMenu.showingWhiteBottom')}
                                     </Text>
                                 </View>
                             </TouchableOpacity>
@@ -150,7 +152,7 @@ const GameMenuModal = ({
                                 <Text
                                     style={[styles.menuItemTitle, { color: colors.TEXT }]}
                                 >
-                                    Report Bug
+                                    {t('gameMenu.reportBug')}
                                 </Text>
                                 <Text
                                     style={[
@@ -158,7 +160,7 @@ const GameMenuModal = ({
                                         { color: colors.TEXT_SECONDARY },
                                     ]}
                                 >
-                                    Include current game state
+                                    {t('gameMenu.includeGameState')}
                                 </Text>
                             </View>
                         </TouchableOpacity>
@@ -213,8 +215,8 @@ const GameMenuModal = ({
                                     ]}
                                 >
                                     {isGameActionProcessing
-                                        ? 'Resigning...'
-                                        : 'Resign Game'}
+                                        ? t('gameMenu.resigning')
+                                        : t('gameMenu.resignGame')}
                                 </Text>
                                 <Text
                                     style={[
@@ -223,10 +225,10 @@ const GameMenuModal = ({
                                     ]}
                                 >
                                     {isGameActionProcessing
-                                        ? 'Please wait...'
+                                        ? t('gameMenu.pleaseWait')
                                         : coralClash.isGameOver()
-                                          ? 'Game already ended'
-                                          : 'Forfeit the current game'}
+                                          ? t('gameMenu.gameEnded')
+                                          : t('gameMenu.forfeitGame')}
                                 </Text>
                             </View>
                         </TouchableOpacity>

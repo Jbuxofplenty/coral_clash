@@ -2,6 +2,7 @@ import { Block, Text, theme } from 'galio-framework';
 import React, { useState } from 'react';
 import { ActivityIndicator, Dimensions, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { moderateScale, verticalScale } from 'react-native-size-matters';
+import { useTranslation } from 'react-i18next';
 import { useAlert, useAuth, useTheme } from '../contexts';
 import Avatar from './Avatar';
 import Icon from './Icon';
@@ -22,6 +23,7 @@ export default function ActiveGamesCard({
     declineGameInvite,
     resignGame,
 }) {
+    const { t } = useTranslation();
     const { colors } = useTheme();
     const { user } = useAuth();
     const { showAlert } = useAlert();
@@ -76,13 +78,13 @@ export default function ActiveGamesCard({
 
     const handleResignGame = async (gameId) => {
         // Show confirmation dialog before resigning
-        showAlert('Resign Game', 'Are you sure you want to resign? You will lose this game.', [
+        showAlert(t('cards.activeGames.resignTitle'), t('cards.activeGames.resignMessage'), [
             {
-                text: 'Cancel',
+                text: t('common.cancel'),
                 style: 'cancel',
             },
             {
-                text: 'Resign',
+                text: t('cards.activeGames.resignButton'),
                 style: 'destructive',
                 onPress: async () => {
                     try {
@@ -90,7 +92,7 @@ export default function ActiveGamesCard({
                         await resignGame(gameId);
                     } catch (error) {
                         console.error('[ActiveGamesCard] Error resigning game:', error);
-                        showAlert('Error', 'Failed to resign game. Please try again.');
+                        showAlert(t('common.error'), t('cards.activeGames.resignError'));
                     } finally {
                         setResigningGameId(null);
                     }
@@ -116,13 +118,13 @@ export default function ActiveGamesCard({
 
         if (isMyTurn) {
             return {
-                text: 'Your turn',
+                text: t('cards.activeGames.yourTurn'),
                 icon: 'play-circle',
                 color: colors.SUCCESS,
             };
         } else {
             return {
-                text: "Opponent's turn",
+                text: t('cards.activeGames.opponentTurn'),
                 icon: 'hourglass',
                 color: colors.TEXT_SECONDARY,
             };
@@ -131,7 +133,7 @@ export default function ActiveGamesCard({
 
     const getOpponentData = (game) => {
         if (!user)
-            return { id: null, avatarKey: 'dolphin', displayName: 'Opponent', isComputer: false };
+            return { id: null, avatarKey: 'dolphin', displayName: t('cards.activeGames.opponent'), isComputer: false };
 
         const opponentId = game.creatorId === user.uid ? game.opponentId : game.creatorId;
 
@@ -144,7 +146,7 @@ export default function ActiveGamesCard({
             // This allows computer users to show their display names (e.g., "Alex", "Jordan")
             // Fall back to 'Computer' only if no display name is available (old games)
             const displayName =
-                game.opponentDisplayName || game.creatorDisplayName || 'Computer';
+                game.opponentDisplayName || game.creatorDisplayName || t('cards.activeGames.computer');
             const avatarKey =
                 game.opponentAvatarKey || game.creatorAvatarKey || (isLegacyComputer ? null : 'dolphin');
 
@@ -161,7 +163,7 @@ export default function ActiveGamesCard({
         return {
             id: opponentId,
             avatarKey: game.opponentAvatarKey || 'dolphin',
-            displayName: game.opponentDisplayName || 'Opponent',
+            displayName: game.opponentDisplayName || t('cards.activeGames.opponent'),
             isComputer: false,
         };
     };
@@ -174,25 +176,25 @@ export default function ActiveGamesCard({
                 return {
                     icon: 'bolt',
                     iconFamily: 'font-awesome',
-                    label: 'Blitz',
+                    label: t('cards.activeGames.blitz'),
                 };
             case 'normal':
                 return {
                     icon: 'clock-o',
                     iconFamily: 'font-awesome',
-                    label: 'Normal',
+                    label: t('cards.activeGames.normal'),
                 };
             case 'unlimited':
                 return {
                     icon: 'infinite',
                     iconFamily: 'ionicon',
-                    label: 'Unlimited',
+                    label: t('cards.activeGames.unlimited'),
                 };
             default:
                 return {
                     icon: 'clock-o',
                     iconFamily: 'font-awesome',
-                    label: 'Timed',
+                    label: t('cards.activeGames.timed'),
                 };
         }
     };
@@ -223,14 +225,13 @@ export default function ActiveGamesCard({
                             bold
                             style={[styles.title, { color: colors.TEXT }]}
                         >
-                            Active Games
+                            {t('cards.activeGames.title')}
                         </Text>
                         <Text
                             size={isTablet ? moderateScale(10) : moderateScale(12)}
                             style={[styles.subtitle, { color: colors.TEXT_SECONDARY }]}
                         >
-                            {activeGames.length} {activeGames.length === 1 ? 'game' : 'games'} in
-                            progress
+                            {activeGames.length} {activeGames.length === 1 ? t('cards.activeGames.game') : t('cards.activeGames.games')} {t('cards.activeGames.inProgress')}
                         </Text>
                     </Block>
                 </Block>
@@ -244,7 +245,7 @@ export default function ActiveGamesCard({
                             size={isTablet ? moderateScale(10) : moderateScale(14)}
                             style={[styles.loadingText, { color: colors.TEXT_SECONDARY }]}
                         >
-                            Loading games...
+                            {t('cards.activeGames.loading')}
                         </Text>
                     </Block>
                 ) : activeGames.length === 0 ? (
@@ -260,13 +261,13 @@ export default function ActiveGamesCard({
                             size={isTablet ? moderateScale(10) : moderateScale(14)}
                             style={[styles.emptyText, { color: colors.TEXT_SECONDARY }]}
                         >
-                            No active games
+                            {t('cards.activeGames.noGames')}
                         </Text>
                         <Text
                             size={isTablet ? moderateScale(10) : moderateScale(12)}
                             style={[styles.emptySubtext, { color: colors.TEXT_SECONDARY }]}
                         >
-                            Start a game with a friend!
+                            {t('cards.activeGames.noGamesHint')}
                         </Text>
                     </Block>
                 ) : (
@@ -329,7 +330,7 @@ export default function ActiveGamesCard({
                                                     numberOfLines={1}
                                                     ellipsizeMode='tail'
                                                 >
-                                                    vs {opponent.displayName}
+                                                    {t('cards.activeGames.vs')}{opponent.displayName}
                                                 </Text>
                                             </Block>
                                             <Block

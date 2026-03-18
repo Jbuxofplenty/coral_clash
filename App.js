@@ -31,6 +31,7 @@ import {
     useTheme,
     useVersion,
 } from './src/contexts';
+import './src/i18n/config';
 import Screens from './src/navigation/Screens';
 import { initializeAdsMode } from './src/utils/featureFlags';
 

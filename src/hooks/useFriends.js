@@ -1,10 +1,12 @@
 import { useFocusEffect } from '@react-navigation/native';
 import { useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { collection, db, onSnapshot, query, where } from '../config/firebase';
 import { useAlert, useAuth } from '../contexts';
 import { useFirebaseFunctions } from './useFirebaseFunctions';
 
 export const useFriends = () => {
+    const { t } = useTranslation();
     const { user } = useAuth();
     const { showAlert } = useAlert();
     const { getFriends, respondToFriendRequest, removeFriend } = useFirebaseFunctions();
@@ -182,12 +184,12 @@ export const useFriends = () => {
 
     const handleRemoveFriend = (friendId, friendDisplayName) => {
         showAlert(
-            'Remove Friend',
-            `Are you sure you want to remove ${friendDisplayName} from your friends?`,
+            t('hooks.friends.removeFriendTitle'),
+            t('hooks.friends.removeFriendMessage', { friendName: friendDisplayName }),
             [
-                { text: 'Cancel', style: 'cancel' },
+                { text: t('hooks.friends.cancel'), style: 'cancel' },
                 {
-                    text: 'Remove',
+                    text: t('hooks.friends.remove'),
                     style: 'destructive',
                     onPress: async () => {
                         try {
@@ -196,7 +198,7 @@ export const useFriends = () => {
                             // Note: Real-time listener will auto-update the UI
                         } catch (error) {
                             console.error('Error removing friend:', error);
-                            showAlert('Error', 'Failed to remove friend');
+                            showAlert(t('hooks.friends.errorTitle'), t('hooks.friends.errorRemove'));
                             setRemovingFriendId(null);
                         }
                     },
@@ -212,7 +214,7 @@ export const useFriends = () => {
             // Note: Real-time listener will auto-update the UI
         } catch (error) {
             console.error('Error accepting friend request:', error);
-            showAlert('Error', 'Failed to accept friend request');
+            showAlert(t('hooks.friends.errorTitle'), t('hooks.friends.errorAccept'));
             setAcceptingRequestId(null);
         }
     };
@@ -224,16 +226,16 @@ export const useFriends = () => {
             // Note: Real-time listener will auto-update the UI
         } catch (error) {
             console.error('Error declining friend request:', error);
-            showAlert('Error', 'Failed to decline friend request');
+            showAlert(t('hooks.friends.errorTitle'), t('hooks.friends.errorDecline'));
             setDecliningRequestId(null);
         }
     };
 
     const handleCancelRequest = async (requestId, displayName) => {
-        showAlert('Cancel Friend Request', `Cancel friend request to ${displayName}?`, [
-            { text: 'No', style: 'cancel' },
+        showAlert(t('hooks.friends.cancelRequestTitle'), t('hooks.friends.cancelRequestMessage', { displayName }), [
+            { text: t('hooks.friends.no'), style: 'cancel' },
             {
-                text: 'Yes, Cancel',
+                text: t('hooks.friends.yesCancel'),
                 style: 'destructive',
                 onPress: async () => {
                     try {
@@ -242,7 +244,7 @@ export const useFriends = () => {
                         // Note: Real-time listener will auto-update the UI
                     } catch (error) {
                         console.error('Error canceling friend request:', error);
-                        showAlert('Error', 'Failed to cancel friend request');
+                        showAlert(t('hooks.friends.errorTitle'), t('hooks.friends.errorCancelRequest'));
                         setDecliningRequestId(null);
                     }
                 },

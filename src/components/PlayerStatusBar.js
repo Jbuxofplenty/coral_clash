@@ -1,5 +1,6 @@
 import React from 'react';
 import { ActivityIndicator, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../contexts';
 import Avatar from './Avatar';
 
@@ -27,6 +28,7 @@ export default function PlayerStatusBar({
     coralUnderControl,
     isThinking = false,
 }) {
+    const { t } = useTranslation();
     const { colors } = useTheme();
     const { height } = useWindowDimensions();
 
@@ -69,7 +71,7 @@ export default function PlayerStatusBar({
                         ]}
                         numberOfLines={1}
                     >
-                        {isComputer ? 'Computer' : playerName}
+                        {isComputer ? t('components.playerStatus.computer') : playerName}
                     </Text>
                     {isThinking && isComputer && (
                         <View style={styles.thinkingIndicator}>
@@ -81,7 +83,7 @@ export default function PlayerStatusBar({
                                     isCompact && styles.thinkingTextCompact,
                                 ]}
                             >
-                                Thinking...
+                                {t('components.playerStatus.thinking')}
                             </Text>
                         </View>
                     )}
@@ -110,7 +112,7 @@ export default function PlayerStatusBar({
                                             isCompact && styles.coralLabelCompact,
                                         ]}
                                     >
-                                        Remaining
+                                        {t('components.playerStatus.remaining')}
                                     </Text>
                                     <Text
                                         style={[
@@ -132,7 +134,7 @@ export default function PlayerStatusBar({
                                             isCompact && styles.coralLabelCompact,
                                         ]}
                                     >
-                                        Under Control
+                                        {t('components.playerStatus.underControl')}
                                     </Text>
                                     <Text
                                         style={[

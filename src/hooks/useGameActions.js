@@ -1,5 +1,6 @@
 import { restoreGameFromSnapshot } from '@jbuxofplenty/coral-clash';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { db, doc, onSnapshot } from '../config/firebase';
 import { useAlert, useAuth } from '../contexts';
 import useFirebaseFunctions from './useFirebaseFunctions';
@@ -15,6 +16,7 @@ import useIsMounted from './useIsMounted';
  * @param {Function} onStateUpdate - Callback when game state changes
  */
 export const useGameActions = (coralClash, gameId, onStateUpdate) => {
+    const { t } = useTranslation();
     const { user } = useAuth();
     const { showAlert } = useAlert();
     const {
@@ -236,12 +238,12 @@ export const useGameActions = (coralClash, gameId, onStateUpdate) => {
             return true;
         } catch (error) {
             console.error('Error resigning game:', error);
-            showAlert('Error', 'Failed to resign. Please check your connection and try again.');
+            showAlert(t('hooks.gameActions.errorTitle'), t('hooks.gameActions.errorResign'));
             return false;
         } finally {
             setIsProcessing(false);
         }
-    }, [coralClash, gameId, resignGameAPI, onStateUpdate, showAlert]);
+    }, [coralClash, gameId, resignGameAPI, onStateUpdate, showAlert, t]);
 
     /**
      * Undo the last move

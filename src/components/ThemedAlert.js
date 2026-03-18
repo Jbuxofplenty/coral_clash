@@ -9,6 +9,7 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../contexts/ThemeContext';
 
 const { width } = Dimensions.get('window');
@@ -29,6 +30,7 @@ export default function ThemedAlert({
     onDismiss,
     vertical = false,
 }) {
+    const { t } = useTranslation();
     const { colors, isDarkMode } = useTheme();
     const [isProcessing, setIsProcessing] = useState(false);
 
@@ -157,7 +159,7 @@ export default function ThemedAlert({
                                                     styles.buttonTextBold,
                                             ]}
                                         >
-                                            {button.text || 'OK'}
+                                            {button.text || t('components.alert.defaultButton')}
                                         </Text>
                                     )}
                                 </TouchableOpacity>

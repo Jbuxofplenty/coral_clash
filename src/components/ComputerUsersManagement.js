@@ -2,6 +2,8 @@ import { Block, Text, theme } from 'galio-framework';
 import React, { useMemo, useState } from 'react';
 import { ActivityIndicator, Dimensions, StyleSheet, TouchableOpacity } from 'react-native';
 import { moderateScale } from 'react-native-size-matters';
+import { useTranslation } from 'react-i18next';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { useAlert, useAuth, useTheme } from '../contexts';
 import { useFirebaseFunctions } from '../hooks';
@@ -16,12 +18,14 @@ const isTablet = width >= 768;
  * Allows initialization and deletion of computer users
  */
 export default function ComputerUsersManagement() {
+    const { t } = useTranslation();
     const { colors } = useTheme();
     const { user } = useAuth();
     const { showAlert } = useAlert();
     const { initializeComputerUsers, deleteComputerUsers } = useFirebaseFunctions();
     const [initializing, setInitializing] = useState(false);
     const [deleting, setDeleting] = useState(false);
+    const [clearingLanguage, setClearingLanguage] = useState(false);
 
     // Only show this component if user has internalUser flag
     const isInternalUser = useMemo(() => {
@@ -38,14 +42,14 @@ export default function ComputerUsersManagement() {
         try {
             const result = await initializeComputerUsers();
             showAlert(
-                'Success',
-                result.message || `Successfully initialized ${result.count || 10} computer users`,
+                t('components.computerUsers.successTitle'),
+                result.message || t('components.computerUsers.initializeSuccess', { count: result.count || 10 }),
             );
         } catch (error) {
             console.error('Error initializing computer users:', error);
             showAlert(
-                'Error',
-                error.message || 'Failed to initialize computer users. Please try again.',
+                t('components.computerUsers.errorTitle'),
+                error.message || t('components.computerUsers.initializeError'),
             );
         } finally {
             setInitializing(false);
@@ -55,31 +59,31 @@ export default function ComputerUsersManagement() {
     const handleDelete = async () => {
         // Confirm before deleting
         showAlert(
-            'Confirm Deletion',
-            'Are you sure you want to delete all computer users? This action cannot be undone.',
+            t('components.computerUsers.confirmDeleteTitle'),
+            t('components.computerUsers.confirmDeleteMessage'),
             [
                 {
-                    text: 'Cancel',
+                    text: t('components.computerUsers.cancel'),
                     style: 'cancel',
                 },
                 {
-                    text: 'Delete',
+                    text: t('components.computerUsers.delete'),
                     style: 'destructive',
                     onPress: async () => {
                         setDeleting(true);
                         try {
                             const result = await deleteComputerUsers();
                             showAlert(
-                                'Success',
+                                t('components.computerUsers.successTitle'),
                                 result.message ||
-                                    `Successfully deleted ${result.deletedCount || 10} computer users`,
+                                    t('components.computerUsers.deleteSuccess', { count: result.deletedCount || 10 }),
                             );
                         } catch (error) {
                             console.error('Error deleting computer users:', error);
                             showAlert(
-                                'Error',
+                                t('components.computerUsers.errorTitle'),
                                 error.message ||
-                                    'Failed to delete computer users. Please try again.',
+                                    t('components.computerUsers.deleteError'),
                             );
                         } finally {
                             setDeleting(false);
@@ -89,6 +93,23 @@ export default function ComputerUsersManagement() {
             ],
             true, // vertical buttons
         );
+    };
+
+    const handleClearLanguage = async () => {
+        setClearingLanguage(true);
+        try {
+            await AsyncStorage.removeItem('@coral_clash_language');
+            showAlert(
+                t('components.computerUsers.successTitle'),
+                t('components.computerUsers.clearLanguageSuccess'),
+            );
+            console.log('Language preference cleared from AsyncStorage');
+        } catch (error) {
+            console.error('Error clearing language preference:', error);
+            showAlert(t('components.computerUsers.errorTitle'), t('components.computerUsers.clearLanguageError'));
+        } finally {
+            setClearingLanguage(false);
+        }
     };
 
     return (
@@ -142,11 +163,11 @@ export default function ComputerUsersManagement() {
                             styles.button,
                             {
                                 backgroundColor: colors.PRIMARY,
-                                opacity: initializing || deleting ? 0.6 : 1,
+                                opacity: initializing || deleting || clearingLanguage ? 0.6 : 1,
                             },
                         ]}
                         onPress={handleInitialize}
-                        disabled={initializing || deleting}
+                        disabled={initializing || deleting || clearingLanguage}
                         activeOpacity={0.8}
                     >
                         {initializing ? (
@@ -170,11 +191,11 @@ export default function ComputerUsersManagement() {
                             styles.button,
                             {
                                 backgroundColor: colors.ERROR || '#FF3B30',
-                                opacity: initializing || deleting ? 0.6 : 1,
+                                opacity: initializing || deleting || clearingLanguage ? 0.6 : 1,
                             },
                         ]}
                         onPress={handleDelete}
-                        disabled={initializing || deleting}
+                        disabled={initializing || deleting || clearingLanguage}
                         activeOpacity={0.8}
                     >
                         {deleting ? (
@@ -189,6 +210,37 @@ export default function ComputerUsersManagement() {
                                 ]}
                             >
                                 Delete All
+                            </Text>
+                        )}
+                    </TouchableOpacity>
+                </Block>
+
+                <Block style={styles.buttonContainer}>
+                    <TouchableOpacity
+                        style={[
+                            styles.button,
+                            styles.fullWidthButton,
+                            {
+                                backgroundColor: colors.WARNING || '#FF9500',
+                                opacity: initializing || deleting || clearingLanguage ? 0.6 : 1,
+                            },
+                        ]}
+                        onPress={handleClearLanguage}
+                        disabled={initializing || deleting || clearingLanguage}
+                        activeOpacity={0.8}
+                    >
+                        {clearingLanguage ? (
+                            <ActivityIndicator size='small' color={colors.WHITE || '#FFFFFF'} />
+                        ) : (
+                            <Text
+                                style={[
+                                    styles.buttonText,
+                                    {
+                                        color: colors.WHITE || '#FFFFFF',
+                                    },
+                                ]}
+                            >
+                                Clear Language Storage
                             </Text>
                         )}
                     </TouchableOpacity>
@@ -256,6 +308,10 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         minHeight: 44,
+    },
+    fullWidthButton: {
+        flex: 1,
+        width: '100%',
     },
     buttonText: {
         fontSize: moderateScale(14),

@@ -3,6 +3,7 @@ import { Block, Text, theme } from 'galio-framework';
 import React, { useCallback, useState } from 'react';
 import { Dimensions, ScrollView, StyleSheet, View } from 'react-native';
 import { moderateScale, scale } from 'react-native-size-matters';
+import { useTranslation } from 'react-i18next';
 
 import { Avatar, Icon, LoadingScreen } from '../components';
 import { useAuth, useTheme } from '../contexts';
@@ -11,6 +12,7 @@ import { useFirebaseFunctions } from '../hooks';
 const { width } = Dimensions.get('screen');
 
 export default function Stats({ navigation: _navigation }) {
+    const { t } = useTranslation();
     const { user } = useAuth();
     const { colors, isDarkMode: _isDarkMode } = useTheme();
     const { getGameHistory, getPublicUserInfo } = useFirebaseFunctions();
@@ -69,7 +71,7 @@ export default function Stats({ navigation: _navigation }) {
                     if (potentialOpponentId === 'computer') {
                         // Old computer games
                         opponentId = 'computer';
-                        opponentName = 'Computer';
+                        opponentName = t('stats.computer');
                         opponentAvatar = 'computer';
                     } else {
                         // New computer users with actual IDs - use their display name from game data
@@ -78,7 +80,7 @@ export default function Stats({ navigation: _navigation }) {
                         // If user is creator, opponent is opponentId, so use opponentDisplayName
                         // If user is opponent, opponent is creatorId, so use creatorDisplayName
                         opponentName =
-                            game.opponentDisplayName || game.creatorDisplayName || 'Computer';
+                            game.opponentDisplayName || game.creatorDisplayName || t('stats.computer');
                         opponentAvatar =
                             game.opponentAvatarKey || game.creatorAvatarKey || 'dolphin';
                     }
@@ -326,7 +328,7 @@ export default function Stats({ navigation: _navigation }) {
                             {winRate}%
                         </Text>
                         <Text size={moderateScale(11)} color={colors.TEXT_SECONDARY}>
-                            Win Rate
+                            {t('stats.winRateShort')}
                         </Text>
                     </Block>
                 </Block>
@@ -355,7 +357,7 @@ export default function Stats({ navigation: _navigation }) {
                         color={colors.TEXT}
                         style={{ marginBottom: 16, paddingHorizontal: 4 }}
                     >
-                        Overall Statistics
+                        {t('stats.overallStatistics')}
                     </Text>
 
                     {/* Large Games Played Card */}
@@ -401,7 +403,7 @@ export default function Stats({ navigation: _navigation }) {
                                 {overallStats.gamesPlayed}
                             </Text>
                             <Text size={moderateScale(18)} color={colors.TEXT_SECONDARY}>
-                                Games Played
+                                {t('stats.gamesPlayed')}
                             </Text>
                         </Block>
                     </Block>
@@ -409,13 +411,13 @@ export default function Stats({ navigation: _navigation }) {
                     {/* Stats Grid */}
                     <Block row style={styles.statsGrid}>
                         {renderStatCard(
-                            'Wins',
+                            t('stats.wins'),
                             overallStats.gamesWon,
                             'check-circle',
                             colors.SUCCESS,
                         )}
                         {renderStatCard(
-                            'Losses',
+                            t('stats.losses'),
                             overallStats.gamesLost,
                             'times-circle',
                             colors.ERROR,
@@ -424,12 +426,12 @@ export default function Stats({ navigation: _navigation }) {
 
                     <Block row style={[styles.statsGrid, { marginBottom: theme.SIZES.BASE * 2 }]}>
                         {renderStatCard(
-                            'Draws',
+                            t('stats.draws'),
                             overallStats.gamesDraw,
                             'minus-circle',
                             colors.INFO,
                         )}
-                        {renderStatCard('Win Rate', `${overallWinRate}%`, 'trophy', colors.WARNING)}
+                        {renderStatCard(t('stats.winRate'), `${overallWinRate}%`, 'trophy', colors.WARNING)}
                     </Block>
                 </Block>
 
@@ -443,7 +445,7 @@ export default function Stats({ navigation: _navigation }) {
                             style={{ marginBottom: 16, paddingHorizontal: 4 }}
                         >
                             <Text size={moderateScale(22)} bold color={colors.TEXT}>
-                                Matchup Statistics
+                                {t('stats.matchupStatistics')}
                             </Text>
                         </Block>
                         <Text
@@ -451,7 +453,7 @@ export default function Stats({ navigation: _navigation }) {
                             color={colors.TEXT_SECONDARY}
                             style={{ marginBottom: 12, paddingHorizontal: 4 }}
                         >
-                            Win rates against each opponent (PvP & Computer)
+                            {t('stats.matchupDescription')}
                         </Text>
                         <Block>
                             {sortedOpponents
@@ -500,7 +502,7 @@ export default function Stats({ navigation: _navigation }) {
                             color={colors.TEXT}
                             style={{ marginBottom: 8 }}
                         >
-                            No Games Yet
+                            {t('stats.noGamesYet')}
                         </Text>
                         <Text
                             size={moderateScale(14)}
@@ -508,7 +510,7 @@ export default function Stats({ navigation: _navigation }) {
                             center
                             style={{ maxWidth: 240 }}
                         >
-                            Start playing games to see your statistics here!
+                            {t('stats.noGamesHint')}
                         </Text>
                     </Block>
                 )}

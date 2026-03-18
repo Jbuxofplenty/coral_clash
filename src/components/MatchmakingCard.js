@@ -8,6 +8,7 @@ import {
     View,
 } from 'react-native';
 import { moderateScale } from 'react-native-size-matters';
+import { useTranslation } from 'react-i18next';
 import { useAlert, useTheme } from '../contexts';
 import Icon from './Icon';
 
@@ -24,6 +25,7 @@ const isTablet = width >= 768;
  * @param {Object} props.style - Additional styles
  */
 function MatchmakingCard({ searching, loading, onStartSearch, onStopSearch, style }) {
+    const { t } = useTranslation();
     const { colors } = useTheme();
     const { showAlert } = useAlert();
     const [isProcessing, setIsProcessing] = useState(false);
@@ -38,12 +40,12 @@ function MatchmakingCard({ searching, loading, onStartSearch, onStopSearch, styl
             } else {
                 const result = await onStartSearch();
                 if (result && !result.success && result.error) {
-                    showAlert('Cannot Join Matchmaking', result.error);
+                    showAlert(t('cards.matchmaking.cannotJoinTitle'), result.error);
                 }
             }
         } catch (error) {
             console.error('Error in matchmaking action:', error);
-            showAlert('Error', 'Something went wrong. Please try again.');
+            showAlert(t('common.error'), t('common.somethingWentWrong'));
         } finally {
             setIsProcessing(false);
         }
@@ -80,7 +82,7 @@ function MatchmakingCard({ searching, loading, onStartSearch, onStopSearch, styl
                         style={[styles.title, { color: textColor }]}
                         center
                     >
-                        {searching ? 'Searching for Opponent...' : 'Find Random Match'}
+                        {searching ? t('cards.matchmaking.searchingForOpponent') : t('cards.matchmaking.findRandomMatch')}
                     </Text>
                     <Text
                         size={isTablet ? moderateScale(10) : moderateScale(14)}
@@ -91,8 +93,8 @@ function MatchmakingCard({ searching, loading, onStartSearch, onStopSearch, styl
                         center
                     >
                         {searching
-                            ? 'Searching for opponent... · Tap to cancel'
-                            : 'Tap to join matchmaking queue'}
+                            ? t('cards.matchmaking.searchingHint')
+                            : t('cards.matchmaking.tapToJoin')}
                     </Text>
                 </Block>
             </Block>

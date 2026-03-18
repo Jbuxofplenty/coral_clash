@@ -1,6 +1,7 @@
 import { Icon } from 'galio-framework';
 import { useState } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useAlert, useAuth, useGamePreferences } from '../contexts';
 import { useFirebaseFunctions } from '../hooks';
 import BaseCoralClashBoard, { baseStyles } from './BaseCoralClashBoard';
@@ -37,6 +38,7 @@ const ComputerCoralClashBoard = ({
     difficulty = 'random',
     opponentData, // For online computer games - contains displayName and avatarKey
 }) => {
+    const { t } = useTranslation();
     const { user } = useAuth();
     const { isBoardFlipped } = useGamePreferences();
     const { showAlert } = useAlert();
@@ -151,15 +153,15 @@ const ComputerCoralClashBoard = ({
                 if (gameId) {
                     // Online game - request reset from server
                     showAlert(
-                        'Reset Game',
-                        'Request to reset this game? The computer will automatically approve.',
+                        t('components.computerBoard.resetGameTitle'),
+                        t('components.computerBoard.resetGameMessage'),
                         [
                             {
-                                text: 'Cancel',
+                                text: t('components.computerBoard.cancel'),
                                 style: 'cancel',
                             },
                             {
-                                text: 'Reset',
+                                text: t('components.computerBoard.reset'),
                                 style: 'destructive',
                                 onPress: async () => {
                                     try {
@@ -167,8 +169,8 @@ const ComputerCoralClashBoard = ({
                                     } catch (error) {
                                         console.error('Error requesting reset:', error);
                                         showAlert(
-                                            'Error',
-                                            'Failed to reset game. Please try again.',
+                                            t('components.pvpBoard.errorReminderTitle'),
+                                            t('components.pvpBoard.errorResetResponse'),
                                         );
                                     }
                                 },
@@ -177,13 +179,13 @@ const ComputerCoralClashBoard = ({
                     );
                 } else {
                     // Offline game - local reset
-                    showAlert('Reset Game', 'Are you sure you want to start a new game?', [
+                    showAlert(t('components.computerBoard.resetGameTitle'), t('components.computerBoard.resetGameMessage'), [
                         {
-                            text: 'Cancel',
+                            text: t('components.computerBoard.cancel'),
                             style: 'cancel',
                         },
                         {
-                            text: 'Reset',
+                            text: t('components.computerBoard.reset'),
                             style: 'destructive',
                             onPress: () => {
                                 coralClash.reset();
@@ -195,11 +197,11 @@ const ComputerCoralClashBoard = ({
         };
 
         const isResetDisabled = isGameOver || noMovesYet;
-        let resetSubtitle = 'Start a new game from the beginning';
+        let resetSubtitle = t('components.computerBoard.startNewGame');
         if (isGameOver) {
-            resetSubtitle = 'Game already ended';
+            resetSubtitle = t('components.computerBoard.gameEnded');
         } else if (noMovesYet) {
-            resetSubtitle = 'No moves have been made yet';
+            resetSubtitle = t('components.computerBoard.noMoves');
         }
 
         return (
@@ -219,7 +221,9 @@ const ComputerCoralClashBoard = ({
                     color={isResetDisabled ? colors.MUTED : '#f57c00'}
                 />
                 <View style={styles.menuItemText}>
-                    <Text style={[styles.menuItemTitle, { color: colors.TEXT }]}>Reset Game</Text>
+                    <Text style={[styles.menuItemTitle, { color: colors.TEXT }]}>
+                        {t('components.computerBoard.resetGame')}
+                    </Text>
                     <Text style={[styles.menuItemSubtitle, { color: colors.TEXT_SECONDARY }]}>
                         {resetSubtitle}
                     </Text>
@@ -239,7 +243,7 @@ const ComputerCoralClashBoard = ({
                 // Firestore listener will apply the undo automatically
             } catch (error) {
                 console.error('Error requesting undo:', error);
-                showAlert('Error', 'Failed to undo. Please try again.');
+                showAlert(t('components.pvpBoard.errorReminderTitle'), t('components.computerBoard.errorUndo'));
             }
         } else {
             // Offline game - local undo
