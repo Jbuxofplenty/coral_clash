@@ -2,6 +2,7 @@ import { Block, Text, theme } from 'galio-framework';
 import React from 'react';
 import { ActivityIndicator, Dimensions, StyleSheet, View } from 'react-native';
 import { moderateScale, verticalScale } from 'react-native-size-matters';
+import { useTranslation } from 'react-i18next';
 import { useAuth, useTheme } from '../contexts';
 import Avatar from './Avatar';
 import Icon from './Icon';
@@ -19,6 +20,7 @@ export default function GameHistoryCard({
     gameHistory = [],
     loading = false,
 }) {
+    const { t } = useTranslation();
     const { colors } = useTheme();
     const { user } = useAuth();
 
@@ -50,13 +52,13 @@ export default function GameHistoryCard({
             const diffDays = Math.floor(diffMs / 86400000);
 
             if (diffMins < 1) {
-                return 'Just now';
+                return t('cards.gameHistory.justNow');
             } else if (diffMins < 60) {
-                return `${diffMins}m ago`;
+                return `${diffMins}${t('cards.gameHistory.minutesAgo')}`;
             } else if (diffHours < 24) {
-                return `${diffHours}h ago`;
+                return `${diffHours}${t('cards.gameHistory.hoursAgo')}`;
             } else if (diffDays < 7) {
-                return `${diffDays}d ago`;
+                return `${diffDays}${t('cards.gameHistory.daysAgo')}`;
             } else {
                 // Format as date
                 return date.toLocaleDateString('en-US', {
@@ -78,7 +80,7 @@ export default function GameHistoryCard({
 
         if (status === 'cancelled') {
             return {
-                text: 'Game cancelled',
+                text: t('cards.gameHistory.cancelled'),
                 icon: 'ban',
                 color: colors.ERROR,
             };
@@ -91,7 +93,7 @@ export default function GameHistoryCard({
 
             if (isDraw) {
                 return {
-                    text: 'Draw',
+                    text: t('cards.gameHistory.draw'),
                     icon: 'minus-circle',
                     color: colors.WARNING,
                 };
@@ -114,13 +116,13 @@ export default function GameHistoryCard({
 
             if (didWin) {
                 return {
-                    text: 'You won',
+                    text: t('cards.gameHistory.won'),
                     icon: 'trophy',
                     color: colors.SUCCESS,
                 };
             } else {
                 return {
-                    text: 'You lost',
+                    text: t('cards.gameHistory.lost'),
                     icon: 'times-circle',
                     color: colors.ERROR,
                 };
@@ -128,7 +130,7 @@ export default function GameHistoryCard({
         }
 
         return {
-            text: 'Unknown',
+            text: t('cards.gameHistory.unknown'),
             icon: 'question-circle',
             color: colors.TEXT_SECONDARY,
         };
@@ -136,7 +138,7 @@ export default function GameHistoryCard({
 
     const getOpponentData = (game) => {
         if (!user)
-            return { id: null, avatarKey: 'dolphin', displayName: 'Opponent', isComputer: false };
+            return { id: null, avatarKey: 'dolphin', displayName: t('cards.gameHistory.opponent'), isComputer: false };
 
         const opponentId = game.creatorId === user.uid ? game.opponentId : game.creatorId;
 
@@ -148,8 +150,8 @@ export default function GameHistoryCard({
         // This allows computer users to show their display names (e.g., "Alex", "Jordan")
         // Fall back to 'Computer' only if no display name is available (old games)
         const displayName = isComputerGame
-            ? game.opponentDisplayName || game.creatorDisplayName || 'Computer'
-            : game.opponentDisplayName || 'Opponent';
+            ? game.opponentDisplayName || game.creatorDisplayName || t('cards.gameHistory.computer')
+            : game.opponentDisplayName || t('cards.gameHistory.opponent');
 
         return {
             id: opponentId,
@@ -167,25 +169,25 @@ export default function GameHistoryCard({
                 return {
                     icon: 'bolt',
                     iconFamily: 'font-awesome',
-                    label: 'Blitz',
+                    label: t('cards.gameHistory.blitz'),
                 };
             case 'normal':
                 return {
                     icon: 'clock-o',
                     iconFamily: 'font-awesome',
-                    label: 'Normal',
+                    label: t('cards.gameHistory.normal'),
                 };
             case 'unlimited':
                 return {
                     icon: 'infinite',
                     iconFamily: 'ionicon',
-                    label: 'Unlimited',
+                    label: t('cards.gameHistory.unlimited'),
                 };
             default:
                 return {
                     icon: 'clock-o',
                     iconFamily: 'font-awesome',
-                    label: 'Timed',
+                    label: t('cards.gameHistory.timed'),
                 };
         }
     };
@@ -216,13 +218,13 @@ export default function GameHistoryCard({
                             bold
                             style={[styles.title, { color: colors.TEXT }]}
                         >
-                            Game History
+                            {t('cards.gameHistory.title')}
                         </Text>
                         <Text
                             size={isTablet ? moderateScale(10) : moderateScale(12)}
                             style={[styles.subtitle, { color: colors.TEXT_SECONDARY }]}
                         >
-                            Recent games
+                            {t('cards.gameHistory.subtitle')}
                         </Text>
                     </Block>
                 </Block>
@@ -236,7 +238,7 @@ export default function GameHistoryCard({
                             size={isTablet ? moderateScale(10) : moderateScale(14)}
                             style={[styles.loadingText, { color: colors.TEXT_SECONDARY }]}
                         >
-                            Loading history...
+                            {t('cards.gameHistory.loading')}
                         </Text>
                     </Block>
                 ) : gameHistory.length === 0 ? (
@@ -252,13 +254,13 @@ export default function GameHistoryCard({
                             size={isTablet ? moderateScale(10) : moderateScale(14)}
                             style={[styles.emptyText, { color: colors.TEXT_SECONDARY }]}
                         >
-                            No game history
+                            {t('cards.gameHistory.noHistory')}
                         </Text>
                         <Text
                             size={isTablet ? moderateScale(10) : moderateScale(12)}
                             style={[styles.emptySubtext, { color: colors.TEXT_SECONDARY }]}
                         >
-                            Your completed games will appear here
+                            {t('cards.gameHistory.noHistoryHint')}
                         </Text>
                     </Block>
                 ) : (
@@ -301,7 +303,7 @@ export default function GameHistoryCard({
                                                 ]}
                                                 numberOfLines={1}
                                             >
-                                                vs {opponent.displayName}
+                                                {t('cards.gameHistory.vs')}{opponent.displayName}
                                             </Text>
                                             <Block row middle>
                                                 {completedDate && (

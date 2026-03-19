@@ -11,6 +11,7 @@ import {
     View,
     useWindowDimensions,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { Icon } from '../components';
 import Coral from '../components/Coral';
 import EmptyBoard from '../components/EmptyBoard';
@@ -25,6 +26,7 @@ export default function ScenarioBoard({ route, navigation }) {
     const { scenario } = route.params;
     const { colors } = useTheme();
     const { width } = useWindowDimensions();
+    const { t } = useTranslation();
     const coralClash = useCoralClash();
     const [updateCounter, setUpdateCounter] = useState(0);
     const [showingMoves, setShowingMoves] = useState(false);
@@ -359,7 +361,7 @@ export default function ScenarioBoard({ route, navigation }) {
                                 color='white'
                             />
                             <Text style={styles.autoPlayText}>
-                                {autoPlayEnabled ? 'Pause Auto-Play' : 'Play Demo'}
+                                {autoPlayEnabled ? t('scenarioBoard.pauseAutoPlay') : t('scenarioBoard.playDemo')}
                             </Text>
                         </TouchableOpacity>
                     )}
@@ -420,7 +422,7 @@ export default function ScenarioBoard({ route, navigation }) {
                             color={colors.PRIMARY}
                         />
                         <Text style={[styles.descriptionTitle, { color: colors.TEXT }]}>
-                            Explanation
+                            {t('scenarioBoard.explanation')}
                         </Text>
                     </View>
                     <Text style={[styles.description, { color: colors.TEXT }]}>
@@ -435,7 +437,7 @@ export default function ScenarioBoard({ route, navigation }) {
                 >
                     <Icon name='arrow-left' family='font-awesome' size={20} color={colors.TEXT} />
                     <Text style={[styles.backButtonText, { color: colors.TEXT }]}>
-                        Back to Guide
+                        {t('scenarioBoard.backToGuide')}
                     </Text>
                 </TouchableOpacity>
             </ScrollView>

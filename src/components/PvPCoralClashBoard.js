@@ -2,6 +2,7 @@ import { calculateUndoMoveCount } from '@jbuxofplenty/coral-clash';
 import { Icon } from 'galio-framework';
 import { useEffect, useState } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { db, doc, onSnapshot } from '../config/firebase';
 import { useAlert, useAuth, useGamePreferences } from '../contexts';
 import { useFirebaseFunctions } from '../hooks';
@@ -14,9 +15,9 @@ import GameRequestBanner from './GameRequestBanner';
  * @param {string} discriminator - The 4-digit discriminator
  * @returns {string} Formatted name like "Username #1234"
  */
-const formatDisplayName = (displayName, discriminator) => {
+const formatDisplayName = (displayName, discriminator, t) => {
     if (!displayName) {
-        return 'Player';
+        return t('components.pvpBoard.player');
     }
     if (!discriminator) {
         return displayName;
@@ -32,6 +33,7 @@ const formatDisplayName = (displayName, discriminator) => {
  * - Real-time sync via Firestore
  */
 const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notificationStatus }) => {
+    const { t } = useTranslation();
     const { user } = useAuth();
     const { isBoardFlipped } = useGamePreferences();
     const { showAlert } = useAlert();
@@ -132,15 +134,15 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
     // Handler for undo request from control bar
     const handleUndoRequest = async (clearVisibleMoves) => {
         showAlert(
-            'Request Undo',
-            `Request to undo the last move? ${liveOpponentData?.displayName || 'Your opponent'} will need to approve.`,
+            t('components.pvpBoard.requestUndoTitle'),
+            t('components.pvpBoard.requestUndoMessage', { opponentName: liveOpponentData?.displayName || t('components.pvpBoard.opponent') }),
             [
                 {
-                    text: 'Cancel',
+                    text: t('components.pvpBoard.cancel'),
                     style: 'cancel',
                 },
                 {
-                    text: 'Request',
+                    text: t('components.pvpBoard.request'),
                     onPress: async () => {
                         try {
                             // Clear visible moves immediately when undo is requested
@@ -152,7 +154,7 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
                             await requestUndo({ gameId, moveCount: 1 });
                         } catch (error) {
                             console.error('Error requesting undo:', error);
-                            showAlert('Error', 'Failed to send undo request. Please try again.');
+                            showAlert(t('components.pvpBoard.errorReminderTitle'), t('components.pvpBoard.errorUndoRequest'));
                         }
                     },
                 },
@@ -172,7 +174,7 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
             // No need to show alert - the banner will disappear automatically via Firestore listener
         } catch (error) {
             console.error('Error responding to undo request:', error);
-            showAlert('Error', 'Failed to respond to undo request. Please try again.');
+            showAlert(t('components.pvpBoard.errorReminderTitle'), t('components.pvpBoard.errorUndoResponse'));
         }
     };
 
@@ -183,7 +185,7 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
             // No need to show alert - the banner will disappear automatically via Firestore listener
         } catch (error) {
             console.error('Error responding to reset request:', error);
-            showAlert('Error', 'Failed to respond to reset request. Please try again.');
+            showAlert(t('components.pvpBoard.errorReminderTitle'), t('components.pvpBoard.errorResetResponse'));
         }
     };
 
@@ -194,7 +196,7 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
             await respondToUndoRequest({ gameId, approve: false });
         } catch (error) {
             console.error('Error canceling undo request:', error);
-            showAlert('Error', 'Failed to cancel undo request. Please try again.');
+            showAlert(t('components.pvpBoard.errorReminderTitle'), t('components.pvpBoard.errorCancelUndo'));
         }
     };
 
@@ -205,7 +207,7 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
             await respondToResetRequest({ gameId, approve: false });
         } catch (error) {
             console.error('Error canceling reset request:', error);
-            showAlert('Error', 'Failed to cancel reset request. Please try again.');
+            showAlert(t('components.pvpBoard.errorReminderTitle'), t('components.pvpBoard.errorCancelReset'));
         }
     };
 
@@ -213,12 +215,12 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
     const handleRemindOpponent = async () => {
         try {
             await remindOpponent({ gameId });
-            showAlert('Success', 'Reminder sent to your opponent.');
+            showAlert(t('components.pvpBoard.reminderSentTitle'), t('components.pvpBoard.reminderSentMessage'));
         } catch (error) {
             console.error('Error sending reminder:', error);
             // Extract error message from Firebase error
-            const errorMessage = error.message || 'Failed to send reminder. Please try again.';
-            showAlert('Error', errorMessage);
+            const errorMessage = error.message || t('components.pvpBoard.errorReminderMessage');
+            showAlert(t('components.pvpBoard.errorReminderTitle'), errorMessage);
         }
     };
 
@@ -312,15 +314,15 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
             await new Promise((resolve) => setTimeout(resolve, 300));
 
             showAlert(
-                'Request Reset',
-                `Request to reset this game? ${liveOpponentData?.displayName || 'Your opponent'} will need to approve.`,
+                t('components.pvpBoard.requestResetTitle'),
+                t('components.pvpBoard.requestResetMessage', { opponentName: liveOpponentData?.displayName || t('components.pvpBoard.opponent') }),
                 [
                     {
-                        text: 'Cancel',
+                        text: t('components.pvpBoard.cancel'),
                         style: 'cancel',
                     },
                     {
-                        text: 'Request',
+                        text: t('components.pvpBoard.request'),
                         style: 'destructive',
                         onPress: async () => {
                             try {
@@ -328,8 +330,8 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
                             } catch (error) {
                                 console.error('Error requesting reset:', error);
                                 showAlert(
-                                    'Error',
-                                    'Failed to send reset request. Please try again.',
+                                    t('components.pvpBoard.errorReminderTitle'),
+                                    t('components.pvpBoard.errorResetResponse'),
                                 );
                             }
                         },
@@ -340,13 +342,13 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
 
         // Disable reset if game is over, no moves yet, or if there's a pending undo request
         const isResetDisabled = isGameOver || noMovesYet || undoRequestData;
-        let resetSubtitle = 'Ask opponent to reset the game';
+        let resetSubtitle = t('components.pvpBoard.askOpponentReset');
         if (isGameOver) {
-            resetSubtitle = 'Game already ended';
+            resetSubtitle = t('components.pvpBoard.gameEnded');
         } else if (noMovesYet) {
-            resetSubtitle = 'No moves have been made yet';
+            resetSubtitle = t('components.pvpBoard.noMoves');
         } else if (undoRequestData) {
-            resetSubtitle = 'Pending undo request must be resolved first';
+            resetSubtitle = t('components.pvpBoard.pendingUndo');
         }
 
         return (
@@ -379,7 +381,7 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
                                 },
                             ]}
                         >
-                            Request Reset
+                            {t('components.pvpBoard.requestReset')}
                         </Text>
                         <Text style={[styles.menuItemSubtitle, { color: colors.TEXT_SECONDARY }]}>
                             {resetSubtitle}
@@ -392,7 +394,7 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
                     // Calculate if reminder can be sent
                     const canSendReminder = !isGameOver && gameData?.currentTurn !== user?.uid;
                     let isReminderDisabled = !canSendReminder;
-                    let reminderSubtitle = 'Remind opponent to take their turn';
+                    let reminderSubtitle = t('components.pvpBoard.remindOpponentSubtitle');
 
                     // Check 24-hour cooldown
                     if (canSendReminder && lastReminderSent) {
@@ -408,14 +410,14 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
                             const hoursRemaining = Math.ceil(
                                 (twentyFourHours - timeSinceLastReminder) / (60 * 60 * 1000),
                             );
-                            reminderSubtitle = `Available in ${hoursRemaining} hour(s)`;
+                            reminderSubtitle = t('components.pvpBoard.availableInHours', { hours: hoursRemaining });
                         }
                     }
 
                     if (isGameOver) {
-                        reminderSubtitle = 'Game already ended';
+                        reminderSubtitle = t('components.pvpBoard.gameEnded');
                     } else if (gameData?.currentTurn === user?.uid) {
-                        reminderSubtitle = "It's your turn";
+                        reminderSubtitle = t('components.pvpBoard.yourTurn');
                     }
 
                     return (
@@ -450,7 +452,7 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
                                         },
                                     ]}
                                 >
-                                    Remind Opponent
+                                    {t('components.pvpBoard.remindOpponent')}
                                 </Text>
                                 <Text
                                     style={[
@@ -483,12 +485,12 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
     const shouldFlipBoard = userIsBlack !== isBoardFlipped;
 
     // Get opponent info from game data (already formatted with discriminator from backend)
-    let opponentName = liveOpponentData?.displayName || 'Opponent';
+    let opponentName = liveOpponentData?.displayName || t('components.pvpBoard.opponent');
     let opponentAvatar = liveOpponentData?.avatarKey || 'dolphin';
 
     // Format current user's name with discriminator
     // Use fallback if discriminator hasn't loaded yet
-    const userName = formatDisplayName(user?.displayName, user?.discriminator);
+    const userName = formatDisplayName(user?.displayName, user?.discriminator, t);
 
     // User should ALWAYS see themselves at bottom, opponent at top
     // The board flip only affects visual rendering, not player positions
@@ -522,7 +524,10 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
                 return (
                     <GameRequestBanner
                         mode='waiting'
-                        message={`Waiting for ${liveOpponentData?.displayName || 'opponent'} to respond to undo ${dynamicMoveCount} move(s) request...`}
+                        message={t('components.pvpBoard.waitingUndoResponse', {
+                            opponentName: liveOpponentData?.displayName || t('components.pvpBoard.opponent'),
+                            moveCount: dynamicMoveCount
+                        })}
                         onCancel={handleCancelUndoRequest}
                     />
                 );
@@ -531,7 +536,10 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
                 return (
                     <GameRequestBanner
                         mode='approval'
-                        message={`${liveOpponentData?.displayName || 'Opponent'} wants to undo ${dynamicMoveCount} move(s)`}
+                        message={t('components.pvpBoard.opponentWantsUndo', {
+                            opponentName: liveOpponentData?.displayName || t('components.pvpBoard.opponent'),
+                            moveCount: dynamicMoveCount
+                        })}
                         onDecline={() => handleUndoResponse(false, clearVisibleMoves)}
                         onAccept={() => handleUndoResponse(true, clearVisibleMoves)}
                     />
@@ -545,7 +553,9 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
                 return (
                     <GameRequestBanner
                         mode='waiting'
-                        message={`Waiting for ${liveOpponentData?.displayName || 'opponent'} to respond to reset request...`}
+                        message={t('components.pvpBoard.waitingResetResponse', {
+                            opponentName: liveOpponentData?.displayName || t('components.pvpBoard.opponent')
+                        })}
                         onCancel={handleCancelResetRequest}
                     />
                 );
@@ -554,7 +564,9 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
                 return (
                     <GameRequestBanner
                         mode='approval'
-                        message={`${liveOpponentData?.displayName || 'Opponent'} wants to reset the game`}
+                        message={t('components.pvpBoard.opponentWantsReset', {
+                            opponentName: liveOpponentData?.displayName || t('components.pvpBoard.opponent')
+                        })}
                         onDecline={() => handleResetResponse(false)}
                         onAccept={() => handleResetResponse(true)}
                     />

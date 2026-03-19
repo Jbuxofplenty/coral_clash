@@ -12,7 +12,7 @@ import {
     View
 } from 'react-native';
 import { moderateScale } from 'react-native-size-matters';
-import { ANDROID_STORE_URL, IOS_STORE_URL } from '../constants';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../contexts';
 import { deletePassAndPlayGame, getPassAndPlayGames } from '../utils/passAndPlayStorage';
 import Avatar from './Avatar';
@@ -37,6 +37,7 @@ export default function PlayWithFriendCard({
     onPassAndPlay,
     onResumePassAndPlay,
 }) {
+    const { t } = useTranslation();
     const { colors } = useTheme();
     const [optionsModalVisible, setOptionsModalVisible] = useState(false);
     const [friendModalVisible, setFriendModalVisible] = useState(false);
@@ -82,7 +83,7 @@ export default function PlayWithFriendCard({
 
     const handleTextFriend = async () => {
         try {
-            const message = `Let's play Coral Clash! 🦀\n\nDownload here:\niOS: ${IOS_STORE_URL}\n\nAndroid: ${ANDROID_STORE_URL}`;
+            const message = t('cards.playWithFriend.shareMessage');
             await Share.share({
                 message,
             });
@@ -194,7 +195,7 @@ export default function PlayWithFriendCard({
                                     },
                                 ]}
                             >
-                                Play with Friend
+                                {t('cards.playWithFriend.title')}
                             </Text>
                             <Text
                                 style={[
@@ -204,7 +205,7 @@ export default function PlayWithFriendCard({
                                     },
                                 ]}
                             >
-                                Invite a friend to play
+                                {t('cards.playWithFriend.description')}
                             </Text>
                         </Block>
                     </Block>
@@ -253,7 +254,7 @@ export default function PlayWithFriendCard({
                                     },
                                 ]}
                             >
-                                Play with Friend
+                                {t('cards.playWithFriend.modalTitle')}
                             </Text>
                             <TouchableOpacity onPress={handleCloseOptionsModal}>
                                 <Icon
@@ -302,7 +303,7 @@ export default function PlayWithFriendCard({
                                             },
                                         ]}
                                     >
-                                        Invite Friend
+                                        {t('cards.playWithFriend.inviteFriend')}
                                     </Text>
                                     <Text
                                         style={[
@@ -312,7 +313,7 @@ export default function PlayWithFriendCard({
                                             },
                                         ]}
                                     >
-                                        Send a game invitation to a friend
+                                        {t('cards.playWithFriend.inviteDescription')}
                                     </Text>
                                 </Block>
                                 <Icon
@@ -358,7 +359,7 @@ export default function PlayWithFriendCard({
                                             },
                                         ]}
                                     >
-                                        Text Invite
+                                        {t('cards.playWithFriend.textInvite')}
                                     </Text>
                                     <Text
                                         style={[
@@ -368,7 +369,7 @@ export default function PlayWithFriendCard({
                                             },
                                         ]}
                                     >
-                                        Send invitations via text
+                                        {t('cards.playWithFriend.textInviteDescription')}
                                     </Text>
                                 </Block>
                                 <Icon
@@ -414,7 +415,7 @@ export default function PlayWithFriendCard({
                                             },
                                         ]}
                                     >
-                                        Pass & Play
+                                        {t('cards.playWithFriend.passAndPlay')}
                                     </Text>
                                     <Text
                                         style={[
@@ -424,7 +425,7 @@ export default function PlayWithFriendCard({
                                             },
                                         ]}
                                     >
-                                        Play locally on this device
+                                        {t('cards.playWithFriend.passAndPlayDescription')}
                                     </Text>
                                 </Block>
                                 <Icon
@@ -475,7 +476,7 @@ export default function PlayWithFriendCard({
                                     },
                                 ]}
                             >
-                                Select a Friend
+                                {t('cards.playWithFriend.selectFriend')}
                             </Text>
                             <TouchableOpacity onPress={handleCloseFriendModal}>
                                 <Icon
@@ -514,7 +515,7 @@ export default function PlayWithFriendCard({
                                             color: colors.TEXT,
                                         },
                                     ]}
-                                    placeholder='Search friends...'
+                                    placeholder={t('cards.playWithFriend.searchFriends')}
                                     placeholderTextColor={colors.TEXT_SECONDARY}
                                     value={searchQuery}
                                     onChangeText={setSearchQuery}
@@ -558,8 +559,8 @@ export default function PlayWithFriendCard({
                                         ]}
                                     >
                                         {searchQuery
-                                            ? 'No friends found'
-                                            : 'No friends yet. Add friends to play!'}
+                                            ? t('cards.playWithFriend.noFriendsFound')
+                                            : t('cards.playWithFriend.noFriendsYet')}
                                     </Text>
                                 </Block>
                             ) : (
@@ -640,7 +641,7 @@ export default function PlayWithFriendCard({
                                     },
                                 ]}
                             >
-                                Pass & Play Games
+                                {t('cards.playWithFriend.passAndPlayGames')}
                             </Text>
                             <TouchableOpacity onPress={handleClosePassAndPlayModal}>
                                 <Icon
@@ -692,7 +693,7 @@ export default function PlayWithFriendCard({
                                         },
                                     ]}
                                 >
-                                    Start New Game
+                                    {t('cards.playWithFriend.startNewGame')}
                                 </Text>
                                 <Icon
                                     name='chevron-right'
@@ -717,7 +718,7 @@ export default function PlayWithFriendCard({
                                             },
                                         ]}
                                     >
-                                        No active games
+                                        {t('cards.playWithFriend.noActiveGames')}
                                     </Text>
                                 </Block>
                             ) : (
@@ -749,7 +750,7 @@ export default function PlayWithFriendCard({
                                                     },
                                                 ]}
                                             >
-                                                vs Guest 1
+                                                {t('cards.playWithFriend.vsGuest')}
                                             </Text>
                                             <Text
                                                 style={[
@@ -760,7 +761,7 @@ export default function PlayWithFriendCard({
                                                 ]}
                                             >
                                                 {new Date(game.updatedAt).toLocaleDateString()} •{' '}
-                                                {game.timeControl?.type || 'Unlimited'}
+                                                {game.timeControl?.type || t('cards.playWithFriend.unlimited')}
                                             </Text>
                                         </Block>
                                         <TouchableOpacity

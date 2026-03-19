@@ -1,6 +1,7 @@
 import { FIXTURES as FIXTURE_FILES } from '@jbuxofplenty/coral-clash/game/__fixtures__';
 import React, { useState } from 'react';
 import { Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useAlert } from '../contexts';
 import Icon from './Icon';
 
@@ -41,13 +42,14 @@ const FIXTURES = [
 ];
 
 const FixtureLoaderModal = ({ visible, onClose, onSelectFixture }) => {
+    const { t } = useTranslation();
     const [selectedFixture, setSelectedFixture] = useState(null);
     const [selectedMode, setSelectedMode] = useState('computer'); // Default to computer mode
     const { showAlert } = useAlert();
 
     const gameModes = [
-        { value: 'computer', label: 'vs Computer', icon: 'computer' },
-        { value: 'passandplay', label: 'Pass & Play', icon: 'people' },
+        { value: 'computer', label: t('components.fixtureLoader.vsComputer'), icon: 'computer' },
+        { value: 'passandplay', label: t('components.fixtureLoader.passAndPlay'), icon: 'people' },
     ];
 
     const handleSelectFixture = (fixtureName) => {
@@ -74,7 +76,7 @@ const FixtureLoaderModal = ({ visible, onClose, onSelectFixture }) => {
             setSelectedFixture(null);
             setSelectedMode('computer');
         } catch (error) {
-            showAlert('Error', `Failed to load fixture: ${error.message}`);
+            showAlert(t('components.fixtureLoader.error'), `${t('components.fixtureLoader.failedToLoad')}: ${error.message}`);
         }
     };
 
@@ -83,7 +85,7 @@ const FixtureLoaderModal = ({ visible, onClose, onSelectFixture }) => {
             <View style={styles.modalOverlay}>
                 <View style={styles.modalContent}>
                     <View style={styles.modalHeader}>
-                        <Text style={styles.modalTitle}>Load Game State</Text>
+                        <Text style={styles.modalTitle}>{t('components.fixtureLoader.title')}</Text>
                         <TouchableOpacity onPress={onClose} style={styles.closeButton}>
                             <Icon name='close' family='MaterialIcons' size={24} color='#333' />
                         </TouchableOpacity>
@@ -126,7 +128,7 @@ const FixtureLoaderModal = ({ visible, onClose, onSelectFixture }) => {
                     {selectedFixture && (
                         <View style={styles.modeSelector}>
                             <View style={styles.modeSelectorHeader}>
-                                <Text style={styles.modeSelectorTitle}>Game Mode:</Text>
+                                <Text style={styles.modeSelectorTitle}>{t('components.fixtureLoader.gameMode')}</Text>
                                 <TouchableOpacity
                                     onPress={handleCancelSelection}
                                     style={styles.cancelButton}
@@ -137,7 +139,7 @@ const FixtureLoaderModal = ({ visible, onClose, onSelectFixture }) => {
                                         size={20}
                                         color='#666'
                                     />
-                                    <Text style={styles.cancelButtonText}>Back</Text>
+                                    <Text style={styles.cancelButtonText}>{t('components.fixtureLoader.back')}</Text>
                                 </TouchableOpacity>
                             </View>
                             <View style={styles.modeOptions}>
@@ -175,11 +177,11 @@ const FixtureLoaderModal = ({ visible, onClose, onSelectFixture }) => {
                     <View style={styles.modalFooter}>
                         {selectedFixture ? (
                             <TouchableOpacity style={styles.loadButton} onPress={handleLoadFixture}>
-                                <Text style={styles.loadButtonText}>Load Game</Text>
+                                <Text style={styles.loadButtonText}>{t('components.fixtureLoader.loadGame')}</Text>
                             </TouchableOpacity>
                         ) : (
                             <Text style={styles.footerText}>
-                                💡 Fixtures are from shared/game/__fixtures__/
+                                {t('components.fixtureLoader.fixturesHint')}
                             </Text>
                         )}
                     </View>

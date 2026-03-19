@@ -11,11 +11,13 @@ import {
     View,
 } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { useTranslation } from 'react-i18next';
 
 import { useAlert, useAuth, useTheme } from '../contexts';
 import { useFirebaseFunctions } from '../hooks';
 
 export default function ReportIssue({ navigation, route }) {
+    const { t } = useTranslation();
     const { user } = useAuth();
     const { colors } = useTheme();
     const { showAlert } = useAlert();
@@ -34,22 +36,22 @@ export default function ReportIssue({ navigation, route }) {
 
         // Validate inputs
         if (!subject.trim()) {
-            showAlert('Missing Information', 'Please enter a subject for your issue.');
+            showAlert(t('reportIssue.validation.missingSubjectTitle'), t('reportIssue.validation.missingSubjectMessage'));
             return;
         }
 
         if (subject.trim().length < 3) {
-            showAlert('Invalid Subject', 'Subject must be at least 3 characters long.');
+            showAlert(t('reportIssue.validation.invalidSubjectTitle'), t('reportIssue.validation.invalidSubjectMessage'));
             return;
         }
 
         if (!description.trim()) {
-            showAlert('Missing Information', 'Please enter a description for your issue.');
+            showAlert(t('reportIssue.validation.missingDescriptionTitle'), t('reportIssue.validation.missingDescriptionMessage'));
             return;
         }
 
         if (description.trim().length < 10) {
-            showAlert('Invalid Description', 'Description must be at least 10 characters long.');
+            showAlert(t('reportIssue.validation.invalidDescriptionTitle'), t('reportIssue.validation.invalidDescriptionMessage'));
             return;
         }
 
@@ -64,11 +66,11 @@ export default function ReportIssue({ navigation, route }) {
 
             if (result.success) {
                 showAlert(
-                    'Issue Submitted',
-                    `Thank you for your feedback! Your issue has been submitted${result.githubIssueNumber ? ` (#${result.githubIssueNumber})` : ''}.`,
+                    t('reportIssue.success.title'),
+                    `${t('reportIssue.success.message')}${result.githubIssueNumber ? ` (#${result.githubIssueNumber})` : ''}.`,
                     [
                         {
-                            text: 'OK',
+                            text: t('reportIssue.success.ok'),
                             onPress: () => navigation.goBack(),
                         },
                     ],
@@ -77,8 +79,8 @@ export default function ReportIssue({ navigation, route }) {
         } catch (error) {
             console.error('Error submitting issue:', error);
             showAlert(
-                'Submission Failed',
-                'Failed to submit your issue. Please check your connection and try again.',
+                t('reportIssue.error.title'),
+                t('reportIssue.error.message'),
             );
         } finally {
             setSubmitting(false);
@@ -122,12 +124,12 @@ export default function ReportIssue({ navigation, route }) {
                                 </View>
                                 <View style={styles.infoBannerContent}>
                                     <Text size={16} bold color={colors.TEXT} style={{ marginBottom: 4 }}>
-                                        {gameSnapshot ? 'Bug Report' : 'Feedback & Issues'}
+                                        {gameSnapshot ? t('reportIssue.bugReportTitle') : t('reportIssue.feedbackTitle')}
                                     </Text>
                                     <Text size={14} color={colors.TEXT_SECONDARY}>
                                         {gameSnapshot
-                                            ? 'Report a bug with the current game state. The game position will be included in your report.'
-                                            : 'Submit feedback or report an issue. We appreciate your input!'}
+                                            ? t('reportIssue.bugReportDescription')
+                                            : t('reportIssue.feedbackDescription')}
                                     </Text>
                                 </View>
                             </View>
@@ -135,7 +137,7 @@ export default function ReportIssue({ navigation, route }) {
                     {/* Subject Input */}
                     <Block style={styles.section}>
                         <Text size={16} bold color={colors.TEXT} style={styles.label}>
-                            Subject
+                            {t('reportIssue.subject')}
                         </Text>
                         <TextInput
                             style={[
@@ -146,7 +148,7 @@ export default function ReportIssue({ navigation, route }) {
                                     borderColor: colors.BORDER_COLOR,
                                 },
                             ]}
-                            placeholder='Brief summary of the issue'
+                            placeholder={t('reportIssue.subjectPlaceholder')}
                             placeholderTextColor={colors.TEXT_SECONDARY}
                             value={subject}
                             onChangeText={setSubject}
@@ -167,7 +169,7 @@ export default function ReportIssue({ navigation, route }) {
                     {/* Description Input */}
                     <Block style={styles.section}>
                         <Text size={16} bold color={colors.TEXT} style={styles.label}>
-                            Description
+                            {t('reportIssue.description')}
                         </Text>
                         <TextInput
                             style={[
@@ -179,7 +181,7 @@ export default function ReportIssue({ navigation, route }) {
                                     borderColor: colors.BORDER_COLOR,
                                 },
                             ]}
-                            placeholder='Detailed description of the issue or feedback...'
+                            placeholder={t('reportIssue.descriptionPlaceholder')}
                             placeholderTextColor={colors.TEXT_SECONDARY}
                             value={description}
                             onChangeText={setDescription}
@@ -210,11 +212,11 @@ export default function ReportIssue({ navigation, route }) {
                                 ]}
                             >
                                 <Text size={14} color={colors.TEXT}>
-                                    ✓ Game state will be included
+                                    {t('reportIssue.gameStateIncluded')}
                                 </Text>
                                 <Text size={12} color={colors.TEXT_SECONDARY} style={{ marginTop: 4 }}>
-                                    Turn: {gameSnapshot.turn === 'w' ? 'White' : 'Black'}
-                                    {gameSnapshot.isGameOver && ' • Game Over'}
+                                    {t('reportIssue.turn')}: {gameSnapshot.turn === 'w' ? t('reportIssue.white') : t('reportIssue.black')}
+                                    {gameSnapshot.isGameOver && ` • ${t('reportIssue.gameOver')}`}
                                 </Text>
                             </Block>
                         </Block>
@@ -237,7 +239,7 @@ export default function ReportIssue({ navigation, route }) {
                                 <ActivityIndicator size='small' color='#fff' />
                             ) : (
                                 <Text bold size={16} color='#fff'>
-                                    Submit Issue
+                                    {t('reportIssue.submitIssue')}
                                 </Text>
                             )}
                         </TouchableOpacity>
@@ -247,7 +249,7 @@ export default function ReportIssue({ navigation, route }) {
                             {!user && (
                                 <Block style={styles.section}>
                                     <Text size={12} color={colors.TEXT_SECONDARY} center>
-                                        Note: You're submitting anonymously. Log in to track your issues.
+                                        {t('reportIssue.anonymousNote')}
                                     </Text>
                                 </Block>
                             )}

@@ -226,19 +226,20 @@ const initiateOnDeviceConversionMeasurement = async (emailAddress) => {
 // Connect to emulators in development
 if (USE_EMULATOR) {
     // Determine the emulator host dynamically:
-    // - Android emulator always uses 10.0.2.2 (special alias for host machine)
-    // - iOS (simulator and physical devices) can use your Mac's local IP
-    //   The Mac's local IP works for BOTH iOS Simulator and physical iPhone on same WiFi
-    // - Set EXPO_PUBLIC_EMULATOR_HOST to override (useful if IP changes or for localhost)
+    // - Android emulator: Always uses 10.0.2.2 (special alias for host machine's localhost)
+    // - iOS Simulator: Uses localhost (127.0.0.1) - works perfectly!
+    // - Physical devices (iOS/Android): MUST set EXPO_PUBLIC_EMULATOR_HOST to your Mac's local IP
+    //   Find your IP: ipconfig getifaddr en0 (usually 192.168.x.x)
+    //   Physical devices can't reach localhost - they need your computer's network IP
     let EMULATOR_HOST;
 
     if (Platform.OS === 'android') {
         // Android emulator uses special IP that maps to host's localhost
         EMULATOR_HOST = process.env.EXPO_PUBLIC_EMULATOR_HOST || '10.0.2.2';
     } else {
-        // iOS: Use Mac's local IP (works for both simulator and physical devices)
-        // Fallback to localhost if not set
-        EMULATOR_HOST = process.env.EXPO_PUBLIC_EMULATOR_HOST || '127.0.0.1';
+        // iOS Simulator: Use localhost (works great!)
+        // Physical iOS device: Use Mac's local IP from EXPO_PUBLIC_EMULATOR_HOST
+        EMULATOR_HOST = process.env.EXPO_PUBLIC_EMULATOR_HOST || 'localhost';
     }
 
     // Connect to Auth Emulator (OAuth providers like Google won't work, use email/password)
@@ -253,6 +254,9 @@ if (USE_EMULATOR) {
     connectFunctionsEmulator(functions, EMULATOR_HOST, 5001);
 
     console.log(`🔧 Connected to Firebase Emulators at ${EMULATOR_HOST}`);
+    if (EMULATOR_HOST === 'localhost' && Platform.OS === 'ios') {
+        console.log('📱 Using localhost (iOS Simulator). For physical device, set EXPO_PUBLIC_EMULATOR_HOST to your Mac\'s IP');
+    }
 }
 
 export {

@@ -19,6 +19,7 @@ import {
     View,
     useWindowDimensions,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAlert, useAuth, useGamePreferences, useTheme } from '../contexts';
 import { CoralClashProvider } from '../contexts/CoralClashContext';
@@ -79,6 +80,7 @@ const BaseCoralClashBoard = ({
     isComputerThinking = false,
     difficulty = 'random', // Default to random for offline games
 }) => {
+    const { t } = useTranslation();
     const { width, height } = useWindowDimensions();
     const _insets = useSafeAreaInsets(); // Reserved for future safe area handling if needed
     const { colors } = useTheme();
@@ -289,21 +291,21 @@ const BaseCoralClashBoard = ({
                     if (userColor) {
                         const isUsersTurn = currentTurn === userColor;
                         if (isUsersTurn) {
-                            message = 'Your turn';
+                            message = t('components.baseBoard.yourTurn');
                         } else if (opponentType === 'computer') {
                             // For computer games, use the name from player data (e.g., "Alex #2847")
                             // User is always bottom, so opponent is top
-                            const opponentName = topPlayerData?.name || 'Computer';
-                            message = `${opponentName}'s turn`;
+                            const opponentName = topPlayerData?.name || t('components.baseBoard.computer');
+                            message = t('components.baseBoard.opponentTurn', { opponentName });
                         } else {
                             // For PvP: Opponent is always topPlayerData (user is always bottom)
-                            const opponentName = topPlayerData?.name || 'Opponent';
-                            message = `${opponentName}'s turn`;
+                            const opponentName = topPlayerData?.name || t('components.baseBoard.opponent');
+                            message = t('components.baseBoard.opponentTurn', { opponentName });
                         }
                     } else {
                         // Fallback for games without userColor
-                        const currentPlayerColor = currentTurn === 'w' ? 'White' : 'Black';
-                        message = `${currentPlayerColor}'s turn`;
+                        const currentPlayerColor = currentTurn === 'w' ? t('components.baseBoard.white') : t('components.baseBoard.black');
+                        message = t('components.baseBoard.playerTurn', { playerColor: currentPlayerColor });
                     }
 
                     setTurnNotification({
@@ -323,7 +325,7 @@ const BaseCoralClashBoard = ({
                 }
             }
         },
-        [coralClash, gameId, userColor, opponentType, topPlayerData],
+        [coralClash, gameId, userColor, opponentType, topPlayerData, t],
     );
 
     // Centralized game actions and state management
@@ -398,10 +400,10 @@ const BaseCoralClashBoard = ({
                 forceUpdate((n) => n + 1);
             } catch (error) {
                 console.error(`Failed to load game state on ${Platform.OS}:`, error);
-                showAlert('Error', 'Failed to load game state');
+                showAlert(t('components.baseBoard.errorReminderTitle'), t('components.baseBoard.errorLoadState'));
             }
         }
-    }, [gameState, gameStateLoaded, fixture, coralClash, width, showAlert, clearVisibleMoves]);
+    }, [gameState, gameStateLoaded, fixture, coralClash, width, showAlert, clearVisibleMoves, t]);
 
     // Load fixture if provided (for dev mode scenarios)
     useEffect(() => {
@@ -421,10 +423,10 @@ const BaseCoralClashBoard = ({
                 forceUpdate((n) => n + 1); // Force re-render to show coral and turn state
             } catch (error) {
                 console.error('Failed to load fixture:', error);
-                showAlert('Error', 'Failed to load game state');
+                showAlert(t('components.baseBoard.errorReminderTitle'), t('components.baseBoard.errorLoadState'));
             }
         }
-    }, [fixture, fixtureLoaded, coralClash, showAlert, clearVisibleMoves]);
+    }, [fixture, fixtureLoaded, coralClash, showAlert, clearVisibleMoves, t]);
 
     // Firestore listener is now managed in useGameActions hook
     // No need for duplicate listener here
@@ -943,32 +945,32 @@ const BaseCoralClashBoard = ({
                 const didUserWin = winner === user.uid;
 
                 if (didUserWin) {
-                    let opponentName = 'Opponent';
+                    let opponentName = t('components.baseBoard.opponent');
                     if (opponentType === 'computer') {
                         // For computer games, use the name from player data (e.g., "Alex #2847")
                         // User is always bottom, so opponent is top
-                        opponentName = topPlayerData?.name || 'Computer';
+                        opponentName = topPlayerData?.name || t('components.baseBoard.computer');
                     } else if (userColor === 'w') {
-                        opponentName = topPlayerData?.name || 'Opponent';
+                        opponentName = topPlayerData?.name || t('components.baseBoard.opponent');
                     } else {
-                        opponentName = bottomPlayerData?.name || 'Opponent';
+                        opponentName = bottomPlayerData?.name || t('components.baseBoard.opponent');
                     }
                     return {
-                        message: `You won! ${opponentName} ran out of time ⏱️`,
+                        message: t('components.baseBoard.youWonTimeout', { opponentName }),
                         type: 'timeout_win',
                     };
                 } else {
                     return {
-                        message: `You lost! Time expired ⏱️`,
+                        message: t('components.baseBoard.youLostTimeout'),
                         type: 'timeout_lose',
                     };
                 }
             } else {
                 // Offline or spectator mode
                 const loserColor = gameData.result === 'win' ? 'b' : 'w';
-                const loserName = loserColor === 'w' ? 'White' : 'Black';
+                const loserName = loserColor === 'w' ? t('components.baseBoard.white') : t('components.baseBoard.black');
                 return {
-                    message: `${loserName} ran out of time! ⏱️`,
+                    message: t('components.baseBoard.timeoutLose', { loserName }),
                     type: 'timeout_lose',
                 };
             }
@@ -979,33 +981,33 @@ const BaseCoralClashBoard = ({
         if (opponentResigned) {
             // Determine opponent name - find the player who is not the computer (for computer games)
             // or whose color doesn't match userColor (for PvP games)
-            let opponentName = 'Opponent';
+            let opponentName = t('components.baseBoard.opponent');
             if (opponentType === 'computer') {
                 // For computer games, use the name from player data (e.g., "Alex #2847")
                 // User is always bottom, so opponent is top
-                opponentName = topPlayerData?.name || 'Computer';
+                opponentName = topPlayerData?.name || t('components.baseBoard.computer');
             } else if (topPlayerData?.isComputer) {
                 // Use name from player data instead of hardcoding "Computer"
-                opponentName = topPlayerData?.name || 'Computer';
+                opponentName = topPlayerData?.name || t('components.baseBoard.computer');
             } else if (bottomPlayerData?.isComputer) {
                 // Use name from player data instead of hardcoding "Computer"
                 opponentName = bottomPlayerData?.name || 'Computer';
             } else if (userColor === 'w') {
                 // For PvP: if user is white, opponent is black (on top when not flipped)
-                opponentName = topPlayerData?.name || 'Opponent';
+                opponentName = topPlayerData?.name || t('components.baseBoard.opponent');
             } else {
                 // For PvP: if user is black, opponent is white (on bottom when not flipped)
-                opponentName = bottomPlayerData?.name || 'Opponent';
+                opponentName = bottomPlayerData?.name || t('components.baseBoard.opponent');
             }
             return {
-                message: `You won! ${opponentName} resigned 🏳️`,
+                message: t('components.baseBoard.youWonResign', { opponentName }),
                 type: 'win',
             };
         }
 
         if (userResigned) {
             return {
-                message: 'You resigned 🏳️',
+                message: t('components.baseBoard.youResigned'),
                 type: 'resign',
             };
         }
@@ -1017,13 +1019,13 @@ const BaseCoralClashBoard = ({
                 // Personalized message for PvP games
                 const didUserWin = winnerColor === userColor;
                 return {
-                    message: didUserWin ? 'Checkmate! You won! 🏆' : 'Checkmate! You lost.',
+                    message: didUserWin ? t('components.baseBoard.checkmateWin') : t('components.baseBoard.checkmateLose'),
                     type: didUserWin ? 'win' : 'lose',
                 };
             } else {
                 // Generic message for offline games
-                const winner = winnerColor === 'w' ? 'White' : 'Black';
-                return { message: `Checkmate! ${winner} wins! 🏆`, type: 'win' };
+                const winner = winnerColor === 'w' ? t('components.baseBoard.white') : t('components.baseBoard.black');
+                return { message: t('components.baseBoard.checkmateGeneric', { winner }), type: 'win' };
             }
         }
 
@@ -1037,71 +1039,71 @@ const BaseCoralClashBoard = ({
                 const didUserResign = resigned === userColor;
                 if (didUserWin) {
                     // Determine opponent name - find the computer or the other player
-                    let opponentName = 'Opponent';
+                    let opponentName = t('components.baseBoard.opponent');
                     if (opponentType === 'computer') {
                         // For computer games, use the name from player data (e.g., "Alex #2847")
                         // User is always bottom, so opponent is top
-                        opponentName = topPlayerData?.name || 'Computer';
+                        opponentName = topPlayerData?.name || t('components.baseBoard.computer');
                     } else if (topPlayerData?.isComputer) {
                         // Use name from player data instead of hardcoding "Computer"
-                        opponentName = topPlayerData?.name || 'Computer';
+                        opponentName = topPlayerData?.name || t('components.baseBoard.computer');
                     } else if (bottomPlayerData?.isComputer) {
                         // Use name from player data instead of hardcoding "Computer"
                         opponentName = bottomPlayerData?.name || 'Computer';
                     } else if (userColor === 'w') {
-                        opponentName = topPlayerData?.name || 'Opponent';
+                        opponentName = topPlayerData?.name || t('components.baseBoard.opponent');
                     } else {
-                        opponentName = bottomPlayerData?.name || 'Opponent';
+                        opponentName = bottomPlayerData?.name || t('components.baseBoard.opponent');
                     }
                     return {
-                        message: `You won! ${opponentName} resigned 🏳️`,
+                        message: t('components.baseBoard.youWonResign', { opponentName }),
                         type: 'win',
                     };
                 } else {
                     return {
-                        message: didUserResign ? 'You resigned 🏳️' : 'You lost',
+                        message: didUserResign ? t('components.baseBoard.youResigned') : t('components.baseBoard.youLost'),
                         type: didUserResign ? 'resign' : 'lose',
                     };
                 }
             } else {
                 // Generic message for offline games
-                const winner = winnerColor === 'w' ? 'White' : 'Black';
-                return { message: `${winner} wins by resignation! 🏳️`, type: 'resign' };
+                const winner = winnerColor === 'w' ? t('components.baseBoard.white') : t('components.baseBoard.black');
+                return { message: t('components.baseBoard.resignGeneric', { winner }), type: 'resign' };
             }
         }
 
         const coralWinner = coralClash.isCoralVictory();
         if (coralWinner) {
-            const winner = coralWinner === 'w' ? 'White' : 'Black';
+            const winner = coralWinner === 'w' ? t('components.baseBoard.white') : t('components.baseBoard.black');
             const whiteScore = coralClash.getCoralAreaControl('w');
             const blackScore = coralClash.getCoralAreaControl('b');
             if (userColor) {
                 const didUserWin = coralWinner === userColor;
                 return {
                     message: didUserWin
-                        ? `You won by Coral Victory! 🪸\n${whiteScore} - ${blackScore}`
-                        : `You lost. ${winner} wins by Coral Victory! 🪸\n${whiteScore} - ${blackScore}`,
+                        ? t('components.baseBoard.coralVictoryWin', { whiteScore, blackScore })
+                        : t('components.baseBoard.coralVictoryLose', { winner, whiteScore, blackScore }),
                     type: didUserWin ? 'win' : 'lose',
                 };
             }
             return {
-                message: `${winner} wins by Coral Victory! 🪸\n${whiteScore} White - ${blackScore} Black`,
+                message: t('components.baseBoard.coralVictoryGeneric', { winner, whiteScore, blackScore }),
                 type: 'win',
             };
         }
 
         if (coralClash.isStalemate()) {
-            return { message: 'Stalemate! 🤝', type: 'draw' };
+            return { message: t('components.baseBoard.stalemate'), type: 'draw' };
         }
 
         // Check for threefold repetition explicitly before other draw conditions
         if (coralClash.isThreefoldRepetition()) {
-            return { message: 'Draw by Repetition! 🤝', type: 'draw' };
+            return { message: t('components.baseBoard.drawRepetition'), type: 'draw' };
         }
 
         // Check for insufficient material
         if (coralClash.isInsufficientMaterial()) {
-            return { message: 'Draw - Insufficient Material! 🤝', type: 'draw' };
+            return { message: t('components.baseBoard.drawInsufficientMaterial'), type: 'draw' };
         }
 
         // Check for coral tie (must check _shouldTriggerCoralScoring directly, not isDraw)
@@ -1125,19 +1127,19 @@ const BaseCoralClashBoard = ({
         if (shouldTriggerCoral && coralWinner === null) {
             const score = coralClash.getCoralAreaControl('w');
             return {
-                message: `Draw - Coral Tie! 🤝🪸\n${score} - ${score}`,
+                message: t('components.baseBoard.drawCoralTie', { score }),
                 type: 'draw',
             };
         }
 
         // Generic draw (50-move rule)
         if (coralClash.isDraw()) {
-            return { message: 'Draw! 🤝', type: 'draw' };
+            return { message: t('components.baseBoard.draw'), type: 'draw' };
         }
 
         if (coralClash.inCheck()) {
-            const player = coralClash.turn() === 'w' ? 'White' : 'Black';
-            return { message: `${player} is in Check! ⚠️`, type: 'check' };
+            const player = coralClash.turn() === 'w' ? t('components.baseBoard.white') : t('components.baseBoard.black');
+            return { message: t('components.baseBoard.check', { player }), type: 'check' };
         }
 
         return null;
@@ -1205,7 +1207,7 @@ const BaseCoralClashBoard = ({
                 type: 'status',
                 content: (
                     <GameStatusBanner
-                        message='Viewing past moves - return to current to play'
+                        message={t('components.baseBoard.viewingHistory')}
                         type='info'
                         visible={true}
                     />
@@ -1219,7 +1221,7 @@ const BaseCoralClashBoard = ({
                 type: 'status',
                 content: (
                     <GameStatusBanner
-                        message='Select the orientation for your whale'
+                        message={t('components.baseBoard.selectWhaleOrientation')}
                         type='info'
                         visible={true}
                     />
@@ -1268,6 +1270,7 @@ const BaseCoralClashBoard = ({
         gameStatus,
         coralClash,
         clearVisibleMoves,
+        t,
     ]);
 
     const handleUndo = () => {
@@ -1310,13 +1313,13 @@ const BaseCoralClashBoard = ({
         // Wait for menu animation to complete before showing alert
         await new Promise((resolve) => setTimeout(resolve, 300));
 
-        showAlert('Resign Game', 'Are you sure you want to resign? You will lose the game.', [
+        showAlert(t('components.baseBoard.resignGameTitle'), t('components.baseBoard.resignGameMessage'), [
             {
-                text: 'Cancel',
+                text: t('components.baseBoard.cancel'),
                 style: 'cancel',
             },
             {
-                text: 'Resign',
+                text: t('components.baseBoard.resign'),
                 style: 'destructive',
                 onPress: async () => {
                     const success = await resignAPI();
@@ -1358,21 +1361,21 @@ const BaseCoralClashBoard = ({
             // For games where user has a specific color (PvP or computer)
             const isUsersTurn = currentTurn === userColor;
             if (isUsersTurn) {
-                message = 'Your turn';
+                message = t('components.baseBoard.yourTurn');
             } else if (opponentType === 'computer') {
                 // For computer games, use the name from player data (e.g., "Alex #2847")
                 // User is always bottom, so opponent is top
-                const opponentName = topPlayerData?.name || 'Computer';
-                message = `${opponentName}'s turn`;
+                const opponentName = topPlayerData?.name || t('components.baseBoard.computer');
+                message = t('components.baseBoard.opponentTurn', { opponentName });
             } else {
                 // Get opponent name from player data
                 const opponentData = userColor === 'w' ? topPlayerData : bottomPlayerData;
-                const opponentName = opponentData?.name || 'Opponent';
-                message = `${opponentName}'s turn`;
+                const opponentName = opponentData?.name || t('components.baseBoard.opponent');
+                message = t('components.baseBoard.opponentTurn', { opponentName });
             }
         } else {
             // For pass-and-play or offline games
-            message = `${currentPlayerColor}'s turn`;
+            message = t('components.baseBoard.playerTurn', { playerColor: currentPlayerColor });
         }
 
         setTurnNotification({
@@ -1381,7 +1384,7 @@ const BaseCoralClashBoard = ({
             timeout: 5000,
             onDismiss: () => setTurnNotification(null),
         });
-    }, [coralClash, userColor, opponentType, topPlayerData, bottomPlayerData]);
+    }, [coralClash, userColor, opponentType, topPlayerData, bottomPlayerData, t]);
 
     // Execute a move - for online games, use backend-first; for offline/local, apply locally
     const executeMove = async (moveParams) => {
@@ -1681,8 +1684,8 @@ const BaseCoralClashBoard = ({
                     });
 
                     showAlert(
-                        'Hunter Effect (Whale)',
-                        'Choose coral removal option:',
+                        t('components.baseBoard.hunterWhaleTitle'),
+                        t('components.baseBoard.hunterWhaleMessage'),
                         alertButtons,
                         true, // vertical layout
                     );
@@ -1775,8 +1778,8 @@ const BaseCoralClashBoard = ({
                     });
 
                     showAlert(
-                        'Hunter Effect (Whale)',
-                        'Choose coral removal option:',
+                        t('components.baseBoard.hunterWhaleTitle'),
+                        t('components.baseBoard.hunterWhaleMessage'),
                         alertButtons,
                         true, // vertical layout
                     );
@@ -1812,9 +1815,9 @@ const BaseCoralClashBoard = ({
             const hasCoralRemoved = movesToThisSquare.some((m) => m.coralRemoved === true);
 
             if (hasCoralPlaced) {
-                showAlert('Gatherer Effect', 'Place coral on this square?', [
+                showAlert(t('components.baseBoard.gathererTitle'), t('components.baseBoard.gathererMessage'), [
                     {
-                        text: 'No',
+                        text: t('components.baseBoard.no'),
                         onPress: async () => {
                             const moveWithoutCoral = movesToThisSquare.find(
                                 (m) => m.coralPlaced === false,
@@ -1834,7 +1837,7 @@ const BaseCoralClashBoard = ({
                         },
                     },
                     {
-                        text: 'Yes',
+                        text: t('components.baseBoard.yes'),
                         onPress: async () => {
                             const moveWithCoral = movesToThisSquare.find(
                                 (m) => m.coralPlaced === true,
@@ -1856,9 +1859,9 @@ const BaseCoralClashBoard = ({
                 ]);
                 return;
             } else if (hasCoralRemoved) {
-                showAlert('Hunter Effect', 'Remove coral from this square?', [
+                showAlert(t('components.baseBoard.hunterTitle'), t('components.baseBoard.hunterMessage'), [
                     {
-                        text: 'No',
+                        text: t('components.baseBoard.no'),
                         onPress: async () => {
                             const moveWithoutCoralRemoval = movesToThisSquare.find(
                                 (m) => m.coralRemoved === false,
@@ -1878,7 +1881,7 @@ const BaseCoralClashBoard = ({
                         },
                     },
                     {
-                        text: 'Yes',
+                        text: t('components.baseBoard.yes'),
                         onPress: async () => {
                             const moveWithCoralRemoval = movesToThisSquare.find(
                                 (m) => m.coralRemoved === true,
@@ -1919,7 +1922,7 @@ const BaseCoralClashBoard = ({
         await new Promise((resolve) => setTimeout(resolve, 300));
 
         try {
-            const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+            // const timestamp = new Date().toISOString().replace(/[:.]/g, '-'); // Unused - keeping for potential future use
             const gameStateData = {
                 schemaVersion: GAME_STATE_VERSION,
                 exportedAt: new Date().toISOString(),
@@ -1941,16 +1944,16 @@ const BaseCoralClashBoard = ({
             };
 
             const jsonString = JSON.stringify(gameStateData, null, 2);
-            const filename = `coral-clash-state-${timestamp}.json`;
+            // const filename = `coral-clash-state-${timestamp}.json`; // Unused - keeping for potential future use
 
             // Copy to clipboard (more reliable than Share for large JSON)
             Clipboard.setString(jsonString);
             showAlert(
-                'Game State Exported',
-                `Copied to clipboard!\n\nFilename: ${filename}\n\nPaste into a text editor to save.`,
+                t('components.baseBoard.exportSuccessTitle'),
+                t('components.baseBoard.exportSuccessMessage'),
             );
         } catch (error) {
-            showAlert('Export Failed', error.message);
+            showAlert(t('components.baseBoard.exportFailedTitle'), error.message);
         }
     };
 

@@ -2,6 +2,7 @@ import { Block, Button, Text, theme } from 'galio-framework';
 import React from 'react';
 import { Dimensions, StyleSheet, View } from 'react-native';
 import { moderateScale, verticalScale } from 'react-native-size-matters';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../contexts';
 import Icon from './Icon';
 
@@ -15,6 +16,7 @@ const isTablet = width >= 768;
  * @param {Object} props.style - Additional styles
  */
 function SignUpPromptCard({ onPress, style }) {
+    const { t } = useTranslation();
     const { colors } = useTheme();
 
     return (
@@ -48,39 +50,39 @@ function SignUpPromptCard({ onPress, style }) {
                     style={[styles.title, { color: colors.TEXT }]}
                     center
                 >
-                    Unlock Full Features
+                    {t('cards.signUpPrompt.title')}
                 </Text>
                 <Text
                     size={moderateScale(15)}
                     style={[styles.description, { color: colors.TEXT_SECONDARY }]}
                     center
                 >
-                    Sign up for a free account to access:
+                    {t('cards.signUpPrompt.subtitle')}
                 </Text>
                 <Block style={styles.featureList}>
                     <Text
                         size={isTablet ? moderateScale(10) : moderateScale(14)}
                         style={[styles.feature, { color: colors.TEXT_SECONDARY }]}
                     >
-                        {'\u2022'} Play with friends online
+                        {'\u2022'} {t('cards.signUpPrompt.feature1')}
                     </Text>
                     <Text
                         size={isTablet ? moderateScale(10) : moderateScale(14)}
                         style={[styles.feature, { color: colors.TEXT_SECONDARY }]}
                     >
-                        {'\u2022'} Find random opponents via matchmaking
+                        {'\u2022'} {t('cards.signUpPrompt.feature2')}
                     </Text>
                     <Text
                         size={isTablet ? moderateScale(10) : moderateScale(14)}
                         style={[styles.feature, { color: colors.TEXT_SECONDARY }]}
                     >
-                        {'\u2022'} Track your game stats & history
+                        {'\u2022'} {t('cards.signUpPrompt.feature3')}
                     </Text>
                     <Text
                         size={isTablet ? moderateScale(10) : moderateScale(14)}
                         style={[styles.feature, { color: colors.TEXT_SECONDARY }]}
                     >
-                        {'\u2022'} Build your friend network
+                        {'\u2022'} {t('cards.signUpPrompt.feature4')}
                     </Text>
                 </Block>
                 <Block center style={styles.buttonContainer}>
@@ -90,7 +92,7 @@ function SignUpPromptCard({ onPress, style }) {
                             bold
                             color='white'
                         >
-                            Sign Up / Log In
+                            {t('cards.signUpPrompt.button')}
                         </Text>
                     </Button>
                 </Block>

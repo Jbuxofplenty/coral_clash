@@ -1,6 +1,7 @@
 import { Icon } from 'galio-framework';
 import React, { useState } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useAlert, useAuth } from '../contexts';
 import { deletePassAndPlayGame, updatePassAndPlayGame } from '../utils/passAndPlayStorage';
 import BaseCoralClashBoard, { baseStyles } from './BaseCoralClashBoard';
@@ -36,6 +37,7 @@ const PassAndPlayCoralClashBoard = ({
     timeControl,
     notificationStatus,
 }) => {
+    const { t } = useTranslation();
     const { user } = useAuth();
     const { showAlert } = useAlert();
 
@@ -153,13 +155,13 @@ const PassAndPlayCoralClashBoard = ({
 
             // Wait for menu animation to complete before showing alert
             setTimeout(() => {
-                showAlert('Reset Game', 'Are you sure you want to start a new game?', [
+                showAlert(t('components.passAndPlayBoard.resetGameTitle'), t('components.passAndPlayBoard.resetGameMessage'), [
                     {
-                        text: 'Cancel',
+                        text: t('components.passAndPlayBoard.cancel'),
                         style: 'cancel',
                     },
                     {
-                        text: 'Reset',
+                        text: t('components.passAndPlayBoard.reset'),
                         style: 'destructive',
                         onPress: () => {
                             coralClash.reset();
@@ -170,11 +172,11 @@ const PassAndPlayCoralClashBoard = ({
         };
 
         const isResetDisabled = isGameOver || noMovesYet;
-        let resetSubtitle = 'Start a new game from the beginning';
+        let resetSubtitle = t('components.passAndPlayBoard.startNewGame');
         if (isGameOver) {
-            resetSubtitle = 'Game already ended';
+            resetSubtitle = t('components.passAndPlayBoard.gameEnded');
         } else if (noMovesYet) {
-            resetSubtitle = 'No moves have been made yet';
+            resetSubtitle = t('components.passAndPlayBoard.noMoves');
         }
 
         return (
@@ -194,7 +196,7 @@ const PassAndPlayCoralClashBoard = ({
                     color={isResetDisabled ? colors.MUTED : '#f57c00'}
                 />
                 <View style={styles.menuItemText}>
-                    <Text style={[styles.menuItemTitle, { color: colors.TEXT }]}>Reset Game</Text>
+                    <Text style={[styles.menuItemTitle, { color: colors.TEXT }]}>{t('components.passAndPlayBoard.resetGame')}</Text>
                     <Text style={[styles.menuItemSubtitle, { color: colors.TEXT_SECONDARY }]}>
                         {resetSubtitle}
                     </Text>

@@ -1,6 +1,7 @@
 import { Block, Text, theme } from 'galio-framework';
 import React, { useEffect, useState } from 'react';
 import { Alert, Image, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { LoadingScreen } from '../components';
 import { DEFAULT_AVATARS, getRandomAvatarKey } from '../constants/avatars';
@@ -8,6 +9,7 @@ import { useAlert, useAuth, useTheme } from '../contexts';
 import { useFirebaseFunctions } from '../hooks';
 
 export default function Settings({ navigation: _navigation }) {
+    const { t, i18n } = useTranslation();
     const { user, refreshUserData, logOut } = useAuth();
     const { colors, setThemePreference } = useTheme();
     const { showAlert } = useAlert();
@@ -55,7 +57,7 @@ export default function Settings({ navigation: _navigation }) {
             await refreshUserData();
         } catch (error) {
             console.error('Error saving avatar:', error);
-            showAlert('Error', 'Failed to save avatar selection');
+            showAlert(t('settings.errors.avatarTitle'), t('settings.errors.avatarFailed'));
             // Revert on error
             setSettings(settings);
         } finally {
@@ -64,10 +66,10 @@ export default function Settings({ navigation: _navigation }) {
     };
 
     const handleResetSettings = () => {
-        showAlert('Reset Settings', 'Are you sure you want to reset all settings to defaults?', [
-            { text: 'Cancel', style: 'cancel' },
+        showAlert(t('settings.actions.resetTitle'), t('settings.actions.resetMessage'), [
+            { text: t('settings.actions.cancel'), style: 'cancel' },
             {
-                text: 'Reset',
+                text: t('settings.actions.reset'),
                 style: 'destructive',
                 onPress: async () => {
                     try {
@@ -84,7 +86,7 @@ export default function Settings({ navigation: _navigation }) {
                         await refreshUserData();
                     } catch (error) {
                         console.error('Error resetting settings:', error);
-                        showAlert('Error', 'Failed to reset settings');
+                        showAlert(t('settings.errors.resetTitle'), t('settings.errors.resetFailed'));
                     } finally {
                         setSaving(false);
                     }
@@ -96,17 +98,12 @@ export default function Settings({ navigation: _navigation }) {
     const handleDeleteAccount = () => {
         // First confirmation - explain consequences
         showAlert(
-            'Delete Account',
-            'This action is permanent and cannot be undone.\n\n' +
-                '• All your personal data will be removed\n' +
-                '• Your games will continue but you will appear as "Anonymous"\n' +
-                '• Your friends and friend requests will be removed\n' +
-                '• Active games will be forfeited\n\n' +
-                'Are you sure you want to continue?',
+            t('settings.dangerZone.confirmTitle'),
+            t('settings.dangerZone.confirmMessage'),
             [
-                { text: 'Cancel', style: 'cancel' },
+                { text: t('settings.dangerZone.cancel'), style: 'cancel' },
                 {
-                    text: 'Continue',
+                    text: t('settings.dangerZone.continue'),
                     style: 'destructive',
                     onPress: () => {
                         // Second confirmation - require typing DELETE
@@ -119,12 +116,12 @@ export default function Settings({ navigation: _navigation }) {
 
     const showDeleteConfirmation = () => {
         Alert.prompt(
-            'Confirm Account Deletion',
-            'To confirm, please type DELETE (all caps) below:',
+            t('settings.dangerZone.finalConfirmTitle'),
+            t('settings.dangerZone.finalConfirmMessage'),
             [
-                { text: 'Cancel', style: 'cancel' },
+                { text: t('settings.dangerZone.cancel'), style: 'cancel' },
                 {
-                    text: 'Delete Account',
+                    text: t('settings.dangerZone.deleteAccount'),
                     style: 'destructive',
                     onPress: (text) => {
                         if (text === 'DELETE') {
@@ -132,8 +129,8 @@ export default function Settings({ navigation: _navigation }) {
                             performAccountDeletion();
                         } else {
                             showAlert(
-                                'Incorrect Confirmation',
-                                'You must type DELETE exactly to confirm account deletion.',
+                                t('settings.dangerZone.incorrectConfirmTitle'),
+                                t('settings.dangerZone.incorrectConfirmMessage'),
                             );
                         }
                     },
@@ -160,11 +157,11 @@ export default function Settings({ navigation: _navigation }) {
 
             // Show success message, then logout when dismissed
             showAlert(
-                'Account Deleted',
-                'Your account has been successfully deleted. You will now be logged out.',
+                t('settings.dangerZone.successTitle'),
+                t('settings.dangerZone.successMessage'),
                 [
                     {
-                        text: 'OK',
+                        text: t('settings.dangerZone.ok'),
                         onPress: async () => {
                             // Log out after user acknowledges (AuthProvider handles navigation)
                             await logOut();
@@ -179,13 +176,13 @@ export default function Settings({ navigation: _navigation }) {
             // Determine error message
             const errorMessage =
                 error.message === 'Request timeout'
-                    ? 'The request timed out. Please check your connection and try again.'
-                    : 'Failed to delete account. Please try again or contact support if the problem persists.';
+                    ? t('settings.errors.deleteTimeout')
+                    : t('settings.errors.deleteFailed');
 
-            showAlert('Deletion Failed', errorMessage, [
-                { text: 'Cancel', style: 'cancel' },
+            showAlert(t('settings.errors.deleteFailedTitle'), errorMessage, [
+                { text: t('settings.dangerZone.cancel'), style: 'cancel' },
                 {
-                    text: 'Retry',
+                    text: t('settings.errors.retry'),
                     onPress: () => handleDeleteAccount(),
                 },
             ]);
@@ -216,6 +213,20 @@ export default function Settings({ navigation: _navigation }) {
         }
     };
 
+    const updateLanguage = async (languageCode) => {
+        try {
+            setSaving(true);
+            // Change language in i18n
+            await i18n.changeLanguage(languageCode);
+            // The language will be cached automatically by the i18n config
+        } catch (error) {
+            console.error('Error changing language:', error);
+            showAlert('Error', 'Failed to change language');
+        } finally {
+            setSaving(false);
+        }
+    };
+
     if (loading) {
         return <LoadingScreen />;
     }
@@ -234,7 +245,7 @@ export default function Settings({ navigation: _navigation }) {
                 {/* User Info */}
                 <Block style={styles.section}>
                     <Text h5 bold color={colors.TEXT}>
-                        Account
+                        {t('settings.account')}
                     </Text>
                     <Block style={[styles.card, { backgroundColor: colors.CARD_BACKGROUND }]}>
                         <Text size={16} bold color={colors.TEXT}>
@@ -249,11 +260,11 @@ export default function Settings({ navigation: _navigation }) {
                 {/* Avatar Selection */}
                 <Block style={styles.section}>
                     <Text h5 bold color={colors.TEXT}>
-                        Profile Avatar
+                        {t('settings.profileAvatar')}
                     </Text>
                     <Block style={[styles.card, { backgroundColor: colors.CARD_BACKGROUND }]}>
                         <Text size={14} color={colors.TEXT_SECONDARY} style={{ marginBottom: 16 }}>
-                            Choose your ocean-themed avatar
+                            {t('settings.chooseAvatar')}
                         </Text>
                         <Block row style={styles.avatarGrid}>
                             {Object.keys(DEFAULT_AVATARS).map((avatarKey) => (
@@ -272,28 +283,52 @@ export default function Settings({ navigation: _navigation }) {
                 {/* Theme Settings */}
                 <Block style={styles.section}>
                     <Text h5 bold color={colors.TEXT}>
-                        Appearance
+                        {t('settings.appearance')}
                     </Text>
                     <Block style={[styles.card, { backgroundColor: colors.CARD_BACKGROUND }]}>
                         <ThemeOption
-                            label='Light'
-                            description='Always use light theme'
+                            label={t('settings.theme.light')}
+                            description={t('settings.theme.lightDescription')}
                             selected={settings.theme === 'light'}
                             onSelect={() => updateTheme('light')}
                             colors={colors}
                         />
                         <ThemeOption
-                            label='Dark'
-                            description='Always use dark theme'
+                            label={t('settings.theme.dark')}
+                            description={t('settings.theme.darkDescription')}
                             selected={settings.theme === 'dark'}
                             onSelect={() => updateTheme('dark')}
                             colors={colors}
                         />
                         <ThemeOption
-                            label='Auto'
-                            description='Match system theme'
+                            label={t('settings.theme.auto')}
+                            description={t('settings.theme.autoDescription')}
                             selected={settings.theme === 'auto'}
                             onSelect={() => updateTheme('auto')}
+                            colors={colors}
+                            last
+                        />
+                    </Block>
+                </Block>
+
+                {/* Language Settings */}
+                <Block style={styles.section}>
+                    <Text h5 bold color={colors.TEXT}>
+                        {t('settings.language.title')}
+                    </Text>
+                    <Block style={[styles.card, { backgroundColor: colors.CARD_BACKGROUND }]}>
+                        <ThemeOption
+                            label={t('settings.language.english')}
+                            description={t('settings.language.englishDescription')}
+                            selected={i18n.language === 'en'}
+                            onSelect={() => updateLanguage('en')}
+                            colors={colors}
+                        />
+                        <ThemeOption
+                            label={t('settings.language.hindi')}
+                            description={t('settings.language.hindiDescription')}
+                            selected={i18n.language === 'hi'}
+                            onSelect={() => updateLanguage('hi')}
                             colors={colors}
                             last
                         />
@@ -308,7 +343,7 @@ export default function Settings({ navigation: _navigation }) {
                         disabled={saving || deleting}
                     >
                         <Text size={14} color={colors.PRIMARY} center style={{ fontWeight: '600' }}>
-                            Reset to Defaults
+                            {t('settings.actions.resetToDefaults')}
                         </Text>
                     </TouchableOpacity>
                 </Block>
@@ -316,11 +351,11 @@ export default function Settings({ navigation: _navigation }) {
                 {/* Danger Zone */}
                 <Block style={styles.section}>
                     <Text h5 bold color={colors.TEXT} style={{ marginBottom: 8 }}>
-                        Danger Zone
+                        {t('settings.dangerZone.title')}
                     </Text>
                     <Block style={[styles.card, { backgroundColor: colors.CARD_BACKGROUND }]}>
                         <Text size={14} color={colors.TEXT_SECONDARY} style={{ marginBottom: 16 }}>
-                            Once you delete your account, there is no going back. Please be certain.
+                            {t('settings.dangerZone.warning')}
                         </Text>
                         <TouchableOpacity
                             style={[
@@ -336,7 +371,7 @@ export default function Settings({ navigation: _navigation }) {
                                 color='#fff'
                                 style={{ textAlign: 'center' }}
                             >
-                                {deleting ? 'Deleting Account...' : 'Delete Account'}
+                                {deleting ? t('settings.dangerZone.deletingAccount') : t('settings.dangerZone.deleteAccount')}
                             </Text>
                         </TouchableOpacity>
                     </Block>
