@@ -1,8 +1,8 @@
 import { calculateUndoMoveCount } from '@jbuxofplenty/coral-clash';
 import { Icon } from 'galio-framework';
 import { useEffect, useState } from 'react';
-import { Text, TouchableOpacity, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { Text, TouchableOpacity, View } from 'react-native';
 import { db, doc, onSnapshot } from '../config/firebase';
 import { useAlert, useAuth, useGamePreferences } from '../contexts';
 import { useFirebaseFunctions } from '../hooks';
@@ -37,8 +37,13 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
     const { user } = useAuth();
     const { isBoardFlipped } = useGamePreferences();
     const { showAlert } = useAlert();
-    const { requestGameReset, requestUndo, respondToUndoRequest, respondToResetRequest, remindOpponent } =
-        useFirebaseFunctions();
+    const {
+        requestGameReset,
+        requestUndo,
+        respondToUndoRequest,
+        respondToResetRequest,
+        remindOpponent,
+    } = useFirebaseFunctions();
     const [userColor, setUserColor] = useState(null);
     const [_creatorId, setCreatorId] = useState(null);
     const [_opponentId, setOpponentId] = useState(null);
@@ -135,7 +140,9 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
     const handleUndoRequest = async (clearVisibleMoves) => {
         showAlert(
             t('components.pvpBoard.requestUndoTitle'),
-            t('components.pvpBoard.requestUndoMessage', { opponentName: liveOpponentData?.displayName || t('components.pvpBoard.opponent') }),
+            t('components.pvpBoard.requestUndoMessage', {
+                opponentName: liveOpponentData?.displayName || t('components.pvpBoard.opponent'),
+            }),
             [
                 {
                     text: t('components.pvpBoard.cancel'),
@@ -154,7 +161,10 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
                             await requestUndo({ gameId, moveCount: 1 });
                         } catch (error) {
                             console.error('Error requesting undo:', error);
-                            showAlert(t('components.pvpBoard.errorReminderTitle'), t('components.pvpBoard.errorUndoRequest'));
+                            showAlert(
+                                t('components.pvpBoard.errorReminderTitle'),
+                                t('components.pvpBoard.errorUndoRequest'),
+                            );
                         }
                     },
                 },
@@ -174,7 +184,10 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
             // No need to show alert - the banner will disappear automatically via Firestore listener
         } catch (error) {
             console.error('Error responding to undo request:', error);
-            showAlert(t('components.pvpBoard.errorReminderTitle'), t('components.pvpBoard.errorUndoResponse'));
+            showAlert(
+                t('components.pvpBoard.errorReminderTitle'),
+                t('components.pvpBoard.errorUndoResponse'),
+            );
         }
     };
 
@@ -185,7 +198,10 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
             // No need to show alert - the banner will disappear automatically via Firestore listener
         } catch (error) {
             console.error('Error responding to reset request:', error);
-            showAlert(t('components.pvpBoard.errorReminderTitle'), t('components.pvpBoard.errorResetResponse'));
+            showAlert(
+                t('components.pvpBoard.errorReminderTitle'),
+                t('components.pvpBoard.errorResetResponse'),
+            );
         }
     };
 
@@ -196,7 +212,10 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
             await respondToUndoRequest({ gameId, approve: false });
         } catch (error) {
             console.error('Error canceling undo request:', error);
-            showAlert(t('components.pvpBoard.errorReminderTitle'), t('components.pvpBoard.errorCancelUndo'));
+            showAlert(
+                t('components.pvpBoard.errorReminderTitle'),
+                t('components.pvpBoard.errorCancelUndo'),
+            );
         }
     };
 
@@ -207,7 +226,10 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
             await respondToResetRequest({ gameId, approve: false });
         } catch (error) {
             console.error('Error canceling reset request:', error);
-            showAlert(t('components.pvpBoard.errorReminderTitle'), t('components.pvpBoard.errorCancelReset'));
+            showAlert(
+                t('components.pvpBoard.errorReminderTitle'),
+                t('components.pvpBoard.errorCancelReset'),
+            );
         }
     };
 
@@ -215,25 +237,15 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
     const handleRemindOpponent = async () => {
         try {
             await remindOpponent({ gameId });
-            showAlert(t('components.pvpBoard.reminderSentTitle'), t('components.pvpBoard.reminderSentMessage'));
+            showAlert(
+                t('components.pvpBoard.reminderSentTitle'),
+                t('components.pvpBoard.reminderSentMessage'),
+            );
         } catch (error) {
             console.error('Error sending reminder:', error);
             // Extract error message from Firebase error
             const errorMessage = error.message || t('components.pvpBoard.errorReminderMessage');
             showAlert(t('components.pvpBoard.errorReminderTitle'), errorMessage);
-        }
-    };
-
-    // Handler for reminding opponent
-    const handleRemindOpponent = async () => {
-        try {
-            await remindOpponent({ gameId });
-            showAlert('Success', 'Reminder sent to your opponent.');
-        } catch (error) {
-            console.error('Error sending reminder:', error);
-            // Extract error message from Firebase error
-            const errorMessage = error.message || 'Failed to send reminder. Please try again.';
-            showAlert('Error', errorMessage);
         }
     };
 
@@ -328,7 +340,10 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
 
             showAlert(
                 t('components.pvpBoard.requestResetTitle'),
-                t('components.pvpBoard.requestResetMessage', { opponentName: liveOpponentData?.displayName || t('components.pvpBoard.opponent') }),
+                t('components.pvpBoard.requestResetMessage', {
+                    opponentName:
+                        liveOpponentData?.displayName || t('components.pvpBoard.opponent'),
+                }),
                 [
                     {
                         text: t('components.pvpBoard.cancel'),
@@ -423,7 +438,9 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
                             const hoursRemaining = Math.ceil(
                                 (twentyFourHours - timeSinceLastReminder) / (60 * 60 * 1000),
                             );
-                            reminderSubtitle = t('components.pvpBoard.availableInHours', { hours: hoursRemaining });
+                            reminderSubtitle = t('components.pvpBoard.availableInHours', {
+                                hours: hoursRemaining,
+                            });
                         }
                     }
 
@@ -538,8 +555,9 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
                     <GameRequestBanner
                         mode='waiting'
                         message={t('components.pvpBoard.waitingUndoResponse', {
-                            opponentName: liveOpponentData?.displayName || t('components.pvpBoard.opponent'),
-                            moveCount: dynamicMoveCount
+                            opponentName:
+                                liveOpponentData?.displayName || t('components.pvpBoard.opponent'),
+                            moveCount: dynamicMoveCount,
                         })}
                         onCancel={handleCancelUndoRequest}
                     />
@@ -550,8 +568,9 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
                     <GameRequestBanner
                         mode='approval'
                         message={t('components.pvpBoard.opponentWantsUndo', {
-                            opponentName: liveOpponentData?.displayName || t('components.pvpBoard.opponent'),
-                            moveCount: dynamicMoveCount
+                            opponentName:
+                                liveOpponentData?.displayName || t('components.pvpBoard.opponent'),
+                            moveCount: dynamicMoveCount,
                         })}
                         onDecline={() => handleUndoResponse(false, clearVisibleMoves)}
                         onAccept={() => handleUndoResponse(true, clearVisibleMoves)}
@@ -567,7 +586,8 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
                     <GameRequestBanner
                         mode='waiting'
                         message={t('components.pvpBoard.waitingResetResponse', {
-                            opponentName: liveOpponentData?.displayName || t('components.pvpBoard.opponent')
+                            opponentName:
+                                liveOpponentData?.displayName || t('components.pvpBoard.opponent'),
                         })}
                         onCancel={handleCancelResetRequest}
                     />
@@ -578,7 +598,8 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
                     <GameRequestBanner
                         mode='approval'
                         message={t('components.pvpBoard.opponentWantsReset', {
-                            opponentName: liveOpponentData?.displayName || t('components.pvpBoard.opponent')
+                            opponentName:
+                                liveOpponentData?.displayName || t('components.pvpBoard.opponent'),
                         })}
                         onDecline={() => handleResetResponse(false)}
                         onAccept={() => handleResetResponse(true)}
