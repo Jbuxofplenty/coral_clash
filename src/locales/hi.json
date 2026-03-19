@@ -1,0 +1,736 @@
+{
+    "auth": {
+        "welcomeBack": "वापसी पर स्वागत है",
+        "createAccount": "खाता बनाएं",
+        "resetPassword": "पासवर्ड रीसेट करें",
+        "signInSubtitle": "कंप्यूटर के खिलाफ खेलने या अन्य खिलाड़ियों को चुनौती देने के लिए साइन इन करें",
+        "signUpSubtitle": "ऑनलाइन खेलने के लिए एक खाता बनाएं। एक अनूठा उपयोगकर्ता नाम चुनें!",
+        "forgotPasswordSubtitle": "पासवर्ड रीसेट लिंक प्राप्त करने के लिए अपना ईमेल दर्ज करें",
+        "usernamePlaceholder": "उपयोगकर्ता नाम (आवश्यक)",
+        "emailPlaceholder": "ईमेल",
+        "passwordPlaceholder": "पासवर्ड",
+        "signInWithApple": "Apple के साथ साइन इन करें",
+        "signUpWithApple": "Apple के साथ साइन अप करें",
+        "signInWithGoogle": "Google के साथ साइन इन करें",
+        "signUpWithGoogle": "Google के साथ साइन अप करें",
+        "or": "या",
+        "signIn": "साइन इन करें",
+        "signUp": "साइन अप करें",
+        "sendResetLink": "रीसेट लिंक भेजें",
+        "forgotPassword": "पासवर्ड भूल गए?",
+        "backToSignIn": "साइन इन पर वापस जाएं",
+        "alreadyHaveAccount": "पहले से खाता है? साइन इन करें",
+        "dontHaveAccount": "खाता नहीं है? साइन अप करें",
+        "errors": {
+            "fillAllFields": "कृपया सभी फ़ील्ड भरें",
+            "usernameRequired": "उपयोगकर्ता नाम आवश्यक है",
+            "usernameMinLength": "उपयोगकर्ता नाम कम से कम 2 अक्षरों का होना चाहिए",
+            "usernameMaxLength": "उपयोगकर्ता नाम 30 अक्षरों से कम होना चाहिए",
+            "usernameInvalidChars": "उपयोगकर्ता नाम में केवल अक्षर, संख्याएं, रिक्त स्थान, अंडरस्कोर और हाइफ़न हो सकते हैं",
+            "authFailed": "प्रमाणीकरण विफल रहा",
+            "googleSignInFailed": "Google साइन-इन विफल रहा",
+            "appleSignInFailed": "Apple साइन-इन विफल रहा",
+            "enterEmail": "कृपया अपना ईमेल पता दर्ज करें",
+            "resetEmailFailed": "रीसेट ईमेल भेजने में विफल"
+        },
+        "success": {
+            "resetEmailSent": "पासवर्ड रीसेट ईमेल भेजा गया! अपना इनबॉक्स जांचें।"
+        }
+    },
+    "game": {
+        "difficulty": {
+            "title": "AI कठिनाई चुनें",
+            "subtitle": "कंप्यूटर प्रतिद्वंद्वी के लिए कठिनाई स्तर चुनें",
+            "random": "रैंडम",
+            "easy": "आसान",
+            "medium": "मध्यम",
+            "hard": "कठिन",
+            "randomDescription": "कंप्यूटर रैंडम चालें चलता है",
+            "easyDescription": "कंप्यूटर बुनियादी रणनीति का उपयोग करता है",
+            "mediumDescription": "कंप्यूटर मध्यवर्ती रणनीति का उपयोग करता है",
+            "hardDescription": "कंप्यूटर उन्नत रणनीति का उपयोग करता है",
+            "createAccountToAccess": "एक्सेस करने के लिए खाता बनाएं"
+        },
+        "matchmaking": {
+            "title": "गेम मोड चुनें",
+            "timeControl": "समय नियंत्रण चुनें",
+            "timeControlSubtitle": "इस गेम के लिए समय सीमा चुनें",
+            "instant": "तत्काल",
+            "instantDescription": "अभी एक प्रतिद्वंद्वी खोजें। आपको ऑनलाइन खिलाड़ियों से मिलाता है।",
+            "correspondence": "पत्राचार",
+            "correspondenceDescription": "एक रैंडम खिलाड़ी को निमंत्रण भेजें। उनके पास स्वीकार करने के लिए 24 घंटे हैं।",
+            "timeControls": {
+                "unlimited": "कोई समय सीमा नहीं",
+                "blitz": "5 मिनट",
+                "normal": "10 मिनट",
+                "custom": "समय सीमा सेट की गई"
+            },
+            "timeControlDescriptions": {
+                "blitz": "प्रति खिलाड़ी 5 मिनट",
+                "normal": "प्रति खिलाड़ी 10 मिनट",
+                "unlimited": "कोई समय सीमा नहीं"
+            }
+        },
+        "status": {
+            "loading": "लोड हो रहा है",
+            "noGamesFound": "कोई गेम नहीं मिला",
+            "error": "त्रुटि",
+            "resetApproved": "गेम रीसेट कर दिया गया है",
+            "resetRejected": "रीसेट अनुरोध अस्वीकृत",
+            "undoApproved": "चाल वापस ली गई",
+            "undoRejected": "पूर्ववत अनुरोध अस्वीकृत"
+        },
+        "actions": {
+            "cancel": "रद्द करें"
+        }
+    },
+    "navigation": {
+        "home": "होम",
+        "game": "गेम",
+        "tutorial": "ट्यूटोरियल",
+        "howToPlay": "कैसे खेलें",
+        "settings": "सेटिंग्स",
+        "friends": "मित्र",
+        "stats": "आंकड़े",
+        "reportIssue": "समस्या रिपोर्ट करें",
+        "rulesVideo": "नियम वीडियो",
+        "physicalGame": "फिजिकल गेम",
+        "logOut": "लॉग आउट",
+        "logOutConfirmTitle": "लॉग आउट",
+        "logOutConfirmMessage": "क्या आप वाकई लॉग आउट करना चाहते हैं?",
+        "cancel": "रद्द करें",
+        "appTitle": "कोरल क्लैश",
+        "appSubtitle": "समुद्री रणनीति खेल"
+    },
+    "home": {
+        "welcome": {
+            "title": "कोरल क्लैश में आपका स्वागत है!",
+            "message": "शुरू करने के लिए मेनू में नियम वीडियो या कैसे खेलें गाइड देखें!",
+            "watchVideo": "वीडियो देखें",
+            "howToPlay": "कैसे खेलें",
+            "ok": "ठीक है"
+        },
+        "opponent": {
+            "computer": "कंप्यूटर",
+            "opponent": "प्रतिद्वंद्वी",
+            "guest": "अतिथि 1"
+        },
+        "gameModes": {
+            "howToPlayTitle": "कैसे खेलें",
+            "howToPlayDescription": "कोरल क्लैश के नियम और रणनीतियाँ सीखें",
+            "playComputerTitle": "कंप्यूटर के खिलाफ खेलें",
+            "playComputerDescription": "AI के खिलाफ एक नया गेम शुरू करें",
+            "loadGameStateTitle": "गेम स्थिति लोड करें (Dev)",
+            "loadGameStateDescription": "फिक्स्चर से सेव की गई गेम स्थिति लोड करें"
+        },
+        "matchmaking": {
+            "cannotJoin": "मैचमेकिंग में शामिल नहीं हो सकते",
+            "instantMatchFound": "पत्राचार मैच मिला!",
+            "instantMatchMessage": "आपका मिलान {{creatorName}} के साथ हुआ है। उन्हें सूचित किया जाएगा और स्वीकार करने के लिए 24 घंटे होंगे।",
+            "correspondenceCreated": "पत्राचार निमंत्रण बनाया गया",
+            "correspondenceMessage": "आपका निमंत्रण बनाया गया है। जब कोई अन्य खिलाड़ी पत्राचार मोड चुनता है, तो उनका मिलान आपके निमंत्रण से हो सकता है। जब कोई खेलना चाहेगा तो आपको सूचित किया जाएगा!"
+        },
+        "errors": {
+            "offlineModeTitle": "ऑफ़लाइन मोड",
+            "offlineModeMessage": "सर्वर से कनेक्ट नहीं हो सका। ऑफ़लाइन कंप्यूटर गेम शुरू हो रहा है।",
+            "errorTitle": "त्रुटि",
+            "failedToStart": "{{action}} शुरू करने में विफल। कृपया पुनः प्रयास करें।",
+            "failedToResign": "गेम छोड़ने में विफल। कृपया पुनः प्रयास करें।",
+            "failedPassAndPlay": "पास-एंड-प्ले गेम शुरू करने में विफल। कृपया पुनः प्रयास करें।",
+            "failedComputerGame": "कंप्यूटर गेम शुरू करने में विफल",
+            "failedMatchmaking": "{{mode}} मैचमेकिंग शुरू करने में विफल। {{message}}"
+        }
+    },
+    "stats": {
+    "overallStatistics": "सम्पूर्ण आंकड़े",
+    "gamesPlayed": "खेले गए गेम्स",
+    "wins": "जीत",
+    "losses": "हार",
+    "draws": "ड्रॉ",
+    "winRate": "जीत दर",
+    "matchupStatistics": "मुकाबला आंकड़े",
+    "matchupDescription": "प्रत्येक प्रतिद्वंद्वी के खिलाफ जीत दर (PvP और कंप्यूटर)",
+    "computer": "कंप्यूटर",
+    "winRateShort": "जीत दर",
+    "winsShort": "W",
+    "lossesShort": "L",
+    "drawsShort": "D",
+    "noGamesYet": "अभी तक कोई गेम नहीं",
+    "noGamesHint": "अपने आंकड़े यहां देखने के लिए गेम खेलना शुरू करें!"
+  },
+  "gameMenu": {
+    "saveGameState": "गेम स्थिति सेव करें",
+    "exportPosition": "वर्तमान गेम स्थिति एक्सपोर्ट करें",
+    "flipBoard": "बोर्ड पलटें",
+    "showingBlackBottom": "वर्तमान में काला नीचे दिख रहा है",
+    "showingWhiteBottom": "वर्तमान में सफेद नीचे दिख रहा है",
+    "reportBug": "बग रिपोर्ट करें",
+    "includeGameState": "वर्तमान गेम स्थिति शामिल करें",
+    "resignGame": "गेम छोड़ें",
+    "resigning": "गेम छोड़ा जा रहा है...",
+    "pleaseWait": "कृपया प्रतीक्षा करें...",
+    "gameEnded": "गेम पहले ही समाप्त हो चुका है",
+    "forfeitGame": "वर्तमान गेम जब्त करें"
+  },
+  "reportIssue": {
+        "bugReportTitle": "बग रिपोर्ट",
+        "bugReportDescription": "वर्तमान गेम स्थिति के साथ बग की रिपोर्ट करें। गेम की स्थिति आपकी रिपोर्ट में शामिल की जाएगी।",
+        "feedbackTitle": "प्रतिक्रिया और समस्याएं",
+        "feedbackDescription": "प्रतिक्रिया दें या समस्या की रिपोर्ट करें। हम आपके इनपुट की सराहना करते हैं!",
+        "subject": "विषय",
+        "subjectPlaceholder": "समस्या का संक्षिप्त सारांश",
+        "description": "विवरण",
+        "descriptionPlaceholder": "समस्या या प्रतिक्रिया का विस्तृत विवरण...",
+        "gameStateIncluded": "✓ गेम स्थिति शामिल की जाएगी",
+        "turn": "बारी",
+        "white": "सफेद",
+        "black": "काला",
+        "gameOver": "गेम समाप्त",
+        "submitIssue": "समस्या सबमिट करें",
+        "anonymousNote": "नोट: आप गुमनाम रूप से सबमिट कर रहे हैं। अपनी समस्याओं को ट्रैक करने के लिए लॉग इन करें।",
+        "validation": {
+            "missingSubjectTitle": "जानकारी गायब है",
+            "missingSubjectMessage": "कृपया अपनी समस्या के लिए एक विषय दर्ज करें।",
+            "invalidSubjectTitle": "अमान्य विषय",
+            "invalidSubjectMessage": "विषय कम से कम 3 अक्षर लंबा होना चाहिए।",
+            "missingDescriptionTitle": "जानकारी गायब है",
+            "missingDescriptionMessage": "कृपया अपनी समस्या के लिए विवरण दर्ज करें।",
+            "invalidDescriptionTitle": "अमान्य विवरण",
+            "invalidDescriptionMessage": "विवरण कम से कम 10 अक्षर लंबा होना चाहिए।"
+        },
+        "success": {
+            "title": "समस्या सबमिट की गई",
+            "message": "आपकी प्रतिक्रिया के लिए धन्यवाद! आपकी समस्या सबमिट कर दी गई है",
+            "ok": "ठीक है"
+        },
+        "error": {
+            "title": "सबमिशन विफल",
+            "message": "आपकी समस्या सबमिट करने में विफल। कृपया अपना कनेक्शन जांचें और पुनः प्रयास करें।"
+        }
+    },
+    "settings": {
+        "account": "खाता",
+        "profileAvatar": "प्रोफाइल अवतार",
+        "chooseAvatar": "अपना समुद्री-थीम वाला अवतार चुनें",
+        "appearance": "दिखावट",
+        "theme": {
+            "light": "लाइट",
+            "lightDescription": "हमेशा लाइट थीम का उपयोग करें",
+            "dark": "डार्क",
+            "darkDescription": "हमेशा डार्क थीम का उपयोग करें",
+            "auto": "ऑटो",
+            "autoDescription": "सिस्टम थीम से मिलाएं"
+        },
+        "language": {
+            "title": "भाषा",
+            "english": "English",
+            "englishDescription": "English Language Interface",
+            "hindi": "हिन्दी",
+            "hindiDescription": "हिन्दी भाषा इंटरफ़ेस"
+        },
+        "actions": {
+            "resetToDefaults": "डिफ़ॉल्ट पर रीसेट करें",
+            "resetTitle": "सेटिंग्स रीसेट करें",
+            "resetMessage": "क्या आप वाकई सभी सेटिंग्स को डिफ़ॉल्ट पर रीसेट करना चाहते हैं?",
+            "cancel": "रद्द करें",
+            "reset": "रीसेट करें"
+        },
+        "dangerZone": {
+            "title": "खतरे का क्षेत्र",
+            "warning": "एक बार जब आप अपना खाता हटा देते हैं, तो वापस नहीं आ सकते। कृपया सुनिश्चित रहें।",
+            "deleteAccount": "खाता हटाएं",
+            "deletingAccount": "खाता हटाया जा रहा है...",
+            "deleteTitle": "खाता हटाएं",
+            "deleteMessage": "यह कार्रवाई स्थायी है और इसे पूर्ववत नहीं किया जा सकता।\n\n• आपका सारा व्यक्तिगत डेटा हटा दिया जाएगा\n• आपके गेम जारी रहेंगे लेकिन आप \"अनाम\" के रूप में दिखाई देंगे\n• आपके मित्र और मित्र अनुरोध हटा दिए जाएंगे\n• सक्रिय गेम जब्त कर लिए जाएंगे\n\nक्या आप वाकई जारी रखना चाहते हैं?",
+            "continue": "जारी रखें",
+            "confirmTitle": "खाता हटाने की पुष्टि करें",
+            "confirmMessage": "पुष्टि करने के लिए, कृपया नीचे DELETE (सभी कैप्स) टाइप करें:",
+            "incorrectTitle": "गलत पुष्टि",
+            "incorrectMessage": "खाता हटाने की पुष्टि करने के लिए आपको DELETE बिल्कुल टाइप करना होगा।",
+            "successTitle": "खाता हटा दिया गया",
+            "successMessage": "आपका खाता सफलतापूर्वक हटा दिया गया है। अब आपको लॉग आउट कर दिया जाएगा।",
+            "failedTitle": "हटाना विफल रहा",
+            "timeoutMessage": "अनुरोध समाप्त हो गया। कृपया अपना कनेक्शन जांचें और पुनः प्रयास करें।",
+            "failedMessage": "खाता हटाने में विफल। कृपया पुनः प्रयास करें या यदि समस्या बनी रहती है तो सपोर्ट से संपर्क करें।",
+            "retry": "पुनः प्रयास करें"
+        },
+        "errors": {
+            "loadFailed": "सेटिंग्स लोड करने में विफल",
+            "saveFailed": "सेटिंग्स सहेजने में विफल",
+            "avatarSaveFailed": "अवतार चयन सहेजने में विफल",
+            "themeSaveFailed": "थीम प्राथमिकता सहेजने में विफल",
+            "languageChangeFailed": "भाषा बदलने में विफल",
+            "resetFailed": "सेटिंग्स रीसेट करने में विफल"
+        }
+    },
+    "friends": {
+        "addFriend": "मित्र जोड़ें",
+        "searchPlaceholder": "उपयोगकर्ता नाम से खोजें",
+        "noUsersFound": "कोई उपयोगकर्ता नहीं मिला",
+        "pending": "लंबित",
+        "incomingRequests": "आने वाले अनुरोध",
+        "sentRequests": "भेजे गए अनुरोध",
+        "myFriends": "मेरे मित्र",
+        "noFriendsYet": "अभी तक कोई मित्र नहीं",
+        "noFriendsHint": "एक साथ खेलना शुरू करने के लिए ऊपर उपयोगकर्ता नाम द्वारा मित्र जोड़ें!"
+    },
+    "common": {
+        "loading": "लोड हो रहा है...",
+        "error": "त्रुटि",
+        "success": "सफलता",
+        "cancel": "रद्द करें",
+        "confirm": "पुष्टि करें",
+        "save": "सेव करें",
+        "delete": "हटाएं",
+        "edit": "एडिट करें",
+        "close": "बंद करें",
+        "ok": "ठीक है",
+        "somethingWentWrong": "कुछ गलत हो गया। कृपया पुनः प्रयास करें।"
+    },
+    "cards": {
+        "matchmaking": {
+            "searchingForOpponent": "प्रतिद्वंद्वी खोज रहे हैं...",
+            "findRandomMatch": "रैंडम मैच खोजें",
+            "searchingHint": "प्रतिद्वंद्वी खोज रहे हैं... · रद्द करने के लिए टैप करें",
+            "tapToJoin": "मैचमेकिंग कतार में शामिल होने के लिए टैप करें",
+            "cannotJoinTitle": "मैचमेकिंग में शामिल नहीं हो सकते"
+        },
+        "playWithFriend": {
+            "title": "मित्र के साथ खेलें",
+            "description": "किसी मित्र को खेलने के लिए आमंत्रित करें",
+            "modalTitle": "मित्र के साथ खेलें",
+            "inviteFriend": "मित्र को आमंत्रित करें",
+            "inviteDescription": "किसी मित्र को गेम आमंत्रण भेजें",
+            "textInvite": "टेक्स्ट आमंत्रण",
+            "textInviteDescription": "टेक्स्ट के माध्यम से आमंत्रण भेजें",
+            "passAndPlay": "पास एंड प्ले",
+            "passAndPlayDescription": "इस डिवाइस पर स्थानीय रूप से खेलें",
+            "selectFriend": "एक मित्र चुनें",
+            "searchFriends": "मित्रों को खोजें...",
+            "noFriendsFound": "कोई मित्र नहीं मिला",
+            "noFriendsYet": "अभी तक कोई मित्र नहीं। मित्र जोड़ें और खेलें!",
+            "passAndPlayGames": "पास एंड प्ले गेम्स",
+            "startNewGame": "नया गेम शुरू करें",
+            "noActiveGames": "कोई सक्रिय गेम नहीं",
+            "vsGuest": "vs गेस्ट 1",
+            "unlimited": "असीमित",
+            "shareMessage": "चलो Coral Clash खेलते हैं! 🦀\n\nयहाँ से डाउनलोड करें:\niOS: [URL]\n\nAndroid: [URL]"
+        },
+        "signUpPrompt": {
+            "title": "पूर्ण सुविधाएँ अनलॉक करें",
+            "subtitle": "एक्सेस के लिए मुफ्त खाता बनाएं:",
+            "feature1": "मित्रों के साथ ऑनलाइन खेलें",
+            "feature2": "मैचमेकिंग के माध्यम से रैंडम प्रतिद्वंद्वी खोजें",
+            "feature3": "अपने गेम आंकड़े और इतिहास ट्रैक करें",
+            "feature4": "अपना मित्र नेटवर्क बनाएं",
+            "button": "साइन अप / लॉग इन करें"
+        },
+        "activeGames": {
+            "title": "सक्रिय गेम्स",
+            "inProgress": "प्रगति में",
+            "game": "गेम",
+            "games": "गेम्स",
+            "yourTurn": "आपकी बारी",
+            "opponentTurn": "प्रतिद्वंद्वी की बारी",
+            "opponent": "प्रतिद्वंद्वी",
+            "computer": "कंप्यूटर",
+            "blitz": "ब्लिट्ज",
+            "normal": "नॉर्मल",
+            "unlimited": "असीमित",
+            "timed": "समयबद्ध",
+            "loading": "गेम लोड हो रहे हैं...",
+            "noGames": "कोई सक्रिय गेम नहीं",
+            "noGamesHint": "किसी मित्र के साथ गेम शुरू करें!",
+            "vs": "vs ",
+            "resignTitle": "गेम छोड़ें",
+            "resignMessage": "क्या आप वाकई गेम छोड़ना चाहते हैं? आप यह गेम हार जाएंगे।",
+            "resignButton": "गेम छोड़ें",
+            "resignError": "गेम छोड़ने में विफल। कृपया पुनः प्रयास करें।"
+        },
+        "gameHistory": {
+            "title": "गेम इतिहास",
+            "subtitle": "हाल के गेम्स",
+            "loading": "इतिहास लोड हो रहा है...",
+            "noHistory": "कोई गेम इतिहास नहीं",
+            "noHistoryHint": "आपके पूर्ण किए गए गेम यहां दिखाई देंगे",
+            "vs": "vs ",
+            "justNow": "अभी-अभी",
+            "minutesAgo": "मि पहले",
+            "hoursAgo": "घं पहले",
+            "daysAgo": "दिन पहले",
+            "cancelled": "गेम रद्द किया गया",
+            "draw": "ड्रॉ",
+            "won": "आप जीते",
+            "lost": "आप हारे",
+            "unknown": "अज्ञात",
+            "opponent": "प्रतिद्वंद्वी",
+            "computer": "कंप्यूटर",
+            "blitz": "ब्लिट्ज",
+            "normal": "नॉर्मल",
+            "unlimited": "असीमित",
+            "timed": "समयबद्ध"
+        }
+    },
+    "errors": {
+        "INVALID_MOVE": "अमान्य चाल",
+        "INVALID_MOVE_OCCUPIED": "वह स्थान पहले से व्याप्त है",
+        "INVALID_MOVE_OUT_OF_BOUNDS": "चाल सीमा से बाहर है",
+        "INVALID_MOVE_NOT_YOUR_TURN": "यह आपकी बारी नहीं है",
+        "INVALID_MOVE_PIECE_BLOCKED": "वह मोहरा अवरुद्ध है",
+        "GAME_NOT_FOUND": "गेम नहीं मिला",
+        "GAME_ALREADY_STARTED": "गेम पहले ही शुरू हो चुका है",
+        "GAME_ALREADY_ENDED": "यह गेम पहले ही समाप्त हो चुका है",
+        "GAME_CANCELLED": "गेम रद्द कर दिया गया",
+        "PLAYER_NOT_IN_GAME": "आप इस गेम में नहीं हैं",
+        "PLAYER_DISCONNECTED": "खिलाड़ी डिस्कनेक्ट हो गया",
+        "CONNECTION_ERROR": "कनेक्शन त्रुटि। कृपया अपना इंटरनेट जांचें।",
+        "SERVER_ERROR": "सर्वर त्रुटि। कृपया बाद में पुनः प्रयास करें।",
+        "TIMEOUT": "अनुरोध समय समाप्त",
+        "ALREADY_IN_QUEUE": "आप पहले से मैचमेकिंग कतार में हैं",
+        "NOT_IN_QUEUE": "आप मैचमेकिंग कतार में नहीं हैं",
+        "QUEUE_TIMEOUT": "मैचमेकिंग समय समाप्त",
+        "OPPONENT_NOT_FOUND": "प्रतिद्वंद्वी नहीं मिला",
+        "MATCHMAKING_DISABLED": "मैचमेकिंग वर्तमान में अक्षम है",
+        "FRIEND_NOT_FOUND": "मित्र नहीं मिला",
+        "FRIEND_ALREADY_EXISTS": "पहले से इस उपयोगकर्ता के मित्र हैं",
+        "CANNOT_ADD_SELF": "आप स्वयं को मित्र के रूप में नहीं जोड़ सकते",
+        "FRIEND_REQUEST_PENDING": "मित्र अनुरोध पहले से लंबित है",
+        "INVALID_CREDENTIALS": "अमान्य ईमेल या पासवर्ड",
+        "USER_NOT_FOUND": "उपयोगकर्ता नहीं मिला",
+        "EMAIL_ALREADY_EXISTS": "ईमेल पहले से उपयोग में है",
+        "USERNAME_TAKEN": "उपयोगकर्ता नाम पहले से लिया गया है",
+        "WEAK_PASSWORD": "पासवर्ड बहुत कमजोर है",
+        "ACCOUNT_DISABLED": "आपका खाता अक्षम कर दिया गया है",
+        "SESSION_EXPIRED": "आपका सत्र समाप्त हो गया है। कृपया पुनः लॉग इन करें।",
+        "UNAUTHORIZED": "आपको यह कार्रवाई करने का अधिकार नहीं है",
+        "RATE_LIMITED": "बहुत सारे अनुरोध। कृपया धीमा करें।",
+        "MAINTENANCE_MODE": "ऐप रखरखाव के अधीन है। कृपया बाद में पुनः प्रयास करें।",
+        "FEATURE_DISABLED": "यह सुविधा वर्तमान में अक्षम है"
+    },
+    "success": {
+        "GAME_WON": "बधाई हो! आप जीत गए!",
+        "GAME_DRAW": "गेम ड्रॉ में समाप्त हुआ",
+        "GAME_LOST": "अगली बार बेहतर भाग्य!",
+        "PLAYER_RESIGNED": "खिलाड़ी ने गेम छोड़ दिया",
+        "FRIEND_REQUEST_SENT": "मित्र अनुरोध भेजा गया!",
+        "FRIEND_REQUEST_ACCEPTED": "मित्र अनुरोध स्वीकार किया गया!",
+        "FRIEND_REQUEST_DECLINED": "मित्र अनुरोध अस्वीकार किया गया",
+        "MOVE_SUCCESS": "चाल सफल"
+    },
+    "scenarioBoard": {
+        "pauseAutoPlay": "ऑटो-प्ले रोकें",
+        "playDemo": "डेमो चलाएं",
+        "explanation": "व्याख्या",
+        "backToGuide": "गाइड पर वापस जाएं"
+    },
+    "howToPlay": {
+        "objective": {
+            "title": "उद्देश्य",
+            "intro": "कोरल क्लैश जीतने के लिए, इन लक्ष्यों में से एक पूरा करें:",
+            "checkmate": "चेकमेट",
+            "checkmateDesc": "अपने प्रतिद्वंद्वी की व्हेल को (जब व्हेल",
+            "check": "चेक",
+            "checkmateDescEnd": "में हो और बच नहीं सकती)",
+            "coralControl": "कोरल के साथ सबसे अधिक क्षेत्र",
+            "coralControlDesc": "नियंत्रित करें",
+            "coralControlWhen": "जब:",
+            "coralPlaced": "एक खिलाड़ी ने अपने सभी कोरल रख दिए हों",
+            "whaleRemaining": "एक खिलाड़ी के पास केवल उनकी व्हेल बची हो",
+            "backRowReached": "एक केकड़ा या ऑक्टोपस प्रतिद्वंद्वी की पिछली पंक्ति तक पहुंच जाए",
+            "areaControlled": "कोरल द्वारा नियंत्रित क्षेत्र:",
+            "areaControlledDesc": "अपने रंग के कोरल की मात्रा गिनें जो आपके प्रतिद्वंद्वी के किसी मोहरे द्वारा कब्जा नहीं की गई है।",
+            "checkmateExample": "चेकमेट उदाहरण",
+            "checkExample": "चेक उदाहरण",
+            "coralVictoryExample": "कोरल विजय उदाहरण"
+        },
+        "setup": {
+            "title": "गेम सेटअप",
+            "boardDesc": "बोर्ड 64 वर्गों के साथ 8x8 ग्रिड है। प्रत्येक खिलाड़ी के पास है:",
+            "coralPieces": "17 कोरल मोहरे",
+            "units": "17 इकाइयाँ: 1 व्हेल, 2 डॉल्फिन, 4 कछुए, 2 पफरफिश, 4 केकड़े, और 4 ऑक्टोपस",
+            "variants": "प्रत्येक मोहरे का प्रकार दो रूपों में आता है:",
+            "hunter": "शिकारी",
+            "hunterDesc": "मोहरे (बिना चार कोरल आइकन के) कोरल हटा सकते हैं",
+            "gatherer": "संग्रहकर्ता",
+            "gathererDesc": "मोहरे (चार कोरल आइकन के साथ) कोरल रख सकते हैं",
+            "hunterExample": "शिकारी प्रभाव उदाहरण",
+            "gathererExample": "संग्रहकर्ता प्रभाव उदाहरण"
+        },
+        "turnOverview": {
+            "title": "बारी का अवलोकन",
+            "intro": "सफेद पहले जाता है, फिर खिलाड़ी बारी-बारी से। आपकी बारी पर:",
+            "step1": "अपने किसी एक मोहरे को हिलाएं",
+            "step2": "किसी भी कैप्चर, शिकारी, या संग्रहकर्ता प्रभाव को हल करें",
+            "step3": "जांचें कि क्या कोई उद्देश्य पूरा हुआ है"
+        },
+        "movement": {
+            "title": "मोहरे कैसे चलते हैं",
+            "important": "महत्वपूर्ण:",
+            "importantDesc": "मोहरे अन्य मोहरों के माध्यम से नहीं जा सकते - उन्हें स्पष्ट रास्ता होना चाहिए।",
+            "variants": "प्रत्येक मोहरे का प्रकार दो रूपों में आता है जो कोरल के साथ अलग तरह से बातचीत करते हैं:",
+            "hunterPieces": "शिकारी मोहरे",
+            "hunterMovement": "(बिना कोरल आइकन के)",
+            "stoppedBy": "रोक दिए जाते हैं",
+            "hunterMovementDesc": "कोरल द्वारा - वे इससे होकर नहीं जा सकते",
+            "gathererPieces": "संग्रहकर्ता मोहरे",
+            "gathererMovement": "(चार कोरल आइकन के साथ) अधिक शक्तिशाली हैं - वे",
+            "through": "पार",
+            "gathererMovementDesc": "कोरल से स्वतंत्र रूप से जा सकते हैं",
+            "coralMovementExample": "कोरल गति उदाहरण",
+            "individualMovements": "व्यक्तिगत मोहरे की गतिविधियाँ"
+        },
+        "pieces": {
+            "whale": {
+                "name": "व्हेल",
+                "intro": "व्हेल आपका सबसे महत्वपूर्ण मोहरा है - यदि इसे चेकमेट कर दिया जाता है, तो आप हार जाते हैं! व्हेल दो वर्ग घेरती है और इसके दो अलग-अलग गति विकल्प हैं:",
+                "slidingMove": "1. स्लाइडिंग मूव:",
+                "slidingMoveDesc": "मोहरे के आधे हिस्से को किसी भी संख्या में वर्ग क्षैतिज, लंबवत, या तिरछे स्थानांतरित करें जबकि इसकी मूल अभिविन्यास बनाए रखें। व्हेल शिकारी गति नियमों का पालन करती है - यह कोरल द्वारा रोक दी जाती है। हालांकि, एक विशेष अपवाद है (नीचे देखें)।",
+                "rotationMove": "2. रोटेशन मूव:",
+                "rotationMoveDesc": "मोहरे के आधे हिस्से को एक आसन्न वर्ग (एक वर्ग लंबवत या क्षैतिज) पर घुमाएं। रोटेशन का चयन करते समय, पहले गंतव्य वर्ग (सफेद वृत्त के साथ दिखाया गया) पर टैप करें। यदि कई वैध अभिविन्यास हैं, तो आप फिर अभिविन्यास वर्ग (हरे वृत्त के साथ दिखाया गया) पर टैप करेंगे। यदि केवल एक वैध अभिविन्यास है, तो व्हेल स्वचालित रूप से अभिविन्यास चयन दिखाए बिना चली जाएगी।",
+                "checkRules": "चेक नियम:",
+                "checkRulesDesc": "व्हेल कभी भी अपनी गति को चेक में समाप्त नहीं कर सकती (जहां इसे पकड़ा जा सकता है), लेकिन यह धमकी वाले वर्गों से गुजर सकती है।",
+                "doubleCapture": "डबल कैप्चर:",
+                "doubleCaptureDesc": "व्हेल एक ही चाल में दो दुश्मन मोहरों को पकड़ सकती है - अपने शरीर के प्रत्येक आधे हिस्से से एक!",
+                "doubleCoralRemoval": "डबल कोरल हटाना:",
+                "doubleCoralRemovalDesc": "जब व्हेल (शिकारी के रूप में कार्य करते हुए) कोरल पर उतरती है, तो वह एक या दोनों कोरल मोहरों को हटाने का चयन कर सकती है। यदि दोनों हिस्से कोरल पर उतरते हैं, तो आप दोनों, केवल एक, या कोई नहीं हटा सकते हैं। यदि केवल आधा हिस्सा नए कोरल पर उतरता है (जबकि दूसरा आधा पहले से ही कोरल पर है), तो आप उस एक कोरल मोहरे को हटाने का चयन कर सकते हैं।",
+                "specialCase": "⚠️ विशेष गति स्थिति",
+                "specialCaseDesc": "यदि व्हेल का आधा हिस्सा पहले से ही कोरल पर बैठा है, तो वह कोरल दूसरे आधे हिस्से को उसी कोरल वर्ग पर या उससे होकर जाने से नहीं रोकता।",
+                "basicMovement": "बुनियादी व्हेल गति",
+                "rotationExample": "व्हेल रोटेशन उदाहरण",
+                "coralException": "व्हेल अपने स्वयं के कोरल से होकर जा रही है"
+            },
+            "dolphin": {
+                "name": "डॉल्फिन",
+                "movement": "किसी भी संख्या में वर्ग लंबवत, क्षैतिज, या तिरछे चलती है।",
+                "example": "डॉल्फिन गति उदाहरण"
+            },
+            "turtle": {
+                "name": "कछुआ",
+                "movement": "किसी भी संख्या में वर्ग लंबवत या क्षैतिज चलता है।",
+                "example": "कछुआ गति उदाहरण"
+            },
+            "pufferfish": {
+                "name": "पफरफिश",
+                "movement": "किसी भी संख्या में वर्ग तिरछे चलती है।",
+                "example": "पफरफिश गति उदाहरण"
+            },
+            "octopus": {
+                "name": "ऑक्टोपस",
+                "movement": "एक वर्ग तिरछे चलता है।",
+                "example": "ऑक्टोपस गति उदाहरण"
+            },
+            "crab": {
+                "name": "केकड़ा",
+                "movement": "एक वर्ग लंबवत या क्षैतिज चलता है।",
+                "example": "केकड़ा गति उदाहरण"
+            }
+        },
+        "specialRules": {
+            "title": "विशेष नियम",
+            "capture": {
+                "title": "कैप्चर",
+                "desc": "एक दुश्मन मोहरे द्वारा कब्जा किए गए वर्ग में चलें। व्हेल एक चाल में दो मोहरों को पकड़ सकती है।",
+                "example": "कैप्चर उदाहरण"
+            },
+            "hunterEffect": {
+                "title": "शिकारी गति और प्रभाव",
+                "desc": "शिकारी मोहरों (बिना कोरल आइकन के) के दो महत्वपूर्ण व्यवहार हैं:",
+                "movementStops": "गति रुक जाती है",
+                "movementStopsDesc": "जब कोरल पर उतरते हैं",
+                "canRemove": "हटा सकते हैं",
+                "canRemoveDesc": "उस कोरल को बोर्ड से",
+                "example": "शिकारी प्रभाव उदाहरण"
+            },
+            "gathererEffect": {
+                "title": "संग्रहकर्ता प्रभाव",
+                "desc": "संग्रहकर्ता मोहरे (चार कोरल आइकन के साथ) खाली वर्गों पर कोरल रख सकते हैं जहां वे चलते हैं।",
+                "example": "संग्रहकर्ता प्रभाव उदाहरण"
+            }
+        },
+        "drawResignation": {
+            "title": "ड्रॉ और त्याग",
+            "stalemate": "गतिरोध:",
+            "stalemateDesc": "जब किसी खिलाड़ी के पास कोई कानूनी चाल नहीं है और उनकी व्हेल चेक में नहीं है",
+            "threefoldRepetition": "तीन बार दोहराव:",
+            "threefoldRepetitionDesc": "एक ही स्थिति तीन बार होती है जब एक ही खिलाड़ी को चलना है",
+            "resignation": "त्याग:",
+            "resignationDesc": "एक खिलाड़ी किसी भी समय त्याग कर सकता है"
+        }
+    },
+    "components": {
+        "fixtureLoader": {
+            "title": "गेम स्थिति लोड करें",
+            "gameMode": "गेम मोड:",
+            "back": "वापस",
+            "vsComputer": "कंप्यूटर के खिलाफ",
+            "passAndPlay": "पास एंड प्ले",
+            "loadGame": "गेम लोड करें",
+            "fixturesHint": "💡 फ़िक्स्चर shared/game/__fixtures__/ से हैं",
+            "error": "त्रुटि",
+            "failedToLoad": "फ़िक्स्चर लोड करने में विफल"
+        },
+        "versionWarning": {
+            "title": "अपडेट उपलब्ध है",
+            "message": "सर्वोत्तम अनुभव के लिए कृपया नवीनतम संस्करण में अपडेट करें।",
+            "updateButton": "अपडेट करें"
+        },
+        "playerStatus": {
+            "computer": "कंप्यूटर",
+            "thinking": "सोच रहा है...",
+            "remaining": "शेष",
+            "underControl": "नियंत्रण में"
+        },
+        "alert": {
+            "defaultButton": "ठीक है"
+        },
+        "pvpBoard": {
+            "player": "खिलाड़ी",
+            "opponent": "प्रतिद्वंद्वी",
+            "requestUndoTitle": "पूर्ववत अनुरोध करें",
+            "requestUndoMessage": "अंतिम चाल को पूर्ववत करने का अनुरोध करें? {{opponentName}} को स्वीकृत करना होगा।",
+            "requestResetTitle": "रीसेट अनुरोध करें",
+            "requestResetMessage": "इस गेम को रीसेट करने का अनुरोध करें? {{opponentName}} को स्वीकृत करना होगा।",
+            "cancel": "रद्द करें",
+            "request": "अनुरोध करें",
+            "requestReset": "रीसेट अनुरोध करें",
+            "askOpponentReset": "प्रतिद्वंद्वी से गेम रीसेट करने को कहें",
+            "gameEnded": "गेम पहले ही समाप्त हो चुका है",
+            "noMoves": "अभी तक कोई चाल नहीं चली गई है",
+            "pendingUndo": "पहले लंबित पूर्ववत अनुरोध हल करना होगा",
+            "remindOpponent": "प्रतिद्वंद्वी को याद दिलाएं",
+            "remindOpponentSubtitle": "प्रतिद्वंद्वी को उनकी बारी लेने के लिए याद दिलाएं",
+            "availableInHours": "{{hours}} घंटे में उपलब्ध होगा",
+            "yourTurn": "आपकी बारी है",
+            "errorUndoRequest": "पूर्ववत अनुरोध भेजने में विफल। कृपया पुनः प्रयास करें।",
+            "errorUndoResponse": "पूर्ववत अनुरोध का जवाब देने में विफल। कृपया पुनः प्रयास करें।",
+            "errorResetResponse": "रीसेट अनुरोध का जवाब देने में विफल। कृपया पुनः प्रयास करें।",
+            "errorCancelUndo": "पूर्ववत अनुरोध रद्द करने में विफल। कृपया पुनः प्रयास करें।",
+            "errorCancelReset": "रीसेट अनुरोध रद्द करने में विफल। कृपया पुनः प्रयास करें।",
+            "reminderSentTitle": "सफलता",
+            "reminderSentMessage": "आपके प्रतिद्वंद्वी को रिमाइंडर भेज दिया गया है।",
+            "errorReminderTitle": "त्रुटि",
+            "errorReminderMessage": "रिमाइंडर भेजने में विफल। कृपया पुनः प्रयास करें।",
+            "waitingUndoResponse": "{{opponentName}} के {{moveCount}} चाल(ों) को पूर्ववत करने के अनुरोध का जवाब देने की प्रतीक्षा...",
+            "opponentWantsUndo": "{{opponentName}} {{moveCount}} चाल(ों) को पूर्ववत करना चाहते हैं",
+            "waitingResetResponse": "{{opponentName}} के रीसेट अनुरोध का जवाब देने की प्रतीक्षा...",
+            "opponentWantsReset": "{{opponentName}} गेम रीसेट करना चाहते हैं"
+        },
+        "passAndPlayBoard": {
+            "resetGameTitle": "गेम रीसेट करें",
+            "resetGameMessage": "क्या आप वाकई एक नया गेम शुरू करना चाहते हैं?",
+            "cancel": "रद्द करें",
+            "reset": "रीसेट करें",
+            "resetGame": "गेम रीसेट करें",
+            "startNewGame": "शुरू से नया गेम शुरू करें",
+            "gameEnded": "गेम पहले ही समाप्त हो चुका है",
+            "noMoves": "अभी तक कोई चाल नहीं चली गई है"
+        },
+        "baseBoard": {
+            "errorLoadState": "गेम स्थिति लोड करने में विफल",
+            "resignGameTitle": "गेम छोड़ें",
+            "resignGameMessage": "क्या आप वाकई गेम छोड़ना चाहते हैं? आप गेम हार जाएंगे।",
+            "cancel": "रद्द करें",
+            "resign": "छोड़ें",
+            "checkTitle": "चेक!",
+            "checkMessage": "आपका {{piece}} चेक में है!",
+            "checkmateTitle": "चेकमेट!",
+            "checkmateMessage": "{{winner}} चेकमेट से जीत गए!",
+            "gathererTitle": "गैथरर प्रभाव",
+            "gathererMessage": "इस वर्ग पर कोरल रखें?",
+            "yes": "हां",
+            "no": "नहीं",
+            "hunterTitle": "हंटर प्रभाव",
+            "hunterMessage": "इस वर्ग से कोरल हटाएं?",
+            "exportSuccessTitle": "सफलता",
+            "exportSuccessMessage": "गेम स्थिति क्लिपबोर्ड में सेव हो गई!",
+            "exportFailedTitle": "एक्सपोर्ट विफल",
+            "computer": "कंप्यूटर",
+            "opponent": "प्रतिद्वंद्वी",
+            "white": "सफेद",
+            "black": "काला",
+            "youWonTimeout": "आप जीत गए! {{opponentName}} का समय समाप्त हो गया ⏱️",
+            "youLostTimeout": "आप हार गए! समय समाप्त हो गया ⏱️",
+            "timeoutLose": "{{loserName}} का समय समाप्त हो गया! ⏱️",
+            "youWonResign": "आप जीत गए! {{opponentName}} ने गेम छोड़ दिया 🏳️",
+            "youResigned": "आपने गेम छोड़ दिया 🏳️",
+            "checkmateWin": "चेकमेट! आप जीत गए! 🏆",
+            "checkmateLose": "चेकमेट! आप हार गए।",
+            "checkmateGeneric": "चेकमेट! {{winner}} जीत गए! 🏆",
+            "youLost": "आप हार गए",
+            "resignGeneric": "{{winner}} त्याग से जीत गए! 🏳️",
+            "coralVictoryWin": "आप कोरल विजय से जीत गए! 🪸\n{{whiteScore}} - {{blackScore}}",
+            "coralVictoryLose": "आप हार गए। {{winner}} कोरल विजय से जीत गए! 🪸\n{{whiteScore}} - {{blackScore}}",
+            "coralVictoryGeneric": "{{winner}} कोरल विजय से जीत गए! 🪸\n{{whiteScore}} सफेद - {{blackScore}} काला",
+            "stalemate": "गतिरोध! 🤝",
+            "drawRepetition": "पुनरावृत्ति से ड्रॉ! 🤝",
+            "drawInsufficientMaterial": "ड्रॉ - अपर्याप्त सामग्री! 🤝",
+            "drawCoralTie": "ड्रॉ - कोरल बराबरी! 🤝🪸\n{{score}} - {{score}}",
+            "draw": "ड्रॉ! 🤝",
+            "check": "{{player}} चेक में है! ⚠️",
+            "viewingHistory": "पिछली चालें देख रहे हैं - खेलने के लिए वर्तमान पर लौटें",
+            "selectWhaleOrientation": "अपनी व्हेल के लिए अभिविन्यास चुनें",
+            "hunterWhaleTitle": "हंटर प्रभाव (व्हेल)",
+            "hunterWhaleMessage": "कोरल हटाने का विकल्प चुनें:",
+            "yourTurn": "आपकी बारी",
+            "opponentTurn": "{{opponentName}} की बारी",
+            "playerTurn": "{{playerColor}} की बारी"
+        },
+        "computerBoard": {
+            "cancelRequestTitle": "अनुरोध रद्द करें",
+            "cancelRequestMessage": "अपना रीसेट अनुरोध रद्द करें?",
+            "cancel": "रद्द करें",
+            "yes": "हां",
+            "resetGameTitle": "गेम रीसेट करें",
+            "resetGameMessage": "क्या आप वाकई एक नया गेम शुरू करना चाहते हैं?",
+            "reset": "रीसेट करें",
+            "resetGame": "गेम रीसेट करें",
+            "startNewGame": "शुरू से नया गेम शुरू करें",
+            "gameEnded": "गेम पहले ही समाप्त हो चुका है",
+            "noMoves": "अभी तक कोई चाल नहीं चली गई है",
+            "errorUndo": "पूर्ववत करने में विफल। कृपया पुनः प्रयास करें।"
+        },
+        "computerUsers": {
+            "successTitle": "सफलता",
+            "errorTitle": "त्रुटि",
+            "initializeSuccess": "{{count}} कंप्यूटर यूज़र सफलतापूर्वक आरंभ किए गए",
+            "initializeError": "कंप्यूटर यूज़र को आरंभ करने में विफल। कृपया पुनः प्रयास करें।",
+            "confirmDeleteTitle": "हटाने की पुष्टि करें",
+            "confirmDeleteMessage": "क्या आप वाकई सभी कंप्यूटर यूज़र को हटाना चाहते हैं? इस क्रिया को पूर्ववत नहीं किया जा सकता।",
+            "cancel": "रद्द करें",
+            "delete": "हटाएं",
+            "deleteSuccess": "{{count}} कंप्यूटर यूज़र सफलतापूर्वक हटा दिए गए",
+            "deleteError": "कंप्यूटर यूज़र को हटाने में विफल। कृपया पुनः प्रयास करें।",
+            "clearLanguageSuccess": "भाषा प्राथमिकता साफ कर दी गई। ऐप अगली बार डिवाइस सेटिंग्स से भाषा स्वतः पहचान लेगा।",
+            "clearLanguageError": "भाषा प्राथमिकता साफ करने में विफल। कृपया पुनः प्रयास करें।"
+        }
+    },
+    "hooks": {
+        "friends": {
+            "removeFriendTitle": "मित्र हटाएं",
+            "removeFriendMessage": "क्या आप वाकई {{friendName}} को अपने मित्रों से हटाना चाहते हैं?",
+            "cancel": "रद्द करें",
+            "remove": "हटाएं",
+            "errorRemove": "मित्र हटाने में विफल",
+            "errorAccept": "मित्र अनुरोध स्वीकार करने में विफल",
+            "errorDecline": "मित्र अनुरोध अस्वीकार करने में विफल",
+            "cancelRequestTitle": "मित्र अनुरोध रद्द करें",
+            "cancelRequestMessage": "{{displayName}} को भेजा गया मित्र अनुरोध रद्द करें?",
+            "no": "नहीं",
+            "yesCancel": "हां, रद्द करें",
+            "errorCancelRequest": "मित्र अनुरोध रद्द करने में विफल",
+            "errorTitle": "त्रुटि"
+        },
+        "game": {
+            "errorTitle": "त्रुटि",
+            "errorLoadGame": "गेम लोड करने में विफल"
+        },
+        "gameActions": {
+            "errorTitle": "त्रुटि",
+            "errorResign": "गेम छोड़ने में विफल"
+        },
+        "userSearch": {
+            "errorTitle": "त्रुटि",
+            "errorSendRequest": "मित्र अनुरोध भेजने में विफल"
+        }
+    }
+}

@@ -1,4 +1,5 @@
 import { ActivityIndicator, Dimensions, Linking, useWindowDimensions, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { Header, Icon } from '../components';
 import { PHYSICAL_GAME_URL, RULES_VIDEO_URL } from '../constants';
 
@@ -22,6 +23,7 @@ const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
 
 function HomeStack(_props) {
+    const { t } = useTranslation();
     return (
         <Stack.Navigator initialRouteName='Dashboard'>
             <Stack.Screen
@@ -29,7 +31,7 @@ function HomeStack(_props) {
                 component={HomeScreen}
                 options={{
                     header: ({ navigation, scene }) => (
-                        <Header title='Home' navigation={navigation} scene={scene} />
+                        <Header title={t('navigation.home')} navigation={navigation} scene={scene} />
                     ),
                 }}
             />
@@ -38,7 +40,7 @@ function HomeStack(_props) {
                 component={GameScreen}
                 options={{
                     header: ({ navigation, scene }) => (
-                        <Header title='Game' navigation={navigation} scene={scene} back />
+                        <Header title={t('navigation.game')} navigation={navigation} scene={scene} back />
                     ),
                 }}
             />
@@ -47,7 +49,7 @@ function HomeStack(_props) {
                 component={ScenarioBoard}
                 options={{
                     header: ({ navigation, scene }) => (
-                        <Header title='Tutorial' navigation={navigation} scene={scene} back />
+                        <Header title={t('navigation.tutorial')} navigation={navigation} scene={scene} back />
                     ),
                 }}
             />
@@ -56,6 +58,7 @@ function HomeStack(_props) {
 }
 
 function HowToPlayStack(_props) {
+    const { t } = useTranslation();
     return (
         <Stack.Navigator initialRouteName='HowToPlayMain'>
             <Stack.Screen
@@ -63,7 +66,7 @@ function HowToPlayStack(_props) {
                 component={HowToPlay}
                 options={{
                     header: ({ navigation, scene }) => (
-                        <Header title='How-To Play' navigation={navigation} scene={scene} />
+                        <Header title={t('navigation.howToPlay')} navigation={navigation} scene={scene} />
                     ),
                 }}
             />
@@ -72,7 +75,7 @@ function HowToPlayStack(_props) {
                 component={ScenarioBoard}
                 options={{
                     header: ({ navigation, scene }) => (
-                        <Header title='Tutorial' navigation={navigation} scene={scene} back />
+                        <Header title={t('navigation.tutorial')} navigation={navigation} scene={scene} back />
                     ),
                 }}
             />
@@ -81,6 +84,7 @@ function HowToPlayStack(_props) {
 }
 
 export default function AppStack(_props) {
+    const { t } = useTranslation();
     const { user, loading, logOut } = useAuth();
     const { showAlert } = useAlert();
     const { colors } = useTheme();
@@ -131,6 +135,7 @@ export default function AppStack(_props) {
                 name='Home'
                 component={HomeStack}
                 options={{
+                    title: t('navigation.home'),
                     drawerIcon: ({ _focused, color }) => (
                         <Icon
                             size={isCompact ? 20 : 24}
@@ -149,6 +154,7 @@ export default function AppStack(_props) {
                         name='Friends'
                         component={Friends}
                         options={{
+                            title: t('navigation.friends'),
                             drawerIcon: ({ _focused: _focused, color }) => (
                                 <Icon
                                     size={isCompact ? 20 : 24}
@@ -159,7 +165,7 @@ export default function AppStack(_props) {
                             ),
                             header: ({ navigation, scene }) => (
                                 <Header
-                                    title='Friends'
+                                    title={t('navigation.friends')}
                                     navigation={navigation}
                                     scene={scene}
                                     user={user}
@@ -171,6 +177,7 @@ export default function AppStack(_props) {
                         name='Stats'
                         component={Stats}
                         options={{
+                            title: t('navigation.stats'),
                             drawerIcon: ({ _focused, color }) => (
                                 <Icon
                                     size={isCompact ? 20 : 24}
@@ -181,7 +188,7 @@ export default function AppStack(_props) {
                             ),
                             header: ({ navigation, scene }) => (
                                 <Header
-                                    title='Stats'
+                                    title={t('navigation.stats')}
                                     navigation={navigation}
                                     scene={scene}
                                     user={user}
@@ -193,6 +200,7 @@ export default function AppStack(_props) {
                         name='How-To Play'
                         component={HowToPlayStack}
                         options={{
+                            title: t('navigation.howToPlay'),
                             drawerIcon: ({ _focused, color }) => (
                                 <Icon
                                     size={isCompact ? 20 : 24}
@@ -208,6 +216,7 @@ export default function AppStack(_props) {
                         name='Rules Video'
                         component={View}
                         options={{
+                            title: t('navigation.rulesVideo'),
                             drawerIcon: ({ _focused, color }) => (
                                 <Icon
                                     size={isCompact ? 20 : 24}
@@ -230,6 +239,7 @@ export default function AppStack(_props) {
                         name='Physical Game'
                         component={View}
                         options={{
+                            title: t('navigation.physicalGame'),
                             drawerIcon: ({ _focused, color }) => (
                                 <Icon
                                     size={isCompact ? 20 : 24}
@@ -252,6 +262,7 @@ export default function AppStack(_props) {
                         name='Report Issue'
                         component={ReportIssue}
                         options={{
+                            title: t('navigation.reportIssue'),
                             drawerIcon: ({ _focused, color }) => (
                                 <Icon
                                     size={isCompact ? 20 : 24}
@@ -262,7 +273,7 @@ export default function AppStack(_props) {
                             ),
                             header: ({ navigation, scene }) => (
                                 <Header
-                                    title='Report Issue'
+                                    title={t('navigation.reportIssue')}
                                     navigation={navigation}
                                     scene={scene}
                                     user={user}
@@ -277,6 +288,7 @@ export default function AppStack(_props) {
                         name='Settings'
                         component={Settings}
                         options={{
+                            title: t('navigation.settings'),
                             drawerIcon: ({ _focused, color }) => (
                                 <Icon
                                     size={isCompact ? 20 : 24}
@@ -290,7 +302,7 @@ export default function AppStack(_props) {
                             },
                             header: ({ navigation, scene }) => (
                                 <Header
-                                    title='Settings'
+                                    title={t('navigation.settings')}
                                     navigation={navigation}
                                     scene={scene}
                                     user={user}
@@ -302,6 +314,7 @@ export default function AppStack(_props) {
                         name='Log Out'
                         component={Login}
                         options={{
+                            title: t('navigation.logOut'),
                             drawerIcon: ({ _focused, color }) => (
                                 <Icon
                                     size={isCompact ? 20 : 24}
@@ -314,13 +327,13 @@ export default function AppStack(_props) {
                         listeners={({ navigation }) => ({
                             drawerItemPress: (e) => {
                                 e.preventDefault();
-                                showAlert('Log Out', 'Are you sure you want to log out?', [
+                                showAlert(t('navigation.logOutConfirmTitle'), t('navigation.logOutConfirmMessage'), [
                                     {
-                                        text: 'Cancel',
+                                        text: t('navigation.cancel'),
                                         style: 'cancel',
                                     },
                                     {
-                                        text: 'Log Out',
+                                        text: t('navigation.logOut'),
                                         style: 'destructive',
                                         onPress: async () => {
                                             try {
@@ -343,6 +356,7 @@ export default function AppStack(_props) {
                         name='How-To Play'
                         component={HowToPlayStack}
                         options={{
+                            title: t('navigation.howToPlay'),
                             drawerIcon: ({ _focused, color }) => (
                                 <Icon
                                     size={isCompact ? 20 : 24}
@@ -358,6 +372,7 @@ export default function AppStack(_props) {
                         name='Rules Video'
                         component={View}
                         options={{
+                            title: t('navigation.rulesVideo'),
                             drawerIcon: ({ _focused, color }) => (
                                 <Icon
                                     size={isCompact ? 20 : 24}
@@ -380,6 +395,7 @@ export default function AppStack(_props) {
                         name='Physical Game'
                         component={View}
                         options={{
+                            title: t('navigation.physicalGame'),
                             drawerIcon: ({ _focused, color }) => (
                                 <Icon
                                     size={isCompact ? 20 : 24}

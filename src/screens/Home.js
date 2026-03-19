@@ -6,6 +6,7 @@ import { RULES_VIDEO_URL } from '../constants';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Linking } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import {
     ActiveGamesCard,
     BannerAd,
@@ -29,6 +30,7 @@ import { savePassAndPlayGame } from '../utils/passAndPlayStorage';
 const { width, height } = Dimensions.get('screen');
 
 export default function Home({ navigation }) {
+    const { t } = useTranslation();
     const { colors } = useTheme();
     const { user } = useAuth();
     const { showAlert } = useAlert();
@@ -135,18 +137,18 @@ export default function Home({ navigation }) {
                 if (hasLaunched === null) {
                     await AsyncStorage.setItem('has_seen_welcome_notification', 'true');
                     showAlert(
-                        'Welcome to Coral Clash!',
-                        'Check out the Rules Video or How-To Play guide in the menu to get started!',
+                        t('home.welcome.title'),
+                        t('home.welcome.message'),
                         [
                             {
-                                text: 'Watch Video',
+                                text: t('home.welcome.watchVideo'),
                                 onPress: () => Linking.openURL(RULES_VIDEO_URL),
                             },
                             {
-                                text: 'How-To Play',
+                                text: t('home.welcome.howToPlay'),
                                 onPress: () => navigation.navigate('How-To Play'),
                             },
-                            { text: 'OK' },
+                            { text: t('home.welcome.ok') },
                         ],
                         true, // Vertical buttons
                     );
@@ -170,7 +172,7 @@ export default function Home({ navigation }) {
         // Handle computer opponent
         if (opponentId === 'computer' || gameData.opponentType === 'computer') {
             return {
-                opponentDisplayName: 'Computer',
+                opponentDisplayName: t('home.opponent.computer'),
                 opponentAvatarKey: 'computer',
             };
         }
@@ -212,7 +214,7 @@ export default function Home({ navigation }) {
 
         // Final fallback
         return {
-            opponentDisplayName: 'Opponent',
+            opponentDisplayName: t('home.opponent.opponent'),
             opponentAvatarKey: 'dolphin',
         };
     };
@@ -419,14 +421,14 @@ export default function Home({ navigation }) {
                 opponentType: 'passandplay',
                 timeControl: timeControl,
                 opponentData: {
-                    displayName: 'Guest 1',
+                    displayName: t('home.opponent.guest'),
                     avatarKey: 'crab', // Different avatar for guest player
                 },
                 // Don't pass gameState on navigation - let CoralClash initialize fresh
             });
         } catch (error) {
             console.error('Failed to start pass-and-play:', error);
-            showAlert('Error', 'Failed to start pass-and-play game. Please try again.');
+            showAlert(t('home.errors.errorTitle'), t('home.errors.failedPassAndPlay'));
         } finally {
             setCreatingGame(false);
         }
@@ -443,7 +445,7 @@ export default function Home({ navigation }) {
             ...(hasGameState && { gameState: game.gameState }),
             timeControl: game.timeControl,
             opponentData: {
-                displayName: 'Guest 1',
+                displayName: t('home.opponent.guest'),
                 avatarKey: 'crab',
             },
         });
@@ -503,7 +505,7 @@ export default function Home({ navigation }) {
                     opponentType: 'passandplay',
                     timeControl: timeControl,
                     opponentData: {
-                        displayName: 'Guest 1',
+                        displayName: t('home.opponent.guest'),
                         avatarKey: 'crab', // Different avatar for guest player
                     },
                     // Don't pass gameState on navigation - let CoralClash initialize fresh
@@ -516,15 +518,15 @@ export default function Home({ navigation }) {
             if (pendingGameAction === 'computer') {
                 console.log('Error starting online computer game, falling back to offline mode');
                 showAlert(
-                    'Offline Mode',
-                    'Unable to connect to server. Starting offline computer game.',
+                    t('home.errors.offlineModeTitle'),
+                    t('home.errors.offlineModeMessage'),
                 );
                 navigation.navigate('Game', {
                     gameId: null, // null gameId = offline mode
                     opponentType: 'computer',
                 });
             } else {
-                showAlert('Error', `Failed to start ${pendingGameAction}. Please try again.`);
+                showAlert(t('home.errors.errorTitle'), t('home.errors.failedToStart', { action: pendingGameAction }));
             }
         } finally {
             setCreatingGame(false);
@@ -554,7 +556,7 @@ export default function Home({ navigation }) {
 
                 const result = await startSearching(pendingTimeControl);
                 if (result && !result.success && result.error) {
-                    showAlert('Cannot Join Matchmaking', result.error);
+                    showAlert(t('home.matchmaking.cannotJoin'), result.error);
                 }
             } else if (mode === 'correspondence') {
                 // Log event for correspondence match
@@ -570,15 +572,15 @@ export default function Home({ navigation }) {
                 if (matchResult.success) {
                     // Successfully matched to an existing invitation
                     showAlert(
-                        'Correspondence Match Found!',
-                        `You've been matched with ${matchResult.creatorName}. They'll be notified and have 24 hours to accept.`,
+                        t('home.matchmaking.instantMatchFound'),
+                        t('home.matchmaking.instantMatchMessage', { creatorName: matchResult.creatorName }),
                     );
                 } else if (matchResult.noMatches) {
                     // No available invitations - create one!
                     // This happens automatically as a fallback in the Cloud Function
                     showAlert(
-                        'Correspondence Invitation Created',
-                        'Your invitation has been created. When another player selects Correspondence mode, they may be matched to your invitation. You\'ll be notified when someone wants to play!',
+                        t('home.matchmaking.correspondenceCreated'),
+                        t('home.matchmaking.correspondenceMessage'),
                     );
                 }
             }
@@ -590,8 +592,8 @@ export default function Home({ navigation }) {
                 stack: error.stack,
             });
             showAlert(
-                'Error',
-                `Failed to start ${mode} matchmaking. ${error.message || 'Please try again.'}`,
+                t('home.errors.errorTitle'),
+                t('home.errors.failedMatchmaking', { mode: mode, message: error.message || t('home.errors.failedToStart', { action: mode }) }),
             );
         } finally {
             setCreatingGame(false);
@@ -632,8 +634,8 @@ export default function Home({ navigation }) {
                 // Fallback to offline mode if online game creation fails
                 console.log('Online computer game failed, starting offline mode');
                 showAlert(
-                    'Offline Mode',
-                    'Unable to connect to server. Starting offline computer game.',
+                    t('home.errors.offlineModeTitle'),
+                    t('home.errors.offlineModeMessage'),
                 );
                 navigation.navigate('Game', {
                     gameId: null, // null gameId = offline mode
@@ -643,7 +645,7 @@ export default function Home({ navigation }) {
             }
         } catch (error) {
             console.error('Error starting computer game:', error);
-            showAlert('Error', error.message || 'Failed to start computer game');
+            showAlert(t('home.errors.errorTitle'), error.message || t('home.errors.failedComputerGame'));
             // Fallback to offline mode on error
             navigation.navigate('Game', {
                 gameId: null,
@@ -683,7 +685,7 @@ export default function Home({ navigation }) {
             // The game will be automatically moved to history via Firestore listeners
         } catch (error) {
             console.error('Failed to resign game:', error);
-            showAlert('Error', 'Failed to resign game. Please try again.');
+            showAlert(t('home.errors.errorTitle'), t('home.errors.failedToResign'));
         }
     };
 
@@ -705,8 +707,8 @@ export default function Home({ navigation }) {
 
                 {!user && (
                     <GameModeCard
-                        title='How-To Play'
-                        description='Learn the rules and strategies of Coral Clash'
+                        title={t('home.gameModes.howToPlayTitle')}
+                        description={t('home.gameModes.howToPlayDescription')}
                         icon='question-circle'
                         iconFamily='font-awesome'
                         onPress={() => navigation.navigate('How-To Play')}
@@ -748,8 +750,8 @@ export default function Home({ navigation }) {
                 )}
 
                 <GameModeCard
-                    title='Play vs Computer'
-                    description='Start a new game against the AI'
+                    title={t('home.gameModes.playComputerTitle')}
+                    description={t('home.gameModes.playComputerDescription')}
                     icon='desktop'
                     iconFamily='font-awesome'
                     onPress={handleStartComputerGame}
@@ -760,8 +762,8 @@ export default function Home({ navigation }) {
 
                 {enableDevFeatures && (
                     <GameModeCard
-                        title='Load Game State (Dev)'
-                        description='Load a saved game state from fixtures'
+                        title={t('home.gameModes.loadGameStateTitle')}
+                        description={t('home.gameModes.loadGameStateDescription')}
                         icon='folder-open'
                         iconFamily='font-awesome'
                         onPress={handleOpenFixtureLoader}

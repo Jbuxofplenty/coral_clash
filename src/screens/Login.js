@@ -11,6 +11,7 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { moderateScale, verticalScale } from 'react-native-size-matters';
 
@@ -20,6 +21,7 @@ const { width, height } = Dimensions.get('screen');
 const isTablet = width >= 768;
 
 function Login({ navigation }) {
+    const { t } = useTranslation();
     const {
         user,
         signIn,
@@ -71,7 +73,7 @@ function Login({ navigation }) {
 
     const handleSubmit = async () => {
         if (!email || !password) {
-            setError('Please fill in all fields');
+            setError(t('auth.errors.fillAllFields'));
             return;
         }
 
@@ -79,25 +81,23 @@ function Login({ navigation }) {
             const trimmedDisplayName = displayName?.trim();
 
             if (!trimmedDisplayName) {
-                setError('Username is required');
+                setError(t('auth.errors.usernameRequired'));
                 return;
             }
 
             if (trimmedDisplayName.length < 2) {
-                setError('Username must be at least 2 characters');
+                setError(t('auth.errors.usernameMinLength'));
                 return;
             }
 
             if (trimmedDisplayName.length > 30) {
-                setError('Username must be less than 30 characters');
+                setError(t('auth.errors.usernameMaxLength'));
                 return;
             }
 
             // Check for valid characters (alphanumeric, spaces, underscores, hyphens)
             if (!/^[a-zA-Z0-9 _-]+$/.test(trimmedDisplayName)) {
-                setError(
-                    'Username can only contain letters, numbers, spaces, underscores, and hyphens',
-                );
+                setError(t('auth.errors.usernameInvalidChars'));
                 return;
             }
         }
@@ -114,7 +114,7 @@ function Login({ navigation }) {
             }
             // Navigation will be handled by auth state change
         } catch (err) {
-            setError(err.message || 'Authentication failed');
+            setError(err.message || t('auth.errors.authFailed'));
         } finally {
             setLoading(false);
         }
@@ -131,7 +131,7 @@ function Login({ navigation }) {
                 console.log('User cancelled Google Sign-In');
             }
         } catch (err) {
-            setError(err.message || 'Google sign-in failed');
+            setError(err.message || t('auth.errors.googleSignInFailed'));
         } finally {
             setLoading(false);
         }
@@ -148,7 +148,7 @@ function Login({ navigation }) {
                 console.log('User cancelled Apple Sign-In');
             }
         } catch (err) {
-            setError(err.message || 'Apple sign-in failed');
+            setError(err.message || t('auth.errors.appleSignInFailed'));
         } finally {
             setLoading(false);
         }
@@ -156,7 +156,7 @@ function Login({ navigation }) {
 
     const handleForgotPassword = async () => {
         if (!email) {
-            setError('Please enter your email address');
+            setError(t('auth.errors.enterEmail'));
             return;
         }
 
@@ -166,10 +166,10 @@ function Login({ navigation }) {
 
         try {
             await resetPassword(email);
-            setSuccessMessage('Password reset email sent! Check your inbox.');
+            setSuccessMessage(t('auth.success.resetEmailSent'));
             setShowForgotPassword(false);
         } catch (err) {
-            setError(err.message || 'Failed to send reset email');
+            setError(err.message || t('auth.errors.resetEmailFailed'));
         } finally {
             setLoading(false);
         }
@@ -211,10 +211,10 @@ function Login({ navigation }) {
                             style={styles.title}
                         >
                             {showForgotPassword
-                                ? 'Reset Password'
+                                ? t('auth.resetPassword')
                                 : isSignUp
-                                  ? 'Create Account'
-                                  : 'Welcome Back'}
+                                  ? t('auth.createAccount')
+                                  : t('auth.welcomeBack')}
                         </Text>
                         <Block style={styles.subtitleContainer}>
                             <Text
@@ -223,10 +223,10 @@ function Login({ navigation }) {
                                 style={styles.subtitle}
                             >
                                 {showForgotPassword
-                                    ? 'Enter your email to receive a password reset link'
+                                    ? t('auth.forgotPasswordSubtitle')
                                     : isSignUp
-                                      ? 'Create an account to play online. Choose a unique username!'
-                                      : 'Sign in to play against the computer or challenge other players online'}
+                                      ? t('auth.signUpSubtitle')
+                                      : t('auth.signInSubtitle')}
                             </Text>
                         </Block>
 
@@ -282,8 +282,8 @@ function Login({ navigation }) {
                                                 style={styles.appleButtonText}
                                             >
                                                 {isSignUp
-                                                    ? 'Sign up with Apple'
-                                                    : 'Sign in with Apple'}
+                                                    ? t('auth.signUpWithApple')
+                                                    : t('auth.signInWithApple')}
                                             </Text>
                                         </TouchableOpacity>
                                     )}
@@ -310,8 +310,8 @@ function Login({ navigation }) {
                                             style={styles.googleButtonText}
                                         >
                                             {isSignUp
-                                                ? 'Sign up with Google'
-                                                : 'Sign in with Google'}
+                                                ? t('auth.signUpWithGoogle')
+                                                : t('auth.signInWithGoogle')}
                                         </Text>
                                     </TouchableOpacity>
 
@@ -327,7 +327,7 @@ function Login({ navigation }) {
                                             color={colors.TEXT_SECONDARY}
                                             style={styles.dividerText}
                                         >
-                                            OR
+                                            {t('auth.or')}
                                         </Text>
                                         <View
                                             style={[
@@ -342,7 +342,7 @@ function Login({ navigation }) {
                             {!showForgotPassword && isSignUp && (
                                 <Input
                                     ref={displayNameRef}
-                                    placeholder='Username (required)'
+                                    placeholder={t('auth.usernamePlaceholder')}
                                     value={displayName}
                                     onChangeText={setDisplayName}
                                     style={[
@@ -364,7 +364,7 @@ function Login({ navigation }) {
                             )}
                             <Input
                                 ref={emailRef}
-                                placeholder='Email'
+                                placeholder={t('auth.emailPlaceholder')}
                                 value={email}
                                 onChangeText={setEmail}
                                 style={[
@@ -393,7 +393,7 @@ function Login({ navigation }) {
                             {!showForgotPassword && (
                                 <Input
                                     ref={passwordRef}
-                                    placeholder='Password'
+                                    placeholder={t('auth.passwordPlaceholder')}
                                     value={password}
                                     onChangeText={setPassword}
                                     style={[
@@ -427,10 +427,10 @@ function Login({ navigation }) {
                                 ) : (
                                     <Text bold size={moderateScale(16)} color='#fff'>
                                         {showForgotPassword
-                                            ? 'Send Reset Link'
+                                            ? t('auth.sendResetLink')
                                             : isSignUp
-                                              ? 'Sign Up'
-                                              : 'Sign In'}
+                                              ? t('auth.signUp')
+                                              : t('auth.signIn')}
                                     </Text>
                                 )}
                             </Button>
@@ -445,7 +445,7 @@ function Login({ navigation }) {
                                         color={colors.PRIMARY}
                                         center
                                     >
-                                        Forgot Password?
+                                        {t('auth.forgotPassword')}
                                     </Text>
                                 </TouchableOpacity>
                             )}
@@ -460,10 +460,10 @@ function Login({ navigation }) {
                                     center
                                 >
                                     {showForgotPassword
-                                        ? 'Back to Sign In'
+                                        ? t('auth.backToSignIn')
                                         : isSignUp
-                                          ? 'Already have an account? Sign In'
-                                          : "Don't have an account? Sign Up"}
+                                          ? t('auth.alreadyHaveAccount')
+                                          : t('auth.dontHaveAccount')}
                                 </Text>
                             </TouchableOpacity>
                         </Block>

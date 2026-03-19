@@ -8,6 +8,7 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../contexts/ThemeContext';
 import Icon from './Icon';
 
@@ -16,24 +17,24 @@ const { width } = Dimensions.get('window');
 const TIME_CONTROLS = [
     {
         type: 'blitz',
-        name: 'Blitz',
-        description: '5 minutes per player',
+        nameKey: 'cards.activeGames.blitz',
+        descriptionKey: 'game.matchmaking.timeControlDescriptions.blitz',
         totalSeconds: 300, // 5 * 60
         icon: 'bolt',
         iconFamily: 'font-awesome',
     },
     {
         type: 'normal',
-        name: 'Normal',
-        description: '10 minutes per player',
+        nameKey: 'cards.activeGames.normal',
+        descriptionKey: 'game.matchmaking.timeControlDescriptions.normal',
         totalSeconds: 600, // 10 * 60
         icon: 'clock-o',
         iconFamily: 'font-awesome',
     },
     {
         type: 'unlimited',
-        name: 'Unlimited',
-        description: 'No time limit',
+        nameKey: 'cards.activeGames.unlimited',
+        descriptionKey: 'game.matchmaking.timeControlDescriptions.unlimited',
         totalSeconds: null,
         icon: 'infinite',
         iconFamily: 'ionicon',
@@ -47,6 +48,7 @@ const TIME_CONTROLS = [
  * @param {function} onCancel - Callback when modal is cancelled
  */
 export default function TimeControlModal({ visible, onSelect, onCancel }) {
+    const { t } = useTranslation();
     const { colors, isDarkMode } = useTheme();
 
     const modalBackgroundColor = isDarkMode ? '#2A2A2A' : colors.CARD_BACKGROUND;
@@ -68,9 +70,11 @@ export default function TimeControlModal({ visible, onSelect, onCancel }) {
                     onStartShouldSetResponder={() => true}
                 >
                     {/* Title */}
-                    <Text style={[styles.title, { color: colors.TEXT }]}>Choose Time Control</Text>
+                    <Text style={[styles.title, { color: colors.TEXT }]}>
+                        {t('game.matchmaking.timeControl')}
+                    </Text>
                     <Text style={[styles.subtitle, { color: colors.TEXT_SECONDARY }]}>
-                        Select the time limit for this game
+                        {t('game.matchmaking.timeControlSubtitle')}
                     </Text>
 
                     {/* Time Control Options */}
@@ -100,7 +104,7 @@ export default function TimeControlModal({ visible, onSelect, onCancel }) {
                                     />
                                     <View style={styles.optionText}>
                                         <Text style={[styles.optionName, { color: colors.TEXT }]}>
-                                            {timeControl.name}
+                                            {t(timeControl.nameKey)}
                                         </Text>
                                         <Text
                                             style={[
@@ -108,7 +112,7 @@ export default function TimeControlModal({ visible, onSelect, onCancel }) {
                                                 { color: colors.TEXT_SECONDARY },
                                             ]}
                                         >
-                                            {timeControl.description}
+                                            {t(timeControl.descriptionKey)}
                                         </Text>
                                     </View>
                                     <Icon
@@ -129,7 +133,7 @@ export default function TimeControlModal({ visible, onSelect, onCancel }) {
                         activeOpacity={0.7}
                     >
                         <Text style={[styles.cancelButtonText, { color: colors.TEXT_SECONDARY }]}>
-                            Cancel
+                            {t('common.cancel')}
                         </Text>
                     </TouchableOpacity>
                 </View>

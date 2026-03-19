@@ -1,8 +1,10 @@
 import { useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAlert } from '../contexts';
 import { useFirebaseFunctions } from './useFirebaseFunctions';
 
 export const useUserSearch = () => {
+    const { t } = useTranslation();
     const { showAlert } = useAlert();
     const { searchUsers, sendFriendRequest } = useFirebaseFunctions();
 
@@ -83,7 +85,7 @@ export const useUserSearch = () => {
             // Note: Real-time listener will auto-update the UI
         } catch (error) {
             console.error('Error sending friend request:', error);
-            showAlert('Error', error.message || 'Failed to send friend request');
+            showAlert(t('hooks.userSearch.errorTitle'), error.message || t('hooks.userSearch.errorSendRequest'));
         } finally {
             setSending(false);
             setSendingUserId(null);

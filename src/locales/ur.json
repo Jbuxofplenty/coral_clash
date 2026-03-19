@@ -1,0 +1,736 @@
+{
+    "auth": {
+        "welcomeBack": "خوش آمدید",
+        "createAccount": "اکاؤنٹ بنائیں",
+        "resetPassword": "پاس ورڈ دوبارہ ترتیب دیں",
+        "signInSubtitle": "کمپیوٹر کے خلاف کھیلنے یا دوسرے کھلاڑیوں کو آن لائن چیلنج کرنے کے لیے سائن ان کریں",
+        "signUpSubtitle": "آن لائن کھیلنے کے لیے اکاؤنٹ بنائیں۔ ایک منفرد صارف نام منتخب کریں!",
+        "forgotPasswordSubtitle": "پاس ورڈ دوبارہ ترتیب دینے کا لنک حاصل کرنے کے لیے اپنا ای میل درج کریں",
+        "usernamePlaceholder": "صارف نام (ضروری)",
+        "emailPlaceholder": "ای میل",
+        "passwordPlaceholder": "پاس ورڈ",
+        "signInWithApple": "Apple کے ساتھ سائن ان کریں",
+        "signUpWithApple": "Apple کے ساتھ سائن اپ کریں",
+        "signInWithGoogle": "Google کے ساتھ سائن ان کریں",
+        "signUpWithGoogle": "Google کے ساتھ سائن اپ کریں",
+        "or": "یا",
+        "signIn": "سائن ان",
+        "signUp": "سائن اپ",
+        "sendResetLink": "ری سیٹ لنک بھیجیں",
+        "forgotPassword": "پاس ورڈ بھول گئے؟",
+        "backToSignIn": "سائن ان پر واپس جائیں",
+        "alreadyHaveAccount": "پہلے سے اکاؤنٹ ہے؟ سائن ان کریں",
+        "dontHaveAccount": "اکاؤنٹ نہیں ہے؟ سائن اپ کریں",
+        "errors": {
+            "fillAllFields": "براہ کرم تمام خانے پُر کریں",
+            "usernameRequired": "صارف نام ضروری ہے",
+            "usernameMinLength": "صارف نام کم از کم 2 حروف کا ہونا چاہیے",
+            "usernameMaxLength": "صارف نام 30 حروف سے کم ہونا چاہیے",
+            "usernameInvalidChars": "صارف نام میں صرف حروف، اعداد، خالی جگہیں، انڈر سکور اور ہائفن ہو سکتے ہیں",
+            "authFailed": "تصدیق ناکام ہو گئی",
+            "googleSignInFailed": "Google سائن ان ناکام ہو گیا",
+            "appleSignInFailed": "Apple سائن ان ناکام ہو گیا",
+            "enterEmail": "براہ کرم اپنا ای میل ایڈریس درج کریں",
+            "resetEmailFailed": "ری سیٹ ای میل بھیجنے میں ناکامی"
+        },
+        "success": {
+            "resetEmailSent": "پاس ورڈ ری سیٹ ای میل بھیج دی گئی! اپنا ان باکس چیک کریں۔"
+        }
+    },
+    "game": {
+        "difficulty": {
+            "title": "AI مشکل درجہ منتخب کریں",
+            "subtitle": "کمپیوٹر مخالف کے لیے مشکل درجہ منتخب کریں",
+            "random": "بے ترتیب",
+            "easy": "آسان",
+            "medium": "درمیانہ",
+            "hard": "مشکل",
+            "randomDescription": "کمپیوٹر بے ترتیب چالیں چلتا ہے",
+            "easyDescription": "کمپیوٹر بنیادی حکمت عملی استعمال کرتا ہے",
+            "mediumDescription": "کمپیوٹر درمیانی حکمت عملی استعمال کرتا ہے",
+            "hardDescription": "کمپیوٹر اعلی حکمت عملی استعمال کرتا ہے",
+            "createAccountToAccess": "رسائی کے لیے اکاؤنٹ بنائیں"
+        },
+        "matchmaking": {
+            "title": "گیم موڈ منتخب کریں",
+            "timeControl": "وقت کا کنٹرول منتخب کریں",
+            "timeControlSubtitle": "اس گیم کے لیے وقت کی حد منتخب کریں",
+            "instant": "فوری",
+            "instantDescription": "ابھی مخالف تلاش کریں۔ آپ کو آن لائن کھلاڑیوں کے ساتھ میچ کرتا ہے۔",
+            "correspondence": "خط و کتابت",
+            "correspondenceDescription": "کسی بے ترتیب کھلاڑی کو دعوت نامہ بھیجیں۔ انہیں قبول کرنے کے لیے 24 گھنٹے ہیں۔",
+            "timeControls": {
+                "unlimited": "وقت کی کوئی حد نہیں",
+                "blitz": "5 منٹ",
+                "normal": "10 منٹ",
+                "custom": "وقت کی حد مقرر"
+            },
+            "timeControlDescriptions": {
+                "blitz": "ہر کھلاڑی کے لیے 5 منٹ",
+                "normal": "ہر کھلاڑی کے لیے 10 منٹ",
+                "unlimited": "وقت کی کوئی حد نہیں"
+            }
+        },
+        "status": {
+            "loading": "لوڈ ہو رہا ہے",
+            "noGamesFound": "کوئی گیم نہیں ملی",
+            "error": "غلطی",
+            "resetApproved": "گیم دوبارہ ترتیب دی گئی",
+            "resetRejected": "ری سیٹ کی درخواست مسترد کر دی گئی",
+            "undoApproved": "چال واپس لی گئی",
+            "undoRejected": "واپسی کی درخواست مسترد کر دی گئی"
+        },
+        "actions": {
+            "cancel": "منسوخ کریں"
+        }
+    },
+    "navigation": {
+        "home": "ہوم",
+        "game": "گیم",
+        "tutorial": "ٹیوٹوریل",
+        "howToPlay": "کیسے کھیلیں",
+        "settings": "ترتیبات",
+        "friends": "دوست",
+        "stats": "اعداد و شمار",
+        "reportIssue": "مسئلہ رپورٹ کریں",
+        "rulesVideo": "قوانین کی ویڈیو",
+        "physicalGame": "فزیکل گیم",
+        "logOut": "لاگ آؤٹ",
+        "logOutConfirmTitle": "لاگ آؤٹ",
+        "logOutConfirmMessage": "کیا آپ واقعی لاگ آؤٹ کرنا چاہتے ہیں؟",
+        "cancel": "منسوخ کریں",
+        "appTitle": "کورل کلیش",
+        "appSubtitle": "سمندری حکمت عملی کا کھیل"
+    },
+    "home": {
+        "welcome": {
+            "title": "کورل کلیش میں خوش آمدید!",
+            "message": "شروع کرنے کے لیے مینو میں قوانین کی ویڈیو یا کیسے کھیلیں گائیڈ دیکھیں!",
+            "watchVideo": "ویڈیو دیکھیں",
+            "howToPlay": "کیسے کھیلیں",
+            "ok": "ٹھیک ہے"
+        },
+        "opponent": {
+            "computer": "کمپیوٹر",
+            "opponent": "مخالف",
+            "guest": "مہمان 1"
+        },
+        "gameModes": {
+            "howToPlayTitle": "کیسے کھیلیں",
+            "howToPlayDescription": "کورل کلیش کے قوانین اور حکمت عملی سیکھیں",
+            "playComputerTitle": "کمپیوٹر کے خلاف کھیلیں",
+            "playComputerDescription": "AI کے خلاف نیا گیم شروع کریں",
+            "loadGameStateTitle": "گیم کی حالت لوڈ کریں (Dev)",
+            "loadGameStateDescription": "فکسچر سے محفوظ شدہ گیم کی حالت لوڈ کریں"
+        },
+        "matchmaking": {
+            "cannotJoin": "میچ میکنگ میں شامل نہیں ہو سکتے",
+            "instantMatchFound": "خط و کتابت میچ مل گیا!",
+            "instantMatchMessage": "آپ کا میچ {{creatorName}} کے ساتھ ہوا ہے۔ انہیں مطلع کیا جائے گا اور قبول کرنے کے لیے 24 گھنٹے ہیں۔",
+            "correspondenceCreated": "خط و کتابت کی دعوت تخلیق کی گئی",
+            "correspondenceMessage": "آپ کی دعوت بنا دی گئی ہے۔ جب کوئی اور کھلاڑی خط و کتابت موڈ منتخب کرے گا، تو ان کا میچ آپ کی دعوت سے ہو سکتا ہے۔ جب کوئی کھیلنا چاہے گا تو آپ کو مطلع کیا جائے گا!"
+        },
+        "errors": {
+            "offlineModeTitle": "آف لائن موڈ",
+            "offlineModeMessage": "سرور سے رابطہ قائم نہیں ہو سکا۔ آف لائن کمپیوٹر گیم شروع ہو رہا ہے۔",
+            "errorTitle": "غلطی",
+            "failedToStart": "{{action}} شروع کرنے میں ناکامی۔ براہ کرم دوبارہ کوشش کریں۔",
+            "failedToResign": "گیم ترک کرنے میں ناکامی۔ براہ کرم دوبارہ کوشش کریں۔",
+            "failedPassAndPlay": "پاس اینڈ پلے گیم شروع کرنے میں ناکامی۔ براہ کرم دوبارہ کوشش کریں۔",
+            "failedComputerGame": "کمپیوٹر گیم شروع کرنے میں ناکامی",
+            "failedMatchmaking": "{{mode}} میچ میکنگ شروع کرنے میں ناکامی۔ {{message}}"
+        }
+    },
+    "stats": {
+        "overallStatistics": "مجموعی اعداد و شمار",
+        "gamesPlayed": "کھیلے گئے گیمز",
+        "wins": "جیتیں",
+        "losses": "ہاریں",
+        "draws": "برابری",
+        "winRate": "جیت کی شرح",
+        "matchupStatistics": "مقابلے کے اعداد و شمار",
+        "matchupDescription": "ہر مخالف کے خلاف جیت کی شرح (PvP اور کمپیوٹر)",
+        "computer": "کمپیوٹر",
+        "winRateShort": "جیت کی شرح",
+        "winsShort": "W",
+        "lossesShort": "L",
+        "drawsShort": "D",
+        "noGamesYet": "ابھی تک کوئی گیم نہیں",
+        "noGamesHint": "اپنے اعداد و شمار یہاں دیکھنے کے لیے گیمز کھیلنا شروع کریں!"
+    },
+    "gameMenu": {
+        "saveGameState": "گیم کی حالت محفوظ کریں",
+        "exportPosition": "موجودہ گیم کی پوزیشن ایکسپورٹ کریں",
+        "flipBoard": "بورڈ الٹائیں",
+        "showingBlackBottom": "فی الوقت نیچے سیاہ دکھا رہا ہے",
+        "showingWhiteBottom": "فی الوقت نیچے سفید دکھا رہا ہے",
+        "reportBug": "بگ رپورٹ کریں",
+        "includeGameState": "موجودہ گیم کی حالت شامل کریں",
+        "resignGame": "گیم ترک کریں",
+        "resigning": "ترک کیا جا رہا ہے...",
+        "pleaseWait": "براہ کرم انتظار کریں...",
+        "gameEnded": "گیم پہلے ہی ختم ہو گئی",
+        "forfeitGame": "موجودہ گیم ضائع کریں"
+    },
+    "reportIssue": {
+        "bugReportTitle": "بگ رپورٹ",
+        "bugReportDescription": "موجودہ گیم کی حالت کے ساتھ بگ رپورٹ کریں۔ گیم کی پوزیشن آپ کی رپورٹ میں شامل ہوگی۔",
+        "feedbackTitle": "فیڈبیک اور مسائل",
+        "feedbackDescription": "فیڈبیک جمع کروائیں یا مسئلہ رپورٹ کریں۔ ہم آپ کی رائے کی قدر کرتے ہیں!",
+        "subject": "موضوع",
+        "subjectPlaceholder": "مسئلے کا مختصر خلاصہ",
+        "description": "تفصیل",
+        "descriptionPlaceholder": "مسئلے یا فیڈبیک کی تفصیلی وضاحت...",
+        "gameStateIncluded": "✓ گیم کی حالت شامل ہوگی",
+        "turn": "باری",
+        "white": "سفید",
+        "black": "سیاہ",
+        "gameOver": "گیم ختم",
+        "submitIssue": "مسئلہ جمع کروائیں",
+        "anonymousNote": "نوٹ: آپ گمنام طور پر جمع کروا رہے ہیں۔ اپنے مسائل کی نگرانی کے لیے لاگ ان کریں۔",
+        "validation": {
+            "missingSubjectTitle": "معلومات غائب ہیں",
+            "missingSubjectMessage": "براہ کرم اپنے مسئلے کا موضوع درج کریں۔",
+            "invalidSubjectTitle": "غلط موضوع",
+            "invalidSubjectMessage": "موضوع کم از کم 3 حروف کا ہونا چاہیے۔",
+            "missingDescriptionTitle": "معلومات غائب ہیں",
+            "missingDescriptionMessage": "براہ کرم اپنے مسئلے کی تفصیل درج کریں۔",
+            "invalidDescriptionTitle": "غلط تفصیل",
+            "invalidDescriptionMessage": "تفصیل کم از کم 10 حروف کی ہونی چاہیے۔"
+        },
+        "success": {
+            "title": "مسئلہ جمع کروا دیا گیا",
+            "message": "آپ کے فیڈبیک کا شکریہ! آپ کا مسئلہ جمع کروا دیا گیا ہے",
+            "ok": "ٹھیک ہے"
+        },
+        "error": {
+            "title": "جمع کروانا ناکام ہو گیا",
+            "message": "آپ کا مسئلہ جمع کروانے میں ناکامی۔ براہ کرم اپنا کنکشن چیک کریں اور دوبارہ کوشش کریں۔"
+        }
+    },
+    "settings": {
+        "account": "اکاؤنٹ",
+        "profileAvatar": "پروفائل اوتار",
+        "chooseAvatar": "اپنا سمندری موضوع کا اوتار منتخب کریں",
+        "appearance": "ظاہری شکل",
+        "theme": {
+            "light": "روشن",
+            "lightDescription": "ہمیشہ روشن تھیم استعمال کریں",
+            "dark": "تاریک",
+            "darkDescription": "ہمیشہ تاریک تھیم استعمال کریں",
+            "auto": "خودکار",
+            "autoDescription": "سسٹم تھیم سے مماثل کریں"
+        },
+        "language": {
+            "title": "زبان (Language)",
+            "english": "English",
+            "englishDescription": "English language interface",
+            "hindi": "हिन्दी (Hindi)",
+            "hindiDescription": "हिन्दी भाषा इंटरफ़ेस"
+        },
+        "actions": {
+            "resetToDefaults": "ڈیفالٹ پر واپس لائیں",
+            "resetTitle": "ترتیبات دوبارہ ترتیب دیں",
+            "resetMessage": "کیا آپ واقعی تمام ترتیبات کو ڈیفالٹ پر واپس لانا چاہتے ہیں؟",
+            "cancel": "منسوخ کریں",
+            "reset": "دوبارہ ترتیب دیں"
+        },
+        "dangerZone": {
+            "title": "خطرناک زون",
+            "warning": "ایک بار جب آپ اپنا اکاؤنٹ ڈیلیٹ کر دیں، تو واپسی نہیں ہے۔ براہ کرم یقینی بنائیں۔",
+            "deleteAccount": "اکاؤنٹ ڈیلیٹ کریں",
+            "deletingAccount": "اکاؤنٹ ڈیلیٹ ہو رہا ہے...",
+            "deleteTitle": "اکاؤنٹ ڈیلیٹ کریں",
+            "deleteMessage": "یہ عمل مستقل ہے اور واپس نہیں ہو سکتا۔\n\n• آپ کا تمام ذاتی ڈیٹا ہٹا دیا جائے گا\n• آپ کے گیمز جاری رہیں گے لیکن آپ \"گمنام\" کے طور پر ظاہر ہوں گے\n• آپ کے دوست اور دوستی کی درخواستیں ہٹا دی جائیں گی\n• فعال گیمز ضائع کر دیے جائیں گے\n\nکیا آپ واقعی جاری رکھنا چاہتے ہیں؟",
+            "continue": "جاری رکھیں",
+            "confirmTitle": "اکاؤنٹ ڈیلیٹ کرنے کی تصدیق کریں",
+            "confirmMessage": "تصدیق کرنے کے لیے، براہ کرم نیچے DELETE (تمام بڑے حروف میں) ٹائپ کریں:",
+            "incorrectTitle": "غلط تصدیق",
+            "incorrectMessage": "اکاؤنٹ ڈیلیٹ کرنے کی تصدیق کے لیے آپ کو بالکل DELETE ٹائپ کرنا ہوگا۔",
+            "successTitle": "اکاؤنٹ ڈیلیٹ ہو گیا",
+            "successMessage": "آپ کا اکاؤنٹ کامیابی سے ڈیلیٹ ہو گیا ہے۔ اب آپ لاگ آؤٹ ہو جائیں گے۔",
+            "failedTitle": "ڈیلیٹ کرنا ناکام ہو گیا",
+            "timeoutMessage": "درخواست کا وقت ختم ہو گیا۔ براہ کرم اپنا کنکشن چیک کریں اور دوبارہ کوشش کریں۔",
+            "failedMessage": "اکاؤنٹ ڈیلیٹ کرنے میں ناکامی۔ براہ کرم دوبارہ کوشش کریں یا اگر مسئلہ برقرار رہے تو سپورٹ سے رابطہ کریں۔",
+            "retry": "دوبارہ کوشش کریں"
+        },
+        "errors": {
+            "loadFailed": "ترتیبات لوڈ کرنے میں ناکامی",
+            "saveFailed": "ترتیبات محفوظ کرنے میں ناکامی",
+            "avatarSaveFailed": "اوتار کا انتخاب محفوظ کرنے میں ناکامی",
+            "themeSaveFailed": "تھیم کی ترجیح محفوظ کرنے میں ناکامی",
+            "languageChangeFailed": "زبان تبدیل کرنے میں ناکامی",
+            "resetFailed": "ترتیبات دوبارہ ترتیب دینے میں ناکامی"
+        }
+    },
+    "friends": {
+        "addFriend": "دوست شامل کریں",
+        "searchPlaceholder": "صارف نام سے تلاش کریں",
+        "noUsersFound": "کوئی صارف نہیں ملا",
+        "pending": "زیر التوا",
+        "incomingRequests": "آنے والی درخواستیں",
+        "sentRequests": "بھیجی گئی درخواستیں",
+        "myFriends": "میرے دوست",
+        "noFriendsYet": "ابھی تک کوئی دوست نہیں",
+        "noFriendsHint": "اوپر صارف نام سے دوست شامل کریں تاکہ ایک ساتھ کھیلنا شروع کریں!"
+    },
+    "common": {
+        "loading": "لوڈ ہو رہا ہے...",
+        "error": "غلطی",
+        "success": "کامیابی",
+        "cancel": "منسوخ کریں",
+        "confirm": "تصدیق کریں",
+        "save": "محفوظ کریں",
+        "delete": "ڈیلیٹ کریں",
+        "edit": "ترمیم کریں",
+        "close": "بند کریں",
+        "ok": "ٹھیک ہے",
+        "somethingWentWrong": "کچھ غلط ہو گیا۔ براہ کرم دوبارہ کوشش کریں۔"
+    },
+    "cards": {
+        "matchmaking": {
+            "searchingForOpponent": "مخالف تلاش کیا جا رہا ہے...",
+            "findRandomMatch": "بے ترتیب میچ تلاش کریں",
+            "searchingHint": "مخالف تلاش کیا جا رہا ہے... · منسوخ کرنے کے لیے ٹیپ کریں",
+            "tapToJoin": "میچ میکنگ قطار میں شامل ہونے کے لیے ٹیپ کریں",
+            "cannotJoinTitle": "میچ میکنگ میں شامل نہیں ہو سکتے"
+        },
+        "playWithFriend": {
+            "title": "دوست کے ساتھ کھیلیں",
+            "description": "کسی دوست کو کھیلنے کی دعوت دیں",
+            "modalTitle": "دوست کے ساتھ کھیلیں",
+            "inviteFriend": "دوست کو دعوت دیں",
+            "inviteDescription": "کسی دوست کو گیم کی دعوت بھیجیں",
+            "textInvite": "ٹیکسٹ دعوت",
+            "textInviteDescription": "ٹیکسٹ کے ذریعے دعوت نامے بھیجیں",
+            "passAndPlay": "پاس اینڈ پلے",
+            "passAndPlayDescription": "اس ڈیوائس پر مقامی طور پر کھیلیں",
+            "selectFriend": "ایک دوست منتخب کریں",
+            "searchFriends": "دوست تلاش کریں...",
+            "noFriendsFound": "کوئی دوست نہیں ملا",
+            "noFriendsYet": "ابھی تک کوئی دوست نہیں۔ کھیلنے کے لیے دوست شامل کریں!",
+            "passAndPlayGames": "پاس اینڈ پلے گیمز",
+            "startNewGame": "نیا گیم شروع کریں",
+            "noActiveGames": "کوئی فعال گیم نہیں",
+            "vsGuest": "بمقابلہ مہمان 1",
+            "unlimited": "لامحدود",
+            "shareMessage": "آئیں کورل کلیش کھیلیں! 🦀\n\nیہاں سے ڈاؤن لوڈ کریں:\niOS: [URL]\n\nAndroid: [URL]"
+        },
+        "signUpPrompt": {
+            "title": "مکمل خصوصیات کھولیں",
+            "subtitle": "رسائی کے لیے مفت اکاؤنٹ کے لیے سائن اپ کریں:",
+            "feature1": "دوستوں کے ساتھ آن لائن کھیلیں",
+            "feature2": "میچ میکنگ کے ذریعے بے ترتیب مخالفین تلاش کریں",
+            "feature3": "اپنے گیم کے اعداد و شمار اور تاریخ کو ٹریک کریں",
+            "feature4": "اپنا دوستوں کا نیٹ ورک بنائیں",
+            "button": "سائن اپ / لاگ ان"
+        },
+        "activeGames": {
+            "title": "فعال گیمز",
+            "inProgress": "جاری ہے",
+            "game": "گیم",
+            "games": "گیمز",
+            "yourTurn": "آپ کی باری",
+            "opponentTurn": "مخالف کی باری",
+            "opponent": "مخالف",
+            "computer": "کمپیوٹر",
+            "blitz": "بلٹز",
+            "normal": "عام",
+            "unlimited": "لامحدود",
+            "timed": "وقت بند",
+            "loading": "گیمز لوڈ ہو رہی ہیں...",
+            "noGames": "کوئی فعال گیم نہیں",
+            "noGamesHint": "کسی دوست کے ساتھ گیم شروع کریں!",
+            "vs": "بمقابلہ ",
+            "resignTitle": "گیم ترک کریں",
+            "resignMessage": "کیا آپ واقعی ہار ماننا چاہتے ہیں؟ آپ یہ گیم ہار جائیں گے۔",
+            "resignButton": "ہار مانیں",
+            "resignError": "گیم ترک کرنے میں ناکامی۔ براہ کرم دوبارہ کوشش کریں۔"
+        },
+        "gameHistory": {
+            "title": "گیم کی تاریخ",
+            "subtitle": "حالیہ گیمز",
+            "loading": "تاریخ لوڈ ہو رہی ہے...",
+            "noHistory": "کوئی گیم کی تاریخ نہیں",
+            "noHistoryHint": "آپ کے مکمل ہونے والے گیمز یہاں ظاہر ہوں گے",
+            "vs": "بمقابلہ ",
+            "justNow": "ابھی",
+            "minutesAgo": "منٹ پہلے",
+            "hoursAgo": "گھنٹے پہلے",
+            "daysAgo": "دن پہلے",
+            "cancelled": "گیم منسوخ ہو گیا",
+            "draw": "برابری",
+            "won": "آپ جیت گئے",
+            "lost": "آپ ہار گئے",
+            "unknown": "نامعلوم",
+            "opponent": "مخالف",
+            "computer": "کمپیوٹر",
+            "blitz": "بلٹز",
+            "normal": "عام",
+            "unlimited": "لامحدود",
+            "timed": "وقت بند"
+        }
+    },
+    "errors": {
+        "INVALID_MOVE": "غلط چال",
+        "INVALID_MOVE_OCCUPIED": "وہ جگہ پہلے سے مصروف ہے",
+        "INVALID_MOVE_OUT_OF_BOUNDS": "چال حد سے باہر ہے",
+        "INVALID_MOVE_NOT_YOUR_TURN": "یہ آپ کی باری نہیں ہے",
+        "INVALID_MOVE_PIECE_BLOCKED": "وہ مہرہ بلاک ہے",
+        "GAME_NOT_FOUND": "گیم نہیں ملا",
+        "GAME_ALREADY_STARTED": "گیم پہلے ہی شروع ہو چکا ہے",
+        "GAME_ALREADY_ENDED": "یہ گیم پہلے ہی ختم ہو چکا ہے",
+        "GAME_CANCELLED": "گیم منسوخ کر دیا گیا",
+        "PLAYER_NOT_IN_GAME": "آپ اس گیم میں نہیں ہیں",
+        "PLAYER_DISCONNECTED": "کھلاڑی منقطع ہو گیا",
+        "CONNECTION_ERROR": "کنکشن کی خرابی۔ براہ کرم اپنا انٹرنیٹ چیک کریں۔",
+        "SERVER_ERROR": "سرور کی خرابی۔ براہ کرم بعد میں دوبارہ کوشش کریں۔",
+        "TIMEOUT": "درخواست کا وقت ختم ہو گیا",
+        "ALREADY_IN_QUEUE": "آپ پہلے سے میچ میکنگ قطار میں ہیں",
+        "NOT_IN_QUEUE": "آپ میچ میکنگ قطار میں نہیں ہیں",
+        "QUEUE_TIMEOUT": "میچ میکنگ کا وقت ختم ہو گیا",
+        "OPPONENT_NOT_FOUND": "مخالف نہیں مل سکا",
+        "MATCHMAKING_DISABLED": "میچ میکنگ فی الوقت غیر فعال ہے",
+        "FRIEND_NOT_FOUND": "دوست نہیں ملا",
+        "FRIEND_ALREADY_EXISTS": "پہلے سے اس صارف کے ساتھ دوست ہیں",
+        "CANNOT_ADD_SELF": "آپ خود کو دوست کے طور پر شامل نہیں کر سکتے",
+        "FRIEND_REQUEST_PENDING": "دوستی کی درخواست پہلے سے زیر التوا ہے",
+        "INVALID_CREDENTIALS": "غلط ای میل یا پاس ورڈ",
+        "USER_NOT_FOUND": "صارف نہیں ملا",
+        "EMAIL_ALREADY_EXISTS": "ای میل پہلے سے استعمال میں ہے",
+        "USERNAME_TAKEN": "صارف نام پہلے سے لیا جا چکا ہے",
+        "WEAK_PASSWORD": "پاس ورڈ بہت کمزور ہے",
+        "ACCOUNT_DISABLED": "آپ کا اکاؤنٹ غیر فعال کر دیا گیا ہے",
+        "SESSION_EXPIRED": "آپ کا سیشن ختم ہو گیا ہے۔ براہ کرم دوبارہ لاگ ان کریں۔",
+        "UNAUTHORIZED": "آپ اس عمل کو انجام دینے کے لیے مجاز نہیں ہیں",
+        "RATE_LIMITED": "بہت زیادہ درخواستیں۔ براہ کرم آہستہ کریں۔",
+        "MAINTENANCE_MODE": "ایپ دیکھ بھال میں ہے۔ براہ کرم بعد میں دوبارہ کوشش کریں۔",
+        "FEATURE_DISABLED": "یہ خصوصیت فی الوقت غیر فعال ہے"
+    },
+    "success": {
+        "GAME_WON": "مبارک ہو! آپ جیت گئے!",
+        "GAME_DRAW": "گیم برابری پر ختم ہوا",
+        "GAME_LOST": "اگلی بار بہتر قسمت!",
+        "PLAYER_RESIGNED": "کھلاڑی نے ہار مان لی",
+        "FRIEND_REQUEST_SENT": "دوستی کی درخواست بھیج دی گئی!",
+        "FRIEND_REQUEST_ACCEPTED": "دوستی کی درخواست قبول کر لی گئی!",
+        "FRIEND_REQUEST_DECLINED": "دوستی کی درخواست مسترد کر دی گئی",
+        "MOVE_SUCCESS": "چال کامیاب رہی"
+    },
+    "scenarioBoard": {
+        "pauseAutoPlay": "آٹو پلے روکیں",
+        "playDemo": "ڈیمو چلائیں",
+        "explanation": "وضاحت",
+        "backToGuide": "گائیڈ پر واپس جائیں"
+    },
+    "howToPlay": {
+        "objective": {
+            "title": "مقصد",
+            "intro": "کورل کلیش جیتنے کے لیے، ان مقاصد میں سے ایک کو مکمل کریں:",
+            "checkmate": "شہ مات",
+            "checkmateDesc": "اپنے مخالف کی وہیل کو (جب وہیل",
+            "check": "شہ",
+            "checkmateDescEnd": "میں ہو اور بچ نہ سکے)",
+            "coralControl": "کورل کے ساتھ زیادہ علاقہ",
+            "coralControlDesc": "اس وقت کنٹرول کریں:",
+            "coralControlWhen": "جب:",
+            "coralPlaced": "ایک کھلاڑی نے اپنے تمام کورل رکھ دیے ہوں",
+            "whaleRemaining": "ایک کھلاڑی کے پاس صرف ان کی وہیل باقی ہو",
+            "backRowReached": "کوئی کریب یا آکٹوپس مخالف کی پچھلی قطار تک پہنچ جائے",
+            "areaControlled": "کورل کے ذریعے کنٹرول شدہ علاقہ:",
+            "areaControlledDesc": "اپنے رنگ کے کورل کی مقدار گنیں جو آپ کے مخالف کے کسی مہرے سے مصروف نہیں ہے۔",
+            "checkmateExample": "شہ مات کی مثال",
+            "checkExample": "شہ کی مثال",
+            "coralVictoryExample": "کورل فتح کی مثال"
+        },
+        "setup": {
+            "title": "گیم کی ترتیب",
+            "boardDesc": "بورڈ 64 خانوں کے ساتھ 8x8 گرڈ ہے۔ ہر کھلاڑی کے پاس:",
+            "coralPieces": "17 کورل کے ٹکڑے",
+            "units": "17 یونٹس: 1 وہیل، 2 ڈالفن، 4 کچھوے، 2 پفر فش، 4 کریب، اور 4 آکٹوپس",
+            "variants": "ہر مہرے کی قسم دو شکلوں میں آتی ہے:",
+            "hunter": "ہنٹر",
+            "hunterDesc": "مہرے (بغیر چار کورل آئیکنز کے) کورل ہٹا سکتے ہیں",
+            "gatherer": "جمع کرنے والے",
+            "gathererDesc": "مہرے (چار کورل آئیکنز کے ساتھ) کورل رکھ سکتے ہیں",
+            "hunterExample": "ہنٹر اثر کی مثال",
+            "gathererExample": "جمع کرنے والے اثر کی مثال"
+        },
+        "turnOverview": {
+            "title": "باری کا جائزہ",
+            "intro": "سفید پہلے جاتا ہے، پھر کھلاڑی باری باری آتے ہیں۔ آپ کی باری پر:",
+            "step1": "اپنے ایک مہرے کو حرکت دیں",
+            "step2": "کسی بھی قبضے، ہنٹر، یا جمع کرنے والے اثرات کو حل کریں",
+            "step3": "چیک کریں کہ آیا کوئی مقاصد پورے ہو گئے ہیں"
+        },
+        "movement": {
+            "title": "مہرے کیسے حرکت کرتے ہیں",
+            "important": "اہم:",
+            "importantDesc": "مہرے دوسرے مہروں کے ذریعے نہیں جا سکتے - ان کے پاس صاف راستہ ہونا چاہیے۔",
+            "variants": "ہر مہرے کی قسم دو شکلوں میں آتی ہے جو کورل کے ساتھ مختلف طریقے سے تعامل کرتی ہیں:",
+            "hunterPieces": "ہنٹر مہرے",
+            "hunterMovement": "(بغیر کورل آئیکنز کے)",
+            "stoppedBy": "رک جاتے ہیں",
+            "hunterMovementDesc": "کورل سے - وہ اس کے ذریعے نہیں جا سکتے",
+            "gathererPieces": "جمع کرنے والے مہرے",
+            "gathererMovement": "(چار کورل آئیکنز کے ساتھ) زیادہ طاقتور ہیں - وہ",
+            "through": "گزر سکتے ہیں",
+            "gathererMovementDesc": "کورل کے ذریعے آزادی سے",
+            "coralMovementExample": "کورل حرکت کی مثال",
+            "individualMovements": "انفرادی مہروں کی حرکتیں"
+        },
+        "pieces": {
+            "whale": {
+                "name": "وہیل",
+                "intro": "وہیل آپ کا سب سے اہم مہرہ ہے - اگر اسے شہ مات کر دیا جائے، تو آپ ہار جاتے ہیں! وہیل دو خانے گھیرتی ہے اور اس کے دو الگ حرکت کے اختیارات ہیں:",
+                "slidingMove": "1. سلائیڈنگ موو:",
+                "slidingMoveDesc": "مہرے کے آدھے حصے کو افقی، عمودی، یا ترچھے کسی بھی تعداد کے خانوں میں منتقل کریں جبکہ اس کی اصل سمت برقرار رکھیں۔ وہیل ہنٹر حرکت کے قوانین کی پیروی کرتی ہے - یہ کورل سے رک جاتی ہے۔ تاہم، ایک خاص استثناء ہے (ذیل میں دیکھیں)۔",
+                "rotationMove": "2. گردش کی حرکت:",
+                "rotationMoveDesc": "مہرے کے آدھے حصے کو ملحقہ خانے (ایک خانہ عمودی یا افقی) میں گھمائیں۔ گردش کا انتخاب کرتے وقت، پہلے منزل کے خانے کو ٹیپ کریں (سفید دائرے کے ساتھ دکھایا گیا)۔ اگر متعدد درست سمتیں ہیں، تو پھر آپ سمت کے خانے کو ٹیپ کریں گے (سبز دائرے کے ساتھ دکھایا گیا)۔ اگر صرف ایک درست سمت ہے، تو وہیل خودکار طور پر سمت کی منتخبی دکھائے بغیر حرکت کرے گی۔",
+                "checkRules": "شہ کے قوانین:",
+                "checkRulesDesc": "وہیل کبھی بھی اپنی حرکت شہ میں ختم نہیں کر سکتی (جہاں اسے پکڑا جا سکتا ہے)، لیکن یہ خطرے میں پڑے خانوں سے گزر سکتی ہے۔",
+                "doubleCapture": "دوہرا قبضہ:",
+                "doubleCaptureDesc": "وہیل ایک ہی حرکت میں دو دشمن مہروں تک کو پکڑ سکتی ہے - اپنے جسم کے ہر آدھے حصے سے ایک!",
+                "doubleCoralRemoval": "دوہری کورل ہٹانا:",
+                "doubleCoralRemovalDesc": "جب وہیل (ہنٹر کے طور پر کام کرتے ہوئے) کورل پر اترتی ہے، تو یہ ایک یا دونوں کورل کے ٹکڑے ہٹانے کا انتخاب کر سکتی ہے۔ اگر دونوں آدھے حصے کورل پر اترتے ہیں، تو آپ دونوں، صرف ایک، یا کسی کو بھی نہیں ہٹا سکتے۔ اگر صرف ایک آدھا حصہ نئے کورل پر اترتا ہے (جبکہ دوسرا آدھا حصہ پہلے سے کورل پر ہے)، تو آپ اس ایک کورل کے ٹکڑے کو ہٹانے کا انتخاب کر سکتے ہیں۔",
+                "specialCase": "⚠️ خاص حرکت کا معاملہ",
+                "specialCaseDesc": "اگر وہیل کا آدھا حصہ پہلے سے کورل پر بیٹھا ہے، تو وہ کورل دوسرے آدھے حصے کو اسی کورل خانے سے گزرنے یا اس پر آنے سے نہیں روکتا۔",
+                "basicMovement": "بنیادی وہیل کی حرکت",
+                "rotationExample": "وہیل گردش کی مثال",
+                "coralException": "وہیل اپنے کورل سے گزر رہی ہے"
+            },
+            "dolphin": {
+                "name": "ڈالفن",
+                "movement": "عمودی، افقی، یا ترچھے کسی بھی تعداد کے خانوں میں حرکت کرتی ہے۔",
+                "example": "ڈالفن حرکت کی مثال"
+            },
+            "turtle": {
+                "name": "کچھوا",
+                "movement": "عمودی یا افقی کسی بھی تعداد کے خانوں میں حرکت کرتا ہے۔",
+                "example": "کچھوا حرکت کی مثال"
+            },
+            "pufferfish": {
+                "name": "پفر فش",
+                "movement": "ترچھے کسی بھی تعداد کے خانوں میں حرکت کرتی ہے۔",
+                "example": "پفر فش حرکت کی مثال"
+            },
+            "octopus": {
+                "name": "آکٹوپس",
+                "movement": "ترچھے ایک خانہ حرکت کرتا ہے۔",
+                "example": "آکٹوپس حرکت کی مثال"
+            },
+            "crab": {
+                "name": "کریب",
+                "movement": "عمودی یا افقی ایک خانہ حرکت کرتا ہے۔",
+                "example": "کریب حرکت کی مثال"
+            }
+        },
+        "specialRules": {
+            "title": "خاص قوانین",
+            "capture": {
+                "title": "قبضہ",
+                "desc": "دشمن کے مہرے سے مصروف خانے میں منتقل ہوں۔ وہیل ایک حرکت میں دو مہرے پکڑ سکتی ہے۔",
+                "example": "قبضہ کی مثال"
+            },
+            "hunterEffect": {
+                "title": "ہنٹر حرکت اور اثر",
+                "desc": "ہنٹر مہروں (بغیر کورل آئیکنز کے) کے دو اہم رویے ہیں:",
+                "movementStops": "حرکت رک جاتی ہے",
+                "movementStopsDesc": "جب کورل پر اترتے ہیں",
+                "canRemove": "ہٹا سکتے ہیں",
+                "canRemoveDesc": "اس کورل کو بورڈ سے",
+                "example": "ہنٹر اثر کی مثال"
+            },
+            "gathererEffect": {
+                "title": "جمع کرنے والے کا اثر",
+                "desc": "جمع کرنے والے مہرے (چار کورل آئیکنز کے ساتھ) خالی خانوں پر کورل رکھ سکتے ہیں جن پر وہ حرکت کرتے ہیں۔",
+                "example": "جمع کرنے والے اثر کی مثال"
+            }
+        },
+        "drawResignation": {
+            "title": "برابری اور ہار ماننا",
+            "stalemate": "تعطل:",
+            "stalemateDesc": "جب کسی کھلاڑی کے پاس کوئی قانونی چال نہیں ہو اور ان کی وہیل شہ میں نہیں ہو",
+            "threefoldRepetition": "تین بار تکرار:",
+            "threefoldRepetitionDesc": "ایک ہی پوزیشن تین بار ظاہر ہو اسی کھلاڑی کی باری کے ساتھ",
+            "resignation": "ہار ماننا:",
+            "resignationDesc": "کوئی کھلاڑی کسی بھی وقت ہار مان سکتا ہے"
+        }
+    },
+    "components": {
+        "fixtureLoader": {
+            "title": "گیم کی حالت لوڈ کریں",
+            "gameMode": "گیم موڈ:",
+            "back": "واپس",
+            "vsComputer": "بمقابلہ کمپیوٹر",
+            "passAndPlay": "پاس اینڈ پلے",
+            "loadGame": "گیم لوڈ کریں",
+            "fixturesHint": "💡 فکسچر shared/game/__fixtures__/ سے ہیں",
+            "error": "غلطی",
+            "failedToLoad": "فکسچر لوڈ کرنے میں ناکامی"
+        },
+        "versionWarning": {
+            "title": "اپ ڈیٹ دستیاب ہے",
+            "message": "بہترین تجربے کے لیے براہ کرم تازہ ترین ورژن میں اپ ڈیٹ کریں۔",
+            "updateButton": "اپ ڈیٹ کریں"
+        },
+        "playerStatus": {
+            "computer": "کمپیوٹر",
+            "thinking": "سوچ رہا ہے...",
+            "remaining": "باقی",
+            "underControl": "کنٹرول میں"
+        },
+        "alert": {
+            "defaultButton": "ٹھیک ہے"
+        },
+        "pvpBoard": {
+            "player": "کھلاڑی",
+            "opponent": "مخالف",
+            "requestUndoTitle": "واپسی کی درخواست کریں",
+            "requestUndoMessage": "آخری چال کو واپس کرنے کی درخواست کریں؟ {{opponentName}} کو منظور کرنا ہوگا۔",
+            "requestResetTitle": "ری سیٹ کی درخواست کریں",
+            "requestResetMessage": "اس گیم کو دوبارہ ترتیب دینے کی درخواست کریں؟ {{opponentName}} کو منظور کرنا ہوگا۔",
+            "cancel": "منسوخ کریں",
+            "request": "درخواست کریں",
+            "requestReset": "ری سیٹ کی درخواست کریں",
+            "askOpponentReset": "مخالف سے گیم دوبارہ ترتیب دینے کو کہیں",
+            "gameEnded": "گیم پہلے ہی ختم ہو گیا",
+            "noMoves": "ابھی تک کوئی چال نہیں چلی",
+            "pendingUndo": "زیر التوا واپسی کی درخواست پہلے حل ہونی چاہیے",
+            "remindOpponent": "مخالف کو یاد دلائیں",
+            "remindOpponentSubtitle": "مخالف کو اپنی باری لینے کی یاد دلائیں",
+            "availableInHours": "{{hours}} گھنٹے میں دستیاب",
+            "yourTurn": "یہ آپ کی باری ہے",
+            "errorUndoRequest": "واپسی کی درخواست بھیجنے میں ناکامی۔ براہ کرم دوبارہ کوشش کریں۔",
+            "errorUndoResponse": "واپسی کی درخواست کا جواب دینے میں ناکامی۔ براہ کرم دوبارہ کوشش کریں۔",
+            "errorResetResponse": "ری سیٹ کی درخواست کا جواب دینے میں ناکامی۔ براہ کرم دوبارہ کوشش کریں۔",
+            "errorCancelUndo": "واپسی کی درخواست منسوخ کرنے میں ناکامی۔ براہ کرم دوبارہ کوشش کریں۔",
+            "errorCancelReset": "ری سیٹ کی درخواست منسوخ کرنے میں ناکامی۔ براہ کرم دوبارہ کوشش کریں۔",
+            "reminderSentTitle": "کامیابی",
+            "reminderSentMessage": "مخالف کو یاد دہانی بھیج دی گئی۔",
+            "errorReminderTitle": "غلطی",
+            "errorReminderMessage": "یاد دہانی بھیجنے میں ناکامی۔ براہ کرم دوبارہ کوشش کریں۔",
+            "waitingUndoResponse": "{{opponentName}} کے جواب کا انتظار ہے کہ {{moveCount}} چال(یں) واپس کرنے کی درخواست...",
+            "opponentWantsUndo": "{{opponentName}} {{moveCount}} چال(یں) واپس کرنا چاہتا ہے",
+            "waitingResetResponse": "{{opponentName}} کے ری سیٹ درخواست کے جواب کا انتظار ہے...",
+            "opponentWantsReset": "{{opponentName}} گیم دوبارہ ترتیب دینا چاہتا ہے"
+        },
+        "passAndPlayBoard": {
+            "resetGameTitle": "گیم دوبارہ ترتیب دیں",
+            "resetGameMessage": "کیا آپ واقعی نیا گیم شروع کرنا چاہتے ہیں؟",
+            "cancel": "منسوخ کریں",
+            "reset": "دوبارہ ترتیب دیں",
+            "resetGame": "گیم دوبارہ ترتیب دیں",
+            "startNewGame": "شروع سے نیا گیم شروع کریں",
+            "gameEnded": "گیم پہلے ہی ختم ہو گیا",
+            "noMoves": "ابھی تک کوئی چال نہیں چلی"
+        },
+        "baseBoard": {
+            "errorLoadState": "گیم کی حالت لوڈ کرنے میں ناکامی",
+            "resignGameTitle": "گیم ترک کریں",
+            "resignGameMessage": "کیا آپ واقعی ہار ماننا چاہتے ہیں؟ آپ گیم ہار جائیں گے۔",
+            "cancel": "منسوخ کریں",
+            "resign": "ہار مانیں",
+            "checkTitle": "شہ!",
+            "checkMessage": "آپ کی {{piece}} شہ میں ہے!",
+            "checkmateTitle": "شہ مات!",
+            "checkmateMessage": "{{winner}} شہ مات سے جیت گیا!",
+            "gathererTitle": "جمع کرنے والے کا اثر",
+            "gathererMessage": "اس خانے پر کورل رکھیں؟",
+            "yes": "ہاں",
+            "no": "نہیں",
+            "hunterTitle": "ہنٹر اثر",
+            "hunterMessage": "اس خانے سے کورل ہٹائیں؟",
+            "exportSuccessTitle": "کامیابی",
+            "exportSuccessMessage": "گیم کی حالت کلپ بورڈ پر محفوظ ہو گئی!",
+            "exportFailedTitle": "ایکسپورٹ ناکام ہو گیا",
+            "computer": "کمپیوٹر",
+            "opponent": "مخالف",
+            "white": "سفید",
+            "black": "سیاہ",
+            "youWonTimeout": "آپ جیت گئے! {{opponentName}} کا وقت ختم ہو گیا ⏱️",
+            "youLostTimeout": "آپ ہار گئے! وقت ختم ہو گیا ⏱️",
+            "timeoutLose": "{{loserName}} کا وقت ختم ہو گیا! ⏱️",
+            "youWonResign": "آپ جیت گئے! {{opponentName}} نے ہار مان لی 🏳️",
+            "youResigned": "آپ نے ہار مان لی 🏳️",
+            "checkmateWin": "شہ مات! آپ جیت گئے! 🏆",
+            "checkmateLose": "شہ مات! آپ ہار گئے۔",
+            "checkmateGeneric": "شہ مات! {{winner}} جیت گیا! 🏆",
+            "youLost": "آپ ہار گئے",
+            "resignGeneric": "{{winner}} ہار ماننے سے جیت گیا! 🏳️",
+            "coralVictoryWin": "آپ کورل فتح سے جیت گئے! 🪸\n{{whiteScore}} - {{blackScore}}",
+            "coralVictoryLose": "آپ ہار گئے۔ {{winner}} کورل فتح سے جیت گیا! 🪸\n{{whiteScore}} - {{blackScore}}",
+            "coralVictoryGeneric": "{{winner}} کورل فتح سے جیت گیا! 🪸\n{{whiteScore}} سفید - {{blackScore}} سیاہ",
+            "stalemate": "تعطل! 🤝",
+            "drawRepetition": "تکرار سے برابری! 🤝",
+            "drawInsufficientMaterial": "برابری - ناکافی مواد! 🤝",
+            "drawCoralTie": "برابری - کورل ٹائی! 🤝🪸\n{{score}} - {{score}}",
+            "draw": "برابری! 🤝",
+            "check": "{{player}} شہ میں ہے! ⚠️",
+            "viewingHistory": "ماضی کی چالیں دیکھ رہے ہیں - کھیلنے کے لیے موجودہ پر واپس آئیں",
+            "selectWhaleOrientation": "اپنی وہیل کی سمت منتخب کریں",
+            "hunterWhaleTitle": "ہنٹر اثر (وہیل)",
+            "hunterWhaleMessage": "کورل ہٹانے کا آپشن منتخب کریں:",
+            "yourTurn": "آپ کی باری",
+            "opponentTurn": "{{opponentName}} کی باری",
+            "playerTurn": "{{playerColor}} کی باری"
+        },
+        "computerBoard": {
+            "cancelRequestTitle": "درخواست منسوخ کریں",
+            "cancelRequestMessage": "اپنی ری سیٹ کی درخواست منسوخ کریں؟",
+            "cancel": "منسوخ کریں",
+            "yes": "ہاں",
+            "resetGameTitle": "گیم دوبارہ ترتیب دیں",
+            "resetGameMessage": "کیا آپ واقعی نیا گیم شروع کرنا چاہتے ہیں؟",
+            "reset": "دوبارہ ترتیب دیں",
+            "resetGame": "گیم دوبارہ ترتیب دیں",
+            "startNewGame": "شروع سے نیا گیم شروع کریں",
+            "gameEnded": "گیم پہلے ہی ختم ہو گیا",
+            "noMoves": "ابھی تک کوئی چال نہیں چلی",
+            "errorUndo": "واپس کرنے میں ناکامی۔ براہ کرم دوبارہ کوشش کریں۔"
+        },
+        "computerUsers": {
+            "successTitle": "کامیابی",
+            "errorTitle": "غلطی",
+            "initializeSuccess": "{{count}} کمپیوٹر صارفین کامیابی سے شروع کیے گئے",
+            "initializeError": "کمپیوٹر صارفین شروع کرنے میں ناکامی۔ براہ کرم دوبارہ کوشش کریں۔",
+            "confirmDeleteTitle": "ڈیلیٹ کرنے کی تصدیق کریں",
+            "confirmDeleteMessage": "کیا آپ واقعی تمام کمپیوٹر صارفین کو ڈیلیٹ کرنا چاہتے ہیں؟ اس عمل کو واپس نہیں کیا جا سکتا۔",
+            "cancel": "منسوخ کریں",
+            "delete": "ڈیلیٹ کریں",
+            "deleteSuccess": "{{count}} کمپیوٹر صارفین کامیابی سے ڈیلیٹ کیے گئے",
+            "deleteError": "کمپیوٹر صارفین ڈیلیٹ کرنے میں ناکامی۔ براہ کرم دوبارہ کوشش کریں۔",
+            "clearLanguageSuccess": "زبان کی ترجیح صاف ہو گئی۔ ایپ اب اگلی بار شروع ہونے پر ڈیوائس کی ترتیبات سے زبان کا خودکار پتہ لگائے گی۔",
+            "clearLanguageError": "زبان کی ترجیح صاف کرنے میں ناکامی۔ براہ کرم دوبارہ کوشش کریں۔"
+        }
+    },
+    "hooks": {
+        "friends": {
+            "removeFriendTitle": "دوست ہٹائیں",
+            "removeFriendMessage": "کیا آپ واقعی {{friendName}} کو اپنے دوستوں سے ہٹانا چاہتے ہیں؟",
+            "cancel": "منسوخ کریں",
+            "remove": "ہٹائیں",
+            "errorRemove": "دوست ہٹانے میں ناکامی",
+            "errorAccept": "دوستی کی درخواست قبول کرنے میں ناکامی",
+            "errorDecline": "دوستی کی درخواست مسترد کرنے میں ناکامی",
+            "cancelRequestTitle": "دوستی کی درخواست منسوخ کریں",
+            "cancelRequestMessage": "{{displayName}} کو بھیجی گئی دوستی کی درخواست منسوخ کریں؟",
+            "no": "نہیں",
+            "yesCancel": "ہاں، منسوخ کریں",
+            "errorCancelRequest": "دوستی کی درخواست منسوخ کرنے میں ناکامی",
+            "errorTitle": "غلطی"
+        },
+        "game": {
+            "errorTitle": "غلطی",
+            "errorLoadGame": "گیم لوڈ کرنے میں ناکامی"
+        },
+        "gameActions": {
+            "errorTitle": "غلطی",
+            "errorResign": "گیم ترک کرنے میں ناکامی"
+        },
+        "userSearch": {
+            "errorTitle": "غلطی",
+            "errorSendRequest": "دوستی کی درخواست بھیجنے میں ناکامی"
+        }
+    }
+}

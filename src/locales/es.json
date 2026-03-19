@@ -1,0 +1,736 @@
+{
+    "auth": {
+        "welcomeBack": "Bienvenido de Nuevo",
+        "createAccount": "Crear Cuenta",
+        "resetPassword": "Restablecer Contraseña",
+        "signInSubtitle": "Inicia sesión para jugar contra la computadora o desafiar a otros jugadores en línea",
+        "signUpSubtitle": "Crea una cuenta para jugar en línea. ¡Elige un nombre de usuario único!",
+        "forgotPasswordSubtitle": "Ingresa tu correo electrónico para recibir un enlace de restablecimiento de contraseña",
+        "usernamePlaceholder": "Nombre de usuario (requerido)",
+        "emailPlaceholder": "Correo electrónico",
+        "passwordPlaceholder": "Contraseña",
+        "signInWithApple": "Iniciar sesión con Apple",
+        "signUpWithApple": "Registrarse con Apple",
+        "signInWithGoogle": "Iniciar sesión con Google",
+        "signUpWithGoogle": "Registrarse con Google",
+        "or": "O",
+        "signIn": "Iniciar Sesión",
+        "signUp": "Registrarse",
+        "sendResetLink": "Enviar Enlace de Restablecimiento",
+        "forgotPassword": "¿Olvidaste tu Contraseña?",
+        "backToSignIn": "Volver a Iniciar Sesión",
+        "alreadyHaveAccount": "¿Ya tienes una cuenta? Inicia Sesión",
+        "dontHaveAccount": "¿No tienes una cuenta? Regístrate",
+        "errors": {
+            "fillAllFields": "Por favor completa todos los campos",
+            "usernameRequired": "El nombre de usuario es requerido",
+            "usernameMinLength": "El nombre de usuario debe tener al menos 2 caracteres",
+            "usernameMaxLength": "El nombre de usuario debe tener menos de 30 caracteres",
+            "usernameInvalidChars": "El nombre de usuario solo puede contener letras, números, espacios, guiones bajos y guiones",
+            "authFailed": "La autenticación falló",
+            "googleSignInFailed": "Error al iniciar sesión con Google",
+            "appleSignInFailed": "Error al iniciar sesión con Apple",
+            "enterEmail": "Por favor ingresa tu dirección de correo electrónico",
+            "resetEmailFailed": "Error al enviar el correo de restablecimiento"
+        },
+        "success": {
+            "resetEmailSent": "¡Correo de restablecimiento de contraseña enviado! Revisa tu bandeja de entrada."
+        }
+    },
+    "game": {
+        "difficulty": {
+            "title": "Elige la Dificultad de la IA",
+            "subtitle": "Selecciona el nivel de dificultad para el oponente de computadora",
+            "random": "Aleatorio",
+            "easy": "Fácil",
+            "medium": "Medio",
+            "hard": "Difícil",
+            "randomDescription": "La computadora hace movimientos aleatorios",
+            "easyDescription": "La computadora usa estrategia básica",
+            "mediumDescription": "La computadora usa estrategia intermedia",
+            "hardDescription": "La computadora usa estrategia avanzada",
+            "createAccountToAccess": "Crea una cuenta para acceder"
+        },
+        "matchmaking": {
+            "title": "Elige el Modo de Juego",
+            "timeControl": "Elige el Control de Tiempo",
+            "timeControlSubtitle": "Selecciona el límite de tiempo para este juego",
+            "instant": "Instantáneo",
+            "instantDescription": "Encuentra un oponente ahora. Te empareja con jugadores en línea.",
+            "correspondence": "Correspondencia",
+            "correspondenceDescription": "Envía una invitación a un jugador aleatorio. Tienen 24 horas para aceptar.",
+            "timeControls": {
+                "unlimited": "Sin límite de tiempo",
+                "blitz": "5 minutos",
+                "normal": "10 minutos",
+                "custom": "Límite de tiempo establecido"
+            },
+            "timeControlDescriptions": {
+                "blitz": "5 minutos por jugador",
+                "normal": "10 minutos por jugador",
+                "unlimited": "Sin límite de tiempo"
+            }
+        },
+        "status": {
+            "loading": "Cargando",
+            "noGamesFound": "No se encontraron juegos",
+            "error": "Error",
+            "resetApproved": "El juego ha sido reiniciado",
+            "resetRejected": "Solicitud de reinicio rechazada",
+            "undoApproved": "Movimiento deshecho",
+            "undoRejected": "Solicitud de deshacer rechazada"
+        },
+        "actions": {
+            "cancel": "Cancelar"
+        }
+    },
+    "navigation": {
+        "home": "Inicio",
+        "game": "Juego",
+        "tutorial": "Tutorial",
+        "howToPlay": "Cómo Jugar",
+        "settings": "Configuración",
+        "friends": "Amigos",
+        "stats": "Estadísticas",
+        "reportIssue": "Reportar Problema",
+        "rulesVideo": "Video de Reglas",
+        "physicalGame": "Juego Físico",
+        "logOut": "Cerrar Sesión",
+        "logOutConfirmTitle": "Cerrar Sesión",
+        "logOutConfirmMessage": "¿Estás seguro de que quieres cerrar sesión?",
+        "cancel": "Cancelar",
+        "appTitle": "Coral Clash",
+        "appSubtitle": "Juego de Estrategia Oceánica"
+    },
+    "home": {
+        "welcome": {
+            "title": "¡Bienvenido a Coral Clash!",
+            "message": "¡Consulta el Video de Reglas o la guía de Cómo Jugar en el menú para comenzar!",
+            "watchVideo": "Ver Video",
+            "howToPlay": "Cómo Jugar",
+            "ok": "OK"
+        },
+        "opponent": {
+            "computer": "Computadora",
+            "opponent": "Oponente",
+            "guest": "Invitado 1"
+        },
+        "gameModes": {
+            "howToPlayTitle": "Cómo Jugar",
+            "howToPlayDescription": "Aprende las reglas y estrategias de Coral Clash",
+            "playComputerTitle": "Jugar vs Computadora",
+            "playComputerDescription": "Inicia un nuevo juego contra la IA",
+            "loadGameStateTitle": "Cargar Estado de Juego (Dev)",
+            "loadGameStateDescription": "Carga un estado de juego guardado desde fixtures"
+        },
+        "matchmaking": {
+            "cannotJoin": "No se Puede Unir a la Búsqueda de Partida",
+            "instantMatchFound": "¡Partida de Correspondencia Encontrada!",
+            "instantMatchMessage": "Has sido emparejado con {{creatorName}}. Serán notificados y tienen 24 horas para aceptar.",
+            "correspondenceCreated": "Invitación de Correspondencia Creada",
+            "correspondenceMessage": "Tu invitación ha sido creada. Cuando otro jugador seleccione el modo de Correspondencia, puede ser emparejado con tu invitación. ¡Serás notificado cuando alguien quiera jugar!"
+        },
+        "errors": {
+            "offlineModeTitle": "Modo Sin Conexión",
+            "offlineModeMessage": "No se puede conectar al servidor. Iniciando juego de computadora sin conexión.",
+            "errorTitle": "Error",
+            "failedToStart": "Error al iniciar {{action}}. Por favor intenta de nuevo.",
+            "failedToResign": "Error al rendirse. Por favor intenta de nuevo.",
+            "failedPassAndPlay": "Error al iniciar juego de pasar y jugar. Por favor intenta de nuevo.",
+            "failedComputerGame": "Error al iniciar juego de computadora",
+            "failedMatchmaking": "Error al iniciar búsqueda de partida {{mode}}. {{message}}"
+        }
+    },
+    "stats": {
+        "overallStatistics": "Estadísticas Generales",
+        "gamesPlayed": "Juegos Jugados",
+        "wins": "Victorias",
+        "losses": "Derrotas",
+        "draws": "Empates",
+        "winRate": "Tasa de Victoria",
+        "matchupStatistics": "Estadísticas de Enfrentamientos",
+        "matchupDescription": "Tasas de victoria contra cada oponente (JvJ y Computadora)",
+        "computer": "Computadora",
+        "winRateShort": "Tasa de Victoria",
+        "winsShort": "V",
+        "lossesShort": "D",
+        "drawsShort": "E",
+        "noGamesYet": "Aún No Hay Juegos",
+        "noGamesHint": "¡Comienza a jugar para ver tus estadísticas aquí!"
+    },
+    "gameMenu": {
+        "saveGameState": "Guardar Estado del Juego",
+        "exportPosition": "Exportar posición actual del juego",
+        "flipBoard": "Voltear Tablero",
+        "showingBlackBottom": "Actualmente mostrando negras abajo",
+        "showingWhiteBottom": "Actualmente mostrando blancas abajo",
+        "reportBug": "Reportar Error",
+        "includeGameState": "Incluir estado actual del juego",
+        "resignGame": "Rendirse",
+        "resigning": "Rindiéndose...",
+        "pleaseWait": "Por favor espera...",
+        "gameEnded": "El juego ya terminó",
+        "forfeitGame": "Abandonar el juego actual"
+    },
+    "reportIssue": {
+        "bugReportTitle": "Reporte de Error",
+        "bugReportDescription": "Reporta un error con el estado actual del juego. La posición del juego se incluirá en tu reporte.",
+        "feedbackTitle": "Comentarios y Problemas",
+        "feedbackDescription": "Envía comentarios o reporta un problema. ¡Apreciamos tu opinión!",
+        "subject": "Asunto",
+        "subjectPlaceholder": "Breve resumen del problema",
+        "description": "Descripción",
+        "descriptionPlaceholder": "Descripción detallada del problema o comentario...",
+        "gameStateIncluded": "✓ El estado del juego se incluirá",
+        "turn": "Turno",
+        "white": "Blancas",
+        "black": "Negras",
+        "gameOver": "Fin del Juego",
+        "submitIssue": "Enviar Problema",
+        "anonymousNote": "Nota: Estás enviando de forma anónima. Inicia sesión para rastrear tus problemas.",
+        "validation": {
+            "missingSubjectTitle": "Información Faltante",
+            "missingSubjectMessage": "Por favor ingresa un asunto para tu problema.",
+            "invalidSubjectTitle": "Asunto Inválido",
+            "invalidSubjectMessage": "El asunto debe tener al menos 3 caracteres.",
+            "missingDescriptionTitle": "Información Faltante",
+            "missingDescriptionMessage": "Por favor ingresa una descripción para tu problema.",
+            "invalidDescriptionTitle": "Descripción Inválida",
+            "invalidDescriptionMessage": "La descripción debe tener al menos 10 caracteres."
+        },
+        "success": {
+            "title": "Problema Enviado",
+            "message": "¡Gracias por tus comentarios! Tu problema ha sido enviado",
+            "ok": "OK"
+        },
+        "error": {
+            "title": "Error al Enviar",
+            "message": "Error al enviar tu problema. Por favor verifica tu conexión e intenta de nuevo."
+        }
+    },
+    "settings": {
+        "account": "Cuenta",
+        "profileAvatar": "Avatar de Perfil",
+        "chooseAvatar": "Elige tu avatar con temática oceánica",
+        "appearance": "Apariencia",
+        "theme": {
+            "light": "Claro",
+            "lightDescription": "Usar siempre tema claro",
+            "dark": "Oscuro",
+            "darkDescription": "Usar siempre tema oscuro",
+            "auto": "Automático",
+            "autoDescription": "Coincidir con el tema del sistema"
+        },
+        "language": {
+            "title": "Idioma (भाषा)",
+            "english": "Inglés",
+            "englishDescription": "Interfaz en idioma inglés",
+            "hindi": "हिन्दी (Hindi)",
+            "hindiDescription": "हिन्दी भाषा इंटरफ़ेस"
+        },
+        "actions": {
+            "resetToDefaults": "Restablecer a Predeterminados",
+            "resetTitle": "Restablecer Configuración",
+            "resetMessage": "¿Estás seguro de que quieres restablecer toda la configuración a los valores predeterminados?",
+            "cancel": "Cancelar",
+            "reset": "Restablecer"
+        },
+        "dangerZone": {
+            "title": "Zona de Peligro",
+            "warning": "Una vez que elimines tu cuenta, no hay vuelta atrás. Por favor, ten certeza.",
+            "deleteAccount": "Eliminar Cuenta",
+            "deletingAccount": "Eliminando Cuenta...",
+            "deleteTitle": "Eliminar Cuenta",
+            "deleteMessage": "Esta acción es permanente y no se puede deshacer.\n\n• Todos tus datos personales serán eliminados\n• Tus juegos continuarán pero aparecerás como \"Anónimo\"\n• Tus amigos y solicitudes de amistad serán eliminadas\n• Los juegos activos serán abandonados\n\n¿Estás seguro de que quieres continuar?",
+            "continue": "Continuar",
+            "confirmTitle": "Confirmar Eliminación de Cuenta",
+            "confirmMessage": "Para confirmar, por favor escribe DELETE (todo en mayúsculas) a continuación:",
+            "incorrectTitle": "Confirmación Incorrecta",
+            "incorrectMessage": "Debes escribir DELETE exactamente para confirmar la eliminación de la cuenta.",
+            "successTitle": "Cuenta Eliminada",
+            "successMessage": "Tu cuenta ha sido eliminada exitosamente. Ahora se cerrará tu sesión.",
+            "failedTitle": "Error al Eliminar",
+            "timeoutMessage": "Se agotó el tiempo de espera. Por favor verifica tu conexión e intenta de nuevo.",
+            "failedMessage": "Error al eliminar la cuenta. Por favor intenta de nuevo o contacta al soporte si el problema persiste.",
+            "retry": "Reintentar"
+        },
+        "errors": {
+            "loadFailed": "Error al cargar configuración",
+            "saveFailed": "Error al guardar configuración",
+            "avatarSaveFailed": "Error al guardar selección de avatar",
+            "themeSaveFailed": "Error al guardar preferencia de tema",
+            "languageChangeFailed": "Error al cambiar idioma",
+            "resetFailed": "Error al restablecer configuración"
+        }
+    },
+    "friends": {
+        "addFriend": "Agregar Amigo",
+        "searchPlaceholder": "Buscar por nombre de usuario",
+        "noUsersFound": "No se encontraron usuarios",
+        "pending": "Pendiente",
+        "incomingRequests": "Solicitudes Entrantes",
+        "sentRequests": "Solicitudes Enviadas",
+        "myFriends": "Mis Amigos",
+        "noFriendsYet": "Aún No Tienes Amigos",
+        "noFriendsHint": "¡Agrega amigos por nombre de usuario arriba para comenzar a jugar juntos!"
+    },
+    "common": {
+        "loading": "Cargando...",
+        "error": "Error",
+        "success": "Éxito",
+        "cancel": "Cancelar",
+        "confirm": "Confirmar",
+        "save": "Guardar",
+        "delete": "Eliminar",
+        "edit": "Editar",
+        "close": "Cerrar",
+        "ok": "OK",
+        "somethingWentWrong": "Algo salió mal. Por favor intenta de nuevo."
+    },
+    "cards": {
+        "matchmaking": {
+            "searchingForOpponent": "Buscando Oponente...",
+            "findRandomMatch": "Encontrar Partida Aleatoria",
+            "searchingHint": "Buscando oponente... · Toca para cancelar",
+            "tapToJoin": "Toca para unirte a la cola de búsqueda",
+            "cannotJoinTitle": "No se Puede Unir a la Búsqueda de Partida"
+        },
+        "playWithFriend": {
+            "title": "Jugar con Amigo",
+            "description": "Invita a un amigo a jugar",
+            "modalTitle": "Jugar con Amigo",
+            "inviteFriend": "Invitar Amigo",
+            "inviteDescription": "Envía una invitación de juego a un amigo",
+            "textInvite": "Invitación por Texto",
+            "textInviteDescription": "Envía invitaciones por mensaje de texto",
+            "passAndPlay": "Pasar y Jugar",
+            "passAndPlayDescription": "Juega localmente en este dispositivo",
+            "selectFriend": "Selecciona un Amigo",
+            "searchFriends": "Buscar amigos...",
+            "noFriendsFound": "No se encontraron amigos",
+            "noFriendsYet": "Aún no tienes amigos. ¡Agrega amigos para jugar!",
+            "passAndPlayGames": "Juegos de Pasar y Jugar",
+            "startNewGame": "Iniciar Nuevo Juego",
+            "noActiveGames": "No hay juegos activos",
+            "vsGuest": "vs Invitado 1",
+            "unlimited": "Ilimitado",
+            "shareMessage": "¡Juguemos Coral Clash! 🦀\n\nDescárgalo aquí:\niOS: [URL]\n\nAndroid: [URL]"
+        },
+        "signUpPrompt": {
+            "title": "Desbloquea Todas las Funciones",
+            "subtitle": "Regístrate para obtener una cuenta gratuita y acceder a:",
+            "feature1": "Jugar con amigos en línea",
+            "feature2": "Encontrar oponentes aleatorios mediante búsqueda de partida",
+            "feature3": "Rastrear tus estadísticas e historial de juegos",
+            "feature4": "Construir tu red de amigos",
+            "button": "Registrarse / Iniciar Sesión"
+        },
+        "activeGames": {
+            "title": "Juegos Activos",
+            "inProgress": "en progreso",
+            "game": "juego",
+            "games": "juegos",
+            "yourTurn": "Tu turno",
+            "opponentTurn": "Turno del oponente",
+            "opponent": "Oponente",
+            "computer": "Computadora",
+            "blitz": "Blitz",
+            "normal": "Normal",
+            "unlimited": "Ilimitado",
+            "timed": "Cronometrado",
+            "loading": "Cargando juegos...",
+            "noGames": "No hay juegos activos",
+            "noGamesHint": "¡Comienza un juego con un amigo!",
+            "vs": "vs ",
+            "resignTitle": "Rendirse",
+            "resignMessage": "¿Estás seguro de que quieres rendirte? Perderás este juego.",
+            "resignButton": "Rendirse",
+            "resignError": "Error al rendirse. Por favor intenta de nuevo."
+        },
+        "gameHistory": {
+            "title": "Historial de Juegos",
+            "subtitle": "Juegos recientes",
+            "loading": "Cargando historial...",
+            "noHistory": "No hay historial de juegos",
+            "noHistoryHint": "Tus juegos completados aparecerán aquí",
+            "vs": "vs ",
+            "justNow": "Justo ahora",
+            "minutesAgo": "min atrás",
+            "hoursAgo": "h atrás",
+            "daysAgo": "d atrás",
+            "cancelled": "Juego cancelado",
+            "draw": "Empate",
+            "won": "Ganaste",
+            "lost": "Perdiste",
+            "unknown": "Desconocido",
+            "opponent": "Oponente",
+            "computer": "Computadora",
+            "blitz": "Blitz",
+            "normal": "Normal",
+            "unlimited": "Ilimitado",
+            "timed": "Cronometrado"
+        }
+    },
+    "errors": {
+        "INVALID_MOVE": "Movimiento inválido",
+        "INVALID_MOVE_OCCUPIED": "Esa posición ya está ocupada",
+        "INVALID_MOVE_OUT_OF_BOUNDS": "El movimiento está fuera de los límites",
+        "INVALID_MOVE_NOT_YOUR_TURN": "No es tu turno",
+        "INVALID_MOVE_PIECE_BLOCKED": "Esa pieza está bloqueada",
+        "GAME_NOT_FOUND": "Juego no encontrado",
+        "GAME_ALREADY_STARTED": "El juego ya ha comenzado",
+        "GAME_ALREADY_ENDED": "Este juego ya ha terminado",
+        "GAME_CANCELLED": "El juego fue cancelado",
+        "PLAYER_NOT_IN_GAME": "No estás en este juego",
+        "PLAYER_DISCONNECTED": "Jugador desconectado",
+        "CONNECTION_ERROR": "Error de conexión. Por favor verifica tu internet.",
+        "SERVER_ERROR": "Error del servidor. Por favor intenta de nuevo más tarde.",
+        "TIMEOUT": "Se agotó el tiempo de espera de la solicitud",
+        "ALREADY_IN_QUEUE": "Ya estás en la cola de búsqueda de partida",
+        "NOT_IN_QUEUE": "No estás en la cola de búsqueda de partida",
+        "QUEUE_TIMEOUT": "Se agotó el tiempo de espera de búsqueda de partida",
+        "OPPONENT_NOT_FOUND": "No se pudo encontrar un oponente",
+        "MATCHMAKING_DISABLED": "La búsqueda de partida está actualmente deshabilitada",
+        "FRIEND_NOT_FOUND": "Amigo no encontrado",
+        "FRIEND_ALREADY_EXISTS": "Ya eres amigo de este usuario",
+        "CANNOT_ADD_SELF": "No puedes agregarte a ti mismo como amigo",
+        "FRIEND_REQUEST_PENDING": "Solicitud de amistad ya pendiente",
+        "INVALID_CREDENTIALS": "Correo electrónico o contraseña inválidos",
+        "USER_NOT_FOUND": "Usuario no encontrado",
+        "EMAIL_ALREADY_EXISTS": "El correo electrónico ya está en uso",
+        "USERNAME_TAKEN": "El nombre de usuario ya está en uso",
+        "WEAK_PASSWORD": "La contraseña es demasiado débil",
+        "ACCOUNT_DISABLED": "Tu cuenta ha sido deshabilitada",
+        "SESSION_EXPIRED": "Tu sesión ha expirado. Por favor inicia sesión de nuevo.",
+        "UNAUTHORIZED": "No estás autorizado para realizar esta acción",
+        "RATE_LIMITED": "Demasiadas solicitudes. Por favor reduce la velocidad.",
+        "MAINTENANCE_MODE": "La aplicación está en mantenimiento. Por favor intenta de nuevo más tarde.",
+        "FEATURE_DISABLED": "Esta función está actualmente deshabilitada"
+    },
+    "success": {
+        "GAME_WON": "¡Felicidades! ¡Ganaste!",
+        "GAME_DRAW": "El juego terminó en empate",
+        "GAME_LOST": "¡Mejor suerte la próxima vez!",
+        "PLAYER_RESIGNED": "El jugador se rindió",
+        "FRIEND_REQUEST_SENT": "¡Solicitud de amistad enviada!",
+        "FRIEND_REQUEST_ACCEPTED": "¡Solicitud de amistad aceptada!",
+        "FRIEND_REQUEST_DECLINED": "Solicitud de amistad rechazada",
+        "MOVE_SUCCESS": "Movimiento exitoso"
+    },
+    "scenarioBoard": {
+        "pauseAutoPlay": "Pausar Auto-Juego",
+        "playDemo": "Reproducir Demo",
+        "explanation": "Explicación",
+        "backToGuide": "Volver a la Guía"
+    },
+    "howToPlay": {
+        "objective": {
+            "title": "Objetivo",
+            "intro": "Para ganar Coral Clash, completa uno de estos objetivos:",
+            "checkmate": "Jaque Mate",
+            "checkmateDesc": "a la Ballena de tu oponente (cuando la Ballena está en",
+            "check": "jaque",
+            "checkmateDescEnd": "y no puede escapar)",
+            "coralControl": "la mayor área con Coral",
+            "coralControlDesc": "Controla",
+            "coralControlWhen": "cuando:",
+            "coralPlaced": "Un jugador ha colocado todo su Coral",
+            "whaleRemaining": "A un jugador solo le queda su Ballena",
+            "backRowReached": "Un Cangrejo u Pulpo alcanza la fila trasera del oponente",
+            "areaControlled": "Área controlada por Coral:",
+            "areaControlledDesc": "Cuenta la cantidad de coral de tu color que no está ocupado por una de las piezas de tu oponente.",
+            "checkmateExample": "Ejemplo de Jaque Mate",
+            "checkExample": "Ejemplo de Jaque",
+            "coralVictoryExample": "Ejemplo de Victoria por Coral"
+        },
+        "setup": {
+            "title": "Configuración del Juego",
+            "boardDesc": "El tablero es una cuadrícula de 8x8 con 64 casillas. Cada jugador tiene:",
+            "coralPieces": "17 piezas de Coral",
+            "units": "17 unidades: 1 Ballena, 2 Delfines, 4 Tortugas, 2 Peces Globo, 4 Cangrejos y 4 Pulpos",
+            "variants": "Cada tipo de pieza viene en dos variantes:",
+            "hunter": "Cazador",
+            "hunterDesc": "piezas (sin cuatro iconos de coral) pueden eliminar Coral",
+            "gatherer": "Recolector",
+            "gathererDesc": "piezas (con cuatro iconos de coral) pueden colocar Coral",
+            "hunterExample": "Ejemplo de Efecto Cazador",
+            "gathererExample": "Ejemplo de Efecto Recolector"
+        },
+        "turnOverview": {
+            "title": "Resumen del Turno",
+            "intro": "Las blancas van primero, luego los jugadores se alternan. En tu turno:",
+            "step1": "Mueve una de tus piezas",
+            "step2": "Resuelve cualquier efecto de Captura, Cazador o Recolector",
+            "step3": "Verifica si se ha cumplido algún objetivo"
+        },
+        "movement": {
+            "title": "Cómo se Mueven las Piezas",
+            "important": "Importante:",
+            "importantDesc": "Las piezas no pueden moverse a través de otras piezas - deben tener un camino despejado.",
+            "variants": "Cada tipo de pieza viene en dos variantes que interactúan con el Coral de manera diferente:",
+            "hunterPieces": "Piezas Cazadoras",
+            "hunterMovement": "(sin iconos de coral) son",
+            "stoppedBy": "DETENIDAS POR",
+            "hunterMovementDesc": "el Coral - no pueden moverse a través de él",
+            "gathererPieces": "Piezas Recolectoras",
+            "gathererMovement": "(con cuatro iconos de coral) son más poderosas - pueden pasar",
+            "through": "A TRAVÉS",
+            "gathererMovementDesc": "del Coral libremente",
+            "coralMovementExample": "Ejemplo de Movimiento de Coral",
+            "individualMovements": "Movimientos Individuales de Piezas"
+        },
+        "pieces": {
+            "whale": {
+                "name": "Ballena",
+                "intro": "La Ballena es tu pieza más importante - ¡si recibe jaque mate, pierdes! La Ballena ocupa dos casillas y tiene dos opciones de movimiento distintas:",
+                "slidingMove": "1. Movimiento Deslizante:",
+                "slidingMoveDesc": "Mueve la mitad de la pieza cualquier número de casillas horizontal, vertical o diagonalmente mientras mantiene su orientación original. La Ballena sigue las reglas de movimiento Cazador - es detenida por el coral. Sin embargo, hay una excepción especial (ver abajo).",
+                "rotationMove": "2. Movimiento de Rotación:",
+                "rotationMoveDesc": "Rota la mitad de la pieza a una casilla adyacente (una casilla vertical u horizontalmente). Al seleccionar una rotación, primero toca la casilla de destino (mostrada con un círculo blanco). Si hay múltiples orientaciones válidas, luego tocarás la casilla de orientación (mostrada con un círculo verde). Si solo hay una orientación válida, la ballena se moverá automáticamente sin mostrar la selección de orientación.",
+                "checkRules": "Reglas de Jaque:",
+                "checkRulesDesc": "La Ballena nunca puede terminar su movimiento en jaque (donde podría ser capturada), pero PUEDE moverse a través de casillas amenazadas.",
+                "doubleCapture": "Captura Doble:",
+                "doubleCaptureDesc": "¡La Ballena puede capturar hasta dos piezas enemigas en un solo movimiento - una con cada mitad de su cuerpo!",
+                "doubleCoralRemoval": "Eliminación Doble de Coral:",
+                "doubleCoralRemovalDesc": "Cuando la Ballena (actuando como Cazador) aterriza en coral, puede elegir eliminar una o ambas piezas de coral. Si ambas mitades aterrizan en coral, puedes eliminar ambas, solo una o ninguna. Si solo una mitad aterriza en nuevo coral (mientras la otra mitad ya está en coral), puedes elegir eliminar esa pieza de coral.",
+                "specialCase": "⚠️ Caso de Movimiento Especial",
+                "specialCaseDesc": "Si la mitad de la Ballena ya está sentada en coral, ese coral NO bloquea a la otra mitad de moverse a través o sobre la misma casilla de coral.",
+                "basicMovement": "Movimiento Básico de Ballena",
+                "rotationExample": "Ejemplo de Rotación de Ballena",
+                "coralException": "Ballena Moviéndose a Través de su Propio Coral"
+            },
+            "dolphin": {
+                "name": "Delfín",
+                "movement": "Se mueve cualquier número de casillas vertical, horizontal o diagonalmente.",
+                "example": "Ejemplo de Movimiento de Delfín"
+            },
+            "turtle": {
+                "name": "Tortuga",
+                "movement": "Se mueve cualquier número de casillas vertical u horizontalmente.",
+                "example": "Ejemplo de Movimiento de Tortuga"
+            },
+            "pufferfish": {
+                "name": "Pez Globo",
+                "movement": "Se mueve cualquier número de casillas diagonalmente.",
+                "example": "Ejemplo de Movimiento de Pez Globo"
+            },
+            "octopus": {
+                "name": "Pulpo",
+                "movement": "Se mueve una casilla diagonalmente.",
+                "example": "Ejemplo de Movimiento de Pulpo"
+            },
+            "crab": {
+                "name": "Cangrejo",
+                "movement": "Se mueve una casilla vertical u horizontalmente.",
+                "example": "Ejemplo de Movimiento de Cangrejo"
+            }
+        },
+        "specialRules": {
+            "title": "Reglas Especiales",
+            "capture": {
+                "title": "Captura",
+                "desc": "Muévete a una casilla ocupada por una pieza enemiga. Las Ballenas pueden capturar dos piezas en un movimiento.",
+                "example": "Ejemplo de Captura"
+            },
+            "hunterEffect": {
+                "title": "Movimiento y Efecto Cazador",
+                "desc": "Las piezas Cazadoras (sin iconos de coral) tienen dos comportamientos importantes:",
+                "movementStops": "El movimiento se detiene",
+                "movementStopsDesc": "al aterrizar en Coral",
+                "canRemove": "Puede eliminar",
+                "canRemoveDesc": "ese Coral del tablero",
+                "example": "Ejemplo de Efecto Cazador"
+            },
+            "gathererEffect": {
+                "title": "Efecto Recolector",
+                "desc": "Las piezas Recolectoras (con cuatro iconos de coral) pueden colocar Coral en casillas vacías a las que se mueven.",
+                "example": "Ejemplo de Efecto Recolector"
+            }
+        },
+        "drawResignation": {
+            "title": "Empate y Rendición",
+            "stalemate": "Estancamiento:",
+            "stalemateDesc": "Cuando un jugador no tiene movimientos legales y su Ballena no está en jaque",
+            "threefoldRepetition": "Repetición triple:",
+            "threefoldRepetitionDesc": "La misma posición ocurre tres veces con el mismo jugador para mover",
+            "resignation": "Rendición:",
+            "resignationDesc": "Un jugador puede rendirse en cualquier momento"
+        }
+    },
+    "components": {
+        "fixtureLoader": {
+            "title": "Cargar Estado del Juego",
+            "gameMode": "Modo de Juego:",
+            "back": "Atrás",
+            "vsComputer": "vs Computadora",
+            "passAndPlay": "Pasar y Jugar",
+            "loadGame": "Cargar Juego",
+            "fixturesHint": "💡 Los fixtures son de shared/game/__fixtures__/",
+            "error": "Error",
+            "failedToLoad": "Error al cargar fixture"
+        },
+        "versionWarning": {
+            "title": "Actualización Disponible",
+            "message": "Por favor actualiza a la última versión para obtener la mejor experiencia.",
+            "updateButton": "Actualizar"
+        },
+        "playerStatus": {
+            "computer": "Computadora",
+            "thinking": "Pensando...",
+            "remaining": "Restante",
+            "underControl": "Bajo Control"
+        },
+        "alert": {
+            "defaultButton": "OK"
+        },
+        "pvpBoard": {
+            "player": "Jugador",
+            "opponent": "Oponente",
+            "requestUndoTitle": "Solicitar Deshacer",
+            "requestUndoMessage": "¿Solicitar deshacer el último movimiento? {{opponentName}} necesitará aprobar.",
+            "requestResetTitle": "Solicitar Reinicio",
+            "requestResetMessage": "¿Solicitar reiniciar este juego? {{opponentName}} necesitará aprobar.",
+            "cancel": "Cancelar",
+            "request": "Solicitar",
+            "requestReset": "Solicitar Reinicio",
+            "askOpponentReset": "Pedir al oponente que reinicie el juego",
+            "gameEnded": "El juego ya terminó",
+            "noMoves": "Aún no se han hecho movimientos",
+            "pendingUndo": "La solicitud de deshacer pendiente debe resolverse primero",
+            "remindOpponent": "Recordar al Oponente",
+            "remindOpponentSubtitle": "Recordar al oponente que haga su turno",
+            "availableInHours": "Disponible en {{hours}} hora(s)",
+            "yourTurn": "Es tu turno",
+            "errorUndoRequest": "Error al enviar solicitud de deshacer. Por favor intenta de nuevo.",
+            "errorUndoResponse": "Error al responder a la solicitud de deshacer. Por favor intenta de nuevo.",
+            "errorResetResponse": "Error al responder a la solicitud de reinicio. Por favor intenta de nuevo.",
+            "errorCancelUndo": "Error al cancelar solicitud de deshacer. Por favor intenta de nuevo.",
+            "errorCancelReset": "Error al cancelar solicitud de reinicio. Por favor intenta de nuevo.",
+            "reminderSentTitle": "Éxito",
+            "reminderSentMessage": "Recordatorio enviado a tu oponente.",
+            "errorReminderTitle": "Error",
+            "errorReminderMessage": "Error al enviar recordatorio. Por favor intenta de nuevo.",
+            "waitingUndoResponse": "Esperando que {{opponentName}} responda a la solicitud de deshacer {{moveCount}} movimiento(s)...",
+            "opponentWantsUndo": "{{opponentName}} quiere deshacer {{moveCount}} movimiento(s)",
+            "waitingResetResponse": "Esperando que {{opponentName}} responda a la solicitud de reinicio...",
+            "opponentWantsReset": "{{opponentName}} quiere reiniciar el juego"
+        },
+        "passAndPlayBoard": {
+            "resetGameTitle": "Reiniciar Juego",
+            "resetGameMessage": "¿Estás seguro de que quieres comenzar un nuevo juego?",
+            "cancel": "Cancelar",
+            "reset": "Reiniciar",
+            "resetGame": "Reiniciar Juego",
+            "startNewGame": "Comenzar un nuevo juego desde el principio",
+            "gameEnded": "El juego ya terminó",
+            "noMoves": "Aún no se han hecho movimientos"
+        },
+        "baseBoard": {
+            "errorLoadState": "Error al cargar el estado del juego",
+            "resignGameTitle": "Rendirse",
+            "resignGameMessage": "¿Estás seguro de que quieres rendirte? Perderás el juego.",
+            "cancel": "Cancelar",
+            "resign": "Rendirse",
+            "checkTitle": "¡Jaque!",
+            "checkMessage": "¡Tu {{piece}} está en jaque!",
+            "checkmateTitle": "¡Jaque Mate!",
+            "checkmateMessage": "¡{{winner}} gana por jaque mate!",
+            "gathererTitle": "Efecto Recolector",
+            "gathererMessage": "¿Colocar coral en esta casilla?",
+            "yes": "Sí",
+            "no": "No",
+            "hunterTitle": "Efecto Cazador",
+            "hunterMessage": "¿Eliminar coral de esta casilla?",
+            "exportSuccessTitle": "Éxito",
+            "exportSuccessMessage": "¡Estado del juego guardado en el portapapeles!",
+            "exportFailedTitle": "Error al Exportar",
+            "computer": "Computadora",
+            "opponent": "Oponente",
+            "white": "Blancas",
+            "black": "Negras",
+            "youWonTimeout": "¡Ganaste! {{opponentName}} se quedó sin tiempo ⏱️",
+            "youLostTimeout": "¡Perdiste! Se agotó el tiempo ⏱️",
+            "timeoutLose": "¡{{loserName}} se quedó sin tiempo! ⏱️",
+            "youWonResign": "¡Ganaste! {{opponentName}} se rindió 🏳️",
+            "youResigned": "Te rendiste 🏳️",
+            "checkmateWin": "¡Jaque Mate! ¡Ganaste! 🏆",
+            "checkmateLose": "¡Jaque Mate! Perdiste.",
+            "checkmateGeneric": "¡Jaque Mate! ¡{{winner}} gana! 🏆",
+            "youLost": "Perdiste",
+            "resignGeneric": "¡{{winner}} gana por rendición! 🏳️",
+            "coralVictoryWin": "¡Ganaste por Victoria de Coral! 🪸\n{{whiteScore}} - {{blackScore}}",
+            "coralVictoryLose": "Perdiste. ¡{{winner}} gana por Victoria de Coral! 🪸\n{{whiteScore}} - {{blackScore}}",
+            "coralVictoryGeneric": "¡{{winner}} gana por Victoria de Coral! 🪸\n{{whiteScore}} Blancas - {{blackScore}} Negras",
+            "stalemate": "¡Estancamiento! 🤝",
+            "drawRepetition": "¡Empate por Repetición! 🤝",
+            "drawInsufficientMaterial": "¡Empate - Material Insuficiente! 🤝",
+            "drawCoralTie": "¡Empate - Empate de Coral! 🤝🪸\n{{score}} - {{score}}",
+            "draw": "¡Empate! 🤝",
+            "check": "¡{{player}} está en Jaque! ⚠️",
+            "viewingHistory": "Viendo movimientos pasados - regresa al actual para jugar",
+            "selectWhaleOrientation": "Selecciona la orientación para tu ballena",
+            "hunterWhaleTitle": "Efecto Cazador (Ballena)",
+            "hunterWhaleMessage": "Elige la opción de eliminación de coral:",
+            "yourTurn": "Tu turno",
+            "opponentTurn": "Turno de {{opponentName}}",
+            "playerTurn": "Turno de {{playerColor}}"
+        },
+        "computerBoard": {
+            "cancelRequestTitle": "Cancelar Solicitud",
+            "cancelRequestMessage": "¿Cancelar tu solicitud de reinicio?",
+            "cancel": "Cancelar",
+            "yes": "Sí",
+            "resetGameTitle": "Reiniciar Juego",
+            "resetGameMessage": "¿Estás seguro de que quieres comenzar un nuevo juego?",
+            "reset": "Reiniciar",
+            "resetGame": "Reiniciar Juego",
+            "startNewGame": "Comenzar un nuevo juego desde el principio",
+            "gameEnded": "El juego ya terminó",
+            "noMoves": "Aún no se han hecho movimientos",
+            "errorUndo": "Error al deshacer. Por favor intenta de nuevo."
+        },
+        "computerUsers": {
+            "successTitle": "Éxito",
+            "errorTitle": "Error",
+            "initializeSuccess": "Se inicializaron exitosamente {{count}} usuarios de computadora",
+            "initializeError": "Error al inicializar usuarios de computadora. Por favor intenta de nuevo.",
+            "confirmDeleteTitle": "Confirmar Eliminación",
+            "confirmDeleteMessage": "¿Estás seguro de que quieres eliminar todos los usuarios de computadora? Esta acción no se puede deshacer.",
+            "cancel": "Cancelar",
+            "delete": "Eliminar",
+            "deleteSuccess": "Se eliminaron exitosamente {{count}} usuarios de computadora",
+            "deleteError": "Error al eliminar usuarios de computadora. Por favor intenta de nuevo.",
+            "clearLanguageSuccess": "Preferencia de idioma borrada. La aplicación ahora detectará automáticamente el idioma desde la configuración del dispositivo en el próximo inicio.",
+            "clearLanguageError": "Error al borrar preferencia de idioma. Por favor intenta de nuevo."
+        }
+    },
+    "hooks": {
+        "friends": {
+            "removeFriendTitle": "Eliminar Amigo",
+            "removeFriendMessage": "¿Estás seguro de que quieres eliminar a {{friendName}} de tus amigos?",
+            "cancel": "Cancelar",
+            "remove": "Eliminar",
+            "errorRemove": "Error al eliminar amigo",
+            "errorAccept": "Error al aceptar solicitud de amistad",
+            "errorDecline": "Error al rechazar solicitud de amistad",
+            "cancelRequestTitle": "Cancelar Solicitud de Amistad",
+            "cancelRequestMessage": "¿Cancelar solicitud de amistad a {{displayName}}?",
+            "no": "No",
+            "yesCancel": "Sí, Cancelar",
+            "errorCancelRequest": "Error al cancelar solicitud de amistad",
+            "errorTitle": "Error"
+        },
+        "game": {
+            "errorTitle": "Error",
+            "errorLoadGame": "Error al cargar juego"
+        },
+        "gameActions": {
+            "errorTitle": "Error",
+            "errorResign": "Error al rendirse"
+        },
+        "userSearch": {
+            "errorTitle": "Error",
+            "errorSendRequest": "Error al enviar solicitud de amistad"
+        }
+    }
+}

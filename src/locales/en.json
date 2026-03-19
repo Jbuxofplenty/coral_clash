@@ -1,0 +1,736 @@
+{
+    "auth": {
+        "welcomeBack": "Welcome Back",
+        "createAccount": "Create Account",
+        "resetPassword": "Reset Password",
+        "signInSubtitle": "Sign in to play against the computer or challenge other players online",
+        "signUpSubtitle": "Create an account to play online. Choose a unique username!",
+        "forgotPasswordSubtitle": "Enter your email to receive a password reset link",
+        "usernamePlaceholder": "Username (required)",
+        "emailPlaceholder": "Email",
+        "passwordPlaceholder": "Password",
+        "signInWithApple": "Sign in with Apple",
+        "signUpWithApple": "Sign up with Apple",
+        "signInWithGoogle": "Sign in with Google",
+        "signUpWithGoogle": "Sign up with Google",
+        "or": "OR",
+        "signIn": "Sign In",
+        "signUp": "Sign Up",
+        "sendResetLink": "Send Reset Link",
+        "forgotPassword": "Forgot Password?",
+        "backToSignIn": "Back to Sign In",
+        "alreadyHaveAccount": "Already have an account? Sign In",
+        "dontHaveAccount": "Don't have an account? Sign Up",
+        "errors": {
+            "fillAllFields": "Please fill in all fields",
+            "usernameRequired": "Username is required",
+            "usernameMinLength": "Username must be at least 2 characters",
+            "usernameMaxLength": "Username must be less than 30 characters",
+            "usernameInvalidChars": "Username can only contain letters, numbers, spaces, underscores, and hyphens",
+            "authFailed": "Authentication failed",
+            "googleSignInFailed": "Google sign-in failed",
+            "appleSignInFailed": "Apple sign-in failed",
+            "enterEmail": "Please enter your email address",
+            "resetEmailFailed": "Failed to send reset email"
+        },
+        "success": {
+            "resetEmailSent": "Password reset email sent! Check your inbox."
+        }
+    },
+    "game": {
+        "difficulty": {
+            "title": "Choose AI Difficulty",
+            "subtitle": "Select the difficulty level for the computer opponent",
+            "random": "Random",
+            "easy": "Easy",
+            "medium": "Medium",
+            "hard": "Hard",
+            "randomDescription": "Computer makes random moves",
+            "easyDescription": "Computer uses basic strategy",
+            "mediumDescription": "Computer uses intermediate strategy",
+            "hardDescription": "Computer uses advanced strategy",
+            "createAccountToAccess": "Create an account to access"
+        },
+        "matchmaking": {
+            "title": "Choose Game Mode",
+            "timeControl": "Choose Time Control",
+            "timeControlSubtitle": "Select the time limit for this game",
+            "instant": "Instant",
+            "instantDescription": "Find an opponent now. Matches you with online players.",
+            "correspondence": "Correspondence",
+            "correspondenceDescription": "Send an invitation to a random player. They have 24 hours to accept.",
+            "timeControls": {
+                "unlimited": "No time limit",
+                "blitz": "5 minutes",
+                "normal": "10 minutes",
+                "custom": "Time limit set"
+            },
+            "timeControlDescriptions": {
+                "blitz": "5 minutes per player",
+                "normal": "10 minutes per player",
+                "unlimited": "No time limit"
+            }
+        },
+        "status": {
+            "loading": "Loading",
+            "noGamesFound": "No games found",
+            "error": "Error",
+            "resetApproved": "Game has been reset",
+            "resetRejected": "Reset request declined",
+            "undoApproved": "Move undone",
+            "undoRejected": "Undo request declined"
+        },
+        "actions": {
+            "cancel": "Cancel"
+        }
+    },
+    "navigation": {
+        "home": "Home",
+        "game": "Game",
+        "tutorial": "Tutorial",
+        "howToPlay": "How-To Play",
+        "settings": "Settings",
+        "friends": "Friends",
+        "stats": "Stats",
+        "reportIssue": "Report Issue",
+        "rulesVideo": "Rules Video",
+        "physicalGame": "Physical Game",
+        "logOut": "Log Out",
+        "logOutConfirmTitle": "Log Out",
+        "logOutConfirmMessage": "Are you sure you want to log out?",
+        "cancel": "Cancel",
+        "appTitle": "Coral Clash",
+        "appSubtitle": "Ocean Strategy Game"
+    },
+    "home": {
+        "welcome": {
+            "title": "Welcome to Coral Clash!",
+            "message": "Check out the Rules Video or How-To Play guide in the menu to get started!",
+            "watchVideo": "Watch Video",
+            "howToPlay": "How-To Play",
+            "ok": "OK"
+        },
+        "opponent": {
+            "computer": "Computer",
+            "opponent": "Opponent",
+            "guest": "Guest 1"
+        },
+        "gameModes": {
+            "howToPlayTitle": "How-To Play",
+            "howToPlayDescription": "Learn the rules and strategies of Coral Clash",
+            "playComputerTitle": "Play vs Computer",
+            "playComputerDescription": "Start a new game against the AI",
+            "loadGameStateTitle": "Load Game State (Dev)",
+            "loadGameStateDescription": "Load a saved game state from fixtures"
+        },
+        "matchmaking": {
+            "cannotJoin": "Cannot Join Matchmaking",
+            "instantMatchFound": "Correspondence Match Found!",
+            "instantMatchMessage": "You've been matched with {{creatorName}}. They'll be notified and have 24 hours to accept.",
+            "correspondenceCreated": "Correspondence Invitation Created",
+            "correspondenceMessage": "Your invitation has been created. When another player selects Correspondence mode, they may be matched to your invitation. You'll be notified when someone wants to play!"
+        },
+        "errors": {
+            "offlineModeTitle": "Offline Mode",
+            "offlineModeMessage": "Unable to connect to server. Starting offline computer game.",
+            "errorTitle": "Error",
+            "failedToStart": "Failed to start {{action}}. Please try again.",
+            "failedToResign": "Failed to resign game. Please try again.",
+            "failedPassAndPlay": "Failed to start pass-and-play game. Please try again.",
+            "failedComputerGame": "Failed to start computer game",
+            "failedMatchmaking": "Failed to start {{mode}} matchmaking. {{message}}"
+        }
+    },
+    "stats": {
+    "overallStatistics": "Overall Statistics",
+    "gamesPlayed": "Games Played",
+    "wins": "Wins",
+    "losses": "Losses",
+    "draws": "Draws",
+    "winRate": "Win Rate",
+    "matchupStatistics": "Matchup Statistics",
+    "matchupDescription": "Win rates against each opponent (PvP & Computer)",
+    "computer": "Computer",
+    "winRateShort": "Win Rate",
+    "winsShort": "W",
+    "lossesShort": "L",
+    "drawsShort": "D",
+    "noGamesYet": "No Games Yet",
+    "noGamesHint": "Start playing games to see your statistics here!"
+  },
+  "gameMenu": {
+    "saveGameState": "Save Game State",
+    "exportPosition": "Export current game position",
+    "flipBoard": "Flip Board",
+    "showingBlackBottom": "Currently showing black on bottom",
+    "showingWhiteBottom": "Currently showing white on bottom",
+    "reportBug": "Report Bug",
+    "includeGameState": "Include current game state",
+    "resignGame": "Resign Game",
+    "resigning": "Resigning...",
+    "pleaseWait": "Please wait...",
+    "gameEnded": "Game already ended",
+    "forfeitGame": "Forfeit the current game"
+  },
+  "reportIssue": {
+        "bugReportTitle": "Bug Report",
+        "bugReportDescription": "Report a bug with the current game state. The game position will be included in your report.",
+        "feedbackTitle": "Feedback & Issues",
+        "feedbackDescription": "Submit feedback or report an issue. We appreciate your input!",
+        "subject": "Subject",
+        "subjectPlaceholder": "Brief summary of the issue",
+        "description": "Description",
+        "descriptionPlaceholder": "Detailed description of the issue or feedback...",
+        "gameStateIncluded": "✓ Game state will be included",
+        "turn": "Turn",
+        "white": "White",
+        "black": "Black",
+        "gameOver": "Game Over",
+        "submitIssue": "Submit Issue",
+        "anonymousNote": "Note: You're submitting anonymously. Log in to track your issues.",
+        "validation": {
+            "missingSubjectTitle": "Missing Information",
+            "missingSubjectMessage": "Please enter a subject for your issue.",
+            "invalidSubjectTitle": "Invalid Subject",
+            "invalidSubjectMessage": "Subject must be at least 3 characters long.",
+            "missingDescriptionTitle": "Missing Information",
+            "missingDescriptionMessage": "Please enter a description for your issue.",
+            "invalidDescriptionTitle": "Invalid Description",
+            "invalidDescriptionMessage": "Description must be at least 10 characters long."
+        },
+        "success": {
+            "title": "Issue Submitted",
+            "message": "Thank you for your feedback! Your issue has been submitted",
+            "ok": "OK"
+        },
+        "error": {
+            "title": "Submission Failed",
+            "message": "Failed to submit your issue. Please check your connection and try again."
+        }
+    },
+    "settings": {
+        "account": "Account",
+        "profileAvatar": "Profile Avatar",
+        "chooseAvatar": "Choose your ocean-themed avatar",
+        "appearance": "Appearance",
+        "theme": {
+            "light": "Light",
+            "lightDescription": "Always use light theme",
+            "dark": "Dark",
+            "darkDescription": "Always use dark theme",
+            "auto": "Auto",
+            "autoDescription": "Match system theme"
+        },
+        "language": {
+            "title": "Language (भाषा)",
+            "english": "English",
+            "englishDescription": "English language interface",
+            "hindi": "हिन्दी (Hindi)",
+            "hindiDescription": "हिन्दी भाषा इंटरफ़ेस"
+        },
+        "actions": {
+            "resetToDefaults": "Reset to Defaults",
+            "resetTitle": "Reset Settings",
+            "resetMessage": "Are you sure you want to reset all settings to defaults?",
+            "cancel": "Cancel",
+            "reset": "Reset"
+        },
+        "dangerZone": {
+            "title": "Danger Zone",
+            "warning": "Once you delete your account, there is no going back. Please be certain.",
+            "deleteAccount": "Delete Account",
+            "deletingAccount": "Deleting Account...",
+            "deleteTitle": "Delete Account",
+            "deleteMessage": "This action is permanent and cannot be undone.\n\n• All your personal data will be removed\n• Your games will continue but you will appear as \"Anonymous\"\n• Your friends and friend requests will be removed\n• Active games will be forfeited\n\nAre you sure you want to continue?",
+            "continue": "Continue",
+            "confirmTitle": "Confirm Account Deletion",
+            "confirmMessage": "To confirm, please type DELETE (all caps) below:",
+            "incorrectTitle": "Incorrect Confirmation",
+            "incorrectMessage": "You must type DELETE exactly to confirm account deletion.",
+            "successTitle": "Account Deleted",
+            "successMessage": "Your account has been successfully deleted. You will now be logged out.",
+            "failedTitle": "Deletion Failed",
+            "timeoutMessage": "The request timed out. Please check your connection and try again.",
+            "failedMessage": "Failed to delete account. Please try again or contact support if the problem persists.",
+            "retry": "Retry"
+        },
+        "errors": {
+            "loadFailed": "Failed to load settings",
+            "saveFailed": "Failed to save settings",
+            "avatarSaveFailed": "Failed to save avatar selection",
+            "themeSaveFailed": "Failed to save theme preference",
+            "languageChangeFailed": "Failed to change language",
+            "resetFailed": "Failed to reset settings"
+        }
+    },
+    "friends": {
+        "addFriend": "Add Friend",
+        "searchPlaceholder": "Search by username",
+        "noUsersFound": "No users found",
+        "pending": "Pending",
+        "incomingRequests": "Incoming Requests",
+        "sentRequests": "Sent Requests",
+        "myFriends": "My Friends",
+        "noFriendsYet": "No Friends Yet",
+        "noFriendsHint": "Add friends by username above to start playing together!"
+    },
+    "common": {
+        "loading": "Loading...",
+        "error": "Error",
+        "success": "Success",
+        "cancel": "Cancel",
+        "confirm": "Confirm",
+        "save": "Save",
+        "delete": "Delete",
+        "edit": "Edit",
+        "close": "Close",
+        "ok": "OK",
+        "somethingWentWrong": "Something went wrong. Please try again."
+    },
+    "cards": {
+        "matchmaking": {
+            "searchingForOpponent": "Searching for Opponent...",
+            "findRandomMatch": "Find Random Match",
+            "searchingHint": "Searching for opponent... · Tap to cancel",
+            "tapToJoin": "Tap to join matchmaking queue",
+            "cannotJoinTitle": "Cannot Join Matchmaking"
+        },
+        "playWithFriend": {
+            "title": "Play with Friend",
+            "description": "Invite a friend to play",
+            "modalTitle": "Play with Friend",
+            "inviteFriend": "Invite Friend",
+            "inviteDescription": "Send a game invitation to a friend",
+            "textInvite": "Text Invite",
+            "textInviteDescription": "Send invitations via text",
+            "passAndPlay": "Pass & Play",
+            "passAndPlayDescription": "Play locally on this device",
+            "selectFriend": "Select a Friend",
+            "searchFriends": "Search friends...",
+            "noFriendsFound": "No friends found",
+            "noFriendsYet": "No friends yet. Add friends to play!",
+            "passAndPlayGames": "Pass & Play Games",
+            "startNewGame": "Start New Game",
+            "noActiveGames": "No active games",
+            "vsGuest": "vs Guest 1",
+            "unlimited": "Unlimited",
+            "shareMessage": "Let's play Coral Clash! 🦀\n\nDownload here:\niOS: [URL]\n\nAndroid: [URL]"
+        },
+        "signUpPrompt": {
+            "title": "Unlock Full Features",
+            "subtitle": "Sign up for a free account to access:",
+            "feature1": "Play with friends online",
+            "feature2": "Find random opponents via matchmaking",
+            "feature3": "Track your game stats & history",
+            "feature4": "Build your friend network",
+            "button": "Sign Up / Log In"
+        },
+        "activeGames": {
+            "title": "Active Games",
+            "inProgress": "in progress",
+            "game": "game",
+            "games": "games",
+            "yourTurn": "Your turn",
+            "opponentTurn": "Opponent's turn",
+            "opponent": "Opponent",
+            "computer": "Computer",
+            "blitz": "Blitz",
+            "normal": "Normal",
+            "unlimited": "Unlimited",
+            "timed": "Timed",
+            "loading": "Loading games...",
+            "noGames": "No active games",
+            "noGamesHint": "Start a game with a friend!",
+            "vs": "vs ",
+            "resignTitle": "Resign Game",
+            "resignMessage": "Are you sure you want to resign? You will lose this game.",
+            "resignButton": "Resign",
+            "resignError": "Failed to resign game. Please try again."
+        },
+        "gameHistory": {
+            "title": "Game History",
+            "subtitle": "Recent games",
+            "loading": "Loading history...",
+            "noHistory": "No game history",
+            "noHistoryHint": "Your completed games will appear here",
+            "vs": "vs ",
+            "justNow": "Just now",
+            "minutesAgo": "m ago",
+            "hoursAgo": "h ago",
+            "daysAgo": "d ago",
+            "cancelled": "Game cancelled",
+            "draw": "Draw",
+            "won": "You won",
+            "lost": "You lost",
+            "unknown": "Unknown",
+            "opponent": "Opponent",
+            "computer": "Computer",
+            "blitz": "Blitz",
+            "normal": "Normal",
+            "unlimited": "Unlimited",
+            "timed": "Timed"
+        }
+    },
+    "errors": {
+        "INVALID_MOVE": "Invalid move",
+        "INVALID_MOVE_OCCUPIED": "That position is already occupied",
+        "INVALID_MOVE_OUT_OF_BOUNDS": "Move is out of bounds",
+        "INVALID_MOVE_NOT_YOUR_TURN": "It's not your turn",
+        "INVALID_MOVE_PIECE_BLOCKED": "That piece is blocked",
+        "GAME_NOT_FOUND": "Game not found",
+        "GAME_ALREADY_STARTED": "Game has already started",
+        "GAME_ALREADY_ENDED": "This game has already ended",
+        "GAME_CANCELLED": "Game was cancelled",
+        "PLAYER_NOT_IN_GAME": "You are not in this game",
+        "PLAYER_DISCONNECTED": "Player disconnected",
+        "CONNECTION_ERROR": "Connection error. Please check your internet.",
+        "SERVER_ERROR": "Server error. Please try again later.",
+        "TIMEOUT": "Request timed out",
+        "ALREADY_IN_QUEUE": "You are already in the matchmaking queue",
+        "NOT_IN_QUEUE": "You are not in the matchmaking queue",
+        "QUEUE_TIMEOUT": "Matchmaking timed out",
+        "OPPONENT_NOT_FOUND": "Could not find an opponent",
+        "MATCHMAKING_DISABLED": "Matchmaking is currently disabled",
+        "FRIEND_NOT_FOUND": "Friend not found",
+        "FRIEND_ALREADY_EXISTS": "Already friends with this user",
+        "CANNOT_ADD_SELF": "You cannot add yourself as a friend",
+        "FRIEND_REQUEST_PENDING": "Friend request already pending",
+        "INVALID_CREDENTIALS": "Invalid email or password",
+        "USER_NOT_FOUND": "User not found",
+        "EMAIL_ALREADY_EXISTS": "Email already in use",
+        "USERNAME_TAKEN": "Username is already taken",
+        "WEAK_PASSWORD": "Password is too weak",
+        "ACCOUNT_DISABLED": "Your account has been disabled",
+        "SESSION_EXPIRED": "Your session has expired. Please log in again.",
+        "UNAUTHORIZED": "You are not authorized to perform this action",
+        "RATE_LIMITED": "Too many requests. Please slow down.",
+        "MAINTENANCE_MODE": "App is under maintenance. Please try again later.",
+        "FEATURE_DISABLED": "This feature is currently disabled"
+    },
+    "success": {
+        "GAME_WON": "Congratulations! You won!",
+        "GAME_DRAW": "Game ended in a draw",
+        "GAME_LOST": "Better luck next time!",
+        "PLAYER_RESIGNED": "Player resigned",
+        "FRIEND_REQUEST_SENT": "Friend request sent!",
+        "FRIEND_REQUEST_ACCEPTED": "Friend request accepted!",
+        "FRIEND_REQUEST_DECLINED": "Friend request declined",
+        "MOVE_SUCCESS": "Move successful"
+    },
+    "scenarioBoard": {
+        "pauseAutoPlay": "Pause Auto-Play",
+        "playDemo": "Play Demo",
+        "explanation": "Explanation",
+        "backToGuide": "Back to Guide"
+    },
+    "howToPlay": {
+        "objective": {
+            "title": "Objective",
+            "intro": "To win Coral Clash, complete one of these goals:",
+            "checkmate": "Checkmate",
+            "checkmateDesc": "your opponent's Whale (when the Whale is in",
+            "check": "check",
+            "checkmateDescEnd": "and cannot escape)",
+            "coralControl": "most area with Coral",
+            "coralControlDesc": "Control the",
+            "coralControlWhen": "when:",
+            "coralPlaced": "A player has placed all their Coral",
+            "whaleRemaining": "A player only has their Whale remaining",
+            "backRowReached": "A Crab or Octopus reaches the opponent's back row",
+            "areaControlled": "Area controlled by Coral:",
+            "areaControlledDesc": "Count the amount of coral of your color that is not occupied by one of your opponent's pieces.",
+            "checkmateExample": "Checkmate Example",
+            "checkExample": "Check Example",
+            "coralVictoryExample": "Coral Victory Example"
+        },
+        "setup": {
+            "title": "Game Setup",
+            "boardDesc": "The board is an 8x8 grid with 64 squares. Each player has:",
+            "coralPieces": "17 Coral pieces",
+            "units": "17 units: 1 Whale, 2 Dolphins, 4 Turtles, 2 Pufferfish, 4 Crabs, and 4 Octopuses",
+            "variants": "Each piece type comes in two variants:",
+            "hunter": "Hunter",
+            "hunterDesc": "pieces (without four coral icons) can remove Coral",
+            "gatherer": "Gatherer",
+            "gathererDesc": "pieces (with four coral icons) can place Coral",
+            "hunterExample": "Hunter Effect Example",
+            "gathererExample": "Gatherer Effect Example"
+        },
+        "turnOverview": {
+            "title": "Turn Overview",
+            "intro": "White goes first, then players alternate. On your turn:",
+            "step1": "Move one of your pieces",
+            "step2": "Resolve any Capture, Hunter, or Gatherer effects",
+            "step3": "Check if any objectives have been met"
+        },
+        "movement": {
+            "title": "How Pieces Move",
+            "important": "Important:",
+            "importantDesc": "Pieces cannot move through other pieces - they must have a clear path.",
+            "variants": "Each piece type comes in two variants that interact with Coral differently:",
+            "hunterPieces": "Hunter pieces",
+            "hunterMovement": "(without coral icons) get",
+            "stoppedBy": "STOPPED BY",
+            "hunterMovementDesc": "Coral - they cannot move through it",
+            "gathererPieces": "Gatherer pieces",
+            "gathererMovement": "(with four coral icons) are more powerful - they can pass",
+            "through": "THROUGH",
+            "gathererMovementDesc": "Coral freely",
+            "coralMovementExample": "Coral Movement Example",
+            "individualMovements": "Individual Piece Movements"
+        },
+        "pieces": {
+            "whale": {
+                "name": "Whale",
+                "intro": "The Whale is your most important piece - if it's checkmated, you lose! The Whale occupies two squares and has two distinct movement options:",
+                "slidingMove": "1. Sliding Move:",
+                "slidingMoveDesc": "Move half of the piece any number of squares horizontally, vertically, or diagonally while maintaining its original orientation. The Whale follows Hunter movement rules - it is stopped by coral. However, there is one special exception (see below).",
+                "rotationMove": "2. Rotation Move:",
+                "rotationMoveDesc": "Rotate half of the piece to an adjacent square (one square vertically or horizontally). When selecting a rotation, first tap the destination square (shown with a white circle). If there are multiple valid orientations, you'll then tap the orientation square (shown with a green circle). If there's only one valid orientation, the whale will automatically move without showing the orientation selection.",
+                "checkRules": "Check Rules:",
+                "checkRulesDesc": "The Whale may never end its movement in check (where it could be captured), but it CAN move through threatened squares.",
+                "doubleCapture": "Double Capture:",
+                "doubleCaptureDesc": "The Whale can capture up to two enemy pieces in a single move - one with each half of its body!",
+                "doubleCoralRemoval": "Double Coral Removal:",
+                "doubleCoralRemovalDesc": "When the Whale (acting as a Hunter) lands on coral, it can choose to remove one or both coral pieces. If both halves land on coral, you can remove both, just one, or neither. If only one half lands on new coral (while the other half is already on coral), you can choose to remove that one coral piece.",
+                "specialCase": "⚠️ Special Movement Case",
+                "specialCaseDesc": "If half of the Whale is already sitting on coral, that coral does NOT block the other half from moving through or onto the same coral square.",
+                "basicMovement": "Basic Whale Movement",
+                "rotationExample": "Whale Rotation Example",
+                "coralException": "Whale Moving Through Own Coral"
+            },
+            "dolphin": {
+                "name": "Dolphin",
+                "movement": "Moves any number of squares vertically, horizontally, or diagonally.",
+                "example": "Dolphin Movement Example"
+            },
+            "turtle": {
+                "name": "Turtle",
+                "movement": "Moves any number of squares vertically or horizontally.",
+                "example": "Turtle Movement Example"
+            },
+            "pufferfish": {
+                "name": "Pufferfish",
+                "movement": "Moves any number of squares diagonally.",
+                "example": "Pufferfish Movement Example"
+            },
+            "octopus": {
+                "name": "Octopus",
+                "movement": "Moves one square diagonally.",
+                "example": "Octopus Movement Example"
+            },
+            "crab": {
+                "name": "Crab",
+                "movement": "Moves one square vertically or horizontally.",
+                "example": "Crab Movement Example"
+            }
+        },
+        "specialRules": {
+            "title": "Special Rules",
+            "capture": {
+                "title": "Capture",
+                "desc": "Move to a square occupied by an enemy piece. Whales can capture two pieces in one move.",
+                "example": "Capture Example"
+            },
+            "hunterEffect": {
+                "title": "Hunter Movement & Effect",
+                "desc": "Hunter pieces (without coral icons) have two important behaviors:",
+                "movementStops": "Movement stops",
+                "movementStopsDesc": "when landing on Coral",
+                "canRemove": "Can remove",
+                "canRemoveDesc": "that Coral from the board",
+                "example": "Hunter Effect Example"
+            },
+            "gathererEffect": {
+                "title": "Gatherer Effect",
+                "desc": "Gatherer pieces (with four coral icons) can place Coral on empty squares they move to.",
+                "example": "Gatherer Effect Example"
+            }
+        },
+        "drawResignation": {
+            "title": "Draw & Resignation",
+            "stalemate": "Stalemate:",
+            "stalemateDesc": "When a player has no legal moves and their Whale is not in check",
+            "threefoldRepetition": "Threefold repetition:",
+            "threefoldRepetitionDesc": "Same position occurs three times with the same player to move",
+            "resignation": "Resignation:",
+            "resignationDesc": "A player may resign at any time"
+        }
+    },
+    "components": {
+        "fixtureLoader": {
+            "title": "Load Game State",
+            "gameMode": "Game Mode:",
+            "back": "Back",
+            "vsComputer": "vs Computer",
+            "passAndPlay": "Pass & Play",
+            "loadGame": "Load Game",
+            "fixturesHint": "💡 Fixtures are from shared/game/__fixtures__/",
+            "error": "Error",
+            "failedToLoad": "Failed to load fixture"
+        },
+        "versionWarning": {
+            "title": "Update Available",
+            "message": "Please update to the latest version for the best experience.",
+            "updateButton": "Update"
+        },
+        "playerStatus": {
+            "computer": "Computer",
+            "thinking": "Thinking...",
+            "remaining": "Remaining",
+            "underControl": "Under Control"
+        },
+        "alert": {
+            "defaultButton": "OK"
+        },
+        "pvpBoard": {
+            "player": "Player",
+            "opponent": "Opponent",
+            "requestUndoTitle": "Request Undo",
+            "requestUndoMessage": "Request to undo the last move? {{opponentName}} will need to approve.",
+            "requestResetTitle": "Request Reset",
+            "requestResetMessage": "Request to reset this game? {{opponentName}} will need to approve.",
+            "cancel": "Cancel",
+            "request": "Request",
+            "requestReset": "Request Reset",
+            "askOpponentReset": "Ask opponent to reset the game",
+            "gameEnded": "Game already ended",
+            "noMoves": "No moves have been made yet",
+            "pendingUndo": "Pending undo request must be resolved first",
+            "remindOpponent": "Remind Opponent",
+            "remindOpponentSubtitle": "Remind opponent to take their turn",
+            "availableInHours": "Available in {{hours}} hour(s)",
+            "yourTurn": "It's your turn",
+            "errorUndoRequest": "Failed to send undo request. Please try again.",
+            "errorUndoResponse": "Failed to respond to undo request. Please try again.",
+            "errorResetResponse": "Failed to respond to reset request. Please try again.",
+            "errorCancelUndo": "Failed to cancel undo request. Please try again.",
+            "errorCancelReset": "Failed to cancel reset request. Please try again.",
+            "reminderSentTitle": "Success",
+            "reminderSentMessage": "Reminder sent to your opponent.",
+            "errorReminderTitle": "Error",
+            "errorReminderMessage": "Failed to send reminder. Please try again.",
+            "waitingUndoResponse": "Waiting for {{opponentName}} to respond to undo {{moveCount}} move(s) request...",
+            "opponentWantsUndo": "{{opponentName}} wants to undo {{moveCount}} move(s)",
+            "waitingResetResponse": "Waiting for {{opponentName}} to respond to reset request...",
+            "opponentWantsReset": "{{opponentName}} wants to reset the game"
+        },
+        "passAndPlayBoard": {
+            "resetGameTitle": "Reset Game",
+            "resetGameMessage": "Are you sure you want to start a new game?",
+            "cancel": "Cancel",
+            "reset": "Reset",
+            "resetGame": "Reset Game",
+            "startNewGame": "Start a new game from the beginning",
+            "gameEnded": "Game already ended",
+            "noMoves": "No moves have been made yet"
+        },
+        "baseBoard": {
+            "errorLoadState": "Failed to load game state",
+            "resignGameTitle": "Resign Game",
+            "resignGameMessage": "Are you sure you want to resign? You will lose the game.",
+            "cancel": "Cancel",
+            "resign": "Resign",
+            "checkTitle": "Check!",
+            "checkMessage": "Your {{piece}} is in check!",
+            "checkmateTitle": "Checkmate!",
+            "checkmateMessage": "{{winner}} wins by checkmate!",
+            "gathererTitle": "Gatherer Effect",
+            "gathererMessage": "Place coral on this square?",
+            "yes": "Yes",
+            "no": "No",
+            "hunterTitle": "Hunter Effect",
+            "hunterMessage": "Remove coral from this square?",
+            "exportSuccessTitle": "Success",
+            "exportSuccessMessage": "Game state saved to clipboard!",
+            "exportFailedTitle": "Export Failed",
+            "computer": "Computer",
+            "opponent": "Opponent",
+            "white": "White",
+            "black": "Black",
+            "youWonTimeout": "You won! {{opponentName}} ran out of time ⏱️",
+            "youLostTimeout": "You lost! Time expired ⏱️",
+            "timeoutLose": "{{loserName}} ran out of time! ⏱️",
+            "youWonResign": "You won! {{opponentName}} resigned 🏳️",
+            "youResigned": "You resigned 🏳️",
+            "checkmateWin": "Checkmate! You won! 🏆",
+            "checkmateLose": "Checkmate! You lost.",
+            "checkmateGeneric": "Checkmate! {{winner}} wins! 🏆",
+            "youLost": "You lost",
+            "resignGeneric": "{{winner}} wins by resignation! 🏳️",
+            "coralVictoryWin": "You won by Coral Victory! 🪸\n{{whiteScore}} - {{blackScore}}",
+            "coralVictoryLose": "You lost. {{winner}} wins by Coral Victory! 🪸\n{{whiteScore}} - {{blackScore}}",
+            "coralVictoryGeneric": "{{winner}} wins by Coral Victory! 🪸\n{{whiteScore}} White - {{blackScore}} Black",
+            "stalemate": "Stalemate! 🤝",
+            "drawRepetition": "Draw by Repetition! 🤝",
+            "drawInsufficientMaterial": "Draw - Insufficient Material! 🤝",
+            "drawCoralTie": "Draw - Coral Tie! 🤝🪸\n{{score}} - {{score}}",
+            "draw": "Draw! 🤝",
+            "check": "{{player}} is in Check! ⚠️",
+            "viewingHistory": "Viewing past moves - return to current to play",
+            "selectWhaleOrientation": "Select the orientation for your whale",
+            "hunterWhaleTitle": "Hunter Effect (Whale)",
+            "hunterWhaleMessage": "Choose coral removal option:",
+            "yourTurn": "Your turn",
+            "opponentTurn": "{{opponentName}}'s turn",
+            "playerTurn": "{{playerColor}}'s turn"
+        },
+        "computerBoard": {
+            "cancelRequestTitle": "Cancel Request",
+            "cancelRequestMessage": "Cancel your reset request?",
+            "cancel": "Cancel",
+            "yes": "Yes",
+            "resetGameTitle": "Reset Game",
+            "resetGameMessage": "Are you sure you want to start a new game?",
+            "reset": "Reset",
+            "resetGame": "Reset Game",
+            "startNewGame": "Start a new game from the beginning",
+            "gameEnded": "Game already ended",
+            "noMoves": "No moves have been made yet",
+            "errorUndo": "Failed to undo. Please try again."
+        },
+        "computerUsers": {
+            "successTitle": "Success",
+            "errorTitle": "Error",
+            "initializeSuccess": "Successfully initialized {{count}} computer users",
+            "initializeError": "Failed to initialize computer users. Please try again.",
+            "confirmDeleteTitle": "Confirm Deletion",
+            "confirmDeleteMessage": "Are you sure you want to delete all computer users? This action cannot be undone.",
+            "cancel": "Cancel",
+            "delete": "Delete",
+            "deleteSuccess": "Successfully deleted {{count}} computer users",
+            "deleteError": "Failed to delete computer users. Please try again.",
+            "clearLanguageSuccess": "Language preference cleared. App will now auto-detect language from device settings on next launch.",
+            "clearLanguageError": "Failed to clear language preference. Please try again."
+        }
+    },
+    "hooks": {
+        "friends": {
+            "removeFriendTitle": "Remove Friend",
+            "removeFriendMessage": "Are you sure you want to remove {{friendName}} from your friends?",
+            "cancel": "Cancel",
+            "remove": "Remove",
+            "errorRemove": "Failed to remove friend",
+            "errorAccept": "Failed to accept friend request",
+            "errorDecline": "Failed to decline friend request",
+            "cancelRequestTitle": "Cancel Friend Request",
+            "cancelRequestMessage": "Cancel friend request to {{displayName}}?",
+            "no": "No",
+            "yesCancel": "Yes, Cancel",
+            "errorCancelRequest": "Failed to cancel friend request",
+            "errorTitle": "Error"
+        },
+        "game": {
+            "errorTitle": "Error",
+            "errorLoadGame": "Failed to load game"
+        },
+        "gameActions": {
+            "errorTitle": "Error",
+            "errorResign": "Failed to resign game"
+        },
+        "userSearch": {
+            "errorTitle": "Error",
+            "errorSendRequest": "Failed to send friend request"
+        }
+    }
+}

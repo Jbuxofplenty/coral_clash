@@ -2,6 +2,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useCallback, useEffect, useState } from 'react';
 import { StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import ComputerCoralClashBoard from '../components/ComputerCoralClashBoard';
 import PassAndPlayCoralClashBoard from '../components/PassAndPlayCoralClashBoard';
@@ -9,6 +10,7 @@ import PvPCoralClashBoard from '../components/PvPCoralClashBoard';
 import { useNotifications, useTheme } from '../contexts';
 
 export default function Game({ route }) {
+    const { t } = useTranslation();
     const { colors } = useTheme();
     const { gameStatusUpdate, setActiveGameId } = useNotifications();
 
@@ -40,10 +42,10 @@ export default function Game({ route }) {
         if (!gameStatusUpdate || gameStatusUpdate.gameId !== gameId) return;
 
         const messageConfig = {
-            reset_approved: { message: 'Game has been reset', type: 'success' },
-            reset_rejected: { message: 'Reset request declined', type: 'error' },
-            undo_approved: { message: 'Move undone', type: 'success' },
-            undo_rejected: { message: 'Undo request declined', type: 'error' },
+            reset_approved: { message: t('game.status.resetApproved'), type: 'success' },
+            reset_rejected: { message: t('game.status.resetRejected'), type: 'error' },
+            undo_approved: { message: t('game.status.undoApproved'), type: 'success' },
+            undo_rejected: { message: t('game.status.undoRejected'), type: 'error' },
         };
 
         const config = messageConfig[gameStatusUpdate.type];
@@ -60,6 +62,7 @@ export default function Game({ route }) {
         setStatusType,
         setShowStatus,
         gameStatusUpdate,
+        t,
     ]);
 
     useFocusEffect(

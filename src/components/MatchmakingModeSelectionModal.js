@@ -7,23 +7,24 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../contexts/ThemeContext';
 import Icon from './Icon';
 
 const { width } = Dimensions.get('window');
 
-const MATCHMAKING_MODES = [
+const getMatchmakingModes = (t) => [
     {
         type: 'instant',
-        name: 'Instant',
-        description: 'Find an opponent now. Matches you with online players.',
+        name: t('game.matchmaking.instant'),
+        description: t('game.matchmaking.instantDescription'),
         icon: 'users',
         iconFamily: 'font-awesome',
     },
     {
         type: 'correspondence',
-        name: 'Correspondence',
-        description: 'Send an invitation to a random player. They have 24 hours to accept.',
+        name: t('game.matchmaking.correspondence'),
+        description: t('game.matchmaking.correspondenceDescription'),
         icon: 'envelope',
         iconFamily: 'font-awesome',
     },
@@ -42,8 +43,10 @@ export default function MatchmakingModeSelectionModal({
     onCancel,
     timeControl,
 }) {
+    const { t } = useTranslation();
     const { colors, isDarkMode } = useTheme();
 
+    const MATCHMAKING_MODES = getMatchmakingModes(t);
     const modalBackgroundColor = isDarkMode ? '#2A2A2A' : colors.CARD_BACKGROUND;
 
     const handleSelect = (mode) => {
@@ -55,12 +58,12 @@ export default function MatchmakingModeSelectionModal({
     // Format time control for display
     const timeControlDisplay = timeControl
         ? timeControl.type === 'unlimited'
-            ? 'No time limit'
+            ? t('game.matchmaking.timeControls.unlimited')
             : timeControl.type === 'blitz'
-              ? '5 minutes'
+              ? t('game.matchmaking.timeControls.blitz')
               : timeControl.type === 'normal'
-                ? '10 minutes'
-                : 'Time limit set'
+                ? t('game.matchmaking.timeControls.normal')
+                : t('game.matchmaking.timeControls.custom')
         : '';
 
     return (
@@ -71,9 +74,11 @@ export default function MatchmakingModeSelectionModal({
                     onStartShouldSetResponder={() => true}
                 >
                     {/* Title */}
-                    <Text style={[styles.title, { color: colors.TEXT }]}>Choose Game Mode</Text>
+                    <Text style={[styles.title, { color: colors.TEXT }]}>
+                        {t('game.matchmaking.title')}
+                    </Text>
                     <Text style={[styles.subtitle, { color: colors.TEXT_SECONDARY }]}>
-                        {timeControlDisplay && `Time Control: ${timeControlDisplay}`}
+                        {timeControlDisplay && `${t('game.matchmaking.timeControl')}: ${timeControlDisplay}`}
                     </Text>
 
                     {/* Mode Options */}
@@ -132,7 +137,7 @@ export default function MatchmakingModeSelectionModal({
                         activeOpacity={0.7}
                     >
                         <Text style={[styles.cancelButtonText, { color: colors.TEXT_SECONDARY }]}>
-                            Cancel
+                            {t('game.actions.cancel')}
                         </Text>
                     </TouchableOpacity>
                 </View>
