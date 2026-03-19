@@ -1,0 +1,736 @@
+{
+    "auth": {
+        "welcomeBack": "欢迎回来",
+        "createAccount": "创建账户",
+        "resetPassword": "重置密码",
+        "signInSubtitle": "登录后可与电脑对战或在线挑战其他玩家",
+        "signUpSubtitle": "创建账户即可在线游戏。选择一个独特的用户名！",
+        "forgotPasswordSubtitle": "输入您的邮箱以接收密码重置链接",
+        "usernamePlaceholder": "用户名（必填）",
+        "emailPlaceholder": "邮箱",
+        "passwordPlaceholder": "密码",
+        "signInWithApple": "使用 Apple 登录",
+        "signUpWithApple": "使用 Apple 注册",
+        "signInWithGoogle": "使用 Google 登录",
+        "signUpWithGoogle": "使用 Google 注册",
+        "or": "或",
+        "signIn": "登录",
+        "signUp": "注册",
+        "sendResetLink": "发送重置链接",
+        "forgotPassword": "忘记密码？",
+        "backToSignIn": "返回登录",
+        "alreadyHaveAccount": "已有账户？登录",
+        "dontHaveAccount": "没有账户？注册",
+        "errors": {
+            "fillAllFields": "请填写所有字段",
+            "usernameRequired": "用户名为必填项",
+            "usernameMinLength": "用户名至少需要2个字符",
+            "usernameMaxLength": "用户名不能超过30个字符",
+            "usernameInvalidChars": "用户名只能包含字母、数字、空格、下划线和连字符",
+            "authFailed": "身份验证失败",
+            "googleSignInFailed": "Google 登录失败",
+            "appleSignInFailed": "Apple 登录失败",
+            "enterEmail": "请输入您的邮箱地址",
+            "resetEmailFailed": "发送重置邮件失败"
+        },
+        "success": {
+            "resetEmailSent": "密码重置邮件已发送！请查收您的邮箱。"
+        }
+    },
+    "game": {
+        "difficulty": {
+            "title": "选择 AI 难度",
+            "subtitle": "选择电脑对手的难度等级",
+            "random": "随机",
+            "easy": "简单",
+            "medium": "中等",
+            "hard": "困难",
+            "randomDescription": "电脑进行随机移动",
+            "easyDescription": "电脑使用基础策略",
+            "mediumDescription": "电脑使用中级策略",
+            "hardDescription": "电脑使用高级策略",
+            "createAccountToAccess": "创建账户以解锁"
+        },
+        "matchmaking": {
+            "title": "选择游戏模式",
+            "timeControl": "选择时间控制",
+            "timeControlSubtitle": "选择此游戏的时间限制",
+            "instant": "即时对战",
+            "instantDescription": "立即寻找对手。与在线玩家匹配。",
+            "correspondence": "通信对战",
+            "correspondenceDescription": "向随机玩家发送邀请。他们有24小时时间接受。",
+            "timeControls": {
+                "unlimited": "无时间限制",
+                "blitz": "5分钟",
+                "normal": "10分钟",
+                "custom": "已设置时间限制"
+            },
+            "timeControlDescriptions": {
+                "blitz": "每位玩家5分钟",
+                "normal": "每位玩家10分钟",
+                "unlimited": "无时间限制"
+            }
+        },
+        "status": {
+            "loading": "加载中",
+            "noGamesFound": "未找到游戏",
+            "error": "错误",
+            "resetApproved": "游戏已重置",
+            "resetRejected": "重置请求已拒绝",
+            "undoApproved": "移动已撤销",
+            "undoRejected": "撤销请求已拒绝"
+        },
+        "actions": {
+            "cancel": "取消"
+        }
+    },
+    "navigation": {
+        "home": "主页",
+        "game": "游戏",
+        "tutorial": "教程",
+        "howToPlay": "游戏指南",
+        "settings": "设置",
+        "friends": "好友",
+        "stats": "统计",
+        "reportIssue": "报告问题",
+        "rulesVideo": "规则视频",
+        "physicalGame": "实体游戏",
+        "logOut": "退出登录",
+        "logOutConfirmTitle": "退出登录",
+        "logOutConfirmMessage": "确定要退出登录吗？",
+        "cancel": "取消",
+        "appTitle": "珊瑚冲突",
+        "appSubtitle": "海洋策略游戏"
+    },
+    "home": {
+        "welcome": {
+            "title": "欢迎来到珊瑚冲突！",
+            "message": "查看菜单中的规则视频或游戏指南以开始游戏！",
+            "watchVideo": "观看视频",
+            "howToPlay": "游戏指南",
+            "ok": "确定"
+        },
+        "opponent": {
+            "computer": "电脑",
+            "opponent": "对手",
+            "guest": "访客 1"
+        },
+        "gameModes": {
+            "howToPlayTitle": "游戏指南",
+            "howToPlayDescription": "学习珊瑚冲突的规则和策略",
+            "playComputerTitle": "与电脑对战",
+            "playComputerDescription": "开始一局与 AI 的新游戏",
+            "loadGameStateTitle": "加载游戏状态（开发）",
+            "loadGameStateDescription": "从固定数据加载已保存的游戏状态"
+        },
+        "matchmaking": {
+            "cannotJoin": "无法加入匹配",
+            "instantMatchFound": "找到通信对战！",
+            "instantMatchMessage": "您已与 {{creatorName}} 匹配。他们将收到通知，有24小时时间接受。",
+            "correspondenceCreated": "通信邀请已创建",
+            "correspondenceMessage": "您的邀请已创建。当其他玩家选择通信模式时，可能会匹配到您的邀请。有人想要游戏时您将收到通知！"
+        },
+        "errors": {
+            "offlineModeTitle": "离线模式",
+            "offlineModeMessage": "无法连接到服务器。开始离线电脑游戏。",
+            "errorTitle": "错误",
+            "failedToStart": "启动 {{action}} 失败。请重试。",
+            "failedToResign": "认输失败。请重试。",
+            "failedPassAndPlay": "启动本地对战失败。请重试。",
+            "failedComputerGame": "启动电脑游戏失败",
+            "failedMatchmaking": "启动 {{mode}} 匹配失败。{{message}}"
+        }
+    },
+    "stats": {
+        "overallStatistics": "总体统计",
+        "gamesPlayed": "已玩游戏数",
+        "wins": "胜利",
+        "losses": "失败",
+        "draws": "平局",
+        "winRate": "胜率",
+        "matchupStatistics": "对战统计",
+        "matchupDescription": "对各对手的胜率（PvP 和电脑）",
+        "computer": "电脑",
+        "winRateShort": "胜率",
+        "winsShort": "胜",
+        "lossesShort": "负",
+        "drawsShort": "平",
+        "noGamesYet": "暂无游戏",
+        "noGamesHint": "开始游戏以查看您的统计数据！"
+    },
+    "gameMenu": {
+        "saveGameState": "保存游戏状态",
+        "exportPosition": "导出当前游戏位置",
+        "flipBoard": "翻转棋盘",
+        "showingBlackBottom": "当前黑方在下方",
+        "showingWhiteBottom": "当前白方在下方",
+        "reportBug": "报告错误",
+        "includeGameState": "包含当前游戏状态",
+        "resignGame": "认输",
+        "resigning": "认输中...",
+        "pleaseWait": "请稍候...",
+        "gameEnded": "游戏已结束",
+        "forfeitGame": "放弃当前游戏"
+    },
+    "reportIssue": {
+        "bugReportTitle": "错误报告",
+        "bugReportDescription": "报告当前游戏状态的错误。游戏位置将包含在您的报告中。",
+        "feedbackTitle": "反馈与问题",
+        "feedbackDescription": "提交反馈或报告问题。我们感谢您的意见！",
+        "subject": "主题",
+        "subjectPlaceholder": "问题的简要概述",
+        "description": "描述",
+        "descriptionPlaceholder": "问题或反馈的详细描述...",
+        "gameStateIncluded": "✓ 游戏状态将被包含",
+        "turn": "回合",
+        "white": "白方",
+        "black": "黑方",
+        "gameOver": "游戏结束",
+        "submitIssue": "提交问题",
+        "anonymousNote": "注意：您正在匿名提交。登录以跟踪您的问题。",
+        "validation": {
+            "missingSubjectTitle": "信息缺失",
+            "missingSubjectMessage": "请为您的问题输入主题。",
+            "invalidSubjectTitle": "主题无效",
+            "invalidSubjectMessage": "主题至少需要3个字符。",
+            "missingDescriptionTitle": "信息缺失",
+            "missingDescriptionMessage": "请为您的问题输入描述。",
+            "invalidDescriptionTitle": "描述无效",
+            "invalidDescriptionMessage": "描述至少需要10个字符。"
+        },
+        "success": {
+            "title": "问题已提交",
+            "message": "感谢您的反馈！您的问题已提交",
+            "ok": "确定"
+        },
+        "error": {
+            "title": "提交失败",
+            "message": "提交您的问题失败。请检查您的连接并重试。"
+        }
+    },
+    "settings": {
+        "account": "账户",
+        "profileAvatar": "个人头像",
+        "chooseAvatar": "选择您的海洋主题头像",
+        "appearance": "外观",
+        "theme": {
+            "light": "浅色",
+            "lightDescription": "始终使用浅色主题",
+            "dark": "深色",
+            "darkDescription": "始终使用深色主题",
+            "auto": "自动",
+            "autoDescription": "匹配系统主题"
+        },
+        "language": {
+            "title": "语言 (भाषा)",
+            "english": "English",
+            "englishDescription": "英语界面",
+            "hindi": "हिन्दी (Hindi)",
+            "hindiDescription": "हिन्दी भाषा इंटरफ़ेस"
+        },
+        "actions": {
+            "resetToDefaults": "重置为默认",
+            "resetTitle": "重置设置",
+            "resetMessage": "确定要将所有设置重置为默认值吗？",
+            "cancel": "取消",
+            "reset": "重置"
+        },
+        "dangerZone": {
+            "title": "危险区域",
+            "warning": "一旦删除您的账户，将无法恢复。请确认。",
+            "deleteAccount": "删除账户",
+            "deletingAccount": "删除账户中...",
+            "deleteTitle": "删除账户",
+            "deleteMessage": "此操作是永久性的，无法撤销。\n\n• 您的所有个人数据将被删除\n• 您的游戏将继续，但您将显示为"匿名"\n• 您的好友和好友请求将被删除\n• 进行中的游戏将被放弃\n\n确定要继续吗？",
+            "continue": "继续",
+            "confirmTitle": "确认删除账户",
+            "confirmMessage": "要确认，请在下方输入 DELETE（全大写）：",
+            "incorrectTitle": "确认错误",
+            "incorrectMessage": "您必须准确输入 DELETE 以确认删除账户。",
+            "successTitle": "账户已删除",
+            "successMessage": "您的账户已成功删除。您现在将退出登录。",
+            "failedTitle": "删除失败",
+            "timeoutMessage": "请求超时。请检查您的连接并重试。",
+            "failedMessage": "删除账户失败。请重试，如果问题持续存在，请联系支持。",
+            "retry": "重试"
+        },
+        "errors": {
+            "loadFailed": "加载设置失败",
+            "saveFailed": "保存设置失败",
+            "avatarSaveFailed": "保存头像选择失败",
+            "themeSaveFailed": "保存主题偏好失败",
+            "languageChangeFailed": "更改语言失败",
+            "resetFailed": "重置设置失败"
+        }
+    },
+    "friends": {
+        "addFriend": "添加好友",
+        "searchPlaceholder": "按用户名搜索",
+        "noUsersFound": "未找到用户",
+        "pending": "待处理",
+        "incomingRequests": "收到的请求",
+        "sentRequests": "已发送的请求",
+        "myFriends": "我的好友",
+        "noFriendsYet": "暂无好友",
+        "noFriendsHint": "通过上方的用户名添加好友以开始一起游戏！"
+    },
+    "common": {
+        "loading": "加载中...",
+        "error": "错误",
+        "success": "成功",
+        "cancel": "取消",
+        "confirm": "确认",
+        "save": "保存",
+        "delete": "删除",
+        "edit": "编辑",
+        "close": "关闭",
+        "ok": "确定",
+        "somethingWentWrong": "出了点问题。请重试。"
+    },
+    "cards": {
+        "matchmaking": {
+            "searchingForOpponent": "寻找对手中...",
+            "findRandomMatch": "寻找随机对战",
+            "searchingHint": "寻找对手中... · 点击取消",
+            "tapToJoin": "点击加入匹配队列",
+            "cannotJoinTitle": "无法加入匹配"
+        },
+        "playWithFriend": {
+            "title": "与好友对战",
+            "description": "邀请好友游戏",
+            "modalTitle": "与好友对战",
+            "inviteFriend": "邀请好友",
+            "inviteDescription": "向好友发送游戏邀请",
+            "textInvite": "短信邀请",
+            "textInviteDescription": "通过短信发送邀请",
+            "passAndPlay": "本地对战",
+            "passAndPlayDescription": "在此设备上本地游戏",
+            "selectFriend": "选择好友",
+            "searchFriends": "搜索好友...",
+            "noFriendsFound": "未找到好友",
+            "noFriendsYet": "暂无好友。添加好友以游戏！",
+            "passAndPlayGames": "本地对战游戏",
+            "startNewGame": "开始新游戏",
+            "noActiveGames": "没有进行中的游戏",
+            "vsGuest": "对战 访客 1",
+            "unlimited": "无限",
+            "shareMessage": "来玩珊瑚冲突吧！🦀\n\n在此下载：\niOS：[URL]\n\nAndroid：[URL]"
+        },
+        "signUpPrompt": {
+            "title": "解锁完整功能",
+            "subtitle": "注册免费账户以访问：",
+            "feature1": "与好友在线游戏",
+            "feature2": "通过匹配寻找随机对手",
+            "feature3": "跟踪您的游戏统计和历史",
+            "feature4": "建立您的好友网络",
+            "button": "注册 / 登录"
+        },
+        "activeGames": {
+            "title": "进行中的游戏",
+            "inProgress": "进行中",
+            "game": "游戏",
+            "games": "游戏",
+            "yourTurn": "您的回合",
+            "opponentTurn": "对手的回合",
+            "opponent": "对手",
+            "computer": "电脑",
+            "blitz": "快棋",
+            "normal": "普通",
+            "unlimited": "无限",
+            "timed": "限时",
+            "loading": "加载游戏中...",
+            "noGames": "没有进行中的游戏",
+            "noGamesHint": "与好友开始一局游戏！",
+            "vs": "对战 ",
+            "resignTitle": "认输",
+            "resignMessage": "确定要认输吗？您将输掉这局游戏。",
+            "resignButton": "认输",
+            "resignError": "认输失败。请重试。"
+        },
+        "gameHistory": {
+            "title": "游戏历史",
+            "subtitle": "最近的游戏",
+            "loading": "加载历史中...",
+            "noHistory": "没有游戏历史",
+            "noHistoryHint": "您完成的游戏将显示在这里",
+            "vs": "对战 ",
+            "justNow": "刚刚",
+            "minutesAgo": "分钟前",
+            "hoursAgo": "小时前",
+            "daysAgo": "天前",
+            "cancelled": "游戏已取消",
+            "draw": "平局",
+            "won": "您赢了",
+            "lost": "您输了",
+            "unknown": "未知",
+            "opponent": "对手",
+            "computer": "电脑",
+            "blitz": "快棋",
+            "normal": "普通",
+            "unlimited": "无限",
+            "timed": "限时"
+        }
+    },
+    "errors": {
+        "INVALID_MOVE": "无效移动",
+        "INVALID_MOVE_OCCUPIED": "该位置已被占用",
+        "INVALID_MOVE_OUT_OF_BOUNDS": "移动超出边界",
+        "INVALID_MOVE_NOT_YOUR_TURN": "还没到您的回合",
+        "INVALID_MOVE_PIECE_BLOCKED": "该棋子被阻挡",
+        "GAME_NOT_FOUND": "未找到游戏",
+        "GAME_ALREADY_STARTED": "游戏已经开始",
+        "GAME_ALREADY_ENDED": "此游戏已结束",
+        "GAME_CANCELLED": "游戏已取消",
+        "PLAYER_NOT_IN_GAME": "您不在此游戏中",
+        "PLAYER_DISCONNECTED": "玩家已断开连接",
+        "CONNECTION_ERROR": "连接错误。请检查您的网络。",
+        "SERVER_ERROR": "服务器错误。请稍后重试。",
+        "TIMEOUT": "请求超时",
+        "ALREADY_IN_QUEUE": "您已在匹配队列中",
+        "NOT_IN_QUEUE": "您不在匹配队列中",
+        "QUEUE_TIMEOUT": "匹配超时",
+        "OPPONENT_NOT_FOUND": "找不到对手",
+        "MATCHMAKING_DISABLED": "匹配当前已禁用",
+        "FRIEND_NOT_FOUND": "未找到好友",
+        "FRIEND_ALREADY_EXISTS": "已经是好友",
+        "CANNOT_ADD_SELF": "您不能添加自己为好友",
+        "FRIEND_REQUEST_PENDING": "好友请求已待处理",
+        "INVALID_CREDENTIALS": "邮箱或密码无效",
+        "USER_NOT_FOUND": "未找到用户",
+        "EMAIL_ALREADY_EXISTS": "邮箱已被使用",
+        "USERNAME_TAKEN": "用户名已被使用",
+        "WEAK_PASSWORD": "密码太弱",
+        "ACCOUNT_DISABLED": "您的账户已被禁用",
+        "SESSION_EXPIRED": "您的会话已过期。请重新登录。",
+        "UNAUTHORIZED": "您无权执行此操作",
+        "RATE_LIMITED": "请求过多。请放慢速度。",
+        "MAINTENANCE_MODE": "应用正在维护中。请稍后重试。",
+        "FEATURE_DISABLED": "此功能当前已禁用"
+    },
+    "success": {
+        "GAME_WON": "恭喜！您赢了！",
+        "GAME_DRAW": "游戏以平局结束",
+        "GAME_LOST": "祝您下次好运！",
+        "PLAYER_RESIGNED": "玩家认输",
+        "FRIEND_REQUEST_SENT": "好友请求已发送！",
+        "FRIEND_REQUEST_ACCEPTED": "好友请求已接受！",
+        "FRIEND_REQUEST_DECLINED": "好友请求已拒绝",
+        "MOVE_SUCCESS": "移动成功"
+    },
+    "scenarioBoard": {
+        "pauseAutoPlay": "暂停自动播放",
+        "playDemo": "播放演示",
+        "explanation": "说明",
+        "backToGuide": "返回指南"
+    },
+    "howToPlay": {
+        "objective": {
+            "title": "游戏目标",
+            "intro": "要赢得珊瑚冲突，完成以下目标之一：",
+            "checkmate": "将死",
+            "checkmateDesc": "对手的鲸鱼（当鲸鱼处于",
+            "check": "将军",
+            "checkmateDescEnd": "状态且无法逃脱时）",
+            "coralControl": "珊瑚控制大部分区域",
+            "coralControlDesc": "控制",
+            "coralControlWhen": "当：",
+            "coralPlaced": "玩家已放置所有珊瑚",
+            "whaleRemaining": "玩家仅剩下鲸鱼",
+            "backRowReached": "螃蟹或章鱼到达对手的后排",
+            "areaControlled": "珊瑚控制的区域：",
+            "areaControlledDesc": "计算未被对手棋子占据的您颜色的珊瑚数量。",
+            "checkmateExample": "将死示例",
+            "checkExample": "将军示例",
+            "coralVictoryExample": "珊瑚胜利示例"
+        },
+        "setup": {
+            "title": "游戏设置",
+            "boardDesc": "棋盘是一个8x8的网格，有64个方格。每位玩家拥有：",
+            "coralPieces": "17个珊瑚棋子",
+            "units": "17个单位：1只鲸鱼、2只海豚、4只海龟、2只河豚、4只螃蟹和4只章鱼",
+            "variants": "每种棋子类型有两种变体：",
+            "hunter": "猎手",
+            "hunterDesc": "棋子（没有四个珊瑚图标）可以移除珊瑚",
+            "gatherer": "采集者",
+            "gathererDesc": "棋子（有四个珊瑚图标）可以放置珊瑚",
+            "hunterExample": "猎手效果示例",
+            "gathererExample": "采集者效果示例"
+        },
+        "turnOverview": {
+            "title": "回合概述",
+            "intro": "白方先行，然后玩家交替进行。在您的回合：",
+            "step1": "移动您的一个棋子",
+            "step2": "解决任何捕获、猎手或采集者效果",
+            "step3": "检查是否达成任何目标"
+        },
+        "movement": {
+            "title": "棋子如何移动",
+            "important": "重要：",
+            "importantDesc": "棋子不能穿过其他棋子 - 它们必须有清晰的路径。",
+            "variants": "每种棋子类型有两种变体，与珊瑚的互动方式不同：",
+            "hunterPieces": "猎手棋子",
+            "hunterMovement": "（没有珊瑚图标）会",
+            "stoppedBy": "被阻挡",
+            "hunterMovementDesc": "珊瑚 - 它们不能穿过珊瑚",
+            "gathererPieces": "采集者棋子",
+            "gathererMovement": "（有四个珊瑚图标）更强大 - 它们可以",
+            "through": "穿过",
+            "gathererMovementDesc": "珊瑚自由移动",
+            "coralMovementExample": "珊瑚移动示例",
+            "individualMovements": "各棋子移动方式"
+        },
+        "pieces": {
+            "whale": {
+                "name": "鲸鱼",
+                "intro": "鲸鱼是您最重要的棋子 - 如果它被将死，您就输了！鲸鱼占据两个方格，有两种不同的移动方式：",
+                "slidingMove": "1. 滑动移动：",
+                "slidingMoveDesc": "移动棋子的一半任意数量的方格（水平、垂直或对角线），同时保持其原始方向。鲸鱼遵循猎手移动规则 - 会被珊瑚阻挡。但是，有一个特殊例外（见下文）。",
+                "rotationMove": "2. 旋转移动：",
+                "rotationMoveDesc": "将棋子的一半旋转到相邻方格（垂直或水平一格）。选择旋转时，首先点击目标方格（显示为白色圆圈）。如果有多个有效方向，然后点击方向方格（显示为绿色圆圈）。如果只有一个有效方向，鲸鱼将自动移动，无需显示方向选择。",
+                "checkRules": "将军规则：",
+                "checkRulesDesc": "鲸鱼的移动绝不能以将军结束（可能被捕获的位置），但它可以穿过受威胁的方格。",
+                "doubleCapture": "双重捕获：",
+                "doubleCaptureDesc": "鲸鱼可以在一次移动中捕获最多两个敌方棋子 - 它身体的每一半各捕获一个！",
+                "doubleCoralRemoval": "双重珊瑚移除：",
+                "doubleCoralRemovalDesc": "当鲸鱼（作为猎手）落在珊瑚上时，它可以选择移除一个或两个珊瑚棋子。如果两半都落在珊瑚上，您可以移除两个、只移除一个或都不移除。如果只有一半落在新的珊瑚上（而另一半已经在珊瑚上），您可以选择移除那一个珊瑚棋子。",
+                "specialCase": "⚠️ 特殊移动情况",
+                "specialCaseDesc": "如果鲸鱼的一半已经坐在珊瑚上，该珊瑚不会阻挡另一半穿过或移动到同一珊瑚方格。",
+                "basicMovement": "鲸鱼基本移动",
+                "rotationExample": "鲸鱼旋转示例",
+                "coralException": "鲸鱼穿过自己的珊瑚"
+            },
+            "dolphin": {
+                "name": "海豚",
+                "movement": "可以垂直、水平或对角线移动任意数量的方格。",
+                "example": "海豚移动示例"
+            },
+            "turtle": {
+                "name": "海龟",
+                "movement": "可以垂直或水平移动任意数量的方格。",
+                "example": "海龟移动示例"
+            },
+            "pufferfish": {
+                "name": "河豚",
+                "movement": "可以对角线移动任意数量的方格。",
+                "example": "河豚移动示例"
+            },
+            "octopus": {
+                "name": "章鱼",
+                "movement": "对角线移动一格。",
+                "example": "章鱼移动示例"
+            },
+            "crab": {
+                "name": "螃蟹",
+                "movement": "垂直或水平移动一格。",
+                "example": "螃蟹移动示例"
+            }
+        },
+        "specialRules": {
+            "title": "特殊规则",
+            "capture": {
+                "title": "捕获",
+                "desc": "移动到敌方棋子占据的方格。鲸鱼可以在一次移动中捕获两个棋子。",
+                "example": "捕获示例"
+            },
+            "hunterEffect": {
+                "title": "猎手移动与效果",
+                "desc": "猎手棋子（没有珊瑚图标）有两个重要行为：",
+                "movementStops": "移动停止",
+                "movementStopsDesc": "落在珊瑚上时",
+                "canRemove": "可以移除",
+                "canRemoveDesc": "该珊瑚从棋盘上",
+                "example": "猎手效果示例"
+            },
+            "gathererEffect": {
+                "title": "采集者效果",
+                "desc": "采集者棋子（有四个珊瑚图标）可以在它们移动到的空方格上放置珊瑚。",
+                "example": "采集者效果示例"
+            }
+        },
+        "drawResignation": {
+            "title": "平局与认输",
+            "stalemate": "僵局：",
+            "stalemateDesc": "当玩家没有合法移动且鲸鱼未处于将军状态时",
+            "threefoldRepetition": "三次重复：",
+            "threefoldRepetitionDesc": "相同位置在同一玩家回合时出现三次",
+            "resignation": "认输：",
+            "resignationDesc": "玩家可以随时认输"
+        }
+    },
+    "components": {
+        "fixtureLoader": {
+            "title": "加载游戏状态",
+            "gameMode": "游戏模式：",
+            "back": "返回",
+            "vsComputer": "对战电脑",
+            "passAndPlay": "本地对战",
+            "loadGame": "加载游戏",
+            "fixturesHint": "💡 固定数据来自 shared/game/__fixtures__/",
+            "error": "错误",
+            "failedToLoad": "加载固定数据失败"
+        },
+        "versionWarning": {
+            "title": "有可用更新",
+            "message": "请更新到最新版本以获得最佳体验。",
+            "updateButton": "更新"
+        },
+        "playerStatus": {
+            "computer": "电脑",
+            "thinking": "思考中...",
+            "remaining": "剩余",
+            "underControl": "控制下"
+        },
+        "alert": {
+            "defaultButton": "确定"
+        },
+        "pvpBoard": {
+            "player": "玩家",
+            "opponent": "对手",
+            "requestUndoTitle": "请求撤销",
+            "requestUndoMessage": "请求撤销上一步移动？{{opponentName}} 需要批准。",
+            "requestResetTitle": "请求重置",
+            "requestResetMessage": "请求重置此游戏？{{opponentName}} 需要批准。",
+            "cancel": "取消",
+            "request": "请求",
+            "requestReset": "请求重置",
+            "askOpponentReset": "请求对手重置游戏",
+            "gameEnded": "游戏已结束",
+            "noMoves": "还没有进行任何移动",
+            "pendingUndo": "必须先解决待处理的撤销请求",
+            "remindOpponent": "提醒对手",
+            "remindOpponentSubtitle": "提醒对手进行回合",
+            "availableInHours": "{{hours}} 小时后可用",
+            "yourTurn": "轮到您了",
+            "errorUndoRequest": "发送撤销请求失败。请重试。",
+            "errorUndoResponse": "响应撤销请求失败。请重试。",
+            "errorResetResponse": "响应重置请求失败。请重试。",
+            "errorCancelUndo": "取消撤销请求失败。请重试。",
+            "errorCancelReset": "取消重置请求失败。请重试。",
+            "reminderSentTitle": "成功",
+            "reminderSentMessage": "提醒已发送给您的对手。",
+            "errorReminderTitle": "错误",
+            "errorReminderMessage": "发送提醒失败。请重试。",
+            "waitingUndoResponse": "等待 {{opponentName}} 响应撤销 {{moveCount}} 步移动的请求...",
+            "opponentWantsUndo": "{{opponentName}} 想要撤销 {{moveCount}} 步移动",
+            "waitingResetResponse": "等待 {{opponentName}} 响应重置请求...",
+            "opponentWantsReset": "{{opponentName}} 想要重置游戏"
+        },
+        "passAndPlayBoard": {
+            "resetGameTitle": "重置游戏",
+            "resetGameMessage": "确定要开始新游戏吗？",
+            "cancel": "取消",
+            "reset": "重置",
+            "resetGame": "重置游戏",
+            "startNewGame": "从头开始新游戏",
+            "gameEnded": "游戏已结束",
+            "noMoves": "还没有进行任何移动"
+        },
+        "baseBoard": {
+            "errorLoadState": "加载游戏状态失败",
+            "resignGameTitle": "认输",
+            "resignGameMessage": "确定要认输吗？您将输掉游戏。",
+            "cancel": "取消",
+            "resign": "认输",
+            "checkTitle": "将军！",
+            "checkMessage": "您的{{piece}}被将军了！",
+            "checkmateTitle": "将死！",
+            "checkmateMessage": "{{winner}} 通过将死获胜！",
+            "gathererTitle": "采集者效果",
+            "gathererMessage": "在此方格放置珊瑚吗？",
+            "yes": "是",
+            "no": "否",
+            "hunterTitle": "猎手效果",
+            "hunterMessage": "从此方格移除珊瑚吗？",
+            "exportSuccessTitle": "成功",
+            "exportSuccessMessage": "游戏状态已保存到剪贴板！",
+            "exportFailedTitle": "导出失败",
+            "computer": "电脑",
+            "opponent": "对手",
+            "white": "白方",
+            "black": "黑方",
+            "youWonTimeout": "您赢了！{{opponentName}} 超时了 ⏱️",
+            "youLostTimeout": "您输了！时间到 ⏱️",
+            "timeoutLose": "{{loserName}} 超时了！⏱️",
+            "youWonResign": "您赢了！{{opponentName}} 认输了 🏳️",
+            "youResigned": "您认输了 🏳️",
+            "checkmateWin": "将死！您赢了！🏆",
+            "checkmateLose": "将死！您输了。",
+            "checkmateGeneric": "将死！{{winner}} 获胜！🏆",
+            "youLost": "您输了",
+            "resignGeneric": "{{winner}} 通过认输获胜！🏳️",
+            "coralVictoryWin": "您通过珊瑚胜利赢了！🪸\n{{whiteScore}} - {{blackScore}}",
+            "coralVictoryLose": "您输了。{{winner}} 通过珊瑚胜利获胜！🪸\n{{whiteScore}} - {{blackScore}}",
+            "coralVictoryGeneric": "{{winner}} 通过珊瑚胜利获胜！🪸\n{{whiteScore}} 白方 - {{blackScore}} 黑方",
+            "stalemate": "僵局！🤝",
+            "drawRepetition": "重复平局！🤝",
+            "drawInsufficientMaterial": "平局 - 子力不足！🤝",
+            "drawCoralTie": "平局 - 珊瑚相等！🤝🪸\n{{score}} - {{score}}",
+            "draw": "平局！🤝",
+            "check": "{{player}} 被将军了！⚠️",
+            "viewingHistory": "查看历史移动 - 返回当前以继续游戏",
+            "selectWhaleOrientation": "选择您的鲸鱼方向",
+            "hunterWhaleTitle": "猎手效果（鲸鱼）",
+            "hunterWhaleMessage": "选择珊瑚移除选项：",
+            "yourTurn": "您的回合",
+            "opponentTurn": "{{opponentName}} 的回合",
+            "playerTurn": "{{playerColor}} 的回合"
+        },
+        "computerBoard": {
+            "cancelRequestTitle": "取消请求",
+            "cancelRequestMessage": "取消您的重置请求？",
+            "cancel": "取消",
+            "yes": "是",
+            "resetGameTitle": "重置游戏",
+            "resetGameMessage": "确定要开始新游戏吗？",
+            "reset": "重置",
+            "resetGame": "重置游戏",
+            "startNewGame": "从头开始新游戏",
+            "gameEnded": "游戏已结束",
+            "noMoves": "还没有进行任何移动",
+            "errorUndo": "撤销失败。请重试。"
+        },
+        "computerUsers": {
+            "successTitle": "成功",
+            "errorTitle": "错误",
+            "initializeSuccess": "成功初始化 {{count}} 个电脑用户",
+            "initializeError": "初始化电脑用户失败。请重试。",
+            "confirmDeleteTitle": "确认删除",
+            "confirmDeleteMessage": "确定要删除所有电脑用户吗？此操作无法撤销。",
+            "cancel": "取消",
+            "delete": "删除",
+            "deleteSuccess": "成功删除 {{count}} 个电脑用户",
+            "deleteError": "删除电脑用户失败。请重试。",
+            "clearLanguageSuccess": "语言偏好已清除。应用将在下次启动时从设备设置自动检测语言。",
+            "clearLanguageError": "清除语言偏好失败。请重试。"
+        }
+    },
+    "hooks": {
+        "friends": {
+            "removeFriendTitle": "删除好友",
+            "removeFriendMessage": "确定要从好友中删除 {{friendName}} 吗？",
+            "cancel": "取消",
+            "remove": "删除",
+            "errorRemove": "删除好友失败",
+            "errorAccept": "接受好友请求失败",
+            "errorDecline": "拒绝好友请求失败",
+            "cancelRequestTitle": "取消好友请求",
+            "cancelRequestMessage": "取消向 {{displayName}} 发送的好友请求？",
+            "no": "否",
+            "yesCancel": "是，取消",
+            "errorCancelRequest": "取消好友请求失败",
+            "errorTitle": "错误"
+        },
+        "game": {
+            "errorTitle": "错误",
+            "errorLoadGame": "加载游戏失败"
+        },
+        "gameActions": {
+            "errorTitle": "错误",
+            "errorResign": "认输失败"
+        },
+        "userSearch": {
+            "errorTitle": "错误",
+            "errorSendRequest": "发送好友请求失败"
+        }
+    }
+}
