@@ -341,7 +341,9 @@ export default function ScenarioBoard({ route, navigation }) {
             >
                 {/* Title */}
                 <View style={[styles.titleCard, { backgroundColor: colors.CARD_BACKGROUND }]}>
-                    <Text style={[styles.title, { color: colors.PRIMARY }]}>{scenario.title}</Text>
+                    <Text style={[styles.title, { color: colors.PRIMARY }]}>
+                        {scenario.titleKey ? t(scenario.titleKey) : scenario.title}
+                    </Text>
                     {scenario.autoPlaySequence && (
                         <TouchableOpacity
                             style={[
@@ -426,7 +428,7 @@ export default function ScenarioBoard({ route, navigation }) {
                         </Text>
                     </View>
                     <Text style={[styles.description, { color: colors.TEXT }]}>
-                        {scenario.description}
+                        {scenario.descriptionKey ? t(scenario.descriptionKey) : scenario.description}
                     </Text>
                 </View>
 

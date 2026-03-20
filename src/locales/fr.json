@@ -557,6 +557,68 @@
             "resignationDesc": "Un joueur peut abandonner à tout moment"
         }
     },
+    "tutorialScenarios": {
+        "checkmate": {
+            "title": "Exemple d'échec et mat",
+            "description": "La Baleine noire est piégée par le corail à a6 (indiqué par la bordure rose). Le Dauphin Chasseur blanc à b7 met la Baleine en échec, et la Tortue Cueilleur blanche (avec des icônes de corail sur la bordure) à g7 protège le dauphin attaquant. La Baleine n'a pas d'échappatoire - échec et mat !"
+        },
+        "coralVictory": {
+            "title": "Victoire Corail - Zone de contrôle",
+            "description": "Blanc a 4 coraux (indiqués par des bordures roses autour des cases) : c3, d3, e3, f3. Noir a 4 coraux (indiqués par des bordures noires autour des cases) : c6, d6, e6, f6. Le Dauphin Cueilleur noir (avec des icônes de corail sur la bordure) à c3 est assis sur l'un des coraux de Blanc, donc Blanc ne contrôle que 3 coraux (d3, e3, f3). Noir contrôle tous les 4 coraux (c6, d6, e6, f6) = Noir gagne 4 à 3 ! Rappel : le corail occupé par une pièce adverse ne compte PAS dans votre zone de contrôle."
+        },
+        "whaleMovement": {
+            "title": "Déplacement de la Baleine",
+            "description": "Les Baleines occupent deux cases adjacentes et peuvent se déplacer de trois façons : (1) Glisser une moitié sur n'importe quel nombre de cases tandis que l'autre reste immobile, (2) Glisser les deux moitiés ensemble dans la même direction (glissement parallèle), ou (3) Pivoter en déplaçant une moitié vers une case adjacente. La baleine doit toujours rester sur deux cases orthogonales adjacentes."
+        },
+        "whaleRotation": {
+            "title": "Rotation de la Baleine",
+            "description": "La Baleine peut pivoter en déplaçant une moitié vers une case adjacente (verticalement ou horizontalement). Regardez la Baleine blanche pivoter d'une position horizontale à une position verticale. Ce mouvement de rotation est particulièrement utile pour naviguer dans des espaces restreints ou changer rapidement de direction."
+        },
+        "whaleCoralException": {
+            "title": "Baleine se déplaçant à travers son propre Corail",
+            "description": "Règle spéciale : Lorsque la moitié de la Baleine est déjà assise sur du corail, ce corail ne bloque PAS l'autre moitié de se déplacer à travers ou sur la même case de corail. Regardez la Baleine blanche glisser de d4-e4 à a4-b4, se déplaçant à travers le corail à d4. Le corail noir à c, d, e dans les rangées 3 et 5 restreint le mouvement vertical, et le corail à f4 bloque le mouvement vers la droite, mais la baleine peut librement se déplacer vers la gauche le long de la rangée 4 car une moitié est déjà assise sur le corail blanc à d4."
+        },
+        "coralMovementComparison": {
+            "title": "Comparaison du déplacement du Corail",
+            "description": "Comparez le Dauphin Chasseur blanc (à gauche, sans icônes de corail) avec le Dauphin Cueilleur blanc (à droite, avec des icônes de corail). Appuyez sur chacun pour voir leurs mouvements. Le Dauphin Chasseur est BLOQUÉ par le corail et ne peut pas le traverser, tandis que le Dauphin Cueilleur peut passer À TRAVERS le corail librement, ce qui le rend plus puissant."
+        },
+        "check": {
+            "title": "Échec",
+            "description": "La Baleine noire est en échec - elle est attaquée par le Dauphin Cueilleur blanc (avec des icônes de corail sur la bordure). Le Dauphin Cueilleur peut se déplacer à travers le corail, il a donc traversé le corail à d7 pour attaquer la baleine. La baleine ne peut pas capturer le dauphin car le corail la bloque. Noir doit déplacer la Baleine hors de danger ou bloquer l'attaque lors de son prochain tour."
+        },
+        "hunterEffect": {
+            "title": "Effet Chasseur",
+            "description": "Les pièces Chasseur (celles sans quatre icônes de corail) s'arrêtent lorsqu'elles se déplacent sur du Corail. Elles peuvent ensuite retirer ce Corail du plateau. Regardez le Crabe Chasseur blanc se déplacer sur du corail et le retirer."
+        },
+        "gathererEffect": {
+            "title": "Effet Cueilleur",
+            "description": "Les pièces Cueilleur (celles avec quatre icônes de corail) peuvent placer du Corail sur les cases vides vers lesquelles elles se déplacent. Regardez la Pieuvre Cueilleur blanche se déplacer et placer du corail."
+        },
+        "dolphinMovement": {
+            "title": "Déplacement du Dauphin",
+            "description": "Les Dauphins peuvent se déplacer sur n'importe quel nombre de cases dans n'importe quelle direction - verticalement, horizontalement ou en diagonale. Ce sont les pièces les plus polyvalentes de Coral Clash !"
+        },
+        "turtleMovement": {
+            "title": "Déplacement de la Tortue",
+            "description": "Les Tortues peuvent se déplacer sur n'importe quel nombre de cases verticalement ou horizontalement, mais pas en diagonale. Elles se déplacent en lignes droites le long des rangées et des colonnes."
+        },
+        "pufferfishMovement": {
+            "title": "Déplacement du Poisson-ballon",
+            "description": "Les Poissons-ballons peuvent se déplacer sur n'importe quel nombre de cases en diagonale. Ils glissent le long des lignes diagonales à travers le plateau."
+        },
+        "crabMovement": {
+            "title": "Déplacement du Crabe",
+            "description": "Les Crabes se déplacent d'une case à la fois verticalement ou horizontalement. Ce sont des pièces lentes mais régulières."
+        },
+        "octopusMovement": {
+            "title": "Déplacement de la Pieuvre",
+            "description": "Les Pieuvres se déplacent d'une case en diagonale. Comme les Crabes, elles se déplacent lentement mais peuvent être très stratégiques."
+        },
+        "capture": {
+            "title": "Capture de pièces",
+            "description": "Pour capturer une pièce ennemie, déplacez l'une de vos pièces sur la case occupée par l'ennemi. Le Dauphin blanc peut capturer le Crabe noir en se déplaçant sur sa case."
+        }
+    },
     "components": {
         "fixtureLoader": {
             "title": "Charger l'état du jeu",

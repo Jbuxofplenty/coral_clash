@@ -557,6 +557,68 @@
             "resignationDesc": "Un jugador puede rendirse en cualquier momento"
         }
     },
+    "tutorialScenarios": {
+        "checkmate": {
+            "title": "Ejemplo de Jaque Mate",
+            "description": "La Ballena Negra está atrapada por coral en a6 (denotado por el borde rosa). El Delfín Cazador Blanco en b7 pone a la Ballena en jaque, y la Tortuga Recolectora Blanca (con iconos de coral en el borde) en g7 protege al delfín atacante. La Ballena no tiene escapatoria - ¡jaque mate!"
+        },
+        "coralVictory": {
+            "title": "Victoria por Coral - Área de Control",
+            "description": "Blancas tiene 4 coral (denotados por bordes rosas alrededor de las casillas): c3, d3, e3, f3. Negras tiene 4 coral (denotados por bordes negros alrededor de las casillas): c6, d6, e6, f6. El Delfín Recolector Negro (con iconos de coral en el borde) en c3 está sentado en uno de los coral de Blancas, así que Blancas solo controla 3 coral (d3, e3, f3). Negras controla todos los 4 coral (c6, d6, e6, f6) = ¡Negras gana 4 a 3! Recuerda: el coral ocupado por una pieza del oponente NO cuenta hacia tu área de control."
+        },
+        "whaleMovement": {
+            "title": "Movimiento de Ballena",
+            "description": "Las Ballenas ocupan dos casillas adyacentes y pueden moverse de tres maneras: (1) Deslizar una mitad cualquier número de casillas mientras la otra permanece quieta, (2) Deslizar ambas mitades juntas en la misma dirección (deslizamiento paralelo), o (3) Rotar moviendo una mitad a una casilla adyacente. La ballena siempre debe permanecer en dos casillas ortogonales adyacentes."
+        },
+        "whaleRotation": {
+            "title": "Rotación de Ballena",
+            "description": "La Ballena puede rotar moviendo una mitad a una casilla adyacente (vertical u horizontalmente). Observa cómo la Ballena Blanca rota de una posición horizontal a una posición vertical. Este movimiento de rotación es especialmente útil para navegar espacios estrechos o cambiar de dirección rápidamente."
+        },
+        "whaleCoralException": {
+            "title": "Ballena Moviéndose a Través de su Propio Coral",
+            "description": "Regla Especial: Cuando la mitad de la Ballena ya está sentada en coral, ese coral NO bloquea a la otra mitad de moverse a través o sobre la misma casilla de coral. Observa cómo la Ballena Blanca se desliza de d4-e4 a a4-b4, moviéndose a través del coral en d4. El coral negro en c, d, e en las filas 3 y 5 restringe el movimiento vertical, y el coral en f4 bloquea el movimiento hacia la derecha, pero la ballena puede moverse libremente hacia la izquierda a lo largo de la fila 4 porque una mitad ya está sentada en el coral blanco en d4."
+        },
+        "coralMovementComparison": {
+            "title": "Comparación de Movimiento de Coral",
+            "description": "Compara el Delfín Cazador Blanco (izquierda, sin iconos de coral) con el Delfín Recolector Blanco (derecha, con iconos de coral). Toca cada uno para ver sus movimientos. El Delfín Cazador está BLOQUEADO por el coral y no puede moverse a través de él, mientras que el Delfín Recolector puede pasar A TRAVÉS del coral libremente, haciéndolo más poderoso."
+        },
+        "check": {
+            "title": "Jaque",
+            "description": "La Ballena Negra está en jaque - está siendo atacada por el Delfín Recolector Blanco (con iconos de coral en el borde). El Delfín Recolector puede moverse a través del coral, así que pasó a través del coral en d7 para atacar a la ballena. La ballena no puede capturar al delfín porque el coral la bloquea. Negras debe mover la Ballena fuera de peligro o bloquear el ataque en su próximo turno."
+        },
+        "hunterEffect": {
+            "title": "Efecto Cazador",
+            "description": "Las piezas Cazadoras (aquellas sin cuatro iconos de coral) se detienen cuando se mueven sobre Coral. Luego pueden eliminar ese Coral del tablero. Observa al Cangrejo Cazador Blanco moverse sobre coral y eliminarlo."
+        },
+        "gathererEffect": {
+            "title": "Efecto Recolector",
+            "description": "Las piezas Recolectoras (aquellas con cuatro iconos de coral) pueden colocar Coral en casillas vacías a las que se mueven. Observa al Pulpo Recolector Blanco moverse y colocar coral."
+        },
+        "dolphinMovement": {
+            "title": "Movimiento de Delfín",
+            "description": "Los Delfines pueden moverse cualquier número de casillas en cualquier dirección - vertical, horizontal o diagonalmente. ¡Son la pieza más versátil en Coral Clash!"
+        },
+        "turtleMovement": {
+            "title": "Movimiento de Tortuga",
+            "description": "Las Tortugas pueden moverse cualquier número de casillas vertical u horizontalmente, pero no diagonalmente. Se mueven en líneas rectas a lo largo de filas y columnas."
+        },
+        "pufferfishMovement": {
+            "title": "Movimiento de Pez Globo",
+            "description": "Los Peces Globo pueden moverse cualquier número de casillas diagonalmente. Se deslizan a lo largo de líneas diagonales a través del tablero."
+        },
+        "crabMovement": {
+            "title": "Movimiento de Cangrejo",
+            "description": "Los Cangrejos se mueven una casilla a la vez vertical u horizontalmente. Son piezas lentas pero constantes."
+        },
+        "octopusMovement": {
+            "title": "Movimiento de Pulpo",
+            "description": "Los Pulpos se mueven una casilla diagonalmente. Al igual que los Cangrejos, se mueven lentamente pero pueden ser muy estratégicos."
+        },
+        "capture": {
+            "title": "Captura de Piezas",
+            "description": "Para capturar una pieza enemiga, mueve una de tus piezas a la casilla ocupada por el enemigo. El Delfín Blanco puede capturar al Cangrejo Negro moviéndose a su casilla."
+        }
+    },
     "components": {
         "fixtureLoader": {
             "title": "Cargar Estado del Juego",

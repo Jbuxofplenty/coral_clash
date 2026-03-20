@@ -6,9 +6,8 @@
 export const TUTORIAL_SCENARIOS = {
     checkmate: {
         id: 'checkmate',
-        title: 'Checkmate Example',
-        description:
-            'The Black Whale is trapped by coral at a6 (denoted by the pink border). The White Hunter Dolphin at b7 puts the Whale in check, and the White Gatherer Turtle (with coral icons on border) at g7 protects the attacking dolphin. The Whale has no escape - checkmate!',
+        titleKey: 'tutorialScenarios.checkmate.title',
+        descriptionKey: 'tutorialScenarios.checkmate.description',
         fixture: {
             schemaVersion: '1.1.0',
             exportedAt: new Date().toISOString(),
@@ -61,9 +60,8 @@ export const TUTORIAL_SCENARIOS = {
 
     coralVictory: {
         id: 'coralVictory',
-        title: 'Coral Victory - Area of Control',
-        description:
-            "White has 4 coral (denoted by pink borders around squares): c3, d3, e3, f3. Black has 4 coral (denoted by black borders around squares): c6, d6, e6, f6. The Black Gatherer Dolphin (with coral icons on border) at c3 is sitting on one of White's coral, so White only controls 3 coral (d3, e3, f3). Black controls all 4 coral (c6, d6, e6, f6) = Black wins 4 to 3! Remember: coral occupied by an opponent's piece does NOT count toward your area of control.",
+        titleKey: 'tutorialScenarios.coralVictory.title',
+        descriptionKey: 'tutorialScenarios.coralVictory.description',
         fixture: {
             schemaVersion: '1.1.0',
             exportedAt: new Date().toISOString(),
@@ -136,9 +134,8 @@ export const TUTORIAL_SCENARIOS = {
 
     whaleMovement: {
         id: 'whaleMovement',
-        title: 'Whale Movement',
-        description:
-            'Whales occupy two adjacent squares and can move in three ways: (1) Slide one half any number of squares while the other stays still, (2) Slide both halves together in the same direction (parallel sliding), or (3) Rotate by moving one half to an adjacent square. The whale must always remain on two adjacent orthogonal squares.',
+        titleKey: 'tutorialScenarios.whaleMovement.title',
+        descriptionKey: 'tutorialScenarios.whaleMovement.description',
         fixture: {
             schemaVersion: '1.1.0',
             exportedAt: new Date().toISOString(),
@@ -181,9 +178,8 @@ export const TUTORIAL_SCENARIOS = {
 
     whaleRotation: {
         id: 'whaleRotation',
-        title: 'Whale Rotation',
-        description:
-            'The Whale can rotate by moving one half to an adjacent square (vertically or horizontally). Watch as the White Whale rotates from a horizontal position to a vertical position. This rotation move is especially useful for navigating tight spaces or changing direction quickly.',
+        titleKey: 'tutorialScenarios.whaleRotation.title',
+        descriptionKey: 'tutorialScenarios.whaleRotation.description',
         fixture: {
             schemaVersion: '1.1.0',
             exportedAt: new Date().toISOString(),
@@ -234,9 +230,8 @@ export const TUTORIAL_SCENARIOS = {
 
     whaleCoralException: {
         id: 'whaleCoralException',
-        title: 'Whale Moving Through Own Coral',
-        description:
-            'Special Rule: When half of the Whale is already sitting on coral, that coral does NOT block the other half from moving through or onto the same coral square. Watch as the White Whale slides from d4-e4 to a4-b4, moving through the coral at d4. Black coral at c, d, e in rows 3 and 5 restricts vertical movement, and coral at f4 blocks rightward movement, but the whale can freely move left along row 4 because one half is already sitting on the white coral at d4.',
+        titleKey: 'tutorialScenarios.whaleCoralException.title',
+        descriptionKey: 'tutorialScenarios.whaleCoralException.description',
         fixture: {
             schemaVersion: '1.1.0',
             exportedAt: new Date().toISOString(),
@@ -300,9 +295,8 @@ export const TUTORIAL_SCENARIOS = {
 
     coralMovementComparison: {
         id: 'coralMovementComparison',
-        title: 'Coral Movement Comparison',
-        description:
-            'Compare the White Hunter Dolphin (left, no coral icons) with the White Gatherer Dolphin (right, with coral icons). Tap each to see their moves. The Hunter Dolphin is BLOCKED by coral and cannot move through it, while the Gatherer Dolphin can pass THROUGH coral freely, making it more powerful.',
+        titleKey: 'tutorialScenarios.coralMovementComparison.title',
+        descriptionKey: 'tutorialScenarios.coralMovementComparison.description',
         fixture: {
             schemaVersion: '1.1.0',
             exportedAt: new Date().toISOString(),
@@ -351,9 +345,8 @@ export const TUTORIAL_SCENARIOS = {
 
     check: {
         id: 'check',
-        title: 'Check',
-        description:
-            'The Black Whale is in check - it is being attacked by the White Gatherer Dolphin (with coral icons on border). The Gatherer Dolphin can move through coral, so it passed through the coral at d7 to attack the whale. The whale cannot capture the dolphin because the coral blocks it. Black must move the Whale out of danger or block the attack on their next turn.',
+        titleKey: 'tutorialScenarios.check.title',
+        descriptionKey: 'tutorialScenarios.check.description',
         fixture: {
             schemaVersion: '1.1.0',
             exportedAt: new Date().toISOString(),
@@ -406,9 +399,8 @@ export const TUTORIAL_SCENARIOS = {
 
     hunterEffect: {
         id: 'hunterEffect',
-        title: 'Hunter Effect',
-        description:
-            'Hunter pieces (those without four coral icons) stop when they move onto Coral. They can then remove that Coral from the board. Watch the White Hunter Crab move onto coral and remove it.',
+        titleKey: 'tutorialScenarios.hunterEffect.title',
+        descriptionKey: 'tutorialScenarios.hunterEffect.description',
         fixture: {
             schemaVersion: '1.1.0',
             exportedAt: new Date().toISOString(),
@@ -462,9 +454,8 @@ export const TUTORIAL_SCENARIOS = {
 
     gathererEffect: {
         id: 'gathererEffect',
-        title: 'Gatherer Effect',
-        description:
-            'Gatherer pieces (those with four coral icons) can place Coral on empty squares they move to. Watch the White Gatherer Octopus move and place coral.',
+        titleKey: 'tutorialScenarios.gathererEffect.title',
+        descriptionKey: 'tutorialScenarios.gathererEffect.description',
         fixture: {
             schemaVersion: '1.1.0',
             exportedAt: new Date().toISOString(),
@@ -518,9 +509,8 @@ export const TUTORIAL_SCENARIOS = {
 
     dolphinMovement: {
         id: 'dolphinMovement',
-        title: 'Dolphin Movement',
-        description:
-            'Dolphins can move any number of squares in any direction - vertically, horizontally, or diagonally. They are the most versatile piece in Coral Clash!',
+        titleKey: 'tutorialScenarios.dolphinMovement.title',
+        descriptionKey: 'tutorialScenarios.dolphinMovement.description',
         fixture: {
             schemaVersion: '1.1.0',
             exportedAt: new Date().toISOString(),
@@ -563,9 +553,8 @@ export const TUTORIAL_SCENARIOS = {
 
     turtleMovement: {
         id: 'turtleMovement',
-        title: 'Turtle Movement',
-        description:
-            'Turtles can move any number of squares vertically or horizontally, but not diagonally. They move in straight lines along ranks and files.',
+        titleKey: 'tutorialScenarios.turtleMovement.title',
+        descriptionKey: 'tutorialScenarios.turtleMovement.description',
         fixture: {
             schemaVersion: '1.1.0',
             exportedAt: new Date().toISOString(),
@@ -608,9 +597,8 @@ export const TUTORIAL_SCENARIOS = {
 
     pufferfishMovement: {
         id: 'pufferfishMovement',
-        title: 'Pufferfish Movement',
-        description:
-            'Pufferfish can move any number of squares diagonally. They slide along diagonal lines across the board.',
+        titleKey: 'tutorialScenarios.pufferfishMovement.title',
+        descriptionKey: 'tutorialScenarios.pufferfishMovement.description',
         fixture: {
             schemaVersion: '1.1.0',
             exportedAt: new Date().toISOString(),
@@ -653,9 +641,8 @@ export const TUTORIAL_SCENARIOS = {
 
     crabMovement: {
         id: 'crabMovement',
-        title: 'Crab Movement',
-        description:
-            'Crabs move one square at a time vertically or horizontally. They are slow but steady pieces.',
+        titleKey: 'tutorialScenarios.crabMovement.title',
+        descriptionKey: 'tutorialScenarios.crabMovement.description',
         fixture: {
             schemaVersion: '1.1.0',
             exportedAt: new Date().toISOString(),
@@ -698,9 +685,8 @@ export const TUTORIAL_SCENARIOS = {
 
     octopusMovement: {
         id: 'octopusMovement',
-        title: 'Octopus Movement',
-        description:
-            'Octopuses move one square diagonally. Like Crabs, they move slowly but can be very strategic.',
+        titleKey: 'tutorialScenarios.octopusMovement.title',
+        descriptionKey: 'tutorialScenarios.octopusMovement.description',
         fixture: {
             schemaVersion: '1.1.0',
             exportedAt: new Date().toISOString(),
@@ -743,9 +729,8 @@ export const TUTORIAL_SCENARIOS = {
 
     capture: {
         id: 'capture',
-        title: 'Capturing Pieces',
-        description:
-            'To capture an enemy piece, move one of your pieces to the square occupied by the enemy. The White Dolphin can capture the Black Crab by moving to its square.',
+        titleKey: 'tutorialScenarios.capture.title',
+        descriptionKey: 'tutorialScenarios.capture.description',
         fixture: {
             schemaVersion: '1.1.0',
             exportedAt: new Date().toISOString(),

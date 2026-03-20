@@ -557,6 +557,68 @@
             "resignationDesc": "Um jogador pode desistir a qualquer momento"
         }
     },
+    "tutorialScenarios": {
+        "checkmate": {
+            "title": "Exemplo de Xeque-mate",
+            "description": "A Baleia Preta está presa por coral em a6 (indicado pela borda rosa). O Golfinho Caçador Branco em b7 coloca a Baleia em xeque, e a Tartaruga Coletora Branca (com ícones de coral na borda) em g7 protege o golfinho atacante. A Baleia não tem escapatória - xeque-mate!"
+        },
+        "coralVictory": {
+            "title": "Vitória por Coral - Área de Controle",
+            "description": "Branco tem 4 corais (indicados por bordas rosas ao redor das casas): c3, d3, e3, f3. Preto tem 4 corais (indicados por bordas pretas ao redor das casas): c6, d6, e6, f6. O Golfinho Coletor Preto (com ícones de coral na borda) em c3 está sentado em um dos corais do Branco, então o Branco controla apenas 3 corais (d3, e3, f3). Preto controla todos os 4 corais (c6, d6, e6, f6) = Preto vence 4 a 3! Lembre-se: coral ocupado por uma peça do oponente NÃO conta para sua área de controle."
+        },
+        "whaleMovement": {
+            "title": "Movimento da Baleia",
+            "description": "Baleias ocupam duas casas adjacentes e podem se mover de três maneiras: (1) Deslizar uma metade qualquer número de casas enquanto a outra fica parada, (2) Deslizar ambas as metades juntas na mesma direção (deslizamento paralelo), ou (3) Girar movendo uma metade para uma casa adjacente. A baleia deve sempre permanecer em duas casas ortogonais adjacentes."
+        },
+        "whaleRotation": {
+            "title": "Rotação da Baleia",
+            "description": "A Baleia pode girar movendo uma metade para uma casa adjacente (verticalmente ou horizontalmente). Observe como a Baleia Branca gira de uma posição horizontal para uma posição vertical. Este movimento de rotação é especialmente útil para navegar em espaços apertados ou mudar de direção rapidamente."
+        },
+        "whaleCoralException": {
+            "title": "Baleia se Movendo Através do Próprio Coral",
+            "description": "Regra Especial: Quando metade da Baleia já está em coral, aquele coral NÃO bloqueia a outra metade de se mover através ou sobre a mesma casa de coral. Observe como a Baleia Branca desliza de d4-e4 para a4-b4, movendo-se através do coral em d4. Coral Preto em c, d, e nas fileiras 3 e 5 restringe o movimento vertical, e coral em f4 bloqueia o movimento para a direita, mas a baleia pode se mover livremente para a esquerda ao longo da fileira 4 porque uma metade já está no coral branco em d4."
+        },
+        "coralMovementComparison": {
+            "title": "Comparação de Movimento com Coral",
+            "description": "Compare o Golfinho Caçador Branco (esquerda, sem ícones de coral) com o Golfinho Coletor Branco (direita, com ícones de coral). Toque em cada um para ver seus movimentos. O Golfinho Caçador é BLOQUEADO por coral e não pode se mover através dele, enquanto o Golfinho Coletor pode passar ATRAVÉS do coral livremente, tornando-o mais poderoso."
+        },
+        "check": {
+            "title": "Xeque",
+            "description": "A Baleia Preta está em xeque - está sendo atacada pelo Golfinho Coletor Branco (com ícones de coral na borda). O Golfinho Coletor pode se mover através de coral, então passou pelo coral em d7 para atacar a baleia. A baleia não pode capturar o golfinho porque o coral a bloqueia. Preto deve mover a Baleia para fora de perigo ou bloquear o ataque em sua próxima jogada."
+        },
+        "hunterEffect": {
+            "title": "Efeito Caçador",
+            "description": "Peças Caçadoras (aquelas sem quatro ícones de coral) param quando se movem para Coral. Elas podem então remover aquele Coral do tabuleiro. Observe o Caranguejo Caçador Branco se mover para o coral e removê-lo."
+        },
+        "gathererEffect": {
+            "title": "Efeito Coletor",
+            "description": "Peças Coletoras (aquelas com quatro ícones de coral) podem colocar Coral em casas vazias para as quais se movem. Observe o Polvo Coletor Branco se mover e colocar coral."
+        },
+        "dolphinMovement": {
+            "title": "Movimento do Golfinho",
+            "description": "Golfinhos podem se mover qualquer número de casas em qualquer direção - verticalmente, horizontalmente ou diagonalmente. Eles são a peça mais versátil no Coral Clash!"
+        },
+        "turtleMovement": {
+            "title": "Movimento da Tartaruga",
+            "description": "Tartarugas podem se mover qualquer número de casas verticalmente ou horizontalmente, mas não diagonalmente. Elas se movem em linhas retas ao longo de fileiras e colunas."
+        },
+        "pufferfishMovement": {
+            "title": "Movimento do Peixe-balão",
+            "description": "Peixes-balão podem se mover qualquer número de casas diagonalmente. Eles deslizam ao longo de linhas diagonais pelo tabuleiro."
+        },
+        "crabMovement": {
+            "title": "Movimento do Caranguejo",
+            "description": "Caranguejos se movem uma casa por vez verticalmente ou horizontalmente. Eles são peças lentas, mas constantes."
+        },
+        "octopusMovement": {
+            "title": "Movimento do Polvo",
+            "description": "Polvos se movem uma casa diagonalmente. Como os Caranguejos, eles se movem lentamente, mas podem ser muito estratégicos."
+        },
+        "capture": {
+            "title": "Capturando Peças",
+            "description": "Para capturar uma peça inimiga, mova uma de suas peças para a casa ocupada pelo inimigo. O Golfinho Branco pode capturar o Caranguejo Preto movendo-se para sua casa."
+        }
+    },
     "components": {
         "fixtureLoader": {
             "title": "Carregar Estado do Jogo",
