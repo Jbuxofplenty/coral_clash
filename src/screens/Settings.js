@@ -9,7 +9,7 @@ import { useAlert, useAuth, useTheme } from '../contexts';
 import { useFirebaseFunctions } from '../hooks';
 
 export default function Settings({ navigation: _navigation }) {
-    const { t, i18n } = useTranslation();
+    const { t } = useTranslation();
     const { user, refreshUserData, logOut } = useAuth();
     const { colors, setThemePreference } = useTheme();
     const { showAlert } = useAlert();
@@ -213,19 +213,6 @@ export default function Settings({ navigation: _navigation }) {
         }
     };
 
-    const updateLanguage = async (languageCode) => {
-        try {
-            setSaving(true);
-            // Change language in i18n
-            await i18n.changeLanguage(languageCode);
-            // The language will be cached automatically by the i18n config
-        } catch (error) {
-            console.error('Error changing language:', error);
-            showAlert('Error', 'Failed to change language');
-        } finally {
-            setSaving(false);
-        }
-    };
 
     if (loading) {
         return <LoadingScreen />;
@@ -305,30 +292,6 @@ export default function Settings({ navigation: _navigation }) {
                             description={t('settings.theme.autoDescription')}
                             selected={settings.theme === 'auto'}
                             onSelect={() => updateTheme('auto')}
-                            colors={colors}
-                            last
-                        />
-                    </Block>
-                </Block>
-
-                {/* Language Settings */}
-                <Block style={styles.section}>
-                    <Text h5 bold color={colors.TEXT}>
-                        {t('settings.language.title')}
-                    </Text>
-                    <Block style={[styles.card, { backgroundColor: colors.CARD_BACKGROUND }]}>
-                        <ThemeOption
-                            label={t('settings.language.english')}
-                            description={t('settings.language.englishDescription')}
-                            selected={i18n.language === 'en'}
-                            onSelect={() => updateLanguage('en')}
-                            colors={colors}
-                        />
-                        <ThemeOption
-                            label={t('settings.language.hindi')}
-                            description={t('settings.language.hindiDescription')}
-                            selected={i18n.language === 'hi'}
-                            onSelect={() => updateLanguage('hi')}
                             colors={colors}
                             last
                         />

@@ -1,47 +1,54 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Localization from 'expo-localization';
 
 import en from '../locales/en.json';
 import hi from '../locales/hi.json';
+import fr from '../locales/fr.json';
+import es from '../locales/es.json';
+import pt from '../locales/pt.json';
+import zh from '../locales/zh.json';
+import ur from '../locales/ur.json';
 
-const LANGUAGE_STORAGE_KEY = '@coral_clash_language';
-
-// Get device language using Intl API (works without native rebuild)
+// Get device language using expo-localization
 const getDeviceLanguage = () => {
   try {
-    // Use Intl.NumberFormat to get locale
-    const locale = Intl.NumberFormat().resolvedOptions().locale;
-    console.log('Device locale detected:', locale);
+    // Get device locales (returns array of locale strings in order of preference)
+    const locales = Localization.getLocales();
+    console.log('Device locales detected:', locales);
 
-    // Extract language code (e.g., 'en-US' -> 'en', 'hi-IN' -> 'hi')
-    const languageCode = locale.split('-')[0].toLowerCase();
+    if (locales && locales.length > 0) {
+      // Try each locale in order of preference
+      for (const locale of locales) {
+        const languageCode = locale.languageCode?.toLowerCase();
 
-    // Map device language to supported languages
-    const supportedLanguages = ['en', 'hi'];
-    return supportedLanguages.includes(languageCode) ? languageCode : 'en';
+        // Map device language to supported languages
+        const supportedLanguages = ['en', 'hi', 'fr', 'es', 'pt', 'zh', 'ur'];
+        if (supportedLanguages.includes(languageCode)) {
+          console.log('Matched device language:', languageCode);
+          return languageCode;
+        }
+      }
+    }
+
+    // Default to English if no match found
+    console.log('No matching language found, defaulting to English');
+    return 'en';
   } catch (error) {
     console.error('Error detecting device language:', error);
     return 'en';
   }
 };
 
-// Language detector plugin
+// Language detector plugin - only uses OS language, no storage
 const languageDetector = {
   type: 'languageDetector',
   async: true,
   detect: async (callback) => {
     try {
-      // Try to get stored language preference first
-      const storedLanguage = await AsyncStorage.getItem(LANGUAGE_STORAGE_KEY);
-      if (storedLanguage) {
-        console.log('Using stored language:', storedLanguage);
-        return callback(storedLanguage);
-      }
-
-      // Fall back to device locale
+      // Always use device locale
       const detectedLanguage = getDeviceLanguage();
-      console.log('Using detected language:', detectedLanguage);
+      console.log('Using detected OS language:', detectedLanguage);
       callback(detectedLanguage);
     } catch (error) {
       console.error('Error detecting language:', error);
@@ -49,13 +56,9 @@ const languageDetector = {
     }
   },
   init: () => {},
-  cacheUserLanguage: async (language) => {
-    try {
-      console.log('Caching language:', language);
-      await AsyncStorage.setItem(LANGUAGE_STORAGE_KEY, language);
-    } catch (error) {
-      console.error('Error caching language:', error);
-    }
+  cacheUserLanguage: () => {
+    // No-op: we don't cache language preferences anymore
+    // Always follow OS language
   },
 };
 
@@ -66,6 +69,11 @@ i18n
     resources: {
       en: { translation: en },
       hi: { translation: hi },
+      fr: { translation: fr },
+      es: { translation: es },
+      pt: { translation: pt },
+      zh: { translation: zh },
+      ur: { translation: ur },
     },
     fallbackLng: 'en',
     interpolation: {

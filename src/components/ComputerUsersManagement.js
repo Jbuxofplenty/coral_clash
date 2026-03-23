@@ -3,7 +3,6 @@ import React, { useMemo, useState } from 'react';
 import { ActivityIndicator, Dimensions, StyleSheet, TouchableOpacity } from 'react-native';
 import { moderateScale } from 'react-native-size-matters';
 import { useTranslation } from 'react-i18next';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { useAlert, useAuth, useTheme } from '../contexts';
 import { useFirebaseFunctions } from '../hooks';
@@ -25,7 +24,6 @@ export default function ComputerUsersManagement() {
     const { initializeComputerUsers, deleteComputerUsers } = useFirebaseFunctions();
     const [initializing, setInitializing] = useState(false);
     const [deleting, setDeleting] = useState(false);
-    const [clearingLanguage, setClearingLanguage] = useState(false);
 
     // Only show this component if user has internalUser flag
     const isInternalUser = useMemo(() => {
@@ -95,23 +93,6 @@ export default function ComputerUsersManagement() {
         );
     };
 
-    const handleClearLanguage = async () => {
-        setClearingLanguage(true);
-        try {
-            await AsyncStorage.removeItem('@coral_clash_language');
-            showAlert(
-                t('components.computerUsers.successTitle'),
-                t('components.computerUsers.clearLanguageSuccess'),
-            );
-            console.log('Language preference cleared from AsyncStorage');
-        } catch (error) {
-            console.error('Error clearing language preference:', error);
-            showAlert(t('components.computerUsers.errorTitle'), t('components.computerUsers.clearLanguageError'));
-        } finally {
-            setClearingLanguage(false);
-        }
-    };
-
     return (
         <Block
             card
@@ -163,11 +144,11 @@ export default function ComputerUsersManagement() {
                             styles.button,
                             {
                                 backgroundColor: colors.PRIMARY,
-                                opacity: initializing || deleting || clearingLanguage ? 0.6 : 1,
+                                opacity: initializing || deleting ? 0.6 : 1,
                             },
                         ]}
                         onPress={handleInitialize}
-                        disabled={initializing || deleting || clearingLanguage}
+                        disabled={initializing || deleting}
                         activeOpacity={0.8}
                     >
                         {initializing ? (
@@ -191,11 +172,11 @@ export default function ComputerUsersManagement() {
                             styles.button,
                             {
                                 backgroundColor: colors.ERROR || '#FF3B30',
-                                opacity: initializing || deleting || clearingLanguage ? 0.6 : 1,
+                                opacity: initializing || deleting ? 0.6 : 1,
                             },
                         ]}
                         onPress={handleDelete}
-                        disabled={initializing || deleting || clearingLanguage}
+                        disabled={initializing || deleting}
                         activeOpacity={0.8}
                     >
                         {deleting ? (
@@ -210,37 +191,6 @@ export default function ComputerUsersManagement() {
                                 ]}
                             >
                                 Delete All
-                            </Text>
-                        )}
-                    </TouchableOpacity>
-                </Block>
-
-                <Block style={styles.buttonContainer}>
-                    <TouchableOpacity
-                        style={[
-                            styles.button,
-                            styles.fullWidthButton,
-                            {
-                                backgroundColor: colors.WARNING || '#FF9500',
-                                opacity: initializing || deleting || clearingLanguage ? 0.6 : 1,
-                            },
-                        ]}
-                        onPress={handleClearLanguage}
-                        disabled={initializing || deleting || clearingLanguage}
-                        activeOpacity={0.8}
-                    >
-                        {clearingLanguage ? (
-                            <ActivityIndicator size='small' color={colors.WHITE || '#FFFFFF'} />
-                        ) : (
-                            <Text
-                                style={[
-                                    styles.buttonText,
-                                    {
-                                        color: colors.WHITE || '#FFFFFF',
-                                    },
-                                ]}
-                            >
-                                Clear Language Storage
                             </Text>
                         )}
                     </TouchableOpacity>
@@ -308,10 +258,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         minHeight: 44,
-    },
-    fullWidthButton: {
-        flex: 1,
-        width: '100%',
     },
     buttonText: {
         fontSize: moderateScale(14),
