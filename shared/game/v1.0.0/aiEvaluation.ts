@@ -823,6 +823,7 @@ export function alphaBeta(
     lastMove: LastMoveInfo | null = null,
     transpositionTable: TranspositionTable | null = null,
     ply: number = 0, // Track the current depth from the root
+    difficulty: 'easy' | 'medium' | 'hard' = 'medium',
 ): AlphaBetaResult {
     let nodesEvaluated = 1;
 
@@ -950,7 +951,8 @@ export function alphaBeta(
     const isMiddleGame = pieceCount >= 16 && pieceCount < 24;
     
     // Only apply pruning deep in the tree (ply >= 2) so first 2 moves of any line are fully examined
-    if (ply >= 2 && (isEarlyGame || isMiddleGame)) {
+    // EXCEPT in easy mode, where we prune immediately to reduce strength and calculation time
+    if ((difficulty === 'easy' || ply >= 2) && (isEarlyGame || isMiddleGame)) {
         // Define high-value pieces: hunters (900), gatherers (850), whales (infinite)
         const HIGH_VALUE_THRESHOLD = 800; // Dolphins and above
         const MEDIUM_VALUE_THRESHOLD = 400; // Turtles and octopi
@@ -1043,6 +1045,7 @@ export function alphaBeta(
                 null,
                 transpositionTable,
                 ply + 1,
+                difficulty,
             );
 
             game.undoInternal();
@@ -1123,6 +1126,7 @@ export function findBestMove(
     transpositionTable: TranspositionTable | null = null,
     aspirationAlpha: number | null = null,
     aspirationBeta: number | null = null,
+    difficulty: 'easy' | 'medium' | 'hard' = 'medium',
 ): AlphaBetaResult & { aspirationFailed?: boolean } {
     let game: CoralClash;
 
@@ -1162,6 +1166,7 @@ export function findBestMove(
         lastMove,
         transpositionTable,
         0, // This is the root level
+        difficulty,
     );
 
     // Convert InternalMove to pretty move format if called with a snapshot for backwards compatibility
@@ -1378,7 +1383,8 @@ export function findBestMoveIterativeDeepening(
                 timeControl,
                 null,
                 transpositionTable,
-                1 // iter loops over root moves, so ply is 1 here
+                1, // iter loops over root moves, so ply is 1 here
+                difficulty,
             );
 
             game.undoInternal();
