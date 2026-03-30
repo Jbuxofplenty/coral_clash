@@ -1,0 +1,2426 @@
+
+> @jbuxofplenty/coral-clash@2.7.0 test
+> jest zobrist.test.ts
+
+  console.log
+    Move XOR out piece: 4274937139123885776 (o at 83)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 5545371256710395437 (o at 66)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR in coral placed: 13115858926228706956
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3127:61)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 4274937139123885776 (o at 83)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 5545371256710395437 (o at 66)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 4274937139123885776 (o at 83)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 6768378270790755913 (o at 68)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR in coral placed: 93096721145587609
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3127:61)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 4274937139123885776 (o at 83)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 6768378270790755913 (o at 68)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 2813571853037949508 (o at 84)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 9716774510592565120 (o at 67)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 2813571853037949508 (o at 84)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 16426299542247014418 (o at 69)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 3355851520879272820 (c at 96)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 1483357540822989372 (c at 80)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 97851678752125020 (o at 97)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 12407960276763417466 (o at 80)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR in coral placed: 7847491794882682083
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3127:61)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 97851678752125020 (o at 97)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 12407960276763417466 (o at 80)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 97851678752125020 (o at 97)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 18168871420872385421 (o at 82)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR in coral placed: 9164125156279471646
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3127:61)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 97851678752125020 (o at 97)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 18168871420872385421 (o at 82)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 1377509683288808626 (c at 98)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 12418467990806826065 (c at 82)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR in coral placed: 9164125156279471646
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3127:61)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 1377509683288808626 (c at 98)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 12418467990806826065 (c at 82)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 9814722362919583737 (d at 99)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 3678198572881540792 (d at 82)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 9814722362919583737 (d at 99)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 290171866012428710 (d at 65)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 9814722362919583737 (d at 99)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 10959498807113168774 (d at 48)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 15130304241617742532 (d at 100)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 1213755624208969429 (d at 85)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR in coral placed: 15704330371548807192
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3127:61)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 15130304241617742532 (d at 100)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 1213755624208969429 (d at 85)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 15130304241617742532 (d at 100)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 6624062202859738069 (d at 70)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR in coral placed: 10926228457288139171
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3127:61)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 15130304241617742532 (d at 100)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 6624062202859738069 (d at 70)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 15130304241617742532 (d at 100)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 10596603869525893495 (d at 55)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR in coral placed: 9712674618412967378
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3127:61)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 15130304241617742532 (d at 100)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 10596603869525893495 (d at 55)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 6582640452118931106 (c at 101)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 6785317478056975164 (c at 85)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 14303612165546446502 (o at 102)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 12849818067311327742 (o at 85)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 14303612165546446502 (o at 102)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 366183288817022617 (o at 87)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 6599914036055948582 (c at 103)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 1504809493434136515 (c at 87)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR in coral placed: 5180479229214185462
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3127:61)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 6599914036055948582 (c at 103)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 1504809493434136515 (c at 87)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 4274937139123885776 (o at 83)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR in piece: 5545371256710395437 (o at 66)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR in coral placed: 13115858926228706956
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3127:61)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR out piece: 4274937139123885776 (o at 83)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR in piece: 5545371256710395437 (o at 66)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR out piece: 4274937139123885776 (o at 83)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR in piece: 6768378270790755913 (o at 68)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR in coral placed: 93096721145587609
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3127:61)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR out piece: 4274937139123885776 (o at 83)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR in piece: 6768378270790755913 (o at 68)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR out piece: 2813571853037949508 (o at 84)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR in piece: 9716774510592565120 (o at 67)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR out piece: 2813571853037949508 (o at 84)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR in piece: 16426299542247014418 (o at 69)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR out piece: 3355851520879272820 (c at 96)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR in piece: 1483357540822989372 (c at 80)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR out piece: 97851678752125020 (o at 97)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR in piece: 12407960276763417466 (o at 80)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR in coral placed: 7847491794882682083
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3127:61)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR out piece: 97851678752125020 (o at 97)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR in piece: 12407960276763417466 (o at 80)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR out piece: 97851678752125020 (o at 97)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR in piece: 18168871420872385421 (o at 82)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR in coral placed: 9164125156279471646
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3127:61)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR out piece: 97851678752125020 (o at 97)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR in piece: 18168871420872385421 (o at 82)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR out piece: 1377509683288808626 (c at 98)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR in piece: 12418467990806826065 (c at 82)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR in coral placed: 9164125156279471646
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3127:61)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR out piece: 1377509683288808626 (c at 98)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR in piece: 12418467990806826065 (c at 82)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR out piece: 9814722362919583737 (d at 99)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR in piece: 3678198572881540792 (d at 82)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR out piece: 9814722362919583737 (d at 99)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR in piece: 290171866012428710 (d at 65)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR out piece: 9814722362919583737 (d at 99)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR in piece: 10959498807113168774 (d at 48)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR out piece: 15130304241617742532 (d at 100)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR in piece: 1213755624208969429 (d at 85)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR in coral placed: 15704330371548807192
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3127:61)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR out piece: 15130304241617742532 (d at 100)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR in piece: 1213755624208969429 (d at 85)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR out piece: 15130304241617742532 (d at 100)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR in piece: 6624062202859738069 (d at 70)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR in coral placed: 10926228457288139171
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3127:61)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR out piece: 15130304241617742532 (d at 100)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR in piece: 6624062202859738069 (d at 70)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR out piece: 15130304241617742532 (d at 100)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR in piece: 10596603869525893495 (d at 55)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR in coral placed: 9712674618412967378
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3127:61)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR out piece: 15130304241617742532 (d at 100)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR in piece: 10596603869525893495 (d at 55)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR out piece: 6582640452118931106 (c at 101)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR in piece: 6785317478056975164 (c at 85)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR out piece: 14303612165546446502 (o at 102)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR in piece: 12849818067311327742 (o at 85)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR out piece: 14303612165546446502 (o at 102)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR in piece: 366183288817022617 (o at 87)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR out piece: 6599914036055948582 (c at 103)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR in piece: 1504809493434136515 (c at 87)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR in coral placed: 5180479229214185462
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3127:61)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR out piece: 6599914036055948582 (c at 103)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR in piece: 1504809493434136515 (c at 87)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+          at Array.map (<anonymous>)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+          at Array.map (<anonymous>)
+
+  console.log
+    --- BEFORE MOVE ---
+
+      at Object.<anonymous> (game/v1.0.0/__tests__/zobrist.test.ts:13:17)
+
+  console.log
+    Hash Before (Inc): 5382020452564039549
+
+      at Object.<anonymous> (game/v1.0.0/__tests__/zobrist.test.ts:15:17)
+
+  console.log
+    Hash Before (Full): 5382020452564039549
+
+      at Object.<anonymous> (game/v1.0.0/__tests__/zobrist.test.ts:17:17)
+
+  console.log
+    
+    --- MAKING MOVE ---
+
+      at Object.<anonymous> (game/v1.0.0/__tests__/zobrist.test.ts:19:17)
+
+  console.log
+    Move XOR out piece: 4274937139123885776 (o at 83)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 5545371256710395437 (o at 66)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR in coral placed: 13115858926228706956
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3127:61)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 4274937139123885776 (o at 83)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 5545371256710395437 (o at 66)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 4274937139123885776 (o at 83)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 6768378270790755913 (o at 68)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR in coral placed: 93096721145587609
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3127:61)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 4274937139123885776 (o at 83)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 6768378270790755913 (o at 68)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 2813571853037949508 (o at 84)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 9716774510592565120 (o at 67)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 2813571853037949508 (o at 84)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 16426299542247014418 (o at 69)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 3355851520879272820 (c at 96)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 1483357540822989372 (c at 80)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 97851678752125020 (o at 97)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 12407960276763417466 (o at 80)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR in coral placed: 7847491794882682083
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3127:61)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 97851678752125020 (o at 97)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 12407960276763417466 (o at 80)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 97851678752125020 (o at 97)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 18168871420872385421 (o at 82)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR in coral placed: 9164125156279471646
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3127:61)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 97851678752125020 (o at 97)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 18168871420872385421 (o at 82)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 1377509683288808626 (c at 98)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 12418467990806826065 (c at 82)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR in coral placed: 9164125156279471646
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3127:61)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 1377509683288808626 (c at 98)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 12418467990806826065 (c at 82)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 9814722362919583737 (d at 99)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 3678198572881540792 (d at 82)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 9814722362919583737 (d at 99)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 290171866012428710 (d at 65)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 9814722362919583737 (d at 99)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 10959498807113168774 (d at 48)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 15130304241617742532 (d at 100)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 1213755624208969429 (d at 85)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR in coral placed: 15704330371548807192
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3127:61)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 15130304241617742532 (d at 100)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 1213755624208969429 (d at 85)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 15130304241617742532 (d at 100)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 6624062202859738069 (d at 70)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR in coral placed: 10926228457288139171
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3127:61)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 15130304241617742532 (d at 100)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 6624062202859738069 (d at 70)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 15130304241617742532 (d at 100)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 10596603869525893495 (d at 55)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR in coral placed: 9712674618412967378
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3127:61)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 15130304241617742532 (d at 100)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 10596603869525893495 (d at 55)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 6582640452118931106 (c at 101)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 6785317478056975164 (c at 85)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 14303612165546446502 (o at 102)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 12849818067311327742 (o at 85)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 14303612165546446502 (o at 102)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 366183288817022617 (o at 87)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 6599914036055948582 (c at 103)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 1504809493434136515 (c at 87)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR in coral placed: 5180479229214185462
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3127:61)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 6599914036055948582 (c at 103)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 1504809493434136515 (c at 87)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 4274937139123885776 (o at 83)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 5545371256710395437 (o at 66)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR in coral placed: 13115858926228706956
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3127:61)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 4274937139123885776 (o at 83)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 5545371256710395437 (o at 66)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 4274937139123885776 (o at 83)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 6768378270790755913 (o at 68)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR in coral placed: 93096721145587609
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3127:61)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 4274937139123885776 (o at 83)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 6768378270790755913 (o at 68)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 2813571853037949508 (o at 84)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 9716774510592565120 (o at 67)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 2813571853037949508 (o at 84)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 16426299542247014418 (o at 69)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 3355851520879272820 (c at 96)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 1483357540822989372 (c at 80)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 97851678752125020 (o at 97)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 12407960276763417466 (o at 80)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR in coral placed: 7847491794882682083
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3127:61)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 97851678752125020 (o at 97)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 12407960276763417466 (o at 80)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 97851678752125020 (o at 97)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 18168871420872385421 (o at 82)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR in coral placed: 9164125156279471646
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3127:61)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 97851678752125020 (o at 97)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 18168871420872385421 (o at 82)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 1377509683288808626 (c at 98)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 12418467990806826065 (c at 82)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR in coral placed: 9164125156279471646
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3127:61)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 1377509683288808626 (c at 98)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 12418467990806826065 (c at 82)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 9814722362919583737 (d at 99)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 3678198572881540792 (d at 82)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 9814722362919583737 (d at 99)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 290171866012428710 (d at 65)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 9814722362919583737 (d at 99)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 10959498807113168774 (d at 48)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 15130304241617742532 (d at 100)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 1213755624208969429 (d at 85)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR in coral placed: 15704330371548807192
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3127:61)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 15130304241617742532 (d at 100)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 1213755624208969429 (d at 85)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 15130304241617742532 (d at 100)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 6624062202859738069 (d at 70)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR in coral placed: 10926228457288139171
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3127:61)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 15130304241617742532 (d at 100)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 6624062202859738069 (d at 70)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 15130304241617742532 (d at 100)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 10596603869525893495 (d at 55)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR in coral placed: 9712674618412967378
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3127:61)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 15130304241617742532 (d at 100)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 10596603869525893495 (d at 55)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 6582640452118931106 (c at 101)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 6785317478056975164 (c at 85)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 14303612165546446502 (o at 102)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 12849818067311327742 (o at 85)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 14303612165546446502 (o at 102)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 366183288817022617 (o at 87)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 6599914036055948582 (c at 103)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 1504809493434136515 (c at 87)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR in coral placed: 5180479229214185462
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3127:61)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 6599914036055948582 (c at 103)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 1504809493434136515 (c at 87)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 4274937139123885776 (o at 83)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 5545371256710395437 (o at 66)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR in coral placed: 13115858926228706956
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3127:61)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 4274937139123885776 (o at 83)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 5545371256710395437 (o at 66)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 4274937139123885776 (o at 83)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 6768378270790755913 (o at 68)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR in coral placed: 93096721145587609
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3127:61)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 4274937139123885776 (o at 83)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 6768378270790755913 (o at 68)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 2813571853037949508 (o at 84)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 9716774510592565120 (o at 67)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 2813571853037949508 (o at 84)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 16426299542247014418 (o at 69)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 3355851520879272820 (c at 96)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 1483357540822989372 (c at 80)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 97851678752125020 (o at 97)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 12407960276763417466 (o at 80)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR in coral placed: 7847491794882682083
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3127:61)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 97851678752125020 (o at 97)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 12407960276763417466 (o at 80)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 97851678752125020 (o at 97)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 18168871420872385421 (o at 82)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR in coral placed: 9164125156279471646
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3127:61)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 97851678752125020 (o at 97)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 18168871420872385421 (o at 82)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 1377509683288808626 (c at 98)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 12418467990806826065 (c at 82)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR in coral placed: 9164125156279471646
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3127:61)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 1377509683288808626 (c at 98)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 12418467990806826065 (c at 82)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 9814722362919583737 (d at 99)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 3678198572881540792 (d at 82)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 9814722362919583737 (d at 99)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 290171866012428710 (d at 65)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 9814722362919583737 (d at 99)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 10959498807113168774 (d at 48)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 15130304241617742532 (d at 100)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 1213755624208969429 (d at 85)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR in coral placed: 15704330371548807192
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3127:61)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 15130304241617742532 (d at 100)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 1213755624208969429 (d at 85)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 15130304241617742532 (d at 100)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 6624062202859738069 (d at 70)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR in coral placed: 10926228457288139171
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3127:61)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 15130304241617742532 (d at 100)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 6624062202859738069 (d at 70)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 15130304241617742532 (d at 100)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 10596603869525893495 (d at 55)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR in coral placed: 9712674618412967378
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3127:61)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 15130304241617742532 (d at 100)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 10596603869525893495 (d at 55)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 6582640452118931106 (c at 101)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 6785317478056975164 (c at 85)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 14303612165546446502 (o at 102)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 12849818067311327742 (o at 85)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 14303612165546446502 (o at 102)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 366183288817022617 (o at 87)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 6599914036055948582 (c at 103)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 1504809493434136515 (c at 87)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR in coral placed: 5180479229214185462
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3127:61)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 6599914036055948582 (c at 103)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 1504809493434136515 (c at 87)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 4274937139123885776 (o at 83)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 5545371256710395437 (o at 66)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR in coral placed: 13115858926228706956
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3127:61)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    Move XOR out piece: 4274937139123885776 (o at 83)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3046:65)
+
+  console.log
+    Move XOR in piece: 5545371256710395437 (o at 66)
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3081:65)
+
+  console.log
+    Move XOR in coral placed: 13115858926228706956
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3127:61)
+
+  console.log
+    Move XOR out turn w: 3057265352820926348, XOR in turn b: 634338577814702972
+
+      at CoralClash._makeMove (game/v1.0.0/coralClash.ts:3178:57)
+
+  console.log
+    
+    --- AFTER MOVE ---
+
+      at Object.<anonymous> (game/v1.0.0/__tests__/zobrist.test.ts:22:17)
+
+  console.log
+    Hash After (Inc): 5431458113488659737
+
+      at Object.<anonymous> (game/v1.0.0/__tests__/zobrist.test.ts:24:17)
+
+  console.log
+    Hash After (Full): 12228002506131172860
+
+      at Object.<anonymous> (game/v1.0.0/__tests__/zobrist.test.ts:26:17)
+
+  console.log
+    XOR DIFFERENCE =  16344404305395009765n
+
+      at Object.<anonymous> (game/v1.0.0/__tests__/zobrist.test.ts:28:17)
+

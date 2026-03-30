@@ -25,6 +25,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+import { zobristKeys } from './zobrist.js';
+
 export const WHITE = 'w';
 export const BLACK = 'b';
 
@@ -170,6 +172,7 @@ interface History {
     coral: Array<Color | null>; // Snapshot of coral state
     coralRemaining: Record<Color, number>; // Snapshot of remaining coral
     pieceRole?: PieceRole; // Role of the piece that moved (for proper undo)
+    hash: bigint; // Zobrist hash of the position before move
 }
 
 export type Move = {
@@ -723,6 +726,56 @@ export class CoralClash {
         b: new Set(),
     };
 
+    private _currentHash: bigint = 0n;
+
+    public get currentHash(): bigint {
+        return this._currentHash;
+    }
+
+    public verifyHash(): bigint {
+        let hash = 0n;
+
+        // Hash pieces in O(64) scan
+        for (let i = 0; i < 120; i++) {
+            if (i & 0x88) {
+                i += 7;
+                continue;
+            }
+
+            const piece = this._board[i];
+            if (piece) {
+                const squareIdx = (i >> 4) * 8 + (i & 7); // 0-63 idx
+                hash ^= zobristKeys.getPieceKey(piece.type, squareIdx, piece.color, piece.role || null);
+            }
+        }
+
+        // Specifically account for the Whale's second square!
+        // The _board only stores the whale piece at kings[color][0], so we explicitly hash kings[color][1]
+        for (const color of ['w', 'b'] as Color[]) {
+            const secondSq = this._kings[color][1];
+            if (secondSq !== EMPTY && secondSq !== undefined) {
+                const squareIdx = (secondSq >> 4) * 8 + (secondSq & 7);
+                hash ^= zobristKeys.getPieceKey(WHALE, squareIdx, color, null);
+            }
+        }
+
+        // Hash coral states
+        for (let i = 0; i < 120; i++) {
+            if (i & 0x88) {
+                i += 7;
+                continue;
+            }
+            const c = this._coral[i];
+            const squareIdx = (i >> 4) * 8 + (i & 7);
+            hash ^= zobristKeys.getCoralKey(squareIdx, c);
+        }
+
+        // Hash turn
+        hash ^= zobristKeys.getTurnKey(this._turn);
+
+        return hash;
+    }
+
     constructor(fen = DEFAULT_POSITION) {
         this.load(fen);
     }
@@ -923,6 +976,8 @@ export class CoralClash {
         ) {
             this._initializeStartingCoral();
         }
+
+        this._currentHash = this.verifyHash();
     }
 
     fen() {
@@ -2677,6 +2732,7 @@ export class CoralClash {
             coral: [...this._coral],
             coralRemaining: { b: this._coralRemaining.b, w: this._coralRemaining.w },
             pieceRole: pieceRole, // Save piece role for undo
+            hash: this._currentHash,
         });
     }
 
@@ -2704,7 +2760,12 @@ export class CoralClash {
     private _makeMove(move: InternalMove) {
         const us = move.color;
         const them = swapColor(us);
+
         this._push(move);
+
+        // Turn hash XOR
+        this._currentHash ^= zobristKeys.getTurnKey(this._turn);
+        this._currentHash ^= zobristKeys.getTurnKey(them);
 
         // Increment board generation to invalidate stale cache entries
         // This is much faster than clearing result cache and allows reuse of valid entries
@@ -2747,6 +2808,9 @@ export class CoralClash {
         if (move.piece === WHALE) {
             // Whale move: Remove piece from both old squares
             const [oldFirst, oldSecond] = this._kings[us];
+
+            this._currentHash ^= zobristKeys.getPieceKey(WHALE, (oldFirst >> 4) * 8 + (oldFirst & 7), us, null);
+            this._currentHash ^= zobristKeys.getPieceKey(WHALE, (oldSecond >> 4) * 8 + (oldSecond & 7), us, null);
 
             // Always use a clean whale piece (don't trust stored data which might be corrupted)
             const whalePiece: Piece = {
@@ -2813,8 +2877,11 @@ export class CoralClash {
                     capturedAtFirst = true;
                     // Remove captured piece from piece list
                     if (pieceAtFirst.type === WHALE) {
+                        this._currentHash ^= zobristKeys.getPieceKey(WHALE, (this._kings[them][0] >> 4) * 8 + (this._kings[them][0] & 7), them, null);
+                        this._currentHash ^= zobristKeys.getPieceKey(WHALE, (this._kings[them][1] >> 4) * 8 + (this._kings[them][1] & 7), them, null);
                         this._pieces[them].delete(this._kings[them][0]);
                     } else {
+                        this._currentHash ^= zobristKeys.getPieceKey(pieceAtFirst.type, (newFirst >> 4) * 8 + (newFirst & 7), them, pieceAtFirst.role || null);
                         this._pieces[them].delete(newFirst);
                     }
                     delete this._board[newFirst];
@@ -2840,8 +2907,11 @@ export class CoralClash {
                     }
                     // Remove captured piece from piece list
                     if (pieceAtSecond.type === WHALE) {
+                        this._currentHash ^= zobristKeys.getPieceKey(WHALE, (this._kings[them][0] >> 4) * 8 + (this._kings[them][0] & 7), them, null);
+                        this._currentHash ^= zobristKeys.getPieceKey(WHALE, (this._kings[them][1] >> 4) * 8 + (this._kings[them][1] & 7), them, null);
                         this._pieces[them].delete(this._kings[them][0]);
                     } else {
+                        this._currentHash ^= zobristKeys.getPieceKey(pieceAtSecond.type, (newSecond >> 4) * 8 + (newSecond & 7), them, pieceAtSecond.role || null);
                         this._pieces[them].delete(newSecond);
                     }
                     delete this._board[newSecond];
@@ -2849,6 +2919,9 @@ export class CoralClash {
             }
 
             this._board[newFirst] = { ...whalePiece };
+
+            this._currentHash ^= zobristKeys.getPieceKey(WHALE, (newFirst >> 4) * 8 + (newFirst & 7), us, null);
+            this._currentHash ^= zobristKeys.getPieceKey(WHALE, (newSecond >> 4) * 8 + (newSecond & 7), us, null);
 
             // Update whale positions
             this._kings[us] = [newFirst, newSecond];
@@ -2858,14 +2931,29 @@ export class CoralClash {
             this._pieces[us].add(newFirst);
         } else {
             // Normal piece move
-            // IMPORTANT: Create a COPY to avoid reference issues
             const pieceToMove = this._board[move.from];
+            
+            this._currentHash ^= zobristKeys.getPieceKey(move.piece, (move.from >> 4) * 8 + (move.from & 7), us, move.role || null);
+
+            const capturedPiece = this._board[move.to];
+            if (capturedPiece && capturedPiece.color === them) {
+                if (capturedPiece.type === WHALE) {
+                    this._currentHash ^= zobristKeys.getPieceKey(WHALE, (this._kings[them][0] >> 4) * 8 + (this._kings[them][0] & 7), them, null);
+                    this._currentHash ^= zobristKeys.getPieceKey(WHALE, (this._kings[them][1] >> 4) * 8 + (this._kings[them][1] & 7), them, null);
+                } else {
+                    this._currentHash ^= zobristKeys.getPieceKey(capturedPiece.type, (move.to >> 4) * 8 + (move.to & 7), them, capturedPiece.role || null);
+                }
+            }
+
+            // IMPORTANT: Create a COPY to avoid reference issues
             if (pieceToMove) {
                 this._board[move.to] = { ...pieceToMove };
             } else {
                 this._board[move.to] = pieceToMove;
             }
             delete this._board[move.from];
+            
+            this._currentHash ^= zobristKeys.getPieceKey(move.piece, (move.to >> 4) * 8 + (move.to & 7), us, move.role || null);
             
             // Update piece list: piece moved from move.from to move.to
             this._pieces[us].delete(move.from);
@@ -2874,8 +2962,12 @@ export class CoralClash {
 
         // if pawn promotion, replace with new piece
         if (move.promotion) {
-            // Preserve the role (hunter/gatherer) from the original piece
             const originalPiece = this._board[move.to];
+
+            this._currentHash ^= zobristKeys.getPieceKey(move.piece, (move.to >> 4) * 8 + (move.to & 7), us, originalPiece?.role || null);
+            this._currentHash ^= zobristKeys.getPieceKey(move.promotion, (move.to >> 4) * 8 + (move.to & 7), us, originalPiece?.role || null);
+
+            // Preserve the role (hunter/gatherer) from the original piece
             this._board[move.to] = {
                 type: move.promotion,
                 color: us,
@@ -2887,7 +2979,9 @@ export class CoralClash {
 
         // Handle coral placement (gatherer effect)
         if (move.coralPlaced) {
+            this._currentHash ^= zobristKeys.getCoralKey((move.to >> 4) * 8 + (move.to & 7), this._coral[move.to]);
             this._coral[move.to] = us;
+            this._currentHash ^= zobristKeys.getCoralKey((move.to >> 4) * 8 + (move.to & 7), us);
             this._coralRemaining[us]--;
         }
 
@@ -2897,7 +2991,9 @@ export class CoralClash {
             for (const sq of move.coralRemovedSquares) {
                 const coralColor = this._coral[sq];
                 if (coralColor) {
+                    this._currentHash ^= zobristKeys.getCoralKey((sq >> 4) * 8 + (sq & 7), coralColor);
                     this._coral[sq] = null;
+                    this._currentHash ^= zobristKeys.getCoralKey((sq >> 4) * 8 + (sq & 7), null);
                     this._coralRemaining[coralColor]++;
                 }
             }
@@ -2905,7 +3001,9 @@ export class CoralClash {
             // Regular piece - remove coral from destination square only
             const coralColor = this._coral[move.to];
             if (coralColor) {
+                this._currentHash ^= zobristKeys.getCoralKey((move.to >> 4) * 8 + (move.to & 7), coralColor);
                 this._coral[move.to] = null;
+                this._currentHash ^= zobristKeys.getCoralKey((move.to >> 4) * 8 + (move.to & 7), null);
                 this._coralRemaining[coralColor]++;
             }
         }
@@ -2983,6 +3081,9 @@ export class CoralClash {
         // Restore coral state (create copies to avoid reference issues)
         this._coral = [...old.coral];
         this._coralRemaining = { b: old.coralRemaining.b, w: old.coralRemaining.w };
+
+        // Restore hash perfectly
+        this._currentHash = old.hash;
 
         // Special handling for whale moves - whale is stored at both positions
         if (move.piece === WHALE && whaleCurrentPositions) {
