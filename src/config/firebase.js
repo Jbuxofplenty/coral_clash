@@ -4,6 +4,7 @@ import analyticsModule, {
     setAnalyticsCollectionEnabled,
     setConsent,
 } from '@react-native-firebase/analytics';
+import analyticsModule from '@react-native-firebase/analytics';
 import { getApp } from '@react-native-firebase/app';
 import * as Crypto from 'expo-crypto';
 import { initializeApp } from 'firebase/app';
