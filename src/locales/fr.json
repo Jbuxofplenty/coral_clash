@@ -82,6 +82,13 @@
         },
         "actions": {
             "cancel": "Annuler"
+        },
+        "postMatchSignup": {
+            "title": "Belle partie !",
+            "message": "Envie de sauvegarder vos stats et jouer contre de vraies personnes ?",
+            "lossTitle": "Continuez comme ça !",
+            "lossMessage": "Chaque défaite est une leçon. Inscrivez-vous pour suivre votre progression.",
+            "button": "S'inscrire maintenant"
         }
     },
     "navigation": {

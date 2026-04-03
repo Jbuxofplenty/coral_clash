@@ -82,6 +82,13 @@
         },
         "actions": {
             "cancel": "取消"
+        },
+        "postMatchSignup": {
+            "title": "精彩对局！",
+            "message": "想要保存您的统计数据并与真实玩家对战吗？",
+            "lossTitle": "再接再厉！",
+            "lossMessage": "每次失败都是一次学习机会。注册以跟踪您的进步并不断提升。",
+            "button": "立即注册"
         }
     },
     "navigation": {
