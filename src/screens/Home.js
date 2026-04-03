@@ -702,19 +702,31 @@ export default function Home({ navigation }) {
                 {/* Banner Ad - displayed below header */}
                 <BannerAd />
 
-                {/* Sign Up Prompt Card - show at top when user is not logged in */}
-                {!user && <SignUpPromptCard onPress={() => navigation.navigate('Log In')} />}
-
                 {!user && (
-                    <GameModeCard
-                        title={t('home.gameModes.howToPlayTitle')}
-                        description={t('home.gameModes.howToPlayDescription')}
-                        icon='question-circle'
-                        iconFamily='font-awesome'
-                        onPress={() => navigation.navigate('How-To Play')}
-                        disabled={creatingGame || searching}
-                    />
+                    <>
+                        <GameModeCard
+                            title={t('home.gameModes.playComputerTitle')}
+                            description={t('home.gameModes.playComputerDescription')}
+                            icon='desktop'
+                            iconFamily='font-awesome'
+                            onPress={handleStartComputerGame}
+                            disabled={creatingGame || searching}
+                            loading={creatingGame && pendingGameAction === 'computer'}
+                            horizontal={false}
+                        />
+                        <GameModeCard
+                            title={t('home.gameModes.howToPlayTitle')}
+                            description={t('home.gameModes.howToPlayDescription')}
+                            icon='question-circle'
+                            iconFamily='font-awesome'
+                            onPress={() => navigation.navigate('How-To Play')}
+                            disabled={creatingGame || searching}
+                        />
+                    </>
                 )}
+
+                {/* Sign Up Prompt Card - show after game modes when user is not logged in */}
+                {!user && <SignUpPromptCard onPress={() => navigation.navigate('Log In')} />}
 
                 {/* Active Games Card - show at top if there are games */}
                 {activeGames.length > 0 && (
@@ -749,16 +761,18 @@ export default function Home({ navigation }) {
                     </>
                 )}
 
-                <GameModeCard
-                    title={t('home.gameModes.playComputerTitle')}
-                    description={t('home.gameModes.playComputerDescription')}
-                    icon='desktop'
-                    iconFamily='font-awesome'
-                    onPress={handleStartComputerGame}
-                    disabled={creatingGame || searching}
-                    loading={creatingGame && pendingGameAction === 'computer'}
-                    horizontal={!!user}
-                />
+                {user && (
+                    <GameModeCard
+                        title={t('home.gameModes.playComputerTitle')}
+                        description={t('home.gameModes.playComputerDescription')}
+                        icon='desktop'
+                        iconFamily='font-awesome'
+                        onPress={handleStartComputerGame}
+                        disabled={creatingGame || searching}
+                        loading={creatingGame && pendingGameAction === 'computer'}
+                        horizontal={true}
+                    />
+                )}
 
                 {enableDevFeatures && (
                     <GameModeCard
