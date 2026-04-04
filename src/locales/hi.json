@@ -149,37 +149,37 @@
         }
     },
     "stats": {
-    "overallStatistics": "सम्पूर्ण आंकड़े",
-    "gamesPlayed": "खेले गए गेम्स",
-    "wins": "जीत",
-    "losses": "हार",
-    "draws": "ड्रॉ",
-    "winRate": "जीत दर",
-    "matchupStatistics": "मुकाबला आंकड़े",
-    "matchupDescription": "प्रत्येक प्रतिद्वंद्वी के खिलाफ जीत दर (PvP और कंप्यूटर)",
-    "computer": "कंप्यूटर",
-    "winRateShort": "जीत दर",
-    "winsShort": "W",
-    "lossesShort": "L",
-    "drawsShort": "D",
-    "noGamesYet": "अभी तक कोई गेम नहीं",
-    "noGamesHint": "अपने आंकड़े यहां देखने के लिए गेम खेलना शुरू करें!"
-  },
-  "gameMenu": {
-    "saveGameState": "गेम स्थिति सेव करें",
-    "exportPosition": "वर्तमान गेम स्थिति एक्सपोर्ट करें",
-    "flipBoard": "बोर्ड पलटें",
-    "showingBlackBottom": "वर्तमान में काला नीचे दिख रहा है",
-    "showingWhiteBottom": "वर्तमान में सफेद नीचे दिख रहा है",
-    "reportBug": "बग रिपोर्ट करें",
-    "includeGameState": "वर्तमान गेम स्थिति शामिल करें",
-    "resignGame": "गेम छोड़ें",
-    "resigning": "गेम छोड़ा जा रहा है...",
-    "pleaseWait": "कृपया प्रतीक्षा करें...",
-    "gameEnded": "गेम पहले ही समाप्त हो चुका है",
-    "forfeitGame": "वर्तमान गेम जब्त करें"
-  },
-  "reportIssue": {
+        "overallStatistics": "सम्पूर्ण आंकड़े",
+        "gamesPlayed": "खेले गए गेम्स",
+        "wins": "जीत",
+        "losses": "हार",
+        "draws": "ड्रॉ",
+        "winRate": "जीत दर",
+        "matchupStatistics": "मुकाबला आंकड़े",
+        "matchupDescription": "प्रत्येक प्रतिद्वंद्वी के खिलाफ जीत दर (PvP और कंप्यूटर)",
+        "computer": "कंप्यूटर",
+        "winRateShort": "जीत दर",
+        "winsShort": "W",
+        "lossesShort": "L",
+        "drawsShort": "D",
+        "noGamesYet": "अभी तक कोई गेम नहीं",
+        "noGamesHint": "अपने आंकड़े यहां देखने के लिए गेम खेलना शुरू करें!"
+    },
+    "gameMenu": {
+        "saveGameState": "गेम स्थिति सेव करें",
+        "exportPosition": "वर्तमान गेम स्थिति एक्सपोर्ट करें",
+        "flipBoard": "बोर्ड पलटें",
+        "showingBlackBottom": "वर्तमान में काला नीचे दिख रहा है",
+        "showingWhiteBottom": "वर्तमान में सफेद नीचे दिख रहा है",
+        "reportBug": "बग रिपोर्ट करें",
+        "includeGameState": "वर्तमान गेम स्थिति शामिल करें",
+        "resignGame": "गेम छोड़ें",
+        "resigning": "गेम छोड़ा जा रहा है...",
+        "pleaseWait": "कृपया प्रतीक्षा करें...",
+        "gameEnded": "गेम पहले ही समाप्त हो चुका है",
+        "forfeitGame": "वर्तमान गेम जब्त करें"
+    },
+    "reportIssue": {
         "bugReportTitle": "बग रिपोर्ट",
         "bugReportDescription": "वर्तमान गेम स्थिति के साथ बग की रिपोर्ट करें। गेम की स्थिति आपकी रिपोर्ट में शामिल की जाएगी।",
         "feedbackTitle": "प्रतिक्रिया और समस्याएं",
@@ -738,6 +738,13 @@
         "userSearch": {
             "errorTitle": "त्रुटि",
             "errorSendRequest": "मित्र अनुरोध भेजने में विफल"
+        }
+    },
+    "tutorial": {
+        "endGame": {
+            "title": "कोरल क्लैश में आपका स्वागत है!",
+            "message": "व्हेल राजा है। आप या तो ब्लैक व्हेल को चेकमेट करके, या अपने सभी 17 कोरल लगाकर जीत सकते हैं। शुभकामनाएँ!",
+            "backInfo": "होम स्क्रीन पर वापस जाने के लिए तीर पर टैप करें"
         }
     }
 }

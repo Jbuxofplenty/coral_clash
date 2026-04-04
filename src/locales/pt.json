@@ -801,5 +801,12 @@
             "errorTitle": "Erro",
             "errorSendRequest": "Falha ao enviar solicitação de amizade"
         }
+    },
+    "tutorial": {
+        "endGame": {
+            "title": "Bem-vindo ao Coral Clash!",
+            "message": "A Baleia é o Rei. Você pode ganhar dando xeque-mate na Baleia Negra ou colocando todos os seus 17 corais. Boa sorte!",
+            "backInfo": "Toque na seta para voltar à tela inicial"
+        }
     }
 }

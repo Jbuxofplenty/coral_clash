@@ -37,6 +37,7 @@ const ComputerCoralClashBoard = ({
     notificationStatus,
     difficulty = 'random',
     opponentData, // For online computer games - contains displayName and avatarKey
+    onGameOver, // Optional callback fired once when the game ends
 }) => {
     const { t } = useTranslation();
     const { user } = useAuth();
@@ -290,6 +291,7 @@ const ComputerCoralClashBoard = ({
             notificationStatus={notificationStatus}
             isComputerThinking={isComputerThinking}
             difficulty={difficulty}
+            onGameOver={onGameOver}
         />
     );
 };

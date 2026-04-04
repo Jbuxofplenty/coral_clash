@@ -801,5 +801,12 @@
             "errorTitle": "错误",
             "errorSendRequest": "发送好友请求失败"
         }
+    },
+    "tutorial": {
+        "endGame": {
+            "title": "欢迎来到 Coral Clash！",
+            "message": "鲸鱼是国王。您可以通过将死黑鲸，或者放置所有 17 个珊瑚来获胜。祝您好运！",
+            "backInfo": "点击箭头返回主页"
+        }
     }
 }

@@ -564,6 +564,13 @@
             "resignationDesc": "A player may resign at any time"
         }
     },
+    "tutorial": {
+        "endGame": {
+            "title": "Welcome to Coral Clash!",
+            "message": "The Whale is the King. You can win by either checkmating the Black Whale, or by placing all 17 of your corals. Good luck!",
+            "backInfo": "Tap the arrow to return to the home screen"
+        }
+    },
     "tutorialScenarios": {
         "checkmate": {
             "title": "Checkmate Example",

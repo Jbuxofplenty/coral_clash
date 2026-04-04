@@ -801,5 +801,12 @@
             "errorTitle": "Error",
             "errorSendRequest": "Error al enviar solicitud de amistad"
         }
+    },
+    "tutorial": {
+        "endGame": {
+            "title": "¡Bienvenido a Coral Clash!",
+            "message": "La Ballena es el Rey. Puedes ganar haciendo jaque mate a la Ballena Negra o colocando tus 17 corales. ¡Buena suerte!",
+            "backInfo": "Toca la flecha para volver a la pantalla de inicio"
+        }
     }
 }

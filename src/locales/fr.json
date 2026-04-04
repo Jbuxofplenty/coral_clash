@@ -801,5 +801,12 @@
             "errorTitle": "Erreur",
             "errorSendRequest": "Échec de l'envoi de la demande d'ami"
         }
+    },
+    "tutorial": {
+        "endGame": {
+            "title": "Bienvenue dans Coral Clash !",
+            "message": "La Baleine est le Roi. Vous pouvez gagner en mettant la Baleine Noire échec et mat, ou en plaçant vos 17 coraux. Bonne chance !",
+            "backInfo": "Appuyez sur la flèche pour revenir à l'écran d'accueil"
+        }
     }
 }

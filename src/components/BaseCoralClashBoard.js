@@ -75,6 +75,7 @@ const BaseCoralClashBoard = ({
     enableUndo = false,
     onUndo,
     onResign, // Optional callback after successful resign
+    onGameOver, // Optional callback fired once when the game ends
     userColor = null,
     effectiveBoardFlip = null,
     notificationStatus = null,
@@ -606,11 +607,18 @@ const BaseCoralClashBoard = ({
     }, [isBoardFlipped]);
 
     // Clear turn notification when game ends or when viewing history
+    // Also fire onGameOver callback once when the game first ends
+    const onGameOverFiredRef = useRef(false);
     useEffect(() => {
-        if (coralClash.isGameOver() || gameData?.status === 'completed' || isViewingHistory) {
+        const ended = coralClash.isGameOver() || gameData?.status === 'completed';
+        if (ended || isViewingHistory) {
             setTurnNotification(null);
         }
-    }, [coralClash, gameData?.status, isViewingHistory]);
+        if (ended && !onGameOverFiredRef.current && onGameOver) {
+            onGameOverFiredRef.current = true;
+            onGameOver();
+        }
+    }, [coralClash, updateCounter, gameData?.status, isViewingHistory, onGameOver]);
 
     // Track whether we've already shown the post-match signup prompt this game
     const postMatchSignupShownRef = useRef(false);

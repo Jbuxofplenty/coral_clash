@@ -2,6 +2,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { theme } from 'galio-framework';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Dimensions, ScrollView, StyleSheet } from 'react-native';
+import { END_GAME_TUTORIAL_FIXTURE } from '../constants/endGameTutorial';
 import { RULES_VIDEO_URL } from '../constants';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -136,6 +137,20 @@ export default function Home({ navigation }) {
                 const hasLaunched = await AsyncStorage.getItem('has_seen_welcome_notification');
                 if (hasLaunched === null) {
                     await AsyncStorage.setItem('has_seen_welcome_notification', 'true');
+                    
+                    // If user is not logged in, drop them in an endgame tutorial
+                    if (!user) {
+                        navigation.navigate('Game', {
+                            gameId: null, // offline mode
+                            opponentType: 'computer',
+                            difficulty: 'random',
+                            fixture: END_GAME_TUTORIAL_FIXTURE,
+                            isEndGameTutorial: true,
+                        });
+                        return;
+                    }
+
+                    // Otherwise show standard popup
                     showAlert(
                         t('home.welcome.title'),
                         t('home.welcome.message'),
@@ -161,7 +176,7 @@ export default function Home({ navigation }) {
         checkFirstLaunch();
         // Run only once on mount
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [user, navigation]);
 
     // Helper function to extract opponent data from game data
     // Uses snapshot data if available, otherwise fetches current data
