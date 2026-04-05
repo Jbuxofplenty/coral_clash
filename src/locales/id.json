@@ -1,0 +1,812 @@
+{
+    "auth": {
+        "welcomeBack": "Selamat Datang Kembali",
+        "createAccount": "Buat Akun",
+        "resetPassword": "Atur Ulang Kata Sandi",
+        "signInSubtitle": "Masuk untuk bermain melawan komputer atau menantang pemain lain secara online",
+        "signUpSubtitle": "Buat akun untuk bermain online. Pilih nama pengguna yang unik!",
+        "forgotPasswordSubtitle": "Masukkan email Anda untuk menerima tautan pengaturan ulang kata sandi",
+        "usernamePlaceholder": "Nama Pengguna (wajib)",
+        "emailPlaceholder": "Email",
+        "passwordPlaceholder": "Kata Sandi",
+        "signInWithApple": "Masuk dengan Apple",
+        "signUpWithApple": "Daftar dengan Apple",
+        "signInWithGoogle": "Masuk dengan Google",
+        "signUpWithGoogle": "Daftar dengan Google",
+        "or": "ATAU",
+        "signIn": "Masuk",
+        "signUp": "Daftar",
+        "sendResetLink": "Kirim Tautan Atur Ulang",
+        "forgotPassword": "Lupa Kata Sandi?",
+        "backToSignIn": "Kembali ke Masuk",
+        "alreadyHaveAccount": "Sudah punya akun? Masuk",
+        "dontHaveAccount": "Belum punya akun? Daftar",
+        "errors": {
+            "fillAllFields": "Mohon isi semua kolom",
+            "usernameRequired": "Nama pengguna wajib diisi",
+            "usernameMinLength": "Nama pengguna minimal 2 karakter",
+            "usernameMaxLength": "Nama pengguna harus kurang dari 30 karakter",
+            "usernameInvalidChars": "Nama pengguna hanya boleh berisi huruf, angka, spasi, garis bawah, dan tanda hubung",
+            "authFailed": "Autentikasi gagal",
+            "googleSignInFailed": "Masuk dengan Google gagal",
+            "appleSignInFailed": "Masuk dengan Apple gagal",
+            "enterEmail": "Mohon masukkan alamat email Anda",
+            "resetEmailFailed": "Gagal mengirim email atur ulang"
+        },
+        "success": {
+            "resetEmailSent": "Email atur ulang kata sandi terkirim! Periksa kotak masuk Anda."
+        }
+    },
+    "game": {
+        "difficulty": {
+            "title": "Pilih Tingkat Kesulitan AI",
+            "subtitle": "Pilih tingkat kesulitan untuk lawan komputer",
+            "random": "Acak",
+            "easy": "Mudah",
+            "medium": "Sedang",
+            "hard": "Sulit",
+            "randomDescription": "Komputer membuat langkah acak",
+            "easyDescription": "Komputer menggunakan strategi dasar",
+            "mediumDescription": "Komputer menggunakan strategi menengah",
+            "hardDescription": "Komputer menggunakan strategi lanjutan",
+            "createAccountToAccess": "Buat akun untuk mengakses"
+        },
+        "matchmaking": {
+            "title": "Pilih Mode Permainan",
+            "timeControl": "Pilih Kontrol Waktu",
+            "timeControlSubtitle": "Pilih batas waktu untuk permainan ini",
+            "instant": "Instan",
+            "instantDescription": "Temukan lawan sekarang. Mencocokkan Anda dengan pemain online.",
+            "correspondence": "Korespondensi",
+            "correspondenceDescription": "Kirim undangan ke pemain acak. Mereka punya 24 jam untuk menerima.",
+            "timeControls": {
+                "unlimited": "Tanpa batas waktu",
+                "blitz": "5 menit",
+                "normal": "10 menit",
+                "custom": "Batas waktu diatur"
+            },
+            "timeControlDescriptions": {
+                "blitz": "5 menit per pemain",
+                "normal": "10 menit per pemain",
+                "unlimited": "Tanpa batas waktu"
+            }
+        },
+        "status": {
+            "loading": "Memuat",
+            "noGamesFound": "Tidak ada permainan ditemukan",
+            "error": "Error",
+            "resetApproved": "Permainan direset",
+            "resetRejected": "Permintaan reset ditolak",
+            "undoApproved": "Langkah dibatalkan",
+            "undoRejected": "Permintaan pembatalan ditolak"
+        },
+        "actions": {
+            "cancel": "Batal"
+        },
+        "postMatchSignup": {
+            "title": "Permainan hebat!",
+            "message": "Ingin menyimpan statistik Anda dan bermain melawan orang sungguhan?",
+            "lossTitle": "Terus semangat!",
+            "lossMessage": "Setiap kekalahan adalah pelajaran. Daftar untuk melacak kemajuan Anda.",
+            "button": "Daftar Sekarang"
+        }
+    },
+    "navigation": {
+        "home": "Beranda",
+        "game": "Permainan",
+        "tutorial": "Tutorial",
+        "howToPlay": "Cara Bermain",
+        "settings": "Pengaturan",
+        "friends": "Teman",
+        "stats": "Statistik",
+        "reportIssue": "Laporkan Masalah",
+        "rulesVideo": "Video Aturan",
+        "physicalGame": "Permainan Fisik",
+        "logOut": "Keluar",
+        "logOutConfirmTitle": "Keluar",
+        "logOutConfirmMessage": "Apakah Anda yakin ingin keluar?",
+        "cancel": "Batal",
+        "appTitle": "Coral Clash",
+        "appSubtitle": "Permainan Strategi Laut"
+    },
+    "home": {
+        "welcome": {
+            "title": "Selamat Datang di Coral Clash!",
+            "message": "Lihat Video Aturan atau panduan Cara Bermain di menu untuk memulai!",
+            "watchVideo": "Tonton Video",
+            "howToPlay": "Cara Bermain",
+            "ok": "OK"
+        },
+        "opponent": {
+            "computer": "Computer",
+            "opponent": "Lawan",
+            "guest": "Tamu 1"
+        },
+        "gameModes": {
+            "howToPlayTitle": "Cara Bermain",
+            "howToPlayDescription": "Pelajari aturan dan strategi Coral Clash",
+            "playComputerTitle": "Main vs Komputer",
+            "playComputerDescription": "Mulai permainan baru melawan AI",
+            "loadGameStateTitle": "Muat Status Permainan (Dev)",
+            "loadGameStateDescription": "Muat status permainan tersimpan dari fixture"
+        },
+        "matchmaking": {
+            "cannotJoin": "Tidak bisa bergabung matchmaking",
+            "instantMatchFound": "Pertandingan Korespondensi Ditemukan!",
+            "instantMatchMessage": "Anda dipasangkan dengan {{creatorName}}. Mereka akan diberitahu dan punya 24 jam untuk menerima.",
+            "correspondenceCreated": "Undangan Korespondensi Dibuat",
+            "correspondenceMessage": "Undangan Anda telah dibuat. Saat pemain lain memilih mode Korespondensi, mereka mungkin dipasangkan dengan undangan Anda. Anda akan diberitahu saat seseorang ingin bermain!"
+        },
+        "errors": {
+            "offlineModeTitle": "Mode Offline",
+            "offlineModeMessage": "Tidak dapat terhubung ke server. Memulai permainan komputer offline.",
+            "errorTitle": "Error",
+            "failedToStart": "Gagal memulai {{action}}. Silakan coba lagi.",
+            "failedToResign": "Gagal menyerah. Silakan coba lagi.",
+            "failedPassAndPlay": "Gagal memulai permainan gantian. Silakan coba lagi.",
+            "failedComputerGame": "Gagal memulai permainan komputer",
+            "failedMatchmaking": "Gagal memulai matchmaking {{mode}}. {{message}}"
+        }
+    },
+    "stats": {
+        "overallStatistics": "Statistik Keseluruhan",
+        "gamesPlayed": "Permainan Dimainkan",
+        "wins": "Menang",
+        "losses": "Kalah",
+        "draws": "Seri",
+        "winRate": "Rasio Menang",
+        "matchupStatistics": "Statistik Pertandingan",
+        "matchupDescription": "Rasio menang terhadap setiap lawan (PvP & Komputer)",
+        "computer": "Computer",
+        "winRateShort": "Rasio",
+        "winsShort": "M",
+        "lossesShort": "K",
+        "drawsShort": "S",
+        "noGamesYet": "Belum Ada Permainan",
+        "noGamesHint": "Mainkan permainan untuk melihat statistik Anda di sini!"
+    },
+    "gameMenu": {
+        "saveGameState": "Simpan Status Permainan",
+        "exportPosition": "Ekspor posisi permainan saat ini",
+        "flipBoard": "Balik Papan",
+        "showingBlackBottom": "Saat ini menampilkan hitam di bawah",
+        "showingWhiteBottom": "Saat ini menampilkan putih di bawah",
+        "reportBug": "Laporkan Bug",
+        "includeGameState": "Sertakan status permainan saat ini",
+        "resignGame": "Menyerah",
+        "resigning": "Menyerah...",
+        "pleaseWait": "Mohon tunggu...",
+        "gameEnded": "Permainan sudah selesai",
+        "forfeitGame": "Gugurkan permainan saat ini"
+    },
+    "reportIssue": {
+        "bugReportTitle": "Laporan Bug",
+        "bugReportDescription": "Laporkan bug dengan status permainan saat ini. Posisi permainan akan disertakan dalam laporan Anda.",
+        "feedbackTitle": "Masukan & Masalah",
+        "feedbackDescription": "Kirim masukan atau laporkan masalah. Kami menghargai masukan Anda!",
+        "subject": "Subjek",
+        "subjectPlaceholder": "Ringkasan singkat masalah",
+        "description": "Deskripsi",
+        "descriptionPlaceholder": "Deskripsi detail masalah atau masukan...",
+        "gameStateIncluded": "✓ Status permainan akan disertakan",
+        "turn": "Giliran",
+        "white": "Putih",
+        "black": "Hitam",
+        "gameOver": "Permainan Selesai",
+        "submitIssue": "Kirim Masalah",
+        "anonymousNote": "Catatan: Anda mengirim secara anonim. Masuk untuk melacak masalah Anda.",
+        "validation": {
+            "missingSubjectTitle": "Informasi Kurang",
+            "missingSubjectMessage": "Mohon masukkan subjek untuk masalah Anda.",
+            "invalidSubjectTitle": "Subjek Tidak Valid",
+            "invalidSubjectMessage": "Subjek harus minimal 3 karakter.",
+            "missingDescriptionTitle": "Informasi Kurang",
+            "missingDescriptionMessage": "Mohon masukkan deskripsi untuk masalah Anda.",
+            "invalidDescriptionTitle": "Deskripsi Tidak Valid",
+            "invalidDescriptionMessage": "Deskripsi harus minimal 10 karakter."
+        },
+        "success": {
+            "title": "Masalah Terkirim",
+            "message": "Terima kasih atas masukan Anda! Masalah Anda telah dikirim",
+            "ok": "OK"
+        },
+        "error": {
+            "title": "Pengiriman Gagal",
+            "message": "Gagal mengirim masalah Anda. Mohon periksa koneksi dan coba lagi."
+        }
+    },
+    "settings": {
+        "account": "Akun",
+        "profileAvatar": "Avatar Profil",
+        "chooseAvatar": "Pilih avatar bertema laut Anda",
+        "appearance": "Tampilan",
+        "theme": {
+            "light": "Terang",
+            "lightDescription": "Selalu gunakan tema terang",
+            "dark": "Gelap",
+            "darkDescription": "Selalu gunakan tema gelap",
+            "auto": "Otomatis",
+            "autoDescription": "Ikuti tema sistem"
+        },
+        "language": {
+            "title": "Bahasa (Language)",
+            "english": "English",
+            "englishDescription": "English language interface",
+            "hindi": "हिन्दी (Hindi)",
+            "hindiDescription": "हिन्दी भाषा इंटरफ़ेस"
+        },
+        "actions": {
+            "resetToDefaults": "Atur Ulang ke Default",
+            "resetTitle": "Atur Ulang Pengaturan",
+            "resetMessage": "Apakah Anda yakin ingin mengatur ulang semua pengaturan ke default?",
+            "cancel": "Batal",
+            "reset": "Atur Ulang"
+        },
+        "dangerZone": {
+            "title": "Zona Bahaya",
+            "warning": "Setelah Anda menghapus akun, tidak ada jalan kembali. Mohon pastikan.",
+            "deleteAccount": "Hapus Akun",
+            "deletingAccount": "Menghapus akun...",
+            "deleteTitle": "Hapus Akun",
+            "deleteMessage": "Tindakan ini permanen dan tidak dapat dibatalkan.\n\n• Semua data pribadi Anda akan dihapus\n• Permainan Anda akan berlanjut tapi Anda akan muncul sebagai \"Anonim\"\n• Teman dan permintaan pertemanan akan dihapus\n• Permainan aktif akan dikalahkan\n\nApakah Anda yakin ingin melanjutkan?",
+            "continue": "Lanjutkan",
+            "confirmTitle": "Konfirmasi Penghapusan Akun",
+            "confirmMessage": "Untuk mengonfirmasi, mohon ketik DELETE (huruf kapital semua) di bawah:",
+            "incorrectTitle": "Konfirmasi Salah",
+            "incorrectMessage": "Anda harus mengetik DELETE persis untuk mengonfirmasi penghapusan akun.",
+            "successTitle": "Akun Dihapus",
+            "successMessage": "Akun Anda telah berhasil dihapus. Anda akan dikeluarkan sekarang.",
+            "failedTitle": "Penghapusan Gagal",
+            "timeoutMessage": "Permintaan waktu habis. Mohon periksa koneksi dan coba lagi.",
+            "failedMessage": "Gagal menghapus akun. Mohon coba lagi atau hubungi dukungan.",
+            "retry": "Coba Lagi"
+        },
+        "errors": {
+            "loadFailed": "Gagal memuat pengaturan",
+            "saveFailed": "Gagal menyimpan pengaturan",
+            "avatarSaveFailed": "Gagal menyimpan pilihan avatar",
+            "themeSaveFailed": "Gagal menyimpan preferensi tema",
+            "languageChangeFailed": "Gagal mengubah bahasa",
+            "resetFailed": "Gagal mengatur ulang pengaturan"
+        }
+    },
+    "friends": {
+        "addFriend": "Tambah Teman",
+        "searchPlaceholder": "Cari berdasarkan nama pengguna",
+        "noUsersFound": "Tidak ada pengguna ditemukan",
+        "pending": "Menunggu",
+        "incomingRequests": "Permintaan Masuk",
+        "sentRequests": "Permintaan Terkirim",
+        "myFriends": "Teman Saya",
+        "noFriendsYet": "Belum Ada Teman",
+        "noFriendsHint": "Tambahkan teman berdasarkan nama pengguna di atas untuk mulai bermain bersama!"
+    },
+    "common": {
+        "loading": "Memuat...",
+        "error": "Error",
+        "success": "Berhasil",
+        "cancel": "Batal",
+        "confirm": "Konfirmasi",
+        "save": "Simpan",
+        "delete": "Hapus",
+        "edit": "Edit",
+        "close": "Tutup",
+        "ok": "OK",
+        "somethingWentWrong": "Terjadi kesalahan. Silakan coba lagi."
+    },
+    "cards": {
+        "matchmaking": {
+            "searchingForOpponent": "Mencari lawan...",
+            "findRandomMatch": "Cari Pertandingan Acak",
+            "searchingHint": "Mencari lawan... · Ketuk untuk membatalkan",
+            "tapToJoin": "Ketuk untuk bergabung antrian pertandingan",
+            "cannotJoinTitle": "Tidak Bisa Bergabung Matchmaking"
+        },
+        "playWithFriend": {
+            "title": "Main dengan Teman",
+            "description": "Undang teman untuk bermain",
+            "modalTitle": "Main dengan Teman",
+            "inviteFriend": "Undang Teman",
+            "inviteDescription": "Kirim undangan permainan ke teman",
+            "textInvite": "Undangan Teks",
+            "textInviteDescription": "Kirim undangan melalui pesan",
+            "passAndPlay": "Gantian Main",
+            "passAndPlayDescription": "Bermain secara lokal di perangkat ini",
+            "selectFriend": "Pilih Teman",
+            "searchFriends": "Cari teman...",
+            "noFriendsFound": "Tidak ada teman ditemukan",
+            "noFriendsYet": "Belum ada teman. Tambahkan teman untuk bermain!",
+            "passAndPlayGames": "Permainan Gantian",
+            "startNewGame": "Mulai Permainan Baru",
+            "noActiveGames": "Tidak ada permainan aktif",
+            "vsGuest": "vs Tamu 1",
+            "unlimited": "Tanpa Batas",
+            "shareMessage": "Ayo main Coral Clash! 🦀\n\nUnduh di sini:\niOS: [URL]\n\nAndroid: [URL]"
+        },
+        "signUpPrompt": {
+            "title": "Buka Semua Fitur",
+            "subtitle": "Buat akun gratis untuk akses:",
+            "feature1": "Bermain dengan teman secara online",
+            "feature2": "Temukan lawan acak melalui matchmaking",
+            "feature3": "Lacak statistik & riwayat permainan",
+            "feature4": "Bangun jaringan pertemanan",
+            "button": "Daftar / Masuk"
+        },
+        "activeGames": {
+            "title": "Permainan Aktif",
+            "inProgress": "berlangsung",
+            "game": "permainan",
+            "games": "permainan",
+            "yourTurn": "Giliran Anda",
+            "opponentTurn": "Giliran Lawan",
+            "opponent": "Lawan",
+            "computer": "Computer",
+            "blitz": "Blitz",
+            "normal": "Normal",
+            "unlimited": "Tanpa Batas",
+            "timed": "Berwaktu",
+            "loading": "Memuat permainan...",
+            "noGames": "Tidak ada permainan aktif",
+            "noGamesHint": "Mulai permainan dengan teman!",
+            "vs": "vs ",
+            "resignTitle": "Menyerah",
+            "resignMessage": "Apakah Anda yakin ingin menyerah? Anda akan kalah dalam permainan ini.",
+            "resignButton": "Menyerah",
+            "resignError": "Gagal menyerah. Silakan coba lagi."
+        },
+        "gameHistory": {
+            "title": "Riwayat Permainan",
+            "subtitle": "Permainan terbaru",
+            "loading": "Memuat riwayat...",
+            "noHistory": "Tidak ada riwayat permainan",
+            "noHistoryHint": "Permainan selesai Anda akan muncul di sini",
+            "vs": "vs ",
+            "justNow": "Baru saja",
+            "minutesAgo": "mnt lalu",
+            "hoursAgo": "jam lalu",
+            "daysAgo": "hari lalu",
+            "cancelled": "Permainan dibatalkan",
+            "draw": "Seri",
+            "won": "Anda menang",
+            "lost": "Anda kalah",
+            "unknown": "Tidak diketahui",
+            "opponent": "Lawan",
+            "computer": "Computer",
+            "blitz": "Blitz",
+            "normal": "Normal",
+            "unlimited": "Tanpa Batas",
+            "timed": "Berwaktu"
+        }
+    },
+    "errors": {
+        "INVALID_MOVE": "Langkah tidak valid",
+        "INVALID_MOVE_OCCUPIED": "Posisi ini sudah terisi",
+        "INVALID_MOVE_OUT_OF_BOUNDS": "Langkah di luar batas",
+        "INVALID_MOVE_NOT_YOUR_TURN": "Bukan giliran Anda",
+        "INVALID_MOVE_PIECE_BLOCKED": "Bidak ini terhalang",
+        "GAME_NOT_FOUND": "Permainan tidak ditemukan",
+        "GAME_ALREADY_STARTED": "Permainan sudah dimulai",
+        "GAME_ALREADY_ENDED": "Permainan ini sudah selesai",
+        "GAME_CANCELLED": "Permainan dibatalkan",
+        "PLAYER_NOT_IN_GAME": "Anda tidak ada dalam permainan ini",
+        "PLAYER_DISCONNECTED": "Pemain terputus",
+        "CONNECTION_ERROR": "Kesalahan koneksi. Mohon periksa koneksi internet Anda.",
+        "SERVER_ERROR": "Kesalahan server. Mohon coba lagi nanti.",
+        "TIMEOUT": "Waktu permintaan habis",
+        "ALREADY_IN_QUEUE": "Anda sudah dalam antrian matchmaking",
+        "NOT_IN_QUEUE": "Anda tidak dalam antrian matchmaking",
+        "QUEUE_TIMEOUT": "Waktu matchmaking habis",
+        "OPPONENT_NOT_FOUND": "Lawan tidak ditemukan",
+        "MATCHMAKING_DISABLED": "Matchmaking saat ini dinonaktifkan",
+        "FRIEND_NOT_FOUND": "Teman tidak ditemukan",
+        "FRIEND_ALREADY_EXISTS": "Sudah berteman dengan pengguna ini",
+        "CANNOT_ADD_SELF": "Tidak bisa menambahkan diri sendiri sebagai teman",
+        "FRIEND_REQUEST_PENDING": "Permintaan pertemanan sudah menunggu",
+        "INVALID_CREDENTIALS": "Email atau kata sandi tidak valid",
+        "USER_NOT_FOUND": "Pengguna tidak ditemukan",
+        "EMAIL_ALREADY_EXISTS": "Email sudah digunakan",
+        "USERNAME_TAKEN": "Nama pengguna sudah diambil",
+        "WEAK_PASSWORD": "Kata sandi terlalu lemah",
+        "ACCOUNT_DISABLED": "Akun Anda telah dinonaktifkan",
+        "SESSION_EXPIRED": "Sesi Anda telah berakhir. Mohon masuk kembali.",
+        "UNAUTHORIZED": "Anda tidak berwenang melakukan tindakan ini",
+        "RATE_LIMITED": "Terlalu banyak permintaan. Mohon pelan-pelan.",
+        "MAINTENANCE_MODE": "Aplikasi sedang dalam pemeliharaan. Mohon coba lagi nanti.",
+        "FEATURE_DISABLED": "Fitur ini saat ini dinonaktifkan"
+    },
+    "success": {
+        "GAME_WON": "Selamat! Anda menang!",
+        "GAME_DRAW": "Permainan berakhir seri",
+        "GAME_LOST": "Semoga beruntung lain kali!",
+        "PLAYER_RESIGNED": "Pemain menyerah",
+        "FRIEND_REQUEST_SENT": "Permintaan pertemanan terkirim!",
+        "FRIEND_REQUEST_ACCEPTED": "Permintaan pertemanan diterima!",
+        "FRIEND_REQUEST_DECLINED": "Permintaan pertemanan ditolak",
+        "MOVE_SUCCESS": "Langkah berhasil"
+    },
+    "scenarioBoard": {
+        "pauseAutoPlay": "Jeda Putar Otomatis",
+        "playDemo": "Putar Demo",
+        "explanation": "Penjelasan",
+        "backToGuide": "Kembali ke Panduan"
+    },
+    "howToPlay": {
+        "objective": {
+            "title": "Tujuan",
+            "intro": "Untuk menang di Coral Clash, capai salah satu tujuan berikut:",
+            "checkmate": "Skakmat",
+            "checkmateDesc": "Paus lawan (ketika Paus dalam",
+            "check": "skak",
+            "checkmateDescEnd": "dan tidak bisa melarikan diri)",
+            "coralControl": "area terbanyak dengan Karang",
+            "coralControlDesc": "Kendalikan",
+            "coralControlWhen": "ketika:",
+            "coralPlaced": "Seorang pemain telah menempatkan semua Karangnya",
+            "whaleRemaining": "Seorang pemain hanya tersisa Paus-nya",
+            "backRowReached": "Kepiting atau Gurita mencapai baris belakang lawan",
+            "areaControlled": "Area yang dikendalikan Karang:",
+            "areaControlledDesc": "Hitung jumlah Karang warna Anda yang tidak ditempati bidak lawan.",
+            "checkmateExample": "Contoh Skakmat",
+            "checkExample": "Contoh Skak",
+            "coralVictoryExample": "Contoh Kemenangan Karang"
+        },
+        "setup": {
+            "title": "Pengaturan Permainan",
+            "boardDesc": "Papan adalah grid 8x8 dengan 64 kotak. Setiap pemain memiliki:",
+            "coralPieces": "17 potongan Karang",
+            "units": "17 unit: 1 Paus, 2 Lumba-lumba, 4 Kura-kura, 2 Ikan Buntal, 4 Kepiting, dan 4 Gurita",
+            "variants": "Setiap jenis bidak hadir dalam dua varian:",
+            "hunter": "Pemburu",
+            "hunterDesc": "bidak (tanpa simbol karang) dapat menghapus Karang",
+            "gatherer": "Pengumpul",
+            "gathererDesc": "bidak (dengan simbol karang) dapat menempatkan Karang",
+            "hunterExample": "Contoh Efek Pemburu",
+            "gathererExample": "Contoh Efek Pengumpul"
+        },
+        "turnOverview": {
+            "title": "Ikhtisar Giliran",
+            "intro": "Putih bergerak pertama, kemudian pemain bergantian. Di giliran Anda:",
+            "step1": "Gerakkan salah satu bidak Anda",
+            "step2": "Selesaikan efek tangkapan, Pemburu, atau Pengumpul",
+            "step3": "Periksa apakah tujuan tercapai"
+        },
+        "movement": {
+            "title": "Cara Bidak Bergerak",
+            "important": "Penting:",
+            "importantDesc": "Bidak tidak bisa bergerak melewati bidak lain - mereka butuh jalur yang jelas.",
+            "variants": "Setiap jenis bidak hadir dalam dua varian yang berinteraksi berbeda dengan Karang:",
+            "hunterPieces": "Bidak Pemburu",
+            "hunterMovement": "(tanpa simbol karang)",
+            "stoppedBy": "DIHENTIKAN OLEH",
+            "hunterMovementDesc": "Karang - tidak bisa melewatinya",
+            "gathererPieces": "Bidak Pengumpul",
+            "gathererMovement": "(dengan simbol karang) lebih kuat - bisa bergerak",
+            "through": "MELEWATI",
+            "gathererMovementDesc": "Karang dengan bebas",
+            "coralMovementExample": "Contoh Pergerakan Karang",
+            "individualMovements": "Pergerakan Bidak Individual"
+        },
+        "pieces": {
+            "whale": {
+                "name": "Paus",
+                "intro": "Paus adalah bidak terpenting Anda - jika diskakmat, Anda kalah! Paus menempati dua kotak dan memiliki dua pilihan gerakan berbeda:",
+                "slidingMove": "1. Gerakan Geser:",
+                "slidingMoveDesc": "Gerakkan separuh bidak sejumlah kotak secara horizontal, vertikal, atau diagonal sambil mempertahankan orientasi aslinya. Paus mengikuti aturan gerakan Pemburu - dihentikan oleh karang. Namun, ada pengecualian khusus (lihat di bawah).",
+                "rotationMove": "2. Gerakan Rotasi:",
+                "rotationMoveDesc": "Rotasikan separuh bidak ke kotak yang berdekatan (satu kotak vertikal atau horizontal). Saat memilih rotasi, pertama ketuk kotak tujuan (ditandai lingkaran putih). Jika ada beberapa orientasi valid, ketuk kotak orientasi (ditandai lingkaran hijau). Jika hanya satu orientasi valid, paus bergerak otomatis.",
+                "checkRules": "Aturan Skak:",
+                "checkRulesDesc": "Paus tidak boleh mengakhiri gerakannya dalam skak (di mana dia bisa ditangkap), TAPI bisa bergerak melewati kotak yang terancam.",
+                "doubleCapture": "Tangkap Ganda:",
+                "doubleCaptureDesc": "Paus bisa menangkap hingga dua bidak lawan dalam satu gerakan - satu dengan setiap separuh tubuhnya!",
+                "doubleCoralRemoval": "Penghapusan Karang Ganda:",
+                "doubleCoralRemovalDesc": "Ketika Paus (sebagai Pemburu) mendarat di karang, dia bisa memilih menghapus satu atau kedua potongan karang.",
+                "specialCase": "⚠️ Kasus Gerakan Khusus",
+                "specialCaseDesc": "Jika separuh Paus sudah berdiri di karang, karang tersebut TIDAK menghalangi separuh lainnya untuk bergerak melewati atau mendarat di kotak karang yang sama.",
+                "basicMovement": "Gerakan Dasar Paus",
+                "rotationExample": "Contoh Rotasi Paus",
+                "coralException": "Paus Bergerak Melewati Karangnya"
+            },
+            "dolphin": {
+                "name": "Lumba-lumba",
+                "movement": "Bergerak sejumlah kotak secara vertikal, horizontal, atau diagonal.",
+                "example": "Contoh Gerakan Lumba-lumba"
+            },
+            "turtle": {
+                "name": "Kura-kura",
+                "movement": "Bergerak sejumlah kotak secara vertikal atau horizontal.",
+                "example": "Contoh Gerakan Kura-kura"
+            },
+            "pufferfish": {
+                "name": "Ikan Buntal",
+                "movement": "Bergerak sejumlah kotak secara diagonal.",
+                "example": "Contoh Gerakan Ikan Buntal"
+            },
+            "octopus": {
+                "name": "Gurita",
+                "movement": "Bergerak satu kotak secara diagonal.",
+                "example": "Contoh Gerakan Gurita"
+            },
+            "crab": {
+                "name": "Kepiting",
+                "movement": "Bergerak satu kotak secara vertikal atau horizontal.",
+                "example": "Contoh Gerakan Kepiting"
+            }
+        },
+        "specialRules": {
+            "title": "Aturan Khusus",
+            "capture": {
+                "title": "Menangkap",
+                "desc": "Bergerak ke kotak yang ditempati bidak lawan. Paus bisa menangkap dua bidak dalam satu gerakan.",
+                "example": "Contoh Menangkap"
+            },
+            "hunterEffect": {
+                "title": "Gerakan & Efek Pemburu",
+                "desc": "Bidak Pemburu (tanpa simbol karang) memiliki dua perilaku penting:",
+                "movementStops": "Gerakan berhenti",
+                "movementStopsDesc": "saat mendarat di Karang",
+                "canRemove": "Bisa menghapus",
+                "canRemoveDesc": "Karang tersebut dari papan",
+                "example": "Contoh Efek Pemburu"
+            },
+            "gathererEffect": {
+                "title": "Efek Pengumpul",
+                "desc": "Bidak Pengumpul (dengan simbol karang) bisa menempatkan Karang di kotak kosong yang mereka lewati.",
+                "example": "Contoh Efek Pengumpul"
+            }
+        },
+        "drawResignation": {
+            "title": "Seri & Menyerah",
+            "stalemate": "Pat:",
+            "stalemateDesc": "Ketika pemain tidak punya gerakan legal dan Paus-nya tidak dalam skak",
+            "threefoldRepetition": "Pengulangan tiga kali:",
+            "threefoldRepetitionDesc": "Posisi yang sama terjadi tiga kali dengan pemain yang sama yang bergerak",
+            "resignation": "Menyerah:",
+            "resignationDesc": "Seorang pemain bisa menyerah kapan saja"
+        }
+    },
+    "tutorial": {
+        "endGame": {
+            "title": "Selamat Datang di Coral Clash!",
+            "message": "Paus adalah Raja. Anda bisa menang dengan menskakmat Paus Hitam, atau dengan menempatkan semua 17 Karang Anda. Semoga beruntung!",
+            "backInfo": "Ketuk panah untuk kembali ke layar utama"
+        }
+    },
+    "tutorialScenarios": {
+        "checkmate": {
+            "title": "Contoh Skakmat",
+            "description": "Paus Hitam terjebak oleh karang di a6 (ditandai batas merah muda). Lumba-lumba Pemburu Putih di b7 memberi skak pada Paus, dan Kura-kura Pengumpul Putih (dengan simbol karang di batas) di g7 melindungi lumba-lumba penyerang. Paus tidak bisa melarikan diri - skakmat!"
+        },
+        "coralVictory": {
+            "title": "Kemenangan Karang - Area Kontrol",
+            "description": "Putih punya 4 karang (batas merah muda): c3, d3, e3, f3. Hitam punya 4 karang (batas hitam): c6, d6, e6, f6. Lumba-lumba Pengumpul Hitam di c3 berdiri di karang Putih, jadi Putih hanya mengendalikan 3 karang (d3, e3, f3). Hitam mengendalikan semua 4 karang = Hitam menang 4 banding 3!"
+        },
+        "whaleMovement": {
+            "title": "Gerakan Paus",
+            "description": "Paus menempati dua kotak berdekatan dan bisa bergerak dengan tiga cara: (1) Menggeser separuh sejumlah kotak sementara yang lain tetap, (2) Menggeser kedua separuh bersama ke arah yang sama, atau (3) Merotasi dengan memindahkan separuh ke kotak berdekatan."
+        },
+        "whaleRotation": {
+            "title": "Rotasi Paus",
+            "description": "Paus bisa berotasi dengan memindahkan separuhnya ke kotak berdekatan (vertikal atau horizontal). Perhatikan Paus Putih berotasi dari posisi horizontal ke vertikal."
+        },
+        "whaleCoralException": {
+            "title": "Paus Bergerak Melewati Karangnya",
+            "description": "Aturan Khusus: Jika separuh Paus sudah di karang, karang tersebut TIDAK menghalangi separuh lainnya bergerak melewati atau mendarat di kotak karang yang sama."
+        },
+        "coralMovementComparison": {
+            "title": "Perbandingan Gerakan Karang",
+            "description": "Bandingkan Lumba-lumba Pemburu Putih (kiri, tanpa simbol karang) dengan Lumba-lumba Pengumpul Putih (kanan, dengan simbol karang). Ketuk masing-masing untuk melihat gerakannya."
+        },
+        "check": {
+            "title": "Skak",
+            "description": "Paus Hitam dalam skak - diserang oleh Lumba-lumba Pengumpul Putih. Lumba-lumba Pengumpul bisa bergerak melewati karang. Hitam harus memindahkan Paus dari bahaya atau memblokir serangan."
+        },
+        "hunterEffect": {
+            "title": "Efek Pemburu",
+            "description": "Bidak Pemburu (tanpa simbol karang) berhenti saat bergerak ke Karang. Mereka bisa menghapus Karang tersebut dari papan."
+        },
+        "gathererEffect": {
+            "title": "Efek Pengumpul",
+            "description": "Bidak Pengumpul (dengan simbol karang) bisa menempatkan Karang di kotak kosong yang mereka lewati."
+        },
+        "dolphinMovement": {
+            "title": "Gerakan Lumba-lumba",
+            "description": "Lumba-lumba bisa bergerak sejumlah kotak ke segala arah - vertikal, horizontal, atau diagonal. Bidak paling serbaguna!"
+        },
+        "turtleMovement": {
+            "title": "Gerakan Kura-kura",
+            "description": "Kura-kura bisa bergerak sejumlah kotak secara vertikal atau horizontal, tapi tidak diagonal."
+        },
+        "pufferfishMovement": {
+            "title": "Gerakan Ikan Buntal",
+            "description": "Ikan Buntal bisa bergerak sejumlah kotak secara diagonal."
+        },
+        "crabMovement": {
+            "title": "Gerakan Kepiting",
+            "description": "Kepiting bergerak satu kotak secara vertikal atau horizontal. Lambat tapi mantap."
+        },
+        "octopusMovement": {
+            "title": "Gerakan Gurita",
+            "description": "Gurita bergerak satu kotak secara diagonal. Seperti kepiting, mereka lambat tapi sangat strategis."
+        },
+        "capture": {
+            "title": "Menangkap Bidak",
+            "description": "Untuk menangkap bidak lawan, gerakkan salah satu bidak Anda ke kotak yang ditempati bidak lawan."
+        }
+    },
+    "components": {
+        "fixtureLoader": {
+            "title": "Muat Status Permainan",
+            "gameMode": "Mode Permainan:",
+            "back": "Kembali",
+            "vsComputer": "vs Computer",
+            "passAndPlay": "Gantian",
+            "loadGame": "Muat Permainan",
+            "fixturesHint": "💡 Fixture dari shared/game/__fixtures__/",
+            "error": "Error",
+            "failedToLoad": "Gagal memuat fixture"
+        },
+        "versionWarning": {
+            "title": "Pembaruan Tersedia",
+            "message": "Mohon perbarui ke versi terbaru untuk pengalaman terbaik.",
+            "updateButton": "Perbarui"
+        },
+        "playerStatus": {
+            "computer": "Computer",
+            "thinking": "Berpikir...",
+            "remaining": "Tersisa",
+            "underControl": "Di Bawah Kendali"
+        },
+        "alert": {
+            "defaultButton": "OK"
+        },
+        "pvpBoard": {
+            "player": "Pemain",
+            "opponent": "Lawan",
+            "requestUndoTitle": "Minta Pembatalan",
+            "requestUndoMessage": "Batalkan langkah terakhir? {{opponentName}} harus menyetujui.",
+            "requestResetTitle": "Minta Reset",
+            "requestResetMessage": "Reset permainan ini? {{opponentName}} harus menyetujui.",
+            "cancel": "Batal",
+            "request": "Minta",
+            "requestReset": "Minta Reset",
+            "askOpponentReset": "Minta lawan mereset permainan",
+            "gameEnded": "Permainan sudah selesai",
+            "noMoves": "Belum ada langkah yang dilakukan",
+            "pendingUndo": "Permintaan pembatalan yang menunggu harus diselesaikan dulu",
+            "remindOpponent": "Ingatkan Lawan",
+            "remindOpponentSubtitle": "Ingatkan lawan tentang gilirannya",
+            "availableInHours": "Tersedia dalam {{hours}} jam",
+            "yourTurn": "Giliran Anda",
+            "errorUndoRequest": "Gagal mengirim permintaan pembatalan. Coba lagi.",
+            "errorUndoResponse": "Gagal menanggapi permintaan pembatalan.",
+            "errorResetResponse": "Gagal menanggapi permintaan reset.",
+            "errorCancelUndo": "Gagal membatalkan permintaan pembatalan.",
+            "errorCancelReset": "Gagal membatalkan permintaan reset.",
+            "reminderSentTitle": "Berhasil",
+            "reminderSentMessage": "Pengingat dikirim ke lawan Anda.",
+            "errorReminderTitle": "Error",
+            "errorReminderMessage": "Gagal mengirim pengingat.",
+            "waitingUndoResponse": "Menunggu tanggapan {{opponentName}} untuk pembatalan {{moveCount}} langkah...",
+            "opponentWantsUndo": "{{opponentName}} ingin membatalkan {{moveCount}} langkah",
+            "waitingResetResponse": "Menunggu tanggapan {{opponentName}} untuk permintaan reset...",
+            "opponentWantsReset": "{{opponentName}} ingin mereset permainan"
+        },
+        "passAndPlayBoard": {
+            "resetGameTitle": "Reset Permainan",
+            "resetGameMessage": "Apakah Anda yakin ingin memulai permainan baru?",
+            "cancel": "Batal",
+            "reset": "Reset",
+            "resetGame": "Reset Permainan",
+            "startNewGame": "Mulai permainan baru dari awal",
+            "gameEnded": "Permainan sudah selesai",
+            "noMoves": "Belum ada langkah yang dilakukan"
+        },
+        "baseBoard": {
+            "errorLoadState": "Gagal memuat status permainan",
+            "resignGameTitle": "Menyerah",
+            "resignGameMessage": "Apakah Anda yakin ingin menyerah? Anda akan kalah.",
+            "cancel": "Batal",
+            "resign": "Menyerah",
+            "checkTitle": "Skak!",
+            "checkMessage": "{{piece}} Anda dalam skak!",
+            "checkmateTitle": "Skakmat!",
+            "checkmateMessage": "{{winner}} menang dengan skakmat!",
+            "gathererTitle": "Efek Pengumpul",
+            "gathererMessage": "Tempatkan karang di kotak ini?",
+            "yes": "Ya",
+            "no": "Tidak",
+            "hunterTitle": "Efek Pemburu",
+            "hunterMessage": "Hapus karang dari kotak ini?",
+            "exportSuccessTitle": "Berhasil",
+            "exportSuccessMessage": "Status permainan disalin ke clipboard!",
+            "exportFailedTitle": "Ekspor Gagal",
+            "computer": "Computer",
+            "opponent": "Lawan",
+            "white": "Putih",
+            "black": "Hitam",
+            "youWonTimeout": "Anda menang! Waktu {{opponentName}} habis ⏱️",
+            "youLostTimeout": "Anda kalah! Waktu habis ⏱️",
+            "timeoutLose": "Waktu {{loserName}} habis! ⏱️",
+            "youWonResign": "Anda menang! {{opponentName}} menyerah 🏳️",
+            "youResigned": "Anda menyerah 🏳️",
+            "checkmateWin": "Skakmat! Anda menang! 🏆",
+            "checkmateLose": "Skakmat! Anda kalah.",
+            "checkmateGeneric": "Skakmat! {{winner}} menang! 🏆",
+            "youLost": "Anda kalah",
+            "resignGeneric": "{{winner}} menang karena menyerah! 🏳️",
+            "coralVictoryWin": "Anda menang dengan Kemenangan Karang! 🪸\n{{whiteScore}} - {{blackScore}}",
+            "coralVictoryLose": "Anda kalah. {{winner}} menang dengan Kemenangan Karang! 🪸\n{{whiteScore}} - {{blackScore}}",
+            "coralVictoryGeneric": "{{winner}} menang dengan Kemenangan Karang! 🪸\n{{whiteScore}} Putih - {{blackScore}} Hitam",
+            "stalemate": "Pat! 🤝",
+            "drawRepetition": "Seri karena Pengulangan! 🤝",
+            "drawInsufficientMaterial": "Seri - Material Tidak Cukup! 🤝",
+            "drawCoralTie": "Seri - Karang Seri! 🤝🪸\n{{score}} - {{score}}",
+            "draw": "Seri! 🤝",
+            "check": "{{player}} dalam Skak! ⚠️",
+            "viewingHistory": "Melihat langkah sebelumnya - kembali ke langkah saat ini untuk bermain",
+            "selectWhaleOrientation": "Pilih orientasi untuk Paus Anda",
+            "hunterWhaleTitle": "Efek Pemburu (Paus)",
+            "hunterWhaleMessage": "Pilih opsi penghapusan karang:",
+            "yourTurn": "Giliran Anda",
+            "opponentTurn": "Giliran {{opponentName}}",
+            "playerTurn": "Giliran {{playerColor}}"
+        },
+        "computerBoard": {
+            "cancelRequestTitle": "Batalkan Permintaan",
+            "cancelRequestMessage": "Batalkan permintaan reset Anda?",
+            "cancel": "Batal",
+            "yes": "Ya",
+            "resetGameTitle": "Reset Permainan",
+            "resetGameMessage": "Apakah Anda yakin ingin memulai permainan baru?",
+            "reset": "Reset",
+            "resetGame": "Reset Permainan",
+            "startNewGame": "Mulai permainan baru dari awal",
+            "gameEnded": "Permainan sudah selesai",
+            "noMoves": "Belum ada langkah yang dilakukan",
+            "errorUndo": "Pembatalan gagal. Silakan coba lagi."
+        },
+        "computerUsers": {
+            "successTitle": "Berhasil",
+            "errorTitle": "Error",
+            "initializeSuccess": "Berhasil menginisialisasi {{count}} pengguna komputer",
+            "initializeError": "Gagal menginisialisasi pengguna komputer.",
+            "confirmDeleteTitle": "Konfirmasi Penghapusan",
+            "confirmDeleteMessage": "Apakah Anda yakin ingin menghapus semua pengguna komputer? Tindakan ini tidak bisa dibatalkan.",
+            "cancel": "Batal",
+            "delete": "Hapus",
+            "deleteSuccess": "Berhasil menghapus {{count}} pengguna komputer",
+            "deleteError": "Gagal menghapus pengguna komputer.",
+            "clearLanguageSuccess": "Preferensi bahasa dihapus. Aplikasi akan mendeteksi bahasa otomatis saat peluncuran berikutnya.",
+            "clearLanguageError": "Gagal menghapus preferensi bahasa."
+        }
+    },
+    "hooks": {
+        "friends": {
+            "removeFriendTitle": "Hapus Teman",
+            "removeFriendMessage": "Apakah Anda yakin ingin menghapus {{friendName}} dari daftar teman?",
+            "cancel": "Batal",
+            "remove": "Hapus",
+            "errorRemove": "Gagal menghapus teman",
+            "errorAccept": "Gagal menerima permintaan pertemanan",
+            "errorDecline": "Gagal menolak permintaan pertemanan",
+            "cancelRequestTitle": "Batalkan Permintaan Pertemanan",
+            "cancelRequestMessage": "Batalkan permintaan pertemanan ke {{displayName}}?",
+            "no": "Tidak",
+            "yesCancel": "Ya, Batalkan",
+            "errorCancelRequest": "Gagal membatalkan permintaan pertemanan",
+            "errorTitle": "Error"
+        },
+        "game": {
+            "errorTitle": "Error",
+            "errorLoadGame": "Gagal memuat permainan"
+        },
+        "gameActions": {
+            "errorTitle": "Error",
+            "errorResign": "Gagal menyerah"
+        },
+        "userSearch": {
+            "errorTitle": "Error",
+            "errorSendRequest": "Gagal mengirim permintaan pertemanan"
+        }
+    }
+}

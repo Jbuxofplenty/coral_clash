@@ -418,6 +418,7 @@ export default function AppStack(_props) {
                         name='Report Issue'
                         component={ReportIssue}
                         options={{
+                            title: t('navigation.reportIssue'),
                             drawerIcon: ({ _focused, color }) => (
                                 <Icon
                                     size={isCompact ? 20 : 24}
@@ -428,7 +429,7 @@ export default function AppStack(_props) {
                             ),
                             header: ({ navigation, scene }) => (
                                 <Header
-                                    title='Report Issue'
+                                    title={t('navigation.reportIssue')}
                                     navigation={navigation}
                                     scene={scene}
                                 />
@@ -442,6 +443,7 @@ export default function AppStack(_props) {
                         name='Log In'
                         component={Login}
                         options={{
+                            title: t('auth.signIn'),
                             drawerIcon: ({ _focused: _focused, color }) => (
                                 <Icon
                                     size={isCompact ? 20 : 24}
@@ -454,7 +456,7 @@ export default function AppStack(_props) {
                                 marginBottom: isCompact ? 10 : 20,
                             },
                             header: ({ navigation, scene }) => (
-                                <Header title='Log In' navigation={navigation} scene={scene} />
+                                <Header title={t('auth.signIn')} navigation={navigation} scene={scene} />
                             ),
                         }}
                     />

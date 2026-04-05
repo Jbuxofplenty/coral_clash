@@ -1,0 +1,812 @@
+{
+    "auth": {
+        "welcomeBack": "ফিরে আসায় স্বাগতম",
+        "createAccount": "অ্যাকাউন্ট তৈরি করুন",
+        "resetPassword": "পাসওয়ার্ড রিসেট করুন",
+        "signInSubtitle": "কম্পিউটারের সাথে খেলতে বা অন্য খেলোয়াড়দের অনলাইনে চ্যালেঞ্জ করতে সাইন ইন করুন",
+        "signUpSubtitle": "অনলাইনে খেলতে একটি অ্যাকাউন্ট তৈরি করুন। একটি অনন্য ব্যবহারকারীর নাম চয়ন করুন!",
+        "forgotPasswordSubtitle": "পাসওয়ার্ড রিসেট লিঙ্ক পেতে আপনার ইমেল লিখুন",
+        "usernamePlaceholder": "ব্যবহারকারীর নাম (আবশ্যক)",
+        "emailPlaceholder": "ইমেল",
+        "passwordPlaceholder": "পাসওয়ার্ড",
+        "signInWithApple": "Apple দিয়ে সাইন ইন করুন",
+        "signUpWithApple": "Apple দিয়ে সাইন আপ করুন",
+        "signInWithGoogle": "Google দিয়ে সাইন ইন করুন",
+        "signUpWithGoogle": "Google দিয়ে সাইন আপ করুন",
+        "or": "অথবা",
+        "signIn": "সাইন ইন করুন",
+        "signUp": "সাইন আপ করুন",
+        "sendResetLink": "রিসেট লিঙ্ক পাঠান",
+        "forgotPassword": "পাসওয়ার্ড ভুলে গেছেন?",
+        "backToSignIn": "সাইন ইন এ ফিরে যান",
+        "alreadyHaveAccount": "ইতোমধ্যে অ্যাকাউন্ট আছে? সাইন ইন করুন",
+        "dontHaveAccount": "অ্যাকাউন্ট নেই? সাইন আপ করুন",
+        "errors": {
+            "fillAllFields": "অনুগ্রহ করে সব ক্ষেত্র পূরণ করুন",
+            "usernameRequired": "ব্যবহারকারীর নাম প্রয়োজন",
+            "usernameMinLength": "ব্যবহারকারীর নাম কমপক্ষে ২ অক্ষরের হতে হবে",
+            "usernameMaxLength": "ব্যবহারকারীর নাম ৩০ অক্ষরের কম হতে হবে",
+            "usernameInvalidChars": "ব্যবহারকারীর নামে কেবল অক্ষর, সংখ্যা, স্পেস, আন্ডারস্কোর এবং হাইফেন থাকতে পারে",
+            "authFailed": "প্রমাণীকরণ ব্যর্থ হয়েছে",
+            "googleSignInFailed": "Google সাইন ইন ব্যর্থ হয়েছে",
+            "appleSignInFailed": "Apple সাইন ইন ব্যর্থ হয়েছে",
+            "enterEmail": "অনুগ্রহ করে আপনার ইমেল লিখুন",
+            "resetEmailFailed": "রিসেট ইমেল পাঠাতে ব্যর্থ"
+        },
+        "success": {
+            "resetEmailSent": "পাসওয়ার্ড রিসেট ইমেল পাঠানো হয়েছে! আপনার ইনবক্স চেক করুন।"
+        }
+    },
+    "game": {
+        "difficulty": {
+            "title": "AI কাঠিন্য স্তর নির্বাচন করুন",
+            "subtitle": "কম্পিউটার প্রতিপক্ষের জন্য কাঠিন্য স্তর চয়ন করুন",
+            "random": "এলোমেলো",
+            "easy": "সহজ",
+            "medium": "মাঝারি",
+            "hard": "কঠিন",
+            "randomDescription": "কম্পিউটার এলোমেলো চাল দেয়",
+            "easyDescription": "কম্পিউটার প্রাথমিক কৌশল ব্যবহার করে",
+            "mediumDescription": "কম্পিউটার মাঝারি কৌশল ব্যবহার করে",
+            "hardDescription": "কম্পিউটার উন্নত কৌশল ব্যবহার করে",
+            "createAccountToAccess": "অ্যাক্সেস পেতে একটি অ্যাকাউন্ট তৈরি করুন"
+        },
+        "matchmaking": {
+            "title": "গেম মোড নির্বাচন করুন",
+            "timeControl": "সময় নিয়ন্ত্রণ নির্বাচন করুন",
+            "timeControlSubtitle": "এই গেমের জন্য সময়সীমা বেছে নিন",
+            "instant": "তাৎক্ষণিক",
+            "instantDescription": "এখনই একজন প্রতিপক্ষ খুঁজুন। আপনাকে অনলাইন খেলোয়াড়দের সাথে মিলিয়ে দেয়।",
+            "correspondence": "চিঠিপত্র (Correspondence)",
+            "correspondenceDescription": "একজন এলোমেলো খেলোয়াড়কে আমন্ত্রণ পাঠান। তাদের গ্রহণ করার জন্য 24 ঘন্টা সময় আছে।",
+            "timeControls": {
+                "unlimited": "সময়সীমা নেই",
+                "blitz": "৫ মিনিট",
+                "normal": "১০ মিনিট",
+                "custom": "সময়সীমা সেট করা হয়েছে"
+            },
+            "timeControlDescriptions": {
+                "blitz": "প্রতি খেলোয়াড় ৫ মিনিট",
+                "normal": "প্রতি খেলোয়াড় ১০ মিনিট",
+                "unlimited": "সময়সীমা নেই"
+            }
+        },
+        "status": {
+            "loading": "লোড হচ্ছে",
+            "noGamesFound": "কোনো গেম পাওয়া যায়নি",
+            "error": "ত্রুটি",
+            "resetApproved": "গেম রিসেট করা হয়েছে",
+            "resetRejected": "রিসেটের অনুরোধ প্রত্যাখ্যান করা হয়েছে",
+            "undoApproved": "চাল পূর্বাবস্থায় ফেরানো হয়েছে",
+            "undoRejected": "পূর্বাবস্থায় ফেরানোর অনুরোধ প্রত্যাখ্যান করা হয়েছে"
+        },
+        "actions": {
+            "cancel": "বাতিল"
+        },
+        "postMatchSignup": {
+            "title": "দারুণ খেলা!",
+            "message": "আপনার পরিসংখ্যান সংরক্ষণ করতে এবং আসল লোকেদের সাথে খেলতে চান?",
+            "lossTitle": "হাল ছাড়বেন না!",
+            "lossMessage": "প্রতিটি পরাজয় একটি শিক্ষা। আপনার অগ্রগতি ট্র্যাক করতে সাইন আপ করুন।",
+            "button": "এখনই সাইন আপ করুন"
+        }
+    },
+    "navigation": {
+        "home": "হোম",
+        "game": "গেম",
+        "tutorial": "Tutorial",
+        "howToPlay": "কিভাবে খেলতে হয়",
+        "settings": "সেটিংস",
+        "friends": "বন্ধুরা",
+        "stats": "পরিসংখ্যান",
+        "reportIssue": "সমস্যা রিপোর্ট করুন",
+        "rulesVideo": "নিয়ম ভিডিও",
+        "physicalGame": "ফিজিক্যাল গেম",
+        "logOut": "লগ আউট",
+        "logOutConfirmTitle": "লগ আউট",
+        "logOutConfirmMessage": "আপনি কি নিশ্চিত যে আপনি লগ আউট করতে চান?",
+        "cancel": "বাতিল",
+        "appTitle": "Coral Clash",
+        "appSubtitle": "দ্য ওশান স্ট্র্যাটেজি গেম"
+    },
+    "home": {
+        "welcome": {
+            "title": "Coral Clash এ স্বাগতম!",
+            "message": "শুরু করতে মেনুতে নিয়ম ভিডিও বা কীভাবে খেলবেন গাইড দেখুন!",
+            "watchVideo": "ভিডিও দেখুন",
+            "howToPlay": "কিভাবে খেলতে হয়",
+            "ok": "OK"
+        },
+        "opponent": {
+            "computer": "Computer",
+            "opponent": "প্রতিপক্ষ",
+            "guest": "অতিথি ১"
+        },
+        "gameModes": {
+            "howToPlayTitle": "কীভাবে খেলবেন",
+            "howToPlayDescription": "Coral Clash এর নিয়ম এবং কৌশল শিখুন",
+            "playComputerTitle": "কম্পিউটারের সাথে খেলুন",
+            "playComputerDescription": "AI এর বিরুদ্ধে নতুন গেম শুরু করুন",
+            "loadGameStateTitle": "গেম স্ট্যাটাস লোড করুন (Dev)",
+            "loadGameStateDescription": "ফিক্সচার থেকে সংরক্ষিত গেম স্ট্যাটাস লোড করুন"
+        },
+        "matchmaking": {
+            "cannotJoin": "ম্যাচমেকিংয়ে যোগ দেওয়া যাচ্ছে না",
+            "instantMatchFound": "পত্রালাপ ম্যাচ পাওয়া গেছে!",
+            "instantMatchMessage": "আপনাকে {{creatorName}} এর সাথে মিলানো হয়েছে। তাদের জানানো হবে এবং গ্রহণ করার জন্য ২৪ ঘন্টা সময় আছে।",
+            "correspondenceCreated": "আমন্ত্রণ তৈরি করা হয়েছে",
+            "correspondenceMessage": "আপনার আমন্ত্রণ তৈরি করা হয়েছে। যখন অন্য কোনো খেলোয়াড় এই মোড নির্বাচন করবে, তখন তারা আপনার আমন্ত্রণের সাথে মিলে যেতে পারে। কেউ খেলতে চাইলে আপনাকে জানানো হবে!"
+        },
+        "errors": {
+            "offlineModeTitle": "অফলাইন মোড",
+            "offlineModeMessage": "সার্ভারের সাথে সংযোগ করা যায়নি। অফলাইন গেম শুরু হচ্ছে।",
+            "errorTitle": "ত্রুটি",
+            "failedToStart": "{{action}} শুরু করতে ব্যর্থ। আবার চেষ্টা করুন।",
+            "failedToResign": "হাল ছাড়তে ব্যর্থ। আবার চেষ্টা করুন।",
+            "failedPassAndPlay": "পাস এবং প্লে গেম শুরু করতে ব্যর্থ। আবার চেষ্টা করুন।",
+            "failedComputerGame": "কম্পিউটার গেম শুরু করতে ব্যর্থ",
+            "failedMatchmaking": "{{mode}} ম্যাচমেকিং শুরু করতে ব্যর্থ। {{message}}"
+        }
+    },
+    "stats": {
+        "overallStatistics": "সামগ্রিক পরিসংখ্যান",
+        "gamesPlayed": "খেলা হয়েছে",
+        "wins": "জয়",
+        "losses": "পরাজয়",
+        "draws": "ড্র",
+        "winRate": "জয়ের হার",
+        "matchupStatistics": "প্রতিপক্ষ পরিসংখ্যান",
+        "matchupDescription": "প্রতিটি প্রতিপক্ষের বিরুদ্ধে জয়ের হার",
+        "computer": "Computer",
+        "winRateShort": "জয়",
+        "winsShort": "জ",
+        "lossesShort": "প",
+        "drawsShort": "ড",
+        "noGamesYet": "এখনো কোনো খেলা নেই",
+        "noGamesHint": "আপনার পরিসংখ্যান দেখতে খেলা শুরু করুন!"
+    },
+    "gameMenu": {
+        "saveGameState": "গেমের অবস্থা সংরক্ষণ করুন",
+        "exportPosition": "বর্তমান অবস্থা রপ্তানি করুন",
+        "flipBoard": "বোর্ড উল্টান",
+        "showingBlackBottom": "বর্তমানে কালো নিচে",
+        "showingWhiteBottom": "বর্তমানে সাদা নিচে",
+        "reportBug": "বাগ রিপোর্ট করুন",
+        "includeGameState": "বর্তমান গেমের অবস্থা অন্তর্ভুক্ত করুন",
+        "resignGame": "হাল ছেড়ে দিন",
+        "resigning": "হাল ছেড়ে দিচ্ছেন...",
+        "pleaseWait": "দয়া করে অপেক্ষা করুন...",
+        "gameEnded": "গেমটি ইতোমধ্যেই শেষ",
+        "forfeitGame": "বর্তমান গেম ত্যাগ করুন"
+    },
+    "reportIssue": {
+        "bugReportTitle": "বাগ রিপোর্ট",
+        "bugReportDescription": "বর্তমান গেমের অবস্থার সাথে একটি বাগ রিপোর্ট করুন। গেমের অবস্থান আপনার রিপোর্টে অন্তর্ভুক্ত করা হবে।",
+        "feedbackTitle": "মতামত এবং সমস্যা",
+        "feedbackDescription": "মতামত পাঠান বা সমস্যা রিপোর্ট করুন। আমরা আপনার ইনপুটের প্রশংসা করি!",
+        "subject": "বিষয়",
+        "subjectPlaceholder": "সমস্যার সংক্ষিপ্ত সারসংক্ষেপ",
+        "description": "বিবরণ",
+        "descriptionPlaceholder": "সমস্যা বা মতামতের বিস্তারিত বিবরণ...",
+        "gameStateIncluded": "✓ গেমের অবস্থা অন্তর্ভুক্ত করা হবে",
+        "turn": "চাল",
+        "white": "সাদা",
+        "black": "কালো",
+        "gameOver": "খেলা শেষ",
+        "submitIssue": "সমস্যা জমা দিন",
+        "anonymousNote": "দ্রষ্টব্য: আপনি বেনামে জমা দিচ্ছেন। আপনার সমস্যাগুলি ট্র্যাক করতে সাইন ইন করুন।",
+        "validation": {
+            "missingSubjectTitle": "তথ্য অনুপস্থিত",
+            "missingSubjectMessage": "অনুগ্রহ করে আপনার সমস্যার জন্য একটি বিষয় লিখুন।",
+            "invalidSubjectTitle": "অবৈধ বিষয়",
+            "invalidSubjectMessage": "বিষয় কমপক্ষে 3 অক্ষরের হতে হবে।",
+            "missingDescriptionTitle": "তথ্য অনুপস্থিত",
+            "missingDescriptionMessage": "অনুগ্রহ করে আপনার সমস্যার জন্য একটি বিবরণ লিখুন।",
+            "invalidDescriptionTitle": "অবৈধ বিবরণ",
+            "invalidDescriptionMessage": "বিবরণ কমপক্ষে 10 অক্ষরের হতে হবে।"
+        },
+        "success": {
+            "title": "সমস্যা জমা দেওয়া হয়েছে",
+            "message": "আপনার মতামতের জন্য ধন্যবাদ! আপনার সমস্যা সফলভাবে জমা দেওয়া হয়েছে",
+            "ok": "OK"
+        },
+        "error": {
+            "title": "জমা দিতে ত্রুটি",
+            "message": "আপনার সমস্যা জমা দিতে ব্যর্থ। আপনার সংযোগ পরীক্ষা করুন এবং আবার চেষ্টা করুন।"
+        }
+    },
+    "settings": {
+        "account": "অ্যাকাউন্ট",
+        "profileAvatar": "প্রোফাইল অবতার",
+        "chooseAvatar": "আপনার সমুদ্র থিমের অবতার চয়ন করুন",
+        "appearance": "চেহারা",
+        "theme": {
+            "light": "হালকা",
+            "lightDescription": "সর্বদা হালকা থিম ব্যবহার করুন",
+            "dark": "অন্ধকার",
+            "darkDescription": "সর্বদা গাঢ় থিম ব্যবহার করুন",
+            "auto": "অটো",
+            "autoDescription": "সিস্টেম থিম অনুসরণ করুন"
+        },
+        "language": {
+            "title": "ভাষা (Language)",
+            "english": "English",
+            "englishDescription": "English language interface",
+            "hindi": "हिन्दी (Hindi)",
+            "hindiDescription": "हिन्दी भाषा इंटरफ़ेस"
+        },
+        "actions": {
+            "resetToDefaults": "ডিফল্টে রিসেট করুন",
+            "resetTitle": "সেটিংস রিসেট করুন",
+            "resetMessage": "আপনি কি নিশ্চিত যে আপনি সমস্ত সেটিংস ডিফল্টে রিসেট করতে চান?",
+            "cancel": "বাতিল",
+            "reset": "রিসেট করুন"
+        },
+        "dangerZone": {
+            "title": "খতরনাক জোন",
+            "warning": "আপনার অ্যাকাউন্ট মুছে ফেললে, ফিরে যাওয়ার কোনো উপায় নেই। নিশ্চিত হন।",
+            "deleteAccount": "অ্যাকাউন্ট মুছুন",
+            "deletingAccount": "অ্যাকাউন্ট মুছে ফেলা হচ্ছে...",
+            "deleteTitle": "অ্যাকাউন্ট মুছুন",
+            "deleteMessage": "এই কাজটি স্থায়ী।\n\n• আপনার সমস্ত ব্যক্তিগত তথ্য সরিয়ে ফেলা হবে\n• আপনার গেমগুলি চলতে থাকবে তবে আপনি \"বেনামী\" হিসাবে উপস্থিত হবেন\n• আপনার বন্ধু এবং বন্ধুত্বের অনুরোধগুলি সরিয়ে ফেলা হবে\n• সক্রিয় গেমগুলি পরাজয় হিসাবে গণ্য হবে\n\nআপনি কি নিশ্চিত যে আপনি চালিয়ে যেতে চান?",
+            "continue": "চালিয়ে যান",
+            "confirmTitle": "মোছা নিশ্চিত করুন",
+            "confirmMessage": "নিশ্চিত করতে অনুগ্রহ করে নিচে DELETE (বড় হাতের অক্ষরে) টাইপ করুন:",
+            "incorrectTitle": "ভুল নিশ্চিতকরণ",
+            "incorrectMessage": "অ্যাকাউন্ট মুছে ফেলার বিষয়টি নিশ্চিত করতে আপনাকে ঠিক DELETE টাইপ করতে হবে।",
+            "successTitle": "অ্যাকাউন্ট মুছে ফেলা হয়েছে",
+            "successMessage": "আপনার অ্যাকাউন্ট সফলভাবে মুছে ফেলা হয়েছে। আপনাকে এখন লগ আউট করা হবে।",
+            "failedTitle": "মুছতে ব্যর্থ",
+            "timeoutMessage": "অনুরোধের সময় শেষ হয়েছে। আপনার সংযোগ পরীক্ষা করুন।",
+            "failedMessage": "অ্যাকাউন্ট মুছতে ব্যর্থ। আবার চেষ্টা করুন বা সহায়তার সাথে যোগাযোগ করুন।",
+            "retry": "আবার চেষ্টা করুন"
+        },
+        "errors": {
+            "loadFailed": "সেটিংস লোড করতে ব্যর্থ",
+            "saveFailed": "সেটিংস সংরক্ষণ করতে ব্যর্থ",
+            "avatarSaveFailed": "অবতার নির্বাচন সংরক্ষণ করতে ব্যর্থ",
+            "themeSaveFailed": "থিম পছন্দ সংরক্ষণ করতে ব্যর্থ",
+            "languageChangeFailed": "ভাষা পরিবর্তন করতে ব্যর্থ",
+            "resetFailed": "সেটিংস রিসেট করতে ব্যর্থ"
+        }
+    },
+    "friends": {
+        "addFriend": "বন্ধু যোগ করুন",
+        "searchPlaceholder": "ব্যবহারকারীর নাম দ্বারা অনুসন্ধান করুন",
+        "noUsersFound": "কোনো ব্যবহারকারী পাওয়া যায়নি",
+        "pending": "অপেক্ষমান",
+        "incomingRequests": "আগত অনুরোধ",
+        "sentRequests": "প্রেরিত অনুরোধ",
+        "myFriends": "আমার বন্ধুরা",
+        "noFriendsYet": "এখনো কোনো বন্ধু নেই",
+        "noFriendsHint": "একসাথে খেলতে ব্যবহারকারীর নাম দিয়ে বন্ধু যোগ করুন!"
+    },
+    "common": {
+        "loading": "লোড হচ্ছে...",
+        "error": "ত্রুটি",
+        "success": "সফল",
+        "cancel": "বাতিল",
+        "confirm": "নিশ্চিত করুন",
+        "save": "সংরক্ষণ করুন",
+        "delete": "মুছুন",
+        "edit": "সম্পাদনা করুন",
+        "close": "বন্ধ করুন",
+        "ok": "OK",
+        "somethingWentWrong": "কিছু ভুল হয়েছে। আবার চেষ্টা করুন।"
+    },
+    "cards": {
+        "matchmaking": {
+            "searchingForOpponent": "প্রতিপক্ষ খোঁজা হচ্ছে...",
+            "findRandomMatch": "র্যান্ডম ম্যাচ খুঁজুন",
+            "searchingHint": "প্রতিপক্ষ খোঁজা হচ্ছে... · বাতিল করতে ট্যাপ করুন",
+            "tapToJoin": "ম্যাচমেকিং কিউতে যোগ দিতে ট্যাপ করুন",
+            "cannotJoinTitle": "যোগ দেওয়া যাচ্ছে না"
+        },
+        "playWithFriend": {
+            "title": "বন্ধুর সাথে খেলুন",
+            "description": "একজন বন্ধুকে খেলার জন্য আমন্ত্রণ জানান",
+            "modalTitle": "বন্ধুর সাথে খেলুন",
+            "inviteFriend": "বন্ধুকে আমন্ত্রণ জানান",
+            "inviteDescription": "বন্ধুকে গেম আমন্ত্রণ পাঠান",
+            "textInvite": "টেক্সট আমন্ত্রণ",
+            "textInviteDescription": "মেসেজের মাধ্যমে আমন্ত্রণ পাঠান",
+            "passAndPlay": "পাস এবং প্লে",
+            "passAndPlayDescription": "স্থানীয়ভাবে এই ডিভাইসে খেলুন",
+            "selectFriend": "বন্ধু নির্বাচন করুন",
+            "searchFriends": "বন্ধুদের খুঁজুন...",
+            "noFriendsFound": "কোনো বন্ধু পাওয়া যায়নি",
+            "noFriendsYet": "এখনো বন্ধু নেই। খেলতে বন্ধু যোগ করুন!",
+            "passAndPlayGames": "পাস এবং প্লে গেমস",
+            "startNewGame": "নতুন গেম শুরু করুন",
+            "noActiveGames": "কোনো সক্রিয় গেম নেই",
+            "vsGuest": "vs অতিথি ১",
+            "unlimited": "সীমাহীন",
+            "shareMessage": "চলো Coral Clash খেলি! 🦀\n\nএখানে ডাউনলোড করুন:\niOS: [URL]\n\nAndroid: [URL]"
+        },
+        "signUpPrompt": {
+            "title": "সব সুবিধা খুলুন",
+            "subtitle": "এর জন্য একটি বিনামূল্যে অ্যাকাউন্ট তৈরি করুন:",
+            "feature1": "অনলাইনে বন্ধুদের সাথে খেলুন",
+            "feature2": "ম্যাচমেকিং এর মাধ্যমে প্রতিপক্ষ খুঁজুন",
+            "feature3": "পরিসংখ্যান এবং গেমের ইতিহাস ট্র্যাক করুন",
+            "feature4": "বন্ধুদের একটি নেটওয়ার্ক তৈরি করুন",
+            "button": "সাইন আপ / সাইন ইন"
+        },
+        "activeGames": {
+            "title": "সক্রিয় গেমস",
+            "inProgress": "চলছে",
+            "game": "গেম",
+            "games": "গেমস",
+            "yourTurn": "আপনার চাল",
+            "opponentTurn": "প্রতিপক্ষের চাল",
+            "opponent": "প্রতিপক্ষ",
+            "computer": "Computer",
+            "blitz": "Blitz",
+            "normal": "Normal",
+            "unlimited": "সীমাহীন",
+            "timed": "সময়বদ্ধ",
+            "loading": "গেম লোড হচ্ছে...",
+            "noGames": "কোনো সক্রিয় গেম নেই",
+            "noGamesHint": "বন্ধুর সাথে একটি গেম শুরু করুন!",
+            "vs": "vs ",
+            "resignTitle": "হাল ছেড়ে দিন",
+            "resignMessage": "আপনি কি নিশ্চিত? আপনি এই গেমটি হারবেন।",
+            "resignButton": "হাল ছেড়ে দিন",
+            "resignError": "হাল ছাড়তে ব্যর্থ। আবার চেষ্টা করুন।"
+        },
+        "gameHistory": {
+            "title": "গেমের ইতিহাস",
+            "subtitle": "সাম্প্রতিক গেমস",
+            "loading": "ইতিহাস লোড হচ্ছে...",
+            "noHistory": "কোনো গেমের ইতিহাস নেই",
+            "noHistoryHint": "আপনার সম্পূর্ণ গেমগুলো এখানে প্রদর্শিত হবে",
+            "vs": "vs ",
+            "justNow": "এইমাত্র",
+            "minutesAgo": "মিনিট আগে",
+            "hoursAgo": "ঘন্টা আগে",
+            "daysAgo": "দিন আগে",
+            "cancelled": "গেম বাতিল হয়েছে",
+            "draw": "ড্র",
+            "won": "আপনি জিতেছেন",
+            "lost": "আপনি হেরেছেন",
+            "unknown": "অজানা",
+            "opponent": "প্রতিপক্ষ",
+            "computer": "Computer",
+            "blitz": "Blitz",
+            "normal": "Normal",
+            "unlimited": "সীমাহীন",
+            "timed": "সময়বদ্ধ"
+        }
+    },
+    "errors": {
+        "INVALID_MOVE": "অবৈধ চাল",
+        "INVALID_MOVE_OCCUPIED": "পদটি ইতোমধ্যেই পূর্ণ",
+        "INVALID_MOVE_OUT_OF_BOUNDS": "বোর্ডের বাইরে চাল",
+        "INVALID_MOVE_NOT_YOUR_TURN": "এটা আপনার চাল নয়",
+        "INVALID_MOVE_PIECE_BLOCKED": "এই গুটিটি অবরুদ্ধ",
+        "GAME_NOT_FOUND": "গেমটি পাওয়া যায়নি",
+        "GAME_ALREADY_STARTED": "গেমটি ইতোমধ্যেই শুরু হয়েছে",
+        "GAME_ALREADY_ENDED": "গেমটি ইতোমধ্যেই শেষ হয়েছে",
+        "GAME_CANCELLED": "গেমটি বাতিল হয়েছে",
+        "PLAYER_NOT_IN_GAME": "আপনি এই গেমে নেই",
+        "PLAYER_DISCONNECTED": "খেলোয়াড় সংযোগ বিচ্ছিন্ন",
+        "CONNECTION_ERROR": "সংযোগ ত্রুটি। আপনার ইন্টারনেট পরীক্ষা করুন।",
+        "SERVER_ERROR": "সার্ভার ত্রুটি। পরে আবার চেষ্টা করুন।",
+        "TIMEOUT": "অনুরোধের সময় শেষ",
+        "ALREADY_IN_QUEUE": "আপনি ইতোমধ্যেই কিউতে আছেন",
+        "NOT_IN_QUEUE": "আপনি কিউতে নেই",
+        "QUEUE_TIMEOUT": "ম্যাচমেকিং সময় শেষ",
+        "OPPONENT_NOT_FOUND": "প্রতিপক্ষ পাওয়া যায়নি",
+        "MATCHMAKING_DISABLED": "ম্যাচমেকিং এখন বন্ধ আছে",
+        "FRIEND_NOT_FOUND": "বন্ধু পাওয়া যায়নি",
+        "FRIEND_ALREADY_EXISTS": "আপনার সাথে ইতোমধ্যেই বন্ধুত্ব আছে",
+        "CANNOT_ADD_SELF": "निजেকে বন্ধু হিসেবে যোগ করা যায় না",
+        "FRIEND_REQUEST_PENDING": "বন্ধুর অনুরোধ ইতোমধ্যেই অপেক্ষমান",
+        "INVALID_CREDENTIALS": "অবৈধ ইমেল বা পাসওয়ার্ড",
+        "USER_NOT_FOUND": "ব্যবহারকারী পাওয়া যায়নি",
+        "EMAIL_ALREADY_EXISTS": "ইমেল ইতোমধ্যেই ব্যবহৃত",
+        "USERNAME_TAKEN": "ব্যবহারকারীর নাম ইতোমধ্যে নেওয়া হয়েছে",
+        "WEAK_PASSWORD": "পাসওয়ার্ড খুব দুর্বল",
+        "ACCOUNT_DISABLED": "আপনার অ্যাকাউন্ট নিষ্ক্রিয় করা হয়েছে",
+        "SESSION_EXPIRED": "সেশন শেষ হয়ে গেছে। পুনরায় লগইন করুন।",
+        "UNAUTHORIZED": "আপনার এই কাজ করার অনুমতি নেই",
+        "RATE_LIMITED": "অতিরিক্ত অনুরোধ। দয়া করে অপেক্ষা করুন।",
+        "MAINTENANCE_MODE": "অ্যাপটি রক্ষণাবেক্ষণে আছে। পরে আবার চেষ্টা করুন।",
+        "FEATURE_DISABLED": "এই বৈশিষ্ট্যটি বর্তমানে নিষ্ক্রিয়"
+    },
+    "success": {
+        "GAME_WON": "অভিনন্দন! আপনি জিতেছেন!",
+        "GAME_DRAW": "গেমটি ড্র হয়েছে",
+        "GAME_LOST": "পরবর্তী সময়ের জন্য শুভকামনা!",
+        "PLAYER_RESIGNED": "খেলোয়াড় হাল ছেড়েছেন",
+        "FRIEND_REQUEST_SENT": "বন্ধুর অনুরোধ পাঠানো হয়েছে!",
+        "FRIEND_REQUEST_ACCEPTED": "বন্ধুর অনুরোধ গ্রহণ করা হয়েছে!",
+        "FRIEND_REQUEST_DECLINED": "বন্ধুর অনুরোধ প্রত্যাখ্যান করা হয়েছে",
+        "MOVE_SUCCESS": "চাল সফল হয়েছে"
+    },
+    "scenarioBoard": {
+        "pauseAutoPlay": "অটো-প্লে থামান",
+        "playDemo": "ডেমো চালান",
+        "explanation": "ব্যাখ্যা",
+        "backToGuide": "গাইডে ফিরে যান"
+    },
+    "howToPlay": {
+        "objective": {
+            "title": "উদ্দেশ্য",
+            "intro": "Coral Clash জিততে, এই লক্ষ্যগুলির একটি অর্জন করুন:",
+            "checkmate": "চেকমেট",
+            "checkmateDesc": "প্রতিপক্ষের তিমিকে (যখন তিমি",
+            "check": "চেক এ থাকে",
+            "checkmateDescEnd": "এবং পালাতে পারে না)",
+            "coralControl": "প্রবাল দিয়ে সবচেয়ে বেশি এলাকা",
+            "coralControlDesc": "নিয়ন্ত্রণ",
+            "coralControlWhen": "যখন:",
+            "coralPlaced": "একজন খেলোয়াড় তাদের সমস্ত প্রবাল স্থাপন করেছে",
+            "whaleRemaining": "একজন খেলোয়াড়ের শুধুমাত্র তিমি বেঁচে আছে",
+            "backRowReached": "একটি কাঁকড়া বা অক্টোপাস প্রতিপক্ষের শেষ সারিতে পৌঁছায়",
+            "areaControlled": "প্রবাল দ্বারা নিয়ন্ত্রিত এলাকা:",
+            "areaControlledDesc": "প্রতিপক্ষের গুটি দ্বারা দখল না হওয়া আপনার রঙের প্রবালগুলো গণনা করুন।",
+            "checkmateExample": "চেকমেটের উদাহরণ",
+            "checkExample": "চেক এর উদাহরণ",
+            "coralVictoryExample": "প্রবাল বিজয়ের উদাহরণ"
+        },
+        "setup": {
+            "title": "গেম সেটআপ",
+            "boardDesc": "বোর্ডটি 64 টি বর্গ বিশিষ্ট একটি 8x8 গ্রিড। প্রতিটি খেলোয়াড়ের থাকে:",
+            "coralPieces": "17 প্রবাল টুকরা",
+            "units": "17 ইউনিট: 1 তিমি, 2 ডলফিন, 4 কচ্ছপ, 2 পাফারফিশ, 4 কাঁকড়া এবং 4 অক্টোপাস",
+            "variants": "প্রতিটি ধরণের গুটির দুটি রূপ রয়েছে:",
+            "hunter": "শিকারী (Hunter)",
+            "hunterDesc": "গুটিগুলো (প্রবাল চিহ্ন ছাড়া) প্রবাল সরিয়ে ফেলতে পারে",
+            "gatherer": "সংগ্রাহক (Gatherer)",
+            "gathererDesc": "গুটিগুলো (প্রবাল চিহ্ন সহ) প্রবাল স্থাপন করতে পারে",
+            "hunterExample": "হান্টার প্রভাবের উদাহরণ",
+            "gathererExample": "গ্যাদারার প্রভাবের উদাহরণ"
+        },
+        "turnOverview": {
+            "title": "চালের সারাংশ",
+            "intro": "সাদা প্রথমে চাল দেয়, তারপরে খেলোয়াড়রা পর্যায়ক্রমে চাল দেয়। আপনার চালে:",
+            "step1": "আপনার একটি গুটি সরান",
+            "step2": "ক্যাপচার, হান্টার বা গ্যাদারার প্রভাবগুলো প্রয়োগ করুন",
+            "step3": "লক্ষ্যগুলি পূরণ হয়েছে কিনা তা পরীক্ষা করুন"
+        },
+        "movement": {
+            "title": "গুটিগুলো কীভাবে চলে",
+            "important": "গুরুত্বপূর্ণ:",
+            "importantDesc": "গুটিগুলো অন্য গুটির উপর দিয়ে যেতে পারে না - তাদের যাওয়ার পথ পরিষ্কার থাকতে হবে।",
+            "variants": "প্রতিটি ধরণের গুটির দুটি রূপ রয়েছে যা প্রবালের সাথে আলাদাভাবে যোগাযোগ করে:",
+            "hunterPieces": "শিকারী (Hunter) গুটিগুলো",
+            "hunterMovement": "(প্রবাল চিহ্ন ছাড়া)",
+            "stoppedBy": "থেমে যায়",
+            "hunterMovementDesc": "প্রবাল দ্বারা - এর উপর দিয়ে যেতে পারে না",
+            "gathererPieces": "সংগ্রাহক (Gatherer) গুটিগুলো",
+            "gathererMovement": "(প্রবাল চিহ্ন সহ) আরও শক্তিশালী - স্বাধীনভাবে যেতে পারে",
+            "through": "প্রবালের",
+            "gathererMovementDesc": "উপর দিয়ে",
+            "coralMovementExample": "প্রবাল চলাচলের উদাহরণ",
+            "individualMovements": "স্বতন্ত্র গুটিগুলোর চলাচল"
+        },
+        "pieces": {
+            "whale": {
+                "name": "তিমি",
+                "intro": "তিমি আপনার সবচেয়ে গুরুত্বপূর্ণ গুটি - চেকমেট হলে আপনি হেরে যাবেন! তিমি দুটি বর্গ দখল করে এবং এর দুটি ভিন্ন চলাচলের বিকল্প রয়েছে:",
+                "slidingMove": "1. স্লাইডিং মুভমেন্ট:",
+                "slidingMoveDesc": "গুটির অর্ধেক যেকোনো সংখ্যক বর্গ আনুভূমিক, উলম্ব, বা তির্যকভাবে সরান। তিমি হান্টার চলাচলের নিয়ম অনুসরণ করে - প্রবাল দ্বারা থেমে যায়। তবে একটি বিশেষ ব্যতিক্রম আছে (নিচে দেখুন)।",
+                "rotationMove": "2. ঘূর্ণন মুভমেন্ট:",
+                "rotationMoveDesc": "গুটির অর্ধেক সংলগ্ন একটি বর্গে ঘোরান (একটি বর্গ উলম্ব বা আনুভূমিকভাবে)। একটি ঘূর্ণন নির্বাচন করার সময়, প্রথমে লক্ষ্য বর্গে ট্যাপ করুন (সাদা বৃত্ত)। যদি একাধিক বৈধ অভিযোজন থাকে, অভিযোজন বর্গটিতে ট্যাপ করুন (সবুজ বৃত্ত)। শুধুমাত্র একটি বৈধ অভিযোজন থাকলে, তিমি স্বয়ংক্রিয়ভাবে সরে যাবে।",
+                "checkRules": "চেক নিয়ম:",
+                "checkRulesDesc": "তিমি কখনোই তার চাল চেক এ শেষ করতে পারে না (যেখানে এটি ক্যাপচার হতে পারে), কিন্তু এটি হুমকির মুখে থাকা লক্ষ্য বর্গের মধ্য দিয়ে যেতে পারে।",
+                "doubleCapture": "ডাবল ক্যাপচার:",
+                "doubleCaptureDesc": "তিমি একটি চালেই দুটি পর্যন্ত শত্রু গুটি ক্যাপচার করতে পারে!",
+                "doubleCoralRemoval": "ডাবল প্রবাল অপসারণ:",
+                "doubleCoralRemovalDesc": "যখন তিমি (হান্টার হিসাবে) প্রবালে অবতরণ করে, এটি প্রবালের টুকরোগুলির একটি বা উভয়ই সরিয়ে ফেলতে পারে।",
+                "specialCase": "⚠️ বিশেষ চালের ক্ষেত্রে",
+                "specialCaseDesc": "যদি একটি তিমির অর্ধেক ইতিমধ্যে একটি প্রবালের উপর দাঁড়িয়ে থাকে, সেই প্রবাল তিমির অপর অর্ধেককে চলাচলে বাধা দেয় না।",
+                "basicMovement": "বেসিক তিমি চলাচল",
+                "rotationExample": "তিমি ঘূর্ণনের উদাহরণ",
+                "coralException": "তিমির প্রবালের উপর দিয়ে চলাচল"
+            },
+            "dolphin": {
+                "name": "ডলফিন",
+                "movement": "যেকোনো সংখ্যক বর্গ উলম্ব, আনুভূমিক, বা তির্যকভাবে চলে।",
+                "example": "ডলফিন চলাচলের উদাহরণ"
+            },
+            "turtle": {
+                "name": "কচ্ছপ",
+                "movement": "যেকোনো সংখ্যক বর্গ উলম্ব বা আনুভূমিকভাবে চলে।",
+                "example": "কচ্ছপ চলাচলের উদাহরণ"
+            },
+            "pufferfish": {
+                "name": "পাফারফিশ",
+                "movement": "যেকোনো সংখ্যক বর্গ তির্যকভাবে চলে।",
+                "example": "পাফারফিশ চলাচলের উদাহরণ"
+            },
+            "octopus": {
+                "name": "অক্টোপাস",
+                "movement": "একটি বর্গ তির্যকভাবে চলে।",
+                "example": "অক্টোপাস চলাচলের উদাহরণ"
+            },
+            "crab": {
+                "name": "কাঁকড়া",
+                "movement": "একটি বর্গ উলম্ব বা আনুভূমিকভাবে চলে।",
+                "example": "কাঁকড়া চলাচলের উদাহরণ"
+            }
+        },
+        "specialRules": {
+            "title": "বিশেষ নিয়ম",
+            "capture": {
+                "title": "ক্যাপচার করা",
+                "desc": "শত্রু গুটি দ্বারা দখল করা জায়গায় যান। তিমি একটি চালেই দুটি গুটি ক্যাপচার করতে পারে।",
+                "example": "ক্যাপচারের উদাহরণ"
+            },
+            "hunterEffect": {
+                "title": "হান্টার মুভমেন্ট এবং প্রভাব",
+                "desc": "হান্টার গুটিগুলোর (প্রবাল চিহ্ন ছাড়া) দুটি গুরুত্বপূর্ণ আচরণ রয়েছে:",
+                "movementStops": "চলাচল থেমে যায়",
+                "movementStopsDesc": "যখন তারা প্রবালে অবতরণ করে",
+                "canRemove": "সরাতে পারে",
+                "canRemoveDesc": "বোর্ড থেকে সেই প্রবালটিকে",
+                "example": "হান্টার প্রভাবের উদাহরণ"
+            },
+            "gathererEffect": {
+                "title": "গ্যাদারার প্রভাব",
+                "desc": "গ্যাদারার গুটিগুলো (প্রবাল চিহ্ন সহ) ফাঁকা বর্গে প্রবাল স্থাপন করতে পারে যেখানে তারা চলে।",
+                "example": "গ্যাদারার প্রভাবের উদাহরণ"
+            }
+        },
+        "drawResignation": {
+            "title": "ড্র এবং হাল ছেড়ে দেওয়া",
+            "stalemate": "স্টেলমেট (Stalemate):",
+            "stalemateDesc": "যখন একজন খেলোয়াড়ের কোনো বৈধ চাল থাকে না এবং তার তিমি চেক এ থাকে না",
+            "threefoldRepetition": "তিনবার পুনরাবৃত্তি:",
+            "threefoldRepetitionDesc": "একই অবস্থান তিনবার দেখা দেয় যখন একই খেলোয়াড় চাল দেয়",
+            "resignation": "হাল ছেড়ে দেওয়া:",
+            "resignationDesc": "একজন খেলোয়াড় যেকোনো সময় হাল ছেড়ে দিতে পারে"
+        }
+    },
+    "tutorial": {
+        "endGame": {
+            "title": "Coral Clash এ স্বাগতম!",
+            "message": "তিমি হলো রাজা। কালো তিমিকে চেকমেট করে, বা আপনার 17 টি প্রবাল স্থাপন করে আপনি জিততে পারেন। শুভকামনা!",
+            "backInfo": "মূল স্ক্রিনে ফিরে যেতে তীর চিহ্নে আলতো চাপ দিন"
+        }
+    },
+    "tutorialScenarios": {
+        "checkmate": {
+            "title": "চেকমেটের উদাহরণ",
+            "description": "কালো তিমি a6 এ প্রবাল দ্বারা অবরুদ্ধ (গোলাপী সীমানা)। b7 এ সাদা হান্টার ডলফিন তিমিকে চেক দিচ্ছে, এবং g7 এ সাদা গ্যাদারার কচ্ছপ (সীমানায় প্রবাল চিহ্ন সহ) আক্রমণকারী ডলফিনকে রক্ষা করছে। তিমির পালানোর পথ নেই - চেকমেট!"
+        },
+        "coralVictory": {
+            "title": "প্রবাল বিজয় - এলাকা নিয়ন্ত্রণ",
+            "description": "সাদাদের 4 টি প্রবাল আছে: c3, d3, e3, f3. কালোদের 4 টি প্রবাল আছে: c6, d6, e6, f6. c3 এ কালো গ্যাদারার ডলফিন সাদাদের প্রবালের উপর দাঁড়িয়ে আছে, তাই সাদা শুধুমাত্র 3 টি প্রবাল নিয়ন্ত্রণ করে। কালো নিয়ন্ত্রণ করে 4 টি = কালো 4 থেকে 3 এ জিতেছে!"
+        },
+        "whaleMovement": {
+            "title": "তিমি চলাচল",
+            "description": "তিমি দুটি সংলগ্ন বর্গ দখল করে এবং তিনটি উপায়ে চলতে পারে: (1) একটি অর্ধেককে স্লাইড করে যখন অন্যটি স্থির থাকে, (2) দুটি অর্ধেক একসাথে স্লাইড করে, অথবা (3) একটি অর্ধেককে সংলগ্ন বর্গে ঘুরিয়ে।"
+        },
+        "whaleRotation": {
+            "title": "তিমি ঘূর্ণন",
+            "description": "তিমি তার একটি অর্ধেক সংলগ্ন বর্গে (উলম্ব বা আনুভূমিক) ঘুরতে পারে। দেখুন কীভাবে সাদা তিমি আনুভূমিক থেকে উলম্ব অবস্থানে ঘোরে।"
+        },
+        "whaleCoralException": {
+            "title": "তিমির প্রবালের উপর দিয়ে চলাচল",
+            "description": "বিশেষ নিয়ম: যদি তিমির অর্ধেক ইতিমধ্যে প্রবালের উপর থাকে, তবে প্রবালটি অপর অর্ধেককে বাধা দেয় না।"
+        },
+        "coralMovementComparison": {
+            "title": "প্রবাল চলাচলের তুলনা",
+            "description": "সাদা হান্টার ডলফিন (বামে) এবং সাদা গ্যাদারার ডলফিনের (ডানে) তুলনা করুন। তাদের চাল দেখতে প্রতিটিতে ট্যাপ করুন।"
+        },
+        "check": {
+            "title": "চেক",
+            "description": "কালো তিমি চেক এ আছে - সাদা গ্যাদারার ডলফিন দ্বারা আক্রান্ত। গ্যাদারার ডলফিন প্রবালের উপর দিয়ে যেতে পারে। কালোকে অবশ্যই তিমিকে রক্ষা করতে হবে বা আক্রমণটি ব্লক করতে হবে।"
+        },
+        "hunterEffect": {
+            "title": "হান্টার প্রভাব",
+            "description": "হান্টার গুটিগুলো প্রবালে গেলে থেমে যায়। এরপর তারা বোর্ড থেকে প্রবালটি সরিয়ে ফেলতে পারে।"
+        },
+        "gathererEffect": {
+            "title": "গ্যাদারার প্রভাব",
+            "description": "গ্যাদারার গুটিগুলো ফাঁকা বর্গে প্রবাল স্থাপন করতে পারে যেখানে তারা চলে।"
+        },
+        "dolphinMovement": {
+            "title": "ডলফিন চলাচল",
+            "description": "ডলফিন যেকোনো দিকে যেকোনো সংখ্যক বর্গ চলতে পারে - এটি বহুমুখী গুটি!"
+        },
+        "turtleMovement": {
+            "title": "কচ্ছপ চলাচল",
+            "description": "কচ্ছপ উলম্ব বা আনুভূমিকভাবে যেকোনো সংখ্যক বর্গ চলতে পারে, কিন্তু তির্যকভাবে নয়।"
+        },
+        "pufferfishMovement": {
+            "title": "পাফারফিশ চলাচল",
+            "description": "পাফারফিশ তির্যকভাবে যেকোনো সংখ্যক বর্গ চলতে পারে।"
+        },
+        "crabMovement": {
+            "title": "কাঁকড়া চলাচল",
+            "description": "কাঁকড়া উলম্ব বা আনুভূমিকভাবে একটি বর্গ চলে। ধীর কিন্তু শক্তিশালী।"
+        },
+        "octopusMovement": {
+            "title": "অক্টোপাস চলাচল",
+            "description": "অক্টোপাস তির্যকভাবে একটি বর্গ চলে। কাঁকড়ার মতো এটিও কৌশলগত হতে পারে।"
+        },
+        "capture": {
+            "title": "গুটি ক্যাপচার করা",
+            "description": "শত্রুর গুটি ক্যাপচার করতে, আপনার গুটিটিকে শত্রুর গুটি দ্বারা দখল করা বর্গে নিয়ে যান।"
+        }
+    },
+    "components": {
+        "fixtureLoader": {
+            "title": "গেম স্ট্যাটাস লোড করুন",
+            "gameMode": "গেম মোড:",
+            "back": "পিছনে",
+            "vsComputer": "vs Computer",
+            "passAndPlay": "পাস এবং প্লে",
+            "loadGame": "গেম লোড করুন",
+            "fixturesHint": "💡 shared/game/__fixtures__/ থেকে ফিক্সচার",
+            "error": "ত্রুটি",
+            "failedToLoad": "ফিক্সচার লোড করতে ব্যর্থ"
+        },
+        "versionWarning": {
+            "title": "আপডেট উপলব্ধ",
+            "message": "সেরা অভিজ্ঞতার জন্য নতুন সংস্করণে আপডেট করুন।",
+            "updateButton": "আপডেট"
+        },
+        "playerStatus": {
+            "computer": "Computer",
+            "thinking": "ভাবছে...",
+            "remaining": "বাকি",
+            "underControl": "নিয়ন্ত্রণে"
+        },
+        "alert": {
+            "defaultButton": "OK"
+        },
+        "pvpBoard": {
+            "player": "খেলোয়াড়",
+            "opponent": "প্রতিপক্ষ",
+            "requestUndoTitle": "আনডু এর অনুরোধ",
+            "requestUndoMessage": "শেষ চাল আনডু করবেন? {{opponentName}} কে অনুমোদন করতে হবে।",
+            "requestResetTitle": "রিসেটের অনুরোধ",
+            "requestResetMessage": "গেমটি রিসেট করবেন? {{opponentName}} কে অনুমোদন করতে হবে।",
+            "cancel": "বাতিল",
+            "request": "অনুরোধ",
+            "requestReset": "রিসেটের অনুরোধ",
+            "askOpponentReset": "প্রতিপক্ষকে গেম রিসেট করতে জিজ্ঞাসা করুন",
+            "gameEnded": "গেমটি ইতোমধ্যেই শেষ",
+            "noMoves": "এখনো কোনো চাল দেওয়া হয়নি",
+            "pendingUndo": "অপেক্ষমান আনডু অনুরোধটি সমাধান করতে হবে",
+            "remindOpponent": "প্রতিপক্ষকে মনে করিয়ে দিন",
+            "remindOpponentSubtitle": "প্রতিপক্ষকে তাদের চাল মনে করিয়ে দিন",
+            "availableInHours": "{{hours}} ঘন্টার মধ্যে পাওয়া যাবে",
+            "yourTurn": "আপনার চাল",
+            "errorUndoRequest": "আনডু অনুরোধ পাঠাতে ত্রুটি। আবার চেষ্টা করুন।",
+            "errorUndoResponse": "আনডু অনুরোধের উত্তর দিতে ত্রুটি।",
+            "errorResetResponse": "রিসেট অনুরোধের উত্তর দিতে ত্রুটি।",
+            "errorCancelUndo": "আনডু অনুরোধ বাতিল করতে ত্রুটি।",
+            "errorCancelReset": "রিসেট অনুরোধ বাতিল করতে ত্রুটি।",
+            "reminderSentTitle": "সফল",
+            "reminderSentMessage": "প্রতিপক্ষকে রিমাইন্ডার পাঠানো হয়েছে।",
+            "errorReminderTitle": "ত্রুটি",
+            "errorReminderMessage": "রিমাইন্ডার পাঠাতে ত্রুটি।",
+            "waitingUndoResponse": "{{moveCount}} টি চাল আনডু করার জন্য {{opponentName}} এর উত্তরের অপেক্ষা...",
+            "opponentWantsUndo": "{{opponentName}} {{moveCount}} টি চাল আনডু করতে চায়",
+            "waitingResetResponse": "রিসেট অনুরোধের জন্য {{opponentName}} এর উত্তরের অপেক্ষা...",
+            "opponentWantsReset": "{{opponentName}} গেমটি রিসেট করতে চায়"
+        },
+        "passAndPlayBoard": {
+            "resetGameTitle": "গেম রিসেট করুন",
+            "resetGameMessage": "আপনি কি নিশ্চিত যে নতুন গেম শুরু করতে চান?",
+            "cancel": "বাতিল",
+            "reset": "রিসেট",
+            "resetGame": "গেম রিসেট করুন",
+            "startNewGame": "শুরু থেকে নতুন গেম শুরু করুন",
+            "gameEnded": "গেমটি ইতোমধ্যেই শেষ",
+            "noMoves": "এখনো কোনো চাল দেওয়া হয়নি"
+        },
+        "baseBoard": {
+            "errorLoadState": "গেমের অবস্থা লোড করতে ত্রুটি",
+            "resignGameTitle": "হাল ছেড়ে দিন",
+            "resignGameMessage": "আপনি কি নিশ্চিত? আপনি গেমটি হারবেন।",
+            "cancel": "বাতিল",
+            "resign": "হাল ছেড়ে দিন",
+            "checkTitle": "চেক!",
+            "checkMessage": "আপনার {{piece}} চেক এ আছে!",
+            "checkmateTitle": "চেকমেট!",
+            "checkmateMessage": "{{winner}} চেকমেট দিয়ে জিতেছে!",
+            "gathererTitle": "গ্যাদারার প্রভাব",
+            "gathererMessage": "এই বর্গে প্রবাল স্থাপন করবেন?",
+            "yes": "হ্যাঁ",
+            "no": "না",
+            "hunterTitle": "হান্টার প্রভাব",
+            "hunterMessage": "এই বর্গ থেকে প্রবাল সরিয়ে ফেলবেন?",
+            "exportSuccessTitle": "সফল",
+            "exportSuccessMessage": "গেমের অবস্থা ক্লিপবোর্ডে কপি করা হয়েছে!",
+            "exportFailedTitle": "রপ্তানি ব্যর্থ",
+            "computer": "Computer",
+            "opponent": "প্রতিপক্ষ",
+            "white": "সাদা",
+            "black": "কালো",
+            "youWonTimeout": "আপনি জিতেছেন! {{opponentName}} এর সময় শেষ ⏱️",
+            "youLostTimeout": "আপনি হেরেছেন! সময় শেষ ⏱️",
+            "timeoutLose": "{{loserName}} এর সময় শেষ! ⏱️",
+            "youWonResign": "আপনি জিতেছেন! {{opponentName}} হাল ছেড়েছে 🏳️",
+            "youResigned": "আপনি হাল ছেড়েছেন 🏳️",
+            "checkmateWin": "চেকমেট! আপনি জিতেছেন! 🏆",
+            "checkmateLose": "চেকমেট! আপনি হেরেছেন।",
+            "checkmateGeneric": "চেকমেট! {{winner}} জিতেছে! 🏆",
+            "youLost": "আপনি হেরেছেন",
+            "resignGeneric": "{{winner}} হাল ছেড়ে জিতেছে! 🏳️",
+            "coralVictoryWin": "আপনি প্রবাল বিজয়ে জিতেছেন! 🪸\n{{whiteScore}} - {{blackScore}}",
+            "coralVictoryLose": "আপনি হেরেছেন। {{winner}} প্রবাল বিজয়ে জিতেছে! 🪸\n{{whiteScore}} - {{blackScore}}",
+            "coralVictoryGeneric": "{{winner}} প্রবাল বিজয়ে জিতেছে! 🪸\n{{whiteScore}} সাদা - {{blackScore}} কালো",
+            "stalemate": "স্টেলমেট! 🤝",
+            "drawRepetition": "পুনরাবৃত্তিতে ড্র! 🤝",
+            "drawInsufficientMaterial": "ড্র - অপর্যাপ্ত উপাদান! 🤝",
+            "drawCoralTie": "ড্র - প্রবাল টাই! 🤝🪸\n{{score}} - {{score}}",
+            "draw": "ড্র! 🤝",
+            "check": "{{player}} চেক এ আছে! ⚠️",
+            "viewingHistory": "পূর্ববর্তী চাল দেখছেন - খেলতে বর্তমান চালে ফিরে যান",
+            "selectWhaleOrientation": "আপনার তিমির অভিযোজন নির্বাচন করুন",
+            "hunterWhaleTitle": "হান্টার প্রভাব (তিমি)",
+            "hunterWhaleMessage": "আপনার প্রবাল অপসারণ বিকল্প নির্বাচন করুন:",
+            "yourTurn": "আপনার চাল",
+            "opponentTurn": "{{opponentName}} এর চাল",
+            "playerTurn": "{{playerColor}} এর চাল"
+        },
+        "computerBoard": {
+            "cancelRequestTitle": "অনুরোধ বাতিল করুন",
+            "cancelRequestMessage": "আপনার রিসেট অনুরোধ বাতিল করবেন?",
+            "cancel": "বাতিল",
+            "yes": "হ্যাঁ",
+            "resetGameTitle": "গেম রিসেট করুন",
+            "resetGameMessage": "আপনি কি নিশ্চিত যে নতুন গেম শুরু করতে চান?",
+            "reset": "রিসেট",
+            "resetGame": "গেম রিসেট করুন",
+            "startNewGame": "শুরু থেকে নতুন গেম শুরু করুন",
+            "gameEnded": "গেমটি ইতোমধ্যেই শেষ",
+            "noMoves": "এখনো কোনো চাল দেওয়া হয়নি",
+            "errorUndo": "আনডু ব্যর্থ হয়েছে। আবার চেষ্টা করুন।"
+        },
+        "computerUsers": {
+            "successTitle": "সফল",
+            "errorTitle": "ত্রুটি",
+            "initializeSuccess": "{{count}} কম্পিউটার ব্যবহারকারীদের সফলভাবে আরম্ভ করা হয়েছে",
+            "initializeError": "কম্পিউটার ব্যবহারকারীদের আরম্ভ করতে ব্যর্থ।",
+            "confirmDeleteTitle": "মুছে ফেলার বিষয়টি নিশ্চিত করুন",
+            "confirmDeleteMessage": "আপনি কি সব কম্পিউটার ব্যবহারকারীদের মুছে ফেলতে চান? এটি ফিরিয়ে আনা যাবে না।",
+            "cancel": "বাতিল",
+            "delete": "মুছুন",
+            "deleteSuccess": "{{count}} কম্পিউটার ব্যবহারকারীদের সফলভাবে মুছে ফেলা হয়েছে",
+            "deleteError": "কম্পিউটার ব্যবহারকারীদের মুছে ফেলতে ব্যর্থ।",
+            "clearLanguageSuccess": "ভাষার পছন্দ সাফ করা হয়েছে। অ্যাপটি পরবর্তী লঞ্চের সময় স্বয়ংক্রিয়ভাবে ভাষা সনাক্ত করবে।",
+            "clearLanguageError": "ভাষার পছন্দ সাফ করতে ব্যর্থ।"
+        }
+    },
+    "hooks": {
+        "friends": {
+            "removeFriendTitle": "বন্ধু সরান",
+            "removeFriendMessage": "আপনি কি সত্যিই {{friendName}} কে আপনার বন্ধু তালিকা থেকে সরাতে চান?",
+            "cancel": "বাতিল",
+            "remove": "সরান",
+            "errorRemove": "বন্ধুকে সরাতে ব্যর্থ",
+            "errorAccept": "বন্ধুত্বের অনুরোধ গ্রহণ করতে ব্যর্থ",
+            "errorDecline": "বন্ধুত্বের অনুরোধ প্রত্যাখ্যান করতে ব্যর্থ",
+            "cancelRequestTitle": "বন্ধুর অনুরোধ বাতিল করুন",
+            "cancelRequestMessage": "{{displayName}} কে দেওয়া বন্ধুর অনুরোধ বাতিল করবেন?",
+            "no": "না",
+            "yesCancel": "হ্যাঁ, বাতিল করুন",
+            "errorCancelRequest": "বন্ধুর অনুরোধ বাতিল করতে ব্যর্থ",
+            "errorTitle": "ত্রুটি"
+        },
+        "game": {
+            "errorTitle": "ত্রুটি",
+            "errorLoadGame": "গেম লোড করতে ব্যর্থ"
+        },
+        "gameActions": {
+            "errorTitle": "ত্রুটি",
+            "errorResign": "হাল ছাড়তে ব্যর্থ"
+        },
+        "userSearch": {
+            "errorTitle": "ত্রুটি",
+            "errorSendRequest": "বন্ধুর অনুরোধ পাঠাতে ব্যর্থ"
+        }
+    }
+}

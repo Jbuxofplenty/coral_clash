@@ -1,0 +1,812 @@
+{
+    "auth": {
+        "welcomeBack": "Tekrar Hoş Geldiniz",
+        "createAccount": "Hesap Oluştur",
+        "resetPassword": "Şifre Sıfırla",
+        "signInSubtitle": "Bilgisayara karşı oynamak veya diğer oyuncuları çevrimiçi olarak davet etmek için giriş yapın",
+        "signUpSubtitle": "Çevrimiçi oynamak için bir hesap oluşturun. Benzersiz bir kullanıcı adı seçin!",
+        "forgotPasswordSubtitle": "Şifre sıfırlama bağlantısı almak için e-postanızı girin",
+        "usernamePlaceholder": "Kullanıcı Adı (gerekli)",
+        "emailPlaceholder": "E-posta",
+        "passwordPlaceholder": "Şifre",
+        "signInWithApple": "Apple ile Giriş Yap",
+        "signUpWithApple": "Apple ile Kayıt Ol",
+        "signInWithGoogle": "Google ile Giriş Yap",
+        "signUpWithGoogle": "Google ile Kayıt Ol",
+        "or": "VEYA",
+        "signIn": "Giriş Yap",
+        "signUp": "Kayıt Ol",
+        "sendResetLink": "Sıfırlama Bağlantısı Gönder",
+        "forgotPassword": "Şifrenizi mi unuttunuz?",
+        "backToSignIn": "Girişe Dön",
+        "alreadyHaveAccount": "Zaten hesabınız var mı? Giriş Yapın",
+        "dontHaveAccount": "Hesabınız yok mu? Kayıt Olun",
+        "errors": {
+            "fillAllFields": "Lütfen tüm alanları doldurun",
+            "usernameRequired": "Kullanıcı adı gerekli",
+            "usernameMinLength": "Kullanıcı adı en az 2 karakter olmalıdır",
+            "usernameMaxLength": "Kullanıcı adı 30 karakterden az olmalıdır",
+            "usernameInvalidChars": "Kullanıcı adı yalnızca harf, rakam, boşluk, alt çizgi ve tire içerebilir",
+            "authFailed": "Kimlik doğrulama başarısız",
+            "googleSignInFailed": "Google ile giriş başarısız",
+            "appleSignInFailed": "Apple ile giriş başarısız",
+            "enterEmail": "Lütfen e-posta adresinizi girin",
+            "resetEmailFailed": "Sıfırlama e-postası gönderilemedi"
+        },
+        "success": {
+            "resetEmailSent": "Şifre sıfırlama e-postası gönderildi! Gelen kutunuzu kontrol edin."
+        }
+    },
+    "game": {
+        "difficulty": {
+            "title": "AI Zorluk Seviyesi Seçin",
+            "subtitle": "Bilgisayar rakibi için zorluk seviyesini seçin",
+            "random": "Rastgele",
+            "easy": "Kolay",
+            "medium": "Orta",
+            "hard": "Zor",
+            "randomDescription": "Bilgisayar rastgele hamleler yapar",
+            "easyDescription": "Bilgisayar temel strateji kullanır",
+            "mediumDescription": "Bilgisayar orta düzey strateji kullanır",
+            "hardDescription": "Bilgisayar gelişmiş strateji kullanır",
+            "createAccountToAccess": "Erişmek için bir hesap oluşturun"
+        },
+        "matchmaking": {
+            "title": "Oyun Modu Seçin",
+            "timeControl": "Süre Kontrolü Seçin",
+            "timeControlSubtitle": "Bu oyun için süre limitini seçin",
+            "instant": "Anında",
+            "instantDescription": "Şimdi bir rakip bulun. Çevrimiçi oyuncularla eşleştirir.",
+            "correspondence": "Yazışma",
+            "correspondenceDescription": "Rastgele bir oyuncuya davetiye gönderin. Kabul etmek için 24 saatleri var.",
+            "timeControls": {
+                "unlimited": "Süre limiti yok",
+                "blitz": "5 dakika",
+                "normal": "10 dakika",
+                "custom": "Süre limiti ayarlandı"
+            },
+            "timeControlDescriptions": {
+                "blitz": "Oyuncu başına 5 dakika",
+                "normal": "Oyuncu başına 10 dakika",
+                "unlimited": "Süre limiti yok"
+            }
+        },
+        "status": {
+            "loading": "Yükleniyor",
+            "noGamesFound": "Oyun bulunamadı",
+            "error": "Hata",
+            "resetApproved": "Oyun sıfırlandı",
+            "resetRejected": "Sıfırlama talebi reddedildi",
+            "undoApproved": "Hamle geri alındı",
+            "undoRejected": "Geri alma talebi reddedildi"
+        },
+        "actions": {
+            "cancel": "İptal"
+        },
+        "postMatchSignup": {
+            "title": "Harika oyun!",
+            "message": "İstatistiklerinizi kaydetmek ve gerçek insanlara karşı oynamak ister misiniz?",
+            "lossTitle": "Devam edin!",
+            "lossMessage": "Her kayıp bir derstir. İlerlemenizi takip etmek için kayıt olun.",
+            "button": "Şimdi Kayıt Ol"
+        }
+    },
+    "navigation": {
+        "home": "Ana Sayfa",
+        "game": "Oyun",
+        "tutorial": "Tutorial",
+        "howToPlay": "Nasıl Oynanır",
+        "settings": "Ayarlar",
+        "friends": "Arkadaşlar",
+        "stats": "İstatistikler",
+        "reportIssue": "Sorun Bildir",
+        "rulesVideo": "Kurallar Videosu",
+        "physicalGame": "Fiziksel Oyun",
+        "logOut": "Çıkış Yap",
+        "logOutConfirmTitle": "Çıkış Yap",
+        "logOutConfirmMessage": "Çıkış yapmak istediğinizden emin misiniz?",
+        "cancel": "İptal",
+        "appTitle": "Coral Clash",
+        "appSubtitle": "Okyanus Strateji Oyunu"
+    },
+    "home": {
+        "welcome": {
+            "title": "Coral Clash'a Hoş Geldiniz!",
+            "message": "Başlamak için menüdeki Kurallar Videosu'nu veya Nasıl Oynanır rehberini inceleyin!",
+            "watchVideo": "Video İzle",
+            "howToPlay": "Nasıl Oynanır",
+            "ok": "OK"
+        },
+        "opponent": {
+            "computer": "Computer",
+            "opponent": "Rakip",
+            "guest": "Misafir 1"
+        },
+        "gameModes": {
+            "howToPlayTitle": "Nasıl Oynanır",
+            "howToPlayDescription": "Coral Clash'ın kurallarını ve stratejilerini öğrenin",
+            "playComputerTitle": "Bilgisayara Karşı Oyna",
+            "playComputerDescription": "AI'ya karşı yeni bir oyun başlat",
+            "loadGameStateTitle": "Oyun Durumu Yükle (Dev)",
+            "loadGameStateDescription": "Kayıtlı bir oyun durumunu fixture'lardan yükleyin"
+        },
+        "matchmaking": {
+            "cannotJoin": "Eşleşmeye katılınamıyor",
+            "instantMatchFound": "Yazışma Eşleşmesi Bulundu!",
+            "instantMatchMessage": "{{creatorName}} ile eşleştiniz. Bilgilendirilecekler ve kabul etmek için 24 saatleri var.",
+            "correspondenceCreated": "Yazışma Davetiyesi Oluşturuldu",
+            "correspondenceMessage": "Davetiyeniz oluşturuldu. Başka bir oyuncu Yazışma modunu seçtiğinde, davetiyenizle eşleşebilir. Biri oynamak istediğinde bilgilendirileceksiniz!"
+        },
+        "errors": {
+            "offlineModeTitle": "Çevrimdışı Mod",
+            "offlineModeMessage": "Sunucuya bağlanılamıyor. Çevrimdışı bilgisayar oyunu başlatılıyor.",
+            "errorTitle": "Hata",
+            "failedToStart": "{{action}} başlatılamadı. Lütfen tekrar deneyin.",
+            "failedToResign": "Teslim olunamadı. Lütfen tekrar deneyin.",
+            "failedPassAndPlay": "Sırayla oyna oyunu başlatılamadı. Lütfen tekrar deneyin.",
+            "failedComputerGame": "Bilgisayar oyunu başlatılamadı",
+            "failedMatchmaking": "{{mode}} eşleşmesi başlatılamadı. {{message}}"
+        }
+    },
+    "stats": {
+        "overallStatistics": "Genel İstatistikler",
+        "gamesPlayed": "Oynanan Oyunlar",
+        "wins": "Galibiyet",
+        "losses": "Mağlubiyet",
+        "draws": "Beraberlik",
+        "winRate": "Kazanma Oranı",
+        "matchupStatistics": "Karşılaşma İstatistikleri",
+        "matchupDescription": "Her rakibe karşı kazanma oranları (PvP & Bilgisayar)",
+        "computer": "Computer",
+        "winRateShort": "Kazanma",
+        "winsShort": "G",
+        "lossesShort": "M",
+        "drawsShort": "B",
+        "noGamesYet": "Henüz Oyun Yok",
+        "noGamesHint": "İstatistiklerinizi görmek için oyun oynamaya başlayın!"
+    },
+    "gameMenu": {
+        "saveGameState": "Oyun Durumunu Kaydet",
+        "exportPosition": "Mevcut oyun pozisyonunu dışa aktar",
+        "flipBoard": "Tahtayı Çevir",
+        "showingBlackBottom": "Şu anda siyah altta",
+        "showingWhiteBottom": "Şu anda beyaz altta",
+        "reportBug": "Hata Bildir",
+        "includeGameState": "Mevcut oyun durumunu dahil et",
+        "resignGame": "Teslim Ol",
+        "resigning": "Teslim olunuyor...",
+        "pleaseWait": "Lütfen bekleyin...",
+        "gameEnded": "Oyun zaten bitti",
+        "forfeitGame": "Mevcut oyundan çekil"
+    },
+    "reportIssue": {
+        "bugReportTitle": "Hata Raporu",
+        "bugReportDescription": "Mevcut oyun durumu ile bir hata bildirin. Oyun pozisyonu raporunuza dahil edilecektir.",
+        "feedbackTitle": "Geri Bildirim & Sorunlar",
+        "feedbackDescription": "Geri bildirim gönderin veya sorun bildirin. Katkınızı takdir ediyoruz!",
+        "subject": "Konu",
+        "subjectPlaceholder": "Sorunun kısa özeti",
+        "description": "Açıklama",
+        "descriptionPlaceholder": "Sorunun veya geri bildirimin ayrıntılı açıklaması...",
+        "gameStateIncluded": "✓ Oyun durumu dahil edilecek",
+        "turn": "Sıra",
+        "white": "Beyaz",
+        "black": "Siyah",
+        "gameOver": "Oyun Bitti",
+        "submitIssue": "Sorunu Gönder",
+        "anonymousNote": "Not: Anonim olarak gönderiyorsunuz. Sorunlarınızı takip etmek için giriş yapın.",
+        "validation": {
+            "missingSubjectTitle": "Eksik Bilgi",
+            "missingSubjectMessage": "Lütfen sorununuz için bir konu girin.",
+            "invalidSubjectTitle": "Geçersiz Konu",
+            "invalidSubjectMessage": "Konu en az 3 karakter olmalıdır.",
+            "missingDescriptionTitle": "Eksik Bilgi",
+            "missingDescriptionMessage": "Lütfen sorununuz için bir açıklama girin.",
+            "invalidDescriptionTitle": "Geçersiz Açıklama",
+            "invalidDescriptionMessage": "Açıklama en az 10 karakter olmalıdır."
+        },
+        "success": {
+            "title": "Sorun Gönderildi",
+            "message": "Geri bildiriminiz için teşekkürler! Sorununuz gönderildi",
+            "ok": "OK"
+        },
+        "error": {
+            "title": "Gönderim Başarısız",
+            "message": "Sorununuz gönderilemedi. Lütfen bağlantınızı kontrol edip tekrar deneyin."
+        }
+    },
+    "settings": {
+        "account": "Hesap",
+        "profileAvatar": "Profil Avatarı",
+        "chooseAvatar": "Okyanus temalı avatarınızı seçin",
+        "appearance": "Görünüm",
+        "theme": {
+            "light": "Açık",
+            "lightDescription": "Her zaman açık tema kullan",
+            "dark": "Koyu",
+            "darkDescription": "Her zaman koyu tema kullan",
+            "auto": "Otomatik",
+            "autoDescription": "Sistem temasını takip et"
+        },
+        "language": {
+            "title": "Dil (Language)",
+            "english": "English",
+            "englishDescription": "English language interface",
+            "hindi": "हिन्दी (Hindi)",
+            "hindiDescription": "हिन्दी भाषा इंटरफ़ेस"
+        },
+        "actions": {
+            "resetToDefaults": "Varsayılana Sıfırla",
+            "resetTitle": "Ayarları Sıfırla",
+            "resetMessage": "Tüm ayarları varsayılana sıfırlamak istediğinizden emin misiniz?",
+            "cancel": "İptal",
+            "reset": "Sıfırla"
+        },
+        "dangerZone": {
+            "title": "Tehlike Bölgesi",
+            "warning": "Hesabınızı sildiğinizde geri dönüş yoktur. Lütfen emin olun.",
+            "deleteAccount": "Hesabı Sil",
+            "deletingAccount": "Hesap siliniyor...",
+            "deleteTitle": "Hesabı Sil",
+            "deleteMessage": "Bu işlem kalıcıdır ve geri alınamaz.\n\n• Tüm kişisel verileriniz kaldırılacaktır\n• Oyunlarınız devam edecek ama \"Anonim\" olarak görüneceksiniz\n• Arkadaşlarınız ve arkadaşlık istekleriniz kaldırılacaktır\n• Aktif oyunlar kaybedilecektir\n\nDevam etmek istediğinizden emin misiniz?",
+            "continue": "Devam Et",
+            "confirmTitle": "Hesap Silmeyi Onayla",
+            "confirmMessage": "Onaylamak için lütfen aşağıya DELETE (tamamı büyük harf) yazın:",
+            "incorrectTitle": "Yanlış Onay",
+            "incorrectMessage": "Hesap silmeyi onaylamak için DELETE yazmalısınız.",
+            "successTitle": "Hesap Silindi",
+            "successMessage": "Hesabınız başarıyla silindi. Şimdi çıkış yapılacak.",
+            "failedTitle": "Silme Başarısız",
+            "timeoutMessage": "İstek zaman aşımına uğradı. Lütfen bağlantınızı kontrol edip tekrar deneyin.",
+            "failedMessage": "Hesap silinemedi. Lütfen tekrar deneyin veya sorun devam ederse destek ile iletişime geçin.",
+            "retry": "Tekrar Dene"
+        },
+        "errors": {
+            "loadFailed": "Ayarlar yüklenemedi",
+            "saveFailed": "Ayarlar kaydedilemedi",
+            "avatarSaveFailed": "Avatar seçimi kaydedilemedi",
+            "themeSaveFailed": "Tema tercihi kaydedilemedi",
+            "languageChangeFailed": "Dil değiştirilemedi",
+            "resetFailed": "Ayarlar sıfırlanamadı"
+        }
+    },
+    "friends": {
+        "addFriend": "Arkadaş Ekle",
+        "searchPlaceholder": "Kullanıcı adına göre ara",
+        "noUsersFound": "Kullanıcı bulunamadı",
+        "pending": "Beklemede",
+        "incomingRequests": "Gelen İstekler",
+        "sentRequests": "Gönderilen İstekler",
+        "myFriends": "Arkadaşlarım",
+        "noFriendsYet": "Henüz Arkadaş Yok",
+        "noFriendsHint": "Birlikte oynamak için yukarıdan kullanıcı adıyla arkadaş ekleyin!"
+    },
+    "common": {
+        "loading": "Yükleniyor...",
+        "error": "Hata",
+        "success": "Başarılı",
+        "cancel": "İptal",
+        "confirm": "Onayla",
+        "save": "Kaydet",
+        "delete": "Sil",
+        "edit": "Düzenle",
+        "close": "Kapat",
+        "ok": "OK",
+        "somethingWentWrong": "Bir şeyler yanlış gitti. Lütfen tekrar deneyin."
+    },
+    "cards": {
+        "matchmaking": {
+            "searchingForOpponent": "Rakip aranıyor...",
+            "findRandomMatch": "Rastgele Eşleşme Bul",
+            "searchingHint": "Rakip aranıyor... · İptal etmek için dokunun",
+            "tapToJoin": "Eşleşme kuyruğuna katılmak için dokunun",
+            "cannotJoinTitle": "Eşleşmeye Katılınamıyor"
+        },
+        "playWithFriend": {
+            "title": "Arkadaşla Oyna",
+            "description": "Bir arkadaşınızı oynamaya davet edin",
+            "modalTitle": "Arkadaşla Oyna",
+            "inviteFriend": "Arkadaş Davet Et",
+            "inviteDescription": "Bir arkadaşınıza oyun davetiyesi gönderin",
+            "textInvite": "Mesaj Davetiyesi",
+            "textInviteDescription": "Mesaj yoluyla davetiye gönderin",
+            "passAndPlay": "Sırayla Oyna",
+            "passAndPlayDescription": "Bu cihazda yerel olarak oynayın",
+            "selectFriend": "Arkadaş Seç",
+            "searchFriends": "Arkadaş ara...",
+            "noFriendsFound": "Arkadaş bulunamadı",
+            "noFriendsYet": "Henüz arkadaş yok. Oynamak için arkadaş ekleyin!",
+            "passAndPlayGames": "Sırayla Oyna Oyunları",
+            "startNewGame": "Yeni Oyun Başlat",
+            "noActiveGames": "Aktif oyun yok",
+            "vsGuest": "vs Misafir 1",
+            "unlimited": "Sınırsız",
+            "shareMessage": "Haydi Coral Clash oynayalım! 🦀\n\nBuradan indir:\niOS: [URL]\n\nAndroid: [URL]"
+        },
+        "signUpPrompt": {
+            "title": "Tüm Özellikleri Aç",
+            "subtitle": "Erişim için ücretsiz bir hesap oluşturun:",
+            "feature1": "Arkadaşlarla çevrimiçi oynayın",
+            "feature2": "Eşleşme ile rastgele rakipler bulun",
+            "feature3": "Oyun istatistiklerinizi ve geçmişinizi takip edin",
+            "feature4": "Arkadaş ağınızı oluşturun",
+            "button": "Kayıt Ol / Giriş Yap"
+        },
+        "activeGames": {
+            "title": "Aktif Oyunlar",
+            "inProgress": "devam ediyor",
+            "game": "oyun",
+            "games": "oyun",
+            "yourTurn": "Senin sıran",
+            "opponentTurn": "Rakibin sırası",
+            "opponent": "Rakip",
+            "computer": "Computer",
+            "blitz": "Blitz",
+            "normal": "Normal",
+            "unlimited": "Sınırsız",
+            "timed": "Süreli",
+            "loading": "Oyunlar yükleniyor...",
+            "noGames": "Aktif oyun yok",
+            "noGamesHint": "Bir arkadaşınızla oyun başlatın!",
+            "vs": "vs ",
+            "resignTitle": "Teslim Ol",
+            "resignMessage": "Teslim olmak istediğinizden emin misiniz? Bu oyunu kaybedersiniz.",
+            "resignButton": "Teslim Ol",
+            "resignError": "Teslim olunamadı. Lütfen tekrar deneyin."
+        },
+        "gameHistory": {
+            "title": "Oyun Geçmişi",
+            "subtitle": "Son oyunlar",
+            "loading": "Geçmiş yükleniyor...",
+            "noHistory": "Oyun geçmişi yok",
+            "noHistoryHint": "Tamamlanan oyunlarınız burada görünecek",
+            "vs": "vs ",
+            "justNow": "Az önce",
+            "minutesAgo": "dk önce",
+            "hoursAgo": "sa önce",
+            "daysAgo": "g önce",
+            "cancelled": "Oyun iptal edildi",
+            "draw": "Berabere",
+            "won": "Kazandınız",
+            "lost": "Kaybettiniz",
+            "unknown": "Bilinmiyor",
+            "opponent": "Rakip",
+            "computer": "Computer",
+            "blitz": "Blitz",
+            "normal": "Normal",
+            "unlimited": "Sınırsız",
+            "timed": "Süreli"
+        }
+    },
+    "errors": {
+        "INVALID_MOVE": "Geçersiz hamle",
+        "INVALID_MOVE_OCCUPIED": "Bu pozisyon zaten dolu",
+        "INVALID_MOVE_OUT_OF_BOUNDS": "Hamle sınırların dışında",
+        "INVALID_MOVE_NOT_YOUR_TURN": "Sıra sizde değil",
+        "INVALID_MOVE_PIECE_BLOCKED": "Bu taş engellendi",
+        "GAME_NOT_FOUND": "Oyun bulunamadı",
+        "GAME_ALREADY_STARTED": "Oyun zaten başladı",
+        "GAME_ALREADY_ENDED": "Bu oyun zaten bitti",
+        "GAME_CANCELLED": "Oyun iptal edildi",
+        "PLAYER_NOT_IN_GAME": "Bu oyunda değilsiniz",
+        "PLAYER_DISCONNECTED": "Oyuncu bağlantısı kesildi",
+        "CONNECTION_ERROR": "Bağlantı hatası. Lütfen internetinizi kontrol edin.",
+        "SERVER_ERROR": "Sunucu hatası. Lütfen daha sonra tekrar deneyin.",
+        "TIMEOUT": "İstek zaman aşımına uğradı",
+        "ALREADY_IN_QUEUE": "Zaten eşleşme kuyruğundasınız",
+        "NOT_IN_QUEUE": "Eşleşme kuyruğunda değilsiniz",
+        "QUEUE_TIMEOUT": "Eşleşme zaman aşımı",
+        "OPPONENT_NOT_FOUND": "Rakip bulunamadı",
+        "MATCHMAKING_DISABLED": "Eşleşme şu anda devre dışı",
+        "FRIEND_NOT_FOUND": "Arkadaş bulunamadı",
+        "FRIEND_ALREADY_EXISTS": "Bu kullanıcıyla zaten arkadaşsınız",
+        "CANNOT_ADD_SELF": "Kendinizi arkadaş olarak ekleyemezsiniz",
+        "FRIEND_REQUEST_PENDING": "Arkadaşlık isteği zaten beklemede",
+        "INVALID_CREDENTIALS": "Geçersiz e-posta veya şifre",
+        "USER_NOT_FOUND": "Kullanıcı bulunamadı",
+        "EMAIL_ALREADY_EXISTS": "E-posta zaten kullanımda",
+        "USERNAME_TAKEN": "Kullanıcı adı zaten alındı",
+        "WEAK_PASSWORD": "Şifre çok zayıf",
+        "ACCOUNT_DISABLED": "Hesabınız devre dışı bırakıldı",
+        "SESSION_EXPIRED": "Oturumunuz sona erdi. Lütfen tekrar giriş yapın.",
+        "UNAUTHORIZED": "Bu işlemi yapmaya yetkiniz yok",
+        "RATE_LIMITED": "Çok fazla istek. Lütfen yavaşlayın.",
+        "MAINTENANCE_MODE": "Uygulama bakımda. Lütfen daha sonra tekrar deneyin.",
+        "FEATURE_DISABLED": "Bu özellik şu anda devre dışı"
+    },
+    "success": {
+        "GAME_WON": "Tebrikler! Kazandınız!",
+        "GAME_DRAW": "Oyun berabere bitti",
+        "GAME_LOST": "Bir dahaki sefere bol şans!",
+        "PLAYER_RESIGNED": "Oyuncu teslim oldu",
+        "FRIEND_REQUEST_SENT": "Arkadaşlık isteği gönderildi!",
+        "FRIEND_REQUEST_ACCEPTED": "Arkadaşlık isteği kabul edildi!",
+        "FRIEND_REQUEST_DECLINED": "Arkadaşlık isteği reddedildi",
+        "MOVE_SUCCESS": "Hamle başarılı"
+    },
+    "scenarioBoard": {
+        "pauseAutoPlay": "Otomatik Oynatmayı Duraklat",
+        "playDemo": "Demo Oynat",
+        "explanation": "Açıklama",
+        "backToGuide": "Rehbere Dön"
+    },
+    "howToPlay": {
+        "objective": {
+            "title": "Hedef",
+            "intro": "Coral Clash'ı kazanmak için bu hedeflerden birini gerçekleştirin:",
+            "checkmate": "Şah Mat",
+            "checkmateDesc": "rakibinizin Balinasını (Balina",
+            "check": "şahta",
+            "checkmateDescEnd": "iken ve kaçamıyorken)",
+            "coralControl": "en fazla alanı Mercanla",
+            "coralControlDesc": "Kontrol edin",
+            "coralControlWhen": "şu durumlarda:",
+            "coralPlaced": "Bir oyuncu tüm Mercanlarını yerleştirdi",
+            "whaleRemaining": "Bir oyuncunun yalnızca Balinası kaldı",
+            "backRowReached": "Bir Yengeç veya Ahtapot rakibin arka sırasına ulaştı",
+            "areaControlled": "Mercan tarafından kontrol edilen alan:",
+            "areaControlledDesc": "Rakibinizin taşları tarafından işgal edilmeyen kendi renginizden mercan miktarını sayın.",
+            "checkmateExample": "Şah Mat Örneği",
+            "checkExample": "Şah Örneği",
+            "coralVictoryExample": "Mercan Zaferi Örneği"
+        },
+        "setup": {
+            "title": "Oyun Kurulumu",
+            "boardDesc": "Tahta 64 kareli 8x8 ızgaradır. Her oyuncunun:",
+            "coralPieces": "17 Mercan parçası",
+            "units": "17 birim: 1 Balina, 2 Yunus, 4 Kaplumbağa, 2 Balon Balığı, 4 Yengeç ve 4 Ahtapot",
+            "variants": "Her taş türü iki varyanta sahiptir:",
+            "hunter": "Avcı",
+            "hunterDesc": "taşlar (mercan simgesi olmayan) Mercanı kaldırabilir",
+            "gatherer": "Toplayıcı",
+            "gathererDesc": "taşlar (mercan simgeli) Mercan yerleştirebilir",
+            "hunterExample": "Avcı Etkisi Örneği",
+            "gathererExample": "Toplayıcı Etkisi Örneği"
+        },
+        "turnOverview": {
+            "title": "Sıra Genel Bakışı",
+            "intro": "Beyaz ilk hamleyi yapar, sonra oyuncular sırayla oynar. Sıranızda:",
+            "step1": "Taşlarınızdan birini hareket ettirin",
+            "step2": "Yakalama, Avcı veya Toplayıcı etkilerini çözümleyin",
+            "step3": "Herhangi bir hedefin gerçekleşip gerçekleşmediğini kontrol edin"
+        },
+        "movement": {
+            "title": "Taşlar Nasıl Hareket Eder",
+            "important": "Önemli:",
+            "importantDesc": "Taşlar diğer taşların üzerinden geçemez - açık bir yola ihtiyaç duyar.",
+            "variants": "Her taş türü Mercanla farklı etkileşime giren iki varyanta sahiptir:",
+            "hunterPieces": "Avcı taşlar",
+            "hunterMovement": "(mercan simgesi olmayan)",
+            "stoppedBy": "DURDURULUR",
+            "hunterMovementDesc": "Mercan tarafından - üzerinden geçemezler",
+            "gathererPieces": "Toplayıcı taşlar",
+            "gathererMovement": "(mercan simgeli) daha güçlüdür - serbestçe",
+            "through": "GEÇEBİLİRLER",
+            "gathererMovementDesc": "Mercan üzerinden",
+            "coralMovementExample": "Mercan Hareketi Örneği",
+            "individualMovements": "Bireysel Taş Hareketleri"
+        },
+        "pieces": {
+            "whale": {
+                "name": "Balina",
+                "intro": "Balina en önemli taşınızdır - şah mat olursa kaybedersiniz! Balina iki kare kaplar ve iki farklı hareket seçeneği vardır:",
+                "slidingMove": "1. Kayma Hareketi:",
+                "slidingMoveDesc": "Taşın yarısını orijinal yönelimini koruyarak yatay, dikey veya çapraz olarak istediğiniz kadar kare hareket ettirin. Balina Avcı hareket kurallarına uyar - mercan tarafından durdurulur. Ancak özel bir istisna vardır (aşağıya bakın).",
+                "rotationMove": "2. Dönme Hareketi:",
+                "rotationMoveDesc": "Taşın yarısını bitişik bir kareye döndürün (bir kare dikey veya yatay). Dönüş seçerken, önce hedef kareye (beyaz daire ile gösterilen) dokunun. Birden fazla geçerli yönelim varsa, yönelim karesine (yeşil daire ile gösterilen) dokunun. Yalnızca bir geçerli yönelim varsa, balina otomatik olarak hareket eder.",
+                "checkRules": "Şah Kuralları:",
+                "checkRulesDesc": "Balina hareketini asla şahta (yakalanabilecek yerde) bitiremez, ancak tehdit altındaki karelerden GEÇEBİLİR.",
+                "doubleCapture": "Çift Yakalama:",
+                "doubleCaptureDesc": "Balina tek bir hamlede iki düşman taşı yakalayabilir - her yarısıyla bir tane!",
+                "doubleCoralRemoval": "Çift Mercan Kaldırma:",
+                "doubleCoralRemovalDesc": "Balina (Avcı olarak) mercana indiğinde, bir veya her iki mercan parçasını kaldırmayı seçebilir.",
+                "specialCase": "⚠️ Özel Hareket Durumu",
+                "specialCaseDesc": "Balinanın yarısı zaten mercanın üzerindeyse, o mercan diğer yarının aynı mercan karesinden geçmesini veya üzerine inmesini ENGELLEMEZ.",
+                "basicMovement": "Temel Balina Hareketi",
+                "rotationExample": "Balina Dönüş Örneği",
+                "coralException": "Balina Kendi Mercanından Geçiyor"
+            },
+            "dolphin": {
+                "name": "Yunus",
+                "movement": "Dikey, yatay veya çapraz olarak istediğiniz kadar kare hareket eder.",
+                "example": "Yunus Hareketi Örneği"
+            },
+            "turtle": {
+                "name": "Kaplumbağa",
+                "movement": "Dikey veya yatay olarak istediğiniz kadar kare hareket eder.",
+                "example": "Kaplumbağa Hareketi Örneği"
+            },
+            "pufferfish": {
+                "name": "Balon Balığı",
+                "movement": "Çapraz olarak istediğiniz kadar kare hareket eder.",
+                "example": "Balon Balığı Hareketi Örneği"
+            },
+            "octopus": {
+                "name": "Ahtapot",
+                "movement": "Çapraz olarak bir kare hareket eder.",
+                "example": "Ahtapot Hareketi Örneği"
+            },
+            "crab": {
+                "name": "Yengeç",
+                "movement": "Dikey veya yatay olarak bir kare hareket eder.",
+                "example": "Yengeç Hareketi Örneği"
+            }
+        },
+        "specialRules": {
+            "title": "Özel Kurallar",
+            "capture": {
+                "title": "Yakalama",
+                "desc": "Düşman taşın olduğu kareye hareket edin. Balinalar tek hamlede iki taş yakalayabilir.",
+                "example": "Yakalama Örneği"
+            },
+            "hunterEffect": {
+                "title": "Avcı Hareketi & Etkisi",
+                "desc": "Avcı taşlar (mercan simgesi olmayan) iki önemli davranışa sahiptir:",
+                "movementStops": "Hareket durur",
+                "movementStopsDesc": "Mercana indiğinde",
+                "canRemove": "Kaldırabilir",
+                "canRemoveDesc": "o Mercanı tahtadan",
+                "example": "Avcı Etkisi Örneği"
+            },
+            "gathererEffect": {
+                "title": "Toplayıcı Etkisi",
+                "desc": "Toplayıcı taşlar (mercan simgeli) hareket ettikleri boş karelere Mercan yerleştirebilir.",
+                "example": "Toplayıcı Etkisi Örneği"
+            }
+        },
+        "drawResignation": {
+            "title": "Berabere & Teslim Olma",
+            "stalemate": "Pat:",
+            "stalemateDesc": "Bir oyuncunun yasal hamlesi olmadığında ve Balinası şahta olmadığında",
+            "threefoldRepetition": "Üç kez tekrar:",
+            "threefoldRepetitionDesc": "Aynı pozisyon aynı oyuncuyla üç kez tekrarlandığında",
+            "resignation": "Teslim Olma:",
+            "resignationDesc": "Bir oyuncu istediği zaman teslim olabilir"
+        }
+    },
+    "tutorial": {
+        "endGame": {
+            "title": "Coral Clash'a Hoş Geldiniz!",
+            "message": "Balina Kral'dır. Siyah Balinayı şah mat ederek veya 17 mercanınızın tamamını yerleştirerek kazanabilirsiniz. İyi şanslar!",
+            "backInfo": "Ana ekrana dönmek için oka dokunun"
+        }
+    },
+    "tutorialScenarios": {
+        "checkmate": {
+            "title": "Şah Mat Örneği",
+            "description": "Siyah Balina a6'daki mercan tarafından sıkıştırılmış (pembe kenarlıkla gösterilen). B7'deki Beyaz Avcı Yunus Balinayı şaha alıyor ve g7'deki Beyaz Toplayıcı Kaplumbağa (kenarlıkta mercan simgeli) saldıran yunusu koruyor. Balinanın kaçışı yok - şah mat!"
+        },
+        "coralVictory": {
+            "title": "Mercan Zaferi - Kontrol Alanı",
+            "description": "Beyazın 4 mercanı var (pembe kenarlıklı): c3, d3, e3, f3. Siyahın 4 mercanı var (siyah kenarlıklı): c6, d6, e6, f6. C3'teki Siyah Toplayıcı Yunus Beyazın mercanının üzerinde duruyor, bu yüzden Beyaz yalnızca 3 mercanı kontrol ediyor (d3, e3, f3). Siyah 4 mercanın tamamını kontrol ediyor = Siyah 4'e 3 kazanıyor!"
+        },
+        "whaleMovement": {
+            "title": "Balina Hareketi",
+            "description": "Balinalar iki bitişik kare kaplar ve üç şekilde hareket edebilir: (1) Bir yarı istediğiniz kadar kare kayarken diğeri yerinde kalır, (2) Her iki yarı aynı yönde birlikte kayar, veya (3) Bir yarının bitişik bir kareye hareket etmesiyle döner."
+        },
+        "whaleRotation": {
+            "title": "Balina Dönüşü",
+            "description": "Balina bir yarısını bitişik bir kareye (dikey veya yatay) hareket ettirerek dönebilir. Beyaz Balinanın yatay pozisyondan dikey pozisyona döndüğünü izleyin."
+        },
+        "whaleCoralException": {
+            "title": "Balina Kendi Mercanından Geçiyor",
+            "description": "Özel Kural: Balinanın yarısı zaten mercanın üzerindeyse, o mercan diğer yarının aynı mercan karesinden geçmesini veya üzerine inmesini ENGELLEMEZ."
+        },
+        "coralMovementComparison": {
+            "title": "Mercan Hareketi Karşılaştırması",
+            "description": "Beyaz Avcı Yunus'u (solda, mercan simgesi olmayan) Beyaz Toplayıcı Yunus (sağda, mercan simgeli) ile karşılaştırın. Hareketlerini görmek için her birine dokunun."
+        },
+        "check": {
+            "title": "Şah",
+            "description": "Siyah Balina şahta - Beyaz Toplayıcı Yunus tarafından saldırıya uğruyor. Toplayıcı Yunus mercanın üzerinden geçebilir. Siyah, Balinayı tehlikeden kurtarmalı veya saldırıyı engellemelidir."
+        },
+        "hunterEffect": {
+            "title": "Avcı Etkisi",
+            "description": "Avcı taşlar (mercan simgesi olmayan) Mercana hareket ettiğinde durur. Daha sonra o Mercanı tahtadan kaldırabilir."
+        },
+        "gathererEffect": {
+            "title": "Toplayıcı Etkisi",
+            "description": "Toplayıcı taşlar (mercan simgeli) hareket ettikleri boş karelere Mercan yerleştirebilir."
+        },
+        "dolphinMovement": {
+            "title": "Yunus Hareketi",
+            "description": "Yunuslar herhangi bir yönde istediğiniz kadar kare hareket edebilir - dikey, yatay veya çapraz. Coral Clash'ın en çok yönlü taşıdır!"
+        },
+        "turtleMovement": {
+            "title": "Kaplumbağa Hareketi",
+            "description": "Kaplumbağalar dikey veya yatay olarak istediğiniz kadar kare hareket edebilir, ancak çapraz olarak değil."
+        },
+        "pufferfishMovement": {
+            "title": "Balon Balığı Hareketi",
+            "description": "Balon Balıkları çapraz olarak istediğiniz kadar kare hareket edebilir."
+        },
+        "crabMovement": {
+            "title": "Yengeç Hareketi",
+            "description": "Yengeçler dikey veya yatay olarak bir kare hareket eder. Yavaş ama kararlı taşlardır."
+        },
+        "octopusMovement": {
+            "title": "Ahtapot Hareketi",
+            "description": "Ahtapotlar çapraz olarak bir kare hareket eder. Yengeçler gibi yavaş hareket ederler ama çok stratejik olabilirler."
+        },
+        "capture": {
+            "title": "Taş Yakalama",
+            "description": "Düşman taşı yakalamak için taşlarınızdan birini düşman taşın olduğu kareye hareket ettirin."
+        }
+    },
+    "components": {
+        "fixtureLoader": {
+            "title": "Oyun Durumu Yükle",
+            "gameMode": "Oyun Modu:",
+            "back": "Geri",
+            "vsComputer": "vs Computer",
+            "passAndPlay": "Sırayla Oyna",
+            "loadGame": "Oyun Yükle",
+            "fixturesHint": "💡 Fixture'lar shared/game/__fixtures__/ konumunda",
+            "error": "Hata",
+            "failedToLoad": "Fixture yüklenemedi"
+        },
+        "versionWarning": {
+            "title": "Güncelleme Mevcut",
+            "message": "En iyi deneyim için lütfen en son sürüme güncelleyin.",
+            "updateButton": "Güncelle"
+        },
+        "playerStatus": {
+            "computer": "Computer",
+            "thinking": "Düşünüyor...",
+            "remaining": "Kalan",
+            "underControl": "Kontrol Altında"
+        },
+        "alert": {
+            "defaultButton": "OK"
+        },
+        "pvpBoard": {
+            "player": "Oyuncu",
+            "opponent": "Rakip",
+            "requestUndoTitle": "Geri Alma İste",
+            "requestUndoMessage": "Son hamleyi geri al? {{opponentName}} onaylamalı.",
+            "requestResetTitle": "Sıfırlama İste",
+            "requestResetMessage": "Bu oyunu sıfırla? {{opponentName}} onaylamalı.",
+            "cancel": "İptal",
+            "request": "İste",
+            "requestReset": "Sıfırlama İste",
+            "askOpponentReset": "Rakipten oyunu sıfırlamasını iste",
+            "gameEnded": "Oyun zaten bitti",
+            "noMoves": "Henüz hamle yapılmadı",
+            "pendingUndo": "Bekleyen geri alma isteği önce çözülmeli",
+            "remindOpponent": "Rakibi Hatırlat",
+            "remindOpponentSubtitle": "Rakibe sırasını hatırlat",
+            "availableInHours": "{{hours}} saat içinde kullanılabilir",
+            "yourTurn": "Senin sıran",
+            "errorUndoRequest": "Geri alma isteği gönderilemedi. Lütfen tekrar deneyin.",
+            "errorUndoResponse": "Geri alma isteğine yanıt verilemedi.",
+            "errorResetResponse": "Sıfırlama isteğine yanıt verilemedi.",
+            "errorCancelUndo": "Geri alma isteği iptal edilemedi.",
+            "errorCancelReset": "Sıfırlama isteği iptal edilemedi.",
+            "reminderSentTitle": "Başarılı",
+            "reminderSentMessage": "Rakibinize hatırlatma gönderildi.",
+            "errorReminderTitle": "Hata",
+            "errorReminderMessage": "Hatırlatma gönderilemedi.",
+            "waitingUndoResponse": "{{opponentName}}'nın {{moveCount}} hamle geri alma yanıtı bekleniyor...",
+            "opponentWantsUndo": "{{opponentName}} {{moveCount}} hamleyi geri almak istiyor",
+            "waitingResetResponse": "{{opponentName}}'nın sıfırlama yanıtı bekleniyor...",
+            "opponentWantsReset": "{{opponentName}} oyunu sıfırlamak istiyor"
+        },
+        "passAndPlayBoard": {
+            "resetGameTitle": "Oyunu Sıfırla",
+            "resetGameMessage": "Yeni bir oyun başlatmak istediğinizden emin misiniz?",
+            "cancel": "İptal",
+            "reset": "Sıfırla",
+            "resetGame": "Oyunu Sıfırla",
+            "startNewGame": "Baştan yeni bir oyun başlat",
+            "gameEnded": "Oyun zaten bitti",
+            "noMoves": "Henüz hamle yapılmadı"
+        },
+        "baseBoard": {
+            "errorLoadState": "Oyun durumu yüklenemedi",
+            "resignGameTitle": "Teslim Ol",
+            "resignGameMessage": "Teslim olmak istediğinizden emin misiniz? Oyunu kaybedersiniz.",
+            "cancel": "İptal",
+            "resign": "Teslim Ol",
+            "checkTitle": "Şah!",
+            "checkMessage": "{{piece}} şahta!",
+            "checkmateTitle": "Şah Mat!",
+            "checkmateMessage": "{{winner}} şah mat ile kazandı!",
+            "gathererTitle": "Toplayıcı Etkisi",
+            "gathererMessage": "Bu kareye mercan yerleştir?",
+            "yes": "Evet",
+            "no": "Hayır",
+            "hunterTitle": "Avcı Etkisi",
+            "hunterMessage": "Bu kareden mercanı kaldır?",
+            "exportSuccessTitle": "Başarılı",
+            "exportSuccessMessage": "Oyun durumu panoya kaydedildi!",
+            "exportFailedTitle": "Dışa Aktarım Başarısız",
+            "computer": "Computer",
+            "opponent": "Rakip",
+            "white": "Beyaz",
+            "black": "Siyah",
+            "youWonTimeout": "Kazandınız! {{opponentName}} süresini doldurdu ⏱️",
+            "youLostTimeout": "Kaybettiniz! Süre doldu ⏱️",
+            "timeoutLose": "{{loserName}} süresini doldurdu! ⏱️",
+            "youWonResign": "Kazandınız! {{opponentName}} teslim oldu 🏳️",
+            "youResigned": "Teslim oldunuz 🏳️",
+            "checkmateWin": "Şah Mat! Kazandınız! 🏆",
+            "checkmateLose": "Şah Mat! Kaybettiniz.",
+            "checkmateGeneric": "Şah Mat! {{winner}} kazandı! 🏆",
+            "youLost": "Kaybettiniz",
+            "resignGeneric": "{{winner}} teslim olma ile kazandı! 🏳️",
+            "coralVictoryWin": "Mercan Zaferi ile kazandınız! 🪸\n{{whiteScore}} - {{blackScore}}",
+            "coralVictoryLose": "Kaybettiniz. {{winner}} Mercan Zaferi ile kazandı! 🪸\n{{whiteScore}} - {{blackScore}}",
+            "coralVictoryGeneric": "{{winner}} Mercan Zaferi ile kazandı! 🪸\n{{whiteScore}} Beyaz - {{blackScore}} Siyah",
+            "stalemate": "Pat! 🤝",
+            "drawRepetition": "Tekrar ile Berabere! 🤝",
+            "drawInsufficientMaterial": "Berabere - Yetersiz Materyal! 🤝",
+            "drawCoralTie": "Berabere - Mercan Eşitliği! 🤝🪸\n{{score}} - {{score}}",
+            "draw": "Berabere! 🤝",
+            "check": "{{player}} Şahta! ⚠️",
+            "viewingHistory": "Geçmiş hamleler görüntüleniyor - oynamak için güncel hamleye dönün",
+            "selectWhaleOrientation": "Balinanız için yönelimi seçin",
+            "hunterWhaleTitle": "Avcı Etkisi (Balina)",
+            "hunterWhaleMessage": "Mercan kaldırma seçeneğini seçin:",
+            "yourTurn": "Senin sıran",
+            "opponentTurn": "{{opponentName}} sırası",
+            "playerTurn": "{{playerColor}} sırası"
+        },
+        "computerBoard": {
+            "cancelRequestTitle": "İsteği İptal Et",
+            "cancelRequestMessage": "Sıfırlama isteğinizi iptal edin?",
+            "cancel": "İptal",
+            "yes": "Evet",
+            "resetGameTitle": "Oyunu Sıfırla",
+            "resetGameMessage": "Yeni bir oyun başlatmak istediğinizden emin misiniz?",
+            "reset": "Sıfırla",
+            "resetGame": "Oyunu Sıfırla",
+            "startNewGame": "Baştan yeni bir oyun başlat",
+            "gameEnded": "Oyun zaten bitti",
+            "noMoves": "Henüz hamle yapılmadı",
+            "errorUndo": "Geri alma başarısız. Lütfen tekrar deneyin."
+        },
+        "computerUsers": {
+            "successTitle": "Başarılı",
+            "errorTitle": "Hata",
+            "initializeSuccess": "{{count}} bilgisayar kullanıcısı başarıyla oluşturuldu",
+            "initializeError": "Bilgisayar kullanıcıları oluşturulamadı.",
+            "confirmDeleteTitle": "Silmeyi Onayla",
+            "confirmDeleteMessage": "Tüm bilgisayar kullanıcılarını silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.",
+            "cancel": "İptal",
+            "delete": "Sil",
+            "deleteSuccess": "{{count}} bilgisayar kullanıcısı başarıyla silindi",
+            "deleteError": "Bilgisayar kullanıcıları silinemedi.",
+            "clearLanguageSuccess": "Dil tercihi temizlendi. Uygulama sonraki başlatmada dili otomatik algılayacak.",
+            "clearLanguageError": "Dil tercihi temizlenemedi."
+        }
+    },
+    "hooks": {
+        "friends": {
+            "removeFriendTitle": "Arkadaşı Kaldır",
+            "removeFriendMessage": "{{friendName}} adlı kişiyi arkadaşlarınızdan kaldırmak istediğinizden emin misiniz?",
+            "cancel": "İptal",
+            "remove": "Kaldır",
+            "errorRemove": "Arkadaş kaldırılamadı",
+            "errorAccept": "Arkadaşlık isteği kabul edilemedi",
+            "errorDecline": "Arkadaşlık isteği reddedilemedi",
+            "cancelRequestTitle": "Arkadaşlık İsteğini İptal Et",
+            "cancelRequestMessage": "{{displayName}} adlı kişiye arkadaşlık isteğini iptal et?",
+            "no": "Hayır",
+            "yesCancel": "Evet, İptal Et",
+            "errorCancelRequest": "Arkadaşlık isteği iptal edilemedi",
+            "errorTitle": "Hata"
+        },
+        "game": {
+            "errorTitle": "Hata",
+            "errorLoadGame": "Oyun yüklenemedi"
+        },
+        "gameActions": {
+            "errorTitle": "Hata",
+            "errorResign": "Teslim olunamadı"
+        },
+        "userSearch": {
+            "errorTitle": "Hata",
+            "errorSendRequest": "Arkadaşlık isteği gönderilemedi"
+        }
+    }
+}

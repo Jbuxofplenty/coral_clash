@@ -1,0 +1,812 @@
+{
+    "auth": {
+        "welcomeBack": "Willkommen zurück",
+        "createAccount": "Konto erstellen",
+        "resetPassword": "Passwort zurücksetzen",
+        "signInSubtitle": "Melden Sie sich an, um gegen den Computer zu spielen oder andere Spieler herauszufordern",
+        "signUpSubtitle": "Erstellen Sie ein Konto, um online zu spielen. Wählen Sie einen einzigartigen Benutzernamen!",
+        "forgotPasswordSubtitle": "Geben Sie Ihre E-Mail-Adresse ein, um einen Link zum Zurücksetzen des Passworts zu erhalten",
+        "usernamePlaceholder": "Benutzername (erforderlich)",
+        "emailPlaceholder": "E-Mail",
+        "passwordPlaceholder": "Passwort",
+        "signInWithApple": "Mit Apple anmelden",
+        "signUpWithApple": "Mit Apple registrieren",
+        "signInWithGoogle": "Mit Google anmelden",
+        "signUpWithGoogle": "Mit Google registrieren",
+        "or": "ODER",
+        "signIn": "Anmelden",
+        "signUp": "Registrieren",
+        "sendResetLink": "Link zum Zurücksetzen senden",
+        "forgotPassword": "Passwort vergessen?",
+        "backToSignIn": "Zurück zur Anmeldung",
+        "alreadyHaveAccount": "Bereits ein Konto? Anmelden",
+        "dontHaveAccount": "Kein Konto? Registrieren",
+        "errors": {
+            "fillAllFields": "Bitte füllen Sie alle Felder aus",
+            "usernameRequired": "Benutzername ist erforderlich",
+            "usernameMinLength": "Benutzername muss mindestens 2 Zeichen lang sein",
+            "usernameMaxLength": "Benutzername muss weniger als 30 Zeichen lang sein",
+            "usernameInvalidChars": "Benutzername darf nur Buchstaben, Zahlen, Leerzeichen, Unterstriche und Bindestriche enthalten",
+            "authFailed": "Authentifizierung fehlgeschlagen",
+            "googleSignInFailed": "Google-Anmeldung fehlgeschlagen",
+            "appleSignInFailed": "Apple-Anmeldung fehlgeschlagen",
+            "enterEmail": "Bitte geben Sie Ihre E-Mail-Adresse ein",
+            "resetEmailFailed": "E-Mail zum Zurücksetzen konnte nicht gesendet werden"
+        },
+        "success": {
+            "resetEmailSent": "E-Mail zum Zurücksetzen des Passworts gesendet! Überprüfen Sie Ihren Posteingang."
+        }
+    },
+    "game": {
+        "difficulty": {
+            "title": "KI-Schwierigkeit wählen",
+            "subtitle": "Wählen Sie den Schwierigkeitsgrad für den Computergegner",
+            "random": "Zufällig",
+            "easy": "Leicht",
+            "medium": "Mittel",
+            "hard": "Schwer",
+            "randomDescription": "Computer macht zufällige Züge",
+            "easyDescription": "Computer verwendet einfache Strategie",
+            "mediumDescription": "Computer verwendet mittlere Strategie",
+            "hardDescription": "Computer verwendet fortgeschrittene Strategie",
+            "createAccountToAccess": "Erstellen Sie ein Konto für den Zugang"
+        },
+        "matchmaking": {
+            "title": "Spielmodus wählen",
+            "timeControl": "Zeitkontrolle wählen",
+            "timeControlSubtitle": "Wählen Sie das Zeitlimit für dieses Spiel",
+            "instant": "Sofort",
+            "instantDescription": "Finden Sie jetzt einen Gegner. Matched Sie mit Online-Spielern.",
+            "correspondence": "Korrespondenz",
+            "correspondenceDescription": "Senden Sie eine Einladung an einen zufälligen Spieler. Sie haben 24 Stunden Zeit zu akzeptieren.",
+            "timeControls": {
+                "unlimited": "Kein Zeitlimit",
+                "blitz": "5 Minuten",
+                "normal": "10 Minuten",
+                "custom": "Zeitlimit gesetzt"
+            },
+            "timeControlDescriptions": {
+                "blitz": "5 Minuten pro Spieler",
+                "normal": "10 Minuten pro Spieler",
+                "unlimited": "Kein Zeitlimit"
+            }
+        },
+        "status": {
+            "loading": "Laden",
+            "noGamesFound": "Keine Spiele gefunden",
+            "error": "Fehler",
+            "resetApproved": "Spiel wurde zurückgesetzt",
+            "resetRejected": "Rücksetzungsanfrage abgelehnt",
+            "undoApproved": "Zug rückgängig gemacht",
+            "undoRejected": "Rückgängig-Anfrage abgelehnt"
+        },
+        "actions": {
+            "cancel": "Abbrechen"
+        },
+        "postMatchSignup": {
+            "title": "Tolles Spiel!",
+            "message": "Möchten Sie Ihre Statistiken speichern und gegen echte Spieler spielen?",
+            "lossTitle": "Weiter so!",
+            "lossMessage": "Jede Niederlage ist eine Lektion. Registrieren Sie sich, um Ihren Fortschritt zu verfolgen.",
+            "button": "Jetzt registrieren"
+        }
+    },
+    "navigation": {
+        "home": "Startseite",
+        "game": "Spiel",
+        "tutorial": "Tutorial",
+        "howToPlay": "Spielanleitung",
+        "settings": "Einstellungen",
+        "friends": "Freunde",
+        "stats": "Statistiken",
+        "reportIssue": "Problem melden",
+        "rulesVideo": "Regelvideo",
+        "physicalGame": "Physisches Spiel",
+        "logOut": "Abmelden",
+        "logOutConfirmTitle": "Abmelden",
+        "logOutConfirmMessage": "Sind Sie sicher, dass Sie sich abmelden möchten?",
+        "cancel": "Abbrechen",
+        "appTitle": "Coral Clash",
+        "appSubtitle": "Ozean-Strategiespiel"
+    },
+    "home": {
+        "welcome": {
+            "title": "Willkommen bei Coral Clash!",
+            "message": "Schauen Sie sich das Regelvideo oder die Spielanleitung im Menü an, um loszulegen!",
+            "watchVideo": "Video ansehen",
+            "howToPlay": "Spielanleitung",
+            "ok": "OK"
+        },
+        "opponent": {
+            "computer": "Computer",
+            "opponent": "Gegner",
+            "guest": "Gast 1"
+        },
+        "gameModes": {
+            "howToPlayTitle": "Spielanleitung",
+            "howToPlayDescription": "Lernen Sie die Regeln und Strategien von Coral Clash",
+            "playComputerTitle": "Gegen Computer spielen",
+            "playComputerDescription": "Starten Sie ein neues Spiel gegen die KI",
+            "loadGameStateTitle": "Spielstand laden (Dev)",
+            "loadGameStateDescription": "Laden Sie einen gespeicherten Spielstand aus Fixtures"
+        },
+        "matchmaking": {
+            "cannotJoin": "Matchmaking nicht möglich",
+            "instantMatchFound": "Korrespondenz-Match gefunden!",
+            "instantMatchMessage": "Sie wurden mit {{creatorName}} gematcht. Sie werden benachrichtigt und haben 24 Stunden Zeit zu akzeptieren.",
+            "correspondenceCreated": "Korrespondenz-Einladung erstellt",
+            "correspondenceMessage": "Ihre Einladung wurde erstellt. Wenn ein anderer Spieler den Korrespondenz-Modus wählt, kann er mit Ihrer Einladung gematcht werden. Sie werden benachrichtigt, wenn jemand spielen möchte!"
+        },
+        "errors": {
+            "offlineModeTitle": "Offline-Modus",
+            "offlineModeMessage": "Keine Verbindung zum Server möglich. Offline-Computerspiel wird gestartet.",
+            "errorTitle": "Fehler",
+            "failedToStart": "{{action}} konnte nicht gestartet werden. Bitte versuchen Sie es erneut.",
+            "failedToResign": "Aufgabe fehlgeschlagen. Bitte versuchen Sie es erneut.",
+            "failedPassAndPlay": "Pass-und-Spielen konnte nicht gestartet werden. Bitte versuchen Sie es erneut.",
+            "failedComputerGame": "Computerspiel konnte nicht gestartet werden",
+            "failedMatchmaking": "{{mode}} Matchmaking konnte nicht gestartet werden. {{message}}"
+        }
+    },
+    "stats": {
+        "overallStatistics": "Gesamtstatistiken",
+        "gamesPlayed": "Gespielte Spiele",
+        "wins": "Siege",
+        "losses": "Niederlagen",
+        "draws": "Unentschieden",
+        "winRate": "Siegquote",
+        "matchupStatistics": "Gegner-Statistiken",
+        "matchupDescription": "Siegquoten gegen jeden Gegner (PvP & Computer)",
+        "computer": "Computer",
+        "winRateShort": "Siegquote",
+        "winsShort": "S",
+        "lossesShort": "N",
+        "drawsShort": "U",
+        "noGamesYet": "Noch keine Spiele",
+        "noGamesHint": "Spielen Sie Spiele, um hier Ihre Statistiken zu sehen!"
+    },
+    "gameMenu": {
+        "saveGameState": "Spielstand speichern",
+        "exportPosition": "Aktuelle Spielposition exportieren",
+        "flipBoard": "Brett drehen",
+        "showingBlackBottom": "Zeigt Schwarz unten",
+        "showingWhiteBottom": "Zeigt Weiß unten",
+        "reportBug": "Fehler melden",
+        "includeGameState": "Aktuellen Spielstand einbeziehen",
+        "resignGame": "Spiel aufgeben",
+        "resigning": "Aufgeben...",
+        "pleaseWait": "Bitte warten...",
+        "gameEnded": "Spiel bereits beendet",
+        "forfeitGame": "Das aktuelle Spiel aufgeben"
+    },
+    "reportIssue": {
+        "bugReportTitle": "Fehlerbericht",
+        "bugReportDescription": "Melden Sie einen Fehler mit dem aktuellen Spielstand. Die Spielposition wird in Ihrem Bericht enthalten sein.",
+        "feedbackTitle": "Feedback & Probleme",
+        "feedbackDescription": "Senden Sie Feedback oder melden Sie ein Problem. Wir schätzen Ihre Meinung!",
+        "subject": "Betreff",
+        "subjectPlaceholder": "Kurze Zusammenfassung des Problems",
+        "description": "Beschreibung",
+        "descriptionPlaceholder": "Detaillierte Beschreibung des Problems oder Feedbacks...",
+        "gameStateIncluded": "✓ Spielstand wird enthalten sein",
+        "turn": "Zug",
+        "white": "Weiß",
+        "black": "Schwarz",
+        "gameOver": "Spiel vorbei",
+        "submitIssue": "Problem einreichen",
+        "anonymousNote": "Hinweis: Sie senden anonym. Melden Sie sich an, um Ihre Probleme zu verfolgen.",
+        "validation": {
+            "missingSubjectTitle": "Fehlende Information",
+            "missingSubjectMessage": "Bitte geben Sie einen Betreff für Ihr Problem ein.",
+            "invalidSubjectTitle": "Ungültiger Betreff",
+            "invalidSubjectMessage": "Der Betreff muss mindestens 3 Zeichen lang sein.",
+            "missingDescriptionTitle": "Fehlende Information",
+            "missingDescriptionMessage": "Bitte geben Sie eine Beschreibung für Ihr Problem ein.",
+            "invalidDescriptionTitle": "Ungültige Beschreibung",
+            "invalidDescriptionMessage": "Die Beschreibung muss mindestens 10 Zeichen lang sein."
+        },
+        "success": {
+            "title": "Problem eingereicht",
+            "message": "Vielen Dank für Ihr Feedback! Ihr Problem wurde eingereicht",
+            "ok": "OK"
+        },
+        "error": {
+            "title": "Einreichung fehlgeschlagen",
+            "message": "Problem konnte nicht eingereicht werden. Bitte überprüfen Sie Ihre Verbindung und versuchen Sie es erneut."
+        }
+    },
+    "settings": {
+        "account": "Konto",
+        "profileAvatar": "Profil-Avatar",
+        "chooseAvatar": "Wählen Sie Ihren Ozean-Avatar",
+        "appearance": "Erscheinungsbild",
+        "theme": {
+            "light": "Hell",
+            "lightDescription": "Immer helles Design verwenden",
+            "dark": "Dunkel",
+            "darkDescription": "Immer dunkles Design verwenden",
+            "auto": "Automatisch",
+            "autoDescription": "Systemdesign übernehmen"
+        },
+        "language": {
+            "title": "Sprache (Language)",
+            "english": "English",
+            "englishDescription": "English language interface",
+            "hindi": "हिन्दी (Hindi)",
+            "hindiDescription": "हिन्दी भाषा इंटरफ़ेस"
+        },
+        "actions": {
+            "resetToDefaults": "Auf Standard zurücksetzen",
+            "resetTitle": "Einstellungen zurücksetzen",
+            "resetMessage": "Sind Sie sicher, dass Sie alle Einstellungen auf Standard zurücksetzen möchten?",
+            "cancel": "Abbrechen",
+            "reset": "Zurücksetzen"
+        },
+        "dangerZone": {
+            "title": "Gefahrenzone",
+            "warning": "Wenn Sie Ihr Konto löschen, gibt es kein Zurück. Bitte seien Sie sicher.",
+            "deleteAccount": "Konto löschen",
+            "deletingAccount": "Konto wird gelöscht...",
+            "deleteTitle": "Konto löschen",
+            "deleteMessage": "Diese Aktion ist dauerhaft und kann nicht rückgängig gemacht werden.\n\n• Alle Ihre persönlichen Daten werden entfernt\n• Ihre Spiele werden fortgesetzt, aber Sie erscheinen als \"Anonym\"\n• Ihre Freunde und Freundschaftsanfragen werden entfernt\n• Aktive Spiele werden aufgegeben\n\nSind Sie sicher, dass Sie fortfahren möchten?",
+            "continue": "Fortfahren",
+            "confirmTitle": "Kontolöschung bestätigen",
+            "confirmMessage": "Zur Bestätigung geben Sie bitte DELETE (in Großbuchstaben) ein:",
+            "incorrectTitle": "Falsche Bestätigung",
+            "incorrectMessage": "Sie müssen DELETE genau eingeben, um die Kontolöschung zu bestätigen.",
+            "successTitle": "Konto gelöscht",
+            "successMessage": "Ihr Konto wurde erfolgreich gelöscht. Sie werden jetzt abgemeldet.",
+            "failedTitle": "Löschung fehlgeschlagen",
+            "timeoutMessage": "Die Anfrage ist abgelaufen. Bitte überprüfen Sie Ihre Verbindung und versuchen Sie es erneut.",
+            "failedMessage": "Konto konnte nicht gelöscht werden. Bitte versuchen Sie es erneut oder kontaktieren Sie den Support.",
+            "retry": "Erneut versuchen"
+        },
+        "errors": {
+            "loadFailed": "Einstellungen konnten nicht geladen werden",
+            "saveFailed": "Einstellungen konnten nicht gespeichert werden",
+            "avatarSaveFailed": "Avatar-Auswahl konnte nicht gespeichert werden",
+            "themeSaveFailed": "Design-Einstellung konnte nicht gespeichert werden",
+            "languageChangeFailed": "Sprache konnte nicht geändert werden",
+            "resetFailed": "Einstellungen konnten nicht zurückgesetzt werden"
+        }
+    },
+    "friends": {
+        "addFriend": "Freund hinzufügen",
+        "searchPlaceholder": "Nach Benutzername suchen",
+        "noUsersFound": "Keine Benutzer gefunden",
+        "pending": "Ausstehend",
+        "incomingRequests": "Eingehende Anfragen",
+        "sentRequests": "Gesendete Anfragen",
+        "myFriends": "Meine Freunde",
+        "noFriendsYet": "Noch keine Freunde",
+        "noFriendsHint": "Fügen Sie Freunde über den Benutzernamen hinzu, um zusammen zu spielen!"
+    },
+    "common": {
+        "loading": "Laden...",
+        "error": "Fehler",
+        "success": "Erfolg",
+        "cancel": "Abbrechen",
+        "confirm": "Bestätigen",
+        "save": "Speichern",
+        "delete": "Löschen",
+        "edit": "Bearbeiten",
+        "close": "Schließen",
+        "ok": "OK",
+        "somethingWentWrong": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut."
+    },
+    "cards": {
+        "matchmaking": {
+            "searchingForOpponent": "Suche nach Gegner...",
+            "findRandomMatch": "Zufälliges Match finden",
+            "searchingHint": "Suche nach Gegner... · Tippen zum Abbrechen",
+            "tapToJoin": "Tippen, um der Warteschlange beizutreten",
+            "cannotJoinTitle": "Matchmaking nicht möglich"
+        },
+        "playWithFriend": {
+            "title": "Mit Freund spielen",
+            "description": "Laden Sie einen Freund zum Spielen ein",
+            "modalTitle": "Mit Freund spielen",
+            "inviteFriend": "Freund einladen",
+            "inviteDescription": "Senden Sie eine Spieleinladung an einen Freund",
+            "textInvite": "Text-Einladung",
+            "textInviteDescription": "Einladungen per SMS senden",
+            "passAndPlay": "Abwechselnd spielen",
+            "passAndPlayDescription": "Lokal auf diesem Gerät spielen",
+            "selectFriend": "Freund auswählen",
+            "searchFriends": "Freunde suchen...",
+            "noFriendsFound": "Keine Freunde gefunden",
+            "noFriendsYet": "Noch keine Freunde. Fügen Sie Freunde hinzu!",
+            "passAndPlayGames": "Abwechselnd-Spiele",
+            "startNewGame": "Neues Spiel starten",
+            "noActiveGames": "Keine aktiven Spiele",
+            "vsGuest": "vs Gast 1",
+            "unlimited": "Unbegrenzt",
+            "shareMessage": "Lass uns Coral Clash spielen! 🦀\n\nHier herunterladen:\niOS: [URL]\n\nAndroid: [URL]"
+        },
+        "signUpPrompt": {
+            "title": "Alle Funktionen freischalten",
+            "subtitle": "Erstellen Sie ein kostenloses Konto für Zugang zu:",
+            "feature1": "Online mit Freunden spielen",
+            "feature2": "Zufällige Gegner per Matchmaking finden",
+            "feature3": "Spielstatistiken & Verlauf verfolgen",
+            "feature4": "Freundesnetzwerk aufbauen",
+            "button": "Registrieren / Anmelden"
+        },
+        "activeGames": {
+            "title": "Aktive Spiele",
+            "inProgress": "laufend",
+            "game": "Spiel",
+            "games": "Spiele",
+            "yourTurn": "Du bist dran",
+            "opponentTurn": "Gegner ist dran",
+            "opponent": "Gegner",
+            "computer": "Computer",
+            "blitz": "Blitz",
+            "normal": "Normal",
+            "unlimited": "Unbegrenzt",
+            "timed": "Zeitbegrenzt",
+            "loading": "Spiele werden geladen...",
+            "noGames": "Keine aktiven Spiele",
+            "noGamesHint": "Starten Sie ein Spiel mit einem Freund!",
+            "vs": "vs ",
+            "resignTitle": "Spiel aufgeben",
+            "resignMessage": "Sind Sie sicher, dass Sie aufgeben möchten? Sie verlieren dieses Spiel.",
+            "resignButton": "Aufgeben",
+            "resignError": "Aufgabe fehlgeschlagen. Bitte versuchen Sie es erneut."
+        },
+        "gameHistory": {
+            "title": "Spielverlauf",
+            "subtitle": "Letzte Spiele",
+            "loading": "Verlauf wird geladen...",
+            "noHistory": "Kein Spielverlauf",
+            "noHistoryHint": "Ihre abgeschlossenen Spiele erscheinen hier",
+            "vs": "vs ",
+            "justNow": "Gerade eben",
+            "minutesAgo": "Min. her",
+            "hoursAgo": "Std. her",
+            "daysAgo": "T. her",
+            "cancelled": "Spiel abgebrochen",
+            "draw": "Unentschieden",
+            "won": "Sie haben gewonnen",
+            "lost": "Sie haben verloren",
+            "unknown": "Unbekannt",
+            "opponent": "Gegner",
+            "computer": "Computer",
+            "blitz": "Blitz",
+            "normal": "Normal",
+            "unlimited": "Unbegrenzt",
+            "timed": "Zeitbegrenzt"
+        }
+    },
+    "errors": {
+        "INVALID_MOVE": "Ungültiger Zug",
+        "INVALID_MOVE_OCCUPIED": "Diese Position ist bereits besetzt",
+        "INVALID_MOVE_OUT_OF_BOUNDS": "Zug ist außerhalb der Grenzen",
+        "INVALID_MOVE_NOT_YOUR_TURN": "Sie sind nicht am Zug",
+        "INVALID_MOVE_PIECE_BLOCKED": "Diese Figur ist blockiert",
+        "GAME_NOT_FOUND": "Spiel nicht gefunden",
+        "GAME_ALREADY_STARTED": "Spiel hat bereits begonnen",
+        "GAME_ALREADY_ENDED": "Dieses Spiel ist bereits beendet",
+        "GAME_CANCELLED": "Spiel wurde abgebrochen",
+        "PLAYER_NOT_IN_GAME": "Sie sind nicht in diesem Spiel",
+        "PLAYER_DISCONNECTED": "Spieler getrennt",
+        "CONNECTION_ERROR": "Verbindungsfehler. Bitte überprüfen Sie Ihre Internetverbindung.",
+        "SERVER_ERROR": "Serverfehler. Bitte versuchen Sie es später erneut.",
+        "TIMEOUT": "Zeitüberschreitung der Anfrage",
+        "ALREADY_IN_QUEUE": "Sie sind bereits in der Matchmaking-Warteschlange",
+        "NOT_IN_QUEUE": "Sie sind nicht in der Matchmaking-Warteschlange",
+        "QUEUE_TIMEOUT": "Matchmaking-Zeitüberschreitung",
+        "OPPONENT_NOT_FOUND": "Kein Gegner gefunden",
+        "MATCHMAKING_DISABLED": "Matchmaking ist derzeit deaktiviert",
+        "FRIEND_NOT_FOUND": "Freund nicht gefunden",
+        "FRIEND_ALREADY_EXISTS": "Bereits befreundet mit diesem Benutzer",
+        "CANNOT_ADD_SELF": "Sie können sich nicht selbst als Freund hinzufügen",
+        "FRIEND_REQUEST_PENDING": "Freundschaftsanfrage bereits ausstehend",
+        "INVALID_CREDENTIALS": "Ungültige E-Mail oder Passwort",
+        "USER_NOT_FOUND": "Benutzer nicht gefunden",
+        "EMAIL_ALREADY_EXISTS": "E-Mail wird bereits verwendet",
+        "USERNAME_TAKEN": "Benutzername ist bereits vergeben",
+        "WEAK_PASSWORD": "Passwort ist zu schwach",
+        "ACCOUNT_DISABLED": "Ihr Konto wurde deaktiviert",
+        "SESSION_EXPIRED": "Ihre Sitzung ist abgelaufen. Bitte melden Sie sich erneut an.",
+        "UNAUTHORIZED": "Sie sind nicht berechtigt, diese Aktion auszuführen",
+        "RATE_LIMITED": "Zu viele Anfragen. Bitte langsamer.",
+        "MAINTENANCE_MODE": "App wird gewartet. Bitte versuchen Sie es später erneut.",
+        "FEATURE_DISABLED": "Diese Funktion ist derzeit deaktiviert"
+    },
+    "success": {
+        "GAME_WON": "Herzlichen Glückwunsch! Sie haben gewonnen!",
+        "GAME_DRAW": "Spiel endete unentschieden",
+        "GAME_LOST": "Mehr Glück beim nächsten Mal!",
+        "PLAYER_RESIGNED": "Spieler hat aufgegeben",
+        "FRIEND_REQUEST_SENT": "Freundschaftsanfrage gesendet!",
+        "FRIEND_REQUEST_ACCEPTED": "Freundschaftsanfrage akzeptiert!",
+        "FRIEND_REQUEST_DECLINED": "Freundschaftsanfrage abgelehnt",
+        "MOVE_SUCCESS": "Zug erfolgreich"
+    },
+    "scenarioBoard": {
+        "pauseAutoPlay": "Auto-Play pausieren",
+        "playDemo": "Demo abspielen",
+        "explanation": "Erklärung",
+        "backToGuide": "Zurück zur Anleitung"
+    },
+    "howToPlay": {
+        "objective": {
+            "title": "Ziel",
+            "intro": "Um Coral Clash zu gewinnen, erfüllen Sie eines dieser Ziele:",
+            "checkmate": "Schachmatt",
+            "checkmateDesc": "den Wal des Gegners (wenn der Wal im",
+            "check": "Schach",
+            "checkmateDescEnd": "steht und nicht entkommen kann)",
+            "coralControl": "meiste Fläche mit Koralle",
+            "coralControlDesc": "Kontrollieren Sie die",
+            "coralControlWhen": "wenn:",
+            "coralPlaced": "Ein Spieler hat alle seine Korallen platziert",
+            "whaleRemaining": "Ein Spieler hat nur noch seinen Wal übrig",
+            "backRowReached": "Eine Krabbe oder ein Oktopus erreicht die letzte Reihe des Gegners",
+            "areaControlled": "Von Koralle kontrollierte Fläche:",
+            "areaControlledDesc": "Zählen Sie die Anzahl Ihrer Korallen, die nicht von einer gegnerischen Figur besetzt sind.",
+            "checkmateExample": "Schachmatt-Beispiel",
+            "checkExample": "Schach-Beispiel",
+            "coralVictoryExample": "Korallensieg-Beispiel"
+        },
+        "setup": {
+            "title": "Spielaufbau",
+            "boardDesc": "Das Brett ist ein 8x8-Raster mit 64 Feldern. Jeder Spieler hat:",
+            "coralPieces": "17 Korallenstücke",
+            "units": "17 Einheiten: 1 Wal, 2 Delfine, 4 Schildkröten, 2 Kugelfische, 4 Krabben und 4 Oktopusse",
+            "variants": "Jeder Figurentyp gibt es in zwei Varianten:",
+            "hunter": "Jäger",
+            "hunterDesc": "Figuren (ohne vier Korallensymbole) können Koralle entfernen",
+            "gatherer": "Sammler",
+            "gathererDesc": "Figuren (mit vier Korallensymbolen) können Koralle platzieren",
+            "hunterExample": "Jäger-Effekt-Beispiel",
+            "gathererExample": "Sammler-Effekt-Beispiel"
+        },
+        "turnOverview": {
+            "title": "Zugübersicht",
+            "intro": "Weiß beginnt, dann wechseln sich die Spieler ab. In Ihrem Zug:",
+            "step1": "Bewegen Sie eine Ihrer Figuren",
+            "step2": "Lösen Sie alle Fang-, Jäger- oder Sammlereffekte aus",
+            "step3": "Prüfen Sie, ob Ziele erreicht wurden"
+        },
+        "movement": {
+            "title": "Wie sich Figuren bewegen",
+            "important": "Wichtig:",
+            "importantDesc": "Figuren können nicht durch andere Figuren hindurchziehen - sie brauchen einen freien Weg.",
+            "variants": "Jeder Figurentyp gibt es in zwei Varianten, die unterschiedlich mit Koralle interagieren:",
+            "hunterPieces": "Jäger-Figuren",
+            "hunterMovement": "(ohne Korallensymbole) werden",
+            "stoppedBy": "GESTOPPT VON",
+            "hunterMovementDesc": "Koralle - sie können nicht hindurchziehen",
+            "gathererPieces": "Sammler-Figuren",
+            "gathererMovement": "(mit vier Korallensymbolen) sind mächtiger - sie können",
+            "through": "DURCH",
+            "gathererMovementDesc": "Koralle frei hindurchziehen",
+            "coralMovementExample": "Korallen-Bewegungsbeispiel",
+            "individualMovements": "Einzelne Figurenbewegungen"
+        },
+        "pieces": {
+            "whale": {
+                "name": "Wal",
+                "intro": "Der Wal ist Ihre wichtigste Figur - wenn er schachmatt gesetzt wird, verlieren Sie! Der Wal belegt zwei Felder und hat zwei unterschiedliche Bewegungsoptionen:",
+                "slidingMove": "1. Gleitbewegung:",
+                "slidingMoveDesc": "Bewegen Sie die Hälfte der Figur beliebig viele Felder horizontal, vertikal oder diagonal, wobei die ursprüngliche Ausrichtung beibehalten wird. Der Wal folgt den Jäger-Bewegungsregeln - er wird von Koralle gestoppt. Es gibt jedoch eine besondere Ausnahme (siehe unten).",
+                "rotationMove": "2. Drehbewegung:",
+                "rotationMoveDesc": "Drehen Sie die Hälfte der Figur auf ein benachbartes Feld (ein Feld vertikal oder horizontal). Bei der Drehung tippen Sie zuerst auf das Zielfeld (mit weißem Kreis markiert). Bei mehreren gültigen Ausrichtungen tippen Sie dann auf das Ausrichtungsfeld (mit grünem Kreis markiert). Bei nur einer gültigen Ausrichtung bewegt sich der Wal automatisch.",
+                "checkRules": "Schach-Regeln:",
+                "checkRulesDesc": "Der Wal darf seinen Zug niemals im Schach beenden (wo er geschlagen werden könnte), KANN aber durch bedrohte Felder ziehen.",
+                "doubleCapture": "Doppelter Fang:",
+                "doubleCaptureDesc": "Der Wal kann bis zu zwei gegnerische Figuren in einem Zug fangen - eine mit jeder Hälfte seines Körpers!",
+                "doubleCoralRemoval": "Doppelte Korallenentfernung:",
+                "doubleCoralRemovalDesc": "Wenn der Wal (als Jäger) auf Koralle landet, kann er eine oder beide Korallenstücke entfernen. Wenn beide Hälften auf Koralle landen, können Sie beide, nur eine oder keine entfernen. Wenn nur eine Hälfte auf neue Koralle landet (während die andere bereits auf Koralle steht), können Sie dieses eine Korallenstück entfernen.",
+                "specialCase": "⚠️ Sonderbewegungsfall",
+                "specialCaseDesc": "Wenn die Hälfte des Wals bereits auf Koralle steht, blockiert diese Koralle NICHT die andere Hälfte beim Durchziehen oder Landen auf demselben Korallenfeld.",
+                "basicMovement": "Grundlegende Wal-Bewegung",
+                "rotationExample": "Wal-Drehungsbeispiel",
+                "coralException": "Wal bewegt sich durch eigene Koralle"
+            },
+            "dolphin": {
+                "name": "Delfin",
+                "movement": "Bewegt sich beliebig viele Felder vertikal, horizontal oder diagonal.",
+                "example": "Delfin-Bewegungsbeispiel"
+            },
+            "turtle": {
+                "name": "Schildkröte",
+                "movement": "Bewegt sich beliebig viele Felder vertikal oder horizontal.",
+                "example": "Schildkröten-Bewegungsbeispiel"
+            },
+            "pufferfish": {
+                "name": "Kugelfisch",
+                "movement": "Bewegt sich beliebig viele Felder diagonal.",
+                "example": "Kugelfisch-Bewegungsbeispiel"
+            },
+            "octopus": {
+                "name": "Oktopus",
+                "movement": "Bewegt sich ein Feld diagonal.",
+                "example": "Oktopus-Bewegungsbeispiel"
+            },
+            "crab": {
+                "name": "Krabbe",
+                "movement": "Bewegt sich ein Feld vertikal oder horizontal.",
+                "example": "Krabben-Bewegungsbeispiel"
+            }
+        },
+        "specialRules": {
+            "title": "Sonderregeln",
+            "capture": {
+                "title": "Fangen",
+                "desc": "Ziehen Sie auf ein Feld, das von einer gegnerischen Figur besetzt ist. Wale können zwei Figuren in einem Zug fangen.",
+                "example": "Fang-Beispiel"
+            },
+            "hunterEffect": {
+                "title": "Jäger-Bewegung & Effekt",
+                "desc": "Jäger-Figuren (ohne Korallensymbole) haben zwei wichtige Verhaltensweisen:",
+                "movementStops": "Bewegung stoppt",
+                "movementStopsDesc": "beim Landen auf Koralle",
+                "canRemove": "Kann entfernen",
+                "canRemoveDesc": "diese Koralle vom Brett",
+                "example": "Jäger-Effekt-Beispiel"
+            },
+            "gathererEffect": {
+                "title": "Sammler-Effekt",
+                "desc": "Sammler-Figuren (mit vier Korallensymbolen) können Koralle auf leeren Feldern platzieren, über die sie ziehen.",
+                "example": "Sammler-Effekt-Beispiel"
+            }
+        },
+        "drawResignation": {
+            "title": "Unentschieden & Aufgabe",
+            "stalemate": "Patt:",
+            "stalemateDesc": "Wenn ein Spieler keine legalen Züge hat und sein Wal nicht im Schach steht",
+            "threefoldRepetition": "Dreifache Wiederholung:",
+            "threefoldRepetitionDesc": "Dieselbe Position tritt dreimal mit demselben Spieler am Zug auf",
+            "resignation": "Aufgabe:",
+            "resignationDesc": "Ein Spieler kann jederzeit aufgeben"
+        }
+    },
+    "tutorial": {
+        "endGame": {
+            "title": "Willkommen bei Coral Clash!",
+            "message": "Der Wal ist der König. Sie können gewinnen, indem Sie den schwarzen Wal schachmatt setzen oder alle 17 Ihrer Korallen platzieren. Viel Glück!",
+            "backInfo": "Tippen Sie auf den Pfeil, um zum Startbildschirm zurückzukehren"
+        }
+    },
+    "tutorialScenarios": {
+        "checkmate": {
+            "title": "Schachmatt-Beispiel",
+            "description": "Der schwarze Wal ist durch Koralle bei a6 (durch den rosa Rand gekennzeichnet) eingeschlossen. Der weiße Jäger-Delfin bei b7 setzt den Wal in Schach, und die weiße Sammler-Schildkröte (mit Korallensymbolen am Rand) bei g7 schützt den angreifenden Delfin. Der Wal hat keinen Ausweg - Schachmatt!"
+        },
+        "coralVictory": {
+            "title": "Korallensieg - Kontrollbereich",
+            "description": "Weiß hat 4 Korallen (durch rosa Ränder gekennzeichnet): c3, d3, e3, f3. Schwarz hat 4 Korallen (durch schwarze Ränder gekennzeichnet): c6, d6, e6, f6. Der schwarze Sammler-Delfin (mit Korallensymbolen am Rand) bei c3 steht auf einer weißen Koralle, also kontrolliert Weiß nur 3 Korallen (d3, e3, f3). Schwarz kontrolliert alle 4 Korallen (c6, d6, e6, f6) = Schwarz gewinnt 4 zu 3! Denken Sie daran: Koralle, die von einer gegnerischen Figur besetzt ist, zählt NICHT zu Ihrem Kontrollbereich."
+        },
+        "whaleMovement": {
+            "title": "Wal-Bewegung",
+            "description": "Wale belegen zwei benachbarte Felder und können sich auf drei Arten bewegen: (1) Eine Hälfte beliebig viele Felder gleiten lassen, während die andere stehen bleibt, (2) Beide Hälften zusammen in dieselbe Richtung gleiten lassen (paralleles Gleiten), oder (3) Drehen, indem eine Hälfte auf ein benachbartes Feld bewegt wird. Der Wal muss immer auf zwei benachbarten orthogonalen Feldern bleiben."
+        },
+        "whaleRotation": {
+            "title": "Wal-Drehung",
+            "description": "Der Wal kann sich drehen, indem eine Hälfte auf ein benachbartes Feld (vertikal oder horizontal) bewegt wird. Beobachten Sie, wie der weiße Wal von einer horizontalen in eine vertikale Position rotiert. Diese Drehbewegung ist besonders nützlich zum Navigieren in engen Räumen oder zum schnellen Richtungswechsel."
+        },
+        "whaleCoralException": {
+            "title": "Wal bewegt sich durch eigene Koralle",
+            "description": "Sonderregel: Wenn die Hälfte des Wals bereits auf Koralle steht, blockiert diese Koralle NICHT die andere Hälfte beim Durchziehen oder Landen auf demselben Korallenfeld. Beobachten Sie, wie der weiße Wal von d4-e4 nach a4-b4 gleitet und durch die Koralle bei d4 zieht. Schwarze Koralle bei c, d, e in den Reihen 3 und 5 beschränkt die vertikale Bewegung, und Koralle bei f4 blockiert die Bewegung nach rechts, aber der Wal kann sich frei nach links entlang Reihe 4 bewegen, weil eine Hälfte bereits auf der weißen Koralle bei d4 steht."
+        },
+        "coralMovementComparison": {
+            "title": "Korallen-Bewegungsvergleich",
+            "description": "Vergleichen Sie den weißen Jäger-Delfin (links, ohne Korallensymbole) mit dem weißen Sammler-Delfin (rechts, mit Korallensymbolen). Tippen Sie auf jeden, um ihre Züge zu sehen. Der Jäger-Delfin wird von Koralle BLOCKIERT und kann nicht hindurchziehen, während der Sammler-Delfin frei DURCH Koralle ziehen kann, was ihn mächtiger macht."
+        },
+        "check": {
+            "title": "Schach",
+            "description": "Der schwarze Wal steht im Schach - er wird vom weißen Sammler-Delfin (mit Korallensymbolen am Rand) angegriffen. Der Sammler-Delfin kann durch Koralle ziehen, also hat er die Koralle bei d7 passiert, um den Wal anzugreifen. Der Wal kann den Delfin nicht fangen, weil die Koralle ihn blockiert. Schwarz muss den Wal aus der Gefahr bewegen oder den Angriff in seinem nächsten Zug blockieren."
+        },
+        "hunterEffect": {
+            "title": "Jäger-Effekt",
+            "description": "Jäger-Figuren (ohne vier Korallensymbole) stoppen, wenn sie auf Koralle ziehen. Sie können dann diese Koralle vom Brett entfernen. Beobachten Sie, wie die weiße Jäger-Krabbe auf Koralle zieht und sie entfernt."
+        },
+        "gathererEffect": {
+            "title": "Sammler-Effekt",
+            "description": "Sammler-Figuren (mit vier Korallensymbolen) können Koralle auf leeren Feldern platzieren, über die sie ziehen. Beobachten Sie, wie der weiße Sammler-Oktopus zieht und Koralle platziert."
+        },
+        "dolphinMovement": {
+            "title": "Delfin-Bewegung",
+            "description": "Delfine können sich beliebig viele Felder in jeder Richtung bewegen - vertikal, horizontal oder diagonal. Sie sind die vielseitigste Figur in Coral Clash!"
+        },
+        "turtleMovement": {
+            "title": "Schildkröten-Bewegung",
+            "description": "Schildkröten können sich beliebig viele Felder vertikal oder horizontal bewegen, aber nicht diagonal. Sie bewegen sich in geraden Linien entlang der Reihen und Spalten."
+        },
+        "pufferfishMovement": {
+            "title": "Kugelfisch-Bewegung",
+            "description": "Kugelfische können sich beliebig viele Felder diagonal bewegen. Sie gleiten entlang diagonaler Linien über das Brett."
+        },
+        "crabMovement": {
+            "title": "Krabben-Bewegung",
+            "description": "Krabben bewegen sich ein Feld vertikal oder horizontal. Sie sind langsam, aber stetige Figuren."
+        },
+        "octopusMovement": {
+            "title": "Oktopus-Bewegung",
+            "description": "Oktopusse bewegen sich ein Feld diagonal. Wie Krabben bewegen sie sich langsam, können aber sehr strategisch sein."
+        },
+        "capture": {
+            "title": "Figuren fangen",
+            "description": "Um eine gegnerische Figur zu fangen, bewegen Sie eine Ihrer Figuren auf das Feld der gegnerischen Figur. Der weiße Delfin kann die schwarze Krabbe fangen, indem er auf ihr Feld zieht."
+        }
+    },
+    "components": {
+        "fixtureLoader": {
+            "title": "Spielstand laden",
+            "gameMode": "Spielmodus:",
+            "back": "Zurück",
+            "vsComputer": "vs Computer",
+            "passAndPlay": "Abwechselnd",
+            "loadGame": "Spiel laden",
+            "fixturesHint": "💡 Fixtures sind aus shared/game/__fixtures__/",
+            "error": "Fehler",
+            "failedToLoad": "Fixture konnte nicht geladen werden"
+        },
+        "versionWarning": {
+            "title": "Update verfügbar",
+            "message": "Bitte aktualisieren Sie auf die neueste Version für das beste Erlebnis.",
+            "updateButton": "Aktualisieren"
+        },
+        "playerStatus": {
+            "computer": "Computer",
+            "thinking": "Denkt nach...",
+            "remaining": "Übrig",
+            "underControl": "Unter Kontrolle"
+        },
+        "alert": {
+            "defaultButton": "OK"
+        },
+        "pvpBoard": {
+            "player": "Spieler",
+            "opponent": "Gegner",
+            "requestUndoTitle": "Rückgängig anfragen",
+            "requestUndoMessage": "Letzten Zug rückgängig machen? {{opponentName}} muss zustimmen.",
+            "requestResetTitle": "Rücksetzung anfragen",
+            "requestResetMessage": "Dieses Spiel zurücksetzen? {{opponentName}} muss zustimmen.",
+            "cancel": "Abbrechen",
+            "request": "Anfragen",
+            "requestReset": "Rücksetzung anfragen",
+            "askOpponentReset": "Gegner um Spielrücksetzung bitten",
+            "gameEnded": "Spiel bereits beendet",
+            "noMoves": "Es wurden noch keine Züge gemacht",
+            "pendingUndo": "Ausstehende Rückgängig-Anfrage muss zuerst gelöst werden",
+            "remindOpponent": "Gegner erinnern",
+            "remindOpponentSubtitle": "Gegner an seinen Zug erinnern",
+            "availableInHours": "Verfügbar in {{hours}} Stunde(n)",
+            "yourTurn": "Du bist am Zug",
+            "errorUndoRequest": "Rückgängig-Anfrage konnte nicht gesendet werden. Bitte erneut versuchen.",
+            "errorUndoResponse": "Antwort auf Rückgängig-Anfrage fehlgeschlagen. Bitte erneut versuchen.",
+            "errorResetResponse": "Antwort auf Rücksetzungsanfrage fehlgeschlagen. Bitte erneut versuchen.",
+            "errorCancelUndo": "Rückgängig-Anfrage konnte nicht abgebrochen werden. Bitte erneut versuchen.",
+            "errorCancelReset": "Rücksetzungsanfrage konnte nicht abgebrochen werden. Bitte erneut versuchen.",
+            "reminderSentTitle": "Erfolg",
+            "reminderSentMessage": "Erinnerung an Ihren Gegner gesendet.",
+            "errorReminderTitle": "Fehler",
+            "errorReminderMessage": "Erinnerung konnte nicht gesendet werden. Bitte erneut versuchen.",
+            "waitingUndoResponse": "Warte auf {{opponentName}}s Antwort auf Rückgängig von {{moveCount}} Zug/Zügen...",
+            "opponentWantsUndo": "{{opponentName}} möchte {{moveCount}} Zug/Züge rückgängig machen",
+            "waitingResetResponse": "Warte auf {{opponentName}}s Antwort auf Rücksetzungsanfrage...",
+            "opponentWantsReset": "{{opponentName}} möchte das Spiel zurücksetzen"
+        },
+        "passAndPlayBoard": {
+            "resetGameTitle": "Spiel zurücksetzen",
+            "resetGameMessage": "Sind Sie sicher, dass Sie ein neues Spiel starten möchten?",
+            "cancel": "Abbrechen",
+            "reset": "Zurücksetzen",
+            "resetGame": "Spiel zurücksetzen",
+            "startNewGame": "Ein neues Spiel von vorne beginnen",
+            "gameEnded": "Spiel bereits beendet",
+            "noMoves": "Es wurden noch keine Züge gemacht"
+        },
+        "baseBoard": {
+            "errorLoadState": "Spielstand konnte nicht geladen werden",
+            "resignGameTitle": "Spiel aufgeben",
+            "resignGameMessage": "Sind Sie sicher, dass Sie aufgeben möchten? Sie verlieren das Spiel.",
+            "cancel": "Abbrechen",
+            "resign": "Aufgeben",
+            "checkTitle": "Schach!",
+            "checkMessage": "Ihr {{piece}} steht im Schach!",
+            "checkmateTitle": "Schachmatt!",
+            "checkmateMessage": "{{winner}} gewinnt durch Schachmatt!",
+            "gathererTitle": "Sammler-Effekt",
+            "gathererMessage": "Koralle auf dieses Feld platzieren?",
+            "yes": "Ja",
+            "no": "Nein",
+            "hunterTitle": "Jäger-Effekt",
+            "hunterMessage": "Koralle von diesem Feld entfernen?",
+            "exportSuccessTitle": "Erfolg",
+            "exportSuccessMessage": "Spielstand in Zwischenablage gespeichert!",
+            "exportFailedTitle": "Export fehlgeschlagen",
+            "computer": "Computer",
+            "opponent": "Gegner",
+            "white": "Weiß",
+            "black": "Schwarz",
+            "youWonTimeout": "Sie haben gewonnen! {{opponentName}} hat keine Zeit mehr ⏱️",
+            "youLostTimeout": "Sie haben verloren! Zeit abgelaufen ⏱️",
+            "timeoutLose": "{{loserName}} hat keine Zeit mehr! ⏱️",
+            "youWonResign": "Sie haben gewonnen! {{opponentName}} hat aufgegeben 🏳️",
+            "youResigned": "Sie haben aufgegeben 🏳️",
+            "checkmateWin": "Schachmatt! Sie haben gewonnen! 🏆",
+            "checkmateLose": "Schachmatt! Sie haben verloren.",
+            "checkmateGeneric": "Schachmatt! {{winner}} gewinnt! 🏆",
+            "youLost": "Sie haben verloren",
+            "resignGeneric": "{{winner}} gewinnt durch Aufgabe! 🏳️",
+            "coralVictoryWin": "Sie haben durch Korallensieg gewonnen! 🪸\n{{whiteScore}} - {{blackScore}}",
+            "coralVictoryLose": "Sie haben verloren. {{winner}} gewinnt durch Korallensieg! 🪸\n{{whiteScore}} - {{blackScore}}",
+            "coralVictoryGeneric": "{{winner}} gewinnt durch Korallensieg! 🪸\n{{whiteScore}} Weiß - {{blackScore}} Schwarz",
+            "stalemate": "Patt! 🤝",
+            "drawRepetition": "Unentschieden durch Wiederholung! 🤝",
+            "drawInsufficientMaterial": "Unentschieden - Unzureichendes Material! 🤝",
+            "drawCoralTie": "Unentschieden - Korallen-Gleichstand! 🤝🪸\n{{score}} - {{score}}",
+            "draw": "Unentschieden! 🤝",
+            "check": "{{player}} steht im Schach! ⚠️",
+            "viewingHistory": "Vergangene Züge ansehen - zurück zum aktuellen Zug, um zu spielen",
+            "selectWhaleOrientation": "Wählen Sie die Ausrichtung für Ihren Wal",
+            "hunterWhaleTitle": "Jäger-Effekt (Wal)",
+            "hunterWhaleMessage": "Korallenentfernungsoption wählen:",
+            "yourTurn": "Du bist dran",
+            "opponentTurn": "{{opponentName}} ist dran",
+            "playerTurn": "{{playerColor}} ist am Zug"
+        },
+        "computerBoard": {
+            "cancelRequestTitle": "Anfrage abbrechen",
+            "cancelRequestMessage": "Ihre Rücksetzungsanfrage abbrechen?",
+            "cancel": "Abbrechen",
+            "yes": "Ja",
+            "resetGameTitle": "Spiel zurücksetzen",
+            "resetGameMessage": "Sind Sie sicher, dass Sie ein neues Spiel starten möchten?",
+            "reset": "Zurücksetzen",
+            "resetGame": "Spiel zurücksetzen",
+            "startNewGame": "Ein neues Spiel von vorne beginnen",
+            "gameEnded": "Spiel bereits beendet",
+            "noMoves": "Es wurden noch keine Züge gemacht",
+            "errorUndo": "Rückgängig fehlgeschlagen. Bitte erneut versuchen."
+        },
+        "computerUsers": {
+            "successTitle": "Erfolg",
+            "errorTitle": "Fehler",
+            "initializeSuccess": "{{count}} Computer-Benutzer erfolgreich initialisiert",
+            "initializeError": "Computer-Benutzer konnten nicht initialisiert werden. Bitte erneut versuchen.",
+            "confirmDeleteTitle": "Löschung bestätigen",
+            "confirmDeleteMessage": "Sind Sie sicher, dass Sie alle Computer-Benutzer löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
+            "cancel": "Abbrechen",
+            "delete": "Löschen",
+            "deleteSuccess": "{{count}} Computer-Benutzer erfolgreich gelöscht",
+            "deleteError": "Computer-Benutzer konnten nicht gelöscht werden. Bitte erneut versuchen.",
+            "clearLanguageSuccess": "Spracheinstellung gelöscht. Die App erkennt beim nächsten Start die Sprache automatisch.",
+            "clearLanguageError": "Spracheinstellung konnte nicht gelöscht werden. Bitte erneut versuchen."
+        }
+    },
+    "hooks": {
+        "friends": {
+            "removeFriendTitle": "Freund entfernen",
+            "removeFriendMessage": "Sind Sie sicher, dass Sie {{friendName}} aus Ihrer Freundesliste entfernen möchten?",
+            "cancel": "Abbrechen",
+            "remove": "Entfernen",
+            "errorRemove": "Freund konnte nicht entfernt werden",
+            "errorAccept": "Freundschaftsanfrage konnte nicht akzeptiert werden",
+            "errorDecline": "Freundschaftsanfrage konnte nicht abgelehnt werden",
+            "cancelRequestTitle": "Freundschaftsanfrage abbrechen",
+            "cancelRequestMessage": "Freundschaftsanfrage an {{displayName}} abbrechen?",
+            "no": "Nein",
+            "yesCancel": "Ja, abbrechen",
+            "errorCancelRequest": "Freundschaftsanfrage konnte nicht abgebrochen werden",
+            "errorTitle": "Fehler"
+        },
+        "game": {
+            "errorTitle": "Fehler",
+            "errorLoadGame": "Spiel konnte nicht geladen werden"
+        },
+        "gameActions": {
+            "errorTitle": "Fehler",
+            "errorResign": "Aufgabe fehlgeschlagen"
+        },
+        "userSearch": {
+            "errorTitle": "Fehler",
+            "errorSendRequest": "Freundschaftsanfrage konnte nicht gesendet werden"
+        }
+    }
+}

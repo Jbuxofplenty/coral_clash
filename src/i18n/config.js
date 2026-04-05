@@ -9,6 +9,15 @@ import es from '../locales/es.json';
 import pt from '../locales/pt.json';
 import zh from '../locales/zh.json';
 import ur from '../locales/ur.json';
+import bn from '../locales/bn.json';
+import my from '../locales/my.json';
+import ar from '../locales/ar.json';
+import de from '../locales/de.json';
+import ru from '../locales/ru.json';
+import id from '../locales/id.json';
+import uz from '../locales/uz.json';
+import tr from '../locales/tr.json';
+import pl from '../locales/pl.json';
 
 // Get device language using expo-localization
 const getDeviceLanguage = () => {
@@ -23,7 +32,7 @@ const getDeviceLanguage = () => {
         const languageCode = locale.languageCode?.toLowerCase();
 
         // Map device language to supported languages
-        const supportedLanguages = ['en', 'hi', 'fr', 'es', 'pt', 'zh', 'ur'];
+        const supportedLanguages = ['en', 'hi', 'fr', 'es', 'pt', 'zh', 'ur', 'bn', 'my', 'ar', 'de', 'ru', 'id', 'uz', 'tr', 'pl'];
         if (supportedLanguages.includes(languageCode)) {
           console.log('Matched device language:', languageCode);
           return languageCode;
@@ -74,6 +83,15 @@ i18n
       pt: { translation: pt },
       zh: { translation: zh },
       ur: { translation: ur },
+      bn: { translation: bn },
+      my: { translation: my },
+      ar: { translation: ar },
+      de: { translation: de },
+      ru: { translation: ru },
+      id: { translation: id },
+      uz: { translation: uz },
+      tr: { translation: tr },
+      pl: { translation: pl },
     },
     fallbackLng: 'en',
     interpolation: {

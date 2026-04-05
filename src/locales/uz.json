@@ -1,0 +1,812 @@
+{
+    "auth": {
+        "welcomeBack": "Xush kelibsiz",
+        "createAccount": "Hisob yaratish",
+        "resetPassword": "Parolni tiklash",
+        "signInSubtitle": "Kompyuterga qarshi onlayn o'ynash yoki boshqa o'yinchilarni chaqirish uchun tizimga kiring",
+        "signUpSubtitle": "Onlayn o'ynash uchun hisob yarating. O'ziga xos foydalanuvchi nomini tanlang!",
+        "forgotPasswordSubtitle": "Parolni tiklash havolasini olish uchun elektron pochtangizni kiriting",
+        "usernamePlaceholder": "Foydalanuvchi nomi (majburiy)",
+        "emailPlaceholder": "Elektron pochta",
+        "passwordPlaceholder": "Parol",
+        "signInWithApple": "Apple bilan kirish",
+        "signUpWithApple": "Apple bilan ro'yxatdan o'tish",
+        "signInWithGoogle": "Google bilan kirish",
+        "signUpWithGoogle": "Google bilan ro'yxatdan o'tish",
+        "or": "YOKI",
+        "signIn": "Tizimga kirish",
+        "signUp": "Ro'yxatdan o'tish",
+        "sendResetLink": "Tiklash havolasini yuborish",
+        "forgotPassword": "Parolni unutdingizmi?",
+        "backToSignIn": "Tizimga kirishga qaytish",
+        "alreadyHaveAccount": "Hisobingiz bormi? Tizimga kiring",
+        "dontHaveAccount": "Hisobingiz yo'qmi? Ro'yxatdan o'ting",
+        "errors": {
+            "fillAllFields": "Iltimos, barcha maydonlarni to'ldiring",
+            "usernameRequired": "Foydalanuvchi nomi majburiy",
+            "usernameMinLength": "Foydalanuvchi nomi kamida 2 ta belgidan iborat bo'lishi kerak",
+            "usernameMaxLength": "Foydalanuvchi nomi 30 ta belgidan kam bo'lishi kerak",
+            "usernameInvalidChars": "Foydalanuvchi nomida faqat harflar, raqamlar, bo'sh joylar, pastki chiziqlar va tirelar bo'lishi mumkin",
+            "authFailed": "Autentifikatsiya amalga oshmadi",
+            "googleSignInFailed": "Google orqali kirish amalga oshmadi",
+            "appleSignInFailed": "Apple orqali kirish amalga oshmadi",
+            "enterEmail": "Iltimos, elektron pochtangizni kiriting",
+            "resetEmailFailed": "Tiklash havolasini yuborish amalga oshmadi"
+        },
+        "success": {
+            "resetEmailSent": "Parolni tiklash pochtasi yuborildi! Kirish qutingizni tekshiring."
+        }
+    },
+    "game": {
+        "difficulty": {
+            "title": "AI qiyinchiligini tanlang",
+            "subtitle": "Kompyuter raqibi uchun qiyinchilik darajasini tanlang",
+            "random": "Tasodifiy",
+            "easy": "Oson",
+            "medium": "O'rta",
+            "hard": "Qiyin",
+            "randomDescription": "Kompyuter tasodifiy harakatlarni amalga oshiradi",
+            "easyDescription": "Kompyuter asosiy strategiyadan foydalanadi",
+            "mediumDescription": "Kompyuter o'rta strategiyadan foydalanadi",
+            "hardDescription": "Kompyuter ilg'or strategiyadan foydalanadi",
+            "createAccountToAccess": "Kirish uchun hisob yarating"
+        },
+        "matchmaking": {
+            "title": "O'yin rejimini tanlang",
+            "timeControl": "Vaqtni boshqarishni tanlang",
+            "timeControlSubtitle": "Ushbu o'yin uchun vaqt cheklovini tanlang",
+            "instant": "Tezkor",
+            "instantDescription": "Hozir raqib toping. Onlayn o'yinchilar bilan moslashtiradi.",
+            "correspondence": "Yozishmalar",
+            "correspondenceDescription": "Tasodifiy o'yinchiga taklif yuboring. Ularda qabul qilish uchun 24 soat vaqt bor.",
+            "timeControls": {
+                "unlimited": "Vaqt cheklovsiz",
+                "blitz": "5 daqiqa",
+                "normal": "10 daqiqa",
+                "custom": "Vaqt cheklovi o'rnatilgan"
+            },
+            "timeControlDescriptions": {
+                "blitz": "Har bir o'yinchi uchun 5 daqiqa",
+                "normal": "Har bir o'yinchi uchun 10 daqiqa",
+                "unlimited": "Vaqt cheklovsiz"
+            }
+        },
+        "status": {
+            "loading": "Yuklanmoqda",
+            "noGamesFound": "O'yinlar topilmadi",
+            "error": "Xato",
+            "resetApproved": "O'yin qayta o'rnatildi",
+            "resetRejected": "Qayta o'rnatish talabi rad etildi",
+            "undoApproved": "Harakat bekor qilindi",
+            "undoRejected": "Bekor qilish talabi rad etildi"
+        },
+        "actions": {
+            "cancel": "Bekor qilish"
+        },
+        "postMatchSignup": {
+            "title": "Ajoyib o'yin!",
+            "message": "Statistikangizni saqlab qolish va haqiqiy raqiblarga qarshi o'ynashni xohlaysizmi?",
+            "lossTitle": "Bo'shashmang!",
+            "lossMessage": "Har bir mag'lubiyat - bu dars. Rivojlanishingizni kuzatish uchun ro'yxatdan o'ting.",
+            "button": "Hozir ro'yxatdan o'ting"
+        }
+    },
+    "navigation": {
+        "home": "Bosh sahifa",
+        "game": "O'yin",
+        "tutorial": "Tutorial",
+        "howToPlay": "Qanday o'ynaladi",
+        "settings": "Sozlamalar",
+        "friends": "Do'stlar",
+        "stats": "Statistika",
+        "reportIssue": "Muammoni xabar qilish",
+        "rulesVideo": "Qoidalar videosi",
+        "physicalGame": "Jismoniy o'yin",
+        "logOut": "Chiqish",
+        "logOutConfirmTitle": "Chiqish",
+        "logOutConfirmMessage": "Haqiqatan ham chiqishni xohlaysizmi?",
+        "cancel": "Bekor qilish",
+        "appTitle": "Coral Clash",
+        "appSubtitle": "Okean strategiyasi o'yini"
+    },
+    "home": {
+        "welcome": {
+            "title": "Coral Clash'ga xush kelibsiz!",
+            "message": "Boshlash uchun menyudagi qoidalar videosini yoki Qanday o'ynaladi bo'limini ko'ring!",
+            "watchVideo": "Videoni ko'rish",
+            "howToPlay": "Qanday o'ynaladi",
+            "ok": "OK"
+        },
+        "opponent": {
+            "computer": "Computer",
+            "opponent": "Raqib",
+            "guest": "Mehmon 1"
+        },
+        "gameModes": {
+            "howToPlayTitle": "Qanday o'ynaladi",
+            "howToPlayDescription": "Coral Clash qoidalari va strategiyalarini o'rganing",
+            "playComputerTitle": "Kompyuterga qarshi o'ynash",
+            "playComputerDescription": "AI ga qarshi yangi o'yin boshlash",
+            "loadGameStateTitle": "O'yin holatini yuklash (Dev)",
+            "loadGameStateDescription": "Fixtures-dan saqlangan o'yin holatini yuklash"
+        },
+        "matchmaking": {
+            "cannotJoin": "Matchmaking'ga ulanib bo'lmadi",
+            "instantMatchFound": "Yozishmalar o'yini topildi!",
+            "instantMatchMessage": "Siz {{creatorName}} bilan moslashtirildingiz. Ular xabardor qilinadi va qabul qilish uchun 24 soat vaqti bor.",
+            "correspondenceCreated": "Yozishmalar taklifi yaratildi",
+            "correspondenceMessage": "Sizning taklifingiz yaratildi. Boshqa o'yinchi Yozishmalar rejimini tanlaganida, ular taklifingiz bilan moslashtirilishi mumkin. Kimdir o'ynashni xohlaganida xabar olasiz!"
+        },
+        "errors": {
+            "offlineModeTitle": "Oflayn rejim",
+            "offlineModeMessage": "Serverga ulanib bo'lmadi. Oflayn kompyuter o'yini boshlanmoqda.",
+            "errorTitle": "Xato",
+            "failedToStart": "{{action}}ni boshlash muvaffaqiyatsiz bo'ldi. Iltimos qaytadan urinib ko'ring.",
+            "failedToResign": "Taslim bo'lish muvaffaqiyatsiz bo'ldi. Iltimos qaytadan urinib ko'ring.",
+            "failedPassAndPlay": "Navbatma-navbat o'ynash muvaffaqiyatsiz bo'ldi. Iltimos, yana bir bor urinib ko'ring.",
+            "failedComputerGame": "Kompyuter o'yinini boshlash muvaffaqiyatsiz bo'ldi",
+            "failedMatchmaking": "{{mode}} matchmaking muvaffaqiyatsiz bo'ldi. {{message}}"
+        }
+    },
+    "stats": {
+        "overallStatistics": "Umumiy statistika",
+        "gamesPlayed": "O'ynalgan o'yinlar",
+        "wins": "G'alabalar",
+        "losses": "Mag'lubiyatlar",
+        "draws": "Duranglar",
+        "winRate": "G'alaba darajasi",
+        "matchupStatistics": "Raqiblar bo'yicha statistika",
+        "matchupDescription": "Har bir raqibga qarshi g'alaba stavkalari (PvP & Kompyuter)",
+        "computer": "Computer",
+        "winRateShort": "G'alaba",
+        "winsShort": "G'",
+        "lossesShort": "M",
+        "drawsShort": "D",
+        "noGamesYet": "Hozircha o'yinlar yo'q",
+        "noGamesHint": "Statistikangizni bu yerda ko'rish uchun o'yinlarni o'ynang!"
+    },
+    "gameMenu": {
+        "saveGameState": "O'yin holatini saqlash",
+        "exportPosition": "Joriy pozitsiyani nusxalash",
+        "flipBoard": "Doskani aylantirish",
+        "showingBlackBottom": "Hozir qora rang pastda ko'rsatilmoqda",
+        "showingWhiteBottom": "Hozir oq rang pastda ko'rsatilmoqda",
+        "reportBug": "Muammo haqida xabar berish",
+        "includeGameState": "Joriy o'yin holatini kiritish",
+        "resignGame": "O'yinni taslim qilish",
+        "resigning": "Taslim bo'linmoqda...",
+        "pleaseWait": "Iltimos, kuting...",
+        "gameEnded": "O'yin allaqachon tugagan",
+        "forfeitGame": "Joriy o'yinni yo'qotish"
+    },
+    "reportIssue": {
+        "bugReportTitle": "Xatoliklar hisoboti",
+        "bugReportDescription": "Joriy o'yin holati bilan nosozlik haqida xabar bering. O'yin pozitsiyasi sizning hisobotingizga kiritiladi.",
+        "feedbackTitle": "Fikr-mulohaza va muammolar",
+        "feedbackDescription": "Fikr-mulohaza yuboring yoki xato haqida xabar bering. Fikr-mulohazangizni qadrlaymiz!",
+        "subject": "Mavzu",
+        "subjectPlaceholder": "Muammoning qisqacha mazmuni",
+        "description": "Tafsilotlar",
+        "descriptionPlaceholder": "Muammo yoki fikr-mulohazaning batafsil tavsifi...",
+        "gameStateIncluded": "✓ O'yin holati kiritiladi",
+        "turn": "Navbat",
+        "white": "Oq",
+        "black": "Qora",
+        "gameOver": "O'yin tugadi",
+        "submitIssue": "Muammoni yuborish",
+        "anonymousNote": "Eslatma: Siz anonim tarzda yuboryapsiz. Muammolaringizni kuzatish uchun tizimga kiring.",
+        "validation": {
+            "missingSubjectTitle": "Ma'lumot yetishmayotgan",
+            "missingSubjectMessage": "Iltimos, muammongiz uchun mavzu kiriting.",
+            "invalidSubjectTitle": "Yaroqsiz mavzu",
+            "invalidSubjectMessage": "Mavzu kamida 3 ta belgidan iborat bo'lishi kerak.",
+            "missingDescriptionTitle": "Ma'lumot yetishmayotgan",
+            "missingDescriptionMessage": "Iltimos, muammongiz uchun tavsif kiriting.",
+            "invalidDescriptionTitle": "Yaroqsiz tavsif",
+            "invalidDescriptionMessage": "Tavsif kamida 10 ta belgidan iborat bo'lishi kerak."
+        },
+        "success": {
+            "title": "Muammo yuborildi",
+            "message": "Fikr-mulohazangiz uchun tashakkur! Fikringiz muvaffaqiyatli yuborildi",
+            "ok": "OK"
+        },
+        "error": {
+            "title": "Yuborish amalga oshmadi",
+            "message": "Muammoni yuborib bo'lmadi. Iltimos, ulanishingizni tekshiring va yana urinib ko'ring."
+        }
+    },
+    "settings": {
+        "account": "Hisob",
+        "profileAvatar": "Profil rasm",
+        "chooseAvatar": "Okean mavzusidagi avataringizni tanlang",
+        "appearance": "Tashqi ko'rinish",
+        "theme": {
+            "light": "Yorug'",
+            "lightDescription": "Har doim yorug'lik mavzusidan foydalaning",
+            "dark": "Qorong'i",
+            "darkDescription": "Har doim qorong'i mavzudan foydalaning",
+            "auto": "Avto",
+            "autoDescription": "Tizim mavzusiga rioya qiling"
+        },
+        "language": {
+            "title": "Til (Language)",
+            "english": "English",
+            "englishDescription": "English language interface",
+            "hindi": "हिन्दी (Hindi)",
+            "hindiDescription": "हिन्दी भाषा इंटरफ़ेस"
+        },
+        "actions": {
+            "resetToDefaults": "Standart bo'yicha tiklash",
+            "resetTitle": "Sozlamalarni tiklash",
+            "resetMessage": "Haqiqatan ham barcha sozlamalarni standart bo'yicha tiklamoqchimisiz?",
+            "cancel": "Bekor qilish",
+            "reset": "Tiklash"
+        },
+        "dangerZone": {
+            "title": "Xavfli hudud",
+            "warning": "Hisobingizni o'chirib tashlaganingizdan so'ng orqaga qaytish yo'q. Iltimos, ishonch hosil qiling.",
+            "deleteAccount": "Hisobni yo'q qilish",
+            "deletingAccount": "Hisob o'chirilmoqda...",
+            "deleteTitle": "Hisobni yo'q qilish",
+            "deleteMessage": "Bu harakat doimiydir va uni bekor qilib bo'lmaydi.\n\n• Barcha shaxsiy maʼlumotlaringiz oʻchiriladi\n• O'yinlaringiz davom etadi, lekin siz \"Anonim\" sifatida ko'rinasiz\n• Do'stlaringiz va do'stlik so'rovlaringiz olib tashlanadi\n• Faol o'yinlar mag'lubiyat sifatida qabul qilinadi\n\nHaqiqatan ham davom etmoqchimisiz?",
+            "continue": "Davom etish",
+            "confirmTitle": "O'chirishni tasdiqlang",
+            "confirmMessage": "Tasdiqlash uchun quyida DELETE (katta harflar bilan) yozing:",
+            "incorrectTitle": "Noto'g'ri tasdiqlash",
+            "incorrectMessage": "Hisob o'chirilishini tasdiqlash uchun roppa-rosa DELETE deb yozing.",
+            "successTitle": "Hisob o'chirildi",
+            "successMessage": "Hisobingiz muvaffaqiyatli o'chirildi. Endi siz tizimdan chiqarilasiz.",
+            "failedTitle": "O'chirish amalga oshmadi",
+            "timeoutMessage": "So'rov vaqti tugadi. Iltimos, ulanishingizni tekshirib ko'ring.",
+            "failedMessage": "Hisobni o'chirib bo'lmadi. Iltimos, yana bir bor urinib ko'ring yoki qo'llab quvvatlash xizmatiga murojaat qiling.",
+            "retry": "Qayta urinish"
+        },
+        "errors": {
+            "loadFailed": "Sozlamalarni yuklab bo'lmadi",
+            "saveFailed": "Sozlamalarni saqlab bo'lmadi",
+            "avatarSaveFailed": "Avatarni saqlash muvaffaqiyatsiz bo'ldi",
+            "themeSaveFailed": "Mavzuni saqlash muvaffaqiyatsiz bo'ldi",
+            "languageChangeFailed": "Tilni o'zgartirib bo'lmadi",
+            "resetFailed": "Sozlamalarni tiklab bo'lmadi"
+        }
+    },
+    "friends": {
+        "addFriend": "Do'st qo'shish",
+        "searchPlaceholder": "Foydalanuvchi nomi orqali qidirish",
+        "noUsersFound": "Foydalanuvchilar topilmadi",
+        "pending": "Kutilmoqda",
+        "incomingRequests": "Kelgan so'rovlar",
+        "sentRequests": "Yuborilgan so'rovlar",
+        "myFriends": "Do'stlarim",
+        "noFriendsYet": "Hozircha do'stlar yo'q",
+        "noFriendsHint": "Birgalikda o'ynashni boshlash uchun foydalanuvchi nomi bilan do'stlaringizni qo'shing!"
+    },
+    "common": {
+        "loading": "Yuklanmoqda...",
+        "error": "Xato",
+        "success": "Muvaffaqiyatli",
+        "cancel": "Bekor qilish",
+        "confirm": "Tasdiqlash",
+        "save": "Saqlash",
+        "delete": "O'chirish",
+        "edit": "Tahrirlash",
+        "close": "Yopish",
+        "ok": "OK",
+        "somethingWentWrong": "Nimadir xato ketdi. Iltimos qaytadan urinib ko'ring."
+    },
+    "cards": {
+        "matchmaking": {
+            "searchingForOpponent": "Raqib qidirilmoqda...",
+            "findRandomMatch": "Tasodifiy o'yinni qidirish",
+            "searchingHint": "Raqib qidirilmoqda... · Bekor qilish uchun bosing",
+            "tapToJoin": "Matchmaking navbatiga qo'shilmoq uchun bosing",
+            "cannotJoinTitle": "Matchmaking'ga ulanib bo'lmadi"
+        },
+        "playWithFriend": {
+            "title": "Do'st bilan o'ynash",
+            "description": "O'ynash uchun do'stingizni taklif qiling",
+            "modalTitle": "Do'stingiz bilan o'ynang",
+            "inviteFriend": "Do'st taklif qilish",
+            "inviteDescription": "Do'stingizga o'yin taklifini yuboring",
+            "textInvite": "Matn taklifi",
+            "textInviteDescription": "Xabarlar orqali taklif yuborish",
+            "passAndPlay": "Bitta qurilmada o'ynash",
+            "passAndPlayDescription": "Ushbu qurilmada mahalliy ravishda o'ynang",
+            "selectFriend": "Do'stingizni tanlang",
+            "searchFriends": "Do'stlarni qidirish...",
+            "noFriendsFound": "Hech qanday do'st topilmadi",
+            "noFriendsYet": "Hozircha do'stlar yo'q. O'ynash uchun do'stlar qo'shing!",
+            "passAndPlayGames": "Bitta qurilmada o'yinlar",
+            "startNewGame": "Yangi o'yinni boshlash",
+            "noActiveGames": "Faol o'yinlar yo'q",
+            "vsGuest": "vs Mehmon 1",
+            "unlimited": "Cheksiz",
+            "shareMessage": "Coral Clash o'ynaylik! 🦀\n\nBu yerdan yuklab oling:\niOS: [URL]\n\nAndroid: [URL]"
+        },
+        "signUpPrompt": {
+            "title": "Barcha xususiyatlarni blokdan chiqaring",
+            "subtitle": "Quyidagilarga kirish uchun bepul hisob yarating:",
+            "feature1": "Do'stlar bilan onlayn o'ynash",
+            "feature2": "Matchmaking orqali tasodifiy raqiblarni toping",
+            "feature3": "O'yin statistikasini va tarixini kuzatib boring",
+            "feature4": "Do'stlar tarmog'ini yarating",
+            "button": "Ro'yxatdan o'tish / Tizimga kirish"
+        },
+        "activeGames": {
+            "title": "Faol o'yinlar",
+            "inProgress": "jarayonda",
+            "game": "o'yin",
+            "games": "o'yinlar",
+            "yourTurn": "Navbat sizda",
+            "opponentTurn": "Raqibning navbati",
+            "opponent": "Raqib",
+            "computer": "Computer",
+            "blitz": "Blitz",
+            "normal": "Normal",
+            "unlimited": "Cheksiz",
+            "timed": "Vaqtli",
+            "loading": "O'yinlar yuklanmoqda...",
+            "noGames": "Faol o'yinlar yo'q",
+            "noGamesHint": "Do'stingiz bilan o'yin boshlang!",
+            "vs": "vs ",
+            "resignTitle": "Taslim bo'lish",
+            "resignMessage": "Aniqmi? Siz bu o'yinda yutqazasiz.",
+            "resignButton": "Taslim bo'lish",
+            "resignError": "Taslim bo'lish muvaffaqiyatsiz bo'ldi. Iltimos qaytadan urinib ko'ring."
+        },
+        "gameHistory": {
+            "title": "O'yinlar tarixi",
+            "subtitle": "Oxirgi o'yinlar",
+            "loading": "Tarix yuklanmoqda...",
+            "noHistory": "O'yinlar tarixi yo'q",
+            "noHistoryHint": "Sizning tugallangan o'yinlaringiz shu yerda paydo bo'ladi",
+            "vs": "vs ",
+            "justNow": "Hozir",
+            "minutesAgo": "daq oldin",
+            "hoursAgo": "soat oldin",
+            "daysAgo": "kun oldin",
+            "cancelled": "O'yin bekor qilindi",
+            "draw": "Durang",
+            "won": "Siz g'alaba qozondingiz",
+            "lost": "Siz yutqazdingiz",
+            "unknown": "Noma'lum",
+            "opponent": "Raqib",
+            "computer": "Computer",
+            "blitz": "Blitz",
+            "normal": "Normal",
+            "unlimited": "Cheksiz",
+            "timed": "Vaqtli"
+        }
+    },
+    "errors": {
+        "INVALID_MOVE": "Yaroqsiz harakat",
+        "INVALID_MOVE_OCCUPIED": "Bu joy allaqachon band",
+        "INVALID_MOVE_OUT_OF_BOUNDS": "Kengashdan tashqariga harakat qilish",
+        "INVALID_MOVE_NOT_YOUR_TURN": "Sizning navbatingiz emas",
+        "INVALID_MOVE_PIECE_BLOCKED": "Bu tosh yopilgan",
+        "GAME_NOT_FOUND": "O'yin topilmadi",
+        "GAME_ALREADY_STARTED": "O'yin allaqachon boshlangan",
+        "GAME_ALREADY_ENDED": "Bu o'yin allaqachon tugagan",
+        "GAME_CANCELLED": "O'yin bekor qilindi",
+        "PLAYER_NOT_IN_GAME": "Siz bu o'yinda emassiz",
+        "PLAYER_DISCONNECTED": "O'yinchi bilan aloqa uzildi",
+        "CONNECTION_ERROR": "Ulanish xatosi. Iltimos, internetingizni tekshiring.",
+        "SERVER_ERROR": "Server xatosi. Iltimos keyinroq qayta urinib ko'ring.",
+        "TIMEOUT": "So'rov vaqti tugadi",
+        "ALREADY_IN_QUEUE": "Siz allaqachon navbatdasiz",
+        "NOT_IN_QUEUE": "Siz matchmaking navbatida emassiz",
+        "QUEUE_TIMEOUT": "Matchmaking vaqti tugadi",
+        "OPPONENT_NOT_FOUND": "Raqib topilmadi",
+        "MATCHMAKING_DISABLED": "Hozirda matchmaking yopiq",
+        "FRIEND_NOT_FOUND": "Do'st topilmadi",
+        "FRIEND_ALREADY_EXISTS": "Allaqachon bu foydalanuvchining do'sti",
+        "CANNOT_ADD_SELF": "O'zingizni do'st sifatida qo'shib bo'lmaydi",
+        "FRIEND_REQUEST_PENDING": "Do'stlik so'rovi allaqachon kutilmoqda",
+        "INVALID_CREDENTIALS": "Yaroqsiz pochta yoki parol",
+        "USER_NOT_FOUND": "Foydalanuvchi topilmadi",
+        "EMAIL_ALREADY_EXISTS": "Pochta allaqachon ishlatilmoqda",
+        "USERNAME_TAKEN": "Foydalanuvchi nomi band",
+        "WEAK_PASSWORD": "Parol juda oddiy",
+        "ACCOUNT_DISABLED": "Sizning hisobingiz o'chirilgan",
+        "SESSION_EXPIRED": "Sizning seansingiz tugadi. Iltimos, qayta tizimga kiring.",
+        "UNAUTHORIZED": "Sizga bu amalni bajarish ruxsat etilmagan",
+        "RATE_LIMITED": "Juda ko'p so'rov. Iltimos, sekinlashing.",
+        "MAINTENANCE_MODE": "Ilova texnik xizmat ko'rsatilmoqda. Iltimos keyinroq qayta urinib ko'ring.",
+        "FEATURE_DISABLED": "Bu funksiya hozirda o'chirilgan"
+    },
+    "success": {
+        "GAME_WON": "Tabriklaymiz! Siz yutdingiz!",
+        "GAME_DRAW": "O'yin durang bilan yakuniga yetdi",
+        "GAME_LOST": "Keyingi safar omad!",
+        "PLAYER_RESIGNED": "O'yinchi taslim bo'ldi",
+        "FRIEND_REQUEST_SENT": "Do'stlik so'rovi yuborildi!",
+        "FRIEND_REQUEST_ACCEPTED": "Do'stlik so'rovi qabul qilindi!",
+        "FRIEND_REQUEST_DECLINED": "Do'stlik so'rovi rad etildi",
+        "MOVE_SUCCESS": "Harakat muvaffaqiyatli qabul qilindi"
+    },
+    "scenarioBoard": {
+        "pauseAutoPlay": "Avtomatik o'ynashni to'xtatish",
+        "playDemo": "Demonstratsiyani o'ynatish",
+        "explanation": "Tushuntirish",
+        "backToGuide": "Qo'llanmaga qaytish"
+    },
+    "howToPlay": {
+        "objective": {
+            "title": "Maqsad",
+            "intro": "Coral Clash'da g'alaba qozonish uchun, ushbu maqsadlarning biriga erishing:",
+            "checkmate": "Qaqshatqich zarba (Shax mat)",
+            "checkmateDesc": "raqibning Kitini",
+            "check": "motda",
+            "checkmateDescEnd": "qoldirish (u qochib qutula olmaydi)",
+            "coralControl": "eng katta maydonni Marjonlar bilan",
+            "coralControlDesc": "Nazorat qilish",
+            "coralControlWhen": "kabi holatlarda:",
+            "coralPlaced": "Bir o'yinchi barcha Marjonlarini joylashtirganida",
+            "whaleRemaining": "O'yinchida faqat Kit qolganida",
+            "backRowReached": "Qisqichbaqa yoki Sakkizoyoq raqibning orqa qatoriga yetib borsagina",
+            "areaControlled": "Marjonlar nazorat qonadigan joylar:",
+            "areaControlledDesc": "Raqibingiz toshlari ishlagani sababli qo'lga kiritilmagan o'zingizning Marjonlaringiz miqdorini sanang.",
+            "checkmateExample": "Shax va Mat misoli",
+            "checkExample": "Shax misoli",
+            "coralVictoryExample": "Marjon G'alabasi misoli"
+        },
+        "setup": {
+            "title": "O'yinni tayyorlash",
+            "boardDesc": "Bu 64 katakli 8x8 doska. Har bir o'yinchida:",
+            "coralPieces": "17 ta Marjon donalari",
+            "units": "17 ta tosh: 1 Kit, 2 Delfin, 4 Toshbaqa, 2 Koptokbaliq, 4 Qisqichbaqa va 4 Sakkizoyoq",
+            "variants": "Har tosh ikki xil turda keladi:",
+            "hunter": "Ovchi",
+            "hunterDesc": "toshlar (Marjon belgilarisiz) Marjonlarni yengishi mumkin",
+            "gatherer": "Yig'uvchi",
+            "gathererDesc": "toshlar (Marjon belgilarisi bilan) Marjonlarni joylashtirishi mumkin",
+            "hunterExample": "Ovchi Effektining namunasi",
+            "gathererExample": "Yig'uvchi Effektining namunasi"
+        },
+        "turnOverview": {
+            "title": "Navbatlarga ko'rinish",
+            "intro": "Oq birinchi navbatni boshlaydi. Navbatingiz yetganda:",
+            "step1": "Har qanday toshni oldinga yuring",
+            "step2": "Tutib olish, Ovchi yoki Yig'uvchi ta'sirini ko'ring",
+            "step3": "Har qanday vazifa uddalanganini bilish"
+        },
+        "movement": {
+            "title": "Qanday qilib tosh harakatlanadi",
+            "important": "Muhim:",
+            "importantDesc": "Toshlar boshqa toshlarning ustidan yura olmaydi - ular bo'sh yo'lni talab qiladi.",
+            "variants": "Barcha toshlarning 2 turi Marjon bilan turlicha harakat qiladi:",
+            "hunterPieces": "Ovchi Toshlar",
+            "hunterMovement": "(Marjon belgisisiz) quyidagilar sabab",
+            "stoppedBy": "TO'XTATILAR YUBORILDI",
+            "hunterMovementDesc": "Marjon — shunchaki borolmaydilar",
+            "gathererPieces": "Yig'uvchi Toshlar",
+            "gathererMovement": "(Marjon belgilari bo'lib) ulardan ham kuchliroq — o'zidan",
+            "through": "YURA OLADI",
+            "gathererMovementDesc": "marjonlarni qo'yadi",
+            "coralMovementExample": "Marjonlarni ko'p tomonlama yurgizish varianti",
+            "individualMovements": "O'zlari istagan joyda boradigan toshlar turlari"
+        },
+        "pieces": {
+            "whale": {
+                "name": "Kit",
+                "intro": "Kit eng katta ahamiyatli toshingiz — unga Mot berilsa siz mag'lubiyasiz! Kit ikki qismdan iborat bo'lib, ikkala qismi ikki xil yuradi:",
+                "slidingMove": "1. Sirpanchiq:",
+                "slidingMoveDesc": "Toshni xohlasangiz yo'g'iga, bo'yiga bo'ylab bir oz surib tashlang, bir narsaga e'tibor bering. Kit o'zi Ovchi yurish yo'llarini tushunadi — marjonga kelganda esa to'xtab qoladi.",
+                "rotationMove": "2. Qaytish usuli:",
+                "rotationMoveDesc": "Toshni biroz yurgizing, yondagi holatga borishingiz mumkin. Avval ko'rsatilgan ustunga olib kelgan joyni ushlap (yoki oq joyi) bosasiz. Yo'nalishi ko'rsatgan usulga ishorangizni berib, kuting. So'ngra kit joyini o'zi belgilaydi.",
+                "checkRules": "Shax berish Qoidalari:",
+                "checkRulesDesc": "Kit o'z harakatini oxirida Shax teshigiga kelolmaydigan joyi borki, hatto ustidan ushlanganidan tortib bo'shashmayman deyishga ruxsat bering.",
+                "doubleCapture": "Ikkilamchi olib tashlash:",
+                "doubleCaptureDesc": "Bir tomonga olib borarida ikkita toshni olish ehtimolidan bir paytda yuksak foiz:",
+                "doubleCoralRemoval": "Ikki qismli Marjonlarni Olib borish:",
+                "doubleCoralRemovalDesc": "U shunchaki Ovchi marjonni bosgan taqdirida, u bitta yoki ikkita marjonni chiziqdan yutishi bor.",
+                "specialCase": "⚠️ Katta muammo borki",
+                "specialCaseDesc": "Kit yarmi o'yinning birortasini oldidagi shunchalik bo'lishiga rozi.",
+                "basicMovement": "Asosiy Kitning harakatlari",
+                "rotationExample": "Kit uchun Qaytish Qiyofasi",
+                "coralException": "Kitning uzaygan tasvirlari haqida Marjon haqida gapiring"
+            },
+            "dolphin": {
+                "name": "Delfin",
+                "movement": "Delfin qiyalik, tekislik bo'yicha toliqib cheksiz suzadi.",
+                "example": "Delfin qiyofasi misoli"
+            },
+            "turtle": {
+                "name": "Toshbaqa",
+                "movement": "Shunchaki tepaga, pastga qarab cheksiz suzadi.",
+                "example": "Toshbaqa qiyofasi misoli"
+            },
+            "pufferfish": {
+                "name": "Koptokbaliq",
+                "movement": "Koptokbaliq diagonl tomonga cheksiz boradi.",
+                "example": "Koptokbaliq qiyofasi misol"
+            },
+            "octopus": {
+                "name": "Sakkizoyoq",
+                "movement": "Bir hujayragina siljiydi va u diagonal ko'rsatiladi.",
+                "example": "Sakkizoyoq qiyofasi misol"
+            },
+            "crab": {
+                "name": "Qisqichbaqa",
+                "movement": "Bir hujayragina o'nga va yonga toliqib oladi.",
+                "example": "Qisqichbaqaning yurishi"
+            }
+        },
+        "specialRules": {
+            "title": "Maxsus Qoidalar",
+            "capture": {
+                "title": "Qo'lga tushirish (yoki Urib olish)",
+                "desc": "Xohlagan raqibning qurbonlik narsasini topdi. Kitdan u hatto ikki qismlini ura bo'lishi ham kelgusi imkonyatdir.",
+                "example": "Tutish haqida qiyomat-ko'pkarini ko'ribchi"
+            },
+            "hunterEffect": {
+                "title": "Ovchini yurishtirish va ta'siri",
+                "desc": "Ovchi toshlari (Marjonsiz belgilar) 2 xil yurishtiruvini bajaradi:",
+                "movementStops": "Uni yondirardi",
+                "movementStopsDesc": "marjonlarga joylashtirganda tugaydi",
+                "canRemove": "olib oladi",
+                "canRemoveDesc": "Marjonning ustiga kelsa tagida tushib yutib ketsa",
+                "example": "Ovchini Effekt ko'rsatkichi nimasidir"
+            },
+            "gathererEffect": {
+                "title": "Yig'uvchi ta'sir qiluvchi xossasi",
+                "desc": "Yig'uvchining ta'sirlari ham Marjonning bir necha yursilarini yaratuvchi ishni to'ldi.",
+                "example": "Yig'uvchini Ta'sir yuridigi"
+            }
+        },
+        "drawResignation": {
+            "title": "Hechqisi tortib tuganmagan qimirlari va Taslim O'z-o'zidan qilinmasligi",
+            "stalemate": "Pat degani:",
+            "stalemateDesc": "Raqibi nafaqatgina nafas chiqarma olmaganini xossalasdan olgach bor",
+            "threefoldRepetition": "O'zaro birdek o'ynashish deganlik:",
+            "threefoldRepetitionDesc": "Sohani yana yana shu nuqtaga to'pga qo'yib ham 3-marta ishlash",
+            "resignation": "Taslimlik - qo'ldan chiqargani qabul:",
+            "resignationDesc": "Sizga o'z ishi ko'proq shunga o'tadan kelar!"
+        }
+    },
+    "tutorial": {
+        "endGame": {
+            "title": "Coral Clash ga Xush Kelibsiz!",
+            "message": "Kit - Qirol bo'lib qoladi. Qora kitga mat qo'ying (u ushlamaydigan ish), yohud o'zingiz bilgan qadar o'n yetti marjonni turing. Omad tilayman!",
+            "backInfo": "Ekran ortiga o'tadi shunchaki chap tomonini urib qayting"
+        }
+    },
+    "tutorialScenarios": {
+        "checkmate": {
+            "title": "Senga Mot bo'ldi - namuna ishi",
+            "description": "Bu degani, a6 dagi ta'sirchilar va pushti chiziqli bo'lgan Qora Kit, g'alati narsa! Qani endi bu Delfin va yana Toshbaqa bir tomonga o'tilishiga yordam bera oladimi? Hammasiga O'lja bo'lmaganda."
+        },
+        "coralVictory": {
+            "title": "Marjonlardan Kelgan Foyda Va Xohlagan joydagi Nazorat qilish",
+            "description": "Bilasizmi nima qilsa, Oq endi o'n ikkinchi joyidagi C, D, va shunga teng keladigan boshqalar. Siyohing g'alabaga tomon qaysi biri ekanini 4 va 3 oraliqda aniqlash imkonyati bordir!"
+        },
+        "whaleMovement": {
+            "title": "Kit - Suvdagi Hukmronning Yo'li",
+            "description": "O'zining ko'p ishi bo'lganligi sabab shuni ishga bera olasizmi: 1 qilib shuni ushlasa 2 ta boshini sursagina u borar va u qo'lni urib yurib ketish bo'lib qola ekan."
+        },
+        "whaleRotation": {
+            "title": "O'rnida to'sib qo'ng",
+            "description": "Siyoning u o'ng-yu yonidan surilib oladi. Bu ko'rinish kabi ko'rish u to'gri u bir paytida."
+        },
+        "whaleCoralException": {
+            "title": "Qanday istisno va U haqida bilsa o'ylaysan",
+            "description": "Shunday bo'rtiq qilinishigacha, uni O'ngga yarmini uning ko'chma ishinigacha ta'siridan ketma etadi."
+        },
+        "coralMovementComparison": {
+            "title": "Bilarmidiki, Nima ular nima orasidagi O'rtadagi Tengsizlikdir",
+            "description": "Aslida uzoqda Delfinlarning xolatidadilar qayerdaligiga qarab turing va har safar ham yon bosmaysiz."
+        },
+        "check": {
+            "title": "Birov shax deb bo'lgan payti Qochish bor! - ya'ni Shax-ta",
+            "description": "Bu ham bir balo emas - O'zi borib senga bo'lgan joyidan hammasigina tortiq urib yurmaydi."
+        },
+        "hunterEffect": {
+            "title": "Ovchini u to'siq qiladi",
+            "description": "Uni ushlab olish, undanda Marjon o'yga sig'mas o'lja bor degani!"
+        },
+        "gathererEffect": {
+            "title": "Yig'uvchi qaysi va qancha Ta'sir bo'lishiga ega!",
+            "description": "Bilinar-bilinmas O'lja qilsagina o'zi to'sinishini bildirar."
+        },
+        "dolphinMovement": {
+            "title": "O'zining erkinligi",
+            "description": "O'sha ajoyib yechimga qarshi qachon kelar va shuncha ishi o'zlashtirar. Dengiz ostida bir hukumat misol."
+        },
+        "turtleMovement": {
+            "title": "Bo'lasa qarab Toshbaqaga - pastga yo pastki osongina",
+            "description": "Uzun bo'yinlar hamkasbidan kimgadir emas..."
+        },
+        "pufferfishMovement": {
+            "title": "Tana degan - Qiziqarli",
+            "description": "To'g'ri o'ylab qarasa, bu Koptokbaliq!"
+        },
+        "crabMovement": {
+            "title": "Boshqacha bu Qisqichbaqa - Sekin Ammo u Aslo Qochmay",
+            "description": "Uzun-qisqangi ekan bu narsa harxil odimdir. Lekin juda pishiq jon!"
+        },
+        "octopusMovement": {
+            "title": "Bu jonvor nima qilishdan iborat - O'zi u 8 ta Qo'li bilan borsa-da faqat sal...",
+            "description": "Hammasini o'z ko'r-ko'zi isbot qilgan O'ylab topingan joydagidek bo'lishadi."
+        },
+        "capture": {
+            "title": "Hammasi bir qo'liga Qamrab Toshni Oldilar",
+            "description": "Raqibining toshlariga yetarli hujum ekan, borib joyiga qo'nib berishgin."
+        }
+    },
+    "components": {
+        "fixtureLoader": {
+            "title": "Holatga O'tildi",
+            "gameMode": "Asosan Qaysisi O'nalyapti",
+            "back": "Orqaga",
+            "vsComputer": "vs Computer",
+            "passAndPlay": "Oling va O'ynang",
+            "loadGame": "O'yingachasiga Kirish",
+            "fixturesHint": "💡 Uzoqdagi ko'rsatma bo'yicha shared/game/__fixtures__/",
+            "error": "O'lja Xatolash",
+            "failedToLoad": "Bu yerga joy olib bilmaydi"
+        },
+        "versionWarning": {
+            "title": "Yangi Sozlama toping",
+            "message": "Yaxshi ta'm qoldishini istasang yangisi qilib ol.",
+            "updateButton": "Almashtir"
+        },
+        "playerStatus": {
+            "computer": "Computer",
+            "thinking": "Hozir Fikri Bor",
+            "remaining": "Hali shunga O'ta kerak...",
+            "underControl": "Ta'sirli Sohalari bor..."
+        },
+        "alert": {
+            "defaultButton": "OK"
+        },
+        "pvpBoard": {
+            "player": "O'yinchi ham yozilgandi",
+            "opponent": "Unda bu kim",
+            "requestUndoTitle": "Undani Ol!",
+            "requestUndoMessage": "Raqib {{opponentName}} ruxsatini aytamizmi shunchalik qo'ydi?",
+            "requestResetTitle": "Qayta qo'yish-ku qilib qayerdan bo'lsinmi?",
+            "requestResetMessage": "Shu bo'lmaganda {{opponentName}} qayta ishida bo'lishdi",
+            "cancel": "Kerak",
+            "request": "Surab qo'y",
+            "requestReset": "Talab Xohlashti",
+            "askOpponentReset": "Tasdiq olsammi kelsang...",
+            "gameEnded": "Bo'ldi Bu Boshqa emas",
+            "noMoves": "Ha men Hech hammasini bo'lib ketsa",
+            "pendingUndo": "Ishi kutar edingmi deya ayta olding!",
+            "remindOpponent": "Aytib qo'ygach unga bo'lgan O'ylab qildi?",
+            "remindOpponentSubtitle": "Uyg'oqlikka solasanmi?",
+            "availableInHours": "{{hours}} Vaqtdan o'tgach yana bor bo'ladi",
+            "yourTurn": "Endi Mening Ishtirok Vaqtligim",
+            "errorUndoRequest": "Nima Uchun So'rong - ishdan o'tmadi",
+            "errorUndoResponse": "Aslida hechkim xulosa ketmadi.",
+            "errorResetResponse": "Ketmabdi-da u Talab.",
+            "errorCancelUndo": "Ketdi Shuni So'rama-ham.",
+            "errorCancelReset": "Orqaga aslini o'ziga borib Xohishida bor?",
+            "reminderSentTitle": "Bo'pti Yubordim!",
+            "reminderSentMessage": "Bir Qarab qo'ydi unga eshitilgan.",
+            "errorReminderTitle": "Jigarlarim Nima-Xatolik O'zi?",
+            "errorReminderMessage": "Bo'sh qolmang aslini kimgadir tushmabdi",
+            "waitingUndoResponse": "Ko'rish uchun - Navbat bo'lib {{opponentName}} qachon senga {{moveCount}} qadam aytgach borar ekan...",
+            "opponentWantsUndo": "{{opponentName}} u shunday deydi \"Menga {{moveCount}} qaytishingni aytsang\"",
+            "waitingResetResponse": "Javobi bo'lib - {{opponentName}} bilmadim qayerdadir?",
+            "opponentWantsReset": "{{opponentName}} Endi yana Yig'ish u-deb qoldi!."
+        },
+        "passAndPlayBoard": {
+            "resetGameTitle": "Hammasi bir yangi!",
+            "resetGameMessage": "Endi hammasini joyiga bosamiz. E'tibor - xursandmisiz?",
+            "cancel": "Bekor",
+            "reset": "Boshidan!",
+            "resetGame": "Tashlasak-qil!",
+            "startNewGame": "Albatta hamma ishlarni unut!",
+            "gameEnded": "Hato ish bu - Endi yo'q",
+            "noMoves": "O'zi kulasiz shunchalik hamma."
+        },
+        "baseBoard": {
+            "errorLoadState": "O'yinchi Topolmayabman-yoq!",
+            "resignGameTitle": "Ketdim",
+            "resignGameMessage": "Bu kabi taslim... Endi ishonchingiz - Mag'lubdirsiz.",
+            "cancel": "Hech-da",
+            "resign": "Bir marta Bo'lgan",
+            "checkTitle": "Voy Quloqqa qara!",
+            "checkMessage": "Endi sen bilasanmi u - sening {{piece}} shu ta'qiq ekanida!",
+            "checkmateTitle": "Tamom!!!",
+            "checkmateMessage": "{{winner}} Eng ajoyib ko'rish. Sen tamom bo'lding!!!",
+            "gathererTitle": "Qanaqadir Narsa Yaratuvchi",
+            "gathererMessage": "Buni shu bo'lak o'rniga Yana teramizmi-ha",
+            "yes": "Yana shunday",
+            "no": "Bas qil",
+            "hunterTitle": "Zarba Bo'l!",
+            "hunterMessage": "Bu yerdan tag-tomirigacha o'ldirib - xossalasammiding",
+            "exportSuccessTitle": "Zor o'tdi",
+            "exportSuccessMessage": "Ular shu gapni hamma narsa yozib ketishni eplasdi!",
+            "exportFailedTitle": "Chiqolmas ekan endi!!!",
+            "computer": "Computer",
+            "opponent": "Mening O'yin Raqibim",
+            "white": "Oq tomoni",
+            "black": "Qora tomoni",
+            "youWonTimeout": "Bosing U-yengildi {{opponentName}} ⏱️",
+            "youLostTimeout": "Achinishim o'ziga, vaqt tamom ⏱️",
+            "timeoutLose": "{{loserName}} shundoq qo'liga berilsa-chi ⏱️",
+            "youWonResign": "Ha U Xatosin Angladi {{opponentName}}! 🏳️",
+            "youResigned": "Aytdim Ku O'zingiz To'g'rilang-ku...🏳️",
+            "checkmateWin": "Senga Mot dedik-a! 🏆",
+            "checkmateLose": "Aytgin qara Mot - Mag'lub bo'larsanu-a?!",
+            "checkmateGeneric": "{{winner}} uni Yutgach Motga Bo'ldi 🏆",
+            "youLost": "G'irrommi shuncha Yo Sen",
+            "resignGeneric": "{{winner}} Bo'lgani Shu. Raqib Taslimlik qildi 🏳️",
+            "coralVictoryWin": "O'ylamagudek Olib o'zing Marjon Quliga Ayting 🪸\n{{whiteScore}} - {{blackScore}}",
+            "coralVictoryLose": "Hammasiga Asli O'zing Sababchi Sen Uni {{winner}} Bilib Bo'lsayu!🪸\n{{whiteScore}} - {{blackScore}}",
+            "coralVictoryGeneric": "Marjon shunga {{winner}} oladi G'olibdir🪸\n{{whiteScore}} Oqlar - {{blackScore}} Qoralar",
+            "stalemate": "Pat U!!! 🤝",
+            "drawRepetition": "Ikki martalikmi Hech kimda Xohla U! 🤝",
+            "drawInsufficientMaterial": "Nimayam qilasiz, yengolmadi-bunda Toshlari Yoq...🤝",
+            "drawCoralTie": "Marjonli g'alaba Ammo Hammasi-TENG 🤝🪸\n{{score}} - {{score}}",
+            "draw": "Gap Tamom! Durang! 🤝",
+            "check": "Hammasiga Yana, Shu deb Bil- {{player}} !!! ⚠️",
+            "viewingHistory": "Menga o'tgan safarini deb - shu eslatding kabi - O'zim ketdim-A",
+            "selectWhaleOrientation": "O'ylasang Kit O'girilar Qayerga!",
+            "hunterWhaleTitle": "Ovla! Tagidan qoyma (Kit Olib bo'lar)",
+            "hunterWhaleMessage": "Tasdiqlab Qanaqasi U!",
+            "yourTurn": "Men Shuni...",
+            "opponentTurn": "U Ham shunga {{opponentName}}",
+            "playerTurn": "Ularning Biri Yurtgani-{{playerColor}}"
+        },
+        "computerBoard": {
+            "cancelRequestTitle": "Asliday u!?",
+            "cancelRequestMessage": "Tashlab yubordim-chi?!",
+            "cancel": "Kerekmi Yo",
+            "yes": "Yana",
+            "resetGameTitle": "Chiq Boshida",
+            "resetGameMessage": "Tozasi kabi qaytaraman! Boshiga kel-a?",
+            "reset": "Nimaga yana?",
+            "resetGame": "Aylanib yotadi!",
+            "startNewGame": "Hech Gap-siz Ishla Yana!",
+            "gameEnded": "Katta ish qildik - Hechqisi Endi Bo'lmas!",
+            "noMoves": "Gap bu...-",
+            "errorUndo": "Oqimi - buzilgandi."
+        },
+        "computerUsers": {
+            "successTitle": "Xush xabar!",
+            "errorTitle": "U Yoq-A...",
+            "initializeSuccess": "{{count}} taga yana hisob kitobim kelar-ku-ku kompyuterdan",
+            "initializeError": "Hamma ularga yaramaydi.",
+            "confirmDeleteTitle": "Shuncha - Ketkaz",
+            "confirmDeleteMessage": "Butun guruhlarga qaytolmas, aniq o'lmoqchimi-bu!?",
+            "cancel": "O'zing Bil",
+            "delete": "Bo'ldida",
+            "deleteSuccess": "Sen zo'san- {{count}} tani butunlay!!!",
+            "deleteError": "Oshqovoq qilmabdi aslini tasha",
+            "clearLanguageSuccess": "Yuzida ko'rar eding Qayta kirar ekan ham",
+            "clearLanguageError": "Topilmabdi aslini Tilim."
+        }
+    },
+    "hooks": {
+        "friends": {
+            "removeFriendTitle": "So'z so'ra Yana Xohlaysizmi!",
+            "removeFriendMessage": "Hamma gapim O'zi bo'ladi- {{friendName}} Ketadimi o'zi-do'st?!",
+            "cancel": "Uzr",
+            "remove": "Yo'qol Xoziroq",
+            "errorRemove": "Ketib qolmas-ku U. Qancha U-a??!",
+            "errorAccept": "Bunga O'ylab top!",
+            "errorDecline": "Endi Yoq demang senga bo'ladi",
+            "cancelRequestTitle": "Taklif U Ketishi!",
+            "cancelRequestMessage": "{{displayName}} Xatlar qabul!??!",
+            "no": "Tepa U",
+            "yesCancel": "Qaytma xech",
+            "errorCancelRequest": "U unga etib Bo'lmas",
+            "errorTitle": "Shumi Asl Natija?"
+        },
+        "game": {
+            "errorTitle": "A! Nega-e?!",
+            "errorLoadGame": "Nimasi bor yana."
+        },
+        "gameActions": {
+            "errorTitle": "Birato'la Ishladi-ku!!",
+            "errorResign": "Ketar bo'ldiku..."
+        },
+        "userSearch": {
+            "errorTitle": "U Yo'lga-Kirdi-U",
+            "errorSendRequest": "Ha deb shundan O'rtada!!!"
+        }
+    }
+}

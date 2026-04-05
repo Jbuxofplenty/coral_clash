@@ -204,7 +204,7 @@ export default function Settings({ navigation: _navigation }) {
             await refreshUserData();
         } catch (error) {
             console.error('Error saving theme:', error);
-            showAlert('Error', 'Failed to save theme preference');
+            showAlert(t('common.error'), t('settings.errors.themeSaveFailed'));
             // Revert on error
             setSettings(settings);
             setThemePreference(settings.theme);
@@ -221,7 +221,7 @@ export default function Settings({ navigation: _navigation }) {
     if (!settings) {
         return (
             <Block flex center middle style={{ backgroundColor: colors.BACKGROUND }}>
-                <Text color={colors.TEXT}>Failed to load settings</Text>
+                <Text color={colors.TEXT}>{t('settings.errors.loadFailed')}</Text>
             </Block>
         );
     }

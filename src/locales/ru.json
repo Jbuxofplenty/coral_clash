@@ -1,0 +1,812 @@
+{
+    "auth": {
+        "welcomeBack": "С возвращением",
+        "createAccount": "Создать аккаунт",
+        "resetPassword": "Сбросить пароль",
+        "signInSubtitle": "Войдите, чтобы играть против компьютера или бросить вызов другим игрокам онлайн",
+        "signUpSubtitle": "Создайте аккаунт для игры онлайн. Выберите уникальное имя пользователя!",
+        "forgotPasswordSubtitle": "Введите email для получения ссылки на сброс пароля",
+        "usernamePlaceholder": "Имя пользователя (обязательно)",
+        "emailPlaceholder": "Email",
+        "passwordPlaceholder": "Пароль",
+        "signInWithApple": "Войти через Apple",
+        "signUpWithApple": "Зарегистрироваться через Apple",
+        "signInWithGoogle": "Войти через Google",
+        "signUpWithGoogle": "Зарегистрироваться через Google",
+        "or": "ИЛИ",
+        "signIn": "Войти",
+        "signUp": "Зарегистрироваться",
+        "sendResetLink": "Отправить ссылку для сброса",
+        "forgotPassword": "Забыли пароль?",
+        "backToSignIn": "Вернуться к входу",
+        "alreadyHaveAccount": "Уже есть аккаунт? Войти",
+        "dontHaveAccount": "Нет аккаунта? Зарегистрироваться",
+        "errors": {
+            "fillAllFields": "Пожалуйста, заполните все поля",
+            "usernameRequired": "Имя пользователя обязательно",
+            "usernameMinLength": "Имя пользователя должно быть не менее 2 символов",
+            "usernameMaxLength": "Имя пользователя должно быть менее 30 символов",
+            "usernameInvalidChars": "Имя пользователя может содержать только буквы, цифры, пробелы, подчёркивания и дефисы",
+            "authFailed": "Ошибка аутентификации",
+            "googleSignInFailed": "Ошибка входа через Google",
+            "appleSignInFailed": "Ошибка входа через Apple",
+            "enterEmail": "Пожалуйста, введите ваш email",
+            "resetEmailFailed": "Не удалось отправить письмо для сброса"
+        },
+        "success": {
+            "resetEmailSent": "Письмо для сброса пароля отправлено! Проверьте почту."
+        }
+    },
+    "game": {
+        "difficulty": {
+            "title": "Выберите сложность ИИ",
+            "subtitle": "Выберите уровень сложности для компьютерного противника",
+            "random": "Случайно",
+            "easy": "Легко",
+            "medium": "Средне",
+            "hard": "Сложно",
+            "randomDescription": "Компьютер делает случайные ходы",
+            "easyDescription": "Компьютер использует базовую стратегию",
+            "mediumDescription": "Компьютер использует среднюю стратегию",
+            "hardDescription": "Компьютер использует продвинутую стратегию",
+            "createAccountToAccess": "Создайте аккаунт для доступа"
+        },
+        "matchmaking": {
+            "title": "Выберите режим игры",
+            "timeControl": "Выберите контроль времени",
+            "timeControlSubtitle": "Установите лимит времени для этой игры",
+            "instant": "Мгновенный",
+            "instantDescription": "Найдите противника прямо сейчас. Подбирает онлайн-игроков.",
+            "correspondence": "По переписке",
+            "correspondenceDescription": "Отправьте приглашение случайному игроку. У них есть 24 часа на принятие.",
+            "timeControls": {
+                "unlimited": "Без лимита времени",
+                "blitz": "5 минут",
+                "normal": "10 минут",
+                "custom": "Лимит времени установлен"
+            },
+            "timeControlDescriptions": {
+                "blitz": "5 минут на игрока",
+                "normal": "10 минут на игрока",
+                "unlimited": "Без лимита времени"
+            }
+        },
+        "status": {
+            "loading": "Загрузка",
+            "noGamesFound": "Игры не найдены",
+            "error": "Ошибка",
+            "resetApproved": "Игра сброшена",
+            "resetRejected": "Запрос на сброс отклонён",
+            "undoApproved": "Ход отменён",
+            "undoRejected": "Запрос на отмену отклонён"
+        },
+        "actions": {
+            "cancel": "Отмена"
+        },
+        "postMatchSignup": {
+            "title": "Отличная игра!",
+            "message": "Хотите сохранить статистику и играть против настоящих людей?",
+            "lossTitle": "Не сдавайтесь!",
+            "lossMessage": "Каждое поражение — это урок. Зарегистрируйтесь, чтобы отслеживать прогресс.",
+            "button": "Зарегистрироваться"
+        }
+    },
+    "navigation": {
+        "home": "Главная",
+        "game": "Игра",
+        "tutorial": "Tutorial",
+        "howToPlay": "Как играть",
+        "settings": "Настройки",
+        "friends": "Друзья",
+        "stats": "Статистика",
+        "reportIssue": "Сообщить о проблеме",
+        "rulesVideo": "Видео правил",
+        "physicalGame": "Физическая игра",
+        "logOut": "Выйти",
+        "logOutConfirmTitle": "Выход",
+        "logOutConfirmMessage": "Вы уверены, что хотите выйти?",
+        "cancel": "Отмена",
+        "appTitle": "Coral Clash",
+        "appSubtitle": "Океанская стратегия"
+    },
+    "home": {
+        "welcome": {
+            "title": "Добро пожаловать в Coral Clash!",
+            "message": "Посмотрите видео правил или руководство «Как играть» в меню, чтобы начать!",
+            "watchVideo": "Смотреть видео",
+            "howToPlay": "Как играть",
+            "ok": "OK"
+        },
+        "opponent": {
+            "computer": "Computer",
+            "opponent": "Противник",
+            "guest": "Гость 1"
+        },
+        "gameModes": {
+            "howToPlayTitle": "Как играть",
+            "howToPlayDescription": "Изучите правила и стратегии Coral Clash",
+            "playComputerTitle": "Играть против компьютера",
+            "playComputerDescription": "Начать новую игру против ИИ",
+            "loadGameStateTitle": "Загрузить состояние игры (Dev)",
+            "loadGameStateDescription": "Загрузить сохранённое состояние из фикстур"
+        },
+        "matchmaking": {
+            "cannotJoin": "Невозможно присоединиться к подбору",
+            "instantMatchFound": "Найден матч по переписке!",
+            "instantMatchMessage": "Вы были подобраны с {{creatorName}}. Они будут уведомлены и имеют 24 часа на принятие.",
+            "correspondenceCreated": "Приглашение по переписке создано",
+            "correspondenceMessage": "Ваше приглашение создано. Когда другой игрок выберет режим переписки, он может быть подобран к вашему приглашению. Вы будете уведомлены, когда кто-то захочет играть!"
+        },
+        "errors": {
+            "offlineModeTitle": "Офлайн-режим",
+            "offlineModeMessage": "Не удалось подключиться к серверу. Запуск офлайн-игры.",
+            "errorTitle": "Ошибка",
+            "failedToStart": "Не удалось начать {{action}}. Попробуйте снова.",
+            "failedToResign": "Не удалось сдаться. Попробуйте снова.",
+            "failedPassAndPlay": "Не удалось начать игру по очереди. Попробуйте снова.",
+            "failedComputerGame": "Не удалось начать игру с компьютером",
+            "failedMatchmaking": "Не удалось начать подбор {{mode}}. {{message}}"
+        }
+    },
+    "stats": {
+        "overallStatistics": "Общая статистика",
+        "gamesPlayed": "Сыграно игр",
+        "wins": "Победы",
+        "losses": "Поражения",
+        "draws": "Ничьи",
+        "winRate": "Процент побед",
+        "matchupStatistics": "Статистика по противникам",
+        "matchupDescription": "Процент побед против каждого противника (PvP и компьютер)",
+        "computer": "Computer",
+        "winRateShort": "Победы",
+        "winsShort": "П",
+        "lossesShort": "Пр",
+        "drawsShort": "Н",
+        "noGamesYet": "Ещё нет игр",
+        "noGamesHint": "Начните играть, чтобы увидеть статистику!"
+    },
+    "gameMenu": {
+        "saveGameState": "Сохранить состояние игры",
+        "exportPosition": "Экспортировать текущую позицию",
+        "flipBoard": "Перевернуть доску",
+        "showingBlackBottom": "Сейчас чёрные внизу",
+        "showingWhiteBottom": "Сейчас белые внизу",
+        "reportBug": "Сообщить об ошибке",
+        "includeGameState": "Включить текущее состояние игры",
+        "resignGame": "Сдаться",
+        "resigning": "Сдача...",
+        "pleaseWait": "Подождите...",
+        "gameEnded": "Игра уже закончена",
+        "forfeitGame": "Отказаться от текущей игры"
+    },
+    "reportIssue": {
+        "bugReportTitle": "Отчёт об ошибке",
+        "bugReportDescription": "Сообщите об ошибке с текущим состоянием игры. Позиция будет включена в отчёт.",
+        "feedbackTitle": "Отзывы и проблемы",
+        "feedbackDescription": "Отправьте отзыв или сообщите о проблеме. Мы ценим ваше мнение!",
+        "subject": "Тема",
+        "subjectPlaceholder": "Краткое описание проблемы",
+        "description": "Описание",
+        "descriptionPlaceholder": "Подробное описание проблемы или отзыва...",
+        "gameStateIncluded": "✓ Состояние игры будет включено",
+        "turn": "Ход",
+        "white": "Белые",
+        "black": "Чёрные",
+        "gameOver": "Игра окончена",
+        "submitIssue": "Отправить",
+        "anonymousNote": "Примечание: вы отправляете анонимно. Войдите, чтобы отслеживать свои проблемы.",
+        "validation": {
+            "missingSubjectTitle": "Отсутствует информация",
+            "missingSubjectMessage": "Введите тему проблемы.",
+            "invalidSubjectTitle": "Некорректная тема",
+            "invalidSubjectMessage": "Тема должна быть не менее 3 символов.",
+            "missingDescriptionTitle": "Отсутствует информация",
+            "missingDescriptionMessage": "Введите описание проблемы.",
+            "invalidDescriptionTitle": "Некорректное описание",
+            "invalidDescriptionMessage": "Описание должно быть не менее 10 символов."
+        },
+        "success": {
+            "title": "Проблема отправлена",
+            "message": "Спасибо за отзыв! Ваша проблема была отправлена",
+            "ok": "OK"
+        },
+        "error": {
+            "title": "Ошибка отправки",
+            "message": "Не удалось отправить проблему. Проверьте подключение и попробуйте снова."
+        }
+    },
+    "settings": {
+        "account": "Аккаунт",
+        "profileAvatar": "Аватар профиля",
+        "chooseAvatar": "Выберите свой океанский аватар",
+        "appearance": "Оформление",
+        "theme": {
+            "light": "Светлая",
+            "lightDescription": "Всегда использовать светлую тему",
+            "dark": "Тёмная",
+            "darkDescription": "Всегда использовать тёмную тему",
+            "auto": "Авто",
+            "autoDescription": "По системной теме"
+        },
+        "language": {
+            "title": "Язык (Language)",
+            "english": "English",
+            "englishDescription": "English language interface",
+            "hindi": "हिन्दी (Hindi)",
+            "hindiDescription": "हिन्दी भाषा इंटरफ़ेस"
+        },
+        "actions": {
+            "resetToDefaults": "Сбросить настройки",
+            "resetTitle": "Сброс настроек",
+            "resetMessage": "Вы уверены, что хотите сбросить все настройки?",
+            "cancel": "Отмена",
+            "reset": "Сбросить"
+        },
+        "dangerZone": {
+            "title": "Опасная зона",
+            "warning": "После удаления аккаунта пути назад нет. Будьте уверены.",
+            "deleteAccount": "Удалить аккаунт",
+            "deletingAccount": "Удаление аккаунта...",
+            "deleteTitle": "Удалить аккаунт",
+            "deleteMessage": "Это действие необратимо.\n\n• Все ваши данные будут удалены\n• Ваши игры продолжатся, но вы будете отображаться как \"Аноним\"\n• Ваши друзья и запросы будут удалены\n• Активные игры будут засчитаны как поражение\n\nВы уверены?",
+            "continue": "Продолжить",
+            "confirmTitle": "Подтвердите удаление",
+            "confirmMessage": "Для подтверждения введите DELETE (заглавными):",
+            "incorrectTitle": "Неверное подтверждение",
+            "incorrectMessage": "Вы должны ввести DELETE для подтверждения.",
+            "successTitle": "Аккаунт удалён",
+            "successMessage": "Ваш аккаунт успешно удалён. Сейчас вы будете выведены.",
+            "failedTitle": "Ошибка удаления",
+            "timeoutMessage": "Время запроса истекло. Проверьте подключение.",
+            "failedMessage": "Не удалось удалить аккаунт. Попробуйте снова или обратитесь в поддержку.",
+            "retry": "Повторить"
+        },
+        "errors": {
+            "loadFailed": "Не удалось загрузить настройки",
+            "saveFailed": "Не удалось сохранить настройки",
+            "avatarSaveFailed": "Не удалось сохранить аватар",
+            "themeSaveFailed": "Не удалось сохранить тему",
+            "languageChangeFailed": "Не удалось сменить язык",
+            "resetFailed": "Не удалось сбросить настройки"
+        }
+    },
+    "friends": {
+        "addFriend": "Добавить друга",
+        "searchPlaceholder": "Поиск по имени",
+        "noUsersFound": "Пользователи не найдены",
+        "pending": "Ожидание",
+        "incomingRequests": "Входящие запросы",
+        "sentRequests": "Отправленные запросы",
+        "myFriends": "Мои друзья",
+        "noFriendsYet": "Пока нет друзей",
+        "noFriendsHint": "Добавьте друзей по имени пользователя, чтобы играть вместе!"
+    },
+    "common": {
+        "loading": "Загрузка...",
+        "error": "Ошибка",
+        "success": "Успех",
+        "cancel": "Отмена",
+        "confirm": "Подтвердить",
+        "save": "Сохранить",
+        "delete": "Удалить",
+        "edit": "Изменить",
+        "close": "Закрыть",
+        "ok": "OK",
+        "somethingWentWrong": "Что-то пошло не так. Попробуйте снова."
+    },
+    "cards": {
+        "matchmaking": {
+            "searchingForOpponent": "Поиск противника...",
+            "findRandomMatch": "Найти случайный матч",
+            "searchingHint": "Поиск противника... · Нажмите для отмены",
+            "tapToJoin": "Нажмите, чтобы присоединиться к очереди",
+            "cannotJoinTitle": "Невозможно присоединиться"
+        },
+        "playWithFriend": {
+            "title": "Играть с другом",
+            "description": "Пригласите друга поиграть",
+            "modalTitle": "Играть с другом",
+            "inviteFriend": "Пригласить друга",
+            "inviteDescription": "Отправить приглашение другу",
+            "textInvite": "Текстовое приглашение",
+            "textInviteDescription": "Отправить приглашение через SMS",
+            "passAndPlay": "По очереди",
+            "passAndPlayDescription": "Играть локально на этом устройстве",
+            "selectFriend": "Выбрать друга",
+            "searchFriends": "Поиск друзей...",
+            "noFriendsFound": "Друзья не найдены",
+            "noFriendsYet": "Пока нет друзей. Добавьте, чтобы играть!",
+            "passAndPlayGames": "Игры по очереди",
+            "startNewGame": "Новая игра",
+            "noActiveGames": "Нет активных игр",
+            "vsGuest": "vs Гость 1",
+            "unlimited": "Без лимита",
+            "shareMessage": "Давай сыграем в Coral Clash! 🦀\n\nСкачать:\niOS: [URL]\n\nAndroid: [URL]"
+        },
+        "signUpPrompt": {
+            "title": "Откройте все функции",
+            "subtitle": "Создайте бесплатный аккаунт для доступа к:",
+            "feature1": "Играть с друзьями онлайн",
+            "feature2": "Находить случайных противников",
+            "feature3": "Отслеживать статистику и историю",
+            "feature4": "Создать сеть друзей",
+            "button": "Регистрация / Вход"
+        },
+        "activeGames": {
+            "title": "Активные игры",
+            "inProgress": "в процессе",
+            "game": "игра",
+            "games": "игры",
+            "yourTurn": "Ваш ход",
+            "opponentTurn": "Ход противника",
+            "opponent": "Противник",
+            "computer": "Computer",
+            "blitz": "Blitz",
+            "normal": "Normal",
+            "unlimited": "Без лимита",
+            "timed": "С таймером",
+            "loading": "Загрузка игр...",
+            "noGames": "Нет активных игр",
+            "noGamesHint": "Начните игру с другом!",
+            "vs": "vs ",
+            "resignTitle": "Сдаться",
+            "resignMessage": "Вы уверены? Вы проиграете эту игру.",
+            "resignButton": "Сдаться",
+            "resignError": "Не удалось сдаться. Попробуйте снова."
+        },
+        "gameHistory": {
+            "title": "История игр",
+            "subtitle": "Последние игры",
+            "loading": "Загрузка истории...",
+            "noHistory": "Нет истории",
+            "noHistoryHint": "Ваши завершённые игры появятся здесь",
+            "vs": "vs ",
+            "justNow": "Только что",
+            "minutesAgo": "мин назад",
+            "hoursAgo": "ч назад",
+            "daysAgo": "дн назад",
+            "cancelled": "Игра отменена",
+            "draw": "Ничья",
+            "won": "Вы выиграли",
+            "lost": "Вы проиграли",
+            "unknown": "Неизвестно",
+            "opponent": "Противник",
+            "computer": "Computer",
+            "blitz": "Blitz",
+            "normal": "Normal",
+            "unlimited": "Без лимита",
+            "timed": "С таймером"
+        }
+    },
+    "errors": {
+        "INVALID_MOVE": "Недопустимый ход",
+        "INVALID_MOVE_OCCUPIED": "Эта позиция занята",
+        "INVALID_MOVE_OUT_OF_BOUNDS": "Ход за пределами доски",
+        "INVALID_MOVE_NOT_YOUR_TURN": "Сейчас не ваш ход",
+        "INVALID_MOVE_PIECE_BLOCKED": "Эта фигура заблокирована",
+        "GAME_NOT_FOUND": "Игра не найдена",
+        "GAME_ALREADY_STARTED": "Игра уже началась",
+        "GAME_ALREADY_ENDED": "Эта игра уже завершена",
+        "GAME_CANCELLED": "Игра отменена",
+        "PLAYER_NOT_IN_GAME": "Вы не в этой игре",
+        "PLAYER_DISCONNECTED": "Игрок отключился",
+        "CONNECTION_ERROR": "Ошибка соединения. Проверьте интернет.",
+        "SERVER_ERROR": "Ошибка сервера. Попробуйте позже.",
+        "TIMEOUT": "Время запроса истекло",
+        "ALREADY_IN_QUEUE": "Вы уже в очереди",
+        "NOT_IN_QUEUE": "Вы не в очереди",
+        "QUEUE_TIMEOUT": "Время подбора истекло",
+        "OPPONENT_NOT_FOUND": "Противник не найден",
+        "MATCHMAKING_DISABLED": "Подбор игроков отключён",
+        "FRIEND_NOT_FOUND": "Друг не найден",
+        "FRIEND_ALREADY_EXISTS": "Уже друзья с этим пользователем",
+        "CANNOT_ADD_SELF": "Нельзя добавить себя в друзья",
+        "FRIEND_REQUEST_PENDING": "Запрос дружбы уже отправлен",
+        "INVALID_CREDENTIALS": "Неверный email или пароль",
+        "USER_NOT_FOUND": "Пользователь не найден",
+        "EMAIL_ALREADY_EXISTS": "Email уже используется",
+        "USERNAME_TAKEN": "Имя пользователя занято",
+        "WEAK_PASSWORD": "Слишком слабый пароль",
+        "ACCOUNT_DISABLED": "Ваш аккаунт отключён",
+        "SESSION_EXPIRED": "Сессия истекла. Войдите снова.",
+        "UNAUTHORIZED": "У вас нет прав для этого действия",
+        "RATE_LIMITED": "Слишком много запросов. Подождите.",
+        "MAINTENANCE_MODE": "Приложение на обслуживании. Попробуйте позже.",
+        "FEATURE_DISABLED": "Эта функция отключена"
+    },
+    "success": {
+        "GAME_WON": "Поздравляем! Вы победили!",
+        "GAME_DRAW": "Игра закончилась ничьёй",
+        "GAME_LOST": "Удачи в следующий раз!",
+        "PLAYER_RESIGNED": "Игрок сдался",
+        "FRIEND_REQUEST_SENT": "Запрос дружбы отправлен!",
+        "FRIEND_REQUEST_ACCEPTED": "Запрос дружбы принят!",
+        "FRIEND_REQUEST_DECLINED": "Запрос дружбы отклонён",
+        "MOVE_SUCCESS": "Ход выполнен"
+    },
+    "scenarioBoard": {
+        "pauseAutoPlay": "Пауза авто-воспроизведения",
+        "playDemo": "Запустить демо",
+        "explanation": "Объяснение",
+        "backToGuide": "Назад к руководству"
+    },
+    "howToPlay": {
+        "objective": {
+            "title": "Цель",
+            "intro": "Чтобы победить в Coral Clash, выполните одну из целей:",
+            "checkmate": "Мат",
+            "checkmateDesc": "киту противника (когда кит под",
+            "check": "шахом",
+            "checkmateDescEnd": "и не может спастись)",
+            "coralControl": "наибольшую площадь кораллами",
+            "coralControlDesc": "Контролируйте",
+            "coralControlWhen": "когда:",
+            "coralPlaced": "Игрок разместил все свои кораллы",
+            "whaleRemaining": "У игрока остался только кит",
+            "backRowReached": "Краб или осьминог достигает последнего ряда противника",
+            "areaControlled": "Площадь под контролем кораллов:",
+            "areaControlledDesc": "Посчитайте количество ваших кораллов, не занятых фигурами противника.",
+            "checkmateExample": "Пример мата",
+            "checkExample": "Пример шаха",
+            "coralVictoryExample": "Пример коралловой победы"
+        },
+        "setup": {
+            "title": "Расстановка",
+            "boardDesc": "Доска 8×8 с 64 клетками. У каждого игрока:",
+            "coralPieces": "17 кораллов",
+            "units": "17 фигур: 1 кит, 2 дельфина, 4 черепахи, 2 рыбы-ежа, 4 краба и 4 осьминога",
+            "variants": "Каждый тип фигуры имеет два варианта:",
+            "hunter": "Охотник",
+            "hunterDesc": "фигуры (без символов кораллов) могут убирать кораллы",
+            "gatherer": "Собиратель",
+            "gathererDesc": "фигуры (с символами кораллов) могут размещать кораллы",
+            "hunterExample": "Пример эффекта охотника",
+            "gathererExample": "Пример эффекта собирателя"
+        },
+        "turnOverview": {
+            "title": "Обзор хода",
+            "intro": "Белые ходят первыми, затем игроки чередуются. В ваш ход:",
+            "step1": "Переместите одну из своих фигур",
+            "step2": "Выполните эффекты захвата, охотника или собирателя",
+            "step3": "Проверьте, достигнуты ли цели"
+        },
+        "movement": {
+            "title": "Как двигаются фигуры",
+            "important": "Важно:",
+            "importantDesc": "Фигуры не могут проходить через другие фигуры — путь должен быть свободен.",
+            "variants": "Каждый тип фигуры имеет два варианта с разным взаимодействием с кораллами:",
+            "hunterPieces": "Фигуры-охотники",
+            "hunterMovement": "(без символов кораллов)",
+            "stoppedBy": "ОСТАНАВЛИВАЮТСЯ",
+            "hunterMovementDesc": "кораллами — не могут проходить через них",
+            "gathererPieces": "Фигуры-собиратели",
+            "gathererMovement": "(с символами кораллов) сильнее — могут проходить",
+            "through": "СКВОЗЬ",
+            "gathererMovementDesc": "кораллы свободно",
+            "coralMovementExample": "Пример движения через кораллы",
+            "individualMovements": "Движение отдельных фигур"
+        },
+        "pieces": {
+            "whale": {
+                "name": "Кит",
+                "intro": "Кит — ваша самая важная фигура. Если ему поставят мат, вы проиграете! Кит занимает две клетки и имеет два способа движения:",
+                "slidingMove": "1. Скольжение:",
+                "slidingMoveDesc": "Переместите половину фигуры на любое количество клеток горизонтально, вертикально или по диагонали, сохраняя исходную ориентацию. Кит следует правилам охотника — останавливается на кораллах. Но есть исключение (см. ниже).",
+                "rotationMove": "2. Вращение:",
+                "rotationMoveDesc": "Поверните половину фигуры на соседнюю клетку (одна клетка вертикально или горизонтально). При вращении сначала нажмите на целевую клетку (белый круг). Если есть несколько ориентаций, нажмите на клетку ориентации (зелёный круг). Если ориентация одна, кит переместится автоматически.",
+                "checkRules": "Правила шаха:",
+                "checkRulesDesc": "Кит не может закончить ход под шахом, но МОЖЕТ проходить через атакованные клетки.",
+                "doubleCapture": "Двойной захват:",
+                "doubleCaptureDesc": "Кит может захватить до двух фигур противника за один ход — по одной каждой половиной!",
+                "doubleCoralRemoval": "Двойное удаление кораллов:",
+                "doubleCoralRemovalDesc": "Когда кит (как охотник) попадает на коралл, он может убрать один или оба коралла.",
+                "specialCase": "⚠️ Особый случай движения",
+                "specialCaseDesc": "Если половина кита уже стоит на коралле, этот коралл НЕ блокирует другую половину.",
+                "basicMovement": "Базовое движение кита",
+                "rotationExample": "Пример вращения кита",
+                "coralException": "Кит движется через свой коралл"
+            },
+            "dolphin": {
+                "name": "Дельфин",
+                "movement": "Двигается на любое количество клеток вертикально, горизонтально или по диагонали.",
+                "example": "Пример движения дельфина"
+            },
+            "turtle": {
+                "name": "Черепаха",
+                "movement": "Двигается на любое количество клеток вертикально или горизонтально.",
+                "example": "Пример движения черепахи"
+            },
+            "pufferfish": {
+                "name": "Рыба-ёж",
+                "movement": "Двигается на любое количество клеток по диагонали.",
+                "example": "Пример движения рыбы-ежа"
+            },
+            "octopus": {
+                "name": "Осьминог",
+                "movement": "Двигается на одну клетку по диагонали.",
+                "example": "Пример движения осьминога"
+            },
+            "crab": {
+                "name": "Краб",
+                "movement": "Двигается на одну клетку вертикально или горизонтально.",
+                "example": "Пример движения краба"
+            }
+        },
+        "specialRules": {
+            "title": "Особые правила",
+            "capture": {
+                "title": "Захват",
+                "desc": "Переместитесь на клетку с фигурой противника. Киты могут захватить две фигуры за ход.",
+                "example": "Пример захвата"
+            },
+            "hunterEffect": {
+                "title": "Движение и эффект охотника",
+                "desc": "Фигуры-охотники (без символов кораллов) имеют два важных свойства:",
+                "movementStops": "Движение останавливается",
+                "movementStopsDesc": "при попадании на коралл",
+                "canRemove": "Может убрать",
+                "canRemoveDesc": "этот коралл с доски",
+                "example": "Пример эффекта охотника"
+            },
+            "gathererEffect": {
+                "title": "Эффект собирателя",
+                "desc": "Фигуры-собиратели (с символами кораллов) могут размещать кораллы на пустых клетках, через которые проходят.",
+                "example": "Пример эффекта собирателя"
+            }
+        },
+        "drawResignation": {
+            "title": "Ничья и сдача",
+            "stalemate": "Пат:",
+            "stalemateDesc": "Когда у игрока нет допустимых ходов и его кит не под шахом",
+            "threefoldRepetition": "Тройное повторение:",
+            "threefoldRepetitionDesc": "Одна и та же позиция возникает трижды с тем же игроком",
+            "resignation": "Сдача:",
+            "resignationDesc": "Игрок может сдаться в любой момент"
+        }
+    },
+    "tutorial": {
+        "endGame": {
+            "title": "Добро пожаловать в Coral Clash!",
+            "message": "Кит — это король. Вы можете победить, поставив мат чёрному киту или разместив все 17 кораллов. Удачи!",
+            "backInfo": "Нажмите стрелку, чтобы вернуться на главный экран"
+        }
+    },
+    "tutorialScenarios": {
+        "checkmate": {
+            "title": "Пример мата",
+            "description": "Чёрный кит заблокирован кораллом на a6. Белый дельфин-охотник на b7 ставит шах, а белая черепаха-собиратель на g7 защищает атакующего дельфина. Киту некуда деться — мат!"
+        },
+        "coralVictory": {
+            "title": "Коралловая победа — контроль площади",
+            "description": "У белых 4 коралла: c3, d3, e3, f3. У чёрных 4 коралла: c6, d6, e6, f6. Чёрный дельфин-собиратель на c3 стоит на коралле белых, поэтому белые контролируют только 3 коралла. Чёрные контролируют все 4 = чёрные побеждают 4:3!"
+        },
+        "whaleMovement": {
+            "title": "Движение кита",
+            "description": "Киты занимают две соседние клетки и могут двигаться тремя способами: (1) скольжение одной половины, (2) параллельное скольжение обеих половин, или (3) вращение одной половины на соседнюю клетку."
+        },
+        "whaleRotation": {
+            "title": "Вращение кита",
+            "description": "Кит может вращаться, перемещая одну половину на соседнюю клетку. Наблюдайте, как белый кит поворачивается из горизонтального в вертикальное положение."
+        },
+        "whaleCoralException": {
+            "title": "Кит движется через свой коралл",
+            "description": "Особое правило: если половина кита стоит на коралле, этот коралл НЕ блокирует другую половину."
+        },
+        "coralMovementComparison": {
+            "title": "Сравнение движения через кораллы",
+            "description": "Сравните белого дельфина-охотника (слева) с белым дельфином-собирателем (справа). Нажмите на каждого, чтобы увидеть ходы."
+        },
+        "check": {
+            "title": "Шах",
+            "description": "Чёрный кит под шахом от белого дельфина-собирателя. Дельфин-собиратель может проходить через кораллы. Чёрные должны спасти кита или заблокировать атаку."
+        },
+        "hunterEffect": {
+            "title": "Эффект охотника",
+            "description": "Фигуры-охотники останавливаются при попадании на коралл и могут его убрать. Наблюдайте за белым крабом-охотником."
+        },
+        "gathererEffect": {
+            "title": "Эффект собирателя",
+            "description": "Фигуры-собиратели могут размещать кораллы на пустых клетках. Наблюдайте за белым осьминогом-собирателем."
+        },
+        "dolphinMovement": {
+            "title": "Движение дельфина",
+            "description": "Дельфины двигаются на любое количество клеток в любом направлении. Самая универсальная фигура!"
+        },
+        "turtleMovement": {
+            "title": "Движение черепахи",
+            "description": "Черепахи двигаются на любое количество клеток вертикально или горизонтально, но не по диагонали."
+        },
+        "pufferfishMovement": {
+            "title": "Движение рыбы-ежа",
+            "description": "Рыба-ёж двигается на любое количество клеток по диагонали."
+        },
+        "crabMovement": {
+            "title": "Движение краба",
+            "description": "Крабы двигаются на одну клетку вертикально или горизонтально. Медленные, но надёжные."
+        },
+        "octopusMovement": {
+            "title": "Движение осьминога",
+            "description": "Осьминоги двигаются на одну клетку по диагонали. Медленные, но стратегические."
+        },
+        "capture": {
+            "title": "Захват фигур",
+            "description": "Чтобы захватить фигуру противника, переместите свою фигуру на её клетку."
+        }
+    },
+    "components": {
+        "fixtureLoader": {
+            "title": "Загрузить состояние",
+            "gameMode": "Режим игры:",
+            "back": "Назад",
+            "vsComputer": "vs Computer",
+            "passAndPlay": "По очереди",
+            "loadGame": "Загрузить игру",
+            "fixturesHint": "💡 Фикстуры из shared/game/__fixtures__/",
+            "error": "Ошибка",
+            "failedToLoad": "Не удалось загрузить фикстуру"
+        },
+        "versionWarning": {
+            "title": "Доступно обновление",
+            "message": "Обновите до последней версии для лучшего опыта.",
+            "updateButton": "Обновить"
+        },
+        "playerStatus": {
+            "computer": "Computer",
+            "thinking": "Думает...",
+            "remaining": "Осталось",
+            "underControl": "Под контролем"
+        },
+        "alert": {
+            "defaultButton": "OK"
+        },
+        "pvpBoard": {
+            "player": "Игрок",
+            "opponent": "Противник",
+            "requestUndoTitle": "Запрос отмены",
+            "requestUndoMessage": "Отменить последний ход? {{opponentName}} должен одобрить.",
+            "requestResetTitle": "Запрос сброса",
+            "requestResetMessage": "Сбросить игру? {{opponentName}} должен одобрить.",
+            "cancel": "Отмена",
+            "request": "Запросить",
+            "requestReset": "Запрос сброса",
+            "askOpponentReset": "Попросить противника сбросить игру",
+            "gameEnded": "Игра уже закончена",
+            "noMoves": "Ходы ещё не сделаны",
+            "pendingUndo": "Сначала решите ожидающий запрос отмены",
+            "remindOpponent": "Напомнить противнику",
+            "remindOpponentSubtitle": "Напомнить противнику о ходе",
+            "availableInHours": "Доступно через {{hours}} час(ов)",
+            "yourTurn": "Ваш ход",
+            "errorUndoRequest": "Не удалось отправить запрос отмены.",
+            "errorUndoResponse": "Не удалось ответить на запрос отмены.",
+            "errorResetResponse": "Не удалось ответить на запрос сброса.",
+            "errorCancelUndo": "Не удалось отменить запрос.",
+            "errorCancelReset": "Не удалось отменить запрос сброса.",
+            "reminderSentTitle": "Успех",
+            "reminderSentMessage": "Напоминание отправлено противнику.",
+            "errorReminderTitle": "Ошибка",
+            "errorReminderMessage": "Не удалось отправить напоминание.",
+            "waitingUndoResponse": "Ожидание ответа {{opponentName}} на отмену {{moveCount}} хода(ов)...",
+            "opponentWantsUndo": "{{opponentName}} хочет отменить {{moveCount}} ход(ов)",
+            "waitingResetResponse": "Ожидание ответа {{opponentName}} на запрос сброса...",
+            "opponentWantsReset": "{{opponentName}} хочет сбросить игру"
+        },
+        "passAndPlayBoard": {
+            "resetGameTitle": "Сбросить игру",
+            "resetGameMessage": "Вы уверены, что хотите начать новую игру?",
+            "cancel": "Отмена",
+            "reset": "Сбросить",
+            "resetGame": "Сбросить игру",
+            "startNewGame": "Начать новую игру с начала",
+            "gameEnded": "Игра уже закончена",
+            "noMoves": "Ходы ещё не сделаны"
+        },
+        "baseBoard": {
+            "errorLoadState": "Не удалось загрузить состояние",
+            "resignGameTitle": "Сдаться",
+            "resignGameMessage": "Вы уверены? Вы проиграете.",
+            "cancel": "Отмена",
+            "resign": "Сдаться",
+            "checkTitle": "Шах!",
+            "checkMessage": "Ваш {{piece}} под шахом!",
+            "checkmateTitle": "Мат!",
+            "checkmateMessage": "{{winner}} побеждает матом!",
+            "gathererTitle": "Эффект собирателя",
+            "gathererMessage": "Разместить коралл на этой клетке?",
+            "yes": "Да",
+            "no": "Нет",
+            "hunterTitle": "Эффект охотника",
+            "hunterMessage": "Убрать коралл с этой клетки?",
+            "exportSuccessTitle": "Успех",
+            "exportSuccessMessage": "Состояние скопировано в буфер обмена!",
+            "exportFailedTitle": "Ошибка экспорта",
+            "computer": "Computer",
+            "opponent": "Противник",
+            "white": "Белые",
+            "black": "Чёрные",
+            "youWonTimeout": "Вы победили! У {{opponentName}} закончилось время ⏱️",
+            "youLostTimeout": "Вы проиграли! Время вышло ⏱️",
+            "timeoutLose": "У {{loserName}} закончилось время! ⏱️",
+            "youWonResign": "Вы победили! {{opponentName}} сдался 🏳️",
+            "youResigned": "Вы сдались 🏳️",
+            "checkmateWin": "Мат! Вы победили! 🏆",
+            "checkmateLose": "Мат! Вы проиграли.",
+            "checkmateGeneric": "Мат! {{winner}} побеждает! 🏆",
+            "youLost": "Вы проиграли",
+            "resignGeneric": "{{winner}} побеждает сдачей! 🏳️",
+            "coralVictoryWin": "Вы победили коралловой победой! 🪸\n{{whiteScore}} - {{blackScore}}",
+            "coralVictoryLose": "Вы проиграли. {{winner}} побеждает кораллами! 🪸\n{{whiteScore}} - {{blackScore}}",
+            "coralVictoryGeneric": "{{winner}} побеждает кораллами! 🪸\n{{whiteScore}} Белые - {{blackScore}} Чёрные",
+            "stalemate": "Пат! 🤝",
+            "drawRepetition": "Ничья повторением! 🤝",
+            "drawInsufficientMaterial": "Ничья — недостаточно фигур! 🤝",
+            "drawCoralTie": "Ничья — равенство кораллов! 🤝🪸\n{{score}} - {{score}}",
+            "draw": "Ничья! 🤝",
+            "check": "{{player}} под шахом! ⚠️",
+            "viewingHistory": "Просмотр прошлых ходов — вернитесь к текущему для игры",
+            "selectWhaleOrientation": "Выберите ориентацию кита",
+            "hunterWhaleTitle": "Эффект охотника (Кит)",
+            "hunterWhaleMessage": "Выберите вариант удаления коралла:",
+            "yourTurn": "Ваш ход",
+            "opponentTurn": "Ход {{opponentName}}",
+            "playerTurn": "Ход {{playerColor}}"
+        },
+        "computerBoard": {
+            "cancelRequestTitle": "Отменить запрос",
+            "cancelRequestMessage": "Отменить запрос сброса?",
+            "cancel": "Отмена",
+            "yes": "Да",
+            "resetGameTitle": "Сбросить игру",
+            "resetGameMessage": "Начать новую игру?",
+            "reset": "Сбросить",
+            "resetGame": "Сбросить игру",
+            "startNewGame": "Начать новую игру с начала",
+            "gameEnded": "Игра уже закончена",
+            "noMoves": "Ходы ещё не сделаны",
+            "errorUndo": "Не удалось отменить. Попробуйте снова."
+        },
+        "computerUsers": {
+            "successTitle": "Успех",
+            "errorTitle": "Ошибка",
+            "initializeSuccess": "Успешно создано {{count}} компьютерных пользователей",
+            "initializeError": "Не удалось создать пользователей.",
+            "confirmDeleteTitle": "Подтвердите удаление",
+            "confirmDeleteMessage": "Удалить всех компьютерных пользователей? Это необратимо.",
+            "cancel": "Отмена",
+            "delete": "Удалить",
+            "deleteSuccess": "Успешно удалено {{count}} пользователей",
+            "deleteError": "Не удалось удалить пользователей.",
+            "clearLanguageSuccess": "Языковые настройки сброшены. Язык определится автоматически при следующем запуске.",
+            "clearLanguageError": "Не удалось сбросить языковые настройки."
+        }
+    },
+    "hooks": {
+        "friends": {
+            "removeFriendTitle": "Удалить друга",
+            "removeFriendMessage": "Удалить {{friendName}} из друзей?",
+            "cancel": "Отмена",
+            "remove": "Удалить",
+            "errorRemove": "Не удалось удалить друга",
+            "errorAccept": "Не удалось принять запрос",
+            "errorDecline": "Не удалось отклонить запрос",
+            "cancelRequestTitle": "Отменить запрос дружбы",
+            "cancelRequestMessage": "Отменить запрос дружбы к {{displayName}}?",
+            "no": "Нет",
+            "yesCancel": "Да, отменить",
+            "errorCancelRequest": "Не удалось отменить запрос",
+            "errorTitle": "Ошибка"
+        },
+        "game": {
+            "errorTitle": "Ошибка",
+            "errorLoadGame": "Не удалось загрузить игру"
+        },
+        "gameActions": {
+            "errorTitle": "Ошибка",
+            "errorResign": "Не удалось сдаться"
+        },
+        "userSearch": {
+            "errorTitle": "Ошибка",
+            "errorSendRequest": "Не удалось отправить запрос дружбы"
+        }
+    }
+}

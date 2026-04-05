@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
     Animated,
     Dimensions,
@@ -20,6 +21,7 @@ const isTablet = width >= 768;
  * Auto-dismisses after 10 seconds
  */
 export const VersionWarningBanner = ({ visible, onDismiss }) => {
+    const { t } = useTranslation();
     const slideAnim = useRef(new Animated.Value(-200)).current;
     const dismissTimerRef = useRef(null);
 
@@ -97,14 +99,14 @@ export const VersionWarningBanner = ({ visible, onDismiss }) => {
                     <Text style={styles.icon}>⚠️</Text>
                 </View>
                 <View style={styles.content}>
-                    <Text style={styles.title}>Update Available</Text>
+                    <Text style={styles.title}>{t('components.versionWarning.title')}</Text>
                     <Text style={styles.message}>
-                        Please update to the latest version for the best experience.
+                        {t('components.versionWarning.message')}
                     </Text>
                 </View>
                 <View style={styles.buttonContainer}>
                     <TouchableOpacity style={styles.updateButton} onPress={openAppStore}>
-                        <Text style={styles.updateButtonText}>Update</Text>
+                        <Text style={styles.updateButtonText}>{t('components.versionWarning.updateButton')}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.dismissButton} onPress={handleDismiss}>
                         <Text style={styles.dismissButtonText}>✕</Text>

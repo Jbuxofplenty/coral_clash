@@ -1,0 +1,812 @@
+{
+    "auth": {
+        "welcomeBack": "مرحباً بعودتك",
+        "createAccount": "إنشاء حساب",
+        "resetPassword": "إعادة تعيين كلمة المرور",
+        "signInSubtitle": "سجّل الدخول للعب ضد الكمبيوتر أو تحدي لاعبين آخرين عبر الإنترنت",
+        "signUpSubtitle": "أنشئ حساباً للعب عبر الإنترنت. اختر اسم مستخدم فريداً!",
+        "forgotPasswordSubtitle": "أدخل بريدك الإلكتروني لتلقي رابط إعادة تعيين كلمة المرور",
+        "usernamePlaceholder": "اسم المستخدم (مطلوب)",
+        "emailPlaceholder": "البريد الإلكتروني",
+        "passwordPlaceholder": "كلمة المرور",
+        "signInWithApple": "تسجيل الدخول بـ Apple",
+        "signUpWithApple": "التسجيل بـ Apple",
+        "signInWithGoogle": "تسجيل الدخول بـ Google",
+        "signUpWithGoogle": "التسجيل بـ Google",
+        "or": "أو",
+        "signIn": "تسجيل الدخول",
+        "signUp": "التسجيل",
+        "sendResetLink": "إرسال رابط إعادة التعيين",
+        "forgotPassword": "نسيت كلمة المرور؟",
+        "backToSignIn": "العودة لتسجيل الدخول",
+        "alreadyHaveAccount": "لديك حساب بالفعل؟ سجّل الدخول",
+        "dontHaveAccount": "ليس لديك حساب؟ سجّل الآن",
+        "errors": {
+            "fillAllFields": "يرجى ملء جميع الحقول",
+            "usernameRequired": "اسم المستخدم مطلوب",
+            "usernameMinLength": "يجب أن يكون اسم المستخدم حرفين على الأقل",
+            "usernameMaxLength": "يجب أن يكون اسم المستخدم أقل من 30 حرفاً",
+            "usernameInvalidChars": "يمكن أن يحتوي اسم المستخدم فقط على أحرف وأرقام ومسافات وشرطات سفلية وشرطات",
+            "authFailed": "فشل المصادقة",
+            "googleSignInFailed": "فشل تسجيل الدخول بـ Google",
+            "appleSignInFailed": "فشل تسجيل الدخول بـ Apple",
+            "enterEmail": "يرجى إدخال بريدك الإلكتروني",
+            "resetEmailFailed": "فشل إرسال بريد إعادة التعيين"
+        },
+        "success": {
+            "resetEmailSent": "تم إرسال بريد إعادة تعيين كلمة المرور! تحقق من صندوق الوارد."
+        }
+    },
+    "game": {
+        "difficulty": {
+            "title": "اختر صعوبة الذكاء الاصطناعي",
+            "subtitle": "اختر مستوى الصعوبة للخصم الحاسوبي",
+            "random": "عشوائي",
+            "easy": "سهل",
+            "medium": "متوسط",
+            "hard": "صعب",
+            "randomDescription": "الكمبيوتر يلعب حركات عشوائية",
+            "easyDescription": "الكمبيوتر يستخدم استراتيجية أساسية",
+            "mediumDescription": "الكمبيوتر يستخدم استراتيجية متوسطة",
+            "hardDescription": "الكمبيوتر يستخدم استراتيجية متقدمة",
+            "createAccountToAccess": "أنشئ حساباً للوصول"
+        },
+        "matchmaking": {
+            "title": "اختر وضع اللعب",
+            "timeControl": "اختر التحكم بالوقت",
+            "timeControlSubtitle": "اختر الحد الزمني لهذه اللعبة",
+            "instant": "فوري",
+            "instantDescription": "ابحث عن خصم الآن. يطابقك مع لاعبين عبر الإنترنت.",
+            "correspondence": "مراسلة",
+            "correspondenceDescription": "أرسل دعوة إلى لاعب عشوائي. لديهم 24 ساعة للقبول.",
+            "timeControls": {
+                "unlimited": "بدون حد زمني",
+                "blitz": "5 دقائق",
+                "normal": "10 دقائق",
+                "custom": "تم تعيين الحد الزمني"
+            },
+            "timeControlDescriptions": {
+                "blitz": "5 دقائق لكل لاعب",
+                "normal": "10 دقائق لكل لاعب",
+                "unlimited": "بدون حد زمني"
+            }
+        },
+        "status": {
+            "loading": "جارٍ التحميل",
+            "noGamesFound": "لم يتم العثور على ألعاب",
+            "error": "خطأ",
+            "resetApproved": "تمت إعادة تعيين اللعبة",
+            "resetRejected": "تم رفض طلب إعادة التعيين",
+            "undoApproved": "تم التراجع عن الحركة",
+            "undoRejected": "تم رفض طلب التراجع"
+        },
+        "actions": {
+            "cancel": "إلغاء"
+        },
+        "postMatchSignup": {
+            "title": "لعبة رائعة!",
+            "message": "هل تريد حفظ إحصائياتك واللعب ضد أشخاص حقيقيين؟",
+            "lossTitle": "واصل!",
+            "lossMessage": "كل خسارة درس. سجّل لتتبع تقدمك وتتحسن.",
+            "button": "سجّل الآن"
+        }
+    },
+    "navigation": {
+        "home": "الرئيسية",
+        "game": "اللعبة",
+        "tutorial": "Tutorial",
+        "howToPlay": "كيف تلعب",
+        "settings": "الإعدادات",
+        "friends": "الأصدقاء",
+        "stats": "الإحصائيات",
+        "reportIssue": "الإبلاغ عن مشكلة",
+        "rulesVideo": "فيديو القواعد",
+        "physicalGame": "اللعبة المادية",
+        "logOut": "تسجيل الخروج",
+        "logOutConfirmTitle": "تسجيل الخروج",
+        "logOutConfirmMessage": "هل أنت متأكد أنك تريد تسجيل الخروج؟",
+        "cancel": "إلغاء",
+        "appTitle": "Coral Clash",
+        "appSubtitle": "لعبة استراتيجية المحيط"
+    },
+    "home": {
+        "welcome": {
+            "title": "!مرحباً في Coral Clash",
+            "message": "شاهد فيديو القواعد أو دليل كيف تلعب في القائمة للبدء!",
+            "watchVideo": "شاهد الفيديو",
+            "howToPlay": "كيف تلعب",
+            "ok": "OK"
+        },
+        "opponent": {
+            "computer": "Computer",
+            "opponent": "الخصم",
+            "guest": "ضيف 1"
+        },
+        "gameModes": {
+            "howToPlayTitle": "كيف تلعب",
+            "howToPlayDescription": "تعلم قواعد واستراتيجيات Coral Clash",
+            "playComputerTitle": "العب ضد الكمبيوتر",
+            "playComputerDescription": "ابدأ لعبة جديدة ضد الذكاء الاصطناعي",
+            "loadGameStateTitle": "تحميل حالة اللعبة (Dev)",
+            "loadGameStateDescription": "تحميل حالة لعبة محفوظة من الملفات"
+        },
+        "matchmaking": {
+            "cannotJoin": "لا يمكن الانضمام للمطابقة",
+            "instantMatchFound": "تم العثور على مباراة مراسلة!",
+            "instantMatchMessage": "تمت مطابقتك مع {{creatorName}}. سيتم إخطارهم ولديهم 24 ساعة للقبول.",
+            "correspondenceCreated": "تم إنشاء دعوة المراسلة",
+            "correspondenceMessage": "تم إنشاء دعوتك. عندما يختار لاعب آخر وضع المراسلة، قد يتم مطابقته مع دعوتك. سيتم إخطارك عندما يريد شخص ما اللعب!"
+        },
+        "errors": {
+            "offlineModeTitle": "الوضع غير متصل",
+            "offlineModeMessage": "غير قادر على الاتصال بالخادم. بدء لعبة كمبيوتر غير متصلة.",
+            "errorTitle": "خطأ",
+            "failedToStart": "فشل بدء {{action}}. يرجى المحاولة مرة أخرى.",
+            "failedToResign": "فشل الاستسلام. يرجى المحاولة مرة أخرى.",
+            "failedPassAndPlay": "فشل بدء لعبة التمرير واللعب. يرجى المحاولة مرة أخرى.",
+            "failedComputerGame": "فشل بدء لعبة الكمبيوتر",
+            "failedMatchmaking": "فشل بدء مطابقة {{mode}}. {{message}}"
+        }
+    },
+    "stats": {
+        "overallStatistics": "الإحصائيات العامة",
+        "gamesPlayed": "الألعاب الملعوبة",
+        "wins": "انتصارات",
+        "losses": "خسائر",
+        "draws": "تعادلات",
+        "winRate": "نسبة الفوز",
+        "matchupStatistics": "إحصائيات المواجهة",
+        "matchupDescription": "نسب الفوز ضد كل خصم (PvP والكمبيوتر)",
+        "computer": "Computer",
+        "winRateShort": "نسبة الفوز",
+        "winsShort": "ف",
+        "lossesShort": "خ",
+        "drawsShort": "ت",
+        "noGamesYet": "لا توجد ألعاب بعد",
+        "noGamesHint": "ابدأ اللعب لرؤية إحصائياتك هنا!"
+    },
+    "gameMenu": {
+        "saveGameState": "حفظ حالة اللعبة",
+        "exportPosition": "تصدير موقع اللعبة الحالي",
+        "flipBoard": "قلب اللوحة",
+        "showingBlackBottom": "يُظهر الأسود في الأسفل حالياً",
+        "showingWhiteBottom": "يُظهر الأبيض في الأسفل حالياً",
+        "reportBug": "الإبلاغ عن خطأ",
+        "includeGameState": "تضمين حالة اللعبة الحالية",
+        "resignGame": "الاستسلام",
+        "resigning": "جارٍ الاستسلام...",
+        "pleaseWait": "يرجى الانتظار...",
+        "gameEnded": "انتهت اللعبة بالفعل",
+        "forfeitGame": "مصادرة اللعبة الحالية"
+    },
+    "reportIssue": {
+        "bugReportTitle": "تقرير خطأ",
+        "bugReportDescription": "أبلغ عن خطأ مع حالة اللعبة الحالية. سيتم تضمين موقع اللعبة في تقريرك.",
+        "feedbackTitle": "ملاحظات ومشاكل",
+        "feedbackDescription": "أرسل ملاحظاتك أو أبلغ عن مشكلة. نقدر مدخلاتك!",
+        "subject": "الموضوع",
+        "subjectPlaceholder": "ملخص موجز للمشكلة",
+        "description": "الوصف",
+        "descriptionPlaceholder": "وصف تفصيلي للمشكلة أو الملاحظات...",
+        "gameStateIncluded": "✓ سيتم تضمين حالة اللعبة",
+        "turn": "الدور",
+        "white": "الأبيض",
+        "black": "الأسود",
+        "gameOver": "انتهت اللعبة",
+        "submitIssue": "إرسال المشكلة",
+        "anonymousNote": "ملاحظة: أنت ترسل بشكل مجهول. سجّل الدخول لتتبع مشاكلك.",
+        "validation": {
+            "missingSubjectTitle": "معلومات مفقودة",
+            "missingSubjectMessage": "يرجى إدخال موضوع لمشكلتك.",
+            "invalidSubjectTitle": "موضوع غير صالح",
+            "invalidSubjectMessage": "يجب أن يكون الموضوع 3 أحرف على الأقل.",
+            "missingDescriptionTitle": "معلومات مفقودة",
+            "missingDescriptionMessage": "يرجى إدخال وصف لمشكلتك.",
+            "invalidDescriptionTitle": "وصف غير صالح",
+            "invalidDescriptionMessage": "يجب أن يكون الوصف 10 أحرف على الأقل."
+        },
+        "success": {
+            "title": "تم إرسال المشكلة",
+            "message": "شكراً لملاحظاتك! تم إرسال مشكلتك",
+            "ok": "OK"
+        },
+        "error": {
+            "title": "فشل الإرسال",
+            "message": "فشل إرسال مشكلتك. يرجى التحقق من اتصالك والمحاولة مرة أخرى."
+        }
+    },
+    "settings": {
+        "account": "الحساب",
+        "profileAvatar": "صورة الملف الشخصي",
+        "chooseAvatar": "اختر صورتك الرمزية بطابع المحيط",
+        "appearance": "المظهر",
+        "theme": {
+            "light": "فاتح",
+            "lightDescription": "استخدام السمة الفاتحة دائماً",
+            "dark": "داكن",
+            "darkDescription": "استخدام السمة الداكنة دائماً",
+            "auto": "تلقائي",
+            "autoDescription": "مطابقة سمة النظام"
+        },
+        "language": {
+            "title": "اللغة (Language)",
+            "english": "English",
+            "englishDescription": "English language interface",
+            "hindi": "हिन्दी (Hindi)",
+            "hindiDescription": "हिन्दी भाषा इंटरफ़ेस"
+        },
+        "actions": {
+            "resetToDefaults": "إعادة التعيين إلى الافتراضي",
+            "resetTitle": "إعادة تعيين الإعدادات",
+            "resetMessage": "هل أنت متأكد أنك تريد إعادة تعيين جميع الإعدادات إلى الافتراضي؟",
+            "cancel": "إلغاء",
+            "reset": "إعادة تعيين"
+        },
+        "dangerZone": {
+            "title": "منطقة الخطر",
+            "warning": "بمجرد حذف حسابك، لا يمكن التراجع. يرجى التأكد.",
+            "deleteAccount": "حذف الحساب",
+            "deletingAccount": "جارٍ حذف الحساب...",
+            "deleteTitle": "حذف الحساب",
+            "deleteMessage": "هذا الإجراء دائم ولا يمكن التراجع عنه.\n\n• سيتم إزالة جميع بياناتك الشخصية\n• ستستمر ألعابك لكن ستظهر كـ \"مجهول\"\n• سيتم إزالة أصدقائك وطلبات الصداقة\n• سيتم مصادرة الألعاب النشطة\n\nهل أنت متأكد أنك تريد المتابعة؟",
+            "continue": "متابعة",
+            "confirmTitle": "تأكيد حذف الحساب",
+            "confirmMessage": "للتأكيد، يرجى كتابة DELETE (بأحرف كبيرة) أدناه:",
+            "incorrectTitle": "تأكيد خاطئ",
+            "incorrectMessage": "يجب كتابة DELETE بالضبط لتأكيد حذف الحساب.",
+            "successTitle": "تم حذف الحساب",
+            "successMessage": "تم حذف حسابك بنجاح. سيتم تسجيل خروجك الآن.",
+            "failedTitle": "فشل الحذف",
+            "timeoutMessage": "انتهت مهلة الطلب. يرجى التحقق من اتصالك والمحاولة مرة أخرى.",
+            "failedMessage": "فشل حذف الحساب. يرجى المحاولة مرة أخرى أو الاتصال بالدعم.",
+            "retry": "إعادة المحاولة"
+        },
+        "errors": {
+            "loadFailed": "فشل تحميل الإعدادات",
+            "saveFailed": "فشل حفظ الإعدادات",
+            "avatarSaveFailed": "فشل حفظ اختيار الصورة الرمزية",
+            "themeSaveFailed": "فشل حفظ تفضيل السمة",
+            "languageChangeFailed": "فشل تغيير اللغة",
+            "resetFailed": "فشل إعادة تعيين الإعدادات"
+        }
+    },
+    "friends": {
+        "addFriend": "إضافة صديق",
+        "searchPlaceholder": "البحث بإسم المستخدم",
+        "noUsersFound": "لم يتم العثور على مستخدمين",
+        "pending": "معلّق",
+        "incomingRequests": "طلبات واردة",
+        "sentRequests": "طلبات مرسلة",
+        "myFriends": "أصدقائي",
+        "noFriendsYet": "لا يوجد أصدقاء بعد",
+        "noFriendsHint": "أضف أصدقاء باسم المستخدم أعلاه لبدء اللعب معاً!"
+    },
+    "common": {
+        "loading": "جارٍ التحميل...",
+        "error": "خطأ",
+        "success": "نجاح",
+        "cancel": "إلغاء",
+        "confirm": "تأكيد",
+        "save": "حفظ",
+        "delete": "حذف",
+        "edit": "تعديل",
+        "close": "إغلاق",
+        "ok": "OK",
+        "somethingWentWrong": "حدث خطأ ما. يرجى المحاولة مرة أخرى."
+    },
+    "cards": {
+        "matchmaking": {
+            "searchingForOpponent": "جارٍ البحث عن خصم...",
+            "findRandomMatch": "البحث عن مباراة عشوائية",
+            "searchingHint": "جارٍ البحث عن خصم... · اضغط للإلغاء",
+            "tapToJoin": "اضغط للانضمام إلى قائمة الانتظار",
+            "cannotJoinTitle": "لا يمكن الانضمام للمطابقة"
+        },
+        "playWithFriend": {
+            "title": "العب مع صديق",
+            "description": "ادع صديقاً للعب",
+            "modalTitle": "العب مع صديق",
+            "inviteFriend": "دعوة صديق",
+            "inviteDescription": "أرسل دعوة لعب إلى صديق",
+            "textInvite": "دعوة نصية",
+            "textInviteDescription": "إرسال دعوات عبر الرسائل",
+            "passAndPlay": "تمرير ولعب",
+            "passAndPlayDescription": "العب محلياً على هذا الجهاز",
+            "selectFriend": "اختر صديقاً",
+            "searchFriends": "البحث عن أصدقاء...",
+            "noFriendsFound": "لم يتم العثور على أصدقاء",
+            "noFriendsYet": "لا يوجد أصدقاء بعد. أضف أصدقاء للعب!",
+            "passAndPlayGames": "ألعاب التمرير واللعب",
+            "startNewGame": "بدء لعبة جديدة",
+            "noActiveGames": "لا توجد ألعاب نشطة",
+            "vsGuest": "vs ضيف 1",
+            "unlimited": "غير محدود",
+            "shareMessage": "هيا نلعب Coral Clash! 🦀\n\nحمّل من هنا:\niOS: [URL]\n\nAndroid: [URL]"
+        },
+        "signUpPrompt": {
+            "title": "افتح جميع الميزات",
+            "subtitle": "أنشئ حساباً مجانياً للوصول إلى:",
+            "feature1": "العب مع الأصدقاء عبر الإنترنت",
+            "feature2": "ابحث عن خصوم عشوائيين عبر المطابقة",
+            "feature3": "تتبع إحصائيات وتاريخ ألعابك",
+            "feature4": "ابنِ شبكة أصدقائك",
+            "button": "تسجيل / دخول"
+        },
+        "activeGames": {
+            "title": "الألعاب النشطة",
+            "inProgress": "قيد التقدم",
+            "game": "لعبة",
+            "games": "ألعاب",
+            "yourTurn": "دورك",
+            "opponentTurn": "دور الخصم",
+            "opponent": "الخصم",
+            "computer": "Computer",
+            "blitz": "Blitz",
+            "normal": "Normal",
+            "unlimited": "غير محدود",
+            "timed": "بتوقيت",
+            "loading": "جارٍ تحميل الألعاب...",
+            "noGames": "لا توجد ألعاب نشطة",
+            "noGamesHint": "ابدأ لعبة مع صديق!",
+            "vs": "vs ",
+            "resignTitle": "الاستسلام",
+            "resignMessage": "هل أنت متأكد أنك تريد الاستسلام؟ ستخسر هذه اللعبة.",
+            "resignButton": "استسلام",
+            "resignError": "فشل الاستسلام. يرجى المحاولة مرة أخرى."
+        },
+        "gameHistory": {
+            "title": "سجل الألعاب",
+            "subtitle": "الألعاب الأخيرة",
+            "loading": "جارٍ تحميل السجل...",
+            "noHistory": "لا يوجد سجل ألعاب",
+            "noHistoryHint": "ستظهر ألعابك المكتملة هنا",
+            "vs": "vs ",
+            "justNow": "الآن",
+            "minutesAgo": "د مضت",
+            "hoursAgo": "س مضت",
+            "daysAgo": "ي مضت",
+            "cancelled": "لعبة ملغاة",
+            "draw": "تعادل",
+            "won": "فزت",
+            "lost": "خسرت",
+            "unknown": "غير معروف",
+            "opponent": "الخصم",
+            "computer": "Computer",
+            "blitz": "Blitz",
+            "normal": "Normal",
+            "unlimited": "غير محدود",
+            "timed": "بتوقيت"
+        }
+    },
+    "errors": {
+        "INVALID_MOVE": "حركة غير صالحة",
+        "INVALID_MOVE_OCCUPIED": "هذا الموقع مشغول بالفعل",
+        "INVALID_MOVE_OUT_OF_BOUNDS": "الحركة خارج الحدود",
+        "INVALID_MOVE_NOT_YOUR_TURN": "ليس دورك",
+        "INVALID_MOVE_PIECE_BLOCKED": "هذه القطعة محجوبة",
+        "GAME_NOT_FOUND": "اللعبة غير موجودة",
+        "GAME_ALREADY_STARTED": "اللعبة بدأت بالفعل",
+        "GAME_ALREADY_ENDED": "هذه اللعبة انتهت بالفعل",
+        "GAME_CANCELLED": "تم إلغاء اللعبة",
+        "PLAYER_NOT_IN_GAME": "أنت لست في هذه اللعبة",
+        "PLAYER_DISCONNECTED": "انقطع اتصال اللاعب",
+        "CONNECTION_ERROR": "خطأ في الاتصال. يرجى التحقق من الإنترنت.",
+        "SERVER_ERROR": "خطأ في الخادم. يرجى المحاولة لاحقاً.",
+        "TIMEOUT": "انتهت مهلة الطلب",
+        "ALREADY_IN_QUEUE": "أنت بالفعل في قائمة الانتظار",
+        "NOT_IN_QUEUE": "أنت لست في قائمة الانتظار",
+        "QUEUE_TIMEOUT": "انتهت مهلة المطابقة",
+        "OPPONENT_NOT_FOUND": "لم يتم العثور على خصم",
+        "MATCHMAKING_DISABLED": "المطابقة معطلة حالياً",
+        "FRIEND_NOT_FOUND": "الصديق غير موجود",
+        "FRIEND_ALREADY_EXISTS": "صديق بالفعل مع هذا المستخدم",
+        "CANNOT_ADD_SELF": "لا يمكنك إضافة نفسك كصديق",
+        "FRIEND_REQUEST_PENDING": "طلب الصداقة معلق بالفعل",
+        "INVALID_CREDENTIALS": "بريد إلكتروني أو كلمة مرور غير صحيحة",
+        "USER_NOT_FOUND": "المستخدم غير موجود",
+        "EMAIL_ALREADY_EXISTS": "البريد الإلكتروني مستخدم بالفعل",
+        "USERNAME_TAKEN": "اسم المستخدم مأخوذ بالفعل",
+        "WEAK_PASSWORD": "كلمة المرور ضعيفة جداً",
+        "ACCOUNT_DISABLED": "تم تعطيل حسابك",
+        "SESSION_EXPIRED": "انتهت جلستك. يرجى تسجيل الدخول مرة أخرى.",
+        "UNAUTHORIZED": "غير مصرح لك بتنفيذ هذا الإجراء",
+        "RATE_LIMITED": "طلبات كثيرة جداً. يرجى الإبطاء.",
+        "MAINTENANCE_MODE": "التطبيق تحت الصيانة. يرجى المحاولة لاحقاً.",
+        "FEATURE_DISABLED": "هذه الميزة معطلة حالياً"
+    },
+    "success": {
+        "GAME_WON": "تهانينا! لقد فزت!",
+        "GAME_DRAW": "انتهت اللعبة بالتعادل",
+        "GAME_LOST": "حظاً أوفر في المرة القادمة!",
+        "PLAYER_RESIGNED": "اللاعب استسلم",
+        "FRIEND_REQUEST_SENT": "تم إرسال طلب الصداقة!",
+        "FRIEND_REQUEST_ACCEPTED": "تم قبول طلب الصداقة!",
+        "FRIEND_REQUEST_DECLINED": "تم رفض طلب الصداقة",
+        "MOVE_SUCCESS": "حركة ناجحة"
+    },
+    "scenarioBoard": {
+        "pauseAutoPlay": "إيقاف التشغيل التلقائي",
+        "playDemo": "تشغيل العرض",
+        "explanation": "شرح",
+        "backToGuide": "العودة للدليل"
+    },
+    "howToPlay": {
+        "objective": {
+            "title": "الهدف",
+            "intro": "للفوز في Coral Clash، حقق أحد هذه الأهداف:",
+            "checkmate": "كش ملك",
+            "checkmateDesc": "حوت خصمك (عندما يكون الحوت في",
+            "check": "كش",
+            "checkmateDescEnd": "ولا يستطيع الهروب)",
+            "coralControl": "أكبر مساحة بالمرجان",
+            "coralControlDesc": "تحكم في",
+            "coralControlWhen": "عندما:",
+            "coralPlaced": "لاعب وضع كل مرجانه",
+            "whaleRemaining": "لاعب بقي لديه حوته فقط",
+            "backRowReached": "سلطعون أو أخطبوط يصل إلى الصف الأخير للخصم",
+            "areaControlled": "المساحة المتحكم بها بالمرجان:",
+            "areaControlledDesc": "عد كمية المرجان من لونك غير المشغولة بقطع خصمك.",
+            "checkmateExample": "مثال كش ملك",
+            "checkExample": "مثال كش",
+            "coralVictoryExample": "مثال فوز المرجان"
+        },
+        "setup": {
+            "title": "إعداد اللعبة",
+            "boardDesc": "اللوحة شبكة 8×8 بها 64 مربعاً. كل لاعب لديه:",
+            "coralPieces": "17 قطعة مرجان",
+            "units": "17 وحدة: 1 حوت، 2 دلفين، 4 سلاحف، 2 سمك منتفخ، 4 سلطعونات، و4 أخطبوطات",
+            "variants": "كل نوع قطعة يأتي بنوعين:",
+            "hunter": "صياد",
+            "hunterDesc": "القطع (بدون رموز مرجان) يمكنها إزالة المرجان",
+            "gatherer": "جامع",
+            "gathererDesc": "القطع (مع رموز مرجان) يمكنها وضع المرجان",
+            "hunterExample": "مثال تأثير الصياد",
+            "gathererExample": "مثال تأثير الجامع"
+        },
+        "turnOverview": {
+            "title": "نظرة عامة على الدور",
+            "intro": "الأبيض يبدأ أولاً، ثم يتناوب اللاعبون. في دورك:",
+            "step1": "حرّك إحدى قطعك",
+            "step2": "نفّذ أي تأثيرات أسر أو صياد أو جامع",
+            "step3": "تحقق إذا تم تحقيق أي أهداف"
+        },
+        "movement": {
+            "title": "كيف تتحرك القطع",
+            "important": "مهم:",
+            "importantDesc": "القطع لا تستطيع التحرك عبر قطع أخرى - يجب أن يكون لديها مسار واضح.",
+            "variants": "كل نوع قطعة يأتي بنوعين يتفاعلان مع المرجان بشكل مختلف:",
+            "hunterPieces": "قطع الصياد",
+            "hunterMovement": "(بدون رموز مرجان) يتم",
+            "stoppedBy": "إيقافها بواسطة",
+            "hunterMovementDesc": "المرجان - لا تستطيع التحرك من خلاله",
+            "gathererPieces": "قطع الجامع",
+            "gathererMovement": "(مع رموز مرجان) أقوى - تستطيع المرور",
+            "through": "عبر",
+            "gathererMovementDesc": "المرجان بحرية",
+            "coralMovementExample": "مثال حركة المرجان",
+            "individualMovements": "حركات القطع الفردية"
+        },
+        "pieces": {
+            "whale": {
+                "name": "الحوت",
+                "intro": "الحوت هو أهم قطعة لديك - إذا تم كش ملكه، تخسر! الحوت يشغل مربعين وله خياران مختلفان للحركة:",
+                "slidingMove": "1. حركة انزلاقية:",
+                "slidingMoveDesc": "حرّك نصف القطعة أي عدد من المربعات أفقياً أو عمودياً أو قطرياً مع الحفاظ على اتجاهها الأصلي. الحوت يتبع قواعد حركة الصياد - يتوقف عند المرجان. ومع ذلك، هناك استثناء خاص (انظر أدناه).",
+                "rotationMove": "2. حركة دورانية:",
+                "rotationMoveDesc": "أدر نصف القطعة إلى مربع مجاور (مربع واحد عمودياً أو أفقياً). عند اختيار الدوران، اضغط أولاً على مربع الوجهة (بدائرة بيضاء). إذا كانت هناك عدة اتجاهات صالحة، اضغط على مربع الاتجاه (بدائرة خضراء). إذا كان هناك اتجاه واحد فقط، يتحرك الحوت تلقائياً.",
+                "checkRules": "قواعد الكش:",
+                "checkRulesDesc": "لا يجوز للحوت إنهاء حركته في كش (حيث يمكن أسره)، لكنه يستطيع التحرك عبر مربعات مهددة.",
+                "doubleCapture": "أسر مزدوج:",
+                "doubleCaptureDesc": "الحوت يمكنه أسر قطعتين في حركة واحدة - واحدة بكل نصف من جسمه!",
+                "doubleCoralRemoval": "إزالة مرجان مزدوجة:",
+                "doubleCoralRemovalDesc": "عندما يهبط الحوت (كصياد) على مرجان، يمكنه اختيار إزالة واحد أو كلا قطعتي المرجان.",
+                "specialCase": "⚠️ حالة حركة خاصة",
+                "specialCaseDesc": "إذا كان نصف الحوت يقف بالفعل على مرجان، فإن ذلك المرجان لا يمنع النصف الآخر من التحرك عبر أو الهبوط على نفس مربع المرجان.",
+                "basicMovement": "حركة الحوت الأساسية",
+                "rotationExample": "مثال دوران الحوت",
+                "coralException": "الحوت يتحرك عبر مرجانه"
+            },
+            "dolphin": {
+                "name": "الدلفين",
+                "movement": "يتحرك أي عدد من المربعات عمودياً أو أفقياً أو قطرياً.",
+                "example": "مثال حركة الدلفين"
+            },
+            "turtle": {
+                "name": "السلحفاة",
+                "movement": "تتحرك أي عدد من المربعات عمودياً أو أفقياً.",
+                "example": "مثال حركة السلحفاة"
+            },
+            "pufferfish": {
+                "name": "السمك المنتفخ",
+                "movement": "يتحرك أي عدد من المربعات قطرياً.",
+                "example": "مثال حركة السمك المنتفخ"
+            },
+            "octopus": {
+                "name": "الأخطبوط",
+                "movement": "يتحرك مربعاً واحداً قطرياً.",
+                "example": "مثال حركة الأخطبوط"
+            },
+            "crab": {
+                "name": "السلطعون",
+                "movement": "يتحرك مربعاً واحداً عمودياً أو أفقياً.",
+                "example": "مثال حركة السلطعون"
+            }
+        },
+        "specialRules": {
+            "title": "قواعد خاصة",
+            "capture": {
+                "title": "الأسر",
+                "desc": "انقل إلى مربع تشغله قطعة خصم. الحيتان يمكنها أسر قطعتين في حركة واحدة.",
+                "example": "مثال الأسر"
+            },
+            "hunterEffect": {
+                "title": "حركة وتأثير الصياد",
+                "desc": "قطع الصياد (بدون رموز مرجان) لها سلوكان مهمان:",
+                "movementStops": "الحركة تتوقف",
+                "movementStopsDesc": "عند الهبوط على المرجان",
+                "canRemove": "يمكن إزالة",
+                "canRemoveDesc": "ذلك المرجان من اللوحة",
+                "example": "مثال تأثير الصياد"
+            },
+            "gathererEffect": {
+                "title": "تأثير الجامع",
+                "desc": "قطع الجامع (مع رموز مرجان) يمكنها وضع المرجان على مربعات فارغة تتحرك إليها.",
+                "example": "مثال تأثير الجامع"
+            }
+        },
+        "drawResignation": {
+            "title": "التعادل والاستسلام",
+            "stalemate": "جمود:",
+            "stalemateDesc": "عندما لا يكون لدى اللاعب حركات قانونية وحوته ليس في كش",
+            "threefoldRepetition": "التكرار الثلاثي:",
+            "threefoldRepetitionDesc": "نفس الموقع يحدث ثلاث مرات مع نفس اللاعب",
+            "resignation": "الاستسلام:",
+            "resignationDesc": "يمكن للاعب الاستسلام في أي وقت"
+        }
+    },
+    "tutorial": {
+        "endGame": {
+            "title": "!مرحباً في Coral Clash",
+            "message": "الحوت هو الملك. يمكنك الفوز إما بكش ملك الحوت الأسود، أو بوضع جميع مرجانك الـ 17. حظاً سعيداً!",
+            "backInfo": "اضغط على السهم للعودة إلى الشاشة الرئيسية"
+        }
+    },
+    "tutorialScenarios": {
+        "checkmate": {
+            "title": "مثال كش ملك",
+            "description": "الحوت الأسود محاصر بالمرجان عند a6 (يُشار إليه بالحدود الوردية). الدلفين الصياد الأبيض عند b7 يضع الحوت في كش، والسلحفاة الجامعة البيضاء (مع رموز مرجان على الحدود) عند g7 تحمي الدلفين المهاجم. الحوت ليس لديه مهرب - كش ملك!"
+        },
+        "coralVictory": {
+            "title": "فوز المرجان - منطقة السيطرة",
+            "description": "الأبيض لديه 4 مرجان (بحدود وردية): c3, d3, e3, f3. الأسود لديه 4 مرجان (بحدود سوداء): c6, d6, e6, f6. الدلفين الجامع الأسود عند c3 يقف على مرجان الأبيض، لذا الأبيض يتحكم فقط في 3 مرجان (d3, e3, f3). الأسود يتحكم في كل 4 مرجان = الأسود يفوز 4 إلى 3!"
+        },
+        "whaleMovement": {
+            "title": "حركة الحوت",
+            "description": "الحيتان تشغل مربعين متجاورين ويمكنها التحرك بثلاث طرق: (1) انزلاق نصف أي عدد من المربعات بينما يبقى الآخر ثابتاً، (2) انزلاق كلا النصفين معاً في نفس الاتجاه، أو (3) الدوران بتحريك نصف إلى مربع مجاور."
+        },
+        "whaleRotation": {
+            "title": "دوران الحوت",
+            "description": "الحوت يمكنه الدوران بتحريك نصف إلى مربع مجاور (عمودياً أو أفقياً). شاهد الحوت الأبيض يدور من وضع أفقي إلى عمودي."
+        },
+        "whaleCoralException": {
+            "title": "الحوت يتحرك عبر مرجانه",
+            "description": "قاعدة خاصة: عندما يكون نصف الحوت على مرجان، ذلك المرجان لا يمنع النصف الآخر من التحرك عبره."
+        },
+        "coralMovementComparison": {
+            "title": "مقارنة حركة المرجان",
+            "description": "قارن الدلفين الصياد الأبيض (يسار، بدون رموز مرجان) مع الدلفين الجامع الأبيض (يمين، مع رموز مرجان). اضغط على كل منهما لرؤية حركاته."
+        },
+        "check": {
+            "title": "كش",
+            "description": "الحوت الأسود في كش - يتعرض لهجوم من الدلفين الجامع الأبيض. الدلفين الجامع يمكنه التحرك عبر المرجان. يجب على الأسود تحريك الحوت من الخطر أو حجب الهجوم."
+        },
+        "hunterEffect": {
+            "title": "تأثير الصياد",
+            "description": "قطع الصياد (بدون رموز مرجان) تتوقف عند التحرك على المرجان. يمكنها بعد ذلك إزالة ذلك المرجان من اللوحة."
+        },
+        "gathererEffect": {
+            "title": "تأثير الجامع",
+            "description": "قطع الجامع (مع رموز مرجان) يمكنها وضع المرجان على مربعات فارغة تتحرك إليها."
+        },
+        "dolphinMovement": {
+            "title": "حركة الدلفين",
+            "description": "الدلافين يمكنها التحرك أي عدد من المربعات في أي اتجاه - عمودياً أو أفقياً أو قطرياً."
+        },
+        "turtleMovement": {
+            "title": "حركة السلحفاة",
+            "description": "السلاحف يمكنها التحرك أي عدد من المربعات عمودياً أو أفقياً، لكن ليس قطرياً."
+        },
+        "pufferfishMovement": {
+            "title": "حركة السمك المنتفخ",
+            "description": "السمك المنتفخ يمكنه التحرك أي عدد من المربعات قطرياً."
+        },
+        "crabMovement": {
+            "title": "حركة السلطعون",
+            "description": "السلطعونات تتحرك مربعاً واحداً عمودياً أو أفقياً."
+        },
+        "octopusMovement": {
+            "title": "حركة الأخطبوط",
+            "description": "الأخطبوطات تتحرك مربعاً واحداً قطرياً."
+        },
+        "capture": {
+            "title": "أسر القطع",
+            "description": "لأسر قطعة خصم، حرّك إحدى قطعك إلى المربع الذي تشغله."
+        }
+    },
+    "components": {
+        "fixtureLoader": {
+            "title": "تحميل حالة اللعبة",
+            "gameMode": "وضع اللعب:",
+            "back": "رجوع",
+            "vsComputer": "vs Computer",
+            "passAndPlay": "تمرير ولعب",
+            "loadGame": "تحميل اللعبة",
+            "fixturesHint": "💡 الملفات من shared/game/__fixtures__/",
+            "error": "خطأ",
+            "failedToLoad": "فشل تحميل الملف"
+        },
+        "versionWarning": {
+            "title": "تحديث متاح",
+            "message": "يرجى التحديث إلى أحدث إصدار للحصول على أفضل تجربة.",
+            "updateButton": "تحديث"
+        },
+        "playerStatus": {
+            "computer": "Computer",
+            "thinking": "يفكر...",
+            "remaining": "متبقي",
+            "underControl": "تحت السيطرة"
+        },
+        "alert": {
+            "defaultButton": "OK"
+        },
+        "pvpBoard": {
+            "player": "اللاعب",
+            "opponent": "الخصم",
+            "requestUndoTitle": "طلب تراجع",
+            "requestUndoMessage": "التراجع عن الحركة الأخيرة؟ {{opponentName}} يجب أن يوافق.",
+            "requestResetTitle": "طلب إعادة تعيين",
+            "requestResetMessage": "إعادة تعيين هذه اللعبة؟ {{opponentName}} يجب أن يوافق.",
+            "cancel": "إلغاء",
+            "request": "طلب",
+            "requestReset": "طلب إعادة تعيين",
+            "askOpponentReset": "اطلب من الخصم إعادة تعيين اللعبة",
+            "gameEnded": "انتهت اللعبة بالفعل",
+            "noMoves": "لم يتم إجراء أي حركات بعد",
+            "pendingUndo": "يجب حل طلب التراجع المعلق أولاً",
+            "remindOpponent": "تذكير الخصم",
+            "remindOpponentSubtitle": "ذكّر الخصم بدوره",
+            "availableInHours": "متاح خلال {{hours}} ساعة/ساعات",
+            "yourTurn": "دورك",
+            "errorUndoRequest": "فشل إرسال طلب التراجع. يرجى المحاولة مرة أخرى.",
+            "errorUndoResponse": "فشل الرد على طلب التراجع.",
+            "errorResetResponse": "فشل الرد على طلب إعادة التعيين.",
+            "errorCancelUndo": "فشل إلغاء طلب التراجع.",
+            "errorCancelReset": "فشل إلغاء طلب إعادة التعيين.",
+            "reminderSentTitle": "نجاح",
+            "reminderSentMessage": "تم إرسال تذكير لخصمك.",
+            "errorReminderTitle": "خطأ",
+            "errorReminderMessage": "فشل إرسال التذكير.",
+            "waitingUndoResponse": "بانتظار رد {{opponentName}} على التراجع عن {{moveCount}} حركة/حركات...",
+            "opponentWantsUndo": "{{opponentName}} يريد التراجع عن {{moveCount}} حركة/حركات",
+            "waitingResetResponse": "بانتظار رد {{opponentName}} على طلب إعادة التعيين...",
+            "opponentWantsReset": "{{opponentName}} يريد إعادة تعيين اللعبة"
+        },
+        "passAndPlayBoard": {
+            "resetGameTitle": "إعادة تعيين اللعبة",
+            "resetGameMessage": "هل أنت متأكد أنك تريد بدء لعبة جديدة؟",
+            "cancel": "إلغاء",
+            "reset": "إعادة تعيين",
+            "resetGame": "إعادة تعيين اللعبة",
+            "startNewGame": "بدء لعبة جديدة من البداية",
+            "gameEnded": "انتهت اللعبة بالفعل",
+            "noMoves": "لم يتم إجراء أي حركات بعد"
+        },
+        "baseBoard": {
+            "errorLoadState": "فشل تحميل حالة اللعبة",
+            "resignGameTitle": "الاستسلام",
+            "resignGameMessage": "هل أنت متأكد أنك تريد الاستسلام؟ ستخسر اللعبة.",
+            "cancel": "إلغاء",
+            "resign": "استسلام",
+            "checkTitle": "كش!",
+            "checkMessage": "{{piece}} في كش!",
+            "checkmateTitle": "كش ملك!",
+            "checkmateMessage": "{{winner}} يفوز بكش ملك!",
+            "gathererTitle": "تأثير الجامع",
+            "gathererMessage": "وضع مرجان على هذا المربع؟",
+            "yes": "نعم",
+            "no": "لا",
+            "hunterTitle": "تأثير الصياد",
+            "hunterMessage": "إزالة المرجان من هذا المربع؟",
+            "exportSuccessTitle": "نجاح",
+            "exportSuccessMessage": "تم حفظ حالة اللعبة في الحافظة!",
+            "exportFailedTitle": "فشل التصدير",
+            "computer": "Computer",
+            "opponent": "الخصم",
+            "white": "الأبيض",
+            "black": "الأسود",
+            "youWonTimeout": "فزت! {{opponentName}} نفد وقته ⏱️",
+            "youLostTimeout": "خسرت! انتهى الوقت ⏱️",
+            "timeoutLose": "{{loserName}} نفد وقته! ⏱️",
+            "youWonResign": "فزت! {{opponentName}} استسلم 🏳️",
+            "youResigned": "لقد استسلمت 🏳️",
+            "checkmateWin": "كش ملك! فزت! 🏆",
+            "checkmateLose": "كش ملك! خسرت.",
+            "checkmateGeneric": "كش ملك! {{winner}} يفوز! 🏆",
+            "youLost": "خسرت",
+            "resignGeneric": "{{winner}} يفوز بالاستسلام! 🏳️",
+            "coralVictoryWin": "فزت بفوز المرجان! 🪸\n{{whiteScore}} - {{blackScore}}",
+            "coralVictoryLose": "خسرت. {{winner}} يفوز بفوز المرجان! 🪸\n{{whiteScore}} - {{blackScore}}",
+            "coralVictoryGeneric": "{{winner}} يفوز بفوز المرجان! 🪸\n{{whiteScore}} أبيض - {{blackScore}} أسود",
+            "stalemate": "جمود! 🤝",
+            "drawRepetition": "تعادل بالتكرار! 🤝",
+            "drawInsufficientMaterial": "تعادل - مواد غير كافية! 🤝",
+            "drawCoralTie": "تعادل - تعادل مرجاني! 🤝🪸\n{{score}} - {{score}}",
+            "draw": "تعادل! 🤝",
+            "check": "{{player}} في كش! ⚠️",
+            "viewingHistory": "عرض الحركات السابقة - عد للحالية للعب",
+            "selectWhaleOrientation": "اختر اتجاه حوتك",
+            "hunterWhaleTitle": "تأثير الصياد (الحوت)",
+            "hunterWhaleMessage": "اختر خيار إزالة المرجان:",
+            "yourTurn": "دورك",
+            "opponentTurn": "دور {{opponentName}}",
+            "playerTurn": "دور {{playerColor}}"
+        },
+        "computerBoard": {
+            "cancelRequestTitle": "إلغاء الطلب",
+            "cancelRequestMessage": "إلغاء طلب إعادة التعيين؟",
+            "cancel": "إلغاء",
+            "yes": "نعم",
+            "resetGameTitle": "إعادة تعيين اللعبة",
+            "resetGameMessage": "هل أنت متأكد أنك تريد بدء لعبة جديدة؟",
+            "reset": "إعادة تعيين",
+            "resetGame": "إعادة تعيين اللعبة",
+            "startNewGame": "بدء لعبة جديدة من البداية",
+            "gameEnded": "انتهت اللعبة بالفعل",
+            "noMoves": "لم يتم إجراء أي حركات بعد",
+            "errorUndo": "فشل التراجع. يرجى المحاولة مرة أخرى."
+        },
+        "computerUsers": {
+            "successTitle": "نجاح",
+            "errorTitle": "خطأ",
+            "initializeSuccess": "تم تهيئة {{count}} مستخدم كمبيوتر بنجاح",
+            "initializeError": "فشل تهيئة مستخدمي الكمبيوتر.",
+            "confirmDeleteTitle": "تأكيد الحذف",
+            "confirmDeleteMessage": "هل أنت متأكد أنك تريد حذف جميع مستخدمي الكمبيوتر؟",
+            "cancel": "إلغاء",
+            "delete": "حذف",
+            "deleteSuccess": "تم حذف {{count}} مستخدم كمبيوتر بنجاح",
+            "deleteError": "فشل حذف مستخدمي الكمبيوتر.",
+            "clearLanguageSuccess": "تم مسح تفضيل اللغة. سيكتشف التطبيق اللغة تلقائياً عند التشغيل التالي.",
+            "clearLanguageError": "فشل مسح تفضيل اللغة."
+        }
+    },
+    "hooks": {
+        "friends": {
+            "removeFriendTitle": "إزالة صديق",
+            "removeFriendMessage": "هل أنت متأكد أنك تريد إزالة {{friendName}} من أصدقائك؟",
+            "cancel": "إلغاء",
+            "remove": "إزالة",
+            "errorRemove": "فشل إزالة الصديق",
+            "errorAccept": "فشل قبول طلب الصداقة",
+            "errorDecline": "فشل رفض طلب الصداقة",
+            "cancelRequestTitle": "إلغاء طلب الصداقة",
+            "cancelRequestMessage": "إلغاء طلب الصداقة إلى {{displayName}}؟",
+            "no": "لا",
+            "yesCancel": "نعم، إلغاء",
+            "errorCancelRequest": "فشل إلغاء طلب الصداقة",
+            "errorTitle": "خطأ"
+        },
+        "game": {
+            "errorTitle": "خطأ",
+            "errorLoadGame": "فشل تحميل اللعبة"
+        },
+        "gameActions": {
+            "errorTitle": "خطأ",
+            "errorResign": "فشل الاستسلام"
+        },
+        "userSearch": {
+            "errorTitle": "خطأ",
+            "errorSendRequest": "فشل إرسال طلب الصداقة"
+        }
+    }
+}

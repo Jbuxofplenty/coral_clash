@@ -1,0 +1,812 @@
+{
+    "auth": {
+        "welcomeBack": "Witamy ponownie",
+        "createAccount": "Utwórz konto",
+        "resetPassword": "Zresetuj hasło",
+        "signInSubtitle": "Zaloguj się, aby grać z komputerem lub wyzywać innych graczy online",
+        "signUpSubtitle": "Utwórz konto, aby grać online. Wybierz unikalną nazwę użytkownika!",
+        "forgotPasswordSubtitle": "Podaj adres e-mail, aby otrzymać link do resetowania hasła",
+        "usernamePlaceholder": "Nazwa użytkownika (wymagana)",
+        "emailPlaceholder": "E-mail",
+        "passwordPlaceholder": "Hasło",
+        "signInWithApple": "Zaloguj przez Apple",
+        "signUpWithApple": "Zarejestruj przez Apple",
+        "signInWithGoogle": "Zaloguj przez Google",
+        "signUpWithGoogle": "Zarejestruj przez Google",
+        "or": "LUB",
+        "signIn": "Zaloguj się",
+        "signUp": "Zarejestruj się",
+        "sendResetLink": "Wyślij link resetujący",
+        "forgotPassword": "Zapomniałeś hasła?",
+        "backToSignIn": "Powrót do logowania",
+        "alreadyHaveAccount": "Masz już konto? Zaloguj się",
+        "dontHaveAccount": "Nie masz konta? Zarejestruj się",
+        "errors": {
+            "fillAllFields": "Proszę wypełnić wszystkie pola",
+            "usernameRequired": "Nazwa użytkownika jest wymagana",
+            "usernameMinLength": "Nazwa użytkownika musi mieć co najmniej 2 znaki",
+            "usernameMaxLength": "Nazwa użytkownika musi mieć mniej niż 30 znaków",
+            "usernameInvalidChars": "Nazwa użytkownika może zawierać tylko litery, cyfry, spacje, podkreślenia i myślniki",
+            "authFailed": "Uwierzytelnianie nie powiodło się",
+            "googleSignInFailed": "Logowanie przez Google nie powiodło się",
+            "appleSignInFailed": "Logowanie przez Apple nie powiodło się",
+            "enterEmail": "Proszę podać adres e-mail",
+            "resetEmailFailed": "Nie udało się wysłać e-maila resetującego"
+        },
+        "success": {
+            "resetEmailSent": "E-mail z resetem hasła wysłany! Sprawdź swoją skrzynkę."
+        }
+    },
+    "game": {
+        "difficulty": {
+            "title": "Wybierz trudność AI",
+            "subtitle": "Wybierz poziom trudności dla komputerowego przeciwnika",
+            "random": "Losowo",
+            "easy": "Łatwy",
+            "medium": "Średni",
+            "hard": "Trudny",
+            "randomDescription": "Komputer wykonuje losowe ruchy",
+            "easyDescription": "Komputer używa podstawowej strategii",
+            "mediumDescription": "Komputer używa średniej strategii",
+            "hardDescription": "Komputer używa zaawansowanej strategii",
+            "createAccountToAccess": "Utwórz konto, aby uzyskać dostęp"
+        },
+        "matchmaking": {
+            "title": "Wybierz tryb gry",
+            "timeControl": "Wybierz kontrolę czasu",
+            "timeControlSubtitle": "Wybierz limit czasu dla tej gry",
+            "instant": "Natychmiastowy",
+            "instantDescription": "Znajdź przeciwnika teraz. Łączy cię z graczami online.",
+            "correspondence": "Korespondencyjny",
+            "correspondenceDescription": "Wyślij zaproszenie do losowego gracza. Ma 24 godziny na akceptację.",
+            "timeControls": {
+                "unlimited": "Bez limitu czasu",
+                "blitz": "5 minut",
+                "normal": "10 minut",
+                "custom": "Limit czasu ustawiony"
+            },
+            "timeControlDescriptions": {
+                "blitz": "5 minut na gracza",
+                "normal": "10 minut na gracza",
+                "unlimited": "Bez limitu czasu"
+            }
+        },
+        "status": {
+            "loading": "Ładowanie",
+            "noGamesFound": "Nie znaleziono gier",
+            "error": "Błąd",
+            "resetApproved": "Gra zresetowana",
+            "resetRejected": "Żądanie resetu odrzucone",
+            "undoApproved": "Ruch cofnięty",
+            "undoRejected": "Żądanie cofnięcia odrzucone"
+        },
+        "actions": {
+            "cancel": "Anuluj"
+        },
+        "postMatchSignup": {
+            "title": "Świetna gra!",
+            "message": "Chcesz zapisać statystyki i grać z prawdziwymi ludźmi?",
+            "lossTitle": "Nie poddawaj się!",
+            "lossMessage": "Każda porażka to lekcja. Zarejestruj się, by śledzić postępy.",
+            "button": "Zarejestruj się teraz"
+        }
+    },
+    "navigation": {
+        "home": "Strona główna",
+        "game": "Gra",
+        "tutorial": "Tutorial",
+        "howToPlay": "Jak grać",
+        "settings": "Ustawienia",
+        "friends": "Znajomi",
+        "stats": "Statystyki",
+        "reportIssue": "Zgłoś problem",
+        "rulesVideo": "Film z zasadami",
+        "physicalGame": "Gra fizyczna",
+        "logOut": "Wyloguj",
+        "logOutConfirmTitle": "Wyloguj",
+        "logOutConfirmMessage": "Czy na pewno chcesz się wylogować?",
+        "cancel": "Anuluj",
+        "appTitle": "Coral Clash",
+        "appSubtitle": "Oceaniczna gra strategiczna"
+    },
+    "home": {
+        "welcome": {
+            "title": "Witaj w Coral Clash!",
+            "message": "Obejrzyj film z zasadami lub przewodnik Jak grać w menu, aby zacząć!",
+            "watchVideo": "Obejrzyj film",
+            "howToPlay": "Jak grać",
+            "ok": "OK"
+        },
+        "opponent": {
+            "computer": "Computer",
+            "opponent": "Przeciwnik",
+            "guest": "Gość 1"
+        },
+        "gameModes": {
+            "howToPlayTitle": "Jak grać",
+            "howToPlayDescription": "Poznaj zasady i strategie Coral Clash",
+            "playComputerTitle": "Graj z komputerem",
+            "playComputerDescription": "Rozpocznij nową grę przeciwko AI",
+            "loadGameStateTitle": "Wczytaj stan gry (Dev)",
+            "loadGameStateDescription": "Wczytaj zapisany stan gry z fixtures"
+        },
+        "matchmaking": {
+            "cannotJoin": "Nie można dołączyć do dobierania",
+            "instantMatchFound": "Znaleziono mecz korespondencyjny!",
+            "instantMatchMessage": "Zostałeś dopasowany z {{creatorName}}. Zostanie powiadomiony i ma 24 godziny na akceptację.",
+            "correspondenceCreated": "Zaproszenie korespondencyjne utworzone",
+            "correspondenceMessage": "Twoje zaproszenie zostało utworzone. Gdy inny gracz wybierze tryb korespondencyjny, może zostać dopasowany do Twojego zaproszenia. Zostaniesz powiadomiony, gdy ktoś zechce zagrać!"
+        },
+        "errors": {
+            "offlineModeTitle": "Tryb offline",
+            "offlineModeMessage": "Nie można połączyć się z serwerem. Uruchamianie gry offline z komputerem.",
+            "errorTitle": "Błąd",
+            "failedToStart": "Nie udało się rozpocząć {{action}}. Spróbuj ponownie.",
+            "failedToResign": "Nie udało się poddać. Spróbuj ponownie.",
+            "failedPassAndPlay": "Nie udało się rozpocząć gry lokalnej. Spróbuj ponownie.",
+            "failedComputerGame": "Nie udało się rozpocząć gry z komputerem",
+            "failedMatchmaking": "Nie udało się rozpocząć dobierania {{mode}}. {{message}}"
+        }
+    },
+    "stats": {
+        "overallStatistics": "Ogólne statystyki",
+        "gamesPlayed": "Rozegrane gry",
+        "wins": "Wygrane",
+        "losses": "Przegrane",
+        "draws": "Remisy",
+        "winRate": "Procent wygranych",
+        "matchupStatistics": "Statystyki przeciwników",
+        "matchupDescription": "Procent wygranych przeciwko każdemu przeciwnikowi (PvP i Komputer)",
+        "computer": "Computer",
+        "winRateShort": "Wygr.",
+        "winsShort": "W",
+        "lossesShort": "P",
+        "drawsShort": "R",
+        "noGamesYet": "Brak gier",
+        "noGamesHint": "Zagraj, aby zobaczyć swoje statystyki!"
+    },
+    "gameMenu": {
+        "saveGameState": "Zapisz stan gry",
+        "exportPosition": "Eksportuj aktualną pozycję",
+        "flipBoard": "Obróć planszę",
+        "showingBlackBottom": "Obecnie czarne na dole",
+        "showingWhiteBottom": "Obecnie białe na dole",
+        "reportBug": "Zgłoś błąd",
+        "includeGameState": "Dołącz aktualny stan gry",
+        "resignGame": "Poddaj się",
+        "resigning": "Poddawanie się...",
+        "pleaseWait": "Proszę czekać...",
+        "gameEnded": "Gra już się zakończyła",
+        "forfeitGame": "Przegraj aktualną grę"
+    },
+    "reportIssue": {
+        "bugReportTitle": "Raport błędu",
+        "bugReportDescription": "Zgłoś błąd z aktualnym stanem gry. Pozycja zostanie dołączona do raportu.",
+        "feedbackTitle": "Opinie i problemy",
+        "feedbackDescription": "Wyślij opinię lub zgłoś problem. Doceniamy Twój wkład!",
+        "subject": "Temat",
+        "subjectPlaceholder": "Krótki opis problemu",
+        "description": "Opis",
+        "descriptionPlaceholder": "Szczegółowy opis problemu lub opinii...",
+        "gameStateIncluded": "✓ Stan gry zostanie dołączony",
+        "turn": "Runda",
+        "white": "Białe",
+        "black": "Czarne",
+        "gameOver": "Gra zakończona",
+        "submitIssue": "Wyślij zgłoszenie",
+        "anonymousNote": "Uwaga: Wysyłasz anonimowo. Zaloguj się, aby śledzić swoje zgłoszenia.",
+        "validation": {
+            "missingSubjectTitle": "Brak informacji",
+            "missingSubjectMessage": "Proszę podać temat zgłoszenia.",
+            "invalidSubjectTitle": "Nieprawidłowy temat",
+            "invalidSubjectMessage": "Temat musi mieć co najmniej 3 znaki.",
+            "missingDescriptionTitle": "Brak informacji",
+            "missingDescriptionMessage": "Proszę podać opis problemu.",
+            "invalidDescriptionTitle": "Nieprawidłowy opis",
+            "invalidDescriptionMessage": "Opis musi mieć co najmniej 10 znaków."
+        },
+        "success": {
+            "title": "Zgłoszenie wysłane",
+            "message": "Dziękujemy za opinię! Twoje zgłoszenie zostało wysłane",
+            "ok": "OK"
+        },
+        "error": {
+            "title": "Wysyłanie nie powiodło się",
+            "message": "Nie udało się wysłać zgłoszenia. Sprawdź połączenie i spróbuj ponownie."
+        }
+    },
+    "settings": {
+        "account": "Konto",
+        "profileAvatar": "Avatar profilu",
+        "chooseAvatar": "Wybierz swój oceaniczny avatar",
+        "appearance": "Wygląd",
+        "theme": {
+            "light": "Jasny",
+            "lightDescription": "Zawsze używaj jasnego motywu",
+            "dark": "Ciemny",
+            "darkDescription": "Zawsze używaj ciemnego motywu",
+            "auto": "Automatyczny",
+            "autoDescription": "Dopasuj do motywu systemowego"
+        },
+        "language": {
+            "title": "Język (Language)",
+            "english": "English",
+            "englishDescription": "English language interface",
+            "hindi": "हिन्दी (Hindi)",
+            "hindiDescription": "हिन्दी भाषा इंटरफ़ेस"
+        },
+        "actions": {
+            "resetToDefaults": "Przywróć domyślne",
+            "resetTitle": "Resetuj ustawienia",
+            "resetMessage": "Czy na pewno chcesz przywrócić wszystkie ustawienia do domyślnych?",
+            "cancel": "Anuluj",
+            "reset": "Resetuj"
+        },
+        "dangerZone": {
+            "title": "Strefa zagrożenia",
+            "warning": "Po usunięciu konta nie ma odwrotu. Upewnij się.",
+            "deleteAccount": "Usuń konto",
+            "deletingAccount": "Usuwanie konta...",
+            "deleteTitle": "Usuń konto",
+            "deleteMessage": "Ta operacja jest trwała i nieodwracalna.\n\n• Wszystkie Twoje dane osobowe zostaną usunięte\n• Twoje gry będą kontynuowane, ale pojawisz się jako \"Anonimowy\"\n• Twoi znajomi i zaproszenia zostaną usunięte\n• Aktywne gry zostaną przegrane\n\nCzy na pewno chcesz kontynuować?",
+            "continue": "Kontynuuj",
+            "confirmTitle": "Potwierdź usunięcie konta",
+            "confirmMessage": "Aby potwierdzić, wpisz poniżej DELETE (wielkimi literami):",
+            "incorrectTitle": "Nieprawidłowe potwierdzenie",
+            "incorrectMessage": "Musisz wpisać dokładnie DELETE, aby potwierdzić usunięcie konta.",
+            "successTitle": "Konto usunięte",
+            "successMessage": "Twoje konto zostało pomyślnie usunięte. Zostaniesz teraz wylogowany.",
+            "failedTitle": "Usunięcie nie powiodło się",
+            "timeoutMessage": "Upłynął limit czasu żądania. Sprawdź połączenie i spróbuj ponownie.",
+            "failedMessage": "Nie udało się usunąć konta. Spróbuj ponownie lub skontaktuj się z pomocą techniczną.",
+            "retry": "Spróbuj ponownie"
+        },
+        "errors": {
+            "loadFailed": "Nie udało się załadować ustawień",
+            "saveFailed": "Nie udało się zapisać ustawień",
+            "avatarSaveFailed": "Nie udało się zapisać wyboru avatara",
+            "themeSaveFailed": "Nie udało się zapisać motywu",
+            "languageChangeFailed": "Nie udało się zmienić języka",
+            "resetFailed": "Nie udało się zresetować ustawień"
+        }
+    },
+    "friends": {
+        "addFriend": "Dodaj znajomego",
+        "searchPlaceholder": "Szukaj po nazwie użytkownika",
+        "noUsersFound": "Nie znaleziono użytkowników",
+        "pending": "Oczekujące",
+        "incomingRequests": "Przychodzące zaproszenia",
+        "sentRequests": "Wysłane zaproszenia",
+        "myFriends": "Moi znajomi",
+        "noFriendsYet": "Brak znajomych",
+        "noFriendsHint": "Dodaj znajomych po nazwie użytkownika, aby grać razem!"
+    },
+    "common": {
+        "loading": "Ładowanie...",
+        "error": "Błąd",
+        "success": "Sukces",
+        "cancel": "Anuluj",
+        "confirm": "Potwierdź",
+        "save": "Zapisz",
+        "delete": "Usuń",
+        "edit": "Edytuj",
+        "close": "Zamknij",
+        "ok": "OK",
+        "somethingWentWrong": "Coś poszło nie tak. Spróbuj ponownie."
+    },
+    "cards": {
+        "matchmaking": {
+            "searchingForOpponent": "Szukanie przeciwnika...",
+            "findRandomMatch": "Znajdź losowy mecz",
+            "searchingHint": "Szukanie przeciwnika... · Dotknij, aby anulować",
+            "tapToJoin": "Dotknij, aby dołączyć do kolejki",
+            "cannotJoinTitle": "Nie można dołączyć"
+        },
+        "playWithFriend": {
+            "title": "Graj ze znajomym",
+            "description": "Zaproś znajomego do gry",
+            "modalTitle": "Graj ze znajomym",
+            "inviteFriend": "Zaproś znajomego",
+            "inviteDescription": "Wyślij zaproszenie do gry",
+            "textInvite": "Zaproszenie tekstowe",
+            "textInviteDescription": "Wyślij zaproszenie przez SMS",
+            "passAndPlay": "Gra lokalna",
+            "passAndPlayDescription": "Graj lokalnie na tym urządzeniu",
+            "selectFriend": "Wybierz znajomego",
+            "searchFriends": "Szukaj znajomych...",
+            "noFriendsFound": "Nie znaleziono znajomych",
+            "noFriendsYet": "Brak znajomych. Dodaj ich, aby grać!",
+            "passAndPlayGames": "Gry lokalne",
+            "startNewGame": "Nowa gra",
+            "noActiveGames": "Brak aktywnych gier",
+            "vsGuest": "vs Gość 1",
+            "unlimited": "Bez limitu",
+            "shareMessage": "Zagrajmy w Coral Clash! 🦀\n\nPobierz tutaj:\niOS: [URL]\n\nAndroid: [URL]"
+        },
+        "signUpPrompt": {
+            "title": "Odblokuj wszystkie funkcje",
+            "subtitle": "Utwórz darmowe konto, aby uzyskać dostęp do:",
+            "feature1": "Graj ze znajomymi online",
+            "feature2": "Znajdź losowych przeciwników przez dobieranie",
+            "feature3": "Śledź statystyki i historię gier",
+            "feature4": "Zbuduj sieć znajomych",
+            "button": "Zarejestruj / Zaloguj"
+        },
+        "activeGames": {
+            "title": "Aktywne gry",
+            "inProgress": "w toku",
+            "game": "gra",
+            "games": "gry",
+            "yourTurn": "Twój ruch",
+            "opponentTurn": "Ruch przeciwnika",
+            "opponent": "Przeciwnik",
+            "computer": "Computer",
+            "blitz": "Blitz",
+            "normal": "Normal",
+            "unlimited": "Bez limitu",
+            "timed": "Na czas",
+            "loading": "Ładowanie gier...",
+            "noGames": "Brak aktywnych gier",
+            "noGamesHint": "Rozpocznij grę ze znajomym!",
+            "vs": "vs ",
+            "resignTitle": "Poddaj się",
+            "resignMessage": "Czy na pewno chcesz się poddać? Przegrasz tę grę.",
+            "resignButton": "Poddaj się",
+            "resignError": "Nie udało się poddać. Spróbuj ponownie."
+        },
+        "gameHistory": {
+            "title": "Historia gier",
+            "subtitle": "Ostatnie gry",
+            "loading": "Ładowanie historii...",
+            "noHistory": "Brak historii gier",
+            "noHistoryHint": "Twoje ukończone gry pojawią się tutaj",
+            "vs": "vs ",
+            "justNow": "Właśnie",
+            "minutesAgo": "min temu",
+            "hoursAgo": "godz. temu",
+            "daysAgo": "dni temu",
+            "cancelled": "Gra anulowana",
+            "draw": "Remis",
+            "won": "Wygrałeś",
+            "lost": "Przegrałeś",
+            "unknown": "Nieznany",
+            "opponent": "Przeciwnik",
+            "computer": "Computer",
+            "blitz": "Blitz",
+            "normal": "Normal",
+            "unlimited": "Bez limitu",
+            "timed": "Na czas"
+        }
+    },
+    "errors": {
+        "INVALID_MOVE": "Nieprawidłowy ruch",
+        "INVALID_MOVE_OCCUPIED": "Ta pozycja jest już zajęta",
+        "INVALID_MOVE_OUT_OF_BOUNDS": "Ruch poza granicami",
+        "INVALID_MOVE_NOT_YOUR_TURN": "To nie twój ruch",
+        "INVALID_MOVE_PIECE_BLOCKED": "Ten pionek jest zablokowany",
+        "GAME_NOT_FOUND": "Gra nie znaleziona",
+        "GAME_ALREADY_STARTED": "Gra już się rozpoczęła",
+        "GAME_ALREADY_ENDED": "Ta gra już się zakończyła",
+        "GAME_CANCELLED": "Gra anulowana",
+        "PLAYER_NOT_IN_GAME": "Nie jesteś w tej grze",
+        "PLAYER_DISCONNECTED": "Gracz rozłączony",
+        "CONNECTION_ERROR": "Błąd połączenia. Sprawdź internet.",
+        "SERVER_ERROR": "Błąd serwera. Spróbuj później.",
+        "TIMEOUT": "Upłynął limit czasu",
+        "ALREADY_IN_QUEUE": "Już jesteś w kolejce",
+        "NOT_IN_QUEUE": "Nie jesteś w kolejce",
+        "QUEUE_TIMEOUT": "Upłynął limit czasu dobierania",
+        "OPPONENT_NOT_FOUND": "Nie znaleziono przeciwnika",
+        "MATCHMAKING_DISABLED": "Dobieranie jest wyłączone",
+        "FRIEND_NOT_FOUND": "Znajomy nie znaleziony",
+        "FRIEND_ALREADY_EXISTS": "Już jesteś znajomym tego użytkownika",
+        "CANNOT_ADD_SELF": "Nie możesz dodać siebie jako znajomego",
+        "FRIEND_REQUEST_PENDING": "Zaproszenie już oczekuje",
+        "INVALID_CREDENTIALS": "Nieprawidłowy e-mail lub hasło",
+        "USER_NOT_FOUND": "Użytkownik nie znaleziony",
+        "EMAIL_ALREADY_EXISTS": "E-mail jest już w użyciu",
+        "USERNAME_TAKEN": "Nazwa użytkownika jest już zajęta",
+        "WEAK_PASSWORD": "Hasło jest za słabe",
+        "ACCOUNT_DISABLED": "Twoje konto zostało wyłączone",
+        "SESSION_EXPIRED": "Sesja wygasła. Zaloguj się ponownie.",
+        "UNAUTHORIZED": "Nie masz uprawnień do tej operacji",
+        "RATE_LIMITED": "Za dużo żądań. Zwolnij.",
+        "MAINTENANCE_MODE": "Aplikacja w konserwacji. Spróbuj później.",
+        "FEATURE_DISABLED": "Ta funkcja jest wyłączona"
+    },
+    "success": {
+        "GAME_WON": "Gratulacje! Wygrałeś!",
+        "GAME_DRAW": "Gra zakończyła się remisem",
+        "GAME_LOST": "Powodzenia następnym razem!",
+        "PLAYER_RESIGNED": "Gracz się poddał",
+        "FRIEND_REQUEST_SENT": "Zaproszenie wysłane!",
+        "FRIEND_REQUEST_ACCEPTED": "Zaproszenie zaakceptowane!",
+        "FRIEND_REQUEST_DECLINED": "Zaproszenie odrzucone",
+        "MOVE_SUCCESS": "Ruch udany"
+    },
+    "scenarioBoard": {
+        "pauseAutoPlay": "Wstrzymaj auto-odtwarzanie",
+        "playDemo": "Odtwórz demo",
+        "explanation": "Wyjaśnienie",
+        "backToGuide": "Wróć do przewodnika"
+    },
+    "howToPlay": {
+        "objective": {
+            "title": "Cel",
+            "intro": "Aby wygrać w Coral Clash, osiągnij jeden z tych celów:",
+            "checkmate": "Szach-mat",
+            "checkmateDesc": "Wieloryba przeciwnika (gdy Wieloryb jest w",
+            "check": "szachu",
+            "checkmateDescEnd": "i nie może uciec)",
+            "coralControl": "największy obszar koralami",
+            "coralControlDesc": "Kontroluj",
+            "coralControlWhen": "gdy:",
+            "coralPlaced": "Gracz umieścił wszystkie swoje korale",
+            "whaleRemaining": "Graczowi został tylko Wieloryb",
+            "backRowReached": "Krab lub Ośmiornica dociera do ostatniego rzędu przeciwnika",
+            "areaControlled": "Obszar kontrolowany przez korale:",
+            "areaControlledDesc": "Policz ilość swoich korali niezajętych przez pionki przeciwnika.",
+            "checkmateExample": "Przykład szach-mata",
+            "checkExample": "Przykład szacha",
+            "coralVictoryExample": "Przykład zwycięstwa koralowego"
+        },
+        "setup": {
+            "title": "Ustawienie gry",
+            "boardDesc": "Plansza to siatka 8x8 z 64 polami. Każdy gracz ma:",
+            "coralPieces": "17 kawałków koralu",
+            "units": "17 jednostek: 1 Wieloryb, 2 Delfiny, 4 Żółwie, 2 Rozdymki, 4 Kraby i 4 Ośmiornice",
+            "variants": "Każdy typ pionka ma dwie odmiany:",
+            "hunter": "Łowca",
+            "hunterDesc": "pionki (bez symboli koralu) mogą usuwać korale",
+            "gatherer": "Zbieracz",
+            "gathererDesc": "pionki (z symbolami koralu) mogą umieszczać korale",
+            "hunterExample": "Przykład efektu łowcy",
+            "gathererExample": "Przykład efektu zbieracza"
+        },
+        "turnOverview": {
+            "title": "Przegląd tury",
+            "intro": "Białe ruszają pierwsze, potem gracze się zmieniają. W swojej turze:",
+            "step1": "Przesuń jeden ze swoich pionków",
+            "step2": "Rozwiąż efekty przechwycenia, łowcy lub zbieracza",
+            "step3": "Sprawdź, czy osiągnięto cele"
+        },
+        "movement": {
+            "title": "Jak poruszają się pionki",
+            "important": "Ważne:",
+            "importantDesc": "Pionki nie mogą przechodzić przez inne pionki - potrzebują wolnej drogi.",
+            "variants": "Każdy typ pionka ma dwie odmiany reagujące inaczej na korale:",
+            "hunterPieces": "Pionki łowcy",
+            "hunterMovement": "(bez symboli koralu) są",
+            "stoppedBy": "ZATRZYMYWANE PRZEZ",
+            "hunterMovementDesc": "korale - nie mogą przez nie przechodzić",
+            "gathererPieces": "Pionki zbieracza",
+            "gathererMovement": "(z symbolami koralu) są silniejsze - mogą przechodzić",
+            "through": "PRZEZ",
+            "gathererMovementDesc": "korale swobodnie",
+            "coralMovementExample": "Przykład ruchu z koralami",
+            "individualMovements": "Ruchy poszczególnych pionków"
+        },
+        "pieces": {
+            "whale": {
+                "name": "Wieloryb",
+                "intro": "Wieloryb to najważniejszy pionek - jeśli zostanie zmatowany, przegrywasz! Wieloryb zajmuje dwa pola i ma dwie opcje ruchu:",
+                "slidingMove": "1. Ruch przesuwny:",
+                "slidingMoveDesc": "Przesuń połowę pionka o dowolną liczbę pól poziomo, pionowo lub ukośnie, zachowując oryginalną orientację. Wieloryb stosuje zasady łowcy - zatrzymuje się na koralach. Jest jednak wyjątek (patrz niżej).",
+                "rotationMove": "2. Ruch obrotowy:",
+                "rotationMoveDesc": "Obróć połowę pionka na sąsiednie pole (jedno pole pionowo lub poziomo). Przy obrocie dotknij najpierw pola docelowego (biały okrąg). Jeśli jest kilka orientacji, dotknij pola orientacji (zielony okrąg). Przy jednej orientacji wieloryb ruszy automatycznie.",
+                "checkRules": "Zasady szacha:",
+                "checkRulesDesc": "Wieloryb nie może zakończyć ruchu w szachu, ale MOŻE przechodzić przez zagrożone pola.",
+                "doubleCapture": "Podwójne przechwycenie:",
+                "doubleCaptureDesc": "Wieloryb może przechwycić dwa pionki przeciwnika w jednym ruchu!",
+                "doubleCoralRemoval": "Podwójne usunięcie koralu:",
+                "doubleCoralRemovalDesc": "Gdy Wieloryb (jako łowca) ląduje na koralu, może usunąć jeden lub oba kawałki.",
+                "specialCase": "⚠️ Specjalny przypadek ruchu",
+                "specialCaseDesc": "Jeśli połowa Wieloryba już stoi na koralu, ten koral NIE blokuje drugiej połowy.",
+                "basicMovement": "Podstawowy ruch Wieloryba",
+                "rotationExample": "Przykład obrotu Wieloryba",
+                "coralException": "Wieloryb przechodzi przez swój koral"
+            },
+            "dolphin": {
+                "name": "Delfin",
+                "movement": "Porusza się o dowolną liczbę pól pionowo, poziomo lub ukośnie.",
+                "example": "Przykład ruchu Delfina"
+            },
+            "turtle": {
+                "name": "Żółw",
+                "movement": "Porusza się o dowolną liczbę pól pionowo lub poziomo.",
+                "example": "Przykład ruchu Żółwia"
+            },
+            "pufferfish": {
+                "name": "Rozdymka",
+                "movement": "Porusza się o dowolną liczbę pól ukośnie.",
+                "example": "Przykład ruchu Rozdymki"
+            },
+            "octopus": {
+                "name": "Ośmiornica",
+                "movement": "Porusza się o jedno pole ukośnie.",
+                "example": "Przykład ruchu Ośmiornicy"
+            },
+            "crab": {
+                "name": "Krab",
+                "movement": "Porusza się o jedno pole pionowo lub poziomo.",
+                "example": "Przykład ruchu Kraba"
+            }
+        },
+        "specialRules": {
+            "title": "Specjalne zasady",
+            "capture": {
+                "title": "Przechwytywanie",
+                "desc": "Wejdź na pole zajęte przez pionek przeciwnika. Wieloryby mogą przechwycić dwa pionki w jednym ruchu.",
+                "example": "Przykład przechwycenia"
+            },
+            "hunterEffect": {
+                "title": "Ruch i efekt łowcy",
+                "desc": "Pionki łowcy (bez symboli koralu) mają dwa ważne zachowania:",
+                "movementStops": "Ruch zatrzymuje się",
+                "movementStopsDesc": "po wejściu na koral",
+                "canRemove": "Może usunąć",
+                "canRemoveDesc": "ten koral z planszy",
+                "example": "Przykład efektu łowcy"
+            },
+            "gathererEffect": {
+                "title": "Efekt zbieracza",
+                "desc": "Pionki zbieracza (z symbolami koralu) mogą umieszczać korale na pustych polach, przez które przechodzą.",
+                "example": "Przykład efektu zbieracza"
+            }
+        },
+        "drawResignation": {
+            "title": "Remis i poddanie",
+            "stalemate": "Pat:",
+            "stalemateDesc": "Gdy gracz nie ma legalnych ruchów i jego wieloryb nie jest w szachu",
+            "threefoldRepetition": "Potrójne powtórzenie:",
+            "threefoldRepetitionDesc": "Ta sama pozycja występuje trzy razy z tym samym graczem",
+            "resignation": "Poddanie:",
+            "resignationDesc": "Gracz może się poddać w dowolnym momencie"
+        }
+    },
+    "tutorial": {
+        "endGame": {
+            "title": "Witaj w Coral Clash!",
+            "message": "Wieloryb jest królem. Możesz wygrać, matując czarnego Wieloryba lub umieszczając wszystkie 17 korali. Powodzenia!",
+            "backInfo": "Dotknij strzałki, aby wrócić do ekranu głównego"
+        }
+    },
+    "tutorialScenarios": {
+        "checkmate": {
+            "title": "Przykład szach-mata",
+            "description": "Czarny Wieloryb jest uwięziony przez koral na a6 (zaznaczony różową obwódką). Biały Delfin Łowca na b7 szachuje Wieloryba, a biały Żółw Zbieracz (z symbolami koralu na obwódce) na g7 chroni atakującego delfina. Wieloryb nie ma ucieczki - szach-mat!"
+        },
+        "coralVictory": {
+            "title": "Zwycięstwo koralowe - obszar kontroli",
+            "description": "Białe mają 4 korale (różowa obwódka): c3, d3, e3, f3. Czarne mają 4 korale (czarna obwódka): c6, d6, e6, f6. Czarny Delfin Zbieracz na c3 stoi na koralu białych, więc białe kontrolują tylko 3 korale. Czarne kontrolują 4 = czarne wygrywają 4 do 3!"
+        },
+        "whaleMovement": {
+            "title": "Ruch Wieloryba",
+            "description": "Wieloryby zajmują dwa sąsiednie pola i mogą się poruszać na trzy sposoby: (1) przesunięcie jednej połowy o dowolną liczbę pól, (2) przesunięcie obu połów razem, lub (3) obrót jednej połowy na sąsiednie pole."
+        },
+        "whaleRotation": {
+            "title": "Obrót Wieloryba",
+            "description": "Wieloryb może się obracać, przesuwając połowę na sąsiednie pole (pionowo lub poziomo). Obserwuj, jak biały Wieloryb obraca się z pozycji poziomej do pionowej."
+        },
+        "whaleCoralException": {
+            "title": "Wieloryb przechodzi przez swój koral",
+            "description": "Zasada specjalna: Jeśli połowa Wieloryba stoi na koralu, ten koral NIE blokuje drugiej połowy."
+        },
+        "coralMovementComparison": {
+            "title": "Porównanie ruchu z koralami",
+            "description": "Porównaj białego Delfina Łowcę (lewo, bez symboli koralu) z białym Delfinem Zbieraczem (prawo, z symbolami koralu). Dotknij każdego, aby zobaczyć ruchy."
+        },
+        "check": {
+            "title": "Szach",
+            "description": "Czarny Wieloryb jest w szachu - atakowany przez białego Delfina Zbieracza. Delfin Zbieracz może przechodzić przez korale. Czarne muszą uratować Wieloryba lub zablokować atak."
+        },
+        "hunterEffect": {
+            "title": "Efekt łowcy",
+            "description": "Pionki łowcy (bez symboli koralu) zatrzymują się na koralu. Mogą go następnie usunąć z planszy."
+        },
+        "gathererEffect": {
+            "title": "Efekt zbieracza",
+            "description": "Pionki zbieracza (z symbolami koralu) mogą umieszczać korale na pustych polach, przez które przechodzą."
+        },
+        "dolphinMovement": {
+            "title": "Ruch Delfina",
+            "description": "Delfiny mogą się poruszać o dowolną liczbę pól w każdym kierunku - pionowo, poziomo lub ukośnie. Najbardziej wszechstronny pionek!"
+        },
+        "turtleMovement": {
+            "title": "Ruch Żółwia",
+            "description": "Żółwie mogą się poruszać o dowolną liczbę pól pionowo lub poziomo, ale nie ukośnie."
+        },
+        "pufferfishMovement": {
+            "title": "Ruch Rozdymki",
+            "description": "Rozdymki mogą się poruszać o dowolną liczbę pól ukośnie."
+        },
+        "crabMovement": {
+            "title": "Ruch Kraba",
+            "description": "Kraby poruszają się o jedno pole pionowo lub poziomo. Powolne, ale stabilne."
+        },
+        "octopusMovement": {
+            "title": "Ruch Ośmiornicy",
+            "description": "Ośmiornice poruszają się o jedno pole ukośnie. Jak kraby, poruszają się powoli, ale mogą być bardzo strategiczne."
+        },
+        "capture": {
+            "title": "Przechwytywanie pionków",
+            "description": "Aby przechwycić pionek przeciwnika, przesuń swój pionek na pole zajęte przez przeciwnika."
+        }
+    },
+    "components": {
+        "fixtureLoader": {
+            "title": "Wczytaj stan gry",
+            "gameMode": "Tryb gry:",
+            "back": "Wróć",
+            "vsComputer": "vs Computer",
+            "passAndPlay": "Gra lokalna",
+            "loadGame": "Wczytaj grę",
+            "fixturesHint": "💡 Fixtures z shared/game/__fixtures__/",
+            "error": "Błąd",
+            "failedToLoad": "Nie udało się wczytać fixture"
+        },
+        "versionWarning": {
+            "title": "Dostępna aktualizacja",
+            "message": "Zaktualizuj do najnowszej wersji dla najlepszego doświadczenia.",
+            "updateButton": "Aktualizuj"
+        },
+        "playerStatus": {
+            "computer": "Computer",
+            "thinking": "Myśli...",
+            "remaining": "Pozostało",
+            "underControl": "Pod kontrolą"
+        },
+        "alert": {
+            "defaultButton": "OK"
+        },
+        "pvpBoard": {
+            "player": "Gracz",
+            "opponent": "Przeciwnik",
+            "requestUndoTitle": "Prośba o cofnięcie",
+            "requestUndoMessage": "Cofnąć ostatni ruch? {{opponentName}} musi się zgodzić.",
+            "requestResetTitle": "Prośba o reset",
+            "requestResetMessage": "Zresetować tę grę? {{opponentName}} musi się zgodzić.",
+            "cancel": "Anuluj",
+            "request": "Poproś",
+            "requestReset": "Prośba o reset",
+            "askOpponentReset": "Poproś przeciwnika o reset gry",
+            "gameEnded": "Gra już się zakończyła",
+            "noMoves": "Nie wykonano jeszcze ruchów",
+            "pendingUndo": "Oczekująca prośba o cofnięcie musi być najpierw rozwiązana",
+            "remindOpponent": "Przypomnij przeciwnikowi",
+            "remindOpponentSubtitle": "Przypomnij przeciwnikowi o jego ruchu",
+            "availableInHours": "Dostępne za {{hours}} godz.",
+            "yourTurn": "Twój ruch",
+            "errorUndoRequest": "Nie udało się wysłać prośby o cofnięcie. Spróbuj ponownie.",
+            "errorUndoResponse": "Nie udało się odpowiedzieć na prośbę o cofnięcie.",
+            "errorResetResponse": "Nie udało się odpowiedzieć na prośbę o reset.",
+            "errorCancelUndo": "Nie udało się anulować prośby o cofnięcie.",
+            "errorCancelReset": "Nie udało się anulować prośby o reset.",
+            "reminderSentTitle": "Sukces",
+            "reminderSentMessage": "Przypomnienie wysłane do przeciwnika.",
+            "errorReminderTitle": "Błąd",
+            "errorReminderMessage": "Nie udało się wysłać przypomnienia.",
+            "waitingUndoResponse": "Oczekiwanie na odpowiedź {{opponentName}} na cofnięcie {{moveCount}} ruchu(ów)...",
+            "opponentWantsUndo": "{{opponentName}} chce cofnąć {{moveCount}} ruch(ów)",
+            "waitingResetResponse": "Oczekiwanie na odpowiedź {{opponentName}} na prośbę o reset...",
+            "opponentWantsReset": "{{opponentName}} chce zresetować grę"
+        },
+        "passAndPlayBoard": {
+            "resetGameTitle": "Resetuj grę",
+            "resetGameMessage": "Czy na pewno chcesz rozpocząć nową grę?",
+            "cancel": "Anuluj",
+            "reset": "Resetuj",
+            "resetGame": "Resetuj grę",
+            "startNewGame": "Rozpocznij nową grę od początku",
+            "gameEnded": "Gra już się zakończyła",
+            "noMoves": "Nie wykonano jeszcze ruchów"
+        },
+        "baseBoard": {
+            "errorLoadState": "Nie udało się wczytać stanu gry",
+            "resignGameTitle": "Poddaj się",
+            "resignGameMessage": "Czy na pewno chcesz się poddać? Przegrasz grę.",
+            "cancel": "Anuluj",
+            "resign": "Poddaj się",
+            "checkTitle": "Szach!",
+            "checkMessage": "Twój {{piece}} jest w szachu!",
+            "checkmateTitle": "Szach-mat!",
+            "checkmateMessage": "{{winner}} wygrywa szach-matem!",
+            "gathererTitle": "Efekt zbieracza",
+            "gathererMessage": "Umieścić koral na tym polu?",
+            "yes": "Tak",
+            "no": "Nie",
+            "hunterTitle": "Efekt łowcy",
+            "hunterMessage": "Usunąć koral z tego pola?",
+            "exportSuccessTitle": "Sukces",
+            "exportSuccessMessage": "Stan gry skopiowany do schowka!",
+            "exportFailedTitle": "Eksport nie powiódł się",
+            "computer": "Computer",
+            "opponent": "Przeciwnik",
+            "white": "Białe",
+            "black": "Czarne",
+            "youWonTimeout": "Wygrałeś! {{opponentName}} nie ma czasu ⏱️",
+            "youLostTimeout": "Przegrałeś! Czas minął ⏱️",
+            "timeoutLose": "{{loserName}} nie ma czasu! ⏱️",
+            "youWonResign": "Wygrałeś! {{opponentName}} się poddał 🏳️",
+            "youResigned": "Poddałeś się 🏳️",
+            "checkmateWin": "Szach-mat! Wygrałeś! 🏆",
+            "checkmateLose": "Szach-mat! Przegrałeś.",
+            "checkmateGeneric": "Szach-mat! {{winner}} wygrywa! 🏆",
+            "youLost": "Przegrałeś",
+            "resignGeneric": "{{winner}} wygrywa przez poddanie! 🏳️",
+            "coralVictoryWin": "Wygrałeś zwycięstwem koralowym! 🪸\n{{whiteScore}} - {{blackScore}}",
+            "coralVictoryLose": "Przegrałeś. {{winner}} wygrywa zwycięstwem koralowym! 🪸\n{{whiteScore}} - {{blackScore}}",
+            "coralVictoryGeneric": "{{winner}} wygrywa zwycięstwem koralowym! 🪸\n{{whiteScore}} Białe - {{blackScore}} Czarne",
+            "stalemate": "Pat! 🤝",
+            "drawRepetition": "Remis przez powtórzenie! 🤝",
+            "drawInsufficientMaterial": "Remis - niewystarczający materiał! 🤝",
+            "drawCoralTie": "Remis - remis koralowy! 🤝🪸\n{{score}} - {{score}}",
+            "draw": "Remis! 🤝",
+            "check": "{{player}} w szachu! ⚠️",
+            "viewingHistory": "Przeglądanie poprzednich ruchów - wróć do aktualnego, aby grać",
+            "selectWhaleOrientation": "Wybierz orientację Wieloryba",
+            "hunterWhaleTitle": "Efekt łowcy (Wieloryb)",
+            "hunterWhaleMessage": "Wybierz opcję usunięcia koralu:",
+            "yourTurn": "Twój ruch",
+            "opponentTurn": "Ruch {{opponentName}}",
+            "playerTurn": "Ruch {{playerColor}}"
+        },
+        "computerBoard": {
+            "cancelRequestTitle": "Anuluj prośbę",
+            "cancelRequestMessage": "Anulować prośbę o reset?",
+            "cancel": "Anuluj",
+            "yes": "Tak",
+            "resetGameTitle": "Resetuj grę",
+            "resetGameMessage": "Czy na pewno chcesz rozpocząć nową grę?",
+            "reset": "Resetuj",
+            "resetGame": "Resetuj grę",
+            "startNewGame": "Rozpocznij nową grę od początku",
+            "gameEnded": "Gra już się zakończyła",
+            "noMoves": "Nie wykonano jeszcze ruchów",
+            "errorUndo": "Cofnięcie nie powiodło się. Spróbuj ponownie."
+        },
+        "computerUsers": {
+            "successTitle": "Sukces",
+            "errorTitle": "Błąd",
+            "initializeSuccess": "Pomyślnie zainicjalizowano {{count}} użytkowników komputerowych",
+            "initializeError": "Nie udało się zainicjalizować użytkowników.",
+            "confirmDeleteTitle": "Potwierdź usunięcie",
+            "confirmDeleteMessage": "Czy na pewno chcesz usunąć wszystkich użytkowników komputerowych? Tej operacji nie można cofnąć.",
+            "cancel": "Anuluj",
+            "delete": "Usuń",
+            "deleteSuccess": "Pomyślnie usunięto {{count}} użytkowników",
+            "deleteError": "Nie udało się usunąć użytkowników.",
+            "clearLanguageSuccess": "Preferencje językowe wyczyszczone. Aplikacja wykryje język automatycznie przy następnym uruchomieniu.",
+            "clearLanguageError": "Nie udało się wyczyścić preferencji językowych."
+        }
+    },
+    "hooks": {
+        "friends": {
+            "removeFriendTitle": "Usuń znajomego",
+            "removeFriendMessage": "Czy na pewno chcesz usunąć {{friendName}} z listy znajomych?",
+            "cancel": "Anuluj",
+            "remove": "Usuń",
+            "errorRemove": "Nie udało się usunąć znajomego",
+            "errorAccept": "Nie udało się zaakceptować zaproszenia",
+            "errorDecline": "Nie udało się odrzucić zaproszenia",
+            "cancelRequestTitle": "Anuluj zaproszenie",
+            "cancelRequestMessage": "Anulować zaproszenie do {{displayName}}?",
+            "no": "Nie",
+            "yesCancel": "Tak, anuluj",
+            "errorCancelRequest": "Nie udało się anulować zaproszenia",
+            "errorTitle": "Błąd"
+        },
+        "game": {
+            "errorTitle": "Błąd",
+            "errorLoadGame": "Nie udało się wczytać gry"
+        },
+        "gameActions": {
+            "errorTitle": "Błąd",
+            "errorResign": "Nie udało się poddać"
+        },
+        "userSearch": {
+            "errorTitle": "Błąd",
+            "errorSendRequest": "Nie udało się wysłać zaproszenia"
+        }
+    }
+}

@@ -32,6 +32,7 @@ import {
     useVersion,
 } from './src/contexts';
 import './src/i18n/config';
+import './src/i18n/rtlText'; // Text-only RTL support (writingDirection for Urdu, etc.)
 import Screens from './src/navigation/Screens';
 import { initializeAdsMode } from './src/utils/featureFlags';
 
