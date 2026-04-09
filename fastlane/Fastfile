@@ -9,14 +9,14 @@ default_platform(:ios)
 # ========================================
 # Configuration from Environment Variables
 # ========================================
-IOS_APP_IDENTIFIER = ENV["IOS_APP_IDENTIFIER"] || "com.example.app"
-IOS_TEAM_ID = ENV["IOS_TEAM_ID"] || ""
-IOS_SCHEME = ENV["IOS_SCHEME"] || "App"
-IOS_WORKSPACE_PATH = ENV["IOS_WORKSPACE_PATH"] || "./ios/#{IOS_SCHEME}.xcworkspace"
-IOS_PROJECT_PATH = ENV["IOS_PROJECT_PATH"] || "./ios/#{IOS_SCHEME}.xcodeproj"
+IOS_APP_IDENTIFIER = ENV["IOS_APP_IDENTIFIER"] || "com.jbuxofplenty.coralclash"
+IOS_TEAM_ID = ENV["IOS_TEAM_ID"] || "FWV22U8U39"
+IOS_SCHEME = ENV["IOS_SCHEME"] || "CoralClash"
+IOS_WORKSPACE_PATH = ENV["IOS_WORKSPACE_PATH"] || "./ios/CoralClash.xcworkspace"
+IOS_PROJECT_PATH = ENV["IOS_PROJECT_PATH"] || "./ios/CoralClash.xcodeproj"
 IOS_OUTPUT_NAME = ENV["IOS_OUTPUT_NAME"] || "#{IOS_SCHEME}.ipa"
 
-ANDROID_PACKAGE_NAME = ENV["ANDROID_PACKAGE_NAME"] || "com.example.app"
+ANDROID_PACKAGE_NAME = ENV["ANDROID_PACKAGE_NAME"] || "com.jbuxofplenty.coralclash"
 ANDROID_PROJECT_DIR = ENV["ANDROID_PROJECT_DIR"] || "./android"
 
 # iOS Platform
@@ -106,12 +106,15 @@ platform :ios do
     # Upload to App Store
     # Note: upload_to_app_store will automatically use APP_STORE_CONNECT_API_KEY_* env vars
     upload_to_app_store(
-      skip_metadata: true,
+      skip_metadata: false,
       skip_screenshots: true,
       submit_for_review: false,
       automatic_release: false,
       force: true,
-      precheck_include_in_app_purchases: false
+      precheck_include_in_app_purchases: false,
+      release_notes: {
+        "default" => "🚀 Bug fixes and performance improvements"
+      }
     )
   end
 
@@ -239,7 +242,7 @@ platform :android do
       package_name: ANDROID_PACKAGE_NAME,
       track: "production",
       aab: "#{ANDROID_PROJECT_DIR}/app/build/outputs/bundle/release/app-release.aab",
-      skip_upload_metadata: true,
+      skip_upload_metadata: false,
       skip_upload_images: true,
       skip_upload_screenshots: true,
       release_status: "draft",

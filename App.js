@@ -123,8 +123,8 @@ export default function App() {
     useEffect(() => {
         async function prepare() {
             try {
-                // Initialize ads mode feature flag (fetches once and caches for app session)
-                await initializeAdsMode();
+                // Initialize ads mode feature flag (fetch from Firestore without blocking startup)
+                initializeAdsMode().catch((e) => console.warn('Error fetching ads mode:', e));
 
                 // Configure AdMob request settings before initialization
                 const requestConfig = {
@@ -135,15 +135,18 @@ export default function App() {
                         ],
                     }),
                 };
-                await mobileAds().setRequestConfiguration(requestConfig);
-
-                // Initialize Google Mobile Ads SDK with configuration
-                const adapterStatuses = await mobileAds().initialize();
-
-                console.log('📱 Mobile Ads SDK initialized:', adapterStatuses);
-                if (__DEV__) {
-                    console.log('📱 AdMob configured for test devices');
-                }
+                
+                // Initialize Google Mobile Ads SDK asynchronously (fire and forget to prevent ANR)
+                mobileAds()
+                    .setRequestConfiguration(requestConfig)
+                    .then(() => mobileAds().initialize())
+                    .then((adapterStatuses) => {
+                        console.log('📱 Mobile Ads SDK initialized:', adapterStatuses);
+                        if (__DEV__) {
+                            console.log('📱 AdMob configured for test devices');
+                        }
+                    })
+                    .catch((e) => console.warn('Error initializing AdMob:', e));
 
                 //Load Resources
                 await _loadResourcesAsync();

@@ -95,3 +95,6 @@ shared/.npmrc
 
 # AI
 docs/plans/
+
+fastlane/keys/*
+fastlane/.env

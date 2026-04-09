@@ -1,4 +1,5 @@
-## fastlane documentation
+fastlane documentation
+----
 
 # Installation
 
@@ -38,7 +39,16 @@ Upload to TestFlight
 
 Upload to App Store
 
----
+### ios debug_lane
+
+```sh
+[bundle exec] fastlane ios debug_lane
+```
+
+Build Debug version with symbols for crash analysis
+
+----
+
 
 ## Android
 
@@ -66,7 +76,7 @@ Upload to Play Store Internal Testing
 
 Upload to Play Store Production
 
----
+----
 
 This README.md is auto-generated and will be re-generated every time [_fastlane_](https://fastlane.tools) is run.
 
