@@ -90,7 +90,7 @@ platform :ios do
       skip_waiting_for_build_processing: true,
       skip_submission: true,
       distribute_external: false,
-      changelog: ENV["CHANGELOG"] || "Bug fixes and performance improvements"
+      changelog: ENV["CHANGELOG"] || (File.read("metadata/en-US/release_notes.txt").strip rescue "Bug fixes and performance improvements")
     }
     
     # Add api_key_path if available
@@ -111,10 +111,7 @@ platform :ios do
       submit_for_review: false,
       automatic_release: false,
       force: true,
-      precheck_include_in_app_purchases: false,
-      release_notes: {
-        "default" => "🚀 Bug fixes and performance improvements"
-      }
+      precheck_include_in_app_purchases: false
     )
   end
 
