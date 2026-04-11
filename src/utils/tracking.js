@@ -9,7 +9,7 @@ import { getAdsMode } from './featureFlags';
  * @param {Object} user - The user object (optional)
  * @returns {Promise<boolean>} Whether ads are enabled (either real or test)
  */
-export const shouldEnableAds = async (_user = null) => {
+export const shouldEnableAds = async (user = null) => {
     // Get ads mode - 'enabled', 'test', or 'disabled'
     const adsMode = await getAdsMode();
 
@@ -18,12 +18,12 @@ export const shouldEnableAds = async (_user = null) => {
         return false;
     }
 
-    // If test mode, show test ads to everyone (including internal users for QA)
+    // If test mode, only show test ads to internal users for QA
     if (adsMode === 'test') {
-        return true;
+        return user?.internalUser === true;
     }
 
-    // If enabled mode
+    // If enabled mode, everyone gets ads (real for normal, test for internal)
     return true;
 };
 

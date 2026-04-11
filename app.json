@@ -208,11 +208,13 @@
         {
           "androidAppId": "ca-app-pub-8519782324189160~6327493409",
           "iosAppId": "ca-app-pub-8519782324189160~8486752889",
-          "userTrackingUsageDescription": "This identifier will be used to deliver personalized ads to you."
+          "userTrackingUsageDescription": "This identifier will be used to deliver personalized ads to you.",
+          "delayAppMeasurementInit": true
         }
       ],
       "@react-native-firebase/app",
       "./plugins/with-modular-headers.js",
+      "./plugins/with-android-ad-optimization.js",
       "expo-asset",
       [
         "expo-build-properties",

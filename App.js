@@ -15,7 +15,7 @@ import { Asset } from 'expo-asset';
 import * as SplashScreen from 'expo-splash-screen';
 import { Block, GalioProvider } from 'galio-framework';
 import React, { useCallback, useEffect, useState } from 'react';
-import { Image, LogBox, StatusBar } from 'react-native';
+import { Image, LogBox, StatusBar, InteractionManager } from 'react-native';
 import mobileAds from 'react-native-google-mobile-ads';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import CustomSplashScreen from './src/components/CustomSplashScreen';
@@ -126,27 +126,7 @@ export default function App() {
                 // Initialize ads mode feature flag (fetch from Firestore without blocking startup)
                 initializeAdsMode().catch((e) => console.warn('Error fetching ads mode:', e));
 
-                // Configure AdMob request settings before initialization
-                const requestConfig = {
-                    ...(__DEV__ && {
-                        testDeviceIdentifiers: [
-                            '08EA2881-FF28-4E64-AE72-35CEEF26E8C9', // Josiah's test device
-                            'EMULATOR',
-                        ],
-                    }),
-                };
-                
-                // Initialize Google Mobile Ads SDK asynchronously (fire and forget to prevent ANR)
-                mobileAds()
-                    .setRequestConfiguration(requestConfig)
-                    .then(() => mobileAds().initialize())
-                    .then((adapterStatuses) => {
-                        console.log('📱 Mobile Ads SDK initialized:', adapterStatuses);
-                        if (__DEV__) {
-                            console.log('📱 AdMob configured for test devices');
-                        }
-                    })
-                    .catch((e) => console.warn('Error initializing AdMob:', e));
+
 
                 //Load Resources
                 await _loadResourcesAsync();
@@ -171,6 +151,29 @@ export default function App() {
     const onLayoutRootView = useCallback(async () => {
         if (appIsReady) {
             await SplashScreen.hideAsync();
+            
+            // Initialize heavy SDKs after the UI has fully mounted and splash is hidden
+            InteractionManager.runAfterInteractions(() => {
+                const requestConfig = {
+                    ...(__DEV__ && {
+                        testDeviceIdentifiers: [
+                            '08EA2881-FF28-4E64-AE72-35CEEF26E8C9', // Josiah's test device
+                            'EMULATOR',
+                        ],
+                    }),
+                };
+                
+                mobileAds()
+                    .setRequestConfiguration(requestConfig)
+                    .then(() => mobileAds().initialize())
+                    .then((adapterStatuses) => {
+                        console.log('📱 Mobile Ads SDK initialized:', adapterStatuses);
+                        if (__DEV__) {
+                            console.log('📱 AdMob configured for test devices');
+                        }
+                    })
+                    .catch((e) => console.warn('Error initializing AdMob:', e));
+            });
         }
     }, [appIsReady]);
 
