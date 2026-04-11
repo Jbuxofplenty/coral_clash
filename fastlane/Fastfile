@@ -103,6 +103,14 @@ platform :ios do
   lane :release do
     build
     
+    # Read localized release notes from metadata folder
+    localized_notes = {}
+    Dir.glob("metadata/*/release_notes.txt").each do |path|
+      lang_code = File.basename(File.dirname(path))
+      localized_notes[lang_code] = File.read(path).strip
+      UI.message("Found release notes for #{lang_code}")
+    end
+    
     # Upload to App Store
     # Note: upload_to_app_store will automatically use APP_STORE_CONNECT_API_KEY_* env vars
     upload_to_app_store(
@@ -111,7 +119,8 @@ platform :ios do
       submit_for_review: false,
       automatic_release: false,
       force: true,
-      precheck_include_in_app_purchases: false
+      precheck_include_in_app_purchases: false,
+      release_notes: localized_notes
     )
   end
 
