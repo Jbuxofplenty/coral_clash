@@ -103,14 +103,51 @@ platform :ios do
   lane :release do
     build
     
-    # Read localized release notes from metadata folder
+    # Map folder names to Apple's App Store locale identifiers.
+    # Folder names that already match Apple's IDs are omitted (pass-through).
+    # Unsupported locales (e.g. 'my', 'uz') are also excluded here.
+    APPLE_LOCALE_MAP = {
+      "bn"      => "bn-BD",
+      "ar-SA"   => "ar-SA",
+      "de-DE"   => "de-DE",
+      "en-US"   => "en-US",
+      "es-ES"   => "es-ES",
+      "fr-FR"   => "fr-FR",
+      "hi"      => "hi",
+      "id"      => "id",
+      "pl"      => "pl",
+      "pt-BR"   => "pt-BR",
+      "ru"      => "ru",
+      "tr"      => "tr",
+      "ur"      => "ur",
+      "zh-Hans" => "zh-Hans"
+      # 'my' (Burmese) and 'uz' (Uzbek) are not supported by the App Store
+    }
+
+    # Read localized release notes from metadata folder.
+    # Use __dir__ (the Fastfile's directory) so the path is correct regardless
+    # of which directory fastlane is invoked from (repo root in GitHub Actions).
+    metadata_dir = File.join(__dir__, "metadata")
     localized_notes = {}
-    Dir.glob("metadata/*/release_notes.txt").each do |path|
-      lang_code = File.basename(File.dirname(path))
-      localized_notes[lang_code] = File.read(path).strip
-      UI.message("Found release notes for #{lang_code}")
+    Dir.glob(File.join(metadata_dir, "*/release_notes.txt")).each do |path|
+      folder_code = File.basename(File.dirname(path))
+      apple_locale = APPLE_LOCALE_MAP[folder_code]
+
+      if apple_locale.nil?
+        UI.important("⚠️  Skipping '#{folder_code}' — not in Apple locale map (unsupported or unmapped locale)")
+        next
+      end
+
+      localized_notes[apple_locale] = File.read(path).strip
+      UI.success("✅ Release notes loaded: #{folder_code} → #{apple_locale}")
     end
-    
+
+    if localized_notes.empty?
+      UI.error("❌ No release notes found in #{metadata_dir}! Check folder names and APPLE_LOCALE_MAP.")
+    else
+      UI.success("📝 Uploading release notes for #{localized_notes.keys.count} locale(s): #{localized_notes.keys.join(', ')}")
+    end
+
     # Upload to App Store
     # Note: upload_to_app_store will automatically use APP_STORE_CONNECT_API_KEY_* env vars
     upload_to_app_store(

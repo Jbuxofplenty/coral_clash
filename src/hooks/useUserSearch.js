@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAlert } from '../contexts';
 import { useFirebaseFunctions } from './useFirebaseFunctions';
+import { logAnalyticsEvent } from '../utils/analyticsEvents';
 
 export const useUserSearch = () => {
     const { t } = useTranslation();
@@ -74,6 +75,10 @@ export const useUserSearch = () => {
             setSending(true);
             setSendingUserId(selectedUser.id);
             await sendFriendRequest(selectedUser.id);
+
+            // Track invite friend event
+            logAnalyticsEvent('invite_friend', { method: 'search' });
+
             // Clear search state completely
             setSearchQuery('');
             setShowDropdown(false);

@@ -8,6 +8,7 @@ import ComputerCoralClashBoard from '../components/ComputerCoralClashBoard';
 import PassAndPlayCoralClashBoard from '../components/PassAndPlayCoralClashBoard';
 import PvPCoralClashBoard from '../components/PvPCoralClashBoard';
 import { useAlert, useNotifications, useTheme } from '../contexts';
+import { logAnalyticsEvent } from '../utils/analyticsEvents';
 
 export default function Game({ route }) {
     const { t } = useTranslation();
@@ -69,7 +70,12 @@ export default function Game({ route }) {
 
     const handleGameOver = useCallback(() => {
         setIsGameOver(true);
-    }, []);
+
+        // Track tutorial completion for end-game tutorial
+        if (isEndGameTutorial) {
+            logAnalyticsEvent('tutorial_complete', { tutorial_type: 'end_game' });
+        }
+    }, [isEndGameTutorial]);
 
     const alertShown = React.useRef(false);
     // End-game tutorial welcome popup

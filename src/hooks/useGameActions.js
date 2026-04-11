@@ -5,6 +5,7 @@ import { db, doc, onSnapshot } from '../config/firebase';
 import { useAlert, useAuth } from '../contexts';
 import useFirebaseFunctions from './useFirebaseFunctions';
 import useIsMounted from './useIsMounted';
+import { logAnalyticsEvent } from '../utils/analyticsEvents';
 
 /**
  * Hook to handle game actions with backend-first approach
@@ -224,6 +225,13 @@ export const useGameActions = (coralClash, gameId, onStateUpdate) => {
             const currentTurn = coralClash.turn();
             coralClash.resign(currentTurn);
             onStateUpdate?.();
+
+            // Track resign event for local games
+            logAnalyticsEvent('game_resign', {
+                game_id: 'offline',
+                opponent_type: 'local',
+            });
+
             return true;
         }
 
@@ -232,6 +240,12 @@ export const useGameActions = (coralClash, gameId, onStateUpdate) => {
         try {
             // Send to backend - backend will update Firestore
             await resignGameAPI({ gameId });
+
+            // Track resign event for online games
+            logAnalyticsEvent('game_resign', {
+                game_id: gameId,
+                opponent_type: gameData?.opponentId === 'computer' ? 'computer' : 'pvp',
+            });
 
             // Don't apply locally - the Firestore listener handles that
             // This prevents inconsistencies and ensures backend state is the source of truth
@@ -243,7 +257,7 @@ export const useGameActions = (coralClash, gameId, onStateUpdate) => {
         } finally {
             setIsProcessing(false);
         }
-    }, [coralClash, gameId, resignGameAPI, onStateUpdate, showAlert, t]);
+    }, [coralClash, gameId, gameData?.opponentId, resignGameAPI, onStateUpdate, showAlert, t]);
 
     /**
      * Undo the last move

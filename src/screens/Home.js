@@ -22,10 +22,11 @@ import {
 } from '../components/';
 import DifficultySelectionModal from '../components/DifficultySelectionModal';
 import FixtureLoaderModal from '../components/FixtureLoaderModal';
-import { analytics, collection, db, onSnapshot, query, where } from '../config/firebase';
+import { collection, db, onSnapshot, query, where } from '../config/firebase';
 import { useAlert, useAuth, useTheme } from '../contexts';
 import { useDevFeatures, useFirebaseFunctions, useGame, useMatchmaking } from '../hooks';
 import { useFriends } from '../hooks/useFriends';
+import { logAnalyticsEvent } from '../utils/analyticsEvents';
 import { savePassAndPlayGame } from '../utils/passAndPlayStorage';
 
 const { width, height } = Dimensions.get('screen');
@@ -140,6 +141,9 @@ export default function Home({ navigation }) {
                     
                     // If user is not logged in, drop them in an endgame tutorial
                     if (!user) {
+                        // Track tutorial start for anonymous users
+                        logAnalyticsEvent('tutorial_begin', { tutorial_type: 'end_game' });
+
                         navigation.navigate('Game', {
                             gameId: null, // offline mode
                             opponentType: 'computer',
@@ -161,7 +165,10 @@ export default function Home({ navigation }) {
                             },
                             {
                                 text: t('home.welcome.howToPlay'),
-                                onPress: () => navigation.navigate('How-To Play'),
+                                onPress: () => {
+                                    logAnalyticsEvent('tutorial_begin', { tutorial_type: 'how_to_play' });
+                                    navigation.navigate('How-To Play');
+                                },
                             },
                             { text: t('home.welcome.ok') },
                         ],
@@ -488,24 +495,19 @@ export default function Home({ navigation }) {
 
         try {
             if (pendingGameAction === 'friend' && selectedFriend) {
-                // 2. Log event when user initiates a match with a friend
-                if (analytics) {
-                    analytics.logEvent('initiate_match_friend', {
-                        time_control: timeControl.type,
-                    });
-                }
+                // Log event when user initiates a match with a friend
+                logAnalyticsEvent('initiate_match_friend', {
+                    time_control: timeControl.type,
+                });
 
                 await sendGameRequest(selectedFriend.id, selectedFriend.name, timeControl);
                 // Game request sent successfully via useGame hook
                 setSelectedFriend(null);
             } else if (pendingGameAction === 'passandplay') {
-                if (analytics) {
-                    console.log('attempting to log initiate_match_passandplay');
-                    analytics.logEvent('initiate_match_passandplay', {
-                        time_control: timeControl.type,
-                    });
-                    console.log('initiate_match_passandplay logged');
-                }
+                logAnalyticsEvent('initiate_match_passandplay', {
+                    time_control: timeControl.type,
+                });
+
                 // Create and save pass-and-play game with initial state
                 const gameId = await savePassAndPlayGame({
                     opponentType: 'passandplay',
@@ -563,11 +565,9 @@ export default function Home({ navigation }) {
         try {
             if (mode === 'instant') {
                 // Log event for instant match
-                if (analytics) {
-                    analytics.logEvent('initiate_match_instant', {
-                        time_control: pendingTimeControl?.type,
-                    });
-                }
+                logAnalyticsEvent('initiate_match_instant', {
+                    time_control: pendingTimeControl?.type,
+                });
 
                 const result = await startSearching(pendingTimeControl);
                 if (result && !result.success && result.error) {
@@ -575,11 +575,9 @@ export default function Home({ navigation }) {
                 }
             } else if (mode === 'correspondence') {
                 // Log event for correspondence match
-                if (analytics) {
-                    analytics.logEvent('initiate_match_correspondence', {
-                        time_control: pendingTimeControl?.type,
-                    });
-                }
+                logAnalyticsEvent('initiate_match_correspondence', {
+                    time_control: pendingTimeControl?.type,
+                });
 
                 // Try to find an existing correspondence invitation to match with
                 const matchResult = await findCorrespondenceMatch(pendingTimeControl);
@@ -629,13 +627,11 @@ export default function Home({ navigation }) {
         setCreatingGame(true);
 
         try {
-            // 3. Log event when user initiates a match against a computer
-            if (analytics) {    
-                analytics.logEvent('initiate_match_computer', {
-                    difficulty: difficulty,
-                    time_control: pendingTimeControl?.type,
-                });
-            }
+            // Log event when user initiates a match against a computer
+            logAnalyticsEvent('initiate_match_computer', {
+                difficulty: difficulty,
+                time_control: pendingTimeControl?.type,
+            });
 
             // Start computer game with both timeControl and difficulty
             const result = await startComputerGame(pendingTimeControl, difficulty);
@@ -697,6 +693,13 @@ export default function Home({ navigation }) {
     const handleResignGame = async (gameId) => {
         try {
             await resignGame({ gameId });
+
+            // Track resign from active games card
+            logAnalyticsEvent('game_resign', {
+                game_id: gameId,
+                source: 'active_games_card',
+            });
+
             // The game will be automatically moved to history via Firestore listeners
         } catch (error) {
             console.error('Failed to resign game:', error);

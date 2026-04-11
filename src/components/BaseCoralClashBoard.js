@@ -25,6 +25,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAlert, useAuth, useGamePreferences, useTheme } from '../contexts';
 import { CoralClashProvider } from '../contexts/CoralClashContext';
 import { useCoralClash, useDevFeatures, useFirebaseFunctions, useGameActions } from '../hooks';
+import { logAnalyticsEvent } from '../utils/analyticsEvents';
 import AnimatedPiece from './AnimatedPiece';
 import Coral from './Coral';
 import EmptyBoard from './EmptyBoard';
@@ -607,8 +608,9 @@ const BaseCoralClashBoard = ({
     }, [isBoardFlipped]);
 
     // Clear turn notification when game ends or when viewing history
-    // Also fire onGameOver callback once when the game first ends
+    // Also fire onGameOver callback and log game_finish analytics event once when the game first ends
     const onGameOverFiredRef = useRef(false);
+    const gameFinishLoggedRef = useRef(false);
     useEffect(() => {
         const ended = coralClash.isGameOver() || gameData?.status === 'completed';
         if (ended || isViewingHistory) {
@@ -618,7 +620,37 @@ const BaseCoralClashBoard = ({
             onGameOverFiredRef.current = true;
             onGameOver();
         }
-    }, [coralClash, updateCounter, gameData?.status, isViewingHistory, onGameOver]);
+
+        // Log game_finish analytics event once per game
+        if (ended && !gameFinishLoggedRef.current) {
+            gameFinishLoggedRef.current = true;
+
+            // Determine the game result from the user's perspective
+            let result = 'draw';
+            if (userColor) {
+                const isCheckmate = coralClash.isCheckmate?.();
+                const resigned = coralClash.isResigned?.();
+
+                if (userResigned || (resigned && resigned === userColor)) {
+                    result = 'loss';
+                } else if (opponentResigned || (resigned && resigned !== userColor)) {
+                    result = 'win';
+                } else if (isCheckmate) {
+                    // The side to move is the one that got checkmated
+                    result = coralClash.turn() === userColor ? 'loss' : 'win';
+                } else if (gameData?.winner) {
+                    result = gameData.winner === user?.uid ? 'win' : 'loss';
+                }
+            }
+
+            logAnalyticsEvent('game_finish', {
+                opponent_type: opponentType || 'pvp',
+                game_id: gameId || 'offline',
+                result: result,
+                result_reason: gameData?.resultReason || 'unknown',
+            });
+        }
+    }, [coralClash, updateCounter, gameData?.status, isViewingHistory, onGameOver, userColor, opponentType, gameId, gameData?.resultReason, gameData?.winner, user?.uid, userResigned, opponentResigned]);
 
     // Track whether we've already shown the post-match signup prompt this game
     const postMatchSignupShownRef = useRef(false);

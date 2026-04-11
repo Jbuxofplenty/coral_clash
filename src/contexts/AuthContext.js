@@ -22,6 +22,7 @@ import {
     initiateOnDeviceConversionMeasurement,
     setConsent,
 } from '../config/firebase';
+import { logAnalyticsEvent, setUserTypeProperty } from '../utils/analyticsEvents';
 import { requestTrackingPermission } from '../utils/tracking';
 
 const AuthContext = createContext({});
@@ -55,6 +56,8 @@ export const AuthProvider = ({ children }) => {
 
         const authUnsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
             if (firebaseUser) {
+                // Set user type property for analytics
+                setUserTypeProperty(true);
                 let cachedUserData = {};
                 let cachedSettings = null;
 
@@ -98,6 +101,8 @@ export const AuthProvider = ({ children }) => {
                     },
                 );
             } else {
+                // Set user type property for analytics
+                setUserTypeProperty(false);
                 setUser(null);
                 setLoading(false);
                 // Clean up listeners if they exist
@@ -215,6 +220,9 @@ export const AuthProvider = ({ children }) => {
                 refreshUserData();
             }, 500);
 
+            // Track sign up event
+            logAnalyticsEvent('sign_up', { method: 'email' });
+
             return userCredential.user;
         } catch (err) {
             setError(err.message);
@@ -226,6 +234,10 @@ export const AuthProvider = ({ children }) => {
         try {
             setError(null);
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
+
+            // Track login event
+            logAnalyticsEvent('login', { method: 'email' });
+
             return userCredential.user;
         } catch (err) {
             setError(err.message);
@@ -287,7 +299,13 @@ export const AuthProvider = ({ children }) => {
                 setTimeout(() => {
                     refreshUserData();
                 }, 500);
+
+                // Track sign up event for new Google users
+                logAnalyticsEvent('sign_up', { method: 'google' });
             }
+
+            // Track login event
+            logAnalyticsEvent('login', { method: 'google' });
 
             return userCredential.user;
         } catch (error) {
@@ -374,7 +392,13 @@ export const AuthProvider = ({ children }) => {
                 setTimeout(() => {
                     refreshUserData();
                 }, 500);
+
+                // Track sign up event for new Apple users
+                logAnalyticsEvent('sign_up', { method: 'apple' });
             }
+
+            // Track login event
+            logAnalyticsEvent('login', { method: 'apple' });
 
             return userCredential.user;
         } catch (error) {

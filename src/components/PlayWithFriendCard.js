@@ -15,6 +15,7 @@ import { moderateScale } from 'react-native-size-matters';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../contexts';
 import { deletePassAndPlayGame, getPassAndPlayGames } from '../utils/passAndPlayStorage';
+import { logAnalyticsEvent } from '../utils/analyticsEvents';
 import Avatar from './Avatar';
 import Icon from './Icon';
 
@@ -87,6 +88,10 @@ export default function PlayWithFriendCard({
             await Share.share({
                 message,
             });
+
+            // Track share game event
+            logAnalyticsEvent('share_game', { method: 'text_invite' });
+
             setOptionsModalVisible(false);
         } catch (error) {
             console.error(error.message);
