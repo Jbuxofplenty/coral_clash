@@ -1,11 +1,12 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { Block, Text, theme } from 'galio-framework';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Dimensions, ScrollView, StyleSheet, View } from 'react-native';
 import { moderateScale } from 'react-native-size-matters';
 import { useTranslation } from 'react-i18next';
 import ExampleLink, { loadViewedExamples, markExampleViewed } from '../components/ExampleLink';
 import { useTheme } from '../contexts';
+import { logTutorialStep } from '../utils/analyticsEvents';
 
 const { width, height } = Dimensions.get('screen');
 
@@ -13,6 +14,64 @@ export default function HowToPlay({ navigation }) {
     const { colors } = useTheme();
     const { t } = useTranslation();
     const [viewedExamples, setViewedExamples] = useState([]);
+
+    // ── Tutorial funnel tracking ──────────────────────────────────────
+    // Tracks which scroll-based steps have already been logged (fire-once per session)
+    const loggedStepsRef = useRef(new Set());
+    // Records the Y offset of each section card for scroll detection
+    const sectionOffsetsRef = useRef({});
+    // Tracks whether the first example tap has been logged this session
+    const firstExampleTappedRef = useRef(false);
+    // ScrollView layout height (viewport)
+    const scrollViewHeightRef = useRef(0);
+
+    // Map section keys to step numbers and step names
+    const SECTION_STEP_MAP = {
+        setup:         { step: 2, name: 'how_to_play_scroll_setup' },
+        turnOverview:  { step: 3, name: 'how_to_play_scroll_turn_overview' },
+        movement:      { step: 4, name: 'how_to_play_scroll_movement' },
+        specialRules:  { step: 5, name: 'how_to_play_scroll_special_rules' },
+        draw:          { step: 6, name: 'how_to_play_scroll_draw' },
+    };
+
+    // Log step 1 (begin) on mount
+    useEffect(() => {
+        logTutorialStep(1, 'how_to_play_begin', 'how_to_play');
+    }, []);
+
+    // Record section Y offset via onLayout
+    const handleSectionLayout = useCallback((sectionKey, event) => {
+        const { y } = event.nativeEvent.layout;
+        sectionOffsetsRef.current[sectionKey] = y;
+    }, []);
+
+    // Check which sections are visible on scroll
+    const handleScroll = useCallback((event) => {
+        const { contentOffset, layoutMeasurement, contentSize } = event.nativeEvent;
+        const scrollY = contentOffset.y;
+        const viewportHeight = layoutMeasurement.height;
+        scrollViewHeightRef.current = viewportHeight;
+
+        // Check each section: consider "visible" when its top is within the viewport
+        for (const [sectionKey, { step, name }] of Object.entries(SECTION_STEP_MAP)) {
+            if (loggedStepsRef.current.has(step)) continue;
+            const sectionY = sectionOffsetsRef.current[sectionKey];
+            if (sectionY !== undefined && scrollY + viewportHeight >= sectionY + 50) {
+                loggedStepsRef.current.add(step);
+                logTutorialStep(step, name, 'how_to_play');
+            }
+        }
+
+        // Step 8: scroll-to-bottom detection (within 20px of the bottom)
+        if (!loggedStepsRef.current.has(8)) {
+            const isAtBottom = scrollY + viewportHeight >= contentSize.height - 20;
+            if (isAtBottom) {
+                loggedStepsRef.current.add(8);
+                logTutorialStep(8, 'how_to_play_complete', 'how_to_play');
+            }
+        }
+    }, []);
+    // ── End tutorial funnel tracking ──────────────────────────────────
 
     useEffect(() => {
         loadExamples();
@@ -24,6 +83,12 @@ export default function HowToPlay({ navigation }) {
     };
 
     const handleMarkViewed = async (scenarioId) => {
+        // Track first example tap for tutorial funnel (step 7)
+        if (!firstExampleTappedRef.current) {
+            firstExampleTappedRef.current = true;
+            logTutorialStep(7, 'how_to_play_first_example', 'how_to_play');
+        }
+
         const updated = await markExampleViewed(scenarioId, viewedExamples);
         setViewedExamples(updated);
     };
@@ -37,6 +102,8 @@ export default function HowToPlay({ navigation }) {
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={styles.scrollContent}
                 style={styles.scrollView}
+                onScroll={handleScroll}
+                scrollEventThrottle={200}
             >
                 <Block style={[styles.card, { backgroundColor: colors.CARD_BACKGROUND }]}>
                     <Text h5 bold style={[styles.heading, { color: colors.PRIMARY }]}>
@@ -111,7 +178,10 @@ export default function HowToPlay({ navigation }) {
                     </View>
                 </Block>
 
-                <Block style={[styles.card, { backgroundColor: colors.CARD_BACKGROUND }]}>
+                <Block
+                    style={[styles.card, { backgroundColor: colors.CARD_BACKGROUND }]}
+                    onLayout={(e) => handleSectionLayout('setup', e)}
+                >
                     <Text h5 bold style={[styles.heading, { color: colors.PRIMARY }]}>
                         {t('howToPlay.setup.title')}
                     </Text>
@@ -163,7 +233,10 @@ export default function HowToPlay({ navigation }) {
                     </View>
                 </Block>
 
-                <Block style={[styles.card, { backgroundColor: colors.CARD_BACKGROUND }]}>
+                <Block
+                    style={[styles.card, { backgroundColor: colors.CARD_BACKGROUND }]}
+                    onLayout={(e) => handleSectionLayout('turnOverview', e)}
+                >
                     <Text h5 bold style={[styles.heading, { color: colors.PRIMARY }]}>
                         {t('howToPlay.turnOverview.title')}
                     </Text>
@@ -183,7 +256,10 @@ export default function HowToPlay({ navigation }) {
                     </View>
                 </Block>
 
-                <Block style={[styles.card, { backgroundColor: colors.CARD_BACKGROUND }]}>
+                <Block
+                    style={[styles.card, { backgroundColor: colors.CARD_BACKGROUND }]}
+                    onLayout={(e) => handleSectionLayout('movement', e)}
+                >
                     <Text h5 bold style={[styles.heading, { color: colors.PRIMARY }]}>
                         {t('howToPlay.movement.title')}
                     </Text>
@@ -432,7 +508,10 @@ export default function HowToPlay({ navigation }) {
                     </View>
                 </Block>
 
-                <Block style={[styles.card, { backgroundColor: colors.CARD_BACKGROUND }]}>
+                <Block
+                    style={[styles.card, { backgroundColor: colors.CARD_BACKGROUND }]}
+                    onLayout={(e) => handleSectionLayout('specialRules', e)}
+                >
                     <Text h5 bold style={[styles.heading, { color: colors.PRIMARY }]}>
                         {t('howToPlay.specialRules.title')}
                     </Text>
@@ -508,7 +587,10 @@ export default function HowToPlay({ navigation }) {
                     </View>
                 </Block>
 
-                <Block style={[styles.card, { backgroundColor: colors.CARD_BACKGROUND }]}>
+                <Block
+                    style={[styles.card, { backgroundColor: colors.CARD_BACKGROUND }]}
+                    onLayout={(e) => handleSectionLayout('draw', e)}
+                >
                     <Text h5 bold style={[styles.heading, { color: colors.PRIMARY }]}>
                         {t('howToPlay.drawResignation.title')}
                     </Text>

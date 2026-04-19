@@ -71,7 +71,7 @@ export default function DifficultySelectionModal({ visible, onSelect, onCancel, 
         return !user && !allowAll && difficultyValue !== 'random';
     };
 
-    if (!visible) return null;
+
 
     return (
         <Modal visible={visible} transparent animationType='fade' onRequestClose={onCancel}>

@@ -1,7 +1,7 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { theme } from 'galio-framework';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Dimensions, ScrollView, StyleSheet } from 'react-native';
+import { Dimensions, ScrollView, StyleSheet, InteractionManager } from 'react-native';
 import { END_GAME_TUTORIAL_FIXTURE } from '../constants/endGameTutorial';
 import { RULES_VIDEO_URL } from '../constants';
 
@@ -26,7 +26,7 @@ import { collection, db, onSnapshot, query, where } from '../config/firebase';
 import { useAlert, useAuth, useTheme } from '../contexts';
 import { useDevFeatures, useFirebaseFunctions, useGame, useMatchmaking } from '../hooks';
 import { useFriends } from '../hooks/useFriends';
-import { logAnalyticsEvent } from '../utils/analyticsEvents';
+import { logAnalyticsEvent, logTutorialStep } from '../utils/analyticsEvents';
 import { savePassAndPlayGame } from '../utils/passAndPlayStorage';
 
 const { width, height } = Dimensions.get('screen');
@@ -143,6 +143,7 @@ export default function Home({ navigation }) {
                     if (!user) {
                         // Track tutorial start for anonymous users
                         logAnalyticsEvent('tutorial_begin', { tutorial_type: 'end_game' });
+                        logTutorialStep(1, 'end_game_begin', 'end_game');
 
                         navigation.navigate('Game', {
                             gameId: null, // offline mode
@@ -167,6 +168,7 @@ export default function Home({ navigation }) {
                                 text: t('home.welcome.howToPlay'),
                                 onPress: () => {
                                     logAnalyticsEvent('tutorial_begin', { tutorial_type: 'how_to_play' });
+                                    logTutorialStep(1, 'how_to_play_begin', 'how_to_play');
                                     navigation.navigate('How-To Play');
                                 },
                             },
@@ -251,37 +253,44 @@ export default function Home({ navigation }) {
         let historyGames = [];
         let creatorInitialSnapshot = true;
         let opponentInitialSnapshot = true;
+        let historyCreatorUnsubscribe = () => {};
+        let historyOpponentUnsubscribe = () => {};
+        let isCancelled = false;
 
-        // Initial load - only call Firebase Function once on mount
-        const initialLoad = async () => {
-            try {
-                const result = await getGameHistory();
-                historyGames = result.games || [];
-                setGameHistory(historyGames);
-            } catch (error) {
-                console.error('[Home] Error loading game history:', error);
-            } finally {
-                setHistoryLoading(false);
-            }
-        };
+        const task = InteractionManager.runAfterInteractions(() => {
+            if (isCancelled) return;
 
-        initialLoad();
+            // Initial load - only call Firebase Function once on mount
+            const initialLoad = async () => {
+                try {
+                    const result = await getGameHistory();
+                    if (isCancelled) return;
+                    historyGames = result.games || [];
+                    setGameHistory(historyGames);
+                } catch (error) {
+                    console.error('[Home] Error loading game history:', error);
+                } finally {
+                    if (!isCancelled) setHistoryLoading(false);
+                }
+            };
 
-        // Listen to completed/cancelled games where user is creator
-        const historyCreatorQuery = query(
-            collection(db, 'games'),
-            where('creatorId', '==', user.uid),
-            where('status', 'in', ['completed', 'cancelled']),
-        );
+            initialLoad();
 
-        // Listen to completed/cancelled games where user is opponent
-        const historyOpponentQuery = query(
-            collection(db, 'games'),
-            where('opponentId', '==', user.uid),
-            where('status', 'in', ['completed', 'cancelled']),
-        );
+            // Listen to completed/cancelled games where user is creator
+            const historyCreatorQuery = query(
+                collection(db, 'games'),
+                where('creatorId', '==', user.uid),
+                where('status', 'in', ['completed', 'cancelled']),
+            );
 
-        const historyCreatorUnsubscribe = onSnapshot(historyCreatorQuery, async (snapshot) => {
+            // Listen to completed/cancelled games where user is opponent
+            const historyOpponentQuery = query(
+                collection(db, 'games'),
+                where('opponentId', '==', user.uid),
+                where('status', 'in', ['completed', 'cancelled']),
+            );
+
+            historyCreatorUnsubscribe = onSnapshot(historyCreatorQuery, async (snapshot) => {
             if (creatorInitialSnapshot) {
                 creatorInitialSnapshot = false;
                 return; // Skip initial snapshot (already loaded via initialLoad)
@@ -341,7 +350,7 @@ export default function Home({ navigation }) {
             }
         });
 
-        const historyOpponentUnsubscribe = onSnapshot(historyOpponentQuery, async (snapshot) => {
+        historyOpponentUnsubscribe = onSnapshot(historyOpponentQuery, async (snapshot) => {
             if (opponentInitialSnapshot) {
                 opponentInitialSnapshot = false;
                 return; // Skip initial snapshot (already loaded via initialLoad)
@@ -398,9 +407,12 @@ export default function Home({ navigation }) {
                 setGameHistory(updatedHistory);
             }
         });
+        });
 
         // Cleanup on unmount
         return () => {
+            isCancelled = true;
+            if (task) task.cancel();
             historyCreatorUnsubscribe();
             historyOpponentUnsubscribe();
         };

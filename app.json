@@ -8,7 +8,7 @@
       "ios",
       "android"
     ],
-    "version": "1.0.14",
+    "version": "1.0.15",
     "orientation": "portrait",
     "icon": "./src/assets/icons/app_icon.png",
     "splash": {
@@ -18,6 +18,7 @@
     },
     "updates": {
       "fallbackToCacheTimeout": 0,
+      "checkOnLaunch": "WIFI_ONLY",
       "url": "https://u.expo.dev/416801e2-5620-4693-8729-161decbd0b5b"
     },
     "assetBundlePatterns": [
@@ -27,7 +28,7 @@
       "googleServicesFile": "./GoogleService-Info.plist",
       "supportsTablet": false,
       "bundleIdentifier": "com.jbuxofplenty.coralclash",
-      "runtimeVersion": "1.0.14",
+      "runtimeVersion": "1.0.15",
       "appleTeamId": "FWV22U8U39",
       "associatedDomains": [
         "webcredentials:coral-clash.firebaseapp.com"
@@ -226,6 +227,7 @@
       ]
     ],
     "android": {
+      "softwareKeyboardLayoutMode": "pan",
       "googleServicesFile": "./google-services.json",
       "package": "com.jbuxofplenty.coralclash",
       "runtimeVersion": {

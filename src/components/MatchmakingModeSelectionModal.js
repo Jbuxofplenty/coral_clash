@@ -53,7 +53,7 @@ export default function MatchmakingModeSelectionModal({
         onSelectMode(mode.type);
     };
 
-    if (!visible) return null;
+
 
     // Format time control for display
     const timeControlDisplay = timeControl

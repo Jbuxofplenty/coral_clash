@@ -1,9 +1,10 @@
 import { Icon } from 'galio-framework';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useAlert, useAuth, useGamePreferences } from '../contexts';
 import { useFirebaseFunctions } from '../hooks';
+import { logTutorialStep } from '../utils/analyticsEvents';
 import BaseCoralClashBoard, { baseStyles } from './BaseCoralClashBoard';
 
 /**
@@ -38,6 +39,7 @@ const ComputerCoralClashBoard = ({
     difficulty = 'random',
     opponentData, // For online computer games - contains displayName and avatarKey
     onGameOver, // Optional callback fired once when the game ends
+    isEndGameTutorial = false, // Whether this is the end-game tutorial
 }) => {
     const { t } = useTranslation();
     const { user } = useAuth();
@@ -52,10 +54,21 @@ const ComputerCoralClashBoard = ({
     // Track when computer is thinking
     const [isComputerThinking, setIsComputerThinking] = useState(false);
 
+    // Track whether the first move has been logged for end-game tutorial
+    const firstMoveTrackedRef = useRef(false);
+
     // Computer-specific: Handle move completion
     const handleMoveComplete = async (result, _move) => {
-        // If it's a computer game and computer's turn, trigger computer move
+        // Track first move for end-game tutorial
+        if (isEndGameTutorial && !firstMoveTrackedRef.current) {
+            firstMoveTrackedRef.current = true;
+            logTutorialStep(3, 'end_game_first_move', 'end_game');
+        }
+
+        // If it's an ONLINE computer game and computer's turn, trigger computer move via API
+        // Offline games handle computer moves locally in BaseCoralClashBoard
         if (
+            gameId &&
             result.opponentType === 'computer' &&
             result.gameState?.turn === 'b' &&
             !result.gameOver
@@ -284,7 +297,7 @@ const ComputerCoralClashBoard = ({
             bottomPlayerData={bottomPlayer}
             renderControls={renderControls}
             renderMenuItems={renderMenuItems}
-            onMoveComplete={gameId ? handleMoveComplete : undefined}
+            onMoveComplete={handleMoveComplete}
             enableUndo={true}
             onUndo={handleUndo}
             userColor='w' // User always plays as white in computer games

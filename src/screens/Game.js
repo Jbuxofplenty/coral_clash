@@ -8,7 +8,7 @@ import ComputerCoralClashBoard from '../components/ComputerCoralClashBoard';
 import PassAndPlayCoralClashBoard from '../components/PassAndPlayCoralClashBoard';
 import PvPCoralClashBoard from '../components/PvPCoralClashBoard';
 import { useAlert, useNotifications, useTheme } from '../contexts';
-import { logAnalyticsEvent } from '../utils/analyticsEvents';
+import { logAnalyticsEvent, logTutorialStep } from '../utils/analyticsEvents';
 
 export default function Game({ route }) {
     const { t } = useTranslation();
@@ -74,6 +74,7 @@ export default function Game({ route }) {
         // Track tutorial completion for end-game tutorial
         if (isEndGameTutorial) {
             logAnalyticsEvent('tutorial_complete', { tutorial_type: 'end_game' });
+            logTutorialStep(4, 'end_game_complete', 'end_game');
         }
     }, [isEndGameTutorial]);
 
@@ -85,6 +86,14 @@ export default function Game({ route }) {
             showAlert(
                 t('tutorial.endGame.title', 'Finish the Game!'),
                 t('tutorial.endGame.message', 'The Whale is the King. You can win by either checkmating the Black Whale, or by placing all 17 of your corals!'),
+                [
+                    {
+                        text: t('common.ok', 'OK'),
+                        onPress: () => {
+                            logTutorialStep(2, 'end_game_alert_dismissed', 'end_game');
+                        },
+                    },
+                ],
             );
         }
     }, [isEndGameTutorial, showAlert, t]);
@@ -173,6 +182,7 @@ export default function Game({ route }) {
                 opponentType={opponentType}
                 timeControl={timeControl}
                 difficulty={difficulty}
+                isEndGameTutorial={isEndGameTutorial}
                 onGameOver={isEndGameTutorial ? handleGameOver : undefined}
                 notificationStatus={
                     showStatus && statusMessage

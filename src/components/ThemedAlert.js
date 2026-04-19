@@ -82,9 +82,7 @@ export default function ThemedAlert({
         }
     };
 
-    if (!visible) {
-        return null;
-    }
+
 
     return (
         <Modal

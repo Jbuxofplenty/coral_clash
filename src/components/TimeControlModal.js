@@ -60,7 +60,7 @@ export default function TimeControlModal({ visible, onSelect, onCancel }) {
         });
     };
 
-    if (!visible) return null;
+
 
     return (
         <Modal visible={visible} transparent animationType='fade' onRequestClose={onCancel}>

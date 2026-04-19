@@ -49,6 +49,24 @@ export const logAnalyticsEvent = (eventName, params = {}) => {
 };
 
 /**
+ * Log a granular tutorial step event for funnel analysis.
+ *
+ * All tutorial steps use the single event name 'tutorial_step' to stay within
+ * Firebase's 500-event-name limit while enabling detailed funnel analysis.
+ *
+ * @param {number} stepNumber - The sequential step number (1-based)
+ * @param {string} stepName - Descriptive step identifier (e.g. 'end_game_first_move')
+ * @param {string} tutorialType - The tutorial flow ('end_game' or 'how_to_play')
+ */
+export const logTutorialStep = (stepNumber, stepName, tutorialType) => {
+    logAnalyticsEvent('tutorial_step', {
+        step_number: stepNumber,
+        step_name: stepName,
+        tutorial_type: tutorialType,
+    });
+};
+
+/**
  * Set the persistent user_type user property in Firebase Analytics.
  * This should be called on every auth state change so that Firebase
  * Analytics dashboards can segment users by type.

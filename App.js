@@ -12,7 +12,9 @@
 */
 import { NavigationContainer } from '@react-navigation/native';
 import { Asset } from 'expo-asset';
+import * as Font from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
+import { FontAwesome, MaterialIcons, Ionicons, AntDesign, Entypo, MaterialCommunityIcons } from '@expo/vector-icons';
 import { Block, GalioProvider } from 'galio-framework';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Image, LogBox, StatusBar, InteractionManager } from 'react-native';
@@ -21,6 +23,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import CustomSplashScreen from './src/components/CustomSplashScreen';
 import VersionWarningBanner from './src/components/VersionWarningBanner';
 import { materialTheme } from './src/constants/';
+import GalioExtraFont from './src/assets/fonts/galioExtra.ttf';
 import {
     AlertProvider,
     AuthProvider,
@@ -142,7 +145,18 @@ export default function App() {
 
     const _loadResourcesAsync = async () => {
         try {
-            await Promise.all([...cacheImages(assetImages)]);
+            await Promise.all([
+                ...cacheImages(assetImages),
+                Font.loadAsync({
+                    ...FontAwesome.font,
+                    ...MaterialIcons.font,
+                    ...Ionicons.font,
+                    ...AntDesign.font,
+                    ...Entypo.font,
+                    ...MaterialCommunityIcons.font,
+                    GalioExtra: GalioExtraFont,
+                }),
+            ]);
         } catch (e) {
             console.warn('Error loading resources:', e);
         }
