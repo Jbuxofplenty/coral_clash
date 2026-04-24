@@ -60,9 +60,17 @@ export const onUserCreate = onDocumentCreated(
             discriminator = Math.floor(1000 + Math.random() * 9000).toString();
         }
 
-        // Update the user document with the discriminator
+        // Update the user document with the discriminator and initial Elo stats
         await snap.ref.update({
             discriminator: discriminator,
+            stats: {
+                elo: 1200,
+                ratedGamesPlayed: 0,
+                gamesPlayed: 0,
+                gamesWon: 0,
+                gamesLost: 0,
+                gamesDraw: 0
+            }
         });
 
         // Initialize default settings in subcollection if not already set

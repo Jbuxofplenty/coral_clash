@@ -27,6 +27,7 @@ export default function PlayerStatusBar({
     coralRemaining,
     coralUnderControl,
     isThinking = false,
+    elo,
 }) {
     const { t } = useTranslation();
     const { colors } = useTheme();
@@ -72,6 +73,9 @@ export default function PlayerStatusBar({
                         numberOfLines={1}
                     >
                         {isComputer ? t('components.playerStatus.computer') : playerName}
+                        {elo !== undefined && elo !== null && (
+                            <Text style={styles.eloText}> ({elo})</Text>
+                        )}
                     </Text>
                     {isThinking && isComputer && (
                         <View style={styles.thinkingIndicator}>
@@ -258,5 +262,10 @@ const styles = StyleSheet.create({
         width: 24,
         height: 24,
         marginLeft: 8,
+    },
+    eloText: {
+        fontSize: 14,
+        fontWeight: '400',
+        color: 'rgba(255, 255, 255, 0.7)',
     },
 });

@@ -2144,6 +2144,7 @@ const BaseCoralClashBoard = ({
                                     topPlayerData.isComputer &&
                                     isTopPlayerActive
                                 }
+                                elo={topPlayerData.elo}
                             />
                         </View>
 
@@ -2271,6 +2272,7 @@ const BaseCoralClashBoard = ({
                                     bottomPlayerData.isComputer &&
                                     isBottomPlayerActive
                                 }
+                                elo={bottomPlayerData.elo}
                             />
                         </View>
 

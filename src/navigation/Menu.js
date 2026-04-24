@@ -70,6 +70,11 @@ function CustomDrawerContent(props) {
                             <Text size={isCompact ? 13 : 16} color='white' style={styles.userName}>
                                 {getDisplayName()}
                             </Text>
+                            {user.stats?.elo && (
+                                <Text size={isCompact ? 11 : 13} color='rgba(255, 255, 255, 0.8)' style={{ marginTop: 2 }}>
+                                    ELO: {user.stats.elo}
+                                </Text>
+                            )}
                         </View>
                     )}
 

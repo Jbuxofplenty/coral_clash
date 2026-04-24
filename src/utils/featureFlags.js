@@ -156,3 +156,25 @@ export const initializeVersionWarning = async () => {
     const enabled = await getVersionWarningEnabled();
     return enabled;
 };
+
+/**
+ * Get the Elo matchmaking feature flag from Firestore
+ * @returns {Promise<boolean>} The Elo matchmaking state (true = enabled, false = disabled)
+ */
+export const getEloMatchmakingEnabled = async () => {
+    return getFeatureFlag('eloMatchmaking', {
+        documentId: 'eloMatchmaking',
+        field: 'enabled',
+        validValues: [true, false],
+        fallback: false,
+        cacheTTL: Infinity, // Cache for entire app session
+    });
+};
+
+/**
+ * Initialize Elo matchmaking feature flag on app startup
+ * @returns {Promise<boolean>} The Elo matchmaking state
+ */
+export const initializeEloMatchmaking = async () => {
+    return await getEloMatchmakingEnabled();
+};

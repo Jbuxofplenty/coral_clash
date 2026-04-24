@@ -99,6 +99,7 @@
         "settings": "Settings",
         "friends": "Friends",
         "stats": "Stats",
+        "leaderboard": "Leaderboard",
         "reportIssue": "Report Issue",
         "rulesVideo": "Rules Video",
         "physicalGame": "Physical Game",
@@ -164,6 +165,14 @@
     "drawsShort": "D",
     "noGamesYet": "No Games Yet",
     "noGamesHint": "Start playing games to see your statistics here!"
+  },
+  "leaderboard": {
+    "title": "Ranked Leaderboard",
+    "subtitle": "Your place in the neighborhood",
+    "loading": "Loading rankings...",
+    "noPlayers": "No ranked players yet",
+    "yourRank": "Your Rank: #{{rank}}",
+    "you": "You"
   },
   "gameMenu": {
     "saveGameState": "Save Game State",

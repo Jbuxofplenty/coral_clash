@@ -1,5 +1,5 @@
 import { useNavigation } from '@react-navigation/native';
-import { Block, NavBar, theme } from 'galio-framework';
+import { Block, NavBar, Text, theme } from 'galio-framework';
 
 import React from 'react';
 import { StyleSheet, TouchableOpacity } from 'react-native';
@@ -27,10 +27,29 @@ function Header({ back, title, transparent }) {
             return null;
         }
 
+        const elo = user.stats?.elo || 1200;
+
         return (
-            <TouchableOpacity onPress={handleAvatarPress} activeOpacity={0.7}>
-                <Avatar size='medium' style={{ marginRight: 8 }} />
-            </TouchableOpacity>
+            <Block row middle>
+                <Block
+                    style={{
+                        backgroundColor: colors.PRIMARY + '20',
+                        paddingHorizontal: 8,
+                        paddingVertical: 4,
+                        borderRadius: 12,
+                        marginRight: 12,
+                        borderWidth: 1,
+                        borderColor: colors.PRIMARY + '40',
+                    }}
+                >
+                    <Text size={12} bold color={colors.PRIMARY}>
+                        {elo}
+                    </Text>
+                </Block>
+                <TouchableOpacity onPress={handleAvatarPress} activeOpacity={0.7}>
+                    <Avatar size="medium" style={{ marginRight: 8 }} />
+                </TouchableOpacity>
+            </Block>
         );
     };
 

@@ -17,6 +17,10 @@ export default function Stats({ navigation: _navigation }) {
     const { colors, isDarkMode: _isDarkMode } = useTheme();
     const { getGameHistory, getPublicUserInfo } = useFirebaseFunctions();
 
+    const userElo = user?.stats?.elo || 1200;
+    const ratedGamesCount = user?.stats?.ratedGamesPlayed || 0;
+    const isProvisional = ratedGamesCount < 30;
+
     const [loading, setLoading] = useState(true);
     const [_gameHistory, setGameHistory] = useState([]);
     const [opponentStats, setOpponentStats] = useState({});
@@ -360,6 +364,62 @@ export default function Stats({ navigation: _navigation }) {
                         {t('stats.overallStatistics')}
                     </Text>
 
+                    {/* Elo Rating Card */}
+                    <Block
+                        style={[
+                            styles.eloCard,
+                            {
+                                backgroundColor: colors.CARD_BACKGROUND,
+                                borderColor: colors.PRIMARY + '40',
+                                shadowColor: colors.SHADOW,
+                                borderLeftWidth: scale(4),
+                                borderLeftColor: colors.PRIMARY,
+                            },
+                        ]}
+                    >
+                        <Block row middle space="between">
+                            <Block>
+                                <Text size={moderateScale(14)} color={colors.TEXT_SECONDARY} bold uppercase>
+                                    {t('stats.eloRating')}
+                                </Text>
+                                <Block row middle>
+                                    <Text size={moderateScale(36)} bold color={colors.TEXT}>
+                                        {userElo}
+                                    </Text>
+                                    {isProvisional && (
+                                        <Block
+                                            style={{
+                                                backgroundColor: colors.WARNING + '20',
+                                                paddingHorizontal: 8,
+                                                paddingVertical: 2,
+                                                borderRadius: 4,
+                                                marginLeft: 8,
+                                            }}
+                                        >
+                                            <Text size={moderateScale(10)} color={colors.WARNING} bold>
+                                                {t('stats.provisional').toUpperCase()}
+                                            </Text>
+                                        </Block>
+                                    )}
+                                </Block>
+                            </Block>
+                            <Block center>
+                                <Icon
+                                    name="line-chart"
+                                    family="font-awesome"
+                                    size={moderateScale(40)}
+                                    color={colors.PRIMARY + '30'}
+                                />
+                            </Block>
+                        </Block>
+                        <Block row middle style={{ marginTop: 8 }}>
+                            <Icon name="history" family="font-awesome" size={moderateScale(12)} color={colors.TEXT_SECONDARY} />
+                            <Text size={moderateScale(12)} color={colors.TEXT_SECONDARY} style={{ marginLeft: 6 }}>
+                                {ratedGamesCount} {t('stats.ratedGames')}
+                            </Text>
+                        </Block>
+                    </Block>
+
                     {/* Large Games Played Card */}
                     <Block
                         style={[
@@ -532,7 +592,17 @@ const styles = StyleSheet.create({
     },
     statsGrid: {
         justifyContent: 'space-between',
-        marginBottom: theme.SIZES.BASE * 1.5,
+        marginTop: 16,
+    },
+    eloCard: {
+        padding: 16,
+        borderRadius: 12,
+        marginBottom: 24,
+        borderWidth: 1,
+        elevation: 3,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
     },
     largeStatCard: {
         width: '100%',

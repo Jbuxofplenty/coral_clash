@@ -60,6 +60,7 @@ async function createCorrespondenceInviteHandler(request) {
         expiresAt: admin.firestore.Timestamp.fromDate(expiresAt),
         gameId: null, // Will be set when game is created
         clientVersion: clientVersion || 'unknown',
+        creatorElo: userData.stats?.elo || 1200,
     });
 
     return {
@@ -237,9 +238,15 @@ async function acceptCorrespondenceInviteHandler(request) {
         moves: [],
         gameState: initializeGameState(),
         version: GAME_VERSION,
+        correspondenceGame: true, // Mark as ranked correspondence game
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
         lastMoveTime: serverTimestamp(),
+        // Elo snapshots
+        eloAtGame: {
+            [userId]: userData.stats?.elo || 1200,
+            [inviteData.matchedUserId]: inviteData.creatorElo || matchedUserData.stats?.elo || 1200,
+        },
     };
 
     // If time control is enabled, initialize time tracking
@@ -442,6 +449,27 @@ async function findCorrespondenceMatchHandler(request) {
         availableInvites = fallbackSnapshot.docs.filter((doc) => doc.data().creatorId !== userId);
     }
 
+    // If eloMatchmaking is enabled, prefer invites with similar Elo
+    let eloMatchmakingEnabled = false;
+    try {
+        const eloFlagDoc = await db.collection('featureFlags').doc('eloMatchmaking').get();
+        if (eloFlagDoc.exists) {
+            eloMatchmakingEnabled = eloFlagDoc.data().enabled === true;
+        }
+    } catch (error) {
+        console.error('[findCorrespondenceMatch] Error checking eloMatchmaking flag:', error);
+    }
+
+    if (eloMatchmakingEnabled && availableInvites.length > 0) {
+        const userElo = userData.stats?.elo || 1200;
+        // Sort by closest Elo
+        availableInvites.sort((a, b) => {
+            const eloA = a.data().creatorElo || 1200;
+            const eloB = b.data().creatorElo || 1200;
+            return Math.abs(eloA - userElo) - Math.abs(eloB - userElo);
+        });
+    }
+
     if (availableInvites.length === 0) {
         // No invitations found - create one for this user
         const expiresAt = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 24 hours
@@ -457,6 +485,7 @@ async function findCorrespondenceMatchHandler(request) {
             createdAt: serverTimestamp(),
             expiresAt: admin.firestore.Timestamp.fromDate(expiresAt),
             gameId: null,
+            creatorElo: userData.stats?.elo || 1200,
         });
 
         return {

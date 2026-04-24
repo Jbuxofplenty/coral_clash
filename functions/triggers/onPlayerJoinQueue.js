@@ -6,6 +6,13 @@ import { getFunctionRegion } from '../utils/appCheckConfig.js';
 import { getRandomComputerUser, isComputerUser } from '../utils/computerUsers.js';
 import { formatDisplayName, initializeGameState, serverTimestamp } from '../utils/helpers.js';
 import { sendMatchFoundNotification } from '../utils/notifications.js';
+import { DEFAULT_ELO } from '../utils/eloRating.js';
+
+const COMPUTER_ELO_MAP = {
+    easy: 800,
+    medium: 1200,
+    hard: 1600
+};
 
 /**
  * Helper function to try matching players
@@ -87,21 +94,50 @@ export async function tryMatchPlayers(newUserId) {
         // Find another real player (not the current user and not a computer user)
         // IMPORTANT: Prioritize real users over computer users
         let opponentDoc = null;
-        const realUserCandidates = [];
-        const computerUserCandidates = [];
-        const sameUserCandidates = [];
+        
+        // Check if Elo matchmaking is enabled
+        let eloMatchmakingEnabled = false;
+        try {
+            const eloFlagDoc = await db.collection('featureFlags').doc('eloMatchmaking').get();
+            if (eloFlagDoc.exists) {
+                eloMatchmakingEnabled = eloFlagDoc.data().enabled === true;
+            }
+        } catch (error) {
+            console.error('[tryMatchPlayers] Error checking eloMatchmaking flag:', error);
+        }
 
-        // First pass: collect all users and prioritize real users
-        for (const doc of queueSnapshot.docs) {
-            if (doc.id === newUserId) {
-                sameUserCandidates.push(doc.id);
-            } else if (isComputerUser(doc.id)) {
-                computerUserCandidates.push(doc.id);
-            } else {
-                realUserCandidates.push(doc.id);
-                // Take the first real user we find (oldest by joinedAt due to ordering)
-                if (!opponentDoc) {
+        if (eloMatchmakingEnabled) {
+            const newUserElo = newUserData.elo || DEFAULT_ELO;
+            const joinedAt = newUserData.joinedAt?.toDate() || new Date();
+            const waitTimeSeconds = Math.floor((Date.now() - joinedAt.getTime()) / 1000);
+
+            // Define Elo range based on wait time
+            let range = 100;
+            if (waitTimeSeconds > 60) range = 10000; // Match anyone
+            else if (waitTimeSeconds > 30) range = 400;
+            else if (waitTimeSeconds > 15) range = 200;
+
+            const minElo = newUserElo - range;
+            const maxElo = newUserElo + range;
+
+            // Filter real users by Elo range
+            const eligibleRealUsers = queueSnapshot.docs.filter(doc => {
+                if (doc.id === newUserId || isComputerUser(doc.id)) return false;
+                const docElo = doc.data().elo || DEFAULT_ELO;
+                return docElo >= minElo && docElo <= maxElo;
+            });
+
+            if (eligibleRealUsers.length > 0) {
+                // Take the oldest eligible user
+                opponentDoc = eligibleRealUsers[0];
+            }
+        } else {
+            // First pass: collect all users and prioritize real users (Original logic)
+            for (const doc of queueSnapshot.docs) {
+                if (doc.id !== newUserId && !isComputerUser(doc.id)) {
+                    // Take the first real user we find (oldest by joinedAt due to ordering)
                     opponentDoc = doc;
+                    break;
                 }
             }
         }
@@ -291,6 +327,13 @@ async function createMatchedGame(player1Id, player2Id) {
                 creatorAvatarKey: player1Settings.avatarKey || 'dolphin',
                 opponentDisplayName: player2Name,
                 opponentAvatarKey: player2Settings.avatarKey || 'dolphin',
+                // Elo snapshots
+                eloAtGame: {
+                    [player1Id]: player1QueueDoc.data().elo || player1Data.stats?.elo || DEFAULT_ELO,
+                    [player2Id]: isOpponentComputer 
+                        ? (COMPUTER_ELO_MAP[opponentDifficulty] || DEFAULT_ELO)
+                        : (player2QueueDoc.data().elo || player2Data.stats?.elo || DEFAULT_ELO)
+                },
                 createdAt: serverTimestamp(),
                 updatedAt: serverTimestamp(),
             };

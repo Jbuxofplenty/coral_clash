@@ -2,6 +2,7 @@ import { HttpsError, onCall } from 'firebase-functions/v2/https';
 import { admin } from '../init.js';
 import { getAppCheckConfig } from '../utils/appCheckConfig.js';
 import { serverTimestamp } from '../utils/helpers.js';
+import { updateEloOnGameComplete } from '../utils/updateEloOnGameComplete.js';
 
 const db = admin.firestore();
 
@@ -217,6 +218,8 @@ async function deleteAccountHandler(request) {
                 updateData.winner = gameData.opponentId;
                 updateData.completedAt = serverTimestamp();
 
+                await updateEloOnGameComplete(doc.id, { ...gameData, ...updateData }, gameData.opponentId);
+
                 // Update opponent's stats
                 const opponentRef = db.collection('users').doc(gameData.opponentId);
                 const opponentDoc = await opponentRef.get();
@@ -262,6 +265,8 @@ async function deleteAccountHandler(request) {
                 updateData.result = 'forfeit';
                 updateData.winner = gameData.creatorId;
                 updateData.completedAt = serverTimestamp();
+
+                await updateEloOnGameComplete(doc.id, { ...gameData, ...updateData }, gameData.creatorId);
 
                 // Update creator's stats
                 const creatorRef = db.collection('users').doc(gameData.creatorId);

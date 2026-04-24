@@ -11,6 +11,7 @@ import GameScreen from '../screens/Game';
 import HomeScreen from '../screens/Home';
 import HowToPlay from '../screens/HowToPlay';
 import Login from '../screens/Login';
+import Leaderboard from '../screens/Leaderboard';
 import ReportIssue from '../screens/ReportIssue';
 import ScenarioBoard from '../screens/ScenarioBoard';
 import Settings from '../screens/Settings';
@@ -167,6 +168,29 @@ export default function AppStack(_props) {
                             header: ({ navigation, scene }) => (
                                 <Header
                                     title={t('navigation.friends')}
+                                    navigation={navigation}
+                                    scene={scene}
+                                    user={user}
+                                />
+                            ),
+                        }}
+                    />
+                    <Drawer.Screen
+                        name='Leaderboard'
+                        component={Leaderboard}
+                        options={{
+                            title: t('navigation.leaderboard'),
+                            drawerIcon: ({ _focused, color }) => (
+                                <Icon
+                                    size={isCompact ? 20 : 24}
+                                    name='trophy'
+                                    family='font-awesome'
+                                    color={color}
+                                />
+                            ),
+                            header: ({ navigation, scene }) => (
+                                <Header
+                                    title={t('navigation.leaderboard')}
                                     navigation={navigation}
                                     scene={scene}
                                     user={user}

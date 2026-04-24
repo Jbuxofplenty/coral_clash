@@ -16,6 +16,7 @@ import { Worker } from 'worker_threads';
 import { admin } from '../init.js';
 import { getAppCheckConfig, getFunctionRegion } from '../utils/appCheckConfig.js';
 import { getComputerUserData, isComputerUser } from '../utils/computerUsers.js';
+import { updateEloOnGameComplete } from '../utils/updateEloOnGameComplete.js';
 import { cancelPendingTimeoutTask, createTimeoutTask } from '../utils/gameTasks.js';
 
 import { getGameResult, validateMove } from '../utils/gameValidator.js';
@@ -780,6 +781,12 @@ export const makeMove = onCall(getAppCheckConfig(), async (request) => {
                         });
                 }
             }
+        }
+
+        // Trigger Elo update if the game is over
+        if (gameResult.isOver) {
+            const realWinnerId = gameResult.winner === 'w' ? gameData.whitePlayerId : (gameResult.winner === 'b' ? gameData.blackPlayerId : null);
+            await updateEloOnGameComplete(gameId, gameData, realWinnerId);
         }
 
         return {
@@ -1638,6 +1645,8 @@ async function checkAndHandleTimeExpiration(gameId, gameData) {
                 });
         }
 
+        await updateEloOnGameComplete(gameId, gameData, winner);
+
         return { timeExpired: true, winner, loser };
     }
 
@@ -1927,6 +1936,8 @@ export const resignGame = region('us-central1').https.onCall(async (data, contex
                 );
             console.log('[resignGame] User stats updated for computer game');
         }
+
+        await updateEloOnGameComplete(gameId, gameData, winner);
 
         console.log('[resignGame] Resignation completed successfully');
         return {

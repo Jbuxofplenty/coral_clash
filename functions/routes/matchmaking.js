@@ -52,6 +52,7 @@ async function joinMatchmakingHandler(request) {
             avatarKey: userData.settings?.avatarKey || 'dolphin',
             timeControl: timeControl || { type: 'unlimited' },
             clientVersion: clientVersion || 'unknown',
+            elo: userData.stats?.elo || 1200,
             joinedAt: serverTimestamp(),
             lastHeartbeat: serverTimestamp(), // Track last activity
             status: 'searching', // searching, matched

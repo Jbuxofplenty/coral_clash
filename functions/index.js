@@ -13,6 +13,7 @@ import * as issues from './routes/issues.js';
 import * as matchmaking from './routes/matchmaking.js';
 import * as userProfile from './routes/userProfile.js';
 import * as userSettings from './routes/userSettings.js';
+import * as leaderboard from './routes/leaderboard.js';
 
 // Import trigger modules
 import { onFriendRequestCreate } from './triggers/onFriendRequestCreate.js';
@@ -25,6 +26,7 @@ import { onUserCreate } from './triggers/onUserCreate.js';
 import { cleanupExpiredCorrespondenceInvites } from './scheduled/cleanupExpiredCorrespondenceInvites.js';
 import { cleanupStaleMatchmakingEntries } from './scheduled/cleanupStaleMatchmakingEntries.js';
 import { retryMatchmaking } from './scheduled/retryMatchmaking.js';
+import { autoResignStaleGames } from './scheduled/autoResignStaleGames.js';
 
 // ==================== User Profile APIs ====================
 export const getPublicUserInfo = userProfile.getPublicUserInfo;
@@ -76,6 +78,9 @@ export const findCorrespondenceMatch = correspondenceMatchmaking.findCorresponde
 // ==================== Issues APIs ====================
 export const submitIssue = issues.submitIssue;
 
+// ==================== Leaderboard APIs ====================
+export const getLeaderboard = leaderboard.getLeaderboard;
+
 // ==================== Admin/Setup APIs ====================
 export const initializeComputerUsers = computerUsers.initializeComputerUsers;
 export const deleteComputerUsers = computerUsers.deleteComputerUsers;
@@ -87,6 +92,7 @@ export { onFriendRequestCreate, onGameCreate, onGameMoveUpdate, onPlayerJoinQueu
     export {
         cleanupExpiredCorrespondenceInvites,
         cleanupStaleMatchmakingEntries,
-        retryMatchmaking
+        retryMatchmaking,
+        autoResignStaleGames
     };
 

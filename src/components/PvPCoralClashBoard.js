@@ -51,6 +51,7 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
     const [resetRequestData, setResetRequestData] = useState(null);
     const [currentMoveCount, setCurrentMoveCount] = useState(0); // Track move count from Firestore
     const [liveOpponentData, setLiveOpponentData] = useState(opponentData); // Track live opponent data
+    const [gameElo, setGameElo] = useState({ user: null, opponent: null }); // Track Elo at game start
     const [lastReminderSent, setLastReminderSent] = useState(null); // Track when user last sent a reminder
 
     // Listen to game document for user color, requests, and opponent snapshot data
@@ -118,6 +119,15 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
                             displayName: opponentDisplayName,
                             avatarKey: opponentAvatarKey,
                         });
+                    }
+
+                    // Track Elo snapshots
+                    if (gameData.eloAtGame) {
+                        const userElo = gameData.eloAtGame[user.uid];
+                        const opponentElo = isCreator 
+                            ? gameData.eloAtGame[gameData.opponentId] 
+                            : gameData.eloAtGame[gameData.creatorId];
+                        setGameElo({ user: userElo, opponent: opponentElo });
                     }
 
                     // Track last reminder sent timestamp for this user
@@ -528,12 +538,14 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
         name: opponentName,
         avatarKey: opponentAvatar,
         isComputer: false,
+        elo: gameElo.opponent,
     };
 
     const bottomPlayer = {
         name: userName,
         avatarKey: user?.settings?.avatarKey || 'dolphin',
         isComputer: false,
+        elo: gameElo.user,
     };
 
     // Render game request banner (undo or reset) - placed below bottom player status bar
