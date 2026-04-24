@@ -30,7 +30,7 @@ function Header({ back, title, transparent }) {
         const elo = user.stats?.elo || 1200;
 
         return (
-            <Block row middle>
+            <Block row middle style={{ flexWrap: 'nowrap' }}>
                 <Block
                     row
                     middle
@@ -39,15 +39,18 @@ function Header({ back, title, transparent }) {
                         paddingHorizontal: 8,
                         paddingVertical: 4,
                         borderRadius: 12,
-                        marginRight: 12,
+                        marginRight: 8,
                         borderWidth: 1,
                         borderColor: colors.PRIMARY + '40',
+                        minWidth: 75,
+                        justifyContent: 'center',
+                        flexWrap: 'nowrap',
                     }}
                 >
-                    <Text size={10} bold color={colors.PRIMARY} style={{ marginRight: 4 }}>
+                    <Text size={10} bold color={colors.PRIMARY} style={{ marginRight: 4 }} numberOfLines={1}>
                         ELO
                     </Text>
-                    <Text size={12} bold color={colors.PRIMARY}>
+                    <Text size={12} bold color={colors.PRIMARY} numberOfLines={1}>
                         {elo}
                     </Text>
                 </Block>
@@ -80,9 +83,10 @@ function Header({ back, title, transparent }) {
                 right={renderRight()}
                 rightStyle={{
                     alignItems: 'center',
-                    flex: 0.3,
+                    flex: 0.35,
+                    paddingRight: 8,
                 }}
-                leftStyle={{ flex: 0.3, paddingTop: 2 }}
+                leftStyle={{ flex: 0.35, paddingTop: 2 }}
                 leftIconName={back ? 'chevron-left' : 'menu'}
                 leftIconSize={back ? 50 : 30}
                 leftIconColor={colors.ICON}
@@ -98,9 +102,8 @@ export default Header;
 const styles = StyleSheet.create({
     title: {
         fontSize: 18,
-        fontWeight: 600,
+        fontWeight: '600',
         textAlign: 'center',
-        width: '100%',
     },
     navbar: {
         paddingVertical: 0,
