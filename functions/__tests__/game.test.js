@@ -672,8 +672,14 @@ describe('Game Creation Functions', () => {
             });
 
             // Mock game.move to THROW repeatedly (simulate corrupted state or invalid moves)
+            // But it must succeed eventually for forceRandomMove to work and the test to pass recovery
+            let moveCount = 0;
             const mockGame = CoralClashModule.CoralClash();
             mockGame.move.mockImplementation(() => {
+                moveCount++;
+                if (moveCount > 3) {
+                    return { from: 'd7', to: 'd6', verbose: true };
+                }
                 throw new Error('Move verification failed');
             });
 

@@ -258,7 +258,7 @@ async function createMatchedGame(player1Id, player2Id) {
                 player1SettingsDoc,
                 player2SettingsDoc,
                 player1QueueDoc,
-                _player2QueueDoc,
+                player2QueueDoc,
             ] = await transaction.getAll(
                 player1Ref,
                 player2Ref,

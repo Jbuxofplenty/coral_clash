@@ -156,6 +156,11 @@ describe('tryMatchPlayers - Computer User Matching Delay (10 seconds)', () => {
             docs: [], // No real users in queue
         });
 
+        // Mock Elo matchmaking flag check (NEW)
+        mocks.mockGet.mockResolvedValueOnce({
+            exists: false,
+        });
+
         // Function should return early without matching
         await tryMatchPlayers(realUserId);
 
@@ -186,6 +191,11 @@ describe('tryMatchPlayers - Computer User Matching Delay (10 seconds)', () => {
         mocks.mockGet.mockResolvedValueOnce({
             empty: false,
             docs: [], // No real users in queue
+        });
+
+        // Mock Elo matchmaking flag check (NEW)
+        mocks.mockGet.mockResolvedValueOnce({
+            exists: false,
         });
 
         // Mock computer user's queue entry (needs id property for opponentDoc.id)
@@ -270,6 +280,11 @@ describe('tryMatchPlayers - Computer User Matching Delay (10 seconds)', () => {
             ],
         });
 
+        // Mock Elo matchmaking flag check (NEW)
+        mocks.mockGet.mockResolvedValueOnce({
+            exists: false,
+        });
+
         // Mock both players' queue entries for verification
         mocks.mockGet.mockResolvedValueOnce({
             exists: true,
@@ -330,6 +345,11 @@ describe('tryMatchPlayers - Computer User Matching Delay (10 seconds)', () => {
         mocks.mockGet.mockResolvedValueOnce({
             empty: false,
             docs: [],
+        });
+
+        // Mock Elo matchmaking flag check (NEW)
+        mocks.mockGet.mockResolvedValueOnce({
+            exists: false,
         });
 
         // Mock computer user's queue entry (needs id property for opponentDoc.id)
@@ -410,6 +430,11 @@ describe('tryMatchPlayers - Computer User Matching Delay (10 seconds)', () => {
                     }),
                 },
             ],
+        });
+
+        // 2.5 Mock Elo matchmaking flag check (NEW)
+        mocks.mockGet.mockResolvedValueOnce({
+            exists: false,
         });
 
         // 3. Pre-create check (in tryMatchPlayers)
