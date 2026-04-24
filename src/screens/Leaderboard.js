@@ -83,8 +83,8 @@ export default function Leaderboard() {
                     )}
                 </Block>
 
-                <Block middle style={styles.eloContainer}>
-                    <Text size={moderateScale(18)} bold color={colors.TEXT}>
+                <Block row middle style={styles.eloContainer}>
+                    <Text size={moderateScale(18)} bold color={colors.TEXT} style={{ marginRight: 4 }}>
                         {item.elo}
                     </Text>
                     <Text size={moderateScale(10)} color={colors.TEXT_SECONDARY} uppercase>
@@ -174,6 +174,7 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     eloContainer: {
-        width: scale(60),
+        width: scale(85),
+        justifyContent: 'flex-end',
     },
 });

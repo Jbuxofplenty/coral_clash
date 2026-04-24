@@ -32,6 +32,8 @@ function Header({ back, title, transparent }) {
         return (
             <Block row middle>
                 <Block
+                    row
+                    middle
                     style={{
                         backgroundColor: colors.PRIMARY + '20',
                         paddingHorizontal: 8,
@@ -42,6 +44,9 @@ function Header({ back, title, transparent }) {
                         borderColor: colors.PRIMARY + '40',
                     }}
                 >
+                    <Text size={10} bold color={colors.PRIMARY} style={{ marginRight: 4 }}>
+                        ELO
+                    </Text>
                     <Text size={12} bold color={colors.PRIMARY}>
                         {elo}
                     </Text>

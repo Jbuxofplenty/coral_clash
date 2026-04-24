@@ -67,14 +67,16 @@ function CustomDrawerContent(props) {
                                 style={styles.avatar}
                                 showBorder={true}
                             />
-                            <Text size={isCompact ? 13 : 16} color='white' style={styles.userName}>
-                                {getDisplayName()}
-                            </Text>
-                            {user.stats?.elo && (
-                                <Text size={isCompact ? 11 : 13} color='rgba(255, 255, 255, 0.8)' style={{ marginTop: 2 }}>
-                                    ELO: {user.stats.elo}
+                            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: isCompact ? 4 : 8 }}>
+                                <Text size={isCompact ? 13 : 16} color='white' style={styles.userName}>
+                                    {getDisplayName()}
                                 </Text>
-                            )}
+                                {user.stats?.elo && (
+                                    <Text size={isCompact ? 11 : 13} color='rgba(255, 255, 255, 0.8)' style={{ marginLeft: 8 }}>
+                                        (ELO: {user.stats.elo})
+                                    </Text>
+                                )}
+                            </View>
                         </View>
                     )}
 
@@ -133,7 +135,6 @@ const styles = StyleSheet.create({
     },
     userName: {
         fontWeight: '600',
-        textAlign: 'center',
     },
     title: {
         fontWeight: 'bold',
