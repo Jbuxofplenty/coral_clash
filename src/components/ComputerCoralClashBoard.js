@@ -280,12 +280,12 @@ const ComputerCoralClashBoard = ({
     const isLegacyComputer = !opponentData?.displayName || opponentData?.displayName === 'Computer';
 
     const topPlayer = isBoardFlipped
-        ? { name: userName, avatarKey: user?.avatarKey, isComputer: false }
-        : { name: computerName, avatarKey: computerAvatar, isComputer: isLegacyComputer };
+        ? { name: userName, avatarKey: user?.avatarKey, isComputer: false, elo: user?.stats?.elo || 1200 }
+        : { name: computerName, avatarKey: computerAvatar, isComputer: isLegacyComputer, elo: opponentData?.elo || 1200 };
 
     const bottomPlayer = isBoardFlipped
-        ? { name: computerName, avatarKey: computerAvatar, isComputer: isLegacyComputer }
-        : { name: userName, avatarKey: user?.avatarKey, isComputer: false };
+        ? { name: computerName, avatarKey: computerAvatar, isComputer: isLegacyComputer, elo: opponentData?.elo || 1200 }
+        : { name: userName, avatarKey: user?.avatarKey, isComputer: false, elo: user?.stats?.elo || 1200 };
 
     return (
         <BaseCoralClashBoard

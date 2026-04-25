@@ -69,6 +69,7 @@ export default function Leaderboard() {
                     avatarKey={item.avatarKey}
                     size="medium"
                     style={styles.avatar}
+                    elo={item.elo}
                 />
 
                 <Block style={styles.nameContainer}>
@@ -81,15 +82,6 @@ export default function Leaderboard() {
                             {t('leaderboard.you')}
                         </Text>
                     )}
-                </Block>
-
-                <Block row middle style={styles.eloContainer}>
-                    <Text size={moderateScale(18)} bold color={colors.TEXT} style={{ marginRight: 4 }}>
-                        {item.elo}
-                    </Text>
-                    <Text size={moderateScale(10)} color={colors.TEXT_SECONDARY} uppercase>
-                        ELO
-                    </Text>
                 </Block>
             </Block>
         );

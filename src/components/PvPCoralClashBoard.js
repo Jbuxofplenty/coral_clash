@@ -538,14 +538,14 @@ const PvPCoralClashBoard = ({ fixture, gameId, gameState, opponentData, notifica
         name: opponentName,
         avatarKey: opponentAvatar,
         isComputer: false,
-        elo: gameElo.opponent,
+        elo: gameElo.opponent || 1200,
     };
 
     const bottomPlayer = {
         name: userName,
         avatarKey: user?.settings?.avatarKey || 'dolphin',
         isComputer: false,
-        elo: gameElo.user,
+        elo: gameElo.user || 1200,
     };
 
     // Render game request banner (undo or reset) - placed below bottom player status bar

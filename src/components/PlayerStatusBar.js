@@ -60,6 +60,7 @@ export default function PlayerStatusBar({
                 computer={isComputer}
                 size={isCompact ? 'small' : 'medium'}
                 showBorder={true}
+                elo={elo}
             />
 
             <View style={styles.info}>
@@ -73,9 +74,6 @@ export default function PlayerStatusBar({
                         numberOfLines={1}
                     >
                         {isComputer ? t('components.playerStatus.computer') : playerName}
-                        {elo !== undefined && elo !== null && (
-                            <Text style={styles.eloText}> ({elo})</Text>
-                        )}
                     </Text>
                     {isThinking && isComputer && (
                         <View style={styles.thinkingIndicator}>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ActivityIndicator, Image, View } from 'react-native';
+import { ActivityIndicator, Image, View, Text } from 'react-native';
 import { moderateScale, scale } from 'react-native-size-matters';
 import { DEFAULT_AVATARS, DEFAULT_AVATAR_NAME } from '../constants/avatars';
 import { useAuth, useTheme } from '../contexts';
@@ -33,6 +33,7 @@ const responsiveBorderScale = (size, maxScale = 1.3) => {
  * @param {Object} props.style - Additional container styles
  * @param {Object} props.imageStyle - Additional image styles
  * @param {boolean} props.showBorder - Whether to show border (default: true)
+ * @param {number|string} props.elo - Elo rating to display as a badge
  */
 export default function Avatar({
     avatarKey,
@@ -41,6 +42,7 @@ export default function Avatar({
     style,
     imageStyle,
     showBorder = true,
+    elo,
 }) {
     const { user } = useAuth();
     const { colors } = useTheme();
@@ -99,7 +101,7 @@ export default function Avatar({
     };
 
     return (
-        <View style={[containerStyle, style]}>
+        <View style={[containerStyle, { overflow: 'visible' }, style]}>
             {computer ? (
                 <Icon
                     name='desktop'
@@ -124,6 +126,40 @@ export default function Avatar({
                         onLoadEnd={() => setImageLoaded(true)}
                     />
                 </>
+            )}
+            {elo !== undefined && elo !== null && (
+                <View
+                    style={{
+                        position: 'absolute',
+                        bottom: -scale(2),
+                        right: -scale(2),
+                        backgroundColor: colors.PRIMARY,
+                        paddingHorizontal: scale(3),
+                        paddingVertical: scale(1),
+                        borderRadius: scale(8),
+                        borderWidth: scale(1),
+                        borderColor: colors.WHITE,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        elevation: 4,
+                        shadowColor: colors.BLACK,
+                        shadowOffset: { width: 0, height: 1 },
+                        shadowOpacity: 0.3,
+                        shadowRadius: 1.5,
+                        zIndex: 10,
+                    }}
+                >
+                    <Text
+                        style={{
+                            color: colors.WHITE,
+                            fontSize: responsiveScale(size === 'small' ? 7 : 8),
+                            fontWeight: '900',
+                            letterSpacing: -0.2,
+                        }}
+                    >
+                        {elo}
+                    </Text>
+                </View>
             )}
         </View>
     );

@@ -229,11 +229,13 @@ const PassAndPlayCoralClashBoard = ({
         name: userName,
         avatarKey: user?.avatarKey,
         isComputer: false,
+        elo: user?.stats?.elo || 1200,
     };
     const blackPlayerData = {
         name: 'Guest 1',
         avatarKey: 'crab',
         isComputer: false,
+        elo: 1200,
     };
 
     // When board is flipped (black's perspective), black is at bottom
