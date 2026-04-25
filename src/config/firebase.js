@@ -18,8 +18,10 @@ import {
     connectFirestoreEmulator,
     doc,
     getDoc,
-    getFirestore,
+    initializeFirestore,
     onSnapshot,
+    persistentLocalCache,
+    persistentMultipleTabManager,
     query,
     where,
 } from 'firebase/firestore';
@@ -102,8 +104,16 @@ try {
     }
 }
 
-// Initialize Firestore
-const db = getFirestore(app);
+// Initialize Firestore with offline persistence
+// persistentLocalCache: caches reads locally so the UI responds from cache first,
+// syncing updates in the background. This dramatically reduces perceived latency
+// on mobile (especially on cold starts or slow networks).
+// persistentMultipleTabManager: safe for multi-tab web, no-op on React Native.
+const db = initializeFirestore(app, {
+    localCache: persistentLocalCache({
+        tabManager: persistentMultipleTabManager(),
+    }),
+});
 
 // Initialize Functions
 const functions = getFunctions(app);

@@ -69,7 +69,7 @@ async function joinMatchmakingHandler(request) {
  * Join the matchmaking queue
  * POST /api/matchmaking/join
  */
-export const joinMatchmaking = onCall(getAppCheckConfig(), async (request) => {
+export const joinMatchmaking = onCall({ ...getAppCheckConfig(), minInstances: 1 }, async (request) => {
     try {
         return await joinMatchmakingHandler(request);
     } catch (error) {

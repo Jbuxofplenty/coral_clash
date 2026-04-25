@@ -238,7 +238,7 @@ async function createGameHandler(request) {
  * Create a new PvP game
  * POST /api/game/create
  */
-export const createGame = onCall(getAppCheckConfig(), async (request) => {
+export const createGame = onCall({ ...getAppCheckConfig(), minInstances: 1 }, async (request) => {
     try {
         return await createGameHandler(request);
     } catch (error) {
@@ -322,7 +322,7 @@ export async function createComputerGameHandler(request) {
  * Create a new game against the computer
  * POST /api/game/createComputer
  */
-export const createComputerGame = onCall(getAppCheckConfig(), async (request) => {
+export const createComputerGame = onCall({ ...getAppCheckConfig(), minInstances: 1 }, async (request) => {
     try {
         return await createComputerGameHandler(request);
     } catch (error) {
@@ -505,7 +505,7 @@ export const respondToGameInvite = onCall(getAppCheckConfig(), async (request) =
  * POST /api/game/move
  * Server-side move validation prevents cheating
  */
-export const makeMove = onCall(getAppCheckConfig(), async (request) => {
+export const makeMove = onCall({ ...getAppCheckConfig(), minInstances: 1 }, async (request) => {
     const { data, auth } = request;
     try {
         if (!auth) {
@@ -808,7 +808,7 @@ export const makeMove = onCall(getAppCheckConfig(), async (request) => {
  * POST /api/game/makeComputerMove
  * @param {string} gameId - The game ID
  */
-export const makeComputerMove = onCall({ ...getAppCheckConfig(), memory: '1GiB' }, async (request) => {
+export const makeComputerMove = onCall({ ...getAppCheckConfig(), memory: '1GiB', minInstances: 1 }, async (request) => {
     const { data, auth: _auth } = request;
     try {
         const { gameId, version } = data;
