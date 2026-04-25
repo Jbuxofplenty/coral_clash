@@ -89,9 +89,9 @@ jobs:
           PROJECT="${{ vars.FIREBASE_PROJECT_ID || 'default' }}"
           
           if [ "$TARGET" = "all" ]; then
-            firebase deploy --project "$PROJECT" --non-interactive
+            firebase deploy --project "$PROJECT" --non-interactive --force
           else
-            firebase deploy --only $TARGET --project "$PROJECT" --non-interactive
+            firebase deploy --only $TARGET --project "$PROJECT" --non-interactive --force
           fi
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
