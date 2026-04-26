@@ -36,6 +36,25 @@
       "usesAppleSignIn": true,
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
+        "CFBundleAllowMixedLocalizations": true,
+        "CFBundleLocalizations": [
+          "en",
+          "ar",
+          "bn",
+          "de",
+          "es",
+          "fr",
+          "hi",
+          "id",
+          "my",
+          "pl",
+          "pt",
+          "ru",
+          "tr",
+          "ur",
+          "uz",
+          "zh-Hans"
+        ],
         "NSUserTrackingUsageDescription": "We use tracking to provide personalized ads and improve your gaming experience. Your privacy is important to us.",
         "CFBundleURLTypes": [
           {
