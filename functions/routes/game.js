@@ -343,7 +343,7 @@ export const createComputerGame = onCall({ ...getAppCheckConfig(), minInstances:
  * - Sender (creatorId) can cancel (decline)
  * - Both can decline/cancel only if game status is 'pending'
  */
-export const respondToGameInvite = onCall(getAppCheckConfig(), async (request) => {
+export const respondToGameInvite = onCall({ ...getAppCheckConfig(), minInstances: 1 }, async (request) => {
     const { data, auth } = request;
     try {
         if (!auth) {

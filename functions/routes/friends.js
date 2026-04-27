@@ -339,7 +339,7 @@ export async function getFriendsHandler(request) {
  * Get user's friends list and pending requests
  * GET /api/friends
  */
-export const getFriends = onCall(getAppCheckConfig(), async (request) => {
+export const getFriends = onCall({ ...getAppCheckConfig(), minInstances: 1 }, async (request) => {
     try {
         return await getFriendsHandler(request);
     } catch (error) {

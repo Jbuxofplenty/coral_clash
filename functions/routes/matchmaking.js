@@ -171,7 +171,7 @@ async function updateMatchmakingHeartbeatHandler(request) {
  * Update heartbeat for matchmaking queue entry
  * POST /api/matchmaking/heartbeat
  */
-export const updateMatchmakingHeartbeat = onCall(getAppCheckConfig(), async (request) => {
+export const updateMatchmakingHeartbeat = onCall({ ...getAppCheckConfig(), minInstances: 1 }, async (request) => {
     try {
         return await updateMatchmakingHeartbeatHandler(request);
     } catch (error) {
