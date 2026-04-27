@@ -1,5 +1,6 @@
 import { GAME_VERSION } from '@jbuxofplenty/coral-clash';
 import { httpsCallable } from 'firebase/functions';
+import React, { useCallback } from 'react';
 import { auth, functions } from '../config/firebase';
 
 /**
@@ -263,7 +264,7 @@ export const useFirebaseFunctions = () => {
 
     // ==================== Leaderboard Functions ====================
 
-    const getLeaderboard = async () => {
+    const getLeaderboard = useCallback(async () => {
         try {
             const callable = httpsCallable(functions, 'getLeaderboard');
             const result = await callable();
@@ -272,7 +273,7 @@ export const useFirebaseFunctions = () => {
             console.error('Error getting leaderboard:', error);
             throw error;
         }
-    };
+    }, []);
 
     // ==================== Friends Functions ====================
 
