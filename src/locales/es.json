@@ -247,6 +247,16 @@
             "hindi": "हिन्दी (Hindi)",
             "hindiDescription": "हिन्दी भाषा इंटरफ़ेस"
         },
+        "avatarClick": {
+            "title": "Comportamiento al Clicar Avatar",
+            "description": "Elige a dónde ir cuando haces clic en tu avatar en el encabezado",
+            "settings": "Ajustes",
+            "settingsDescription": "Ir a la pantalla de ajustes",
+            "leaderboard": "Tabla de Clasificación",
+            "leaderboardDescription": "Ir a la pantalla de clasificaciones",
+            "stats": "Estadísticas",
+            "statsDescription": "Ir a tu pantalla de estadísticas personales"
+        },
         "actions": {
             "resetToDefaults": "Restablecer a Predeterminados",
             "resetTitle": "Restablecer Configuración",

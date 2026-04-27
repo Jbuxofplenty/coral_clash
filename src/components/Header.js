@@ -19,7 +19,8 @@ function Header({ back, title, transparent }) {
     };
 
     const handleAvatarPress = () => {
-        navigation.navigate('Settings');
+        const behavior = user?.settings?.avatarClickBehavior || 'Settings';
+        navigation.navigate(behavior);
     };
 
     const renderRight = () => {

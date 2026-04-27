@@ -272,6 +272,16 @@
             "themeSaveFailed": "Mavzuni saqlash muvaffaqiyatsiz bo'ldi",
             "languageChangeFailed": "Tilni o'zgartirib bo'lmadi",
             "resetFailed": "Sozlamalarni tiklab bo'lmadi"
+        },
+        "avatarClick": {
+            "title": "Avatar bosilgandagi amal",
+            "description": "Yuqori paneldagi profil avataringizni bosganingizda qaysi sahifa ochilishini tanlang",
+            "settings": "Sozlamalar",
+            "settingsDescription": "Sozlamalar sahifasiga o'tish",
+            "leaderboard": "Reyting",
+            "leaderboardDescription": "Reyting sahifasiga o'tish",
+            "stats": "Statistika",
+            "statsDescription": "Shaxsiy statistika sahifasiga o'tish"
         }
     },
     "friends": {

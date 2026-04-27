@@ -239,6 +239,16 @@
             "hindi": "हिन्दी (Hindi)",
             "hindiDescription": "हिन्दी भाषा इंटरफ़ेस"
         },
+        "avatarClick": {
+            "title": "Поведение при нажатии на аватар",
+            "description": "Выберите, куда переходить при нажатии на ваш аватар в заголовке",
+            "settings": "Настройки",
+            "settingsDescription": "Перейти к экрану настроек",
+            "leaderboard": "Таблица лидеров",
+            "leaderboardDescription": "Перейти к экрану рейтинга",
+            "stats": "Статистика",
+            "statsDescription": "Перейти к вашей личной статистике"
+        },
         "actions": {
             "resetToDefaults": "Сбросить настройки",
             "resetTitle": "Сброс настроек",

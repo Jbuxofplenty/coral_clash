@@ -272,6 +272,16 @@
             "themeSaveFailed": "থিম পছন্দ সংরক্ষণ করতে ব্যর্থ",
             "languageChangeFailed": "ভাষা পরিবর্তন করতে ব্যর্থ",
             "resetFailed": "সেটিংস রিসেট করতে ব্যর্থ"
+        },
+        "avatarClick": {
+            "title": "অবতার ক্লিক আচরণ",
+            "description": "হেডারে আপনার অবতারে ক্লিক করলে আপনি কোথায় যাবেন তা চয়ন করুন",
+            "settings": "সেটিংস",
+            "settingsDescription": "সেটিংস স্ক্রিনে যান",
+            "leaderboard": "লিডারবোর্ড",
+            "leaderboardDescription": "র‍্যাঙ্কিং স্ক্রিনে যান",
+            "stats": "পরিসংখ্যান",
+            "statsDescription": "আপনার ব্যক্তিগত পরিসংখ্যান স্ক্রিনে যান"
         }
     },
     "friends": {

@@ -235,9 +235,19 @@
         "language": {
             "title": "Język (Language)",
             "english": "English",
-            "englishDescription": "English language interface",
+            "englishDescription": "Interfejs w języku angielskim",
             "hindi": "हिन्दी (Hindi)",
-            "hindiDescription": "हिन्दी भाषा इंटरफ़ेस"
+            "hindiDescription": "Interfejs w języku hindi"
+        },
+        "avatarClick": {
+            "title": "Zachowanie po kliknięciu awatara",
+            "description": "Wybierz stronę, która otworzy się po kliknięciu awatara profilu w nagłówku",
+            "settings": "Ustawienia",
+            "settingsDescription": "Przejdź do ekranu ustawień",
+            "leaderboard": "Ranking",
+            "leaderboardDescription": "Przejdź do ekranu rankingu",
+            "stats": "Statystyki",
+            "statsDescription": "Przejdź do ekranu swoich statystyk"
         },
         "actions": {
             "resetToDefaults": "Przywróć domyślne",

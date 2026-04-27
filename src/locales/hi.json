@@ -235,9 +235,19 @@
         "language": {
             "title": "भाषा",
             "english": "English",
-            "englishDescription": "English Language Interface",
+            "englishDescription": "अंग्रेजी भाषा इंटरफ़ेस",
             "hindi": "हिन्दी",
             "hindiDescription": "हिन्दी भाषा इंटरफ़ेस"
+        },
+        "avatarClick": {
+            "title": "अवतार क्लिक व्यवहार",
+            "description": "चुनें कि हेडर में अपने अवतार पर क्लिक करने पर आप कहाँ जाते हैं",
+            "settings": "सेटिंग्स",
+            "settingsDescription": "सेटिंग्स स्क्रीन पर जाएं",
+            "leaderboard": "लीडरबोर्ड",
+            "leaderboardDescription": "रैंकिंग स्क्रीन पर जाएं",
+            "stats": "आंकड़े",
+            "statsDescription": "अपनी व्यक्तिगत सांख्यिकी स्क्रीन पर जाएं"
         },
         "actions": {
             "resetToDefaults": "डिफ़ॉल्ट पर रीसेट करें",

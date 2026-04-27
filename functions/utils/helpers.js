@@ -25,6 +25,8 @@ function getDefaultSettings() {
         theme: 'auto', // 'light', 'dark', 'auto'
         // Avatar preference (ocean-themed pieces) - dolphin is default
         avatarKey: 'dolphin',
+        // Click behavior for the profile avatar in header
+        avatarClickBehavior: 'Settings', // 'Settings', 'Leaderboard', 'Stats'
     };
 }
 

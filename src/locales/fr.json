@@ -239,6 +239,16 @@
             "hindi": "हिन्दी (Hindi)",
             "hindiDescription": "हिन्दी भाषा इंटरफ़ेस"
         },
+        "avatarClick": {
+            "title": "Comportement du clic sur l'avatar",
+            "description": "Choisissez où vous allez lorsque vous cliquez sur votre avatar dans l'en-tête",
+            "settings": "Paramètres",
+            "settingsDescription": "Aller à l'écran des paramètres",
+            "leaderboard": "Classement",
+            "leaderboardDescription": "Aller à l'écran du classement",
+            "stats": "Statistiques",
+            "statsDescription": "Aller à votre écran de statistiques personnelles"
+        },
         "actions": {
             "resetToDefaults": "Réinitialiser par défaut",
             "resetTitle": "Réinitialiser les paramètres",

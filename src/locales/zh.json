@@ -239,6 +239,16 @@
             "hindi": "हिन्दी (Hindi)",
             "hindiDescription": "हिन्दी भाषा इंटरफ़ेस"
         },
+        "avatarClick": {
+            "title": "头像点击行为",
+            "description": "选择点击顶部栏头像后的跳转页面",
+            "settings": "设置",
+            "settingsDescription": "跳转到设置页面",
+            "leaderboard": "排行榜",
+            "leaderboardDescription": "跳转到排行榜页面",
+            "stats": "统计",
+            "statsDescription": "跳转到您的个人统计页面"
+        },
         "actions": {
             "resetToDefaults": "重置为默认",
             "resetTitle": "重置设置",

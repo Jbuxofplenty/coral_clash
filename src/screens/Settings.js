@@ -30,7 +30,11 @@ export default function Settings({ navigation: _navigation }) {
                 setSettings(result.settings);
             } catch (_error) {
                 // Silently fail for new users - just use default settirngs with random avatar
-                setSettings({ theme: 'auto', avatarKey: getRandomAvatarKey() });
+                setSettings({
+                    theme: 'auto',
+                    avatarKey: getRandomAvatarKey(),
+                    avatarClickBehavior: 'Settings',
+                });
             } finally {
                 setLoading(false);
             }
@@ -213,6 +217,27 @@ export default function Settings({ navigation: _navigation }) {
         }
     };
 
+    const updateAvatarClickBehavior = async (behavior) => {
+        const newSettings = {
+            ...settings,
+            avatarClickBehavior: behavior,
+        };
+        setSettings(newSettings);
+
+        try {
+            setSaving(true);
+            await updateUserSettings(newSettings);
+            await refreshUserData();
+        } catch (error) {
+            console.error('Error saving avatar click behavior:', error);
+            showAlert(t('common.error'), t('settings.errors.saveFailed'));
+            // Revert on error
+            setSettings(settings);
+        } finally {
+            setSaving(false);
+        }
+    };
+
 
     if (loading) {
         return <LoadingScreen />;
@@ -292,6 +317,37 @@ export default function Settings({ navigation: _navigation }) {
                             description={t('settings.theme.autoDescription')}
                             selected={settings.theme === 'auto'}
                             onSelect={() => updateTheme('auto')}
+                            colors={colors}
+                            last
+                        />
+                    </Block>
+                </Block>
+
+                {/* Avatar Click Behavior */}
+                <Block style={styles.section}>
+                    <Text h5 bold color={colors.TEXT}>
+                        {t('settings.avatarClick.title')}
+                    </Text>
+                    <Block style={[styles.card, { backgroundColor: colors.CARD_BACKGROUND }]}>
+                        <ThemeOption
+                            label={t('settings.avatarClick.settings')}
+                            description={t('settings.avatarClick.settingsDescription')}
+                            selected={settings.avatarClickBehavior === 'Settings' || !settings.avatarClickBehavior}
+                            onSelect={() => updateAvatarClickBehavior('Settings')}
+                            colors={colors}
+                        />
+                        <ThemeOption
+                            label={t('settings.avatarClick.leaderboard')}
+                            description={t('settings.avatarClick.leaderboardDescription')}
+                            selected={settings.avatarClickBehavior === 'Leaderboard'}
+                            onSelect={() => updateAvatarClickBehavior('Leaderboard')}
+                            colors={colors}
+                        />
+                        <ThemeOption
+                            label={t('settings.avatarClick.stats')}
+                            description={t('settings.avatarClick.statsDescription')}
+                            selected={settings.avatarClickBehavior === 'Stats'}
+                            onSelect={() => updateAvatarClickBehavior('Stats')}
                             colors={colors}
                             last
                         />

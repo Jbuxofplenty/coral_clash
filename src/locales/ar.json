@@ -235,9 +235,19 @@
         "language": {
             "title": "اللغة (Language)",
             "english": "English",
-            "englishDescription": "English language interface",
+            "englishDescription": "واجهة اللغة الإنجليزية",
             "hindi": "हिन्दी (Hindi)",
-            "hindiDescription": "हिन्दी भाषा इंटरफ़ेस"
+            "hindiDescription": "واجهة لغة الهندية"
+        },
+        "avatarClick": {
+            "title": "سلوك النقر على الصورة الرمزية",
+            "description": "اختر إلى أين تذهب عند النقر على صورتك الرمزية في الرأس",
+            "settings": "الإعدادات",
+            "settingsDescription": "الذهاب إلى شاشة الإعدادات",
+            "leaderboard": "لوحة المتصدرين",
+            "leaderboardDescription": "الذهاب إلى شاشة التصنيف",
+            "stats": "الإحصائيات",
+            "statsDescription": "الذهاب إلى شاشة إحصائياتك الشخصية"
         },
         "actions": {
             "resetToDefaults": "إعادة التعيين إلى الافتراضي",

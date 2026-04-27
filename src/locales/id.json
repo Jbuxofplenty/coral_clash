@@ -235,9 +235,19 @@
         "language": {
             "title": "Bahasa (Language)",
             "english": "English",
-            "englishDescription": "English language interface",
+            "englishDescription": "Antarmuka bahasa Inggris",
             "hindi": "हिन्दी (Hindi)",
-            "hindiDescription": "हिन्दी भाषा इंटरफ़ेस"
+            "hindiDescription": "Antarmuka bahasa Hindi"
+        },
+        "avatarClick": {
+            "title": "Tindakan Klik Avatar",
+            "description": "Pilih halaman yang akan dibuka saat Anda mengetuk avatar profil di bar atas",
+            "settings": "Pengaturan",
+            "settingsDescription": "Buka halaman pengaturan",
+            "leaderboard": "Papan Peringkat",
+            "leaderboardDescription": "Buka halaman papan peringkat",
+            "stats": "Statistik",
+            "statsDescription": "Buka halaman statistik pribadi Anda"
         },
         "actions": {
             "resetToDefaults": "Atur Ulang ke Default",

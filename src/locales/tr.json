@@ -272,6 +272,16 @@
             "themeSaveFailed": "Tema tercihi kaydedilemedi",
             "languageChangeFailed": "Dil değiştirilemedi",
             "resetFailed": "Ayarlar sıfırlanamadı"
+        },
+        "avatarClick": {
+            "title": "Profil Resmi Tıklama Davranışı",
+            "description": "Üst menüdeki profil resminize tıkladığınızda hangi ekranın açılacağını seçin",
+            "settings": "Ayarlar",
+            "settingsDescription": "Ayarlar ekranına git",
+            "leaderboard": "Liderlik Tablosu",
+            "leaderboardDescription": "Sıralama ekranına git",
+            "stats": "İstatistikler",
+            "statsDescription": "Kişisel istatistikler ekranına git"
         }
     },
     "friends": {
