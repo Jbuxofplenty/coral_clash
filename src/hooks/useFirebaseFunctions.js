@@ -261,6 +261,19 @@ export const useFirebaseFunctions = () => {
         }
     };
 
+    // ==================== Leaderboard Functions ====================
+
+    const getLeaderboard = async () => {
+        try {
+            const callable = httpsCallable(functions, 'getLeaderboard');
+            const result = await callable();
+            return result.data;
+        } catch (error) {
+            console.error('Error getting leaderboard:', error);
+            throw error;
+        }
+    };
+
     // ==================== Friends Functions ====================
 
     /**
@@ -523,6 +536,8 @@ export const useFirebaseFunctions = () => {
         remindOpponent,
         getActiveGames,
         getGameHistory,
+        // Leaderboard
+        getLeaderboard,
         // Friends
         sendFriendRequest,
         respondToFriendRequest,
