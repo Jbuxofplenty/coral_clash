@@ -1,11 +1,11 @@
 import { Block, Text, theme } from 'galio-framework';
 import React, { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Dimensions, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import { ActivityIndicator, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
 import { moderateScale, scale } from 'react-native-size-matters';
 import { useTranslation } from 'react-i18next';
 
 import { Avatar, Icon, LoadingScreen, TimeControlModal } from '../components';
-import { useAuth, useTheme } from '../contexts';
+import { useTheme } from '../contexts';
 import { useFirebaseFunctions, useGame } from '../hooks';
 
 export default function Leaderboard() {

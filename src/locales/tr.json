@@ -163,7 +163,11 @@
         "lossesShort": "M",
         "drawsShort": "B",
         "noGamesYet": "Henüz Oyun Yok",
-        "noGamesHint": "İstatistiklerinizi görmek için oyun oynamaya başlayın!"
+        "noGamesHint": "İstatistiklerinizi görmek için oyun oynamaya başlayın!",
+        "eloRating": "Elo Puanı",
+        "provisional": "Geçici",
+        "ratedGames": "Dereceli Oyunlar",
+        "eloDescription": "Elo, oyuncuların göreceli yetenek seviyelerini hesaplamak için kullanılan bir derecelendirme sistemidir. Diğer oyunculara karşı kazandığınızda puanınız artar, kaybettiğinizde düşer."
     },
     "gameMenu": {
         "saveGameState": "Oyun Durumunu Kaydet",
@@ -808,5 +812,13 @@
             "errorTitle": "Hata",
             "errorSendRequest": "Arkadaşlık isteği gönderilemedi"
         }
+    },
+    "leaderboard": {
+        "title": "Sıralama",
+        "subtitle": "Mahalledeki yeriniz",
+        "loading": "Sıralama yükleniyor...",
+        "noPlayers": "Henüz dereceli oyuncu yok",
+        "yourRank": "Sıralamanız: #{{rank}}",
+        "you": "Siz"
     }
 }

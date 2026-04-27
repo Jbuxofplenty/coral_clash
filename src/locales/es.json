@@ -163,7 +163,19 @@
         "lossesShort": "D",
         "drawsShort": "E",
         "noGamesYet": "Aún No Hay Juegos",
-        "noGamesHint": "¡Comienza a jugar para ver tus estadísticas aquí!"
+        "noGamesHint": "¡Comienza a jugar para ver tus estadísticas aquí!",
+        "eloRating": "Calificación Elo",
+        "provisional": "Provisional",
+        "ratedGames": "Juegos Clasificados",
+        "eloDescription": "Elo es un sistema de calificación utilizado para calcular los niveles de habilidad relativos de los jugadores. Tu calificación aumenta cuando ganas y disminuye cuando pierdes contra otros jugadores."
+    },
+    "leaderboard": {
+        "title": "Tabla de Clasificación",
+        "subtitle": "Tu lugar en el vecindario",
+        "loading": "Cargando clasificaciones...",
+        "noPlayers": "Aún no hay jugadores clasificados",
+        "yourRank": "Tu Rango: #{{rank}}",
+        "you": "Tú"
     },
     "gameMenu": {
         "saveGameState": "Guardar Estado del Juego",

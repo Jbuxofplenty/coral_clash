@@ -163,7 +163,11 @@
         "lossesShort": "负",
         "drawsShort": "平",
         "noGamesYet": "暂无游戏",
-        "noGamesHint": "开始游戏以查看您的统计数据！"
+        "noGamesHint": "开始游戏以查看您的统计数据！",
+        "eloRating": "Elo 评分",
+        "provisional": "暂定",
+        "ratedGames": "计分赛局数",
+        "eloDescription": "Elo 是一种用于计算玩家相对水平的评分系统。在与其他玩家的对战中获胜时评分会上升，失败时则会下降。"
     },
     "gameMenu": {
         "saveGameState": "保存游戏状态",
@@ -808,5 +812,13 @@
             "message": "鲸鱼是国王。您可以通过将死黑鲸，或者放置所有 17 个珊瑚来获胜。祝您好运！",
             "backInfo": "点击箭头返回主页"
         }
+    },
+    "leaderboard": {
+        "title": "排行榜",
+        "subtitle": "你在社区中的排名",
+        "loading": "正在加载排名...",
+        "noPlayers": "暂无排名玩家",
+        "yourRank": "你的排名：#{{rank}}",
+        "you": "你"
     }
 }

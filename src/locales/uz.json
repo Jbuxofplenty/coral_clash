@@ -163,7 +163,11 @@
         "lossesShort": "M",
         "drawsShort": "D",
         "noGamesYet": "Hozircha o'yinlar yo'q",
-        "noGamesHint": "Statistikangizni bu yerda ko'rish uchun o'yinlarni o'ynang!"
+        "noGamesHint": "Statistikangizni bu yerda ko'rish uchun o'yinlarni o'ynang!",
+        "eloRating": "Elo reytingi",
+        "provisional": "Vaqtinchalik",
+        "ratedGames": "Reytingli o'yinlar",
+        "eloDescription": "Elo — o'yinchilarning nisbiy mahorat darajasini hisoblash uchun foydalaniladigan reyting tizimi. Boshqa o'yinchilarga qarshi g'alaba qozonganingizda reytingingiz oshadi, mag'lub bo'lganda esa tushadi."
     },
     "gameMenu": {
         "saveGameState": "O'yin holatini saqlash",
@@ -808,5 +812,13 @@
             "errorTitle": "U Yo'lga-Kirdi-U",
             "errorSendRequest": "Ha deb shundan O'rtada!!!"
         }
+    },
+    "leaderboard": {
+        "title": "Reyting jadvali",
+        "subtitle": "Mahalladagi o'rningiz",
+        "loading": "Reyting yuklanmoqda...",
+        "noPlayers": "Reytingli o'yinchilar hali yo'q",
+        "yourRank": "Sizning o'rningiz: #{{rank}}",
+        "you": "Siz"
     }
 }

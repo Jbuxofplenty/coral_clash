@@ -163,7 +163,11 @@
         "lossesShort": "D",
         "drawsShort": "N",
         "noGamesYet": "Aucune partie pour le moment",
-        "noGamesHint": "Commencez à jouer pour voir vos statistiques ici !"
+        "noGamesHint": "Commencez à jouer pour voir vos statistiques ici !",
+        "eloRating": "Classement Elo",
+        "provisional": "Provisoire",
+        "ratedGames": "Parties classées",
+        "eloDescription": "Elo est un système de classement utilisé pour calculer les niveaux de compétence relatifs des joueurs. Votre classement augmente quand vous gagnez et diminue quand vous perdez contre d'autres joueurs."
     },
     "gameMenu": {
         "saveGameState": "Sauvegarder l'état du jeu",
@@ -808,5 +812,13 @@
             "message": "La Baleine est le Roi. Vous pouvez gagner en mettant la Baleine Noire échec et mat, ou en plaçant vos 17 coraux. Bonne chance !",
             "backInfo": "Appuyez sur la flèche pour revenir à l'écran d'accueil"
         }
+    },
+    "leaderboard": {
+        "title": "Classement mondial",
+        "subtitle": "Votre place dans le quartier",
+        "loading": "Chargement du classement...",
+        "noPlayers": "Pas encore de joueurs classés",
+        "yourRank": "Votre rang : #{{rank}}",
+        "you": "Vous"
     }
 }

@@ -163,7 +163,11 @@
         "lossesShort": "N",
         "drawsShort": "U",
         "noGamesYet": "Noch keine Spiele",
-        "noGamesHint": "Spielen Sie Spiele, um hier Ihre Statistiken zu sehen!"
+        "noGamesHint": "Spielen Sie Spiele, um hier Ihre Statistiken zu sehen!",
+        "eloRating": "Elo-Zahl",
+        "provisional": "Provisorisch",
+        "ratedGames": "Gewertete Spiele",
+        "eloDescription": "Elo ist ein Wertungssystem zur Berechnung des relativen Spielstärkeniveaus von Spielern. Deine Wertung steigt bei Siegen und sinkt bei Niederlagen gegen andere Spieler."
     },
     "gameMenu": {
         "saveGameState": "Spielstand speichern",
@@ -808,5 +812,13 @@
             "errorTitle": "Fehler",
             "errorSendRequest": "Freundschaftsanfrage konnte nicht gesendet werden"
         }
+    },
+    "leaderboard": {
+        "title": "Rangliste",
+        "subtitle": "Dein Platz in der Nachbarschaft",
+        "loading": "Rangliste wird geladen...",
+        "noPlayers": "Noch keine gewerteten Spieler",
+        "yourRank": "Dein Rang: #{{rank}}",
+        "you": "Du"
     }
 }

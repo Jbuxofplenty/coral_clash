@@ -164,7 +164,11 @@
     "lossesShort": "L",
     "drawsShort": "D",
     "noGamesYet": "No Games Yet",
-    "noGamesHint": "Start playing games to see your statistics here!"
+    "noGamesHint": "Start playing games to see your statistics here!",
+    "eloRating": "Elo Rating",
+    "provisional": "Provisional",
+    "ratedGames": "Rated Games",
+    "eloDescription": "Elo is a rating system used to calculate the relative skill levels of players. Your rating increases when you win and decreases when you lose against other players."
   },
   "leaderboard": {
     "title": "Ranked Leaderboard",

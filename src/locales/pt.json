@@ -163,7 +163,11 @@
         "lossesShort": "D",
         "drawsShort": "E",
         "noGamesYet": "Ainda Sem Jogos",
-        "noGamesHint": "Comece a jogar para ver suas estatísticas aqui!"
+        "noGamesHint": "Comece a jogar para ver suas estatísticas aqui!",
+        "eloRating": "Classificação Elo",
+        "provisional": "Provisório",
+        "ratedGames": "Jogos ranqueados",
+        "eloDescription": "Elo é um sistema de classificação usado para calcular os níveis de habilidade relativos dos jogadores. Sua classificação aumenta quando você ganha e diminui quando você perde contra outros jogadores."
     },
     "gameMenu": {
         "saveGameState": "Salvar Estado do Jogo",
@@ -808,5 +812,13 @@
             "message": "A Baleia é o Rei. Você pode ganhar dando xeque-mate na Baleia Negra ou colocando todos os seus 17 corais. Boa sorte!",
             "backInfo": "Toque na seta para voltar à tela inicial"
         }
+    },
+    "leaderboard": {
+        "title": "Classificação",
+        "subtitle": "Seu lugar na vizinhança",
+        "loading": "Carregando classificações...",
+        "noPlayers": "Ainda não há jogadores ranqueados",
+        "yourRank": "Sua classificação: #{{rank}}",
+        "you": "Você"
     }
 }

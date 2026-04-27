@@ -163,7 +163,11 @@
         "lossesShort": "P",
         "drawsShort": "R",
         "noGamesYet": "Brak gier",
-        "noGamesHint": "Zagraj, aby zobaczyć swoje statystyki!"
+        "noGamesHint": "Zagraj, aby zobaczyć swoje statystyki!",
+        "eloRating": "Ranking Elo",
+        "provisional": "Tymczasowy",
+        "ratedGames": "Gry rankingowe",
+        "eloDescription": "Elo to system rankingowy służący do obliczania względnego poziomu umiejętności graczy. Twój ranking rośnie, gdy wygrywasz, i spada, gdy przegrywasz z innymi graczami."
     },
     "gameMenu": {
         "saveGameState": "Zapisz stan gry",
@@ -808,5 +812,13 @@
             "errorTitle": "Błąd",
             "errorSendRequest": "Nie udało się wysłać zaproszenia"
         }
+    },
+    "leaderboard": {
+        "title": "Ranking",
+        "subtitle": "Twoje miejsce w sąsiedztwie",
+        "loading": "Ładowanie rankingu...",
+        "noPlayers": "Brak rankingowych graczy",
+        "yourRank": "Twój ranking: #{{rank}}",
+        "you": "Ty"
     }
 }

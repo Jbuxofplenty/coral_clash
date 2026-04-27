@@ -163,7 +163,11 @@
         "lossesShort": "K",
         "drawsShort": "S",
         "noGamesYet": "Belum Ada Permainan",
-        "noGamesHint": "Mainkan permainan untuk melihat statistik Anda di sini!"
+        "noGamesHint": "Mainkan permainan untuk melihat statistik Anda di sini!",
+        "eloRating": "Peringkat Elo",
+        "provisional": "Provisional",
+        "ratedGames": "Permainan Berperingkat",
+        "eloDescription": "Elo adalah sistem peringkat yang digunakan untuk menghitung tingkat keahlian relatif pemain. Peringkat Anda naik saat menang dan turun saat kalah melawan pemain lain."
     },
     "gameMenu": {
         "saveGameState": "Simpan Status Permainan",
@@ -808,5 +812,13 @@
             "errorTitle": "Error",
             "errorSendRequest": "Gagal mengirim permintaan pertemanan"
         }
+    },
+    "leaderboard": {
+        "title": "Papan Peringkat",
+        "subtitle": "Posisi Anda di lingkungan",
+        "loading": "Memuat peringkat...",
+        "noPlayers": "Belum ada pemain berperingkat",
+        "yourRank": "Peringkat Anda: #{{rank}}",
+        "you": "Anda"
     }
 }

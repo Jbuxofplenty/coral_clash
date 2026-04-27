@@ -418,6 +418,27 @@ export default function Stats({ navigation: _navigation }) {
                                 {ratedGamesCount} {t('stats.ratedGames')}
                             </Text>
                         </Block>
+
+                        <Block
+                            style={{
+                                marginTop: 16,
+                                padding: 12,
+                                backgroundColor: colors.PRIMARY + '08',
+                                borderRadius: 8,
+                                borderLeftWidth: 2,
+                                borderLeftColor: colors.PRIMARY + '30',
+                            }}
+                        >
+                            <Block row middle style={{ marginBottom: 4 }}>
+                                <Icon name="info-circle" family="font-awesome" size={moderateScale(12)} color={colors.PRIMARY} />
+                                <Text size={moderateScale(12)} color={colors.PRIMARY} bold style={{ marginLeft: 6 }}>
+                                    {t('stats.eloRating')}
+                                </Text>
+                            </Block>
+                            <Text size={moderateScale(12)} color={colors.TEXT_SECONDARY} style={{ lineHeight: 18 }}>
+                                {t('stats.eloDescription')}
+                            </Text>
+                        </Block>
                     </Block>
 
                     {/* Large Games Played Card */}
