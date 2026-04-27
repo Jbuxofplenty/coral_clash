@@ -33,6 +33,7 @@ describe('Helpers', () => {
             expect(settings).toEqual({
                 theme: 'auto',
                 avatarKey: 'dolphin',
+                avatarClickBehavior: 'Settings',
             });
         });
 
