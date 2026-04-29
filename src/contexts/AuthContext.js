@@ -128,15 +128,15 @@ export const AuthProvider = ({ children }) => {
         };
     }, []);
 
-    // Request App Tracking Transparency permission and set Firebase Analytics consent after user logs in
-    // This runs once per app session when user authenticates
+    // Request App Tracking Transparency permission and set Firebase Analytics consent on app load
+    // This runs once per app session after initial loading is complete
     useEffect(() => {
         const requestATTAndSetConsent = async () => {
-            // Only request once per app session, and only when user is authenticated
-            if (user && !loading && !hasRequestedATT.current) {
+            // Only request once per app session, after initial loading is complete
+            if (!loading && !hasRequestedATT.current) {
                 hasRequestedATT.current = true;
 
-                // Small delay to let UI settle after login
+                // Small delay to let UI settle
                 setTimeout(async () => {
                     try {
                         // Request ATT permission (iOS) or check if tracking is allowed
@@ -165,14 +165,15 @@ export const AuthProvider = ({ children }) => {
 
                         // Initiate on-device conversion measurement for iOS Ads
                         // This helps measure conversions from iOS ad campaigns while maintaining user privacy
-                        // Should be called once per install, as close as possible to login
+                        // Should be called once per install
                         // Reference: https://firebase.google.com/docs/tutorials/ads-ios-on-device-measurement/step-3
-                        if (user.email) {
+                        const emailToUse = user?.email;
+                        if (emailToUse) {
                             try {
                                 // Small delay between setting consent and initiating conversion measurement
                                 // Firebase recommends this if events happen immediately after registration
                                 setTimeout(async () => {
-                                    await initiateOnDeviceConversionMeasurement(user.email);
+                                    await initiateOnDeviceConversionMeasurement(emailToUse);
                                 }, 500);
                             } catch (conversionError) {
                                 // Silently handle - conversion measurement is non-critical
