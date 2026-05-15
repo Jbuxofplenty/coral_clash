@@ -8,7 +8,7 @@
       "ios",
       "android"
     ],
-    "version": "1.0.16",
+    "version": "1.0.17",
     "orientation": "portrait",
     "icon": "./src/assets/icons/app_icon.png",
     "splash": {
@@ -28,7 +28,7 @@
       "googleServicesFile": "./GoogleService-Info.plist",
       "supportsTablet": false,
       "bundleIdentifier": "com.jbuxofplenty.coralclash",
-      "runtimeVersion": "1.0.15",
+      "runtimeVersion": "1.0.7",
       "appleTeamId": "FWV22U8U39",
       "associatedDomains": [
         "webcredentials:coral-clash.firebaseapp.com"

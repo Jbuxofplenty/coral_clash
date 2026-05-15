@@ -13,6 +13,7 @@ import {
     updateProfile,
 } from 'firebase/auth';
 import { doc, getDoc, onSnapshot, setDoc } from 'firebase/firestore';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { Platform } from 'react-native';
 import {
@@ -215,6 +216,9 @@ export const AuthProvider = ({ children }) => {
                 friends: [],
             });
 
+            // Clear free trial counter — user is now authenticated
+            try { await AsyncStorage.removeItem('free_trial_games_played'); } catch (_) {}
+
             // Wait a moment for the Firestore trigger to assign discriminator and settings
             // Then refresh user data to get the discriminator and settings
             setTimeout(() => {
@@ -235,6 +239,9 @@ export const AuthProvider = ({ children }) => {
         try {
             setError(null);
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
+
+            // Clear free trial counter — user is now authenticated
+            try { await AsyncStorage.removeItem('free_trial_games_played'); } catch (_) {}
 
             // Track login event
             logAnalyticsEvent('login', { method: 'email' });
@@ -304,6 +311,9 @@ export const AuthProvider = ({ children }) => {
                 // Track sign up event for new Google users
                 logAnalyticsEvent('sign_up', { method: 'google' });
             }
+
+            // Clear free trial counter — user is now authenticated
+            try { await AsyncStorage.removeItem('free_trial_games_played'); } catch (_) {}
 
             // Track login event
             logAnalyticsEvent('login', { method: 'google' });
@@ -397,6 +407,9 @@ export const AuthProvider = ({ children }) => {
                 // Track sign up event for new Apple users
                 logAnalyticsEvent('sign_up', { method: 'apple' });
             }
+
+            // Clear free trial counter — user is now authenticated
+            try { await AsyncStorage.removeItem('free_trial_games_played'); } catch (_) {}
 
             // Track login event
             logAnalyticsEvent('login', { method: 'apple' });

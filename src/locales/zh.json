@@ -390,6 +390,17 @@
             "normal": "普通",
             "unlimited": "无限",
             "timed": "限时"
+        },
+        "freeTrial": {
+            "gateTitle": "你已掌握基础知识！",
+            "gateMessage": "登录以继续游玩 Coral Clash，并查看你在全球玩家中的排名。",
+            "signIn": "登录 / 创建账户",
+            "maybeLater": "也许以后",
+            "limitedAccessTitle": "免费试玩次数已用完",
+            "limitedAccessMessage": "你已玩完 3 场免费游戏。登录以继续游玩！",
+            "pill1": "全球排行榜",
+            "pill2": "在线对战",
+            "pill3": "查看统计"
         }
     },
     "errors": {

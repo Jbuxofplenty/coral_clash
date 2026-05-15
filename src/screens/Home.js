@@ -22,10 +22,12 @@ import {
 } from '../components/';
 import DifficultySelectionModal from '../components/DifficultySelectionModal';
 import FixtureLoaderModal from '../components/FixtureLoaderModal';
+import FreeTrialGateModal from '../components/FreeTrialGateModal';
 import { collection, db, onSnapshot, query, where } from '../config/firebase';
 import { useAlert, useAuth, useTheme } from '../contexts';
 import { useDevFeatures, useFirebaseFunctions, useGame, useMatchmaking } from '../hooks';
 import { useFriends } from '../hooks/useFriends';
+import { useFreeTrial } from '../hooks/useFreeTrial';
 import { logAnalyticsEvent, logTutorialStep } from '../utils/analyticsEvents';
 import { savePassAndPlayGame } from '../utils/passAndPlayStorage';
 
@@ -47,6 +49,10 @@ export default function Home({ navigation }) {
     const [creatingGame, setCreatingGame] = useState(false); // Track when a game is being created
     const [selectedFriend, setSelectedFriend] = useState(null); // Store selected friend for game invite
     const [pendingTimeControl, setPendingTimeControl] = useState(null); // Store time control while showing difficulty modal or mode selection
+    const [trialGateVisible, setTrialGateVisible] = useState(false);
+
+    // Free trial tracking for guest users
+    const { isTrialExhausted } = useFreeTrial(user);
 
     // Wrap callbacks in useCallback to prevent infinite re-renders
     const handleGameAccepted = useCallback(
@@ -736,12 +742,16 @@ export default function Home({ navigation }) {
                     <>
                         <GameModeCard
                             title={t('home.gameModes.playComputerTitle')}
-                            description={t('home.gameModes.playComputerDescription')}
-                            icon='desktop'
+                            description={
+                                isTrialExhausted
+                                    ? t('cards.freeTrial.limitedAccessMessage')
+                                    : t('home.gameModes.playComputerDescription')
+                            }
+                            icon={isTrialExhausted ? 'lock' : 'desktop'}
                             iconFamily='font-awesome'
-                            onPress={handleStartComputerGame}
-                            disabled={creatingGame || searching}
-                            loading={creatingGame && pendingGameAction === 'computer'}
+                            onPress={isTrialExhausted ? () => setTrialGateVisible(true) : handleStartComputerGame}
+                            disabled={!isTrialExhausted && (creatingGame || searching)}
+                            loading={!isTrialExhausted && creatingGame && pendingGameAction === 'computer'}
                             horizontal={false}
                         />
                         <GameModeCard
@@ -863,6 +873,16 @@ export default function Home({ navigation }) {
                 onCancel={handleDifficultyCancel}
                 user={user}
                 allowAll={enableDevFeatures}
+            />
+
+            {/* Free trial gate modal — shown on home when trial exhausted and user taps the locked card */}
+            <FreeTrialGateModal
+                visible={trialGateVisible}
+                onSignIn={() => {
+                    setTrialGateVisible(false);
+                    navigation.navigate('Log In');
+                }}
+                onDismiss={() => setTrialGateVisible(false)}
             />
         </LinearGradient>
     );

@@ -390,6 +390,17 @@
             "normal": "Normal",
             "unlimited": "Cheksiz",
             "timed": "Vaqtli"
+        },
+        "freeTrial": {
+            "gateTitle": "Siz asoslarni egallading!",
+            "gateMessage": "Coral Clash o'ynashni davom ettirish va global reytingingizni ko'rish uchun kirish qiling.",
+            "signIn": "Kirish / Hisob yaratish",
+            "maybeLater": "Keyinroq ehtimol",
+            "limitedAccessTitle": "Bepul sinov limiti tugadi",
+            "limitedAccessMessage": "Siz 3 ta bepul o'yin o'yndingiz. O'ynashni davom ettirish uchun kiring!",
+            "pill1": "Global reyting",
+            "pill2": "Onlayn o'ynash",
+            "pill3": "Statistika"
         }
     },
     "errors": {

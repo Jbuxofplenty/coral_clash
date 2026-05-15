@@ -390,6 +390,17 @@
             "normal": "Normal",
             "unlimited": "Tanpa Batas",
             "timed": "Berwaktu"
+        },
+        "freeTrial": {
+            "gateTitle": "Kamu sudah menguasai dasar-dasarnya!",
+            "gateMessage": "Masuk untuk terus bermain Coral Clash dan lihat peringkatmu secara global.",
+            "signIn": "Masuk / Buat Akun",
+            "maybeLater": "Mungkin nanti",
+            "limitedAccessTitle": "Batas uji coba tercapai",
+            "limitedAccessMessage": "Kamu sudah memainkan 3 game gratis. Masuk untuk terus bermain!",
+            "pill1": "Peringkat Global",
+            "pill2": "Main Online",
+            "pill3": "Statistik"
         }
     },
     "errors": {

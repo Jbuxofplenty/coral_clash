@@ -390,6 +390,17 @@
             "normal": "Normal",
             "unlimited": "Ilimitado",
             "timed": "Cronometrado"
+        },
+        "freeTrial": {
+            "gateTitle": "Você dominou o básico!",
+            "gateMessage": "Faça login para continuar jogando Coral Clash e ver sua classificação global.",
+            "signIn": "Entrar / Criar conta",
+            "maybeLater": "Talvez mais tarde",
+            "limitedAccessTitle": "Limite de avaliação atingido",
+            "limitedAccessMessage": "Você jogou seus 3 jogos gratuitos. Faça login para continuar jogando!",
+            "pill1": "Ranking global",
+            "pill2": "Jogar online",
+            "pill3": "Estatísticas"
         }
     },
     "errors": {

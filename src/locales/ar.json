@@ -390,6 +390,17 @@
             "normal": "Normal",
             "unlimited": "غير محدود",
             "timed": "بتوقيت"
+        },
+        "freeTrial": {
+            "gateTitle": "لقد أتقنت الأساسيات!",
+            "gateMessage": "سجّل دخولك لمواصلة لعب Coral Clash ومعرفة ترتيبك على مستوى العالم.",
+            "signIn": "تسجيل الدخول / إنشاء حساب",
+            "maybeLater": "ربما لاحقاً",
+            "limitedAccessTitle": "انتهى حد التجربة المجانية",
+            "limitedAccessMessage": "لقد لعبت 3 ألعاب مجانية. سجّل دخولك للاستمرار!",
+            "pill1": "ترتيب عالمي",
+            "pill2": "العب أونلاين",
+            "pill3": "الإحصائيات"
         }
     },
     "errors": {

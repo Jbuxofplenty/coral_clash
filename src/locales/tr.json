@@ -390,6 +390,17 @@
             "normal": "Normal",
             "unlimited": "Sınırsız",
             "timed": "Süreli"
+        },
+        "freeTrial": {
+            "gateTitle": "Temelleri öğrendiniz!",
+            "gateMessage": "Coral Clash oynamaya devam etmek ve küresel sıralamadaki yerinizi görmek için giriş yapın.",
+            "signIn": "Giriş Yap / Hesap Oluştur",
+            "maybeLater": "Belki daha sonra",
+            "limitedAccessTitle": "Ücretsiz deneme limiti doldu",
+            "limitedAccessMessage": "3 ücretsiz oyununuzu oynadınız. Oynamaya devam etmek için giriş yapın!",
+            "pill1": "Global Sıralama",
+            "pill2": "Online Oyna",
+            "pill3": "İstatistikler"
         }
     },
     "errors": {

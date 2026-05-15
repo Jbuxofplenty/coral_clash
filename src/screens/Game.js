@@ -1,18 +1,23 @@
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Animated, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import ComputerCoralClashBoard from '../components/ComputerCoralClashBoard';
+import FreeTrialGateModal from '../components/FreeTrialGateModal';
 import PassAndPlayCoralClashBoard from '../components/PassAndPlayCoralClashBoard';
 import PvPCoralClashBoard from '../components/PvPCoralClashBoard';
-import { useAlert, useNotifications, useTheme } from '../contexts';
+import { useAlert, useAuth, useNotifications, useTheme } from '../contexts';
+import { FREE_TRIAL_LIMIT, useFreeTrial } from '../hooks/useFreeTrial';
 import { logAnalyticsEvent, logTutorialStep } from '../utils/analyticsEvents';
 
 export default function Game({ route }) {
     const { t } = useTranslation();
     const { colors } = useTheme();
+    const navigation = useNavigation();
+    const { user } = useAuth();
+    const { isTrialExhausted, incrementTrialCount } = useFreeTrial(user);
     const { gameStatusUpdate, setActiveGameId } = useNotifications();
 
     // Get game params from route
@@ -31,7 +36,8 @@ export default function Game({ route }) {
     const [statusType, setStatusType] = useState('info');
     const [showStatus, setShowStatus] = useState(false);
     const [isGameOver, setIsGameOver] = useState(false);
-    const { showAlert } = useAlert(); // Need this if not already in Game.js... wait, it's not. I must check. Let me just add the hook call here and we'll import it above if missing in the next step.
+    const [showTrialGate, setShowTrialGate] = useState(false);
+    const { showAlert } = useAlert();
     
     // Set active game ID for notification filtering
     useEffect(() => {
@@ -68,7 +74,7 @@ export default function Game({ route }) {
         outputRange: [0, -8],
     });
 
-    const handleGameOver = useCallback(() => {
+    const handleGameOver = useCallback(async () => {
         setIsGameOver(true);
 
         // Track tutorial completion for end-game tutorial
@@ -76,7 +82,18 @@ export default function Game({ route }) {
             logAnalyticsEvent('tutorial_complete', { tutorial_type: 'end_game' });
             logTutorialStep(4, 'end_game_complete', 'end_game');
         }
-    }, [isEndGameTutorial]);
+
+        // Increment free-trial counter for guest computer games
+        if (!user) {
+            const newCount = await incrementTrialCount();
+            // Show gate once the free trial limit has been reached.
+            // Compare newCount directly — isTrialExhausted is stale at this point.
+            if (newCount != null && newCount >= FREE_TRIAL_LIMIT) {
+                // Small delay so the game-over state renders first
+                setTimeout(() => setShowTrialGate(true), 800);
+            }
+        }
+    }, [isEndGameTutorial, user, incrementTrialCount]);
 
     const alertShown = React.useRef(false);
     // End-game tutorial welcome popup
@@ -154,6 +171,9 @@ export default function Game({ route }) {
         BoardComponent = PvPCoralClashBoard;
     }
 
+    // Determine whether this is a guest vs-computer game (any, not just tutorial)
+    const isGuestComputerGame = !user && (opponentType === 'computer' || (!gameId && opponentType !== 'passandplay'));
+
     return (
         <LinearGradient
             colors={[colors.GRADIENT_START, colors.GRADIENT_MID, colors.GRADIENT_END]}
@@ -183,7 +203,7 @@ export default function Game({ route }) {
                 timeControl={timeControl}
                 difficulty={difficulty}
                 isEndGameTutorial={isEndGameTutorial}
-                onGameOver={isEndGameTutorial ? handleGameOver : undefined}
+                onGameOver={isGuestComputerGame || isEndGameTutorial ? handleGameOver : undefined}
                 notificationStatus={
                     showStatus && statusMessage
                         ? {
@@ -194,6 +214,19 @@ export default function Game({ route }) {
                           }
                         : null
                 }
+            />
+
+            {/* Free Trial Gate — shown to guests after 3 computer games */}
+            <FreeTrialGateModal
+                visible={showTrialGate}
+                onSignIn={() => {
+                    setShowTrialGate(false);
+                    navigation.navigate('Log In');
+                }}
+                onDismiss={() => {
+                    setShowTrialGate(false);
+                    navigation.goBack();
+                }}
             />
         </LinearGradient>
     );
