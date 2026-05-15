@@ -17,7 +17,8 @@ import * as SplashScreen from 'expo-splash-screen';
 import { FontAwesome, MaterialIcons, Ionicons, AntDesign, Entypo, MaterialCommunityIcons } from '@expo/vector-icons';
 import { Block, GalioProvider } from 'galio-framework';
 import React, { useCallback, useEffect, useState } from 'react';
-import { Image, LogBox, StatusBar, InteractionManager } from 'react-native';
+import { Image, LogBox, Platform, StatusBar, InteractionManager, View } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import mobileAds from 'react-native-google-mobile-ads';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import CustomSplashScreen from './src/components/CustomSplashScreen';
@@ -168,31 +169,39 @@ export default function App() {
             
             // Initialize heavy SDKs after the UI has fully mounted and splash is hidden
             InteractionManager.runAfterInteractions(() => {
-                const requestConfig = {
-                    ...(__DEV__ && {
-                        testDeviceIdentifiers: [
-                            '08EA2881-FF28-4E64-AE72-35CEEF26E8C9', // Josiah's test device
-                            'EMULATOR',
-                        ],
-                    }),
-                };
-                
-                mobileAds()
-                    .setRequestConfiguration(requestConfig)
-                    .then(() => mobileAds().initialize())
-                    .then((adapterStatuses) => {
-                        console.log('📱 Mobile Ads SDK initialized:', adapterStatuses);
-                        if (__DEV__) {
-                            console.log('📱 AdMob configured for test devices');
-                        }
-                    })
-                    .catch((e) => console.warn('Error initializing AdMob:', e));
+                // Delay AdMob initialization to avoid Binder contention and RenderThread starvation 
+                // during the initial heavy layout and GPU shader compilation phase.
+                setTimeout(() => {
+                    const requestConfig = {
+                        ...(__DEV__ && {
+                            testDeviceIdentifiers: [
+                                '08EA2881-FF28-4E64-AE72-35CEEF26E8C9', // Josiah's test device
+                                'EMULATOR',
+                            ],
+                        }),
+                    };
+                    
+                    mobileAds()
+                        .setRequestConfiguration(requestConfig)
+                        .then(() => mobileAds().initialize())
+                        .then((adapterStatuses) => {
+                            console.log('📱 Mobile Ads SDK initialized:', adapterStatuses);
+                            if (__DEV__) {
+                                console.log('📱 AdMob configured for test devices');
+                            }
+                        })
+                        .catch((e) => console.warn('Error initializing AdMob:', e));
+                }, 3000);
             });
         }
     }, [appIsReady]);
 
     if (!appIsReady) {
-        return null;
+        return (
+            <View style={{ width: 0, height: 0, opacity: 0 }} pointerEvents="none">
+                <LinearGradient colors={['#000', '#fff']} style={{ width: 1, height: 1 }} />
+            </View>
+        );
     }
 
     return (

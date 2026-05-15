@@ -1,6 +1,6 @@
 import { Block, Text, theme } from 'galio-framework';
-import React, { useState } from 'react';
-import { ActivityIndicator, Dimensions, StyleSheet, TouchableOpacity, View } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { ActivityIndicator, Dimensions, StyleSheet, TouchableOpacity, View, InteractionManager } from 'react-native';
 import { moderateScale, verticalScale } from 'react-native-size-matters';
 import { useTranslation } from 'react-i18next';
 import { useAlert, useAuth, useTheme } from '../contexts';
@@ -23,6 +23,14 @@ export default function ActiveGamesCard({
     declineGameInvite,
     resignGame,
 }) {
+    const [isReady, setIsReady] = useState(false);
+
+    useEffect(() => {
+        const task = InteractionManager.runAfterInteractions(() => {
+            setIsReady(true);
+        });
+        return () => task.cancel();
+    }, []);
     const { t } = useTranslation();
     const { colors } = useTheme();
     const { user } = useAuth();
@@ -238,7 +246,7 @@ export default function ActiveGamesCard({
             </Block>
 
             <Block style={styles.gamesList}>
-                {loading ? (
+                {loading || !isReady ? (
                     <Block center middle style={styles.loadingContainer}>
                         <ActivityIndicator size='large' color={colors.PRIMARY} />
                         <Text
@@ -271,7 +279,7 @@ export default function ActiveGamesCard({
                         </Text>
                     </Block>
                 ) : (
-                    activeGames.map((game, index) => {
+                    activeGames.slice(0, 15).map((game, index) => {
                         const opponent = getOpponentData(game);
                         const status = getGameStatus(game);
                         const isPending = game.status === 'pending';

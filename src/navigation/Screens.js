@@ -26,7 +26,7 @@ const Drawer = createDrawerNavigator();
 function HomeStack(_props) {
     const { t } = useTranslation();
     return (
-        <Stack.Navigator initialRouteName='Dashboard' detachInactiveScreens={false}>
+        <Stack.Navigator initialRouteName='Dashboard'>
             <Stack.Screen
                 name='Dashboard'
                 component={HomeScreen}
@@ -61,7 +61,7 @@ function HomeStack(_props) {
 function HowToPlayStack(_props) {
     const { t } = useTranslation();
     return (
-        <Stack.Navigator initialRouteName='HowToPlayMain' detachInactiveScreens={false}>
+        <Stack.Navigator initialRouteName='HowToPlayMain'>
             <Stack.Screen
                 name='HowToPlayMain'
                 component={HowToPlay}
@@ -112,7 +112,6 @@ export default function AppStack(_props) {
 
     return (
         <Drawer.Navigator
-            detachInactiveScreens={false}
             drawerContent={(props) => <CustomDrawerContent {...props} />}
             screenOptions={{
                 drawerStyle: {

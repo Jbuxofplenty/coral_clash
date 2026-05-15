@@ -1,6 +1,5 @@
 import { Block, Text, theme } from 'galio-framework';
 import { useMemo, useState } from 'react';
-import {
     ActivityIndicator,
     Dimensions,
     Modal,
@@ -9,7 +8,8 @@ import {
     StyleSheet,
     TextInput,
     TouchableOpacity,
-    View
+    View,
+    FlatList
 } from 'react-native';
 import { moderateScale } from 'react-native-size-matters';
 import { useTranslation } from 'react-i18next';
@@ -541,37 +541,40 @@ export default function PlayWithFriendCard({
                         </Block>
 
                         {/* Friends List */}
-                        <ScrollView style={styles.friendsList} showsVerticalScrollIndicator={false}>
-                            {loading ? (
-                                <Block center style={{ padding: theme.SIZES.BASE * 2 }}>
-                                    <ActivityIndicator size='large' color={colors.PRIMARY} />
-                                </Block>
-                            ) : filteredFriends.length === 0 ? (
-                                <Block center style={{ padding: theme.SIZES.BASE * 2 }}>
-                                    <Icon
-                                        name='users'
-                                        family='font-awesome'
-                                        size={48}
-                                        color={colors.TEXT_SECONDARY}
-                                        style={{ marginBottom: theme.SIZES.BASE }}
-                                    />
-                                    <Text
-                                        style={[
-                                            styles.emptyText,
-                                            {
-                                                color: colors.TEXT_SECONDARY,
-                                            },
-                                        ]}
-                                    >
-                                        {searchQuery
-                                            ? t('cards.playWithFriend.noFriendsFound')
-                                            : t('cards.playWithFriend.noFriendsYet')}
-                                    </Text>
-                                </Block>
-                            ) : (
-                                filteredFriends.map((friend) => (
+                        {loading ? (
+                            <Block center style={{ padding: theme.SIZES.BASE * 2 }}>
+                                <ActivityIndicator size='large' color={colors.PRIMARY} />
+                            </Block>
+                        ) : filteredFriends.length === 0 ? (
+                            <Block center style={{ padding: theme.SIZES.BASE * 2 }}>
+                                <Icon
+                                    name='users'
+                                    family='font-awesome'
+                                    size={48}
+                                    color={colors.TEXT_SECONDARY}
+                                    style={{ marginBottom: theme.SIZES.BASE }}
+                                />
+                                <Text
+                                    style={[
+                                        styles.emptyText,
+                                        {
+                                            color: colors.TEXT_SECONDARY,
+                                        },
+                                    ]}
+                                >
+                                    {searchQuery
+                                        ? t('cards.playWithFriend.noFriendsFound')
+                                        : t('cards.playWithFriend.noFriendsYet')}
+                                </Text>
+                            </Block>
+                        ) : (
+                            <FlatList
+                                style={styles.friendsList}
+                                showsVerticalScrollIndicator={false}
+                                data={filteredFriends}
+                                keyExtractor={(friend) => friend.id}
+                                renderItem={({ item: friend }) => (
                                     <TouchableOpacity
-                                        key={friend.id}
                                         onPress={() => handleSelectFriend(friend)}
                                         style={[
                                             styles.friendItem,
@@ -603,9 +606,9 @@ export default function PlayWithFriendCard({
                                             color={colors.TEXT_SECONDARY}
                                         />
                                     </TouchableOpacity>
-                                ))
-                            )}
-                        </ScrollView>
+                                )}
+                            />
+                        )}
                     </View>
                 </View>
             </Modal>
@@ -659,77 +662,77 @@ export default function PlayWithFriendCard({
                         </Block>
 
                         {/* Games List */}
-                        <ScrollView
-                            style={styles.passAndPlayList}
-                            showsVerticalScrollIndicator={false}
-                        >
-                            {/* Start New Game Button */}
-                            <TouchableOpacity
-                                onPress={handleStartNewPassAndPlay}
-                                style={[
-                                    styles.passAndPlayItem,
-                                    styles.newGameItem,
-                                    {
-                                        backgroundColor: colors.PRIMARY + '10',
-                                        borderColor: colors.PRIMARY,
-                                    },
-                                ]}
-                            >
-                                <Block
-                                    style={[
-                                        styles.newGameIconContainer,
-                                        {
-                                            backgroundColor: colors.PRIMARY + '20',
-                                        },
-                                    ]}
-                                >
-                                    <Icon
-                                        name='plus'
-                                        family='font-awesome'
-                                        size={20}
-                                        color={colors.PRIMARY}
-                                    />
-                                </Block>
-                                <Text
-                                    style={[
-                                        styles.newGameText,
-                                        {
-                                            color: colors.PRIMARY,
-                                        },
-                                    ]}
-                                >
-                                    {t('cards.playWithFriend.startNewGame')}
-                                </Text>
-                                <Icon
-                                    name='chevron-right'
-                                    family='font-awesome'
-                                    size={16}
-                                    color={colors.PRIMARY}
-                                />
-                            </TouchableOpacity>
-
-                            {/* Active Games */}
-                            {loadingPassAndPlay ? (
-                                <Block center style={{ padding: theme.SIZES.BASE * 2 }}>
-                                    <ActivityIndicator size='large' color={colors.PRIMARY} />
-                                </Block>
-                            ) : passAndPlayGames.length === 0 ? (
-                                <Block center style={{ padding: theme.SIZES.BASE * 2 }}>
-                                    <Text
+                        {loadingPassAndPlay ? (
+                            <Block center style={{ padding: theme.SIZES.BASE * 2 }}>
+                                <ActivityIndicator size='large' color={colors.PRIMARY} />
+                            </Block>
+                        ) : (
+                            <FlatList
+                                style={styles.passAndPlayList}
+                                showsVerticalScrollIndicator={false}
+                                data={sortedPassAndPlayGames}
+                                keyExtractor={(game) => game.id}
+                                ListEmptyComponent={
+                                    <Block center style={{ padding: theme.SIZES.BASE * 2 }}>
+                                        <Text
+                                            style={[
+                                                styles.emptyText,
+                                                {
+                                                    color: colors.TEXT_SECONDARY,
+                                                },
+                                            ]}
+                                        >
+                                            {t('cards.playWithFriend.noActiveGames')}
+                                        </Text>
+                                    </Block>
+                                }
+                                ListHeaderComponent={
+                                    <TouchableOpacity
+                                        onPress={handleStartNewPassAndPlay}
                                         style={[
-                                            styles.emptyText,
+                                            styles.passAndPlayItem,
+                                            styles.newGameItem,
                                             {
-                                                color: colors.TEXT_SECONDARY,
+                                                backgroundColor: colors.PRIMARY + '10',
+                                                borderColor: colors.PRIMARY,
                                             },
                                         ]}
                                     >
-                                        {t('cards.playWithFriend.noActiveGames')}
-                                    </Text>
-                                </Block>
-                            ) : (
-                                sortedPassAndPlayGames.map((game) => (
+                                        <Block
+                                            style={[
+                                                styles.newGameIconContainer,
+                                                {
+                                                    backgroundColor: colors.PRIMARY + '20',
+                                                },
+                                            ]}
+                                        >
+                                            <Icon
+                                                name='plus'
+                                                family='font-awesome'
+                                                size={20}
+                                                color={colors.PRIMARY}
+                                            />
+                                        </Block>
+                                        <Text
+                                            style={[
+                                                styles.newGameText,
+                                                {
+                                                    color: colors.PRIMARY,
+                                                },
+                                            ]}
+                                        >
+                                            {t('cards.playWithFriend.startNewGame')}
+                                        </Text>
+                                        <Icon
+                                            name='chevron-right'
+                                            family='font-awesome'
+                                            size={16}
+                                            color={colors.PRIMARY}
+                                        />
+                                    </TouchableOpacity>
+                                }
+                                renderItem={({ item: game }) => (
                                     <TouchableOpacity
-                                        key={game.id}
                                         onPress={() => handleResumeGame(game)}
                                         style={[
                                             styles.passAndPlayItem,
@@ -804,9 +807,9 @@ export default function PlayWithFriendCard({
                                             style={{ marginLeft: 8 }}
                                         />
                                     </TouchableOpacity>
-                                ))
-                            )}
-                        </ScrollView>
+                                )}
+                            />
+                        )}
                     </View>
                 </View>
             </Modal>

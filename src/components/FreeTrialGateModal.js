@@ -78,9 +78,10 @@ export default function FreeTrialGateModal({ visible, onSignIn, onDismiss }) {
             visible={visible}
             transparent
             animationType="none"
-            statusBarTranslucent
             onRequestClose={onDismiss}
         >
+            {/* Stable root view prevents Fabric "Unable to find viewState" crash on Android */}
+            <View style={StyleSheet.absoluteFill}>
             {/* Backdrop */}
             <Animated.View style={[styles.backdrop, { opacity: fadeAnim }]}>
                 <TouchableOpacity
@@ -180,6 +181,7 @@ export default function FreeTrialGateModal({ visible, onSignIn, onDismiss }) {
                     </LinearGradient>
                 </Animated.View>
             </Animated.View>
+            </View>
         </Modal>
     );
 }
