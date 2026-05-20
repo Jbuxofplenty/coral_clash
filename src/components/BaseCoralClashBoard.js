@@ -652,62 +652,8 @@ const BaseCoralClashBoard = ({
         }
     }, [coralClash, updateCounter, gameData?.status, isViewingHistory, onGameOver, userColor, opponentType, gameId, gameData?.resultReason, gameData?.winner, user?.uid, userResigned, opponentResigned]);
 
-    // Track whether we've already shown the post-match signup prompt this game
-    const postMatchSignupShownRef = useRef(false);
-
-    // Show post-match signup prompt for anonymous users after a computer game ends
-    useEffect(() => {
-        const isGameOverNow = coralClash.isGameOver() || gameData?.status === 'completed';
-        if (
-            isGameOverNow &&
-            !user &&
-            opponentType === 'computer' &&
-            !postMatchSignupShownRef.current
-        ) {
-            postMatchSignupShownRef.current = true;
-
-            // Determine if the anonymous player lost:
-            // Covers checkmate and resignation (both online flag and local engine state).
-            const didUserLose = (() => {
-                if (!userColor) return false;
-                // Real-time resign flag from useGameActions
-                if (userResigned) return true;
-                // Local engine: checkmate — the side to move is the one that got mated
-                if (coralClash.isCheckmate()) {
-                    return coralClash.turn() === userColor;
-                }
-                // Local engine: resignation recorded in coralClash state
-                const resigned = coralClash.isResigned?.();
-                if (resigned && resigned === userColor) return true;
-                return false;
-            })();
-
-            const alertTitle = didUserLose
-                ? t('game.postMatchSignup.lossTitle')
-                : t('game.postMatchSignup.title');
-            const alertMessage = didUserLose
-                ? t('game.postMatchSignup.lossMessage')
-                : t('game.postMatchSignup.message');
-
-            // Small delay so the game-over banner renders first
-            setTimeout(() => {
-                showAlert(
-                    alertTitle,
-                    alertMessage,
-                    [
-                        {
-                            text: t('game.postMatchSignup.button'),
-                            onPress: () => navigation.navigate('Log In'),
-                        },
-                        {
-                            text: t('common.cancel'),
-                            style: 'cancel',
-                        },
-                    ],
-                );
-            }, 800);
-        }
-    }, [coralClash, gameData?.status, user, opponentType, userColor, userResigned, showAlert, navigation, t]);
+    // The old post-match signup prompt has been removed.
+    // Post-match gating is now handled by Game.js and useFreeTrial.
 
     // Check game time on mount for online games with time control
     useEffect(() => {
