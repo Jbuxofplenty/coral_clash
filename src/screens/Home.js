@@ -52,7 +52,7 @@ export default function Home({ navigation }) {
     const [trialGateVisible, setTrialGateVisible] = useState(false);
 
     // Free trial tracking for guest users
-    const { isTrialExhausted } = useFreeTrial(user);
+    const { isTrialExhausted, freeTrialLimit } = useFreeTrial(user);
 
     // Wrap callbacks in useCallback to prevent infinite re-renders
     const handleGameAccepted = useCallback(
@@ -744,7 +744,7 @@ export default function Home({ navigation }) {
                             title={t('home.gameModes.playComputerTitle')}
                             description={
                                 isTrialExhausted
-                                    ? t('cards.freeTrial.limitedAccessMessage')
+                                    ? t('cards.freeTrial.limitedAccessMessage', { limit: freeTrialLimit })
                                     : t('home.gameModes.playComputerDescription')
                             }
                             icon={isTrialExhausted ? 'lock' : 'desktop'}

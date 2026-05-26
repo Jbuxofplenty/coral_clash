@@ -397,7 +397,7 @@
             "signIn": "Anmelden / Konto erstellen",
             "maybeLater": "Vielleicht später",
             "limitedAccessTitle": "Testlimit erreicht",
-            "limitedAccessMessage": "Du hast deine 3 kostenlosen Spiele gespielt. Melde dich an, um weiterzuspielen!",
+            "limitedAccessMessage": "Du hast deine {{limit}} kostenlosen Spiele gespielt. Melde dich an, um weiterzuspielen!",
             "pill1": "Weltrangliste",
             "pill2": "Online spielen",
             "pill3": "Statistiken"

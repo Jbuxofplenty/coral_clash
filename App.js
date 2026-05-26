@@ -17,7 +17,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { FontAwesome, MaterialIcons, Ionicons, AntDesign, Entypo, MaterialCommunityIcons } from '@expo/vector-icons';
 import { Block, GalioProvider } from 'galio-framework';
 import React, { useCallback, useEffect, useState } from 'react';
-import { Image, LogBox, Platform, StatusBar, InteractionManager, View } from 'react-native';
+import { Image, LogBox, StatusBar, InteractionManager, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import mobileAds from 'react-native-google-mobile-ads';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -38,7 +38,7 @@ import {
 import './src/i18n/config';
 import './src/i18n/rtlText'; // Text-only RTL support (writingDirection for Urdu, etc.)
 import Screens from './src/navigation/Screens';
-import { initializeAdsMode } from './src/utils/featureFlags';
+import { initializeAdsMode, initializeMaxLoggedOutGames } from './src/utils/featureFlags';
 
 // Ignore expo-notifications warnings in development (keychain access issues in Expo Go)
 // Also ignore Galio Input deprecation warnings (third-party library issue)
@@ -130,9 +130,8 @@ export default function App() {
                 // Initialize ads mode feature flag (fetch from Firestore without blocking startup)
                 initializeAdsMode().catch((e) => console.warn('Error fetching ads mode:', e));
 
-
-
-                //Load Resources
+                // Initialize max logged out games feature flag
+                initializeMaxLoggedOutGames().catch((e) => console.warn('Error fetching max logged out games:', e));                //Load Resources
                 await _loadResourcesAsync();
             } catch (e) {
                 console.warn('Error initializing:', e);

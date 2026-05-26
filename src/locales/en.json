@@ -406,7 +406,7 @@
             "signIn": "Sign In / Create Account",
             "maybeLater": "Maybe Later",
             "limitedAccessTitle": "Free Trial Limit Reached",
-            "limitedAccessMessage": "You've played your 3 free games. Sign in to keep playing!",
+            "limitedAccessMessage": "You've played your {{limit}} free games. Sign in to keep playing!",
             "pill1": "Global Rankings",
             "pill2": "Play Online",
             "pill3": "Track Stats"

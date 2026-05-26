@@ -397,7 +397,7 @@
             "signIn": "Kirish / Hisob yaratish",
             "maybeLater": "Keyinroq ehtimol",
             "limitedAccessTitle": "Bepul sinov limiti tugadi",
-            "limitedAccessMessage": "Siz 3 ta bepul o'yin o'yndingiz. O'ynashni davom ettirish uchun kiring!",
+            "limitedAccessMessage": "Siz {{limit}} ta bepul o'yin o'yndingiz. O'ynashni davom ettirish uchun kiring!",
             "pill1": "Global reyting",
             "pill2": "Onlayn o'ynash",
             "pill3": "Statistika"

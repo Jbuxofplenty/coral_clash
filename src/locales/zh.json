@@ -397,7 +397,7 @@
             "signIn": "登录 / 创建账户",
             "maybeLater": "也许以后",
             "limitedAccessTitle": "免费试玩次数已用完",
-            "limitedAccessMessage": "你已玩完 3 场免费游戏。登录以继续游玩！",
+            "limitedAccessMessage": "你已玩完 {{limit}} 场免费游戏。登录以继续游玩！",
             "pill1": "全球排行榜",
             "pill2": "在线对战",
             "pill3": "查看统计"

@@ -405,7 +405,7 @@
             "signIn": "Iniciar sesión / Crear cuenta",
             "maybeLater": "Quizás más tarde",
             "limitedAccessTitle": "Límite de prueba alcanzado",
-            "limitedAccessMessage": "Has jugado tus 3 partidas gratuitas. ¡Inicia sesión para continuar!",
+            "limitedAccessMessage": "Has jugado tus {{limit}} partidas gratuitas. ¡Inicia sesión para continuar!",
             "pill1": "Clasificación global",
             "pill2": "Jugar en línea",
             "pill3": "Ver estadísticas"

@@ -1,9 +1,10 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useCallback, useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
+import { getMaxLoggedOutGames } from '../utils/featureFlags';
 
 const TRIAL_STORAGE_KEY = 'free_trial_games_played';
-export const FREE_TRIAL_LIMIT = 3;
+const DEFAULT_LIMIT = 5;
 
 /**
  * useFreeTrial — tracks how many vs-computer games a guest user has played.
@@ -18,6 +19,7 @@ export const FREE_TRIAL_LIMIT = 3;
  */
 export function useFreeTrial(user) {
     const [trialGamesPlayed, setTrialGamesPlayed] = useState(0);
+    const [freeTrialLimit, setFreeTrialLimit] = useState(DEFAULT_LIMIT);
 
     // Load persisted count when screen comes into focus
     useFocusEffect(
@@ -28,6 +30,8 @@ export function useFreeTrial(user) {
                     if (stored !== null) {
                         setTrialGamesPlayed(parseInt(stored, 10) || 0);
                     }
+                    const limit = await getMaxLoggedOutGames();
+                    setFreeTrialLimit(limit);
                 } catch (err) {
                     console.warn('[useFreeTrial] Could not read trial count:', err);
                 }
@@ -45,7 +49,11 @@ export function useFreeTrial(user) {
             const newCount = currentCount + 1;
             await AsyncStorage.setItem(TRIAL_STORAGE_KEY, String(newCount));
             setTrialGamesPlayed(newCount);
-            return newCount;
+
+            const limit = await getMaxLoggedOutGames();
+            setFreeTrialLimit(limit);
+
+            return { newCount, limit };
         } catch (err) {
             console.warn('[useFreeTrial] Could not persist trial count:', err);
         }
@@ -61,13 +69,13 @@ export function useFreeTrial(user) {
         }
     }, []);
 
-    const isTrialExhausted = !user && trialGamesPlayed >= FREE_TRIAL_LIMIT;
+    const isTrialExhausted = !user && trialGamesPlayed >= freeTrialLimit;
 
     return {
         trialGamesPlayed,
         isTrialExhausted,
         incrementTrialCount,
         resetTrialCount,
-        FREE_TRIAL_LIMIT,
+        freeTrialLimit,
     };
 }

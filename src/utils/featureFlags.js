@@ -178,3 +178,25 @@ export const getEloMatchmakingEnabled = async () => {
 export const initializeEloMatchmaking = async () => {
     return await getEloMatchmakingEnabled();
 };
+
+/**
+ * Get the max logged out games feature flag from Firestore with fallback to 5
+ * @returns {Promise<number>} The max logged out games
+ */
+export const getMaxLoggedOutGames = async () => {
+    return getFeatureFlag('maxLoggedOutGames', {
+        documentId: 'maxLoggedOutGames',
+        field: 'value',
+        validValues: Array.from({ length: 100 }, (_, i) => i + 1),
+        fallback: 5,
+        cacheTTL: Infinity, // Cache for entire app session
+    });
+};
+
+/**
+ * Initialize max logged out games feature flag on app startup
+ * @returns {Promise<number>} The max logged out games
+ */
+export const initializeMaxLoggedOutGames = async () => {
+    return await getMaxLoggedOutGames();
+};

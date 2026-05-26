@@ -1,6 +1,6 @@
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Animated, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
@@ -9,7 +9,7 @@ import FreeTrialGateModal from '../components/FreeTrialGateModal';
 import PassAndPlayCoralClashBoard from '../components/PassAndPlayCoralClashBoard';
 import PvPCoralClashBoard from '../components/PvPCoralClashBoard';
 import { useAlert, useAuth, useNotifications, useTheme } from '../contexts';
-import { FREE_TRIAL_LIMIT, useFreeTrial } from '../hooks/useFreeTrial';
+import { useFreeTrial } from '../hooks/useFreeTrial';
 import { logAnalyticsEvent, logTutorialStep } from '../utils/analyticsEvents';
 
 export default function Game({ route }) {
@@ -17,7 +17,7 @@ export default function Game({ route }) {
     const { colors } = useTheme();
     const navigation = useNavigation();
     const { user } = useAuth();
-    const { isTrialExhausted, incrementTrialCount } = useFreeTrial(user);
+    const { incrementTrialCount } = useFreeTrial(user);
     const { gameStatusUpdate, setActiveGameId } = useNotifications();
 
     // Get game params from route
@@ -85,10 +85,10 @@ export default function Game({ route }) {
 
         // Increment free-trial counter for guest computer games
         if (!user) {
-            const newCount = await incrementTrialCount();
+            const result = await incrementTrialCount();
             // Show gate once the free trial limit has been reached.
             // Compare newCount directly — isTrialExhausted is stale at this point.
-            if (newCount != null && newCount >= FREE_TRIAL_LIMIT) {
+            if (result != null && result.newCount >= result.limit) {
                 // Small delay so the game-over state renders first
                 setTimeout(() => setShowTrialGate(true), 800);
             }

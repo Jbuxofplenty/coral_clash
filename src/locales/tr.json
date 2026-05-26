@@ -397,7 +397,7 @@
             "signIn": "Giriş Yap / Hesap Oluştur",
             "maybeLater": "Belki daha sonra",
             "limitedAccessTitle": "Ücretsiz deneme limiti doldu",
-            "limitedAccessMessage": "3 ücretsiz oyununuzu oynadınız. Oynamaya devam etmek için giriş yapın!",
+            "limitedAccessMessage": "{{limit}} ücretsiz oyununuzu oynadınız. Oynamaya devam etmek için giriş yapın!",
             "pill1": "Global Sıralama",
             "pill2": "Online Oyna",
             "pill3": "İstatistikler"

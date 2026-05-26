@@ -397,7 +397,7 @@
             "signIn": "Se connecter / Créer un compte",
             "maybeLater": "Peut-être plus tard",
             "limitedAccessTitle": "Limite d’essai atteinte",
-            "limitedAccessMessage": "Vous avez joué vos 3 parties gratuites. Connectez-vous pour continuer !",
+            "limitedAccessMessage": "Vous avez joué vos {{limit}} parties gratuites. Connectez-vous pour continuer !",
             "pill1": "Classement mondial",
             "pill2": "Jouer en ligne",
             "pill3": "Statistiques"

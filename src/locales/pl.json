@@ -397,7 +397,7 @@
             "signIn": "Zaloguj się / Utwórz konto",
             "maybeLater": "Może później",
             "limitedAccessTitle": "Limit bezpłatnych gier osiągnięty",
-            "limitedAccessMessage": "Rozegrałeś 3 bezpłatne gry. Zaloguj się, aby kontynuować grę!",
+            "limitedAccessMessage": "Rozegrałeś {{limit}} bezpłatne gry. Zaloguj się, aby kontynuować grę!",
             "pill1": "Ranking globalny",
             "pill2": "Graj online",
             "pill3": "Statystyki"
