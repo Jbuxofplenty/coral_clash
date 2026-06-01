@@ -8,7 +8,7 @@ const db = admin.firestore();
 /**
  * Get Ranked Neighborhood (5 players above, 5 players below)
  */
-export const getLeaderboard = onCall({ ...getAppCheckConfig(), minInstances: 1 }, async (request) => {
+export const getLeaderboard = onCall(getAppCheckConfig(), async (request) => {
     try {
         const { auth } = request;
         if (!auth) {
@@ -95,7 +95,7 @@ export const getLeaderboard = onCall({ ...getAppCheckConfig(), minInstances: 1 }
 /**
  * Format user data for public display
  */
-function formatPublicUserInfo(userData, isCurrentUser) {
+function formatPublicUserInfo(userData, _isCurrentUser) {
     return {
         displayName: userData.displayName || 'User',
         discriminator: userData.discriminator || '',

@@ -69,7 +69,7 @@ async function joinMatchmakingHandler(request) {
  * Join the matchmaking queue
  * POST /api/matchmaking/join
  */
-export const joinMatchmaking = onCall({ ...getAppCheckConfig(), minInstances: 1 }, async (request) => {
+export const joinMatchmaking = onCall(getAppCheckConfig(), async (request) => {
     try {
         return await joinMatchmakingHandler(request);
     } catch (error) {
@@ -171,7 +171,7 @@ async function updateMatchmakingHeartbeatHandler(request) {
  * Update heartbeat for matchmaking queue entry
  * POST /api/matchmaking/heartbeat
  */
-export const updateMatchmakingHeartbeat = onCall({ ...getAppCheckConfig(), minInstances: 1 }, async (request) => {
+export const updateMatchmakingHeartbeat = onCall(getAppCheckConfig(), async (request) => {
     try {
         return await updateMatchmakingHeartbeatHandler(request);
     } catch (error) {
